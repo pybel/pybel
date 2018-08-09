@@ -20,8 +20,6 @@ from .utils import hash_node
 
 __all__ = [
     'node_to_tuple',
-    'sort_dict_list',
-    'sort_variant_dict_list',
     'hash_node_dict',
 ]
 
@@ -57,11 +55,6 @@ def hash_node_dict(node_dict):
     return hash_node(node_to_tuple(node_dict))
 
 
-def sort_dict_list(tokens):
-    """Sort a list of PyBEL data dictionaries to their canonical ordering."""
-    return sorted(tokens, key=node_to_tuple)
-
-
 def node_to_tuple(tokens):
     """Create a PyBEL node tuple given tokens from either PyParsing or following the PyBEL node data dictionary model.
 
@@ -72,7 +65,7 @@ def node_to_tuple(tokens):
     if isinstance(tokens, BaseEntity):
         return tokens.as_tuple()
 
-    raise ValueError('NO')
+    # raise ValueError('NO')
 
     if MODIFIER in tokens:
         return node_to_tuple(tokens[TARGET])
@@ -156,15 +149,6 @@ def _fusion_po_to_dict(tokens):
     )
 
 
-def sort_variant_dict_list(variants):
-    """Sort a list of variant dictionaries.
-
-    :type variants: list
-    :rtype: list
-    """
-    return sorted(variants, key=_variant_po_to_tuple)
-
-
 def _simple_po_to_dict(tokens):
     """Convert a simple named entity to a DSL object.
 
@@ -196,7 +180,7 @@ def _variant_po_to_dict(tokens):
         name=tokens[NAME],
         variants=[
             _variant_tokens_to_dsl(variant_tokens)
-            for variant_tokens in sort_variant_dict_list(tokens[VARIANTS])
+            for variant_tokens in tokens[VARIANTS]
         ],
     )
 
@@ -319,7 +303,7 @@ def _reaction_part_po_to_dict(tokens):
     :type tokens: ParseResult
     :rtype: list[BaseAbundance]
     """
-    return [po_to_dict(token) for token in sort_dict_list(tokens)]
+    return [po_to_dict(token) for token in tokens]
 
 
 def _simple_to_tuple(tokens):
@@ -451,10 +435,7 @@ def _list_po_to_dict(tokens):
     func = tokens[FUNCTION]
     dsl = _list_func_to_dsl[func]
 
-    members = [
-        po_to_dict(token)
-        for token in sort_dict_list(tokens[MEMBERS])
-    ]
+    members = [po_to_dict(token) for token in tokens[MEMBERS]]
 
     return dsl(members)
 

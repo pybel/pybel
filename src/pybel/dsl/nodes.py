@@ -3,6 +3,7 @@
 """Internal DSL functions for nodes."""
 
 import abc
+from operator import methodcaller
 
 import six
 
@@ -228,7 +229,11 @@ class CentralDogma(BaseAbundance):
         """
         super(CentralDogma, self).__init__(func, namespace, name=name, identifier=identifier)
         if variants:
-            self[VARIANTS] = [variants] if isinstance(variants, Variant) else variants
+            self[VARIANTS] = (
+                [variants]
+                if isinstance(variants, Variant) else
+                sorted(variants, key=methodcaller('as_tuple'))
+            )
 
     @property
     def variants(self):
@@ -754,8 +759,8 @@ class Reaction(BaseEntity):
         """
         super(Reaction, self).__init__(func=REACTION)
         self.update({
-            REACTANTS: reactants,
-            PRODUCTS: products
+            REACTANTS: sorted(reactants, key=methodcaller('as_tuple')),
+            PRODUCTS: sorted(products, key=methodcaller('as_tuple')),
         })
 
     def as_tuple(self):
@@ -790,7 +795,7 @@ class ListAbundance(BaseEntity):
         """
         super(ListAbundance, self).__init__(func=func)
         self.update({
-            MEMBERS: members,
+            MEMBERS: sorted(members, key=methodcaller('as_tuple')),
         })
 
     def as_tuple(self):

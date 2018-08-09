@@ -13,7 +13,7 @@ from pybel.constants import (
     OBJECT, PARTNER_3P, PARTNER_5P, PATHOLOGY, PMOD, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P, REACTANTS, REACTION,
     RELATION, RNA, SUBJECT, TARGET, TO_LOC, TRANSLOCATION, VARIANTS,
 )
-from pybel.dsl import cell_surface_expression, entity, secretion, translocation
+from pybel.dsl import cell_surface_expression, entity, secretion, translocation, protein
 from pybel.dsl.nodes import abundance, bioprocess, gene, gmod, hgvs, pmod
 from pybel.parser import BelParser
 from pybel.parser.exc import MalformedTranslocationWarning
@@ -34,32 +34,26 @@ class TestAbundance(TestTokenParserBase):
         self.parser.clear()
         self.parser.general_abundance.setParseAction(self.parser.handle_term)
 
-        self.expected_node = ABUNDANCE, 'CHEBI', 'oxygen atom'
         self.expected_node_data = abundance(namespace='CHEBI', name='oxygen atom')
-
         self.expected_canonical_bel = 'a(CHEBI:"oxygen atom")'
 
-    def test_short_abundance(self):
-        """small molecule"""
-        statement = 'a(CHEBI:"oxygen atom")'
-
+    def _test_abundance_helper(self, statement):
         result = self.parser.general_abundance.parseString(statement)
-
         self.assertEqual(self.expected_node_data, result.asDict())
 
-        node = node_to_tuple(result)
-
-        self.assertEqual(self.expected_node, node)
-        self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node))
+        self.assertIn(self.expected_node_data.as_tuple(), self.graph)
+        self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node_data))
 
         self.assertEqual({}, modifier_po_to_dict(result), msg='The modifier dictionary should be empty')
 
         self.assertTrue(self.graph.has_node_with_data(self.expected_node_data))
 
-    def test_long_abundance(self):
-        """small molecule"""
-        statement = 'abundance(CHEBI:"oxygen atom", loc(GOCC:intracellular))'
+    def test_abundance(self):
+        """Test short/long abundance name."""
+        self._test_abundance_helper('a(CHEBI:"oxygen atom")')
+        self._test_abundance_helper('abundance(CHEBI:"oxygen atom")')
 
+    def _test_abundance_with_location_helper(self, statement):
         result = self.parser.general_abundance.parseString(statement)
 
         expected_result = {
@@ -74,10 +68,8 @@ class TestAbundance(TestTokenParserBase):
 
         self.assertEqual(expected_result, result.asDict())
 
-        node = node_to_tuple(result)
-
-        self.assertEqual(self.expected_node, node)
-        self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node))
+        self.assertIn(self.expected_node_data.as_tuple(), self.graph)
+        self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node_data))
 
         modifier = modifier_po_to_dict(result)
         expected_modifier = {
@@ -85,7 +77,14 @@ class TestAbundance(TestTokenParserBase):
         }
         self.assertEqual(expected_modifier, modifier)
 
-        self.assert_has_node(node, **self.expected_node_data)
+        self.assertTrue(self.graph.has_node_with_data(self.expected_node_data))
+
+    def test_abundance_with_location(self):
+        """Test short/long abundance name and short/long location name."""
+        self._test_abundance_with_location_helper('a(CHEBI:"oxygen atom", loc(GOCC:intracellular))')
+        self._test_abundance_with_location_helper('abundance(CHEBI:"oxygen atom", loc(GOCC:intracellular))')
+        self._test_abundance_with_location_helper('a(CHEBI:"oxygen atom", location(GOCC:intracellular))')
+        self._test_abundance_with_location_helper('abundance(CHEBI:"oxygen atom", location(GOCC:intracellular))')
 
 
 class TestGene(TestTokenParserBase):
@@ -1524,21 +1523,7 @@ class TestComplex(TestTokenParserBase):
 
         expected_node = COMPLEX, (PROTEIN, 'HGNC', 'FOS'), (PROTEIN, 'HGNC', 'JUN')
         self.assertEqual(expected_node, node_to_tuple(result))
-        self.assert_has_node(expected_node, **{
-            FUNCTION: COMPLEX,
-            MEMBERS: [
-                {
-                    FUNCTION: PROTEIN,
-                    NAMESPACE: 'HGNC',
-                    NAME: 'FOS'
-                },
-                {
-                    FUNCTION: PROTEIN,
-                    NAMESPACE: 'HGNC',
-                    NAME: 'JUN'
-                }
-            ]
-        })
+        self.assert_has_node(expected_node, **expected_result)
 
         expected_canonical_bel = statement
         self.assertEqual(expected_canonical_bel, self.graph.node_to_bel(expected_node))
@@ -1837,8 +1822,7 @@ class TestActivity(TestTokenParserBase):
         }
         self.assertEqual(expected_mod, mod)
 
-        node = PROTEIN, 'HGNC', 'AKT1'
-        self.assertEqual(node, node_to_tuple(result))
+        node = protein('HGNC', 'AKT1')
         self.assert_has_node(node)
 
     def test_kinase_activity_on_named_complex(self):
