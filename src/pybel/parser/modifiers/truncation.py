@@ -33,20 +33,18 @@ looking up the amino acid sequence.
 .. seealso::
 
     - BEL 2.0 specification on `truncations <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_variants_2>`_
-    - PyBEL module :py:class:`pybel.parser.modifiers.TruncationParser`
+    - PyBEL module :py:class:`pybel.parser.modifiers.get_truncation_language`
 """
 
 import logging
 
 from pyparsing import pyparsing_common as ppc
 
-from ..baseparser import BaseParser
 from ..utils import nest, one_of_tags
 from ...constants import HGVS, IDENTIFIER, KIND, TRUNCATION_POSITION
 
 __all__ = [
-    'truncation_tag',
-    'TruncationParser',
+    'get_truncation_language',
 ]
 
 log = logging.getLogger(__name__)
@@ -54,18 +52,16 @@ log = logging.getLogger(__name__)
 truncation_tag = one_of_tags(tags=['trunc', 'truncation'], canonical_tag=HGVS, name=KIND)
 
 
-class TruncationParser(BaseParser):
-    """Parses a protein trunctation and normalizes to HGVS"""
-    def __init__(self):
-        self.language = truncation_tag + nest(ppc.integer(TRUNCATION_POSITION))
-        self.language.setParseAction(self.handle_trunc_legacy)
-
-        super(TruncationParser, self).__init__(self.language)
-
+def _handle_trunc_legacy(line, position, tokens):
     # FIXME this isn't correct HGVS nomenclature, but truncation isn't forward compatible without more information
-    def handle_trunc_legacy(self, line, position, tokens):
-        upgraded = 'p.{}*'.format(tokens[TRUNCATION_POSITION])
-        log.warning('trunc() is deprecated. Re-encode with reference terminal amino acid in HGVS: %s', line)
-        tokens[IDENTIFIER] = upgraded
-        del tokens[TRUNCATION_POSITION]
-        return tokens
+    upgraded = 'p.{}*'.format(tokens[TRUNCATION_POSITION])
+    log.warning('trunc() is deprecated. Re-encode with reference terminal amino acid in HGVS: %s', line)
+    tokens[IDENTIFIER] = upgraded
+    del tokens[TRUNCATION_POSITION]
+    return tokens
+
+
+def get_truncation_language():
+    language = truncation_tag + nest(ppc.integer(TRUNCATION_POSITION))
+    language.setParseAction(_handle_trunc_legacy)
+    return language

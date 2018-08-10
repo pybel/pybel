@@ -44,7 +44,7 @@ class MetadataParser(BaseParser):
     """
 
     def __init__(self, manager, namespace_dict=None, annotation_dict=None, namespace_regex=None,
-                 annotation_regex=None, default_namespace=None, allow_redefinition=False):
+                 annotation_regex=None, default_namespace=None, allow_redefinition=False, skip_validation=False):
         """Build a metadata parser.
 
         :param pybel.manager.Manager manager: A cache manager
@@ -57,11 +57,12 @@ class MetadataParser(BaseParser):
         :param dict[str,str] annotation_regex: A dictionary of pre-loaded, regular expression annotations from
                                 {annotation keyword: regex string}
         :param set[str] default_namespace: A set of strings that can be used without a namespace
+        :param bool skip_validation: If true, don't download and cache namespaces/annotations
         """
         #: This metadata parser's internal definition cache manager
         self.manager = manager
-
         self.disallow_redefinition = not allow_redefinition
+        self.skip_validation = skip_validation
 
         #: A dictionary of cached {namespace keyword: {name: encoding}}
         self.namespace_dict = {} if namespace_dict is None else namespace_dict
@@ -172,6 +173,10 @@ class MetadataParser(BaseParser):
         self.raise_for_redefined_namespace(line, position, namespace)
 
         url = tokens['url']
+        self.namespace_url_dict[namespace] = url
+
+        if self.skip_validation:
+            return tokens
 
         namespace_result = self.manager.ensure_namespace(url)
 
@@ -180,8 +185,6 @@ class MetadataParser(BaseParser):
             self.uncachable_namespaces.add(url)
         else:
             self.namespace_dict[namespace] = namespace_result.to_values()
-
-        self.namespace_url_dict[namespace] = url
 
         return tokens
 
@@ -223,8 +226,12 @@ class MetadataParser(BaseParser):
         self.raise_for_redefined_annotation(line, position, keyword)
 
         url = tokens['url']
-        self.annotation_dict[keyword] = self.manager.get_annotation_entry_names(url)
         self.annotation_url_dict[keyword] = url
+
+        if self.skip_validation:
+            return tokens
+
+        self.annotation_dict[keyword] = self.manager.get_annotation_entry_names(url)
 
         return tokens
 
