@@ -11,7 +11,7 @@ from ...constants import (
     ABUNDANCE, ACTIVITY, CAUSAL_RELATIONS, DEGRADATION, FRAGMENT, FUNCTION, GENE, GMOD, HGVS, KIND, MIRNA, OBJECT,
     PATHOLOGY, PMOD, PROTEIN, RELATION, RNA, SUBJECT, TRANSLOCATION, VARIANTS,
 )
-from ...tokens import node_to_tuple
+from ...dsl import BaseEntity
 
 __all__ = [
     'node_predicate',
@@ -289,7 +289,11 @@ def has_causal_out_edges(graph, node):
 
 def _hash_node_list(nodes):
     return {
-        node_to_tuple(node) if isinstance(node, dict) else node
+        (
+            node.as_tuple()
+            if isinstance(node, BaseEntity) else
+            node
+        )
         for node in nodes
     }
 
@@ -307,10 +311,10 @@ def node_exclusion_predicate_builder(nodes):
     def node_exclusion_predicate(data):
         """Returns true if the node is not in the given set of nodes
 
-        :param dict data: A PyBEL data dictionary
+        :param BaseEntity data: A PyBEL data dictionary
         :rtype: bool
         """
-        return node_to_tuple(data) not in nodes
+        return data.as_tuple() not in nodes
 
     return node_exclusion_predicate
 
@@ -328,10 +332,10 @@ def node_inclusion_predicate_builder(nodes):
     def node_inclusion_predicate(data):
         """Returns true if the node is in the given set of nodes
 
-        :param dict data: A PyBEL data dictionary
+        :param BaseEntity data: A PyBEL data dictionary
         :rtype: bool
         """
-        return node_to_tuple(data) in nodes
+        return data.as_tuple() in nodes
 
     return node_inclusion_predicate
 

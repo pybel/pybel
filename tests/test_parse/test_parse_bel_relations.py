@@ -15,12 +15,14 @@ from pybel.constants import (
     PRODUCTS, PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, SUBPROCESS_OF, TARGET, TO_LOC,
     TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, VARIANTS,
 )
-from pybel.dsl import abundance, activity, entity, pmod, protein, rna
+from pybel.dsl import (
+    abundance, activity, bioprocess, complex_abundance, composite_abundance, entity, gene, hgvs, pmod, protein,
+    reaction, rna,
+)
 from pybel.parser import BelParser
 from pybel.parser.exc import (
     MissingNamespaceNameWarning, NestedRelationWarning, RelabelWarning, UndefinedNamespaceWarning,
 )
-from pybel.tokens import node_to_tuple
 from tests.constants import TestTokenParserBase, test_citation_dict, test_evidence_text
 
 log = logging.getLogger(__name__)
@@ -70,14 +72,17 @@ class TestRelations(TestTokenParserBase):
         ]
         self.assertEqual(expected, result.asList())
 
-        sub = node_to_tuple(result)
-        self.assert_has_node(sub)
-
-        sub_member_1 = PROTEIN, 'HGNC', 'CASP8'
+        sub_member_1 = protein('HGNC', 'CASP8')
         self.assert_has_node(sub_member_1)
 
-        sub_member_2 = PROTEIN, 'HGNC', 'FADD'
+        sub_member_2 = protein('HGNC', 'FADD')
         self.assert_has_node(sub_member_2)
+
+        sub_member_3 = abundance('ADO', 'Abeta_42')
+        self.assert_has_node(sub_member_3)
+
+        sub = composite_abundance([sub_member_1, sub_member_2, sub_member_3])
+        self.assert_has_node(sub)
 
         self.assert_has_edge(sub, sub_member_1, relation=HAS_COMPONENT)
         self.assert_has_edge(sub, sub_member_2, relation=HAS_COMPONENT)
@@ -104,19 +109,23 @@ class TestRelations(TestTokenParserBase):
         ]
         self.assertEqual(expected, result.asList())
 
-        sub = node_to_tuple(result[SUBJECT])
-        self.assert_has_node(sub)
-
-        sub_member_1 = PROTEIN, 'HGNC', 'CASP8'
+        sub_member_1 = protein('HGNC', 'CASP8')
         self.assert_has_node(sub_member_1)
 
-        sub_member_2 = PROTEIN, 'HGNC', 'FADD'
+        sub_member_2 = protein('HGNC', 'FADD')
         self.assert_has_node(sub_member_2)
+
+        sub_member_3 = abundance('ADO', 'Abeta_42')
+        self.assert_has_node(sub_member_3)
+
+        sub = composite_abundance([sub_member_1, sub_member_2, sub_member_3])
+        self.assert_has_node(sub)
 
         self.assert_has_edge(sub, sub_member_1, relation=HAS_COMPONENT)
         self.assert_has_edge(sub, sub_member_2, relation=HAS_COMPONENT)
+        self.assert_has_edge(sub, sub_member_3, relation=HAS_COMPONENT)
 
-        obj = BIOPROCESS, 'GOBP', 'neuron apoptotic process'
+        obj = bioprocess('GOBP', 'neuron apoptotic process')
         self.assert_has_node(obj)
 
         self.assert_has_edge(sub, obj, relation=INCREASES)
@@ -151,10 +160,10 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        sub = ABUNDANCE, 'ADO', 'Abeta_42'
+        sub = abundance('ADO', 'Abeta_42')
         self.assert_has_node(sub)
 
-        obj = ABUNDANCE, 'CHEBI', 'calcium(2+)'
+        obj = abundance('CHEBI', 'calcium(2+)')
         self.assert_has_node(obj)
 
         expected_annotations = {
@@ -171,9 +180,10 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_edge(sub, obj, **expected_annotations)
 
     def test_decreases(self):
-        """
+        """Test parsing a decreases relation with a reaction.
+
         3.1.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xdecreases
-        Test decreases with reaction"""
+        """
         statement = 'pep(p(SFAM:"CAPN Family", location(GOCC:intracellular))) -| reaction(reactants(p(HGNC:CDK5R1)),products(p(HGNC:CDK5)))'
         result = self.parser.relation.parseString(statement)
 
@@ -205,17 +215,17 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        sub = PROTEIN, 'SFAM', 'CAPN Family'
+        sub = protein('SFAM', 'CAPN Family')
         self.assert_has_node(sub)
 
-        obj = node_to_tuple(result[OBJECT])
-        self.assert_has_node(obj)
-
-        obj_member_1 = PROTEIN, 'HGNC', 'CDK5R1'
+        obj_member_1 = protein('HGNC', 'CDK5R1')
         self.assert_has_node(obj_member_1)
 
-        obj_member_2 = PROTEIN, 'HGNC', 'CDK5'
+        obj_member_2 = protein('HGNC', 'CDK5')
         self.assert_has_node(obj_member_2)
+
+        obj = reaction(reactants=[obj_member_1], products=[obj_member_2])
+        self.assert_has_node(obj)
 
         self.assert_has_edge(obj, obj_member_1, relation=HAS_REACTANT)
         self.assert_has_edge(obj, obj_member_2, relation=HAS_PRODUCT)
@@ -260,10 +270,10 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        sub = PROTEIN, 'HGNC', 'CAT'
+        sub = protein('HGNC', 'CAT')
         self.assert_has_node(sub)
 
-        obj = ABUNDANCE, 'CHEBI', 'hydrogen peroxide'
+        obj = abundance('CHEBI', 'hydrogen peroxide')
         self.assert_has_node(obj)
 
         expected_attrs = {
@@ -358,10 +368,10 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        sub = PROTEIN, 'HGNC', 'HMGCR'
+        sub = protein('HGNC', 'HMGCR')
         self.assert_has_node(sub)
 
-        obj = BIOPROCESS, 'GOBP', 'cholesterol biosynthetic process'
+        obj = bioprocess('GOBP', 'cholesterol biosynthetic process')
         self.assert_has_node(obj)
 
         self.assert_has_edge(sub, obj, relation=expected_dict[RELATION])
@@ -442,19 +452,19 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        sub = node_to_tuple(result[SUBJECT])
-        self.assert_has_node(sub)
-
-        sub_member_1 = PROTEIN, 'HGNC', 'F3'
+        sub_member_1 = protein('HGNC', 'F3')
         self.assert_has_node(sub_member_1)
 
-        sub_member_2 = PROTEIN, 'HGNC', 'F7'
+        sub_member_2 = protein('HGNC', 'F7')
         self.assert_has_node(sub_member_2)
+
+        sub = complex_abundance([sub_member_1, sub_member_2])
+        self.assert_has_node(sub)
 
         self.assert_has_edge(sub, sub_member_1)
         self.assert_has_edge(sub, sub_member_2)
 
-        obj = PROTEIN, 'HGNC', 'F9'
+        obj = protein('HGNC', 'F9')
         self.assert_has_node(obj)
 
         self.assert_has_edge(sub, obj, relation=expected_dict[RELATION])
@@ -474,9 +484,12 @@ class TestRelations(TestTokenParserBase):
 
         self.parser.relation.parseString(statement)
 
-        self.assert_has_edge((PROTEIN, 'HGNC', 'CAT'), (ABUNDANCE, 'CHEBI', "hydrogen peroxide"))
-        self.assert_has_edge((ABUNDANCE, 'CHEBI', "hydrogen peroxide"),
-                             (BIOPROCESS, 'GO', "apoptotic process"))
+        cat = protein('HGNC', 'CAT')
+        h2o2 = abundance('CHEBI', "hydrogen peroxide")
+        apoptosis = bioprocess('GO', "apoptotic process")
+
+        self.assert_has_edge(cat, h2o2)
+        self.assert_has_edge(h2o2, apoptosis)
 
         self.parser.lenient = False
 
@@ -758,9 +771,9 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = node_to_tuple(result[SUBJECT])
-
+        expected_node = gene('HGNC', 'APOE', variants=[hgvs('c.526C>T'), hgvs('c.388T>C')])
         self.assert_has_node(expected_node)
+
         self.assertTrue(self.parser.graph.has_node_description(expected_node))
         self.assertEqual('APOE E2', self.parser.graph.get_node_description(expected_node))
 
@@ -812,15 +825,11 @@ class TestRelations(TestTokenParserBase):
         corpus_striatum = abundance(namespace='UBERON', name='corpus striatum')
         basal_ganglion = abundance(namespace='UBERON', name='basal ganglion')
 
-        self.assertTrue(self.parser.graph.has_node_with_data(corpus_striatum))
-        self.assertTrue(self.parser.graph.has_node_with_data(basal_ganglion))
+        self.assert_has_node(corpus_striatum)
+        self.assert_has_node(basal_ganglion)
+        self.assert_has_edge(corpus_striatum, basal_ganglion, relation=PART_OF)
 
-        cs_node = node_to_tuple(corpus_striatum)
-        bg_node = node_to_tuple(basal_ganglion)
-
-        self.assertIn(bg_node, self.parser.graph[cs_node])
-
-        v = list(self.parser.graph[cs_node][bg_node].values())
+        v = list(self.parser.graph[corpus_striatum.as_tuple()][basal_ganglion.as_tuple()].values())
         self.assertEqual(1, len(v))
 
         v = v[0]
@@ -853,15 +862,12 @@ class TestRelations(TestTokenParserBase):
             [BIOPROCESS, 'GOBP', 'cholesterol biosynthetic process']]
         self.assertEqual(expected_result, result.asList())
 
-        sub = node_to_tuple(result[SUBJECT])
-        self.assert_has_node(sub)
-
-        sub_reactant_1 = ABUNDANCE, 'CHEBI', '(S)-3-hydroxy-3-methylglutaryl-CoA'
-        sub_reactant_2 = ABUNDANCE, 'CHEBI', 'NADPH'
-        sub_reactant_3 = ABUNDANCE, 'CHEBI', 'hydron'
-        sub_product_1 = ABUNDANCE, 'CHEBI', 'mevalonate'
-        sub_product_2 = ABUNDANCE, 'CHEBI', 'CoA-SH'
-        sub_product_3 = ABUNDANCE, 'CHEBI', 'NADP(+)'
+        sub_reactant_1 = abundance('CHEBI', '(S)-3-hydroxy-3-methylglutaryl-CoA')
+        sub_reactant_2 = abundance('CHEBI', 'NADPH')
+        sub_reactant_3 = abundance('CHEBI', 'hydron')
+        sub_product_1 = abundance('CHEBI', 'mevalonate')
+        sub_product_2 = abundance('CHEBI', 'CoA-SH')
+        sub_product_3 = abundance('CHEBI', 'NADP(+)')
 
         self.assert_has_node(sub_reactant_1)
         self.assert_has_node(sub_reactant_2)
@@ -870,6 +876,8 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_node(sub_product_2)
         self.assert_has_node(sub_product_3)
 
+        sub = reaction([sub_reactant_1, sub_reactant_2, sub_reactant_3], [sub_product_1, sub_product_2, sub_product_3])
+
         self.assert_has_edge(sub, sub_reactant_1, relation=HAS_REACTANT)
         self.assert_has_edge(sub, sub_reactant_2, relation=HAS_REACTANT)
         self.assert_has_edge(sub, sub_reactant_3, relation=HAS_REACTANT)
@@ -877,8 +885,8 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_edge(sub, sub_product_2, relation=HAS_PRODUCT)
         self.assert_has_edge(sub, sub_product_3, relation=HAS_PRODUCT)
 
-        obj = cls, ns, val = BIOPROCESS, 'GOBP', 'cholesterol biosynthetic process'
-        self.assert_has_node(obj, **{FUNCTION: cls, NAMESPACE: ns, NAME: val})
+        obj = bioprocess('GOBP', 'cholesterol biosynthetic process')
+        self.assert_has_node(obj)
 
         self.assert_has_edge(sub, obj, **{RELATION: 'subProcessOf'})
 
@@ -907,15 +915,12 @@ class TestRelations(TestTokenParserBase):
                     hasReactant a(CHEBI:"(S)-3-hydroxy-3-methylglutaryl-CoA")'
         result = self.parser.relation.parseString(statement)
 
-        sub = node_to_tuple(result[SUBJECT])
-        self.assert_has_node(sub)
-
-        sub_reactant_1 = ABUNDANCE, 'CHEBI', '(S)-3-hydroxy-3-methylglutaryl-CoA'
-        sub_reactant_2 = ABUNDANCE, 'CHEBI', 'NADPH'
-        sub_reactant_3 = ABUNDANCE, 'CHEBI', 'hydron'
-        sub_product_1 = ABUNDANCE, 'CHEBI', 'mevalonate'
-        sub_product_2 = ABUNDANCE, 'CHEBI', 'CoA-SH'
-        sub_product_3 = ABUNDANCE, 'CHEBI', 'NADP(+)'
+        sub_reactant_1 = abundance('CHEBI', '(S)-3-hydroxy-3-methylglutaryl-CoA')
+        sub_reactant_2 = abundance('CHEBI', 'NADPH')
+        sub_reactant_3 = abundance('CHEBI', 'hydron')
+        sub_product_1 = abundance('CHEBI', 'mevalonate')
+        sub_product_2 = abundance('CHEBI', 'CoA-SH')
+        sub_product_3 = abundance('CHEBI', 'NADP(+)')
 
         self.assert_has_node(sub_reactant_1)
         self.assert_has_node(sub_reactant_2)
@@ -923,6 +928,12 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_node(sub_product_1)
         self.assert_has_node(sub_product_2)
         self.assert_has_node(sub_product_3)
+
+        sub = reaction(
+            reactants=[sub_reactant_1, sub_reactant_2, sub_reactant_3],
+            products=[sub_product_1, sub_product_2, sub_product_3]
+        )
+        self.assert_has_node(sub)
 
         self.assert_has_edge(sub, sub_reactant_1, relation=HAS_REACTANT)
         self.assert_has_edge(sub, sub_reactant_2, relation=HAS_REACTANT)

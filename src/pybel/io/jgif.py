@@ -318,8 +318,8 @@ def to_jgif(graph):
     nodes_entry = []
     edges_entry = []
 
-    for i, (node, node_data) in enumerate(graph.iter_node_data_pairs()):
-        bel = node_to_bel(node_data)
+    for i, (node, node_data) in enumerate(graph.nodes(data=True)):
+        bel = graph.node_to_bel(node_data)
         node_bel[node] = bel
 
         nodes_entry.append({

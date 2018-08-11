@@ -1129,7 +1129,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             return self.object_cache_node[sha512]
 
         node_data = graph.node[node_tuple]
-        bel = node_to_bel(node_data)
+        bel = graph.node_to_bel(node_data)
 
         node = self.get_node_by_hash(sha512)
 

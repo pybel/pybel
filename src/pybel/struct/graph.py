@@ -916,7 +916,11 @@ class BELGraph(networkx.MultiDiGraph):
         :rtype: str
         """
         if isinstance(n, BaseEntity):
-            return node_to_bel(self.node[n.as_tuple()])
+            return n.as_bel()
+
+        if isinstance(n, dict):
+            return node_to_bel(n)
+
         return node_to_bel(self.node[n])
 
     def edge_to_bel(self, u, v, data, sep=None):

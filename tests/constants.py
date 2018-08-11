@@ -68,7 +68,13 @@ def assert_has_node(self, node, graph, **kwargs):
     if isinstance(node, BaseEntity):
         node = node.as_tuple()
 
-    self.assertTrue(graph.has_node(node), msg='{} not found in graph. Other nodes: {}'.format(node, graph.nodes()))
+    self.assertTrue(
+        graph.has_node(node),
+        msg='{} not found in graph. Other nodes:\n{}'.format(graph.node_to_bel(node), '\n'.join(
+            graph.node_to_bel(node)
+            for node in graph
+        ))
+    )
 
     if kwargs:
         missing = set(kwargs) - set(graph.node[node])
@@ -114,7 +120,18 @@ def assert_has_edge(self, u, v, graph, permissive=True, **kwargs):
     :param tuple v: target node
     :param BELGraph graph: underlying graph
     """
-    self.assertTrue(graph.has_edge(u, v), msg='Edge ({}, {}) not in graph. Other edges:\n{}'.format(u, v, '\n'.join(map(str, graph.edges()))))
+    if isinstance(u, BaseEntity):
+        u = u.as_tuple()
+    if isinstance(v, BaseEntity):
+        v = v.as_tuple()
+
+    self.assertTrue(
+        graph.has_edge(u, v),
+        msg='Edge ({}, {}) not in graph. Other edges:\n{}'.format(u, v, '\n'.join(
+            '{} {} {}'.format(graph.node_to_bel(u), d[RELATION], graph.node_to_bel(v))
+            for u, v, d in graph.edges(data=True)
+        ))
+    )
 
     if not kwargs:
         return

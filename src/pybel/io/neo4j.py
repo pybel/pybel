@@ -43,7 +43,7 @@ def to_neo4j(graph, neo_connection, context=None):
         if NAME in data:
             attrs['identifier'] = data[NAME]
 
-        node_map[node] = py2neo.Node(node_type, bel=node_to_bel(data), **attrs)
+        node_map[node] = py2neo.Node(node_type, bel=graph.node_to_bel(data), **attrs)
 
         tx.create(node_map[node])
 

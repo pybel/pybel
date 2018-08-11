@@ -21,11 +21,11 @@ from ..constants import (
     RELATION, SUBJECT,
 )
 from ..dsl import (
-    complex_abundance, composite_abundance, fragment, fusion_range, hgvs, missing_fusion_range,
-    named_complex_abundance, reaction,
+    complex_abundance, composite_abundance, fragment, fusion_range, gmod, hgvs, missing_fusion_range,
+    named_complex_abundance, pmod, reaction,
 )
 from ..io.gpickle import from_bytes, to_bytes
-from ..tokens import _func_dsl, _fusion_func_to_dsl, gmod, node_to_tuple, pmod
+from ..tokens import FUNC_TO_DSL, FUNC_TO_FUSION_DSL
 
 __all__ = [
     'Base',
@@ -485,7 +485,8 @@ node_modification = Table(
 
 
 class Node(Base):
-    """Represents a BEL Term"""
+    """Represents a BEL Term."""
+
     __tablename__ = NODE_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
@@ -515,14 +516,14 @@ class Node(Base):
     def to_json(self):
         """Serialize this node as a PyBEL DSL object.
 
-        :rtype: BaseEntity
+        :rtype: pybel.dsl.BaseEntity
         """
         func = self.type
 
         if self.has_fusion:
             j = self.modifications[0].to_json()
-            fusion_dsl = _fusion_func_to_dsl[func]
-            member_dsl = _func_dsl[func]
+            fusion_dsl = FUNC_TO_FUSION_DSL[func]
+            member_dsl = FUNC_TO_DSL[func]
             partner_5p = member_dsl(**j[PARTNER_5P])
             partner_3p = member_dsl(**j[PARTNER_3P])
 
@@ -574,7 +575,7 @@ class Node(Base):
 
             return complex_abundance(members=members)
 
-        dsl = _func_dsl[func]
+        dsl = FUNC_TO_DSL[func]
 
         if self.is_variant:
             return dsl(
@@ -598,7 +599,7 @@ class Node(Base):
 
         :rtype: tuple
         """
-        return node_to_tuple(self.to_json())
+        return self.to_json().as_tuple()
 
 
 class Modification(Base):

@@ -4,8 +4,9 @@
 
 from __future__ import print_function
 
-import itertools as itt
 import logging
+
+import itertools as itt
 
 from .constants import (
     ABUNDANCE, ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CITATION, CITATION_REFERENCE, CITATION_TYPE,
@@ -13,8 +14,9 @@ from .constants import (
     FRAGMENT_STOP, FROM_LOC, FUNCTION, FUSION, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GENE, GMOD, GOCC_KEYWORD,
     GOCC_LATEST, HGVS, IDENTIFIER, KIND, LOCATION, MEMBERS, MIRNA, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P,
     PARTNER_5P, PATHOLOGY, PMOD, PMOD_ORDER, PRODUCTS, PROTEIN, PYBEL_AUTOEVIDENCE, RANGE_3P, RANGE_5P, REACTANTS,
-    REACTION, RELATION, RNA, SUBJECT, TO_LOC, TRANSLOCATION, VARIANTS, rev_abundance_labels, UNQUALIFIED_EDGES
+    REACTION, RELATION, RNA, SUBJECT, TO_LOC, TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS, rev_abundance_labels,
 )
+from .dsl import BaseEntity
 from .resources.document import make_knowledge_header
 from .utils import ensure_quotes
 
@@ -113,6 +115,9 @@ def node_to_bel(data):
     :param dict data: A PyBEL node data dictionary
     :rtype: str
     """
+    if isinstance(data, BaseEntity):
+        return data.as_bel()
+
     if data[FUNCTION] == REACTION:
         return 'rxn(reactants({}), products({}))'.format(
             ', '.join(node_to_bel(reactant_data) for reactant_data in data[REACTANTS]),
