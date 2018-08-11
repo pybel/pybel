@@ -34,7 +34,7 @@ from ..constants import (
     TARGET, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, TWO_WAY_RELATIONS, VARIANTS,
     belns_encodings,
 )
-from ..tokens import modifier_po_to_dict, po_to_dict
+from ..tokens import modifier_po_to_dict, parse_result_to_dsl
 
 __all__ = ['BelParser']
 
@@ -703,11 +703,11 @@ class BelParser(BaseParser):
 
     def _handle_list_helper(self, tokens, relation):
         """Provides the functionality for :meth:`handle_has_members` and :meth:`handle_has_components`"""
-        parent_node_tuple, parent_node_attr = self.ensure_node(tokens[0])
+        parent_node_dsl = self.ensure_node(tokens[0])
 
         for child_tokens in tokens[2]:
-            child_node_tuple, child_node_attr = self.ensure_node(child_tokens)
-            self.graph.add_unqualified_edge(parent_node_tuple, child_node_tuple, relation)
+            child_node_dsl = self.ensure_node(child_tokens)
+            self.graph.add_unqualified_edge(parent_node_dsl, child_node_dsl, relation)
 
         return tokens
 
@@ -769,8 +769,8 @@ class BelParser(BaseParser):
 
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
         """
-        subject_node_tuple, _ = self.ensure_node(tokens[SUBJECT])
-        object_node_tuple, _ = self.ensure_node(tokens[OBJECT])
+        subject_node_dsl = self.ensure_node(tokens[SUBJECT])
+        object_node_dsl = self.ensure_node(tokens[OBJECT])
 
         subject_modifier = modifier_po_to_dict(tokens[SUBJECT])
         object_modifier = modifier_po_to_dict(tokens[OBJECT])
@@ -790,8 +790,8 @@ class BelParser(BaseParser):
         }
 
         self._add_qualified_edge(
-            subject_node_tuple,
-            object_node_tuple,
+            subject_node_dsl,
+            object_node_dsl,
             relation=tokens[RELATION],
             annotations=annotations,
             subject_modifier=subject_modifier,
@@ -827,10 +827,10 @@ class BelParser(BaseParser):
         :param int position: The position in the line being parsed
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
         """
-        subject_node_tuple, _ = self.ensure_node(tokens[SUBJECT])
-        object_node_tuple, _ = self.ensure_node(tokens[OBJECT])
+        subject_node_dsl = self.ensure_node(tokens[SUBJECT])
+        object_node_dsl = self.ensure_node(tokens[OBJECT])
         rel = tokens[RELATION]
-        self.graph.add_unqualified_edge(subject_node_tuple, object_node_tuple, rel)
+        self.graph.add_unqualified_edge(subject_node_dsl, object_node_dsl, rel)
 
     def handle_label_relation(self, line, position, tokens):
         """Handles statements like ``p(X) label "Label for X"``
@@ -840,23 +840,23 @@ class BelParser(BaseParser):
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
         :raises: RelabelWarning
         """
-        subject_node_tuple, _ = self.ensure_node(tokens[SUBJECT])
+        subject_node_dsl = self.ensure_node(tokens[SUBJECT])
         description = tokens[OBJECT]
 
-        if self.graph.has_node_description(subject_node_tuple):
+        if self.graph.has_node_description(subject_node_dsl):
             raise RelabelWarning(
                 line_number=self.line_number,
                 line=line,
                 position=position,
                 node=self.graph.node,
-                old_label=self.graph.get_node_description(subject_node_tuple),
+                old_label=self.graph.get_node_description(subject_node_dsl),
                 new_label=description
             )
 
-        self.graph.set_node_description(subject_node_tuple, description)
+        self.graph.set_node_description(subject_node_dsl, description)
 
     def ensure_node(self, tokens):
-        """Turns parsed tokens into canonical node name and makes sure its in the graph
+        """Turn parsed tokens into canonical node name and makes sure its in the graph.
 
         :param pyparsing.ParseResult tokens: Tokens from PyParsing
         :return: A pair of the PyBEL node tuple and the PyBEL node data dictionary
@@ -865,12 +865,17 @@ class BelParser(BaseParser):
         if MODIFIER in tokens:
             return self.ensure_node(tokens[TARGET])
 
-        node_attr_dict = po_to_dict(tokens)
-        node_tuple = self.graph.add_node_from_data(node_attr_dict)
-
-        return node_tuple, node_attr_dict
+        node_dsl = parse_result_to_dsl(tokens)
+        self.graph.add_node_from_data(node_dsl)
+        return node_dsl
 
     def handle_translocation_illegal(self, line, position, tokens):
+        """Handles a malformed translocation
+
+        :param str line: The line being parsed
+        :param int position: The position in the line being parsed
+        :param pyparsing.ParseResult tokens: The tokens from PyParsing
+        """
         raise MalformedTranslocationWarning(self.line_number, line, position, tokens)
 
 

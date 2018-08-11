@@ -21,6 +21,8 @@ from .utils import hash_node
 __all__ = [
     'node_to_tuple',
     'hash_node_dict',
+    'parse_result_to_dsl',
+    'modifier_po_to_dict',
 ]
 
 _list_func_to_dsl = {
@@ -303,7 +305,7 @@ def _reaction_part_po_to_dict(tokens):
     :type tokens: ParseResult
     :rtype: list[BaseAbundance]
     """
-    return [po_to_dict(token) for token in tokens]
+    return [parse_result_to_dsl(token) for token in tokens]
 
 
 def _simple_to_tuple(tokens):
@@ -435,19 +437,19 @@ def _list_po_to_dict(tokens):
     func = tokens[FUNCTION]
     dsl = _list_func_to_dsl[func]
 
-    members = [po_to_dict(token) for token in tokens[MEMBERS]]
+    members = [parse_result_to_dsl(token) for token in tokens[MEMBERS]]
 
     return dsl(members)
 
 
-def po_to_dict(tokens):
+def parse_result_to_dsl(tokens):
     """Convert a ParseResult to a PyBEL DSL object
 
     :type tokens: ParseResult
     :rtype: BaseEntity
     """
     if MODIFIER in tokens:
-        return po_to_dict(tokens[TARGET])
+        return parse_result_to_dsl(tokens[TARGET])
 
     elif REACTION == tokens[FUNCTION]:
         return _reaction_po_to_dict(tokens)
