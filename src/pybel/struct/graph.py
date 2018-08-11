@@ -354,16 +354,19 @@ class BELGraph(networkx.MultiDiGraph):
         self.warnings.append((line_number, line, exception, {} if context is None else context))
 
     def _help_add_edge(self, u, v, attr):
-        if isinstance(u, dict):
-            u = self.add_node_from_data(u)
+        if not isinstance(u, BaseEntity):
+            raise TypeError('subject is not BaseEntity: {}'.format(u))
+        if not isinstance(v, BaseEntity):
+            raise TypeError('object is not BaseEntity: {}'.format(v))
 
-        if isinstance(v, dict):
-            v = self.add_node_from_data(v)
+        u_tuple = self.add_node_from_data(u)
 
-        key = hash_edge(u, v, attr)
+        v_tuple = self.add_node_from_data(v)
 
-        if not self.has_edge(u, v, key):
-            self.add_edge(u, v, key=key, **attr)
+        key = hash_edge(u_tuple, v_tuple, attr)
+
+        if not self.has_edge(u_tuple, v_tuple, key):
+            self.add_edge(u_tuple, v_tuple, key=key, **attr)
 
         return key
 
@@ -605,7 +608,7 @@ class BELGraph(networkx.MultiDiGraph):
         """Convert a PyBEL node data dictionary to a canonical PyBEL node tuple and ensures it is in the graph.
 
         :param attr_dict: A PyBEL node data dictionary
-        :type attr_dict: BaseEntity or dict
+        :type attr_dict: BaseEntity
         :return: A PyBEL node tuple
         :rtype: tuple
         """
@@ -968,9 +971,13 @@ class BELGraph(networkx.MultiDiGraph):
     def get_equivalent_nodes(self, node):
         """Get a set of equivalent nodes to this node, excluding the given node.
 
-        :param tuple node: A PyBEL node tuple
+        :param node: A PyBEL node tuple
+        :type node: tuple or BaseEntity
         :rtype: set[tuple]
         """
+        if isinstance(node, BaseEntity):
+            return set(self.iter_equivalent_nodes(node.as_tuple()))
+
         return set(self.iter_equivalent_nodes(node))
 
     def _node_has_namespace_helper(self, node, namespace):

@@ -3,7 +3,7 @@
 from ...pipeline import in_place_transformation
 from ...pipeline.decorators import register_deprecated
 from ....constants import FUNCTION, IDENTIFIER, MIRNA, NAME, NAMESPACE, PROTEIN, RNA, VARIANTS
-from ....dsl import gene, rna
+from ....dsl import gene, rna, BaseEntity
 
 __all__ = [
     'enrich_rnas_with_genes',
@@ -19,23 +19,21 @@ def enrich_proteins_with_rnas(graph):
 
     :param pybel.BELGraph graph: A BEL graph
     """
-    for protein_node, data in list(graph.nodes(data=True)):
-        if data[FUNCTION] != PROTEIN:
+    for protein_node, protein_node_data in list(graph.nodes(data=True)):
+        if protein_node_data[FUNCTION] != PROTEIN:
             continue
 
-        namespace = data.get(NAMESPACE)
-        if namespace is None:
-            continue
-
-        if VARIANTS in data:
+        namespace = protein_node_data.get(NAMESPACE)
+        if namespace is None or VARIANTS in protein_node_data:
             continue
 
         rna_node = rna(
             namespace=namespace,
-            name=data.get(NAME),
-            identifier=data.get(IDENTIFIER),
+            name=protein_node_data.get(NAME),
+            identifier=protein_node_data.get(IDENTIFIER),
         )
-        graph.add_translation(rna_node, protein_node)
+
+        graph.add_translation(rna_node, protein_node_data)
 
 
 @register_deprecated('infer_central_dogmatic_transcriptions')
@@ -45,23 +43,20 @@ def enrich_rnas_with_genes(graph):
 
     :param pybel.BELGraph graph: A BEL graph
     """
-    for rna_node, data in list(graph.nodes(data=True)):
-        if data[FUNCTION] not in {MIRNA, RNA}:
+    for rna_node_tuple, rna_node_data in list(graph.nodes(data=True)):
+        if rna_node_data[FUNCTION] not in {MIRNA, RNA}:
             continue
 
-        namespace = data.get(NAMESPACE)
-        if namespace is None:
-            continue
-
-        if VARIANTS in data:
+        namespace = rna_node_data.get(NAMESPACE)
+        if namespace is None or VARIANTS in rna_node_data:
             continue
 
         gene_node = gene(
             namespace=namespace,
-            name=data.get(NAME),
-            identifier=data.get(IDENTIFIER),
+            name=rna_node_data.get(NAME),
+            identifier=rna_node_data.get(IDENTIFIER),
         )
-        graph.add_transcription(gene_node, rna_node)
+        graph.add_transcription(gene_node, rna_node_data)
 
 
 @register_deprecated('infer_central_dogma')

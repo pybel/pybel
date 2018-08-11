@@ -139,12 +139,14 @@ class TestNodePredicates(unittest.TestCase):
     def test_p1_active(self):
         """cat(p(HGNC:HSD11B1)) increases deg(a(CHEBI:cortisol))"""
         g = BELGraph()
-        u = g.add_node_from_data(protein(name='HSD11B1', namespace='HGNC'))
-        v = g.add_node_from_data(abundance(name='cortisol', namespace='CHEBI', identifier='17650'))
+        u_node = protein(name='HSD11B1', namespace='HGNC')
+        v_node = abundance(name='cortisol', namespace='CHEBI', identifier='17650')
+        u = g.add_node_from_data(u_node)
+        v = g.add_node_from_data(v_node)
 
         g.add_qualified_edge(
-            u,
-            v,
+            u_node,
+            v_node,
             relation=INCREASES,
             citation={
                 CITATION_TYPE: CITATION_TYPE_ONLINE, CITATION_REFERENCE: 'https://www.ncbi.nlm.nih.gov/gene/3290'
@@ -171,12 +173,14 @@ class TestNodePredicates(unittest.TestCase):
     def test_object_has_translocation(self):
         """p(HGNC: EGF) increases tloc(p(HGNC: VCP), GOCCID: 0005634, GOCCID: 0005737)"""
         g = BELGraph()
-        u = g.add_node_from_data(protein(name='EFG', namespace='HGNC'))
-        v = g.add_node_from_data(protein(name='VCP', namespace='HGNC'))
+        u_node = protein(name='EFG', namespace='HGNC')
+        v_node = protein(name='VCP', namespace='HGNC')
+        u = g.add_node_from_data(u_node)
+        v = g.add_node_from_data(v_node)
 
         g.add_qualified_edge(
-            u,
-            v,
+            u_node,
+            v_node,
             relation=INCREASES,
             citation='10855792',
             evidence="Although found predominantly in the cytoplasm and, less abundantly, in the nucleus, VCP can be "
@@ -203,12 +207,14 @@ class TestNodePredicates(unittest.TestCase):
     def test_object_has_secretion(self):
         """p(MGI:Il4) increases sec(p(MGI:Cxcl1))"""
         g = BELGraph()
-        u = g.add_node_from_data(protein(name='Il4', namespace='MGI'))
-        v = g.add_node_from_data(protein(name='Cxcl1', namespace='MGI'))
+        u_node = protein(name='Il4', namespace='MGI')
+        v_node = protein(name='Cxcl1', namespace='MGI')
+        u = g.add_node_from_data(u_node)
+        v = g.add_node_from_data(v_node)
 
         g.add_increases(
-            u,
-            v,
+            u_node,
+            v_node,
             citation='10072486',
             evidence='Compared with controls treated with culture medium alone, IL-4 and IL-5 induced significantly '
                      'higher levels of MIP-2 and KC production; IL-4 also increased the production of MCP-1 '
@@ -234,12 +240,14 @@ class TestNodePredicates(unittest.TestCase):
     def test_subject_has_secretion(self):
         """sec(p(MGI:S100b)) increases a(CHEBI:"nitric oxide")"""
         g = BELGraph()
-        u = g.add_node_from_data(protein(name='S100b', namespace='MGI'))
-        v = g.add_node_from_data(abundance(name='nitric oxide', namespace='CHEBI'))
+        u_node = protein(name='S100b', namespace='MGI')
+        v_node = abundance(name='nitric oxide', namespace='CHEBI')
+        u = g.add_node_from_data(u_node)
+        v = g.add_node_from_data(v_node)
 
         g.add_increases(
-            u,
-            v,
+            u_node,
+            v_node,
             citation='11180510',
             evidence='S100B protein is also secreted by astrocytes and acts on these cells to stimulate nitric oxide '
                      'secretion in an autocrine manner.',

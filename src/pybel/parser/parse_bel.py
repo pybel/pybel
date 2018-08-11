@@ -860,7 +860,7 @@ class BelParser(BaseParser):
 
         :param pyparsing.ParseResult tokens: Tokens from PyParsing
         :return: A pair of the PyBEL node tuple and the PyBEL node data dictionary
-        :rtype: tuple[tuple, dict]
+        :rtype: BaseEntity
         """
         if MODIFIER in tokens:
             return self.ensure_node(tokens[TARGET])

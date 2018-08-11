@@ -30,13 +30,15 @@ def transfer_causal_edges(graph, source, target):
     :param tuple source:
     :param tuple target:
     """
+    target_node = graph.node[target]
+
     for _, v, k, d in graph.out_edges(source, keys=True, data=True):
         if d[RELATION] not in CAUSAL_RELATIONS:
             continue
 
         graph.add_qualified_edge(
-            target,
-            v,
+            target_node,
+            graph.node[v],
             relation=d[RELATION],
             evidence=d[EVIDENCE],
             citation=d[CITATION],
@@ -50,8 +52,8 @@ def transfer_causal_edges(graph, source, target):
             continue
 
         graph.add_qualified_edge(
-            u,
-            target,
+            graph.node[u],
+            target_node,
             relation=d[RELATION],
             evidence=d[EVIDENCE],
             citation=d[CITATION],
