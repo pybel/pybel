@@ -3,7 +3,7 @@
 from ...pipeline import in_place_transformation
 from ...pipeline.decorators import register_deprecated
 from ....constants import FUNCTION, IDENTIFIER, MIRNA, NAME, NAMESPACE, PROTEIN, RNA, VARIANTS
-from ....dsl import gene, rna, BaseEntity
+from ....dsl import gene, rna
 
 __all__ = [
     'enrich_rnas_with_genes',
@@ -19,7 +19,7 @@ def enrich_proteins_with_rnas(graph):
 
     :param pybel.BELGraph graph: A BEL graph
     """
-    for protein_node, protein_node_data in list(graph.nodes(data=True)):
+    for _, protein_node_data in list(graph.nodes(data=True)):
         if protein_node_data[FUNCTION] != PROTEIN:
             continue
 
@@ -43,7 +43,7 @@ def enrich_rnas_with_genes(graph):
 
     :param pybel.BELGraph graph: A BEL graph
     """
-    for rna_node_tuple, rna_node_data in list(graph.nodes(data=True)):
+    for _, rna_node_data in list(graph.nodes(data=True)):
         if rna_node_data[FUNCTION] not in {MIRNA, RNA}:
             continue
 

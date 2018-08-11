@@ -14,10 +14,9 @@ from sqlalchemy import not_
 from pybel import BELGraph, from_database, from_path, to_database
 from pybel.constants import (
     ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_REFERENCE,
-    CITATION_TYPE, CITATION_TYPE_OTHER, CITATION_TYPE_PUBMED, DECREASES, FUNCTION, GENE, HAS_COMPONENT, HAS_PRODUCT,
-    HAS_REACTANT, HGVS, IDENTIFIER,
-    INCREASES, KIND, LOCATION, METADATA_DESCRIPTION, METADATA_NAME, METADATA_VERSION, NAME, NAMESPACE,
-    PATHOLOGY, PROTEIN, RELATION, VARIANTS,
+    CITATION_TYPE, CITATION_TYPE_OTHER, CITATION_TYPE_PUBMED, DECREASES, HAS_COMPONENT, HAS_PRODUCT,
+    HAS_REACTANT, INCREASES, LOCATION, METADATA_DESCRIPTION, METADATA_NAME, METADATA_VERSION, PATHOLOGY, PROTEIN,
+    RELATION,
 )
 from pybel.dsl import (
     BaseEntity, activity, complex_abundance, composite_abundance, degradation, entity, fragment, fusion_range, gene,
@@ -508,7 +507,6 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertEqual(1, self.graph.number_of_nodes())
 
     def test_single_variant(self):
-
         node_data = gene('HGNC', 'AKT1', variants=hgvs('p.Phe508del'))
         node_tuple = node_data.as_tuple()
         node_parent_data = node_data.get_parent()
@@ -1383,7 +1381,7 @@ class TestEquivalentNodes(unittest.TestCase):
     def test_direct_has_namespace(self):
         graph = BELGraph()
 
-        n1_data= protein(namespace='HGNC', name='CD33', identifier='1659')
+        n1_data = protein(namespace='HGNC', name='CD33', identifier='1659')
         n2_data = protein(namespace='NOPE', name='NOPE', identifier='NOPE')
 
         n1 = graph.add_node_from_data(n1_data)

@@ -12,7 +12,7 @@ from .operations import left_full_join, left_node_intersection_join, left_outer_
 from ..canonicalize import edge_to_bel, node_to_bel
 from ..constants import (
     ANNOTATIONS, ASSOCIATION, CITATION, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, DECREASES, DESCRIPTION,
-    DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO, EVIDENCE, FUNCTION, GRAPH_ANNOTATION_LIST,
+    DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO, EVIDENCE, GRAPH_ANNOTATION_LIST,
     GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL,
     GRAPH_PYBEL_VERSION, GRAPH_UNCACHED_NAMESPACES, HASH, HAS_COMPONENT, HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT,
     HAS_VARIANT, IDENTIFIER, INCREASES, IS_A, MEMBERS, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT,
@@ -21,7 +21,6 @@ from ..constants import (
 )
 from ..dsl import activity
 from ..dsl.nodes import BaseEntity, CentralDogma
-from ..tokens import node_to_tuple
 from ..utils import get_version, hash_edge, hash_node
 
 __all__ = [
@@ -1016,13 +1015,3 @@ class BELGraph(networkx.MultiDiGraph):
             return hash_node(node_tuple)
 
         return sha512
-
-    def hash_edge(self, u, v, k):
-        """Hash the edge.
-
-        :type u: tuple
-        :type v: tuple
-        :type k: int
-        :rtype: str
-        """
-        return k
