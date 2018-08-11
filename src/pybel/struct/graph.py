@@ -782,6 +782,9 @@ class BELGraph(networkx.MultiDiGraph):
 
         :rtype: Optional[str]
         """
+        if isinstance(node, BaseEntity):
+            return self.node[node.as_tuple()].get(DESCRIPTION)
+
         return self.node[node].get(DESCRIPTION)
 
     def has_node_description(self, node):
@@ -790,6 +793,9 @@ class BELGraph(networkx.MultiDiGraph):
         :param tuple node: A PyBEL node tuple
         :rtype: bool
         """
+        if isinstance(node, BaseEntity):
+            return DESCRIPTION in self.node[node.as_tuple()]
+
         return DESCRIPTION in self.node[node]
 
     def set_node_description(self, node, description):
@@ -798,7 +804,10 @@ class BELGraph(networkx.MultiDiGraph):
         :param tuple node: A PyBEL node tuple
         :type description: str
         """
-        self.node[node][DESCRIPTION] = description
+        if isinstance(node, BaseEntity):
+            self.node[node.as_tuple()][DESCRIPTION] = description
+        else:
+            self.node[node][DESCRIPTION] = description
 
     def __add__(self, other):
         """Creates a deep copy of this graph and full joins another graph with it using
