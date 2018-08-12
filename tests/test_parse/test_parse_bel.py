@@ -41,7 +41,7 @@ class TestAbundance(TestTokenParserBase):
 
     def _test_abundance_helper(self, statement):
         result = self.parser.general_abundance.parseString(statement)
-        self.assertEqual(self.expected_node_data, result.asDict())
+        self.assertEqual(dict(self.expected_node_data), result.asDict())
 
         self.assertIn(self.expected_node_data.as_tuple(), self.graph)
         self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node_data))
@@ -188,7 +188,7 @@ class TestGene(TestTokenParserBase):
             namespace='HGNC',
             variants=[hgvs(TEST_GENE_VARIANT)]
         )
-        self.assertEqual(expected_result, result.asDict())
+        self.assertEqual(dict(expected_result), result.asDict())
 
         expected_node = gene('HGNC', 'AKT1', variants=hgvs("c.308G>A"))
         self.assert_has_node(expected_node)
@@ -1319,13 +1319,12 @@ class TestComposite(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node_data = composite_abundance([
-            named_complex_abundance('GOCC', 'interleukin-23 complex'),
-            protein('HGNC', 'IL6')
-        ])
+        il23 = named_complex_abundance('GOCC', 'interleukin-23 complex')
+        il6 = protein('HGNC', 'IL6')
+        expected_node_data = composite_abundance([il23, il6])
         self.assert_has_node(expected_node_data)
-        expected_node = expected_node_data.as_tuple()
 
+        expected_node = expected_node_data.as_tuple()
         expected_node_dict = {
             FUNCTION: COMPOSITE,
             MEMBERS: [
@@ -1346,12 +1345,11 @@ class TestComposite(TestTokenParserBase):
         self.assertIn(MEMBERS, self.graph.node[expected_node])
         self.assertIsInstance(self.graph.node[expected_node][MEMBERS], (list, tuple))
         self.assertEqual(2, len(self.graph.node[expected_node][MEMBERS]))
-        self.assertEqual(expected_node_dict[MEMBERS][0], self.graph.node[expected_node][MEMBERS][0])
-        self.assertEqual(expected_node_dict[MEMBERS][1], self.graph.node[expected_node][MEMBERS][1])
-        self.assertEqual(expected_node_dict, self.graph.node[expected_node])
+        self.assertEqual(il23, self.graph.node[expected_node][MEMBERS][0])
+        self.assertEqual(il6, self.graph.node[expected_node][MEMBERS][1])
+        self.assertEqual(expected_node_data, self.graph.node[expected_node])
 
-        expected_canonical_bel = 'composite(complex(GOCC:"interleukin-23 complex"), p(HGNC:IL6))'  # sorted
-        self.assertEqual(expected_canonical_bel, self.graph.node_to_bel(expected_node))
+        self.assertEqual('composite(complex(GOCC:"interleukin-23 complex"), p(HGNC:IL6))', self.graph.node_to_bel(expected_node))
 
         self.assertEqual(3, self.parser.graph.number_of_nodes())
         self.assert_has_node(expected_node)

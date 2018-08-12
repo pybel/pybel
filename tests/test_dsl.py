@@ -5,7 +5,7 @@
 import unittest
 
 from pybel import BELGraph
-from pybel.constants import ABUNDANCE, COMPLEX, FUNCTION, IDENTIFIER, NAME, NAMESPACE, PROTEIN
+from pybel.constants import ABUNDANCE, COMPLEX, NAME
 from pybel.dsl import (
     abundance, complex_abundance, entity, fragment, fusion_range, gene, gene_fusion, missing_fusion_range, protein,
 )
@@ -23,16 +23,7 @@ class TestDSL(unittest.TestCase):
         node = protein(namespace=namespace, name=name, identifier=identifier)
 
         graph.add_node_from_data(node)
-
-        self.assertEqual(
-            {
-                FUNCTION: PROTEIN,
-                NAMESPACE: namespace,
-                NAME: name,
-                IDENTIFIER: identifier,
-            },
-            graph.node[node.as_tuple()]
-        )
+        self.assertEqual(node, graph.node[node.as_tuple()])
 
     def test_add_identified_node(self):
         """Test what happens when a node with only an identifier is added to a graph."""
@@ -43,14 +34,7 @@ class TestDSL(unittest.TestCase):
 
         t = graph.add_node_from_data(node)
 
-        self.assertEqual(
-            {
-                FUNCTION: PROTEIN,
-                NAMESPACE: namespace,
-                IDENTIFIER: identifier,
-            },
-            graph.node[t]
-        )
+        self.assertEqual(node, graph.node[t])
 
     def test_add_named_node(self):
         """Test adding a named node to a BEL graph."""
@@ -59,15 +43,7 @@ class TestDSL(unittest.TestCase):
         node = protein(namespace=namespace, name=name)
 
         graph.add_node_from_data(node)
-
-        self.assertEqual(
-            {
-                FUNCTION: PROTEIN,
-                NAMESPACE: namespace,
-                NAME: name,
-            },
-            graph.node[node.as_tuple()]
-        )
+        self.assertEqual(node, graph.node[node.as_tuple()])
 
     def test_missing_information(self):
         """Test that entity and abundance functions raise on missing name/identifier."""
