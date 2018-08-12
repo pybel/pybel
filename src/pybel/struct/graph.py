@@ -587,6 +587,11 @@ class BELGraph(networkx.MultiDiGraph):
         return super(BELGraph, self).__contains__(n)
 
     def has_node(self, n):
+        """Check if the graph contains the given node tuple or BaseEntity.
+
+        :param n: A node
+        :rtype: bool
+        """
         if isinstance(n, BaseEntity):
             n = n.as_tuple()
         return super(BELGraph, self).has_node(n)

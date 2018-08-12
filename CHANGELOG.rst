@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+Unreleased
+----------
+Changed
+~~~~~~~
+- Update edge hashing algorithm (this invalidates old hashes)
+- Edge hashes are now used as keys instead of being put inside edge data dictionaries
+- Improved graph operations with new location of edge hashes
+- Update Node/Link JSON schema
+- Improve __contains__ and has_node functions to handle DSL objects
+- Require usage of DSL when creating BELGraph instances
+- Use DSL completely in ORM
+
+Removed
+~~~~~~~
+- Remove ``pybel.tokens.node_to_tuple`` function and ``pybel.tokens.node_to_bel`` functions
+
 `0.11.11 <https://github.com/pybel/pybel/compare/v0.11.10...0.11.11>`_ - 2018-07-31
 -----------------------------------------------------------------------------------
 Added
