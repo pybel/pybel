@@ -40,7 +40,13 @@ __all__ = [
     'protein_fusion',
     'rna_fusion',
     'gene_fusion',
+    # Base Classes
     'BaseEntity',
+    'BaseAbundance',
+    'CentralDogma',
+    'FusionBase',
+    'FusionRangeBase',
+    'Variant',
 ]
 
 
