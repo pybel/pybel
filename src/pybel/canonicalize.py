@@ -9,12 +9,10 @@ import logging
 import itertools as itt
 
 from .constants import (
-    ABUNDANCE, ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CITATION, CITATION_REFERENCE, CITATION_TYPE,
-    COMPLEX, COMPOSITE, DEGRADATION, EFFECT, EVIDENCE, FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING, FRAGMENT_START,
-    FRAGMENT_STOP, FROM_LOC, FUNCTION, FUSION, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GENE, GMOD, GOCC_KEYWORD,
-    GOCC_LATEST, HGVS, IDENTIFIER, KIND, LOCATION, MEMBERS, MIRNA, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P,
-    PARTNER_5P, PATHOLOGY, PMOD, PMOD_ORDER, PRODUCTS, PROTEIN, PYBEL_AUTOEVIDENCE, RANGE_3P, RANGE_5P, REACTANTS,
-    REACTION, RELATION, RNA, SUBJECT, TO_LOC, TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS, rev_abundance_labels,
+    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_REFERENCE, CITATION_TYPE, COMPLEX, COMPOSITE,
+    DEGRADATION, EFFECT, EVIDENCE, FROM_LOC, FUNCTION, FUSION, GOCC_KEYWORD, GOCC_LATEST, IDENTIFIER, LOCATION,
+    MODIFIER, NAME, NAMESPACE, OBJECT, PYBEL_AUTOEVIDENCE, REACTION, RELATION, SUBJECT, TO_LOC, TRANSLOCATION,
+    UNQUALIFIED_EDGES, VARIANTS,
 )
 from .dsl import BaseEntity
 from .resources.document import make_knowledge_header
@@ -24,7 +22,6 @@ __all__ = [
     'to_bel_lines',
     'to_bel',
     'to_bel_path',
-    'node_to_bel',
     'edge_to_bel',
 ]
 
@@ -52,123 +49,15 @@ def postpend_location(bel_string, location_model):
     )
 
 
-def _get_variant_name(tokens):
-    if tokens[IDENTIFIER][NAMESPACE] == BEL_DEFAULT_NAMESPACE:
-        return tokens[IDENTIFIER][NAME]
-    else:
-        return '{}:{}'.format(tokens[IDENTIFIER][NAMESPACE], ensure_quotes(tokens[IDENTIFIER][NAME]))
-
-
-def _get_fragment_range_str(tokens):
-    if FRAGMENT_MISSING in tokens:
-        return '?'
-    else:
-        return '{}_{}'.format(tokens[FRAGMENT_START], tokens[FRAGMENT_STOP])
-
-
-def variant_to_bel(tokens):  # Replace with class-method of different Variant instances
-    """Canonicalize a variant dictionary.
-
-    Assumes the dictionary was produced by one of :func:`pybel.dsl.hgvs`, :func:`pybel.dsl.fragment`,
-    :func:`pybel.dsl.pmod`, or :func:`pybel.dsl.gmod`.
-
-    :param dict tokens: A variant data dictionary
-    :rtype: str
-    """
-    if tokens[KIND] == PMOD:
-        name = _get_variant_name(tokens)
-        return 'pmod({}{})'.format(name, ''.join(', {}'.format(tokens[x]) for x in PMOD_ORDER[2:] if x in tokens))
-
-    elif tokens[KIND] == GMOD:
-        name = _get_variant_name(tokens)
-        return 'gmod({})'.format(name)
-
-    elif tokens[KIND] == HGVS:
-        return 'var("{}")'.format(tokens[IDENTIFIER])
-
-    elif tokens[KIND] == FRAGMENT:
-        res = '"{}"'.format(_get_fragment_range_str(tokens))
-
-        if FRAGMENT_DESCRIPTION in tokens:
-            res += ', "{}"'.format(tokens[FRAGMENT_DESCRIPTION])
-
-        return 'frag({})'.format(res)
-
-    raise ValueError('token kind was not valid: {}'.format(tokens[KIND]))
-
-
-def fusion_range_to_bel(tokens):
-    """Convert a fusion range to BEL.
-
-    :param tokens:
-    :rtype: str
-    """
-    if FUSION_REFERENCE in tokens:
-        return '{}.{}_{}'.format(tokens[FUSION_REFERENCE], tokens[FUSION_START], tokens[FUSION_STOP])
-
-    return '?'
-
-
-def node_to_bel(data):
-    """Return a node data dictionary as a BEL string.
-
-    :param dict data: A PyBEL node data dictionary
-    :rtype: str
-    """
-    if isinstance(data, BaseEntity):
-        return data.as_bel()
-
-    if data[FUNCTION] == REACTION:
-        return 'rxn(reactants({}), products({}))'.format(
-            ', '.join(node_to_bel(reactant_data) for reactant_data in data[REACTANTS]),
-            ', '.join(node_to_bel(product_data) for product_data in data[PRODUCTS])
-        )
-
-    if data[FUNCTION] in {COMPOSITE, COMPLEX} and NAMESPACE not in data:
-        return '{}({})'.format(
-            rev_abundance_labels[data[FUNCTION]],
-            ', '.join(node_to_bel(member_data) for member_data in data[MEMBERS])
-        )
-
-    if VARIANTS in data:
-        variants_canon = sorted(map(variant_to_bel, data[VARIANTS]))
-        return "{}({}:{}, {})".format(
-            rev_abundance_labels[data[FUNCTION]],
-            data[NAMESPACE],
-            ensure_quotes(data[NAME]),
-            ', '.join(variants_canon)
-        )
-
-    if FUSION in data:
-        return '{}(fus({}:{}, "{}", {}:{}, "{}"))'.format(
-            rev_abundance_labels[data[FUNCTION]],
-            data[FUSION][PARTNER_5P][NAMESPACE],
-            data[FUSION][PARTNER_5P][NAME],
-            fusion_range_to_bel(data[FUSION][RANGE_5P]),
-            data[FUSION][PARTNER_3P][NAMESPACE],
-            data[FUSION][PARTNER_3P][NAME],
-            fusion_range_to_bel(data[FUSION][RANGE_3P])
-        )
-
-    if data[FUNCTION] in {GENE, RNA, MIRNA, PROTEIN, ABUNDANCE, COMPLEX, PATHOLOGY, BIOPROCESS}:
-        return "{}({}:{})".format(
-            rev_abundance_labels[data[FUNCTION]],
-            data[NAMESPACE],
-            ensure_quotes(data[NAME])
-        )
-
-    raise ValueError('Unknown values in node data: {}'.format(data))
-
-
 def _decanonicalize_edge_node(node, edge_data, node_position):
     """Canonicalize a node with its modifiers stored in the given edge to a BEL string.
 
-    :param dict node: A PyBEL node data dictionary
+    :param BaseEntity node: A PyBEL node data dictionary
     :param dict edge_data: A PyBEL edge data dictionary
     :param node_position: Either :data:`pybel.constants.SUBJECT` or :data:`pybel.constants.OBJECT`
     :rtype: str
     """
-    node_str = node_to_bel(node)
+    node_str = node.as_bel()
 
     if node_position not in edge_data:
         return node_str
@@ -441,29 +330,26 @@ def to_bel_path(graph, path, mode='w', **kwargs):
         to_bel(graph, bel_file)
 
 
-def calculate_canonical_name(graph, node):
+def calculate_canonical_name(data):
     """Calculates the canonical name for a given node.
 
     If it is a simple node, uses the already given name. Otherwise, it uses the BEL string.
 
-    :param BELGraph graph: A BEL Graph
-    :param tuple node: A PyBEL node tuple
+    :type data: BaseEntity
     :return: Canonical node name
     :rtype: str
     """
-    data = graph.node[node]
-
     if data[FUNCTION] == COMPLEX and NAMESPACE in data:
-        return graph.node[node][NAME]
+        return data[NAME]
 
     if VARIANTS in data:
-        return node_to_bel(data)
+        return data.as_bel()
 
     if FUSION in data:
-        return node_to_bel(data)
+        return data.as_bel()
 
     if data[FUNCTION] in {REACTION, COMPOSITE, COMPLEX}:
-        return node_to_bel(data)
+        return data.as_bel()
 
     if VARIANTS not in data and FUSION not in data:  # this is should be a simple node
         if IDENTIFIER in data and NAME in data:
@@ -475,4 +361,3 @@ def calculate_canonical_name(graph, node):
         return data[NAME]
 
     raise ValueError('Unexpected node data: {}'.format(data))
-

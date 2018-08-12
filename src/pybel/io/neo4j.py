@@ -2,7 +2,6 @@
 
 """Output functions for BEL graphs to Neo4j."""
 
-from ..canonicalize import calculate_canonical_name, node_to_bel
 from ..constants import FUNCTION, NAME, PYBEL_CONTEXT_TAG, RELATION
 from ..utils import flatten_dict
 
@@ -38,7 +37,7 @@ def to_neo4j(graph, neo_connection, context=None):
     for node, data in graph.nodes(data=True):
         node_type = data[FUNCTION]
         attrs = {k: v for k, v in data.items() if k not in {FUNCTION, NAME}}
-        attrs['name'] = calculate_canonical_name(graph, node)
+        attrs['name'] = data.as_bel()
 
         if NAME in data:
             attrs['identifier'] = data[NAME]

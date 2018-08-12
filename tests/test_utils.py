@@ -2,15 +2,15 @@
 
 """Tests for PyBEL utilities."""
 
-import time
 import unittest
 
 import networkx as nx
+import time
 from six import string_types
 
-from pybel.canonicalize import node_to_bel, postpend_location
+from pybel.canonicalize import postpend_location
 from pybel.constants import (
-    CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, FUNCTION,
+    CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED,
 )
 from pybel.parser.exc import PlaceholderAminoAcidWarning
 from pybel.parser.modifiers.constants import amino_acid
@@ -49,12 +49,6 @@ class TestCanonicalizeHelper(unittest.TestCase):
     def test_postpend_location_failure(self):
         with self.assertRaises(ValueError):
             postpend_location('', dict(name='failure'))
-
-    def test_decanonicalize_node_failure(self):
-        test_node = {FUNCTION: 'nope'}
-
-        with self.assertRaises(ValueError):
-            node_to_bel(test_node)
 
 
 class TestRandom(unittest.TestCase):

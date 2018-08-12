@@ -29,7 +29,6 @@ from .models import (
 )
 from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, update_insert_values
-from ..canonicalize import node_to_bel
 from ..constants import (
     ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR,
     CITATION_ISSUE, CITATION_LAST_AUTHOR, CITATION_NAME, CITATION_PAGES, CITATION_REFERENCE, CITATION_TITLE,
@@ -1129,7 +1128,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             return self.object_cache_node[sha512]
 
         node_data = graph.node[node_tuple]
-        bel = graph.node_to_bel(node_data)
+        bel = node_data.as_bel()
 
         node = self.get_node_by_hash(sha512)
 

@@ -12,7 +12,6 @@ from collections import defaultdict
 
 from pyparsing import ParseException
 
-from ..canonicalize import node_to_bel
 from ..constants import (
     ANNOTATIONS, CITATION, CITATION_REFERENCE, CITATION_TYPE, EVIDENCE, FUNCTION, METADATA_AUTHORS, METADATA_CONTACT,
     METADATA_INSERT_KEYS, METADATA_LICENSES, RELATION, UNQUALIFIED_EDGES,
@@ -319,7 +318,7 @@ def to_jgif(graph):
     edges_entry = []
 
     for i, (node, node_data) in enumerate(graph.nodes(data=True)):
-        bel = graph.node_to_bel(node_data)
+        bel = node_data.as_bel()
         node_bel[node] = bel
 
         nodes_entry.append({

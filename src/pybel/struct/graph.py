@@ -9,7 +9,7 @@ import networkx
 from six import string_types
 
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
-from ..canonicalize import edge_to_bel, node_to_bel
+from ..canonicalize import edge_to_bel
 from ..constants import (
     ANNOTATIONS, ASSOCIATION, CITATION, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, DECREASES, DESCRIPTION,
     DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO, EVIDENCE, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN,
@@ -918,10 +918,7 @@ class BELGraph(networkx.MultiDiGraph):
         if isinstance(n, BaseEntity):
             return n.as_bel()
 
-        if isinstance(n, dict):
-            return node_to_bel(n)
-
-        return node_to_bel(self.node[n])
+        return self.node[n].as_bel()
 
     def edge_to_bel(self, u, v, data, sep=None):
         """Serialize a pair of nodes and related edge data as a BEL relation.

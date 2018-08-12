@@ -3,9 +3,9 @@
 import unittest
 
 from pybel import BELGraph
-from pybel.canonicalize import _to_bel_lines_body, fusion_range_to_bel, variant_to_bel
+from pybel.canonicalize import _to_bel_lines_body
 from pybel.constants import (
-    ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, FRAGMENT, GENE, KIND, MODIFIER,
+    ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, FRAGMENT, GENE, MODIFIER,
     PATHOLOGY, PMOD, PROTEIN, REACTION, RNA,
 )
 from pybel.dsl import (
@@ -18,34 +18,6 @@ from pybel.utils import canonicalize_edge
 
 
 class TestCanonicalize(unittest.TestCase):
-    def test_variant_to_bel_key_error(self):
-        with self.assertRaises(Exception):
-            variant_to_bel({})
-
-    def test_variant_to_bel_value_error(self):
-        with self.assertRaises(ValueError):
-            variant_to_bel({KIND: 'nope'})
-
-    def test_canonicalize_variant(self):
-        self.assertEqual('var("p.Val600Glu")', variant_to_bel(hgvs('p.Val600Glu')))
-        self.assertEqual('var("p.Val600Glu")', variant_to_bel(protein_substitution('Val', 600, 'Glu')))
-
-        self.assertEqual('pmod(Ph)', variant_to_bel(pmod('Ph')))
-        self.assertEqual('pmod(TEST:Ph)', variant_to_bel(pmod('Ph', namespace='TEST')))
-        self.assertEqual('pmod(TEST:Ph, Ser)', variant_to_bel(pmod('Ph', namespace='TEST', code='Ser')))
-        self.assertEqual('pmod(TEST:Ph, Ser, 5)', variant_to_bel(pmod('Ph', namespace='TEST', code='Ser', position=5)))
-        self.assertEqual('pmod(GO:"protein phosphorylation", Thr, 308)',
-                         variant_to_bel(pmod(name='protein phosphorylation', namespace='GO', code='Thr', position=308)))
-
-        self.assertEqual('frag("?")', variant_to_bel(fragment()))
-        self.assertEqual('frag("672_713")', variant_to_bel(fragment(start=672, stop=713)))
-        self.assertEqual('frag("?", "descr")', variant_to_bel(fragment(description='descr')))
-        self.assertEqual('frag("672_713", "descr")', variant_to_bel(fragment(start=672, stop=713, description='descr')))
-
-        self.assertEqual('gmod(Me)', variant_to_bel(gmod('Me')))
-        self.assertEqual('gmod(TEST:Me)', variant_to_bel(gmod('Me', namespace='TEST')))
-        self.assertEqual('gmod(GO:"DNA Methylation")', variant_to_bel(gmod('DNA Methylation', namespace='GO')))
-
     def test_canonicalize_variant_dsl(self):
         """Uses the __str__ functions in the DSL to create BEL instead of external pybel.canonicalize"""
         self.assertEqual('var("p.Val600Glu")', str(hgvs('p.Val600Glu')))
@@ -66,10 +38,6 @@ class TestCanonicalize(unittest.TestCase):
         self.assertEqual('gmod(Me)', str(gmod('Me')))
         self.assertEqual('gmod(TEST:Me)', str(gmod('Me', namespace='TEST')))
         self.assertEqual('gmod(GO:"DNA Methylation")', str(gmod('DNA Methylation', namespace='GO')))
-
-    def test_canonicalize_fusion_range(self):
-        self.assertEqual('p.1_15', fusion_range_to_bel(fusion_range('p', 1, 15)))
-        self.assertEqual('p.*_15', fusion_range_to_bel(fusion_range('p', '*', 15)))
 
     def test_canonicalize_fusion_range_dsl(self):
         self.assertEqual('p.1_15', str(fusion_range('p', 1, 15)))
