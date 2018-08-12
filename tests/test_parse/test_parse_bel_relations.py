@@ -11,7 +11,7 @@ from pybel.constants import (
     ABUNDANCE, ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CITATION, COMPLEX, COMPOSITE, DECREASES,
     DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE, FROM_LOC, FUNCTION, GENE, GMOD,
     HAS_COMPONENT, HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, IDENTIFIER, INCREASES, IS_A, KIND,
-    LOCATION, MEMBERS, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, PATHOLOGY, PMOD,
+    LOCATION, MEMBERS, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, PATHOLOGY,
     PRODUCTS, PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, SUBPROCESS_OF, TARGET, TO_LOC,
     TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, VARIANTS,
 )
@@ -523,10 +523,10 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        sub = PROTEIN, 'SFAM', 'GSK3 Family'
+        sub = protein('SFAM', 'GSK3 Family')
         self.assert_has_node(sub)
 
-        obj = PROTEIN, 'HGNC', 'MAPT', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'))
+        obj = protein('HGNC', 'MAPT', variants=pmod('Ph'))
         self.assert_has_node(obj)
 
         self.assert_has_edge(sub, obj, relation=expected_dict[RELATION])
@@ -562,10 +562,10 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        subject_node = PROTEIN, 'HGNC', 'GSK3B', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Ser', 9)
+        subject_node = protein('HGNC', 'GSK3B', variants=pmod('Ph', code='Ser', position=9))
         self.assert_has_node(subject_node)
 
-        object_node = PROTEIN, 'HGNC', 'GSK3B'
+        object_node = protein('HGNC', 'GSK3B')
         self.assert_has_node(object_node)
 
         self.assert_has_edge(subject_node, object_node, relation=expected_dict[RELATION])

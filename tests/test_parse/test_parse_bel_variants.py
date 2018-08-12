@@ -98,13 +98,63 @@ class TestPmod(unittest.TestCase):
         identifier_qualified = identifier_parser.identifier_qualified
         self.parser = get_protein_modification_language(identifier_qualified)
 
-    def test_pmod1(self):
-        statement = 'pmod(Ph, Ser, 473)'
+    def _help_test_pmod_simple(self, statement):
         result = self.parser.parseString(statement)
 
         expected = {
             KIND: PMOD,
-            IDENTIFIER: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'Ph'},
+            IDENTIFIER: {
+                NAMESPACE: BEL_DEFAULT_NAMESPACE,
+                NAME: 'Ph',
+            },
+        }
+        self.assertEqual(expected, pmod('Ph'))
+        self.assertEqual(expected, result.asDict())
+
+    def test_bel_name(self):
+        # long function, legacy modification
+        self._help_test_pmod_simple('proteinModification(P)')
+        # long function, new modification
+        self._help_test_pmod_simple('proteinModification(Ph)')
+        # long function, qualified modification
+        self._help_test_pmod_simple('proteinModification(bel:Ph)')
+
+        # short function, legacy modification
+        self._help_test_pmod_simple('pmod(P)')
+        # short function, new modification
+        self._help_test_pmod_simple('pmod(Ph)')
+        # short function, qualified modification
+        self._help_test_pmod_simple('pmod(bel:Ph)')
+
+    def _help_test_pmod_with_residue(self, statement):
+        result = self.parser.parseString(statement)
+
+        expected = {
+            KIND: PMOD,
+            IDENTIFIER: {
+                NAMESPACE: BEL_DEFAULT_NAMESPACE,
+                NAME: 'Ph',
+            },
+            PMOD_CODE: 'Ser',
+        }
+        self.assertEqual(expected, pmod('Ph', code='Ser'))
+        self.assertEqual(expected, result.asDict())
+
+    def test_residue(self):
+        # short amino acid
+        self._help_test_pmod_with_residue('pmod(Ph, S)')
+        # long amino acid
+        self._help_test_pmod_with_residue('pmod(Ph, Ser)')
+
+    def _help_test_pmod_full(self, statement):
+        result = self.parser.parseString(statement)
+
+        expected = {
+            KIND: PMOD,
+            IDENTIFIER: {
+                NAMESPACE: BEL_DEFAULT_NAMESPACE,
+                NAME: 'Ph',
+            },
             PMOD_CODE: 'Ser',
             PMOD_POSITION: 473
         }
@@ -112,45 +162,21 @@ class TestPmod(unittest.TestCase):
         self.assertEqual(expected, pmod('Ph', code='Ser', position=473))
         self.assertEqual(expected, result.asDict())
 
-    def test_pmod2(self):
-        statement = 'pmod(Ph, Ser)'
-        result = self.parser.parseString(statement)
+    def test_full(self):
+        self._help_test_pmod_full('proteinModification(P, Ser, 473)')
+        self._help_test_pmod_full('proteinModification(P, S, 473)')
+        self._help_test_pmod_full('proteinModification(Ph, Ser, 473)')
+        self._help_test_pmod_full('proteinModification(Ph, S, 473)')
+        self._help_test_pmod_full('proteinModification(bel:Ph, Ser, 473)')
+        self._help_test_pmod_full('proteinModification(bel:Ph, S, 473)')
+        self._help_test_pmod_full('pmod(P, Ser, 473)')
+        self._help_test_pmod_full('pmod(P, S, 473)')
+        self._help_test_pmod_full('pmod(Ph, Ser, 473)')
+        self._help_test_pmod_full('pmod(Ph, S, 473)')
+        self._help_test_pmod_full('pmod(bel:Ph, Ser, 473)')
+        self._help_test_pmod_full('pmod(bel:Ph, S, 473)')
 
-        expected = {
-            KIND: PMOD,
-            IDENTIFIER: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'Ph'},
-            PMOD_CODE: 'Ser',
-        }
-        self.assertEqual(expected, pmod('Ph', code='Ser'))
-        self.assertEqual(expected, result.asDict())
-
-    def test_pmod3(self):
-        statement = 'pmod(Ph)'
-        result = self.parser.parseString(statement)
-
-        expected = {
-            KIND: PMOD,
-            IDENTIFIER: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'Ph'},
-        }
-        self.assertEqual(expected, pmod('Ph'))
-        self.assertEqual(expected, result.asDict())
-
-    def test_pmod4(self):
-        statement = 'pmod(P, S, 473)'
-        result = self.parser.parseString(statement)
-
-        expected = {
-            KIND: PMOD,
-            IDENTIFIER: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'Ph'},
-            PMOD_CODE: 'Ser',
-            PMOD_POSITION: 473
-        }
-
-        self.assertEqual(expected, pmod(name='Ph', code='Ser', position=473))
-        self.assertEqual(expected, result.asDict())
-
-    def test_pmod5(self):
-        statement = 'pmod(MOD:PhosRes, Ser, 473)'
+    def _help_test_non_standard_namespace(self, statement):
         result = self.parser.parseString(statement)
 
         expected = {
@@ -162,6 +188,12 @@ class TestPmod(unittest.TestCase):
 
         self.assertEqual(expected, pmod(name='PhosRes', namespace='MOD', code='Ser', position=473))
         self.assertEqual(expected, result.asDict())
+
+    def test_full_with_non_standard_namespace(self):
+        self._help_test_non_standard_namespace('proteinModification(MOD:PhosRes, S, 473)')
+        self._help_test_non_standard_namespace('proteinModification(MOD:PhosRes, Ser, 473)')
+        self._help_test_non_standard_namespace('pmod(MOD:PhosRes, S, 473)')
+        self._help_test_non_standard_namespace('pmod(MOD:PhosRes, Ser, 473)')
 
 
 class TestGeneModification(unittest.TestCase):
