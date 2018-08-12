@@ -4,16 +4,16 @@
 
 from .constants import (
     ABUNDANCE, ACTIVITY, BIOPROCESS, CELL_SECRETION, CELL_SURFACE_EXPRESSION, COMPLEX, COMPOSITE, DEGRADATION, EFFECT,
-    FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_START, FRAGMENT_STOP, FUNCTION, FUSION, FUSION_MISSING,
-    FUSION_REFERENCE, FUSION_START, FUSION_STOP, GENE, GMOD, HGVS, IDENTIFIER, KIND, LOCATION, MEMBERS,
-    MIRNA, MODIFIER, NAME, NAMESPACE, PARTNER_3P, PARTNER_5P, PATHOLOGY, PMOD, PMOD_CODE, PMOD_POSITION,
-    PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P, REACTANTS, REACTION, RNA, TARGET, TRANSLOCATION, VARIANTS,
+    FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_START, FRAGMENT_STOP, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE,
+    FUSION_START, FUSION_STOP, GENE, GMOD, HGVS, IDENTIFIER, KIND, LOCATION, MEMBERS, MIRNA, MODIFIER, NAME, NAMESPACE,
+    PARTNER_3P, PARTNER_5P, PATHOLOGY, PMOD, PMOD_CODE, PMOD_POSITION, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P, REACTANTS,
+    REACTION, RNA, TARGET, TRANSLOCATION, VARIANTS,
 )
-from .dsl import cell_surface_expression, fusion_range, missing_fusion_range, secretion
-from .dsl.nodes import (
-    BaseAbundance, BaseEntity, CentralDogma, FusionBase, Variant, abundance, bioprocess, complex_abundance,
-    composite_abundance, fragment, gene, gene_fusion, gmod, hgvs, mirna, named_complex_abundance, pathology, pmod,
-    protein, protein_fusion, reaction, rna, rna_fusion,
+from .dsl import (
+    BaseAbundance, BaseEntity, CentralDogma, FusionBase, Variant, abundance, bioprocess, cell_surface_expression,
+    complex_abundance, composite_abundance, fragment, fusion_range, gene, gene_fusion, gmod, hgvs, mirna,
+    missing_fusion_range, named_complex_abundance, pathology, pmod, protein, protein_fusion, reaction, rna, rna_fusion,
+    secretion,
 )
 
 __all__ = [
