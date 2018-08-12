@@ -750,17 +750,30 @@ class Reaction(BaseEntity):
     def __init__(self, reactants, products):
         """Build a reaction node data dictionary.
 
-        :param list[BaseAbundance] reactants: A list of PyBEL node data dictionaries representing the reactants
-        :param list[BaseAbundance] products: A list of PyBEL node data dictionaries representing the products
+        :param reactants: A list of PyBEL node data dictionaries representing the reactants
+        :type reactants: BaseAbundance or iter[BaseAbundance]
+        :param products: A list of PyBEL node data dictionaries representing the products
+        :type products: BaseAbundance or iter[BaseAbundance]
 
         Example:
 
         >>> reaction([protein(namespace='HGNC', name='KNG1')], [abundance(namespace='CHEBI', name='bradykinin')])
         """
         super(Reaction, self).__init__(func=REACTION)
+
+        if isinstance(reactants, BaseEntity):
+            reactants = [reactants]
+        else:
+            reactants = sorted(reactants, key=methodcaller('as_tuple'))
+
+        if isinstance(products, BaseEntity):
+            products = [products]
+        else:
+            products = sorted(products, key=methodcaller('as_tuple'))
+
         self.update({
-            REACTANTS: sorted(reactants, key=methodcaller('as_tuple')),
-            PRODUCTS: sorted(products, key=methodcaller('as_tuple')),
+            REACTANTS: reactants,
+            PRODUCTS: products,
         })
 
     def as_tuple(self):
