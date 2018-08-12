@@ -52,9 +52,9 @@ class TestDeletions(unittest.TestCase):
 
         remove_pathologies(g)
 
-        self.assertTrue(g.has_node_with_data(p1))
-        self.assertTrue(g.has_node_with_data(p2))
-        self.assertTrue(g.has_node_with_data(p3))
+        self.assertTrue(p1, g)
+        self.assertTrue(p2, g)
+        self.assertTrue(p3, g)
         self.assertEqual(3, g.number_of_nodes())
         self.assertEqual(2, g.number_of_edges())
 
@@ -95,7 +95,7 @@ class TestProcessing(unittest.TestCase):
         :type graph: pybel.BELGraph
         :rtype: bool
         """
-        self.assertTrue(graph.has_node_with_data(node))
+        self.assertIn(node, graph)
 
     def assert_not_in_graph(self, node, graph):
         """Assert the node is not in the graph.
@@ -104,7 +104,7 @@ class TestProcessing(unittest.TestCase):
         :type graph: pybel.BELGraph
         :rtype: bool
         """
-        self.assertFalse(graph.has_node_with_data(node))
+        self.assertNotIn(node, graph)
 
     def test_infer_on_sialic_acid_example(self):
         """Test infer_central_dogma on the sialic acid example."""

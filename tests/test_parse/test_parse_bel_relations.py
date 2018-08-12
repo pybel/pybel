@@ -636,22 +636,18 @@ class TestRelations(TestTokenParserBase):
 
         self.assertEqual(2, self.graph.number_of_nodes())
 
-        source = RNA, 'HGNC', 'AKT1'
         source_dict = rna(name='AKT1', namespace='HGNC')
-        self.assertIn(source, self.graph)
-        self.assertEqual(source_dict, self.graph.node[source])
-        self.assertTrue(self.graph.has_node_with_data(source_dict))
+        self.assertIn(source_dict, self.graph)
+        self.assertEqual(source_dict, self.graph.node[source_dict.as_tuple()])
 
-        target = PROTEIN, 'HGNC', 'AKT1'
         target_dict = protein(name='AKT1', namespace='HGNC')
-        self.assertIn(target, self.graph)
-        self.assertEqual(target_dict, self.graph.node[target])
-        self.assertTrue(self.graph.has_node_with_data(target_dict))
+        self.assertIn(target_dict, self.graph)
+        self.assertEqual(target_dict, self.graph.node[target_dict.as_tuple()])
 
         self.assertEqual(1, self.graph.number_of_edges())
-        self.assertTrue(self.graph.has_edge(source, target))
+        self.assertTrue(self.graph.has_edge(source_dict.as_tuple(), target_dict.as_tuple()))
 
-        key_data = self.parser.graph[source][target]
+        key_data = self.parser.graph[source_dict.as_tuple()][target_dict.as_tuple()]
         self.assertEqual(1, len(key_data))
 
         key = list(key_data)[0]
@@ -660,10 +656,10 @@ class TestRelations(TestTokenParserBase):
         self.assertIn(RELATION, data)
         self.assertEqual(TRANSLATED_TO, data[RELATION])
 
-        calculated_source_data = self.graph.node[source]
+        calculated_source_data = self.graph.node[source_dict.as_tuple()]
         self.assertTrue(calculated_source_data)
 
-        calculated_target_data = self.graph.node[target]
+        calculated_target_data = self.graph.node[target_dict.as_tuple()]
         self.assertTrue(calculated_target_data)
 
         calculated_edge_bel = edge_to_bel(calculated_source_data, calculated_target_data, data=data)

@@ -581,6 +581,16 @@ class BELGraph(networkx.MultiDiGraph):
                                        annotations=annotations, subject_modifier=subject_modifier,
                                        object_modifier=object_modifier, **attr)
 
+    def __contains__(self, n):
+        if isinstance(n, BaseEntity):
+            n = n.as_tuple()
+        return super(BELGraph, self).__contains__(n)
+
+    def has_node(self, n):
+        if isinstance(n, BaseEntity):
+            n = n.as_tuple()
+        return super(BELGraph, self).has_node(n)
+
     def add_node_from_data(self, attr_dict):
         """Convert a PyBEL node data dictionary to a canonical PyBEL node tuple and ensures it is in the graph.
 
@@ -623,7 +633,7 @@ class BELGraph(networkx.MultiDiGraph):
         if not isinstance(attr_dict, BaseEntity):
             raise TypeError('not BaseEntity: {}'.format(attr_dict))
 
-        return self.has_node(attr_dict.as_tuple())
+        return self.has_node(attr_dict)
 
     def add_qualified_edge(self, u, v, relation, evidence, citation, annotations=None, subject_modifier=None,
                            object_modifier=None, **attr):

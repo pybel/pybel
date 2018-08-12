@@ -69,7 +69,7 @@ class TestCollapse(unittest.TestCase):
 
         collapse_to_genes(graph)
 
-        self.assertTrue(graph.has_node_with_data(g1))
+        self.assertIn(g1, graph)
         self.assertEqual(1, graph.number_of_nodes())
         self.assertEqual(0, graph.number_of_edges())
 
@@ -84,7 +84,7 @@ class TestCollapse(unittest.TestCase):
 
         collapse_to_genes(graph)
 
-        self.assertTrue(graph.has_node_with_data(g1))
+        self.assertIn(g1, graph)
         self.assertEqual(1, graph.number_of_nodes())
         self.assertEqual(0, graph.number_of_edges())
 
@@ -98,7 +98,7 @@ class TestCollapse(unittest.TestCase):
 
         collapse_to_genes(graph)
 
-        self.assertTrue(graph.has_node_with_data(g1))
+        self.assertIn(g1, graph)
         self.assertEqual(1, graph.number_of_nodes())
         self.assertEqual(0, graph.number_of_edges())
 

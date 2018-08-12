@@ -94,9 +94,9 @@ class TestSeeding(TemporaryCacheClsMixin):
 
         self.assertEqual(3, graph.number_of_nodes(), msg='Nodes: {}'.format(graph.nodes()))
 
-        self.assertTrue(graph.has_node_with_data(trem2))
-        self.assertTrue(graph.has_node_with_data(syk))
-        self.assertTrue(graph.has_node_with_data(shp2))
+        self.assertIn(trem2, graph)
+        self.assertIn(syk, graph)
+        self.assertIn(shp2, graph)
 
         self.assertEqual(2, graph.number_of_edges())
 
@@ -110,9 +110,9 @@ class TestSeeding(TemporaryCacheClsMixin):
 
         self.assertEqual(4, graph.number_of_nodes(), msg='Nodes: {}'.format(graph.nodes()))
 
-        self.assertTrue(graph.has_node_with_data(cd33_phosphorylated))
-        self.assertTrue(graph.has_node_with_data(cd33))
-        self.assertTrue(graph.has_node_with_data(syk))
-        self.assertTrue(graph.has_node_with_data(shp2))
+        self.assertIn(cd33_phosphorylated, graph)
+        self.assertIn(cd33, graph)
+        self.assertIn(syk,graph)
+        self.assertIn(shp2, graph)
 
         self.assertEqual(3, graph.number_of_edges())

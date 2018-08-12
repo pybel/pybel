@@ -70,7 +70,7 @@ class TestAbundance(TestTokenParserBase):
 
         self.assertEqual(expected_result, result.asDict())
 
-        self.assertIn(self.expected_node_data.as_tuple(), self.graph)
+        self.assertIn(self.expected_node_data, self.graph)
         self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node_data))
 
         modifier = modifier_po_to_dict(result)
@@ -79,7 +79,6 @@ class TestAbundance(TestTokenParserBase):
         }
         self.assertEqual(expected_modifier, modifier)
 
-        self.assertTrue(self.graph.has_node_with_data(self.expected_node_data))
 
     def test_abundance_with_location(self):
         """Test short/long abundance name and short/long location name."""
@@ -1890,5 +1889,4 @@ class TestSemantics(unittest.TestCase):
         parser.bel_term.parseString('bp(ABASD)')
 
         node_data = bioprocess(namespace=DIRTY, name='ABASD')
-
-        self.assertTrue(graph.has_node_with_data(node_data))
+        self.assertIn(node_data, graph)

@@ -68,8 +68,9 @@ def assert_has_node(self, node, graph, **kwargs):
     if isinstance(node, BaseEntity):
         node = node.as_tuple()
 
-    self.assertTrue(
-        graph.has_node(node),
+    self.assertIn(
+        node,
+        graph,
         msg='{} not found in graph. Other nodes:\n{}'.format(graph.node_to_bel(node), '\n'.join(
             graph.node_to_bel(node)
             for node in graph
@@ -116,8 +117,10 @@ def assert_has_edge(self, u, v, graph, permissive=True, **kwargs):
     """A helper function for checking if an edge with the given properties is contained within a graph
 
     :param unittest.TestCase self: A TestCase
-    :param tuple u: source node
-    :param tuple v: target node
+    :param u: source node
+    :type u: BaseEntity or tuple
+    :param v: target node
+    :type v: BaseEntity or tuple
     :param BELGraph graph: underlying graph
     """
     if isinstance(u, BaseEntity):
@@ -194,7 +197,13 @@ class TestTokenParserBase(unittest.TestCase):
         assert_has_node(self, member, self.graph, **kwargs)
 
     def assert_has_edge(self, u, v, **kwargs):
-        """Assert that this test case's graph has the given edge."""
+        """Assert that this test case's graph has the given edge.
+
+        :param u: source node
+        :type u: BaseEntity or tuple
+        :param v: target node
+        :type v: BaseEntity or tuple
+        """
         assert_has_edge(self, u, v, self.graph, **kwargs)
 
     def add_default_provenance(self):
@@ -951,10 +960,10 @@ class BelReconstitutionMixin(TestGraphMixin):
         for _, data in graph.nodes(data=True):
             self.assertIsInstance(data, BaseEntity)
 
-        self.assertTrue(graph.has_node_with_data(protein(namespace='HGNC', name='AKT1')))
-        self.assertTrue(graph.has_node_with_data(protein(namespace='HGNC', name='EGFR')))
-        self.assertTrue(graph.has_node_with_data(protein(namespace='HGNC', name='FADD')))
-        self.assertTrue(graph.has_node_with_data(protein(namespace='HGNC', name='CASP8')))
+        self.assertIn(protein(namespace='HGNC', name='AKT1'), graph)
+        self.assertIn(protein(namespace='HGNC', name='EGFR'), graph)
+        self.assertIn(protein(namespace='HGNC', name='FADD'), graph)
+        self.assertIn(protein(namespace='HGNC', name='CASP8'), graph)
 
         bel_simple_citation_1 = {
             CITATION_NAME: "That one article from last week",
@@ -1124,8 +1133,8 @@ class BelReconstitutionMixin(TestGraphMixin):
         for _, data in graph.nodes(data=True):
             self.assertIsInstance(data, BaseEntity)
 
-        self.assertTrue(graph.has_node_with_data(protein(namespace='HGNC', name='AKT1')))
-        self.assertTrue(graph.has_node_with_data(protein(namespace='HGNC', name='EGFR')))
+        self.assertIn(protein(namespace='HGNC', name='AKT1'), graph)
+        self.assertIn(protein(namespace='HGNC', name='EGFR'), graph)
 
         self.assertLess(0, graph.number_of_edges())
 
@@ -1151,10 +1160,10 @@ class BelReconstitutionMixin(TestGraphMixin):
         for _, data in graph.nodes(data=True):
             self.assertIsInstance(data, BaseEntity)
 
-        self.assertTrue(graph.has_node_with_data(adgrb1))
-        self.assertTrue(graph.has_node_with_data(adgrb2))
-        self.assertTrue(graph.has_node_with_data(adgrb_complex))
-        self.assertTrue(graph.has_node_with_data(achlorhydria))
+        self.assertIn(adgrb1, graph)
+        self.assertIn(adgrb2, graph)
+        self.assertIn(adgrb_complex, graph)
+        self.assertIn(achlorhydria, graph)
 
         b = adgrb1.as_tuple()
         c = adgrb2.as_tuple()

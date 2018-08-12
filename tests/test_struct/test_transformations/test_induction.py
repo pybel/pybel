@@ -26,24 +26,6 @@ trem2_protein = protein(namespace='HGNC', name='TREM2')
 class TestGraphMixin(unittest.TestCase):
     """A mixin to enable testing nodes and edge membership in the graph."""
 
-    def assert_in_graph(self, node, graph):
-        """Assert the node is in the graph.
-
-        :type node: pybel.dsl.BaseEntity
-        :type graph: pybel.BELGraph
-        :rtype: bool
-        """
-        self.assertTrue(graph.has_node_with_data(node))
-
-    def assert_not_in_graph(self, node, graph):
-        """Assert the node is not in the graph.
-
-        :type node: pybel.dsl.BaseEntity
-        :type graph: pybel.BELGraph
-        :rtype: bool
-        """
-        self.assertFalse(graph.has_node_with_data(node))
-
     def assert_in_edge(self, source, target, graph):
         """Assert the edge is in the graph.
 
@@ -77,10 +59,10 @@ class TestInduction(TestGraphMixin):
         self.assertIn(keyword, subgraph.namespace_url)
         self.assertEqual(url, subgraph.namespace_url[keyword])
 
-        self.assert_not_in_graph(a, subgraph)
-        self.assert_in_graph(b, subgraph)
-        self.assert_in_graph(c, subgraph)
-        self.assert_not_in_graph(d, subgraph)
+        self.assertNotIn(a, subgraph)
+        self.assertIn(b, subgraph)
+        self.assertIn(c, subgraph)
+        self.assertNotIn(d, subgraph)
 
     def test_get_subgraph_by_all_shortest_paths(self):
         """Test get_subgraph_by_all_shortest_paths."""
@@ -108,12 +90,12 @@ class TestInduction(TestGraphMixin):
         self.assertIn(keyword, subgraph.namespace_url)
         self.assertEqual(url, subgraph.namespace_url[keyword])
 
-        self.assert_in_graph(a, subgraph)
-        self.assert_in_graph(b, subgraph)
-        self.assert_in_graph(c, subgraph)
-        self.assert_in_graph(d, subgraph)
-        self.assert_not_in_graph(e, subgraph)
-        self.assert_not_in_graph(f, subgraph)
+        self.assertIn(a, subgraph)
+        self.assertIn(b, subgraph)
+        self.assertIn(c, subgraph)
+        self.assertIn(d, subgraph)
+        self.assertNotIn(e, subgraph)
+        self.assertNotIn(f, subgraph)
 
     def test_get_upstream_causal_subgraph(self):
         """Test get_upstream_causal_subgraph."""
@@ -133,14 +115,14 @@ class TestInduction(TestGraphMixin):
         self.assertIn('test', subgraph.namespace_pattern)
         self.assertEqual('test-url', subgraph.namespace_pattern['test'])
 
-        self.assert_in_graph(a, subgraph)
+        self.assertIn(a, subgraph)
         self.assertIn(FUNCTION, subgraph.node[a.as_tuple()])
         self.assertEqual(PROTEIN, subgraph.node[a.as_tuple()][FUNCTION])
-        self.assert_in_graph(b, subgraph)
-        self.assert_not_in_graph(c, subgraph)
-        self.assert_not_in_graph(d, subgraph)
-        self.assert_in_graph(e, subgraph)
-        self.assert_in_graph(f, subgraph)
+        self.assertIn(b, subgraph)
+        self.assertNotIn(c, subgraph)
+        self.assertNotIn(d, subgraph)
+        self.assertIn(e, subgraph)
+        self.assertIn(f, subgraph)
         self.assertIn(FUNCTION, subgraph.node[f.as_tuple()])
         self.assertEqual(PROTEIN, subgraph.node[f.as_tuple()][FUNCTION])
         self.assertEqual(4, subgraph.number_of_nodes())
@@ -166,14 +148,14 @@ class TestInduction(TestGraphMixin):
 
         expand_upstream_causal(universe, subgraph)
 
-        self.assert_in_graph(a, subgraph)
+        self.assertIn(a, subgraph)
         self.assertIn(FUNCTION, subgraph.node[a.as_tuple()])
         self.assertEqual(PROTEIN, subgraph.node[a.as_tuple()][FUNCTION])
-        self.assert_in_graph(b, subgraph)
-        self.assert_not_in_graph(c, subgraph)
-        self.assert_not_in_graph(d, subgraph)
-        self.assert_in_graph(e, subgraph)
-        self.assert_in_graph(f, subgraph)
+        self.assertIn(b, subgraph)
+        self.assertNotIn(c, subgraph)
+        self.assertNotIn(d, subgraph)
+        self.assertIn(e, subgraph)
+        self.assertIn(f, subgraph)
         self.assertIn(FUNCTION, subgraph.node[f.as_tuple()])
         self.assertEqual(PROTEIN, subgraph.node[f.as_tuple()][FUNCTION])
         self.assertEqual(4, subgraph.number_of_nodes())
@@ -207,10 +189,10 @@ class TestEdgePredicateBuilders(TestGraphMixin):
         self.assertIn(keyword, subgraph.namespace_url)
         self.assertEqual(url, subgraph.namespace_url[keyword])
 
-        self.assert_in_graph(a, subgraph)
-        self.assert_in_graph(b, subgraph)
-        self.assert_in_graph(c, subgraph)
-        self.assert_not_in_graph(d, subgraph)
+        self.assertIn(a, subgraph)
+        self.assertIn(b, subgraph)
+        self.assertIn(c, subgraph)
+        self.assertNotIn(d, subgraph)
 
         empty_subgraph = get_subgraph_by_pubmed(graph, p4)
         self.assertIn(keyword, subgraph.namespace_url)
@@ -237,12 +219,12 @@ class TestEdgePredicateBuilders(TestGraphMixin):
         self.assertIn(keyword, subgraph.namespace_url)
         self.assertEqual(url, subgraph.namespace_url[keyword])
 
-        self.assert_in_graph(a, subgraph)
-        self.assert_in_graph(b, subgraph)
-        self.assert_in_graph(c, subgraph)
-        self.assert_not_in_graph(d, subgraph)
-        self.assert_in_graph(e, subgraph)
-        self.assert_in_graph(f, subgraph)
+        self.assertIn(a, subgraph)
+        self.assertIn(b, subgraph)
+        self.assertIn(c, subgraph)
+        self.assertNotIn(d, subgraph)
+        self.assertIn(e, subgraph)
+        self.assertIn(f, subgraph)
 
         empty_subgraph = get_subgraph_by_pubmed(graph, [p5, p6])
         self.assertIn(keyword, subgraph.namespace_url)
@@ -278,20 +260,20 @@ class TestEdgePredicateBuilders(TestGraphMixin):
         self.assertIn(keyword, subgraph1.namespace_url)
         self.assertEqual(url, subgraph1.namespace_url[keyword])
 
-        self.assert_in_graph(a, subgraph1)
-        self.assert_in_graph(b, subgraph1)
-        self.assert_in_graph(c, subgraph1)
-        self.assert_in_graph(d, subgraph1)
+        self.assertIn(a, subgraph1)
+        self.assertIn(b, subgraph1)
+        self.assertIn(c, subgraph1)
+        self.assertIn(d, subgraph1)
 
         subgraph2 = get_subgraph_by_authors(graph, a2)
 
         self.assertIn(keyword, subgraph2.namespace_url)
         self.assertEqual(url, subgraph2.namespace_url[keyword])
 
-        self.assert_in_graph(a, subgraph2)
-        self.assert_in_graph(b, subgraph2)
-        self.assert_in_graph(c, subgraph2)
-        self.assert_not_in_graph(d, subgraph2)
+        self.assertIn(a, subgraph2)
+        self.assertIn(b, subgraph2)
+        self.assertIn(c, subgraph2)
+        self.assertNotIn(d, subgraph2)
 
         subgraph3 = get_subgraph_by_authors(graph, a5)
         self.assertIn(keyword, subgraph3.namespace_url)
@@ -327,7 +309,7 @@ class TestEdgePredicateBuilders(TestGraphMixin):
         self.assertIn(keyword, subgraph1.namespace_url)
         self.assertEqual(url, subgraph1.namespace_url[keyword])
 
-        self.assert_in_graph(a, subgraph1)
-        self.assert_in_graph(b, subgraph1)
-        self.assert_in_graph(c, subgraph1)
-        self.assert_in_graph(d, subgraph1)
+        self.assertIn(a, subgraph1)
+        self.assertIn(b, subgraph1)
+        self.assertIn(c, subgraph1)
+        self.assertIn(d, subgraph1)

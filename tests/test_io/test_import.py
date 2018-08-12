@@ -321,8 +321,8 @@ class TestFull(TestTokenParserBase):
         test_node_2_dict = gene(namespace='TESTNS', name='2')
 
         self.assertEqual(2, self.graph.number_of_nodes())
-        self.assertTrue(self.graph.has_node_with_data(test_node_1_dict))
-        self.assertTrue(self.graph.has_node_with_data(test_node_2_dict))
+        self.assertIn(test_node_1_dict, self.graph)
+        self.assertIn(test_node_2_dict, self.graph)
 
         test_node_1 = test_node_1_dict.as_tuple()
         test_node_2 = test_node_2_dict.as_tuple()
@@ -353,11 +353,8 @@ class TestFull(TestTokenParserBase):
         test_node_2_dict = gene(namespace='TESTNS', name='2')
 
         self.assertEqual(2, self.parser.graph.number_of_nodes())
-        self.assertTrue(self.parser.graph.has_node_with_data(test_node_1_dict))
-        self.assertTrue(self.parser.graph.has_node_with_data(test_node_2_dict))
-
-        test_node_1 = test_node_1_dict.as_tuple()
-        test_node_2 = test_node_2_dict.as_tuple()
+        self.assertIn(test_node_1_dict, self.graph)
+        self.assertIn(test_node_2_dict, self.graph)
 
         self.assertEqual(1, self.parser.graph.number_of_edges())
 
@@ -368,7 +365,7 @@ class TestFull(TestTokenParserBase):
             },
             CITATION: test_citation_dict
         }
-        self.assert_has_edge(test_node_1, test_node_2, **kwargs)
+        self.assert_has_edge(test_node_1_dict, test_node_2_dict, **kwargs)
 
     def test_annotations_with_multilist(self):
         self.add_default_provenance()
@@ -384,12 +381,9 @@ class TestFull(TestTokenParserBase):
         test_node_1_dict = gene(namespace='TESTNS', name='1')
         test_node_2_dict = gene(namespace='TESTNS', name='2')
 
-        test_node_1 = test_node_1_dict.as_tuple()
-        test_node_2 = test_node_2_dict.as_tuple()
-
         self.assertEqual(2, self.parser.graph.number_of_nodes())
-        self.assertTrue(self.parser.graph.has_node_with_data(test_node_1_dict))
-        self.assertTrue(self.parser.graph.has_node_with_data(test_node_2_dict))
+        self.assertIn(test_node_1_dict, self.graph)
+        self.assertIn(test_node_2_dict, self.graph)
 
         self.assertEqual(1, self.parser.graph.number_of_edges())
 
@@ -401,7 +395,7 @@ class TestFull(TestTokenParserBase):
             },
             CITATION: test_citation_dict
         }
-        self.assert_has_edge(test_node_1, test_node_2, **kwargs)
+        self.assert_has_edge(test_node_1_dict, test_node_2_dict, **kwargs)
 
 
 class TestRandom(unittest.TestCase):
