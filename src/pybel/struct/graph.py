@@ -703,6 +703,17 @@ class BELGraph(networkx.MultiDiGraph):
         )
 
     def _has_edge_attr(self, u, v, key, attr):
+        """
+
+        :type u: BaseEntity or tuple
+        :type v: BaseEntity or tuple
+        :type key: str
+        :type attr: str
+        :rtype: bool
+        """
+        if isinstance(u, BaseEntity):
+            u = u.as_tuple()
+
         return attr in self[u][v][key]
 
     def has_edge_citation(self, u, v, key):
