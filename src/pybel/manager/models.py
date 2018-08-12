@@ -534,7 +534,7 @@ class Node(Base):
                 range_3p=j.get(RANGE_3P),
             )
 
-        if self.type == REACTION:
+        if func == REACTION:
             return reaction(
                 reactants=[
                     edge.target.to_json()
@@ -546,7 +546,7 @@ class Node(Base):
                 ]
             )
 
-        if self.type in {COMPLEX, COMPOSITE}:
+        if func in {COMPLEX, COMPOSITE}:
             members = [
                 edge.target.to_json()
                 for edge in self.out_edges.filter(Edge.relation == HAS_COMPONENT)
@@ -555,25 +555,24 @@ class Node(Base):
             if self.type == COMPOSITE:
                 return composite_abundance(members)
 
-            if self.namespace_entry:
-                if members:
-                    return complex_abundance(
-                        members=members,
-                        namespace=self.namespace_entry.namespace.keyword,
-                        name=self.namespace_entry.name,
-                        identifier=self.namespace_entry.identifier,
-                    )
-                else:  # no members means named complex abundance
-                    return named_complex_abundance(
-                        namespace=self.namespace_entry.namespace.keyword,
-                        name=self.namespace_entry.name,
-                        identifier=self.namespace_entry.identifier,
-                    )
+            if self.namespace_entry and members:
+                return complex_abundance(
+                    members=members,
+                    namespace=self.namespace_entry.namespace.keyword,
+                    name=self.namespace_entry.name,
+                    identifier=self.namespace_entry.identifier,
+                )
+            if self.namespace_entry and not members:
+                return named_complex_abundance(
+                    namespace=self.namespace_entry.namespace.keyword,
+                    name=self.namespace_entry.name,
+                    identifier=self.namespace_entry.identifier,
+                )
 
-            elif not members:
-                raise ValueError('complex can not be nameless and have no members')
+            if members:
+                return complex_abundance(members=members)
 
-            return complex_abundance(members=members)
+            raise ValueError('complex can not be nameless and have no members')
 
         dsl = FUNC_TO_DSL[func]
 
