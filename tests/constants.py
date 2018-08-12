@@ -948,6 +948,9 @@ class BelReconstitutionMixin(TestGraphMixin):
         # self.assertEqual(6, graph.number_of_edges(),
         #                  msg='Edges:\n{}'.format('\n'.join(map(str, graph.edges(keys=True, data=True)))))
 
+        for _, data in graph.nodes(data=True):
+            self.assertIsInstance(data, BaseEntity)
+
         self.assertTrue(graph.has_node_with_data(protein(namespace='HGNC', name='AKT1')))
         self.assertTrue(graph.has_node_with_data(protein(namespace='HGNC', name='EGFR')))
         self.assertTrue(graph.has_node_with_data(protein(namespace='HGNC', name='FADD')))
@@ -1050,6 +1053,9 @@ class BelReconstitutionMixin(TestGraphMixin):
             self.assertEqual({'TESTAN1', 'TESTAN2'}, set(graph.annotation_list))
             self.assertEqual({'TestRegex'}, set(graph.annotation_pattern))
 
+        for _, data in graph.nodes(data=True):
+            self.assertIsInstance(data, BaseEntity)
+
         self.assertEqual(set(BEL_THOROUGH_NODES), set(graph))
 
         # FIXME
@@ -1115,6 +1121,9 @@ class BelReconstitutionMixin(TestGraphMixin):
                 self.assertEqual(el, l, msg="Expected different error on line {}. Check line {}".format(el, l))
                 self.assertIsInstance(w, ew, msg='Line: {}'.format(el))
 
+        for _, data in graph.nodes(data=True):
+            self.assertIsInstance(data, BaseEntity)
+
         self.assertTrue(graph.has_node_with_data(protein(namespace='HGNC', name='AKT1')))
         self.assertTrue(graph.has_node_with_data(protein(namespace='HGNC', name='EGFR')))
 
@@ -1138,6 +1147,9 @@ class BelReconstitutionMixin(TestGraphMixin):
         adgrb2 = protein(namespace='HGNC', name='ADGRB2')
         adgrb_complex = complex_abundance([adgrb1, adgrb2])
         achlorhydria = pathology(namespace='MESHD', name='Achlorhydria')
+
+        for _, data in graph.nodes(data=True):
+            self.assertIsInstance(data, BaseEntity)
 
         self.assertTrue(graph.has_node_with_data(adgrb1))
         self.assertTrue(graph.has_node_with_data(adgrb2))

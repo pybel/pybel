@@ -18,7 +18,7 @@ from pybel.constants import (
     ANNOTATIONS, CITATION, DECREASES, DIRECTLY_DECREASES, EVIDENCE, GENE, GRAPH_PYBEL_VERSION, INCREASES,
     PYBEL_MINIMUM_IMPORT_VERSION, RELATION,
 )
-from pybel.dsl import gene
+from pybel.dsl import gene, BaseEntity
 from pybel.examples import sialic_acid_graph
 from pybel.io.exc import ImportVersionWarning, import_version_message_fmt
 from pybel.parser import BelParser
@@ -48,6 +48,9 @@ class TestExampleInterchange(unittest.TestCase):
 
         :type graph: pybel.BELGraph
         """
+        for _, data in graph.nodes(data=True):
+            self.assertIsInstance(data, BaseEntity)
+
         self.assertEqual(set(sialic_acid_graph), set(graph))
         self.assertEqual(set(sialic_acid_graph.edges()), set(graph.edges()))
 

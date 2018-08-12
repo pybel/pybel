@@ -4,13 +4,14 @@
 
 import json
 import os
+from operator import itemgetter, methodcaller
 
-from networkx.readwrite.json_graph import node_link_data, node_link_graph
+from itertools import chain, count
 
 from .utils import ensure_version
 from ..constants import GRAPH_ANNOTATION_LIST, GRAPH_UNCACHED_NAMESPACES
 from ..struct import BELGraph
-from ..utils import list2tuple
+from ..tokens import parse_result_to_dsl
 
 __all__ = [
     'to_json',
@@ -32,10 +33,14 @@ def to_json(graph):
     :rtype: dict
     """
     graph_json_dict = node_link_data(graph)
+
+    # Convert annotation list definitions (which are sets) to canonicalized/sorted lists
     graph_json_dict['graph'][GRAPH_ANNOTATION_LIST] = {
         keyword: list(sorted(values))
         for keyword, values in graph_json_dict['graph'][GRAPH_ANNOTATION_LIST].items()
     }
+
+    # Convert set to list
     graph_json_dict['graph'][GRAPH_UNCACHED_NAMESPACES] = list(graph_json_dict['graph'][GRAPH_UNCACHED_NAMESPACES])
 
     return graph_json_dict
@@ -79,11 +84,7 @@ def from_json(graph_json_dict, check_version=True):
     :param bool check_version: Checks if the graph was produced by this version of PyBEL
     :rtype: BELGraph
     """
-    for i, node in enumerate(graph_json_dict['nodes']):
-        graph_json_dict['nodes'][i]['id'] = list2tuple(graph_json_dict['nodes'][i]['id'])
-
-    graph = node_link_graph(graph_json_dict, directed=True, multigraph=True)
-    graph = BELGraph(data=graph)
+    graph = node_link_graph(graph_json_dict)
     return ensure_version(graph, check_version=check_version)
 
 
@@ -118,3 +119,80 @@ def from_jsons(graph_json_str, check_version=True):
     """
     graph_json_dict = json.loads(graph_json_str)
     return from_json(graph_json_dict, check_version=check_version)
+
+
+def node_link_data(graph):
+    """Convert a BEL graph to a node-link format.
+
+    Adapted from :func:`networkx.readwrite.json_graph.node_link_data`
+
+    :param pybel.BELGraph graph:
+    :rtype: dict
+    """
+    nodes = sorted(graph.nodes(data=True), key=lambda node_data: node_data[1].as_bel())
+
+    mapping = dict(zip(map(itemgetter(0), nodes), count()))
+
+    return {
+        'directed': True,
+        'multigraph': True,
+        'graph': graph.graph,
+        'nodes': [
+            _augment_node_with_sha512(data)
+            for node, data in nodes
+        ],
+        'links': [
+            dict(chain(
+                data.items(),
+                [('source', mapping[u]), ('target', mapping[v]), ('key', key)]
+            ))
+            for u, v, key, data in graph.edges(keys=True, data=True)
+        ]
+    }
+
+
+def _augment_node_with_sha512(node):
+    """
+
+    :type node: BaseEntity
+    :rtype: dict
+    """
+    v = node.copy()
+    v['id'] = node.as_sha512()
+    return v
+
+
+def node_link_graph(data):
+    """Return graph from node-link data format.
+
+    Adapted from :func:`networkx.readwrite.json_graph.node_link_graph`
+
+    :param dict data:
+    :rtype: BELGraph
+    """
+    graph = BELGraph()
+    graph.graph = data.get('graph', {})
+
+    mapping = []
+
+    for node_data in data['nodes']:
+        _dsl = parse_result_to_dsl(node_data)
+        node = graph.add_node_from_data(_dsl)
+        mapping.append(node)
+
+    for data in data['links']:
+        src = data['source']
+        tgt = data['target']
+        key = data['key']
+
+        u = mapping[src]
+        v = mapping[tgt]
+
+        edgedata = {
+            k: v
+            for k, v in data.items()
+            if k not in {'source', 'target', 'key'}
+        }
+        graph.add_edge(u, v, key=key, **edgedata)
+
+    return graph
