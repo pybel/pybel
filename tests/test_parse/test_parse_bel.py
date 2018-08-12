@@ -20,7 +20,7 @@ from pybel.dsl import (
 from pybel.dsl.nodes import abundance, bioprocess, gene, gmod, hgvs, pmod
 from pybel.parser import BelParser
 from pybel.parser.exc import MalformedTranslocationWarning
-from pybel.tokens import modifier_po_to_dict
+from pybel.parser.parse_bel import modifier_po_to_dict
 from tests.constants import TestTokenParserBase, assert_has_edge, assert_has_node, update_provenance
 
 log = logging.getLogger(__name__)
@@ -801,7 +801,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         parent = protein('HGNC', 'AKT1')
-        expected_node = parent.with_variants (hgvs('p.Cys40*'))
+        expected_node = parent.with_variants(hgvs('p.Cys40*'))
         self.assert_has_node(expected_node)
         self.assertEqual('p(HGNC:AKT1, var("p.Cys40*"))', self.graph.node_to_bel(expected_node))
 

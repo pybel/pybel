@@ -25,18 +25,20 @@ from .parse_identifier import IdentifierParser
 from .utils import WCW, nest, one_of_tags, quote, triple
 from .. import language
 from ..constants import (
-    ABUNDANCE, ACTIVITY, ASSOCIATION, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE,
-    CELL_SECRETION, CELL_SURFACE_EXPRESSION, COMPLEX, COMPOSITE, DECREASES, DEGRADATION, DIRECTLY_DECREASES,
-    DIRECTLY_INCREASES, DIRTY, EFFECT, EQUIVALENT_TO, FROM_LOC, FUNCTION, FUSION, GENE, HAS_COMPONENT, HAS_MEMBER,
-    IDENTIFIER, INCREASES, IS_A, LINE, MEMBERS, MIRNA, MODIFIER, NAME,
-    NAMESPACE, NEGATIVE_CORRELATION, OBJECT, PART_OF, PATHOLOGY, POSITIVE_CORRELATION, PRODUCTS,
-    PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT,
-    TARGET, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, TWO_WAY_RELATIONS, VARIANTS,
-    belns_encodings,
+    ABUNDANCE, ACTIVITY, ASSOCIATION, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE, CELL_SECRETION,
+    CELL_SURFACE_EXPRESSION, COMPLEX, COMPOSITE, DECREASES, DEGRADATION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, DIRTY,
+    EFFECT, EQUIVALENT_TO, FROM_LOC, FUNCTION, FUSION, GENE, HAS_COMPONENT, HAS_MEMBER, IDENTIFIER, INCREASES, IS_A,
+    LINE, LOCATION, MEMBERS, MIRNA, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, PART_OF, PATHOLOGY,
+    POSITIVE_CORRELATION, PRODUCTS, PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, TARGET, TO_LOC,
+    TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, TWO_WAY_RELATIONS, VARIANTS, belns_encodings,
 )
-from ..tokens import modifier_po_to_dict, parse_result_to_dsl
+from ..dsl import cell_surface_expression, secretion
+from ..tokens import parse_result_to_dsl
 
-__all__ = ['BelParser']
+__all__ = [
+    'BelParser',
+    'modifier_po_to_dict',
+]
 
 log = logging.getLogger('pybel.parser')
 
@@ -921,3 +923,47 @@ def handle_legacy_tloc(line, position, tokens):
     """
     log.log(5, 'legacy translocation statement: %s', line)
     return tokens
+
+
+def modifier_po_to_dict(tokens):
+    """Get location, activity, and/or transformation information as a dictionary.
+
+    :return: a dictionary describing the modifier
+    :rtype: dict
+    """
+    attrs = {}
+
+    if LOCATION in tokens:
+        attrs[LOCATION] = dict(tokens[LOCATION])
+
+    if MODIFIER not in tokens:
+        return attrs
+
+    if LOCATION in tokens[TARGET]:
+        attrs[LOCATION] = tokens[TARGET][LOCATION].asDict()
+
+    if tokens[MODIFIER] == DEGRADATION:
+        attrs[MODIFIER] = tokens[MODIFIER]
+
+    elif tokens[MODIFIER] == ACTIVITY:
+        attrs[MODIFIER] = tokens[MODIFIER]
+
+        if EFFECT in tokens:
+            attrs[EFFECT] = dict(tokens[EFFECT])
+
+    elif tokens[MODIFIER] == TRANSLOCATION:
+        attrs[MODIFIER] = tokens[MODIFIER]
+
+        if EFFECT in tokens:
+            attrs[EFFECT] = tokens[EFFECT].asDict()
+
+    elif tokens[MODIFIER] == CELL_SECRETION:
+        attrs.update(secretion())
+
+    elif tokens[MODIFIER] == CELL_SURFACE_EXPRESSION:
+        attrs.update(cell_surface_expression())
+
+    else:
+        raise ValueError('Invalid value for tokens[MODIFIER]: {}'.format(tokens[MODIFIER]))
+
+    return attrs

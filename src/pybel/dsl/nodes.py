@@ -47,6 +47,10 @@ __all__ = [
     'FusionBase',
     'FusionRangeBase',
     'Variant',
+    # Lookup dictionaries
+    'FUNC_TO_LIST_DSL',
+    'FUNC_TO_FUSION_DSL',
+    'FUNC_TO_DSL',
 ]
 
 
@@ -1137,3 +1141,23 @@ class GeneFusion(FusionBase):
 
 
 gene_fusion = GeneFusion
+
+FUNC_TO_LIST_DSL = {
+    COMPLEX: complex_abundance,
+    COMPOSITE: composite_abundance
+}
+FUNC_TO_FUSION_DSL = {
+    GENE: gene_fusion,
+    RNA: rna_fusion,
+    PROTEIN: protein_fusion,
+}
+FUNC_TO_DSL = {
+    PROTEIN: protein,
+    RNA: rna,
+    MIRNA: mirna,
+    GENE: gene,
+    PATHOLOGY: pathology,
+    BIOPROCESS: bioprocess,
+    COMPLEX: named_complex_abundance,
+    ABUNDANCE: abundance,
+}
