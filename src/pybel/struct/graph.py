@@ -623,18 +623,6 @@ class BELGraph(networkx.MultiDiGraph):
 
         return node_tuple
 
-    def has_node_with_data(self, attr_dict):
-        """Check if this graph has a node with the given data dictionary.
-
-        :param attr_dict: A PyBEL node data dictionary
-        :type attr_dict: BaseEntity or dict
-        :rtype: bool
-        """
-        if not isinstance(attr_dict, BaseEntity):
-            raise TypeError('not BaseEntity: {}'.format(attr_dict))
-
-        return self.has_node(attr_dict)
-
     def add_qualified_edge(self, u, v, relation, evidence, citation, annotations=None, subject_modifier=None,
                            object_modifier=None, **attr):
         """Add a qualified edge.

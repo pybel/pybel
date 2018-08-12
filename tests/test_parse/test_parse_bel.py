@@ -43,12 +43,10 @@ class TestAbundance(TestTokenParserBase):
         result = self.parser.general_abundance.parseString(statement)
         self.assertEqual(dict(self.expected_node_data), result.asDict())
 
-        self.assertIn(self.expected_node_data.as_tuple(), self.graph)
+        self.assertIn(self.expected_node_data, self.graph)
         self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node_data))
 
         self.assertEqual({}, modifier_po_to_dict(result), msg='The modifier dictionary should be empty')
-
-        self.assertTrue(self.graph.has_node_with_data(self.expected_node_data))
 
     def test_abundance(self):
         """Test short/long abundance name."""
