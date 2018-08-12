@@ -75,7 +75,7 @@ class BaseEntity(dict):
     def as_bel(self):
         """Return this entity as a BEL string.
 
-        :rtype: tuple
+        :rtype: str
         """
 
     def as_sha512(self):
