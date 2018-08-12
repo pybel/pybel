@@ -926,13 +926,14 @@ class BELGraph(networkx.MultiDiGraph):
     def edge_to_bel(self, u, v, data, sep=None):
         """Serialize a pair of nodes and related edge data as a BEL relation.
 
-        :param tuple u: A PyBEL node tuple for the soure node
-        :param tuple v: A PyBEL node tuple for the target node
+        :type u: BaseEntity or tuple
+        :type v: BaseEntity or tuple
         :param dict data: A PyBEL edge data dictionary
         :param Optional[str] sep: The separator between the source, relation, and target. Defaults to ' '
         :rtype: str
         """
-        source, target = self.node[u], self.node[v]
+        source = u if isinstance(u, BaseEntity) else self.node[u]
+        target = v if isinstance(v, BaseEntity) else self.node[v]
         return edge_to_bel(source, target, data=data, sep=sep)
 
     def _has_no_equivalent_edge(self, u, v):

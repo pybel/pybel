@@ -111,8 +111,8 @@ def _decanonicalize_edge_node(node, edge_data, node_position):
 def edge_to_bel(u, v, data, sep=None):
     """Take two nodes and gives back a BEL string representing the statement.
 
-    :param dict u: The edge's source's PyBEL node data dictionary
-    :param dict v: The edge's target's PyBEL node data dictionary
+    :param BaseEntity u: The edge's source's PyBEL node data dictionary
+    :param BaseEntity v: The edge's target's PyBEL node data dictionary
     :param dict data: The edge's data dictionary
     :param str sep: The separator between the source, relation, and target. Defaults to ' '
     :return: The canonical BEL for this edge
