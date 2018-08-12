@@ -3,7 +3,7 @@
 import unittest
 
 from pybel import BELGraph
-from pybel.canonicalize import _to_bel_lines_body, canonicalize_edge, fusion_range_to_bel, variant_to_bel
+from pybel.canonicalize import _to_bel_lines_body, fusion_range_to_bel, variant_to_bel
 from pybel.constants import (
     ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, FRAGMENT, GENE, KIND, MODIFIER,
     PATHOLOGY, PMOD, PROTEIN, REACTION, RNA,
@@ -14,6 +14,7 @@ from pybel.dsl import (
     pmod, protein, protein_substitution, reaction, rna, rna_fusion, secretion, translocation,
 )
 from pybel.testing.utils import n
+from pybel.utils import canonicalize_edge
 
 
 class TestCanonicalize(unittest.TestCase):

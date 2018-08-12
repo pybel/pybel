@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 
-from collections import Iterable, MutableMapping, defaultdict
-
 import hashlib
 import json
 import logging
-import networkx as nx
 import pickle
+from collections import Iterable, MutableMapping, defaultdict
 from datetime import datetime
+
+import networkx as nx
 from six import string_types
 
 from .constants import (
-    CITATION_AUTHORS, CITATION_ENTRIES, CITATION_REFERENCE, CITATION_TYPE,
-    PYBEL_EDGE_DATA_KEYS, VERSION,
+    ACTIVITY, CITATION, CITATION_AUTHORS, CITATION_ENTRIES, CITATION_REFERENCE, CITATION_TYPE,
+    DEGRADATION, EFFECT, EVIDENCE, FROM_LOC, LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT, PYBEL_EDGE_DATA_KEYS,
+    RELATION, SUBJECT, TO_LOC, TRANSLOCATION, VERSION, IDENTIFIER
 )
 
 log = logging.getLogger(__name__)
@@ -218,7 +219,7 @@ def parse_datetime(s):
 
 
 def hash_node(node_tuple):
-    """Converts a PyBEL node tuple to a hash
+    """Convert a PyBEL node tuple to an SHA512 hash.
 
     :param tuple node_tuple: A BEL node
     :return: A hashed version of the node tuple using :func:`hashlib.sha512` hash of the binary pickle dump
@@ -227,33 +228,34 @@ def hash_node(node_tuple):
     return hashlib.sha512(pickle.dumps(node_tuple)).hexdigest()
 
 
-def _extract_pybel_data(data):
-    """Extracts only the PyBEL-specific data from the given edge data dictionary
+def _get_citation_tuple(data):
+    citation = data.get(CITATION)
 
-    :param dict data: An edge data dictionary
-    :rtype: dict
-    """
-    return {
-        key: value
-        for key, value in data.items()
-        if key in PYBEL_EDGE_DATA_KEYS
-    }
+    if citation is None:
+        return None, None
+
+    return citation[CITATION_TYPE], citation[CITATION_REFERENCE]
 
 
-def _edge_to_tuple(u, v, data):
-    """Converts an edge to tuple
+def _get_edge_tuple(u, v, data):
+    """Convert an edge to a consistent tuple.
 
     :param tuple u: The source BEL node
     :param tuple v: The target BEL node
     :param dict data: The edge's data dictionary
     :return: A tuple that can be hashed representing this edge. Makes no promises to its structure.
     """
-    extracted_data_dict = _extract_pybel_data(data)
-    return u, v, json.dumps(extracted_data_dict, ensure_ascii=False, sort_keys=True)
+    return (
+        u,
+        v,
+        _get_citation_tuple(data),
+        data.get(EVIDENCE),
+        canonicalize_edge(data),
+    )
 
 
 def hash_edge(u, v, data):
-    """Converts an edge tuple to a hash
+    """Convert an edge tuple to a SHA512 hash.
     
     :param tuple u: The source BEL node
     :param tuple v: The target BEL node
@@ -261,7 +263,7 @@ def hash_edge(u, v, data):
     :return: A hashed version of the edge tuple using md5 hash of the binary pickle dump of u, v, and the json dump of d
     :rtype: str
     """
-    edge_tuple = _edge_to_tuple(u, v, data)
+    edge_tuple = _get_edge_tuple(u, v, data)
     edge_tuple_bytes = pickle.dumps(edge_tuple)
     return hashlib.sha512(edge_tuple_bytes).hexdigest()
 
@@ -331,3 +333,90 @@ def hash_evidence(text, type, reference):
     :rtype: str
     """
     return hash_dump((type, reference, text))
+
+
+def canonicalize_edge(data):
+    """Canonicalize the edge to a tuple based on the relation, subject modifications, and object modifications.
+
+    :param dict data: A PyBEL edge data dictionary
+    :return: A 3-tuple that's specific for the edge (relation, subject, object)
+    :rtype: tuple
+    """
+    return (
+        data[RELATION],
+        _canonicalize_edge_modifications(data.get(SUBJECT)),
+        _canonicalize_edge_modifications(data.get(OBJECT)),
+    )
+
+
+def _canonicalize_edge_modifications(data):
+    """Return the SUBJECT or OBJECT entry of a PyBEL edge data dictionary as a canonical tuple.
+
+    :param dict data: A PyBEL edge data dictionary
+    :rtype: tuple
+    """
+    if data is None:
+        return
+
+    modifier = data.get(MODIFIER)
+    location = data.get(LOCATION)
+    effect = data.get(EFFECT)
+
+    if modifier is None and location is None:
+        return
+
+    result = []
+
+    if modifier == ACTIVITY:
+        if effect:
+            effect_name = effect.get(NAME)
+            effect_identifier = effect.get(IDENTIFIER)
+
+            t = (
+                ACTIVITY,
+                effect[NAMESPACE],
+                effect_name or effect_identifier,
+            )
+
+        else:
+            t = (ACTIVITY, )
+
+        result.append(t)
+
+    elif modifier == DEGRADATION:
+        t = (DEGRADATION,)
+        result.append(t)
+
+    elif modifier == TRANSLOCATION:
+        if effect:
+            from_loc_name = effect[FROM_LOC].get(NAME)
+            from_loc_identifier = effect[FROM_LOC].get(IDENTIFIER)
+            to_loc_name = effect[TO_LOC].get(NAME)
+            to_loc_identifier = effect[TO_LOC].get(IDENTIFIER)
+
+            t = (
+                TRANSLOCATION,
+                data[EFFECT][FROM_LOC][NAMESPACE],
+                from_loc_name or from_loc_identifier,
+                data[EFFECT][TO_LOC][NAMESPACE],
+                to_loc_name or to_loc_identifier,
+            )
+        else:
+            t = (TRANSLOCATION,)
+        result.append(t)
+
+    if location:
+        location_name = location.get(NAME)
+        location_identifier = location.get(IDENTIFIER)
+
+        t = (
+            LOCATION,
+            location[NAMESPACE],
+            location_name or location_identifier,
+        )
+        result.append(t)
+
+    if not result:
+        raise ValueError('Invalid data: {}'.format(data))
+
+    return tuple(result)
