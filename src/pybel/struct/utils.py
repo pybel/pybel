@@ -36,7 +36,7 @@ def update_node_helper(source, target):
     for node in target:
         if node not in source:
             continue
-        target.node[node].update(source.node[node])
+        target.node[node] = source.node[node]
 
 
 def ensure_node_from_universe(source, target, node):
@@ -47,4 +47,5 @@ def ensure_node_from_universe(source, target, node):
     :param tuple node: A BEL node
     """
     if node not in target:
-        target.add_node(node, **source.node[node])
+        target.add_node(node)
+        target.node[node] = source.node[node]

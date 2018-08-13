@@ -20,14 +20,16 @@ def subgraph(graph, nodes):
     # see implementation for .copy()
     result = graph.fresh_copy()
     result.graph.update(subgraph.graph)
-    result.add_nodes_from(
-        (n, d.copy())
-        for n, d in subgraph.nodes(data=True)
-    )
+
+    for node, data in subgraph.nodes(data=True):
+        result.add_node(node)
+        result.node[node] = data
+
     result.add_edges_from(
         (u, v, key, datadict.copy())
         for u, v, key, datadict in subgraph.edges(keys=True, data=True)
     )
+
     return result
 
 
