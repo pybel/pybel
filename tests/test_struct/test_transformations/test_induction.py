@@ -10,7 +10,7 @@ from pybel.constants import (
     ASSOCIATION, CITATION_AUTHORS, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED,
     DECREASES, FUNCTION, INCREASES, PROTEIN,
 )
-from pybel.dsl import gene, protein, rna
+from pybel.dsl import BaseEntity, gene, protein, rna
 from pybel.struct.mutation.expansion import expand_upstream_causal
 from pybel.struct.mutation.induction.citation import get_subgraph_by_authors, get_subgraph_by_pubmed
 from pybel.struct.mutation.induction.paths import get_nodes_in_all_shortest_paths, get_subgraph_by_all_shortest_paths
@@ -36,6 +36,11 @@ class TestGraphMixin(unittest.TestCase):
         """
         self.assertIn(target.as_tuple(), graph[source.as_tuple()])
 
+    def assert_all_nodes_are_base_entities(self, graph):
+        """Assert that all nodes are base entities."""
+        for _, data in graph.nodes(data=True):
+            self.assertIsInstance(data, BaseEntity)
+
 
 class TestInduction(TestGraphMixin):
     """Test induction functions."""
@@ -55,6 +60,7 @@ class TestInduction(TestGraphMixin):
         subgraph = get_subgraph_by_induction(graph, nodes)
 
         self.assertIsInstance(subgraph, BELGraph)
+        self.assert_all_nodes_are_base_entities(subgraph)
         self.assertNotEqual(0, len(subgraph.namespace_url), msg='improperly found metadata: {}'.format(subgraph.graph))
         self.assertIn(keyword, subgraph.namespace_url)
         self.assertEqual(url, subgraph.namespace_url[keyword])
@@ -80,12 +86,14 @@ class TestInduction(TestGraphMixin):
 
         query_nodes = [a.as_tuple(), d.as_tuple()]
         shortest_paths_nodes = get_nodes_in_all_shortest_paths(graph, query_nodes)
+
         self.assertIn(a.as_tuple(), shortest_paths_nodes)
         self.assertIn(b.as_tuple(), shortest_paths_nodes)
         self.assertIn(c.as_tuple(), shortest_paths_nodes)
         self.assertIn(d.as_tuple(), shortest_paths_nodes)
 
         subgraph = get_subgraph_by_all_shortest_paths(graph, query_nodes)
+        self.assert_all_nodes_are_base_entities(subgraph)
         self.assertIsInstance(subgraph, BELGraph)
         self.assertIn(keyword, subgraph.namespace_url)
         self.assertEqual(url, subgraph.namespace_url[keyword])
@@ -111,6 +119,9 @@ class TestInduction(TestGraphMixin):
         universe.add_qualified_edge(f, b, DECREASES, citation, evidence)
 
         subgraph = get_upstream_causal_subgraph(universe, [a.as_tuple(), b.as_tuple()])
+
+        self.assertIsInstance(subgraph, BELGraph)
+        self.assert_all_nodes_are_base_entities(subgraph)
 
         self.assertIn('test', subgraph.namespace_pattern)
         self.assertEqual('test-url', subgraph.namespace_pattern['test'])
@@ -147,6 +158,9 @@ class TestInduction(TestGraphMixin):
         subgraph.add_qualified_edge(a, b, INCREASES, n(), n())
 
         expand_upstream_causal(universe, subgraph)
+
+        self.assertIsInstance(subgraph, BELGraph)
+        self.assert_all_nodes_are_base_entities(subgraph)
 
         self.assertIn(a, subgraph)
         self.assertIn(FUNCTION, subgraph.node[a.as_tuple()])
@@ -186,6 +200,9 @@ class TestEdgePredicateBuilders(TestGraphMixin):
 
         subgraph = get_subgraph_by_pubmed(graph, p1)
 
+        self.assertIsInstance(subgraph, BELGraph)
+        self.assert_all_nodes_are_base_entities(subgraph)
+
         self.assertIn(keyword, subgraph.namespace_url)
         self.assertEqual(url, subgraph.namespace_url[keyword])
 
@@ -215,6 +232,9 @@ class TestEdgePredicateBuilders(TestGraphMixin):
         graph.add_increases(e, f, n(), citation=p4)
 
         subgraph = get_subgraph_by_pubmed(graph, [p1, p4])
+
+        self.assertIsInstance(subgraph, BELGraph)
+        self.assert_all_nodes_are_base_entities(subgraph)
 
         self.assertIn(keyword, subgraph.namespace_url)
         self.assertEqual(url, subgraph.namespace_url[keyword])
@@ -257,6 +277,9 @@ class TestEdgePredicateBuilders(TestGraphMixin):
 
         subgraph1 = get_subgraph_by_authors(graph, a1)
 
+        self.assertIsInstance(subgraph1, BELGraph)
+        self.assert_all_nodes_are_base_entities(subgraph1)
+
         self.assertIn(keyword, subgraph1.namespace_url)
         self.assertEqual(url, subgraph1.namespace_url[keyword])
 
@@ -267,6 +290,9 @@ class TestEdgePredicateBuilders(TestGraphMixin):
 
         subgraph2 = get_subgraph_by_authors(graph, a2)
 
+        self.assertIsInstance(subgraph2, BELGraph)
+        self.assert_all_nodes_are_base_entities(subgraph2)
+
         self.assertIn(keyword, subgraph2.namespace_url)
         self.assertEqual(url, subgraph2.namespace_url[keyword])
 
@@ -276,6 +302,10 @@ class TestEdgePredicateBuilders(TestGraphMixin):
         self.assertNotIn(d, subgraph2)
 
         subgraph3 = get_subgraph_by_authors(graph, a5)
+
+        self.assertIsInstance(subgraph3, BELGraph)
+        self.assert_all_nodes_are_base_entities(subgraph3)
+
         self.assertIn(keyword, subgraph3.namespace_url)
         self.assertEqual(url, subgraph3.namespace_url[keyword])
         self.assertEqual(0, subgraph3.number_of_nodes())
@@ -305,6 +335,9 @@ class TestEdgePredicateBuilders(TestGraphMixin):
         graph.add_increases(c, d, n(), citation=c2)
 
         subgraph1 = get_subgraph_by_authors(graph, [a1, a2])
+
+        self.assertIsInstance(subgraph1, BELGraph)
+        self.assert_all_nodes_are_base_entities(subgraph1)
 
         self.assertIn(keyword, subgraph1.namespace_url)
         self.assertEqual(url, subgraph1.namespace_url[keyword])
