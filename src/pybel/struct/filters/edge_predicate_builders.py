@@ -49,7 +49,7 @@ def build_annotation_dict_all_filter(annotations):
 
     If no annotations are given, will always evaluate to true.
 
-    :param dict annotations: The annotation query dict to match
+    :param dict[str,iter[str]] annotations: The annotation query dict to match
     :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
     """
     if not annotations:
@@ -71,7 +71,7 @@ def _annotation_dict_any_filter(data, query):
     """A filter that matches edges with the given dictionary as a sub-dictionary
 
     :param dict data: A PyBEL edge data dictionary
-    :param dict query: The annotation query dict to match
+    :param dict[str,iter[str]] query: The annotation query dict to match
     :rtype: bool
     """
     annotations = data.get(ANNOTATIONS)
@@ -91,7 +91,7 @@ def build_annotation_dict_any_filter(annotations):
 
     If the given dictionary is empty, will always evaluate to true.
 
-    :param dict annotations: The annotation query dict to match
+    :param dict[str,iter[str]] annotations: The annotation query dict to match
     :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
     """
     if not annotations:

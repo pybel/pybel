@@ -12,6 +12,7 @@ from pybel.constants import (
 )
 from pybel.dsl import BaseEntity, gene, protein, rna
 from pybel.struct.mutation.expansion import expand_upstream_causal
+from pybel.struct.mutation.induction import get_subgraph_by_annotation_value
 from pybel.struct.mutation.induction.citation import get_subgraph_by_authors, get_subgraph_by_pubmed
 from pybel.struct.mutation.induction.paths import get_nodes_in_all_shortest_paths, get_subgraph_by_all_shortest_paths
 from pybel.struct.mutation.induction.upstream import get_upstream_causal_subgraph
@@ -346,3 +347,66 @@ class TestEdgePredicateBuilders(TestGraphMixin):
         self.assertIn(b, subgraph1)
         self.assertIn(c, subgraph1)
         self.assertIn(d, subgraph1)
+
+
+class TestEdgeInduction(unittest.TestCase):
+    """Test induction over edges."""
+
+    def test_get_subgraph_by_annotation_value(self):
+        """Test getting a subgraph by a single annotation value."""
+        graph = BELGraph()
+        a, b, c, d = [protein(namespace='test', name=n()) for _ in range(4)]
+
+        k1 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={
+            'Subgraph': {'A'}
+        })
+
+        k2 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={
+            'Subgraph': {'B'}
+        })
+
+        k3 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={
+            'Subgraph': {'A', 'C', 'D'}
+        })
+
+        subgraph = get_subgraph_by_annotation_value(graph, 'Subgraph', 'A')
+        self.assertIsInstance(subgraph, BELGraph)
+
+        self.assertIn(a, subgraph)
+        self.assertIn(b, subgraph)
+        self.assertIn(b.as_tuple(), subgraph[a.as_tuple()])
+        self.assertIn(k1, subgraph[a.as_tuple()][b.as_tuple()])
+        self.assertNotIn(k2, subgraph[a.as_tuple()][b.as_tuple()])
+        self.assertIn(k3, subgraph[a.as_tuple()][b.as_tuple()])
+
+    def test_get_subgraph_by_annotation_values(self):
+        """Test getting a subgraph by multiple annotation value."""
+        graph = BELGraph()
+        a, b, c, d = [protein(namespace='test', name=n()) for _ in range(4)]
+
+        k1 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={
+            'Subgraph': {'A'}
+        })
+
+        k2 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={
+            'Subgraph': {'B'}
+        })
+
+        k3 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={
+            'Subgraph': {'A', 'C', 'D'}
+        })
+
+        k4 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={
+            'Subgraph': {'C', 'D'}
+        })
+
+        subgraph = get_subgraph_by_annotation_value(graph, 'Subgraph', {'A', 'C'})
+        self.assertIsInstance(subgraph, BELGraph)
+
+        self.assertIn(a, subgraph)
+        self.assertIn(b, subgraph)
+        self.assertIn(b.as_tuple(), subgraph[a.as_tuple()])
+        self.assertIn(k1, subgraph[a.as_tuple()][b.as_tuple()])
+        self.assertNotIn(k2, subgraph[a.as_tuple()][b.as_tuple()])
+        self.assertIn(k3, subgraph[a.as_tuple()][b.as_tuple()])
+        self.assertIn(k4, subgraph[a.as_tuple()][b.as_tuple()])
