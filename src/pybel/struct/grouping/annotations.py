@@ -5,7 +5,7 @@
 import logging
 from collections import defaultdict
 
-from ..utils import update_metadata, update_node_helper
+from .utils import cleanup
 from ...constants import ANNOTATIONS
 
 log = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ def _get_subgraphs_by_annotation_keep_undefined(graph, annotation, sentinel):
 
 
 def get_subgraphs_by_annotation(graph, annotation, sentinel=None):
-    """Stratifies the given graph into sub-graphs based on the values for edges' annotations
+    """Stratify the given graph into sub-graphs based on the values for edges' annotations.
 
     :param pybel.BELGraph graph: A BEL graph
     :param str annotation: The annotation to group by
@@ -61,8 +61,6 @@ def get_subgraphs_by_annotation(graph, annotation, sentinel=None):
     else:
         subgraphs = _get_subgraphs_by_annotation_disregard_undefined(graph, annotation)
 
-    for subgraph in subgraphs.values():
-        update_node_helper(graph, subgraph)
-        update_metadata(graph, subgraph)
+    cleanup(graph, subgraphs)
 
     return subgraphs
