@@ -10,6 +10,9 @@ the `Biological Expression Language <http://openbel.org/language/version_2.0/bel
 Its companion package, `PyBEL Tools <http://pybel-tools.readthedocs.io/>`_, contains a
 suite of functions and pipelines for analyzing the resulting biological networks.
 
+We realize there we have a name conflict with the python wrapper for the cheminformatics package, OpenBabel. If you're
+looking for their python wrapper, see `here <https://github.com/openbabel/openbabel/tree/master/scripts/python>`_.
+
 =========== =============== ======================= ================== =======================
 Stable      |stable_build|  |stable_windows_build|  |stable_coverage|  |stable_documentation|
 Development |develop_build| |develop_windows_build| |develop_coverage| |develop_documentation|
