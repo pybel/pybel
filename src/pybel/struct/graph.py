@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-"""Contains the main data structure for PyBEL"""
+"""Contains the main data structure for PyBEL."""
 
 import logging
 from copy import deepcopy
 
-import networkx
+import networkx as nx
 from six import string_types
 
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
@@ -19,8 +19,7 @@ from ..constants import (
     METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAME, NAMESPACE, OBJECT,
     ORTHOLOGOUS, PART_OF, PRODUCTS, REACTANTS, RELATION, SUBJECT, TRANSCRIBED_TO, TRANSLATED_TO, VARIANTS,
 )
-from ..dsl import activity
-from ..dsl.nodes import BaseEntity
+from ..dsl import BaseEntity, activity
 from ..utils import get_version, hash_edge, hash_node
 
 __all__ = [
@@ -39,9 +38,9 @@ RESOURCE_DICTIONARY_NAMES = (
 
 
 def _clean_annotations(annotations_dict):
-    """Fixes formatting of annotation dict
+    """Fix the formatting of annotation dict.
 
-    :type annotations_dict: dict[str,str] or dict[str,set] or dict[str,dict[str,bool]]
+    :type annotations_dict: dict[str,str] or dict[str,set[str]] or dict[str,dict[str,bool]]
     :rtype: dict[str,dict[str,bool]]
     """
     return {
@@ -54,15 +53,12 @@ def _clean_annotations(annotations_dict):
     }
 
 
-class BELGraph(networkx.MultiDiGraph):
-    """This class represents biological knowledge assembled in BEL as a network by extending the
-    :class:`networkx.MultiDiGraph`.
-    """
+class BELGraph(nx.MultiDiGraph):
+    """An extension to :class:`networkx.MultiDiGraph` to represent BEL."""
 
     def __init__(self, name=None, version=None, description=None, authors=None, contact=None, license=None,
                  copyright=None, disclaimer=None, data=None, **kwargs):
-        """The default constructor parses a BEL graph using the built-in :mod:`networkx` methods. For IO, see
-        the :mod:`pybel.io` module
+        """The default constructor parses a BEL graph using the built-in :mod:`networkx` methods.
 
         :param str name: The graph's name
         :param str version: The graph's version. Recommended to use `semantic versioning <http://semver.org/>`_ or
@@ -75,7 +71,11 @@ class BELGraph(networkx.MultiDiGraph):
         :param str disclaimer: The disclaimer for this graph
         :param data: initial graph data to pass to :class:`networkx.MultiDiGraph`
         :param kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
+
+        For IO, see the :mod:`pybel.io` module.
         """
+        # TODO check that kwargs doesn't use any special pybel ones!
+
         super(BELGraph, self).__init__(data=data, **kwargs)
 
         self._warnings = []
@@ -1020,3 +1020,12 @@ class BELGraph(networkx.MultiDiGraph):
             return hash_node(node_tuple)
 
         return sha512
+
+    def describe(self, file=None):
+        """Print a summary of the graph"""
+        number_nodes = self.number_of_nodes()
+        print(self, file=file)
+        print('Number of Nodes: {}'.format(number_nodes), file=file)
+        print('Number of Edges: {}'.format(self.number_of_edges()), file=file)
+        print('Network Density: {}'.format(nx.density(self)), file=file)
+        print('Number of Components: {}'.format(nx.number_weakly_connected_components(self)), file=file)
