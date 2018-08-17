@@ -2,6 +2,8 @@
 
 """Contains the main data structure for PyBEL."""
 
+from __future__ import print_function
+
 import logging
 from copy import deepcopy
 
