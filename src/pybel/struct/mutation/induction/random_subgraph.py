@@ -109,7 +109,7 @@ def get_random_node(graph, node_blacklist, invert_degrees=None):
     try:
         nodes, degrees = zip(*(
             (node, degree)
-            for node, degree in sorted(graph.degree().items(), key=itemgetter(1))
+            for node, degree in sorted(graph.degree(), key=itemgetter(1))
             if node not in node_blacklist
         ))
     except ValueError:  # something wrong with graph, probably no elements in graph.degree_iter

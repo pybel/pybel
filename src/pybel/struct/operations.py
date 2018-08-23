@@ -23,7 +23,7 @@ def subgraph(graph, nodes):
 
     for node, data in subgraph.nodes(data=True):
         result.add_node(node)
-        result.node[node] = data
+        result._node[node] = data
 
     result.add_edges_from(
         (u, v, key, datadict.copy())

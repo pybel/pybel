@@ -36,7 +36,7 @@ def update_node_helper(source, target):
     for node in target:
         if node not in source:
             continue
-        target.node[node] = source.node[node]
+        target._node[node] = source._node[node]
 
 
 def ensure_node_from_universe(source, target, node):
@@ -48,4 +48,4 @@ def ensure_node_from_universe(source, target, node):
     """
     if node not in target:
         target.add_node(node)
-        target.node[node] = source.node[node]
+        target._node[node] = source._node[node]

@@ -12,10 +12,12 @@ from pybel.constants import (
     CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_REFERENCE, CITATION_TYPE,
     CITATION_TYPE_PUBMED,
 )
+from pybel.dsl import protein
 from pybel.manager.citation_utils import enrich_pubmed_citations, get_citations_by_pmids, sanitize_date
 from pybel.manager.models import Citation
 from pybel.struct.summary.provenance import get_pubmed_identifiers
 from pybel.testing.cases import TemporaryCacheMixin
+from pybel.testing.utils import n
 
 
 class TestSanitizeDate(unittest.TestCase):
@@ -57,22 +59,13 @@ class TestSanitizeDate(unittest.TestCase):
 class TestCitations(TemporaryCacheMixin):
     def setUp(self):
         super(TestCitations, self).setUp()
-
+        self.u, self.v = (protein(n(), n()) for _ in range(2))
         self.pmid = "9611787"
-
-        g = BELGraph()
-
-        g.add_node(1)
-        g.add_node(2)
-
-        g.add_edge(1, 2, attr_dict={
-            CITATION: {
-                CITATION_TYPE: CITATION_TYPE_PUBMED,
-                CITATION_REFERENCE: self.pmid
-            }
+        self.graph = BELGraph()
+        self.graph.add_increases(self.u, self.v, evidence=n(), citation={
+            CITATION_TYPE: CITATION_TYPE_PUBMED,
+            CITATION_REFERENCE: self.pmid,
         })
-
-        self.graph = g
 
     def test_enrich(self):
         pmids = get_pubmed_identifiers(self.graph)
@@ -120,7 +113,7 @@ class TestCitations(TemporaryCacheMixin):
 
         enrich_pubmed_citations(manager=self.manager, graph=self.graph)
 
-        _, _, d = self.graph.edges(data=True)[0]
+        _, _, d = list(self.graph.edges(data=True))[0]
         citation_dict = d[CITATION]
 
         self.assertIn(CITATION_NAME, citation_dict)
@@ -137,7 +130,7 @@ class TestCitations(TemporaryCacheMixin):
     def test_enrich_graph(self):
         enrich_pubmed_citations(manager=self.manager, graph=self.graph)
 
-        _, _, d = self.graph.edges(data=True)[0]
+        _, _, d = list(self.graph.edges(data=True))[0]
         citation_dict = d[CITATION]
 
         self.assertIn(CITATION_NAME, citation_dict)

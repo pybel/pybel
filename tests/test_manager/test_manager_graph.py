@@ -15,7 +15,7 @@ from pybel import BELGraph, from_database, from_path, to_database
 from pybel.constants import (
     ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_REFERENCE,
     CITATION_TYPE, CITATION_TYPE_OTHER, CITATION_TYPE_PUBMED, DECREASES, HAS_COMPONENT, HAS_PRODUCT,
-    HAS_REACTANT, INCREASES, LOCATION, METADATA_DESCRIPTION, METADATA_NAME, METADATA_VERSION, PATHOLOGY, PROTEIN,
+    HAS_REACTANT, INCREASES, LOCATION, METADATA_NAME, METADATA_VERSION, PATHOLOGY, PROTEIN,
     RELATION,
 )
 from pybel.dsl import (
@@ -23,16 +23,17 @@ from pybel.dsl import (
     gene_fusion, gmod, hgvs, named_complex_abundance, pmod, protein, protein_fusion, reaction, secretion, translocation,
 )
 from pybel.dsl.namespaces import chebi, hgnc
+from pybel.examples import sialic_acid_graph
 from pybel.manager import models
 from pybel.manager.models import Author, Evidence
 from pybel.testing.cases import FleetingTemporaryCacheMixin, TemporaryCacheClsMixin, TemporaryCacheMixin
-from pybel.testing.constants import test_bel_simple, test_bel_thorough
+from pybel.testing.constants import test_bel_simple
 from pybel.testing.mocks import mock_bel_resources
 from pybel.testing.utils import make_dummy_annotations, make_dummy_namespaces, n
 from pybel.utils import hash_citation, hash_evidence, hash_node
 from tests import constants
 from tests.constants import (
-    BelReconstitutionMixin, expected_test_simple_metadata, expected_test_thorough_metadata, test_citation_dict,
+    BelReconstitutionMixin, expected_test_simple_metadata, test_citation_dict,
     test_evidence_text,
 )
 
@@ -87,11 +88,10 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
     @mock_bel_resources
     def test_reload(self, mock_get):
         """Tests that a graph with the same name and version can't be added twice"""
-        self.graph = from_path(test_bel_thorough, manager=self.manager, allow_nested=True)
-        self.assertEqual('1.0.0', self.graph.version)
+        graph = sialic_acid_graph.copy()
+        self.assertEqual('1.0.0', graph.version)
 
-        to_database(self.graph, manager=self.manager, store_parts=False)
-
+        to_database(graph, manager=self.manager, store_parts=False)
         time.sleep(1)
 
         self.assertEqual(1, self.manager.count_networks())
@@ -100,32 +100,32 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         self.assertEqual(1, len(networks))
 
         network = networks[0]
+        self.assertEqual(graph.name, network.name)
+        self.assertEqual(graph.version, network.version)
+        self.assertEqual(graph.description, network.description)
 
-        self.assertEqual(expected_test_thorough_metadata[METADATA_NAME], network.name)
-        self.assertEqual(expected_test_thorough_metadata[METADATA_VERSION], network.version)
-        self.assertEqual(expected_test_thorough_metadata[METADATA_DESCRIPTION], network.description)
+        reconstituted = self.manager.get_graph_by_name_version(graph.name, graph.version)
 
-        reconstituted = self.manager.get_graph_by_name_version(
-            expected_test_thorough_metadata[METADATA_NAME],
-            expected_test_thorough_metadata[METADATA_VERSION]
-        )
-        self.bel_thorough_reconstituted(reconstituted)
+        self.assertIsInstance(reconstituted, BELGraph)
+        self.assertEqual(graph.nodes(data=True), reconstituted.nodes(data=True))
+        # self.bel_thorough_reconstituted(reconstituted)
 
         # Test that the graph can't be added a second time
         with self.assertRaises(sqlalchemy.exc.IntegrityError):
-            self.manager.insert_graph(self.graph, store_parts=False)
+            self.manager.insert_graph(graph, store_parts=False)
 
         self.manager.session.rollback()
-
         time.sleep(1)
 
         self.assertEqual(1, self.manager.count_networks())
 
-        graph_copy = self.graph.copy()
-        graph_copy.document[METADATA_VERSION] = '1.0.1'
+        graph_copy = graph.copy()
+        graph_copy.version = '1.0.1'
         network_copy = self.manager.insert_graph(graph_copy, store_parts=False)
 
         time.sleep(1)  # Sleep so the first graph always definitely goes in first
+
+        self.assertNotEqual(network.id, network_copy.id)
 
         self.assertTrue(self.manager.has_name_version(graph_copy.name, graph_copy.version))
         self.assertFalse(self.manager.has_name_version('wrong name', '0.1.2'))
@@ -134,26 +134,26 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
 
         self.assertEqual(2, self.manager.count_networks())
 
-        self.assertEqual('1.0.1', self.manager.get_most_recent_network_by_name(self.graph.name).version)
+        self.assertEqual('1.0.1', self.manager.get_most_recent_network_by_name(graph.name).version)
 
         query_ids = {-1, network.id, network_copy.id}
         query_networks_result = self.manager.get_networks_by_ids(query_ids)
         self.assertEqual(2, len(query_networks_result))
         self.assertEqual({network.id, network_copy.id}, {network.id for network in query_networks_result})
 
-        expected_versions = {'1.0.1', self.graph.version}
-        self.assertEqual(expected_versions, set(self.manager.get_network_versions(self.graph.name)))
+        expected_versions = {'1.0.1', '1.0.0'}
+        self.assertEqual(expected_versions, set(self.manager.get_network_versions(graph.name)))
 
-        exact_name_version = from_database(self.graph.name, self.graph.version, manager=self.manager)
-        self.assertEqual(self.graph.name, exact_name_version.name)
-        self.assertEqual(self.graph.version, exact_name_version.version)
+        exact_name_version = from_database(graph.name, graph.version, manager=self.manager)
+        self.assertEqual(graph.name, exact_name_version.name)
+        self.assertEqual(graph.version, exact_name_version.version)
 
-        exact_name_version = from_database(self.graph.name, '1.0.1', manager=self.manager)
-        self.assertEqual(self.graph.name, exact_name_version.name)
+        exact_name_version = from_database(graph.name, '1.0.1', manager=self.manager)
+        self.assertEqual(graph.name, exact_name_version.name)
         self.assertEqual('1.0.1', exact_name_version.version)
 
-        most_recent_version = from_database(self.graph.name, manager=self.manager)
-        self.assertEqual(self.graph.name, most_recent_version.name)
+        most_recent_version = from_database(graph.name, manager=self.manager)
+        self.assertEqual(graph.name, most_recent_version.name)
         self.assertEqual('1.0.1', exact_name_version.version)
 
         recent_networks = list(self.manager.list_recent_networks())  # just try it to see if it fails

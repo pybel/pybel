@@ -598,6 +598,22 @@ class BELGraph(nx.MultiDiGraph):
             n = n.as_tuple()
         return super(BELGraph, self).has_node(n)
 
+    def copy(self, as_view=False):
+        if as_view is True:
+            return nx.graphviews.MultiDiGraphView(self)
+        G = self.fresh_copy()
+        G.graph.update(self.graph)
+
+        for n, d in self._node.items():
+            G.add_node(n)
+            G._node[n] = d
+
+        G.add_edges_from((u, v, key, datadict.copy())
+                         for u, nbrs in self._adj.items()
+                         for v, keydict in nbrs.items()
+                         for key, datadict in keydict.items())
+        return G
+
     def add_node_from_data(self, attr_dict):
         """Convert a PyBEL node data dictionary to a canonical PyBEL node tuple and ensures it is in the graph.
 
@@ -612,7 +628,7 @@ class BELGraph(nx.MultiDiGraph):
             return node_tuple
 
         self.add_node(node_tuple)
-        self.node[node_tuple] = attr_dict
+        self._node[node_tuple] = attr_dict
 
         if VARIANTS in attr_dict:
             self.add_has_variant(attr_dict.get_parent(), attr_dict)

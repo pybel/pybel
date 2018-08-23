@@ -29,7 +29,7 @@ CLASSIFIERS = [
     'Topic :: Scientific/Engineering :: Bio-Informatics'
 ]
 INSTALL_REQUIRES = [
-    'networkx==1.11',
+    'networkx>=2.1',
     'sqlalchemy',
     'click',
     'click-plugins',
