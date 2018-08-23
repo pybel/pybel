@@ -599,6 +599,13 @@ class BELGraph(nx.MultiDiGraph):
         return super(BELGraph, self).has_node(n)
 
     def copy(self, as_view=False):
+        """Copy this graph.
+
+        Implementation almost the same as the base implementation from MultiDiGraph, but deals with the node data
+        better.
+
+        :rtype: pybel.BELGraph
+        """
         if as_view is True:
             return nx.graphviews.MultiDiGraphView(self)
         G = self.fresh_copy()
