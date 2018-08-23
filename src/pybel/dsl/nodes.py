@@ -64,6 +64,18 @@ class BaseEntity(dict):
         """
         super(BaseEntity, self).__init__(**{FUNCTION: func})
 
+    @property
+    def function(self):
+        """Return the function of this entity.
+
+        :rtype: str
+        """
+        return self[FUNCTION]
+
+    @property
+    def _func(self):
+        return rev_abundance_labels[self.function]
+
     @abc.abstractmethod
     def as_tuple(self):
         """Return this entity as a PyBEL tuple.
@@ -110,14 +122,6 @@ class BaseAbundance(BaseEntity):
         self.update(entity(namespace=namespace, name=name, identifier=identifier))
 
     @property
-    def function(self):
-        """Return the function of this abundance.
-
-        :rtype: str
-        """
-        return self[FUNCTION]
-
-    @property
     def namespace(self):
         """Return the namespace of this abundance.
 
@@ -158,8 +162,8 @@ class BaseAbundance(BaseEntity):
         :rtype: str
         """
         return "{}({}:{})".format(
-            rev_abundance_labels[self.function],
-            self[NAMESPACE],
+            self._func,
+            self.namespace,
             ensure_quotes(self._priority_id)
         )
 
@@ -278,9 +282,9 @@ class CentralDogma(BaseAbundance):
         variants_canon = sorted(map(str, variants))
 
         return "{}({}:{}, {})".format(
-            rev_abundance_labels[self[FUNCTION]],
-            self[NAMESPACE],
-            ensure_quotes(self[NAME]),
+            self._func,
+            self.namespace,
+            ensure_quotes(self._priority_id),
             ', '.join(variants_canon)
         )
 
@@ -742,14 +746,14 @@ def _entity_list_as_tuple(entities):
     ))
 
 
-def _entity_list_as_bel(entities):  # TODO sorted?
+def _entity_list_as_bel(entities):
     """Stringify a list of BEL entities.
 
-    :type entities: iter[BaseEntity]
+    :type entities: iter[BaseAbundance]
     :rtype: str
     """
     return ', '.join(
-        str(e)
+        e.as_bel()
         for e in entities
     )
 
@@ -786,12 +790,32 @@ class Reaction(BaseEntity):
             PRODUCTS: products,
         })
 
+    @property
+    def reactants(self):
+        """Return the list of reactants in this reaction.
+
+        :rtype: list[BaseAbundance]
+        """
+        return self[REACTANTS]
+
+    @property
+    def products(self):
+        """Return the list of products in this reaction.
+
+        :rtype: list[BaseAbundance]
+        """
+        return self[PRODUCTS]
+
     def as_tuple(self):
         """Return this reaction as a tuple.
 
         :rtype: tuple
         """
-        return self[FUNCTION], _entity_list_as_tuple(self[REACTANTS]), _entity_list_as_tuple(self[PRODUCTS])
+        return (
+            self.function,
+            _entity_list_as_tuple(self.reactants),
+            _entity_list_as_tuple(self.products),
+        )
 
     def as_bel(self):
         """Return this reaction as a BEL string.
@@ -799,8 +823,8 @@ class Reaction(BaseEntity):
         :rtype: str
         """
         return 'rxn(reactants({}), products({}))'.format(
-            _entity_list_as_bel(self[REACTANTS]),
-            _entity_list_as_bel(self[PRODUCTS])
+            _entity_list_as_bel(self.reactants),
+            _entity_list_as_bel(self.products)
         )
 
 
@@ -808,25 +832,36 @@ reaction = Reaction
 
 
 class ListAbundance(BaseEntity):
-    """The superclass for building list abundance (complex, abundance) node data dictionaries"""
+    """The superclass for building list abundance (complex, abundance) node data dictionaries."""
 
     def __init__(self, func, members):
         """Build a list abundance node data dictionary.
 
         :param str func: The PyBEL function
-        :param list[BaseAbundance] members: A list of PyBEL node data dictionaries
+        :param members: A list of PyBEL node data dictionaries
+        :type members: BaseAbundance or list[BaseAbundance]
         """
         super(ListAbundance, self).__init__(func=func)
-        self.update({
-            MEMBERS: sorted(members, key=methodcaller('as_tuple')),
-        })
+        self[MEMBERS] = (
+            [members]
+            if isinstance(members, BaseEntity) else
+            sorted(members, key=methodcaller('as_tuple'))
+        )
+
+    @property
+    def members(self):
+        """Return the list of members in this list abundance.
+
+        :rtype: list[BaseAbundance]
+        """
+        return self[MEMBERS]
 
     def as_tuple(self):
         """Return this list abundance as a tuple.
 
         :rtype: tuple
         """
-        return (self[FUNCTION],) + _entity_list_as_tuple(self[MEMBERS])
+        return (self.function,) + _entity_list_as_tuple(self.members)
 
     def as_bel(self):
         """Return this list abundance as a BEL string.
@@ -834,8 +869,8 @@ class ListAbundance(BaseEntity):
         :rtype: str
         """
         return '{}({})'.format(
-            rev_abundance_labels[self[FUNCTION]],
-            _entity_list_as_bel(self[MEMBERS])
+            self._func,
+            _entity_list_as_bel(self.members)
         )
 
 
@@ -900,7 +935,7 @@ composite_abundance = CompositeAbundance
 
 @six.add_metaclass(abc.ABCMeta)
 class FusionRangeBase(dict):
-    """The superclass for fusion range data dictionaries"""
+    """The superclass for fusion range data dictionaries."""
 
     @abc.abstractmethod
     def as_tuple(self):
@@ -909,17 +944,21 @@ class FusionRangeBase(dict):
         :rtype: tuple
         """
 
+    @abc.abstractmethod
+    def as_bel(self):
+        """Return this fusion range as a tuple.
+
+        :rtype: tuple
+        """
+
 
 class MissingFusionRange(FusionRangeBase):
-    """Builds a missing fusion range data dictionary"""
+    """Builds a missing fusion range data dictionary."""
 
     def __init__(self):
         super(MissingFusionRange, self).__init__({
             FUSION_MISSING: '?'
         })
-
-    def __str__(self):
-        return '?'
 
     def as_tuple(self):
         """Return this fusion range as a tuple.
@@ -927,6 +966,12 @@ class MissingFusionRange(FusionRangeBase):
         :rtype: tuple
         """
         return self[FUSION_MISSING],
+
+    def as_bel(self):
+        return '?'
+
+    def __str__(self):
+        return self.as_bel()
 
 
 missing_fusion_range = MissingFusionRange
@@ -994,54 +1039,82 @@ class FusionBase(BaseEntity):
         :param Optional[FusionRangeBase] range_3p: A fusion range for the 3-prime partner
         """
         super(FusionBase, self).__init__(func=func)
-        self.update({
-            FUNCTION: func,
-            FUSION: {
-                PARTNER_5P: partner_5p,
-                PARTNER_3P: partner_3p,
-                RANGE_5P: range_5p or missing_fusion_range(),
-                RANGE_3P: range_3p or missing_fusion_range()
-            }
-        })
+        self[FUSION] = {
+            PARTNER_5P: partner_5p,
+            PARTNER_3P: partner_3p,
+            RANGE_5P: range_5p or missing_fusion_range(),
+            RANGE_3P: range_3p or missing_fusion_range()
+        }
+
+    @property
+    def partner_5p(self):
+        """
+
+        :rtype: CentralDogma
+        """
+        return self[FUSION][PARTNER_5P]
+
+    @property
+    def partner_3p(self):
+        """
+
+        :rtype: CentralDogma
+        """
+        return self[FUSION][PARTNER_3P]
+
+    @property
+    def range_5p(self):
+        """
+
+        :rtype: FusionRangeBase
+        """
+        return self[FUSION][RANGE_5P]
+
+    @property
+    def range_3p(self):
+        """
+
+        :rtype: FusionRangeBase
+        """
+        return self[FUSION][RANGE_3P]
 
     def as_tuple(self):
         """Return this fusion as a tuple.
 
         :rtype: tuple
         """
-        fusion = self[FUSION]
-
-        partner5p = fusion[PARTNER_5P][NAMESPACE], fusion[PARTNER_5P][NAME]
-        partner3p = fusion[PARTNER_3P][NAMESPACE], fusion[PARTNER_3P][NAME]
-        range5p = fusion[RANGE_5P].as_tuple()
-        range3p = fusion[RANGE_3P].as_tuple()
-
         return (
-            self[FUNCTION],
-            partner5p,
-            range5p,
-            partner3p,
-            range3p,
+            self.function,
+            (
+                self.partner_5p.namespace,
+                self.partner_5p._priority_id,
+            ),
+            self.range_5p.as_tuple(),
+            (
+                self.partner_3p.namespace,
+                self.partner_3p._priority_id,
+            ),
+            self.range_3p.as_tuple(),
         )
 
     def as_bel(self):
-        """Return this fusion as a BEL string
+        """Return this fusion as a BEL string.
 
         :rtype: str
         """
         return '{}(fus({}:{}, "{}", {}:{}, "{}"))'.format(
-            rev_abundance_labels[self[FUNCTION]],
-            self[FUSION][PARTNER_5P][NAMESPACE],
-            self[FUSION][PARTNER_5P][NAME],
-            str(self[FUSION][RANGE_5P]),
-            self[FUSION][PARTNER_3P][NAMESPACE],
-            self[FUSION][PARTNER_3P][NAME],
-            str(self[FUSION][RANGE_3P])
+            self._func,
+            self.partner_5p.namespace,
+            self.partner_5p._priority_id,
+            self.range_5p.as_bel(),
+            self.partner_3p.namespace,
+            self.partner_3p._priority_id,
+            self.range_3p.as_bel(),
         )
 
 
 class ProteinFusion(FusionBase):
-    """Builds a protein fusion data dictionary"""
+    """Builds a protein fusion data dictionary."""
 
     def __init__(self, partner_5p, partner_3p, range_5p=None, range_3p=None):
         """Build a protein fusion node data dictionary.
@@ -1064,7 +1137,7 @@ protein_fusion = ProteinFusion
 
 
 class RnaFusion(FusionBase):
-    """Builds an RNA fusion data dictionary"""
+    """Builds an RNA fusion data dictionary."""
 
     def __init__(self, partner_5p, partner_3p, range_5p=None, range_3p=None):
         """Build an RNA fusion node data dictionary.
