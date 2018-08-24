@@ -219,7 +219,7 @@ class BelParser(BaseParser):
     """Build a parser backed by a given dictionary of namespaces"""
 
     def __init__(self, graph, namespace_dict=None, annotation_dict=None, namespace_regex=None, annotation_regex=None,
-                 allow_naked_names=False, allow_nested=False, allow_unqualified_translocations=False,
+                 allow_naked_names=False, allow_nested=False, disallow_unqualified_translocations=False,
                  citation_clearing=True, skip_validation=False, autostreamline=True, required_annotations=None):
         """
         :param pybel.BELGraph graph: The BEL Graph to use to store the network
@@ -239,14 +239,16 @@ class BelParser(BaseParser):
          :class:`pybel.parser.parse_identifier.IdentifierParser`
         :param bool allow_nested: If true, turn off nested statement failures. Delegated to
          :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
+        :param bool disallow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
         :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
          Delegated to :class:`pybel.parser.ControlParser`
         :param bool autostreamline: Should the parser be streamlined on instantiation?
         :param Optional[list[str]] required_annotations: Optional list of required annotations
         """
         self.graph = graph
+
         self.allow_nested = allow_nested
+        self.disallow_unqualified_translocations = disallow_unqualified_translocations
 
         if skip_validation:
             self.control_parser = ControlParser(
@@ -430,7 +432,7 @@ class BelParser(BaseParser):
         self.translocation_legacy.addParseAction(handle_legacy_tloc)
         self.translocation_unqualified = nest(Group(self.simple_abundance)(TARGET))
 
-        if not allow_unqualified_translocations:
+        if self.disallow_unqualified_translocations:
             self.translocation_unqualified.setParseAction(self.handle_translocation_illegal)
 
         #: `2.5.1 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_translocations>`_

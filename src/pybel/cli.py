@@ -67,13 +67,13 @@ def main():
 @click.option('-s', '--store', is_flag=True, help='Stores to database specified by -c')
 @click.option('--allow-naked-names', is_flag=True, help="Enable lenient parsing for naked names")
 @click.option('--allow-nested', is_flag=True, help="Enable lenient parsing for nested statements")
-@click.option('--allow-unqualified-translocations', is_flag=True,
-              help="Enable lenient parsing for unqualified translocations")
+@click.option('--disallow-unqualified-translocations', is_flag=True,
+              help="Disable lenient parsing for unqualified translocations")
 @click.option('--no-identifier-validation', is_flag=True, help='Turn off identifier validation')
 @click.option('--no-citation-clearing', is_flag=True, help='Turn off citation clearing')
 @click.option('-r', '--required-annotations', multiple=True, help='Specify multiple required annotations')
 def convert(path, connection, csv, sif, gsea, graphml, json, pickle, bel, neo, neo_context, store, allow_naked_names,
-            allow_nested, allow_unqualified_translocations, no_identifier_validation, no_citation_clearing,
+            allow_nested, disallow_unqualified_translocations, no_identifier_validation, no_citation_clearing,
             required_annotations):
     """Convert BEL."""
     manager = Manager(connection=connection)
@@ -83,7 +83,7 @@ def convert(path, connection, csv, sif, gsea, graphml, json, pickle, bel, neo, n
         manager=manager,
         allow_nested=allow_nested,
         allow_naked_names=allow_naked_names,
-        allow_unqualified_translocations=allow_unqualified_translocations,
+        disallow_unqualified_translocations=disallow_unqualified_translocations,
         citation_clearing=(not no_citation_clearing),
         required_annotations=required_annotations,
         no_identifier_validation=no_identifier_validation,

@@ -29,7 +29,7 @@ METADATA_LINE_RE = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOT
 
 
 def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearing=True, use_tqdm=False,
-                no_identifier_validation=False, **kwargs):
+                no_identifier_validation=False, disallow_unqualified_translocations=False, **kwargs):
     """Parse an iterable of lines into this graph.
 
     Delegates to :func:`parse_document`, :func:`parse_definitions`, and :func:`parse_statements`.
@@ -41,6 +41,8 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                    Delegated to :class:`pybel.parser.ControlParser`
     :param bool use_tqdm: Use :mod:`tqdm` to show a progress bar?
+    :param bool no_identifier_validation: If true, turns off namespace validation
+    :param bool disallow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
 
     .. warning::
 
@@ -48,8 +50,9 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
         risk to reproducibility and validity of your results.
 
     :param bool allow_naked_names: If true, turns off naked namespace failures
-    :param bool allow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
-    :param bool no_identifier_validation: If true, turns off namespace validation
+    :param bool allow_redefinition: If true, doesn't fail on second definition of same name or annotation
+    :param bool allow_definition_failures: If true, allows parsing to continue if a terminology file download/parse
+     fails
     :param Optional[list[str]] required_annotations: Annotations that are required for all statements
     """
     docs, definitions, statements = split_file_to_annotations_and_definitions(lines)
@@ -87,7 +90,7 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
         citation_clearing=citation_clearing,
         skip_validation=no_identifier_validation,
         allow_naked_names=kwargs.get('allow_naked_names'),
-        allow_unqualified_translocations=kwargs.get('allow_unqualified_translocations'),
+        disallow_unqualified_translocations=disallow_unqualified_translocations,
         required_annotations=kwargs.get('required_annotations'),
     )
 

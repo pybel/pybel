@@ -1567,7 +1567,7 @@ class TestTranslocationPermissive(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.graph = BELGraph()
-        cls.parser = BelParser(cls.graph, allow_unqualified_translocations=True)
+        cls.parser = BelParser(cls.graph, disallow_unqualified_translocations=True)
 
     def setUp(self):
         self.parser.clear()
