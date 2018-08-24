@@ -1050,6 +1050,8 @@ class BELGraph(nx.MultiDiGraph):
         """Print a summary of the graph"""
         number_nodes = self.number_of_nodes()
         print(self, file=file)
+        if self.warnings:
+            print('Number of Warnings: {}'.format(len(self.warnings)), file=file)
         print('Number of Nodes: {}'.format(number_nodes), file=file)
         print('Number of Edges: {}'.format(self.number_of_edges()), file=file)
         print('Network Density: {}'.format(nx.density(self)), file=file)
