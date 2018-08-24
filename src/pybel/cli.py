@@ -23,7 +23,9 @@ from click_plugins import with_plugins
 
 from .canonicalize import to_bel
 from .constants import get_cache_connection
-from .io import from_lines, to_csv, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif
+from .io import (
+    from_lines, from_path, from_pickle, to_csv, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif,
+)
 from .io.web import _get_host
 from .manager import Manager
 from .manager.database_io import to_database
@@ -53,6 +55,25 @@ def main():
 
 
 @main.command()
+@click.argument('path')
+@connection_option
+def compile(path, connection):
+    """Compile a BEL script to a graph pickle."""
+    manager = Manager(connection=connection)
+    graph = from_path(path, manager=manager, use_tqdm=True)
+    to_pickle(graph, '{path}.pickle'.format(path=path))
+    graph.describe()
+
+
+@main.command()
+@click.argument('path', type=click.File('rb'))
+def summarize(path):
+    """Summarize a pre-compiled graph."""
+    graph = from_pickle(path)
+    graph.describe()
+
+
+@main.command()
 @click.option('-p', '--path', type=click.File('r'), default=sys.stdin, help='Input BEL file file path')
 @connection_option
 @click.option('--csv', type=click.File('w'), help='Path to output a CSV file.')
@@ -75,7 +96,7 @@ def main():
 def convert(path, connection, csv, sif, gsea, graphml, json, pickle, bel, neo, neo_context, store, allow_naked_names,
             allow_nested, disallow_unqualified_translocations, no_identifier_validation, no_citation_clearing,
             required_annotations):
-    """Convert BEL."""
+    """Compile a BEL script and convert."""
     manager = Manager(connection=connection)
 
     g = from_lines(
