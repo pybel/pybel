@@ -74,6 +74,14 @@ def summarize(path):
 
 
 @main.command()
+@click.argument('path', type=click.File('rb'))
+def errors(path):
+    """Summarize errors from a pre-compiled graph."""
+    graph = from_pickle(path)
+    _warning_helper(graph.warnings)
+
+
+@main.command()
 @click.option('-p', '--path', type=click.File('r'), default=sys.stdin, help='Input BEL file file path')
 @connection_option
 @click.option('--csv', type=click.File('w'), help='Path to output a CSV file.')
@@ -357,6 +365,43 @@ def summarize(manager):
     click.echo('Namespaces entries: {}'.format(manager.count_namespace_entries()))
     click.echo('Annotations: {}'.format(manager.count_annotations()))
     click.echo('Annotation entries: {}'.format(manager.count_annotation_entries()))
+
+
+def _warning_helper(warnings, sep='\t'):
+    # Exit if no warnings
+    if not warnings:
+        click.echo('Congratulations! No warnings.')
+        sys.exit(0)
+
+    max_line_width = max(
+        len(str(line_number))
+        for line_number, _, _, _ in warnings
+    )
+
+    max_warning_width = max(
+        len(exc.__class__.__name__)
+        for _, _, exc, _ in warnings
+    )
+
+    s1 = '{:>' + str(max_line_width) + '}' + sep
+    s2 = '{:>' + str(max_warning_width) + '}' + sep
+
+    def _make_line(line_number, line, exc):
+        s = click.style(s1.format(line_number), fg='blue', bold=True)
+
+        if exc.__class__.__name__.endswith('Error'):
+            s += click.style(s2.format(exc.__class__.__name__), fg='red')
+        else:
+            s += click.style(s2.format(exc.__class__.__name__), fg='yellow')
+
+        s += click.style(line, bold=True) + sep
+        s += click.style(str(exc))
+        return s
+
+    click.echo_via_pager('\n'.join(
+        _make_line(line_number, line, exc)
+        for line_number, line, exc, _ in warnings
+    ))
 
 
 if __name__ == '__main__':
