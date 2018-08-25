@@ -21,7 +21,7 @@ from pybel.constants import (
 from pybel.dsl import gene, BaseEntity
 from pybel.examples import sialic_acid_graph
 from pybel.io.exc import ImportVersionWarning, import_version_message_fmt
-from pybel.parser import BelParser
+from pybel.parser import BELParser
 from pybel.parser.exc import InvalidFunctionSemantic, MissingCitationException, MissingNamespaceRegexWarning
 from pybel.struct.summary import get_syntax_errors
 from pybel.testing.cases import TemporaryCacheClsMixin
@@ -97,7 +97,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
 
         with mock_bel_resources:
             cls.thorough_graph = from_path(test_bel_thorough, manager=cls.manager, allow_nested=True)
-            cls.slushy_graph = from_path(test_bel_slushy, manager=cls.manager)
+            cls.slushy_graph = from_path(test_bel_slushy, manager=cls.manager, disallow_unqualified_translocations=True)
             cls.simple_graph = from_url(Path(test_bel_simple).as_uri(), manager=cls.manager)
             cls.isolated_graph = from_path(test_bel_isolated, manager=cls.manager)
             cls.misordered_graph = from_path(test_bel_misordered, manager=cls.manager, citation_clearing=False)
@@ -270,7 +270,7 @@ class TestFull(TestTokenParserBase):
     @classmethod
     def setUpClass(cls):
         cls.graph = BELGraph()
-        cls.parser = BelParser(
+        cls.parser = BELParser(
             cls.graph,
             namespace_dict=namespaces,
             annotation_dict=annotations,

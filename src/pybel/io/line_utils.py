@@ -14,7 +14,7 @@ from tqdm import tqdm
 from ..constants import GRAPH_METADATA, INVERSE_DOCUMENT_KEYS, REQUIRED_METADATA
 from ..exceptions import PyBelWarning
 from ..manager import Manager
-from ..parser import BelParser, MetadataParser
+from ..parser import BELParser, MetadataParser
 from ..parser.exc import (
     BelSyntaxError, InconsistentDefinitionError, MalformedMetadataException, MissingMetadataException,
     VersionFormatWarning,
@@ -80,7 +80,7 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
         use_tqdm=use_tqdm,
     )
 
-    bel_parser = BelParser(
+    bel_parser = BELParser(
         graph=graph,
         namespace_dict=metadata_parser.namespace_dict,
         annotation_dict=metadata_parser.annotation_dict,
@@ -191,7 +191,7 @@ def parse_statements(graph, statements, bel_parser, use_tqdm=False):
 
     :param BELGraph graph: A BEL graph
     :param iter[str] statements: An enumerated iterable over the lines in the statements section of a BEL script
-    :param BelParser bel_parser: A BEL parser
+    :param BELParser bel_parser: A BEL parser
     :param bool use_tqdm: Use :mod:`tqdm` to show a progress bar?
     """
     parse_statements_start_time = time.time()

@@ -18,7 +18,7 @@ from pybel.dsl import (
     named_complex_abundance, pathology, protein, protein_fusion, reaction, rna, rna_fusion, secretion, translocation,
 )
 from pybel.dsl.nodes import abundance, bioprocess, gene, gmod, hgvs, pmod
-from pybel.parser import BelParser
+from pybel.parser import BELParser
 from pybel.parser.exc import MalformedTranslocationWarning
 from pybel.parser.parse_bel import modifier_po_to_dict
 from tests.constants import TestTokenParserBase, assert_has_edge, assert_has_node, update_provenance
@@ -1567,7 +1567,10 @@ class TestTranslocationPermissive(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.graph = BELGraph()
-        cls.parser = BelParser(cls.graph, disallow_unqualified_translocations=True)
+        cls.parser = BELParser(
+            cls.graph,
+            disallow_unqualified_translocations=False,
+        )
 
     def setUp(self):
         self.parser.clear()
@@ -1605,9 +1608,9 @@ class TestTranslocationPermissive(unittest.TestCase):
         self.assert_has_node(node)
 
     def test_unqualified_translocation_relation(self):
-        """
+        """Test translocation in object.
+
         3.1.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdIncreases
-        Test translocation in object
         """
         update_provenance(self.parser.control_parser)
 
@@ -1879,7 +1882,7 @@ class TestTransformation(TestTokenParserBase):
 class TestSemantics(unittest.TestCase):
     def test_lenient_semantic_no_failure(self):
         graph = BELGraph()
-        parser = BelParser(graph, allow_naked_names=True)
+        parser = BELParser(graph, allow_naked_names=True)
 
         update_provenance(parser.control_parser)
 

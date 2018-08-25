@@ -16,7 +16,7 @@ from ..constants import (
     ANNOTATIONS, CITATION, CITATION_REFERENCE, CITATION_TYPE, EVIDENCE, FUNCTION, METADATA_AUTHORS, METADATA_CONTACT,
     METADATA_INSERT_KEYS, METADATA_LICENSES, RELATION, UNQUALIFIED_EDGES,
 )
-from ..parser import BelParser
+from ..parser import BELParser
 from ..parser.exc import NakedNameWarning
 from ..struct import BELGraph
 
@@ -219,7 +219,7 @@ def from_jgif(graph_jgif_dict):
             if key in metadata:
                 graph.document[key] = metadata[key]
 
-    parser = BelParser(graph)
+    parser = BELParser(graph)
     parser.bel_term.addParseAction(parser.handle_term)
 
     for node in root['nodes']:
