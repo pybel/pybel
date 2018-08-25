@@ -19,7 +19,7 @@ from pybel.dsl import (
     abundance, activity, bioprocess, complex_abundance, composite_abundance, entity, gene, hgvs, pmod, protein,
     reaction, rna,
 )
-from pybel.parser import BelParser
+from pybel.parser import BELParser
 from pybel.parser.exc import (
     MissingNamespaceNameWarning, NestedRelationWarning, RelabelWarning, UndefinedNamespaceWarning,
 )
@@ -953,7 +953,7 @@ class TestCustom(unittest.TestCase):
             }
         }
 
-        self.parser = BelParser(graph, namespace_dict=namespace_dict, autostreamline=False)
+        self.parser = BELParser(graph, namespace_dict=namespace_dict, autostreamline=False)
 
     def test_tloc_undefined_namespace(self):
         s = 'tloc(p(HGNC:AKT1), fromLoc(MESHCS:nucleus), toLoc(MISSING:"undefined"))'

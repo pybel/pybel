@@ -26,7 +26,7 @@ from pybel.parser.exc import (
     MissingNamespaceRegexWarning, MissingSupportWarning, NakedNameWarning, NestedRelationWarning,
     PlaceholderAminoAcidWarning, UndefinedAnnotationWarning, UndefinedNamespaceWarning, VersionFormatWarning,
 )
-from pybel.parser.parse_bel import BelParser
+from pybel.parser.parse_bel import BELParser
 from pybel.utils import subdict_matches
 
 log = logging.getLogger(__name__)
@@ -183,7 +183,11 @@ class TestTokenParserBase(unittest.TestCase):
     def setUpClass(cls):
         """Build a BEL graph and BEL parser that persist through the class."""
         cls.graph = BELGraph()
-        cls.parser = BelParser(cls.graph, autostreamline=False)
+        cls.parser = BELParser(
+            cls.graph,
+            autostreamline=False,
+            disallow_unqualified_translocations=True,
+        )
 
     def setUp(self):
         """Clear the parser at the beginning of each test."""

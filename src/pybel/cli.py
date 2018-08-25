@@ -23,7 +23,9 @@ from click_plugins import with_plugins
 
 from .canonicalize import to_bel
 from .constants import get_cache_connection
-from .io import from_lines, to_csv, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif
+from .io import (
+    from_lines, from_path, from_pickle, to_csv, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif,
+)
 from .io.web import _get_host
 from .manager import Manager
 from .manager.database_io import to_database
@@ -53,6 +55,33 @@ def main():
 
 
 @main.command()
+@click.argument('path')
+@connection_option
+def compile(path, connection):
+    """Compile a BEL script to a graph pickle."""
+    manager = Manager(connection=connection)
+    graph = from_path(path, manager=manager, use_tqdm=True)
+    to_pickle(graph, '{path}.pickle'.format(path=path))
+    graph.describe()
+
+
+@main.command()
+@click.argument('path', type=click.File('rb'))
+def summarize(path):
+    """Summarize a pre-compiled graph."""
+    graph = from_pickle(path)
+    graph.describe()
+
+
+@main.command()
+@click.argument('path', type=click.File('rb'))
+def errors(path):
+    """Summarize errors from a pre-compiled graph."""
+    graph = from_pickle(path)
+    _warning_helper(graph.warnings)
+
+
+@main.command()
 @click.option('-p', '--path', type=click.File('r'), default=sys.stdin, help='Input BEL file file path')
 @connection_option
 @click.option('--csv', type=click.File('w'), help='Path to output a CSV file.')
@@ -67,15 +96,15 @@ def main():
 @click.option('-s', '--store', is_flag=True, help='Stores to database specified by -c')
 @click.option('--allow-naked-names', is_flag=True, help="Enable lenient parsing for naked names")
 @click.option('--allow-nested', is_flag=True, help="Enable lenient parsing for nested statements")
-@click.option('--allow-unqualified-translocations', is_flag=True,
-              help="Enable lenient parsing for unqualified translocations")
+@click.option('--disallow-unqualified-translocations', is_flag=True,
+              help="Disable lenient parsing for unqualified translocations")
 @click.option('--no-identifier-validation', is_flag=True, help='Turn off identifier validation')
 @click.option('--no-citation-clearing', is_flag=True, help='Turn off citation clearing')
 @click.option('-r', '--required-annotations', multiple=True, help='Specify multiple required annotations')
 def convert(path, connection, csv, sif, gsea, graphml, json, pickle, bel, neo, neo_context, store, allow_naked_names,
-            allow_nested, allow_unqualified_translocations, no_identifier_validation, no_citation_clearing,
+            allow_nested, disallow_unqualified_translocations, no_identifier_validation, no_citation_clearing,
             required_annotations):
-    """Convert BEL."""
+    """Compile a BEL script and convert."""
     manager = Manager(connection=connection)
 
     g = from_lines(
@@ -83,7 +112,7 @@ def convert(path, connection, csv, sif, gsea, graphml, json, pickle, bel, neo, n
         manager=manager,
         allow_nested=allow_nested,
         allow_naked_names=allow_naked_names,
-        allow_unqualified_translocations=allow_unqualified_translocations,
+        disallow_unqualified_translocations=disallow_unqualified_translocations,
         citation_clearing=(not no_citation_clearing),
         required_annotations=required_annotations,
         no_identifier_validation=no_identifier_validation,
@@ -336,6 +365,43 @@ def summarize(manager):
     click.echo('Namespaces entries: {}'.format(manager.count_namespace_entries()))
     click.echo('Annotations: {}'.format(manager.count_annotations()))
     click.echo('Annotation entries: {}'.format(manager.count_annotation_entries()))
+
+
+def _warning_helper(warnings, sep='\t'):
+    # Exit if no warnings
+    if not warnings:
+        click.echo('Congratulations! No warnings.')
+        sys.exit(0)
+
+    max_line_width = max(
+        len(str(line_number))
+        for line_number, _, _, _ in warnings
+    )
+
+    max_warning_width = max(
+        len(exc.__class__.__name__)
+        for _, _, exc, _ in warnings
+    )
+
+    s1 = '{:>' + str(max_line_width) + '}' + sep
+    s2 = '{:>' + str(max_warning_width) + '}' + sep
+
+    def _make_line(line_number, line, exc):
+        s = click.style(s1.format(line_number), fg='blue', bold=True)
+
+        if exc.__class__.__name__.endswith('Error'):
+            s += click.style(s2.format(exc.__class__.__name__), fg='red')
+        else:
+            s += click.style(s2.format(exc.__class__.__name__), fg='yellow')
+
+        s += click.style(line, bold=True) + sep
+        s += click.style(str(exc))
+        return s
+
+    click.echo_via_pager('\n'.join(
+        _make_line(line_number, line, exc)
+        for line_number, line, exc, _ in warnings
+    ))
 
 
 if __name__ == '__main__':
