@@ -7,9 +7,9 @@ from uuid import uuid4
 from requests.compat import urlparse
 
 from ..constants import FRAUNHOFER_RESOURCES
-from ..manager.models import Annotation, AnnotationEntry, Namespace, NamespaceEntry
-from ..struct.summary.node_summary import get_names
+from ..manager.models import Namespace, NamespaceEntry
 from ..struct.summary import get_annotation_values_by_annotation
+from ..struct.summary.node_summary import get_names
 
 
 def get_uri_name(url):
@@ -59,10 +59,9 @@ def make_dummy_namespaces(manager, graph, namespace_dict=None):
 
         namespace = Namespace(keyword=keyword, url=url)
         manager.session.add(namespace)
-        manager.namespace_model[url] = namespace
 
         for name in names:
-            entry = manager.namespace_object_cache[url][name] = NamespaceEntry(name=name, namespace=namespace)
+            entry = NamespaceEntry(name=name, namespace=namespace)
             manager.session.add(entry)
 
         manager.session.commit()
@@ -80,12 +79,11 @@ def make_dummy_annotations(manager, graph):
         url = n()
         graph.annotation_url[keyword] = url
 
-        annotation = Annotation(keyword=keyword, url=url)
-        manager.session.add(annotation)
-        manager.annotation_model[url] = annotation
+        namespace = Namespace(keyword=keyword, url=url)
+        manager.session.add(namespace)
 
         for name in names:
-            entry = manager.annotation_object_cache[url][name] = AnnotationEntry(name=name, annotation=annotation)
+            entry = NamespaceEntry(name=name, namespace=namespace)
             manager.session.add(entry)
 
         manager.session.commit()

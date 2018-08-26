@@ -9,7 +9,7 @@ from six import string_types
 from sqlalchemy import and_, func, or_
 
 from .lookup_manager import LookupManager
-from .models import Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Namespace, NamespaceEntry, Node
+from .models import Author, Citation, Edge, Evidence, Namespace, NamespaceEntry, Node
 from ..constants import CITATION_TYPE_PUBMED
 from ..struct import BELGraph
 from ..utils import hash_node, parse_datetime
@@ -140,8 +140,8 @@ class QueryManager(LookupManager):
         :param str value:
         :rtype: list[Edge]
         """
-        query = self.session.query(Edge).join(AnnotationEntry, Edge.annotations).join(Annotation)
-        query = query.filter(Annotation.keyword == annotation).filter(AnnotationEntry.name == value)
+        query = self.session.query(Edge).join(NamespaceEntry, Edge.annotations).join(Namespace)
+        query = query.filter(Namespace.keyword == annotation).filter(NamespaceEntry.name == value)
         return query.all()
 
     @staticmethod

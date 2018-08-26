@@ -28,7 +28,7 @@ from .io import from_path, from_pickle, to_csv, to_graphml, to_gsea, to_json_fil
 from .io.web import _get_host
 from .manager import Manager
 from .manager.database_io import to_database
-from .manager.models import Annotation, Edge, Namespace
+from .manager.models import Edge, Namespace
 
 log = logging.getLogger(__name__)
 
@@ -242,25 +242,12 @@ def namespaces():
     """Manage namespaces."""
 
 
-@manage.group()
-def annotations():
-    """Manage annotations."""
-
-
 @namespaces.command()
 @click.argument('url')
 @click.pass_obj
 def insert(manager, url):
     """Add a namespace by URL."""
     manager.ensure_namespace(url)
-
-
-@annotations.command()
-@click.argument('url')
-@click.pass_obj
-def insert(manager, url):
-    """Add an annotation by URL."""
-    manager.ensure_annotation(url)
 
 
 def _ls(manager, model_cls, model_id):
@@ -286,33 +273,12 @@ def ls(manager, url, namespace_id):
         _ls(manager, Namespace, namespace_id)
 
 
-@annotations.command()
-@click.option('--url', help='Specific resource URL to list')
-@click.option('-i', '--annotation-id', help='Specific resource URL to list')
-@click.pass_obj
-def ls(manager, url, annotation_id):
-    """List cached annotations."""
-    if url:
-        n = manager.ensure_annotation(url)
-        _page(n.entries)
-    else:
-        _ls(manager, Annotation, annotation_id)
-
-
 @namespaces.command()
 @click.argument('url')
 @click.pass_obj
 def drop(manager, url):
     """Drop a namespace by URL."""
     manager.drop_namespace_by_url(url)
-
-
-@annotations.command()
-@click.argument('url')
-@click.pass_obj
-def drop(manager, url):
-    """Drop an annotation by URL."""
-    manager.drop_annotation_by_url(url)
 
 
 @manage.group()

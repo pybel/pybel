@@ -9,7 +9,6 @@ enable this option, but can specify a database location if they choose.
 from __future__ import unicode_literals
 
 import logging
-from collections import defaultdict
 from copy import deepcopy
 
 import six
@@ -24,8 +23,8 @@ from .base_manager import BaseManager, build_engine_session
 from .exc import EdgeAddError
 from .lookup_manager import LookupManager
 from .models import (
-    Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Modification, Namespace, NamespaceEntry, Network,
-    Node, Property, edge_annotation, edge_property, network_edge, network_node,
+    Author, Citation, Edge, Evidence, Modification, Namespace, NamespaceEntry, Network, Node, Property, edge_annotation,
+    edge_property, network_edge, network_node,
 )
 from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, update_insert_values
@@ -36,7 +35,7 @@ from ..constants import (
     FRAGMENT_STOP, FUNCTION, FUSION, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, GOCC_KEYWORD, GOCC_LATEST, HGVS,
     IDENTIFIER, KIND, LINE, LOCATION, METADATA_INSERT_KEYS, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P,
     PMOD, PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P, RELATION, SUBJECT, TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS,
-    belns_encodings, config, get_cache_connection,
+    belns_encodings, get_cache_connection,
 )
 from ..language import (
     BEL_DEFAULT_NAMESPACE_URL, BEL_DEFAULT_NAMESPACE_VERSION, activity_mapping, gmod_mappings, pmod_mappings,
@@ -80,19 +79,17 @@ _annotation_mapping = {
 
 
 def _get_annotation_insert_values(bel_resource):
-    annotation_insert_values = {
-        'type': bel_resource['AnnotationDefinition']['TypeString'],
-    }
-    annotation_insert_values.update(extract_shared_required(bel_resource, 'AnnotationDefinition'))
+    annotation_insert_values = extract_shared_required(bel_resource, 'AnnotationDefinition')
     annotation_insert_values.update(extract_shared_optional(bel_resource, 'AnnotationDefinition'))
-
     update_insert_values(bel_resource, _annotation_mapping, annotation_insert_values)
-
     return annotation_insert_values
 
 
 def not_resource_cachable(bel_resource):
-    """Checks if the BEL resource is cachable. Takes in a dictionary from :func:`get_bel_resource`"""
+    """Check if the BEL resource is cacheable.
+
+    :param dict bel_resource: A dictionary returned by :func:`get_bel_resource`.
+    """
     return bel_resource['Processing'].get('CacheableFlag') not in {'yes', 'Yes', 'True', 'true'}
 
 
@@ -120,66 +117,31 @@ def _normalize_url(graph, keyword):  # FIXME move to utilities and unit test
 
 
 class NamespaceManager(BaseManager):
-    """Manages BEL namespaces"""
-
-    def __init__(self, use_namespace_cache=False, *args, **kwargs):
-        """
-        :param use_namespace_cache: Should namespaces be cached in-memory?
-        """
-        super(NamespaceManager, self).__init__(*args, **kwargs)
-
-        self.use_namespace_cache = (
-            use_namespace_cache
-            if use_namespace_cache is not None
-            else config.get('PYBEL_IN_MEMORY_NAMESPACE_CACHE', False)
-        )
-        self._namespace_model = {}
-        self._namespace_object_cache = defaultdict(dict)
-
-        log.debug('namespace manager caching: %s', self.use_namespace_cache)
-
-    @property
-    def namespace_model(self):
-        """A dictionary from {namespace URL: Namespace}
-
-        :rtype: dict[str,Namespace]
-        """
-        return self._namespace_model
-
-    @property
-    def namespace_object_cache(self):
-        """A dictionary from {namespace URL: {entry name: NamespaceEntry}}
-
-        :rtype: dict[str,dict[str,NamespaceEntry]]
-        """
-        return self._namespace_object_cache
+    """Manages BEL namespaces."""
 
     def list_namespaces(self):
-        """Returns a list of all namespaces
+        """List all namespaces.
 
         :rtype: list[Namespace]
         """
         return self.session.query(Namespace).all()
 
     def count_namespaces(self):
-        """Count the number of namespaces in the database
+        """Count the number of namespaces in the database.
 
         :rtype: int
         """
         return self.session.query(Namespace).count()
 
     def count_namespace_entries(self):
-        """Count the number of namespace entries in the database
+        """Count the number of namespace entries in the database.
 
         :rtype: int
         """
         return self.session.query(NamespaceEntry).count()
 
     def drop_namespaces(self):
-        """Drops all namespaces"""
-        self.namespace_object_cache.clear()
-        self.namespace_model.clear()
-
+        """Drop all namespaces."""
         for namespace in self.session.query(NamespaceEntry).all():
             namespace.children[:] = []
             self.session.commit()
@@ -189,7 +151,9 @@ class NamespaceManager(BaseManager):
         self.session.commit()
 
     def drop_namespace_by_url(self, url):
-        """Drops the namespace at the given URL. Won't work if the edge store is in use.
+        """Drop the namespace at the given URL.
+
+        Won't work if the edge store is in use.
 
         :param str url: The URL of the namespace to drop
         """
@@ -199,15 +163,15 @@ class NamespaceManager(BaseManager):
         self.session.commit()
 
     def get_namespace_by_url(self, url):
-        """Looks up a namespace by url. Fails if not inserted already into database.
+        """Look up a namespace by url.
 
         :param str url: The URL of the namespace
-        :rtype: Namespace
+        :rtype: Optional[Namespace]
         """
         return self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
 
     def get_namespace_by_keyword_version(self, keyword, version):
-        """Gets a namespace with a given keyword and version
+        """Get a namespace with a given keyword and version.
 
         :param str keyword: The keyword to search
         :param str version: The version to search
@@ -217,7 +181,7 @@ class NamespaceManager(BaseManager):
         return self.session.query(Namespace).filter(filt).one_or_none()
 
     def ensure_default_namespace(self):
-        """Creates or gets the BEL default namespace
+        """Get or create the BEL default namespace.
 
         :rtype: Namespace
         """
@@ -242,11 +206,11 @@ class NamespaceManager(BaseManager):
         return namespace
 
     def get_or_create_namespace(self, url):
-        """Inserts the namespace file at the given location to the cache. If not cachable, returns the dict of
-        the values of this namespace.
+        """Insert the namespace file at the given location to the cache.
+
+        If not cachable, returns the dict of the values of this namespace.
 
         :param str url: the location of the namespace file
-        :return: SQL Alchemy model instance, populated with data from URL
         :rtype: Namespace or dict
         :raises: pybel.resources.exc.ResourceError
         """
@@ -285,33 +249,16 @@ class NamespaceManager(BaseManager):
 
         return namespace
 
-    def _cache_namespace(self, namespace):
-        """Caches a namespace's model
-
-        :param Namespace namespace:
-        """
-        self.namespace_model[namespace.url] = namespace
-
-    def _cache_namespace_entries(self, namespace):
-        """Caches a namespace's entries' models
-
-        :param Namespace namespace:
-        """
-        for entry in namespace.entries:
-            self.namespace_object_cache[namespace.url][entry.name] = entry
-
     def ensure_namespace(self, url):
-        """Gets or creates a namespace by its URL. Stores in the database and cache if it's cachable, otherwise
+        """Get or create a namespace by its URL.
+
+        Stores in the database if its cachable, otherwise
         returns a dictionary of {names: encodings}
 
         :param str url: the location of the namespace file
         :rtype: Namespace or dict[str,str]
         :raises: pybel.resources.exc.ResourceError
         """
-        if self.use_namespace_cache and url in self.namespace_model:
-            log.debug('already in memory: %s', url)
-            return self.namespace_model[url]
-
         namespace = self.get_or_create_namespace(url)
 
         if isinstance(namespace, dict):
@@ -320,14 +267,10 @@ class NamespaceManager(BaseManager):
 
         log.debug('loaded namespace: %s', url)
 
-        if self.use_namespace_cache:
-            self._cache_namespace(namespace)
-            self._cache_namespace_entries(namespace)
-
         return namespace
 
     def get_namespace_by_keyword_pattern(self, keyword, pattern):
-        """Gets a namespace with a given keyword and pattern
+        """Get a namespace with a given keyword and pattern.
 
         :param str keyword: The keyword to search
         :param str pattern: The pattern to search
@@ -337,7 +280,7 @@ class NamespaceManager(BaseManager):
         return self.session.query(Namespace).filter(filt).one_or_none()
 
     def ensure_regex_namespace(self, keyword, pattern):
-        """Gets or creates a regular expression namespace
+        """Get or create a regular expression namespace.
 
         :param str keyword: The keyword of a regular expression namespace
         :param str pattern: The pattern for a regular expression namespace
@@ -366,11 +309,7 @@ class NamespaceManager(BaseManager):
         :param str name: The value of the namespace from the given url's document
         :rtype: Optional[NamespaceEntry]
         """
-        if self.namespace_object_cache and url in self.namespace_object_cache:
-            return self.namespace_object_cache[url][name]
-
         entry_filter = and_(Namespace.url == url, NamespaceEntry.name == name)
-
         result = self.session.query(NamespaceEntry).join(Namespace).filter(entry_filter).all()
 
         if 0 == len(result):
@@ -380,6 +319,16 @@ class NamespaceManager(BaseManager):
             log.warning('result for get_namespace_entry is too long. Returning first of %s', [str(r) for r in result])
 
         return result[0]
+
+    def get_annotation_entry_by_name(self, url, name):
+        """Get an annotation entry by URL and name.
+
+        :param str url: The url of the annotation source
+        :param str name: The name of the annotation entry from the given url's document
+        :rtype: NamespaceEntry
+        """
+        annotation_filter = and_(Namespace.url == url, NamespaceEntry.name == name)
+        return self.session.query(NamespaceEntry).join(Namespace).filter(annotation_filter).one()
 
     def get_or_create_regex_namespace_entry(self, namespace, pattern, name):
         """Gets a namespace entry from a regular expression. Need to commit after!
@@ -404,160 +353,60 @@ class NamespaceManager(BaseManager):
 
         return name_model
 
-
-class AnnotationManager(BaseManager):
-    """Manages BEL annotations"""
-
-    def __init__(self, use_annotation_cache=None, *args, **kwargs):
-        super(AnnotationManager, self).__init__(*args, **kwargs)
-
-        self.use_annotation_cache = (
-            use_annotation_cache
-            if use_annotation_cache is not None
-            else config.get('PYBEL_IN_MEMORY_ANNOTATION_CACHE', False)
-        )
-        self._annotation_model = {}
-        self._annotation_object_cache = defaultdict(dict)
-
-        log.debug('annotation manager caching: %s', self.use_annotation_cache)
-
-    @property
-    def annotation_model(self):
-        """A dictionary from {annotation URL: Annotation}
-
-        :rtype: dict[str:Annotation]
-        """
-        return self._annotation_model
-
-    @property
-    def annotation_object_cache(self):
-        """A dictionary from {annotation URL: {name: AnnotationEntry}}
-
-        :rtype: dict[str,dict[str,AnnotationEntry]]
-        """
-        return self._annotation_object_cache
-
     def list_annotations(self):
         """Return a list of all annotations
 
-        :rtype: list[Annotation]
+        :rtype: list[Namespace]
         """
-        return self.session.query(Annotation).all()
+        return self.session.query(Namespace).filter(Namespace.is_annotation).all()
 
     def count_annotations(self):
         """Count the number of annotations in the database
 
         :rtype: int
         """
-        return self.session.query(Annotation).count()
+        return self.session.query(Namespace).filter(Namespace.is_annotation).count()
 
     def count_annotation_entries(self):
         """Count the number of annotation entries in the database
 
         :rtype: int
         """
-        return self.session.query(AnnotationEntry).count()
-
-    def drop_annotations(self):
-        """Drops all annotations"""
-        self.annotation_object_cache.clear()
-        self.annotation_model.clear()
-
-        for annotation in self.session.query(AnnotationEntry).all():
-            annotation.children[:] = []
-            self.session.commit()
-
-        self.session.query(AnnotationEntry).delete()
-        self.session.query(Annotation).delete()
-        self.session.commit()
-
-    def drop_annotation_by_url(self, url):
-        """Drops the annotation at the given URL. Won't work if the edge store is in use.
-
-        :param str url: The URL of the annotation to drop
-        """
-        annotation = self.get_annotation_by_url(url)
-        self.session.query(AnnotationEntry).filter(AnnotationEntry.annotation == annotation).delete()
-        self.session.delete(annotation)
-        self.session.commit()
-
-    def _cache_annotation(self, annotation):
-        """Caches an annotation
-
-        :param Annotation annotation:
-        """
-        url = annotation.url
-
-        if url in self.annotation_model:
-            return
-
-        self.annotation_model[url] = annotation
-
-        for entry in annotation.entries:
-            self.annotation_object_cache[url][entry.name] = entry
-
-    def get_annotation_by_url(self, url):
-        """Gets an annotation by URL
-
-        :param str url:
-        :rtype: Optional[Annotation]
-        """
-        return self.session.query(Annotation).filter(Annotation.url == url).one_or_none()
+        return self.session.query(NamespaceEntry).filter(NamespaceEntry.is_annotation).count()
 
     def get_or_create_annotation(self, url):
-        """Inserts the namespace file at the given location to the cache
+        """Insert the namespace file at the given location to the cache
 
         :param str url: the location of the namespace file
-        :rtype: Annotation
+        :rtype: Namespace
         :raises: pybel.resources.exc.ResourceError
         """
-        annotation = self.get_annotation_by_url(url)
+        result = self.get_namespace_by_url(url)
 
-        if annotation is not None:
-            return annotation
+        if result is not None:
+            return result
 
         t = time.time()
 
         bel_resource = get_bel_resource(url)
 
-        annotation = Annotation(
+        result = Namespace(
             url=url,
             **_get_annotation_insert_values(bel_resource)
         )
-        annotation.entries = [
-            AnnotationEntry(name=name, label=label)
+        result.entries = [
+            NamespaceEntry(name=name, identifier=label)
             for name, label in bel_resource['Values'].items()
             if name
         ]
 
-        self._cache_annotation(annotation)
-        self.session.add(annotation)
+        self.session.add(result)
         self.session.commit()
 
         log.info('inserted annotation: %s (%d terms in %.2f seconds)', url, len(bel_resource['Values']),
                  time.time() - t)
 
-        return annotation
-
-    def ensure_annotation(self, url):
-        """Caches an annotation file if not already in the cache
-
-        :param str url: the location of the annotation file
-        :rtype: Annotation
-        :raises: pybel.resources.exc.ResourceError
-        """
-        if url in self.annotation_model:
-            log.debug('already in memory: %s (%d)', url, len(self.annotation_object_cache[url]))
-            return self.annotation_model[url]
-
-        result = self.session.query(Annotation).filter(Annotation.url == url).one_or_none()
-
-        if result is not None:
-            self._cache_annotation(result)
-            log.debug('cached annotation: %s (%d)', url, len(self.annotation_object_cache[url]))
-            return result
-
-        return self.get_or_create_annotation(url)
+        return result
 
     def get_annotation_entry_names(self, url):
         """Return a dict of annotations and their labels for the given annotation file.
@@ -565,34 +414,21 @@ class AnnotationManager(BaseManager):
         :param str url: the location of the annotation file
         :rtype: set[str]
         """
-        annotation = self.ensure_annotation(url)
-        return annotation.get_entry_names()
-
-    def get_annotation_entry_by_name(self, url, name):
-        """Get an annotation entry by URL and name.
-
-        :param str url: The url of the annotation source
-        :param str name: The name of the annotation entry from the given url's document
-        :rtype: AnnotationEntry
-        """
-        if self.annotation_object_cache and url in self.annotation_object_cache:
-            return self.annotation_object_cache[url][name]
-
-        annotation_filter = and_(Annotation.url == url, AnnotationEntry.name == name)
-        return self.session.query(AnnotationEntry).join(Annotation).filter(annotation_filter).one()
+        annotation = self.get_or_create_annotation(url)
+        return set(annotation.get_entry_names())
 
     def get_annotation_entries_by_names(self, url, names):
         """Get annotation entries by URL and names.
 
         :param str url: The url of the annotation source
         :param list[str] names: The names of the annotation entries from the given url's document
-        :rtype: list[AnnotationEntry]
+        :rtype: list[NamespaceEntry]
         """
-        annotation_filter = and_(Annotation.url == url, AnnotationEntry.name.in_(names))
-        return self.session.query(AnnotationEntry).join(Annotation).filter(annotation_filter).all()
+        annotation_filter = and_(Namespace.url == url, NamespaceEntry.name.in_(names))
+        return self.session.query(NamespaceEntry).join(Namespace).filter(annotation_filter).all()
 
 
-class NetworkManager(NamespaceManager, AnnotationManager):
+class NetworkManager(NamespaceManager):
     """Groups functions for inserting and querying networks in the database's network store."""
 
     def count_networks(self):
@@ -835,7 +671,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         return rv
 
 
-class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
+class InsertManager(NamespaceManager, LookupManager):
     """Manages inserting data into the edge store"""
 
     def __init__(self, *args, **kwargs):
@@ -880,7 +716,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             self.ensure_regex_namespace(keyword, pattern)
 
         for url in graph.annotation_url.values():
-            self.ensure_annotation(url)
+            self.get_or_create_annotation(url)
 
         network = Network(**{
             key: value
