@@ -24,6 +24,7 @@ from pkg_resources import iter_entry_points
 
 from .canonicalize import to_bel
 from .constants import get_cache_connection
+from .examples import braf_graph, egf_graph, homology_graph, sialic_acid_graph, statin_graph
 from .io import from_path, from_pickle, to_csv, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif, to_web
 from .io.web import _get_host
 from .manager import Manager
@@ -77,8 +78,7 @@ graph_pickle_argument = click.argument(
 
 
 @with_plugins(iter_entry_points('pybel.cli_plugins'))
-@click.group(help="PyBEL Command Line Utilities on {} using default "
-                  "connection {}".format(sys.executable, get_cache_connection()))
+@click.group(help="PyBEL Command Line Interface on {}".format(sys.executable))
 @click.version_option()
 @connection_option
 @click.pass_context
@@ -99,7 +99,7 @@ def main(ctx, connection):
 @click.pass_obj
 def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified_translocations,
             no_identifier_validation, no_citation_clearing, required_annotations):
-    """Compile a BEL script to a graph pickle."""
+    """Compile a BEL script to a graph."""
     graph = from_path(
         path,
         manager=manager,
@@ -120,14 +120,14 @@ def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified
 @main.command()
 @graph_pickle_argument
 def summarize(graph):
-    """Summarize a pre-compiled graph."""
+    """Summarize a graph."""
     graph.describe()
 
 
 @main.command()
 @graph_pickle_argument
 def warnings(graph):
-    """List warnings from a pre-compiled graph."""
+    """List warnings from a graph."""
     echo_warnings_via_pager(graph.warnings)
 
 
@@ -135,7 +135,7 @@ def warnings(graph):
 @graph_pickle_argument
 @click.pass_obj
 def insert(manager, graph):
-    """Insert a pre-compiled graph to the network store."""
+    """Insert a graph to the database."""
     to_database(graph, manager=manager)
 
 
@@ -143,7 +143,7 @@ def insert(manager, graph):
 @graph_pickle_argument
 @host_option
 def post(graph, host):
-    """Upload a pre-compiled graph to BEL Commons."""
+    """Upload a graph to BEL Commons."""
     resp = to_web(graph, host=host)
     resp.raise_for_status()
 
@@ -158,8 +158,8 @@ def post(graph, host):
 @click.option('--bel', type=click.File('w'), help='Output canonical BEL.')
 @click.option('--neo', help='Connection string for neo4j upload.')
 @click.option('--neo-context', help='Optional context for neo4j upload.')
-def convert(graph, csv, sif, gsea, graphml, json, bel, neo, neo_context):
-    """Convert a pre-compiled BEL script."""
+def serialize(graph, csv, sif, gsea, graphml, json, bel, neo, neo_context):
+    """Serialize a graph to various formats."""
     if csv:
         log.info('Outputting CSV to %s', csv)
         to_csv(graph, csv)
@@ -235,6 +235,18 @@ def drop(manager, yes):
     """Drop the database."""
     if yes or click.confirm('Drop database?'):
         manager.drop_all()
+
+
+@manage.command()
+@click.pass_obj
+def examples(manager):
+    """Load examples to the database."""
+    for graph in (sialic_acid_graph, statin_graph, homology_graph, braf_graph, egf_graph):
+        if manager.has_name_version(graph.name, graph.version):
+            click.echo('already inserted {}'.format(graph))
+            continue
+        click.echo('inserting {}'.format(graph))
+        manager.insert_graph(graph, use_tqdm=True)
 
 
 @manage.group()
