@@ -4,7 +4,6 @@ cache: pip
 services:
   - mysql
   - postgresql
-  - sqlite
 
 language: python
 
@@ -19,12 +18,10 @@ stages:
   - test
 
 env:
-  - TOXENV=py DB=mysql
-    PYBEL_TEST_CONNECTOR=mysqlclient
+  - TOXENV=py DB=mysql PYBEL_TEST_CONNECTOR=mysqlclient
     PYBEL_TEST_CONNECTION=mysql+mysqldb://travis@localhost/test?charset=utf8
 
-  - TOXENV=py DB=postgresql
-    PYBEL_TEST_CONNECTOR=psycopg2
+  - TOXENV=py DB=postgresql PYBEL_TEST_CONNECTOR=psycopg2
     PYBEL_TEST_CONNECTION=postgresql+psycopg2://travis@localhost/tests
 
   - TOXENV=py DB=sqlite
@@ -35,7 +32,9 @@ jobs:
     - stage: lint
       env: TOXENV=manifest
     - env: TOXENV=flake8
-    # - env: TOXENV=pylint
+    - env: TOXENV=pylint
+    - env: TOXENV=xenon
+    - env: TOXENV=vulture
 
     # docs stage
     - stage: docs
@@ -46,7 +45,9 @@ jobs:
 matrix:
   allow_failures:
       - env: TOXENV=flake8
-      # - env: TOXENV=pylint
+      - env: TOXENV=pylint
+      - env: TOXENV=xenon
+      - env: TOXENV=vulture
 
 install:
     - sh -c 'if [ "$TOXENV" = "py" ]; then pip install tox codecov; else pip install tox; fi'
@@ -68,10 +69,6 @@ after_success:
 
 notifications:
   slack: pybel:n2KbWKBum3musnBg3L76gGwq
-
-addons:
-    code_climate:
-        repo_token: e8d763f60ca5495b8bce79682b7c1e2e462a776f8de5c4540ceb01f52458f891
 
 deploy:
     - provider: pypi
