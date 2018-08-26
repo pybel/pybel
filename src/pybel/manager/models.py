@@ -8,6 +8,7 @@ import hashlib
 from sqlalchemy import (
     Boolean, Column, Date, DateTime, ForeignKey, Integer, LargeBinary, String, Table, Text, UniqueConstraint,
 )
+from collections import defaultdict
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import backref, relationship
 
@@ -739,6 +740,7 @@ class Citation(Base):
 
 class Evidence(Base):
     """This table contains the evidence text that proves a specific relationship and refers the source that is cited."""
+
     __tablename__ = EVIDENCE_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
@@ -785,6 +787,7 @@ edge_property = Table(
 
 class Property(Base):
     """The property table contains additional information that is used to describe the context of a relation."""
+
     __tablename__ = PROPERTY_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
@@ -801,14 +804,14 @@ class Property(Base):
 
     @property
     def side(self):
-        """Returns either :data:`pybel.constants.SUBJECT` or :data:`pybel.constants.OBJECT`
+        """Return either :data:`pybel.constants.SUBJECT` or :data:`pybel.constants.OBJECT`.
 
         :rtype: str
         """
         return SUBJECT if self.is_subject else OBJECT
 
     def to_json(self):
-        """Creates a property dict that is used to recreate an edge dictionary for a :class:`BELGraph`.
+        """Create a property dict that is used to recreate an edge dictionary for a :class:`BELGraph`.
 
         :return: Property dictionary of an edge that is participant (sub/obj) related.
         :rtype: dict
@@ -838,9 +841,8 @@ class Property(Base):
 
 
 class Edge(Base):
-    """Relationships are represented in this table. It shows the nodes that are in a relation to eachother and provides
-    information about the context of the relation by refaring to the annotation, property and evidence tables.
-    """
+    """Relationships between BEL nodes and their properties, annotations, and provenance."""
+
     __tablename__ = EDGE_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
@@ -872,22 +874,19 @@ class Edge(Base):
         return '<Edge {}: {}>'.format(self.sha512[:10], self.bel)
 
     def get_annotations_json(self):
-        """Formats the annotations properly
+        """Format the annotations properly.
 
         :rtype: Optional[dict[str,dict[str,bool]]
         """
-        annotations = {}
+        annotations = defaultdict(dict)
 
         for entry in self.annotations:
-            if entry.namespace.keyword not in annotations:
-                annotations[entry.namespace.keyword] = {entry.name: True}
-            else:
-                annotations[entry.namespace.keyword][entry.name] = True
+            annotations[entry.namespace.keyword][entry.name] = True
 
-        return annotations or None
+        return dict(annotations) or None
 
     def get_data_json(self):
-        """Gets the PyBEL edge data dictionary this edge represents
+        """Get the PyBEL edge data dictionary this edge represents.
 
         :rtype: dict
         """
