@@ -323,7 +323,7 @@ class TestEnsure(TemporaryCacheMixin):
             CITATION_REFERENCE: reference,
         }
 
-        citation_hash = hash_citation(citation_dict[CITATION_TYPE], citation_dict[CITATION_REFERENCE])
+        citation_hash = hash_citation(type=citation_dict[CITATION_TYPE], reference=citation_dict[CITATION_REFERENCE])
 
         citation = self.manager.get_or_create_citation(**citation_dict)
         self.manager.session.commit()
@@ -353,7 +353,7 @@ class TestEnsure(TemporaryCacheMixin):
             CITATION_AUTHORS: sorted(['Jackson M', 'Lajoie J'])
         }
 
-        citation_hash = hash_citation(citation_dict[CITATION_TYPE], citation_dict[CITATION_REFERENCE])
+        citation_hash = hash_citation(type=citation_dict[CITATION_TYPE], reference=citation_dict[CITATION_REFERENCE])
 
         citation = self.manager.get_or_create_citation(**citation_dict)
         self.manager.session.commit()
@@ -385,7 +385,7 @@ class TestEnsure(TemporaryCacheMixin):
 
     def test_get_or_create_evidence(self):
         basic_citation = self.manager.get_or_create_citation(**test_citation_dict)
-        utf8_test_evidence = "Yes, all the information is true! This contains a unicode alpha: α"
+        utf8_test_evidence = u"Yes, all the information is true! This contains a unicode alpha: α"
         evidence_hash = hash_evidence(
             text=utf8_test_evidence,
             type=CITATION_TYPE_PUBMED,

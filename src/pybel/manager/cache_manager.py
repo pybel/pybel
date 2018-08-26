@@ -31,11 +31,11 @@ from .utils import extract_shared_optional, extract_shared_required, update_inse
 from ..constants import (
     ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR,
     CITATION_ISSUE, CITATION_LAST_AUTHOR, CITATION_NAME, CITATION_PAGES, CITATION_REFERENCE, CITATION_TITLE,
-    CITATION_TYPE, CITATION_VOLUME, DEGRADATION, EFFECT, EVIDENCE, FRAGMENT, FRAGMENT_MISSING, FRAGMENT_START,
-    FRAGMENT_STOP, FUSION, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, GOCC_KEYWORD, GOCC_LATEST, HGVS,
-    IDENTIFIER, KIND, LINE, LOCATION, METADATA_INSERT_KEYS, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P,
-    PMOD, PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P, RELATION, SUBJECT, TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS,
-    belns_encodings, get_cache_connection,
+    CITATION_TYPE, CITATION_TYPE_PUBMED, CITATION_VOLUME, DEGRADATION, EFFECT, EVIDENCE, FRAGMENT, FRAGMENT_MISSING,
+    FRAGMENT_START, FRAGMENT_STOP, FUSION, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, GOCC_KEYWORD, GOCC_LATEST,
+    HGVS, IDENTIFIER, KIND, LINE, LOCATION, METADATA_INSERT_KEYS, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P,
+    PARTNER_5P, PMOD, PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P, RELATION, SUBJECT, TRANSLOCATION, UNQUALIFIED_EDGES,
+    VARIANTS, belns_encodings, get_cache_connection,
 )
 from ..language import (
     BEL_DEFAULT_NAMESPACE_URL, BEL_DEFAULT_NAMESPACE_VERSION, activity_mapping, gmod_mappings, pmod_mappings,
@@ -1105,7 +1105,7 @@ class InsertManager(NamespaceManager, LookupManager):
         self.object_cache_edge[sha512] = edge
         return edge
 
-    def get_or_create_citation(self, type, reference, name=None, title=None, volume=None, issue=None, pages=None,
+    def get_or_create_citation(self, reference, type=None, name=None, title=None, volume=None, issue=None, pages=None,
                                date=None, first=None, last=None, authors=None):
         """Create an entry for given citation if it does not exist, or return it if it does.
 
@@ -1123,8 +1123,8 @@ class InsertManager(NamespaceManager, LookupManager):
         :type authors: None or str or list[str]
         :rtype: Citation
         """
-        type = type.strip()
-        reference = reference.strip()
+        if type is None:
+            type = CITATION_TYPE_PUBMED
 
         sha512 = hash_citation(type=type, reference=reference)
 
@@ -1456,6 +1456,13 @@ class InsertManager(NamespaceManager, LookupManager):
 
 class _Manager(QueryManager, InsertManager, NetworkManager):
     """A wrapper around PyBEL managers that can be directly instantiated with an engine and session."""
+
+
+    def count_citations(self):
+        return self._count_model(Citation)
+
+    def list_citations(self):
+        return self._list_model(Citation)
 
 
 class Manager(_Manager):

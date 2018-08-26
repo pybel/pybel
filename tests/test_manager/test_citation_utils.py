@@ -6,16 +6,14 @@ from __future__ import unicode_literals
 
 import os
 import unittest
-
+import time
 from pybel import BELGraph
 from pybel.constants import (
-    CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_REFERENCE, CITATION_TYPE,
-    CITATION_TYPE_PUBMED,
+    CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_TYPE_PUBMED,
 )
 from pybel.dsl import protein
 from pybel.manager.citation_utils import enrich_pubmed_citations, get_citations_by_pmids, sanitize_date
 from pybel.manager.models import Citation
-from pybel.struct.summary.provenance import get_pubmed_identifiers
 from pybel.testing.cases import TemporaryCacheMixin
 from pybel.testing.utils import n
 
@@ -57,27 +55,26 @@ class TestSanitizeDate(unittest.TestCase):
 
 
 class TestCitations(TemporaryCacheMixin):
+    """Tests for citations."""
+
     def setUp(self):
         super(TestCitations, self).setUp()
         self.u, self.v = (protein(n(), n()) for _ in range(2))
         self.pmid = "9611787"
         self.graph = BELGraph()
-        self.graph.add_increases(self.u, self.v, evidence=n(), citation={
-            CITATION_TYPE: CITATION_TYPE_PUBMED,
-            CITATION_REFERENCE: self.pmid,
-        })
+        self.graph.add_increases(self.u, self.v, citation=self.pmid, evidence=n())
 
     def test_enrich(self):
-        pmids = get_pubmed_identifiers(self.graph)
+        """"""
+        self.assertEqual(0, self.manager.count_citations())
+        get_citations_by_pmids(manager=self.manager, pmids=[self.pmid])
+        self.assertEqual(1, self.manager.count_citations())
 
-        stored_citations = self.manager.session.query(Citation).all()
-
-        self.assertEqual(0, len(stored_citations))
-
-        get_citations_by_pmids(manager=self.manager, pmids=pmids)
-
-        stored_citations = self.manager.session.query(Citation).all()
-        self.assertEqual(1, len(stored_citations))
+        c = self.manager.get_citation_by_pmid(self.pmid)
+        self.assertIsNotNone(c)
+        self.assertIsInstance(c, Citation)
+        self.assertEqual(CITATION_TYPE_PUBMED, c.type)
+        self.assertEqual(self.pmid, c.reference)
 
     def test_enrich_list(self):
         pmids = [
@@ -102,7 +99,7 @@ class TestCitations(TemporaryCacheMixin):
 
         get_citations_by_pmids(manager=self.manager, pmids=pmids, group_size=2)
 
-        citation = self.manager.get_or_create_citation(type=CITATION_TYPE_PUBMED, reference='25818332')
+        citation = self.manager.get_citation_by_pmid('25818332')
         self.assertIsNotNone(citation)
 
     def test_enrich_overwrite(self):
@@ -117,7 +114,6 @@ class TestCitations(TemporaryCacheMixin):
         citation_dict = d[CITATION]
 
         self.assertIn(CITATION_NAME, citation_dict)
-
         self.assertIn(CITATION_DATE, citation_dict)
         self.assertEqual('1998-05-01', citation_dict[CITATION_DATE])
 
@@ -147,16 +143,19 @@ class TestCitations(TemporaryCacheMixin):
     @unittest.skipIf(os.environ.get('DB') == 'mysql', reason='MySQL collation is wonky')
     def test_accent_duplicate(self):
         """Test when two authors, Gomez C and Goméz C are both checked that they are not counted as duplicates."""
-        g1 = u'Gomez C'
-        g2 = u'Gómez C'
+        g1 = 'Gomez C'
+        g2 = 'Gómez C'
         pmid_1, pmid_2 = pmids = [
             '29324713',
             '29359844',
         ]
         get_citations_by_pmids(manager=self.manager, pmids=pmids)
 
+        time.sleep(1)
+
         x = self.manager.get_citation_by_pmid(pmid_1)
-        self.assertEqual(u'Martínez-Guillén JR', x.first.name)
+        self.assertIsNotNone(x)
+        self.assertEqual('Martínez-Guillén JR', x.first.name)
 
         self.assertIn(g1, self.manager.object_cache_author)
         self.assertIn(g2, self.manager.object_cache_author)

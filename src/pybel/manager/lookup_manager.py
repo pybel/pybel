@@ -50,6 +50,14 @@ class LookupManager(BaseManager):
         """
         return self.session.query(Edge).filter(Edge.sha512.in_(edge_hashes)).all()
 
+    def get_citation_by_pmid(self, pubmed_identifier):
+        """Get a citation object by its PubMed identifier.
+
+        :param str pubmed_identifier: The PubMed identifier
+        :rtype: Optional[Citation]
+        """
+        return self.get_citation_by_reference(reference=pubmed_identifier, type=CITATION_TYPE_PUBMED)
+
     def get_citation_by_reference(self, type, reference):
         """Get a citation object by its type and reference.
 
@@ -59,14 +67,6 @@ class LookupManager(BaseManager):
         """
         citation_hash = hash_citation(type=type, reference=reference)
         return self.get_citation_by_hash(citation_hash)
-
-    def get_citation_by_pmid(self, pubmed_identifier):
-        """Get a citation object by its PubMed identifier.
-
-        :param str pubmed_identifier: The PubMed identifier
-        :rtype: Optional[Citation]
-        """
-        return self.get_citation_by_reference(reference=pubmed_identifier, type=CITATION_TYPE_PUBMED)
 
     def get_citation_by_hash(self, citation_hash):
         """Get a citation object by its hash.

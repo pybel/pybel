@@ -103,5 +103,19 @@ class BaseManager(object):
         self.base.metadata.bind = self.engine
         self.base.query = self.session.query_property()
 
+    def _count_model(self, model_cls):
+        """Count the number of models in the database.
+
+        :rtype: int
+        """
+        return self.session.query(model_cls).count()
+
+    def list_citations(self, model_cls):
+        """List the models in the database.
+
+        :rtype: list
+        """
+        return self.session.query(model_cls).all()
+
     def __repr__(self):
         return '<{} connection={}>'.format(self.__class__.__name__, self.engine.url)

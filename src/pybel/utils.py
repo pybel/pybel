@@ -310,7 +310,8 @@ def hash_citation(type, reference):
     :param str reference: The citation reference
     :rtype: str
     """
-    return _hash_tuple((type, reference))
+    s = u'{type}:{reference}'.format(type=type, reference=reference)
+    return hashlib.sha512(s.encode('utf8')).hexdigest()
 
 
 def hash_evidence(text, type, reference):
@@ -321,7 +322,8 @@ def hash_evidence(text, type, reference):
     :param str reference: The citation reference
     :rtype: str
     """
-    return _hash_tuple((type, reference, text))
+    s = u'{type}:{reference}:{text}'.format(type=type, reference=reference, text=text)
+    return hashlib.sha512(s.encode('utf8')).hexdigest()
 
 
 def canonicalize_edge(data):
