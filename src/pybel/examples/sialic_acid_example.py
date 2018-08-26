@@ -35,7 +35,7 @@ from ..constants import (
     ACTIVITY, BEL_DEFAULT_NAMESPACE, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, EFFECT, MODIFIER, NAME,
     NAMESPACE,
 )
-from ..dsl.nodes import abundance, bioprocess, complex_abundance, pmod, protein
+from ..dsl import abundance, bioprocess, complex_abundance, pmod, protein, activity
 from ..struct.graph import BELGraph
 
 __all__ = [
@@ -96,7 +96,7 @@ sialic_acid_graph.add_increases(
     citation=citation,
     annotations={'Species': '9606', 'Confidence': 'High'},
     evidence=evidence_1,
-    object_modifier={MODIFIER: ACTIVITY}
+    object_modifier=activity()
 )
 
 sialic_acid_graph.add_increases(
@@ -105,7 +105,7 @@ sialic_acid_graph.add_increases(
     citation=citation,
     annotations={'Species': '9606', 'Confidence': 'High'},
     evidence=evidence_1,
-    subject_modifier={MODIFIER: ACTIVITY}
+    subject_modifier=activity()
 )
 
 sialic_acid_graph.add_directly_increases(
@@ -114,7 +114,7 @@ sialic_acid_graph.add_directly_increases(
     citation=citation,
     evidence=evidence_1,
     annotations={'Species': '9606', 'Confidence': 'High'},
-    subject_modifier={MODIFIER: ACTIVITY},
+    subject_modifier=activity(),
     object_modifier={
         MODIFIER: ACTIVITY,
         EFFECT: {
@@ -130,7 +130,7 @@ sialic_acid_graph.add_directly_increases(
     citation=citation,
     evidence=evidence_1,
     annotations={'Species': '9606', 'Confidence': 'High'},
-    subject_modifier={MODIFIER: ACTIVITY},
+    subject_modifier=activity(),
     object_modifier={
         MODIFIER: ACTIVITY,
         EFFECT: {
@@ -146,8 +146,8 @@ sialic_acid_graph.add_directly_decreases(
     citation=citation,
     evidence=evidence_2,
     annotations={'Species': '9606', 'Confidence': 'High'},
-    subject_modifier={MODIFIER: ACTIVITY},
-    object_modifier={MODIFIER: ACTIVITY}
+    subject_modifier=activity(),
+    object_modifier=activity()
 )
 
 sialic_acid_graph.add_directly_decreases(
@@ -156,8 +156,8 @@ sialic_acid_graph.add_directly_decreases(
     citation=citation,
     evidence=evidence_2,
     annotations={'Species': '9606', 'Confidence': 'High'},
-    subject_modifier={MODIFIER: ACTIVITY},
-    object_modifier={MODIFIER: ACTIVITY}
+    subject_modifier=activity(),
+    object_modifier=activity()
 )
 
 sialic_acid_graph.add_increases(
@@ -166,8 +166,8 @@ sialic_acid_graph.add_increases(
     citation=citation,
     evidence=evidence_2,
     annotations={'Species': '9606', 'Confidence': 'Low'},
-    subject_modifier={MODIFIER: ACTIVITY},
-    object_modifier={MODIFIER: ACTIVITY}
+    subject_modifier=activity(),
+    object_modifier=activity()
 )
 
 sialic_acid_graph.add_increases(
@@ -176,6 +176,6 @@ sialic_acid_graph.add_increases(
     citation=citation,
     evidence=evidence_2,
     annotations={'Species': '9606', 'Confidence': 'Low'},
-    subject_modifier={MODIFIER: ACTIVITY},
-    object_modifier={MODIFIER: ACTIVITY}
+    subject_modifier=activity(),
+    object_modifier=activity()
 )
