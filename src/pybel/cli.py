@@ -259,7 +259,7 @@ def namespaces():
 @click.pass_obj
 def insert(manager, url):
     """Add a namespace by URL."""
-    manager.ensure_namespace(url)
+    manager.get_or_create_namespace(url)
 
 
 def _ls(manager, model_cls, model_id):
@@ -279,7 +279,7 @@ def _ls(manager, model_cls, model_id):
 def ls(manager, url, namespace_id):
     """List cached namespaces."""
     if url:
-        n = manager.ensure_namespace(url)
+        n = manager.get_or_create_namespace(url)
         _page(n.entries)
     else:
         _ls(manager, Namespace, namespace_id)

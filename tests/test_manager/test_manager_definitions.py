@@ -48,10 +48,10 @@ class TestDefinitionManagers(TemporaryCacheClsMixin):
     def test_insert_namespace_persistent(self, mock_get):
         self.assertEqual(0, self.manager.count_namespaces())
         self.assertEqual(0, self.manager.count_namespace_entries())
-        self.manager.ensure_namespace(HGNC_URL)
+        self.manager.get_or_create_namespace(HGNC_URL)
         self._help_check_hgnc(self.manager)
 
-        self.manager.ensure_namespace(HGNC_URL)
+        self.manager.get_or_create_namespace(HGNC_URL)
         self._help_check_hgnc(self.manager)
 
         self.manager.drop_namespace_by_url(HGNC_URL)
@@ -63,7 +63,7 @@ class TestDefinitionManagers(TemporaryCacheClsMixin):
         self.assertEqual(0, self.manager.count_namespaces())
         self.assertEqual(0, self.manager.count_namespace_entries())
 
-        self.manager.ensure_namespace(test_ns_nocache_path)
+        self.manager.get_or_create_namespace(test_ns_nocache_path)
 
         self.assertEqual(0, self.manager.count_namespaces())
         self.assertEqual(0, self.manager.count_namespace_entries())

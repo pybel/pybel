@@ -229,6 +229,7 @@ class NamespaceManager(BaseManager):
 
         if not_resource_cachable(bel_resource):
             log.debug('not caching namespace: %s (%d terms in %.2f seconds)', url, len(values), time.time() - t)
+            log.debug('loaded uncached namespace: %s (%d)', url, len(values))
             return values
 
         namespace_insert_values = _get_namespace_insert_values(bel_resource)
@@ -246,26 +247,6 @@ class NamespaceManager(BaseManager):
 
         self.session.add(namespace)
         self.session.commit()
-
-        return namespace
-
-    def ensure_namespace(self, url):
-        """Get or create a namespace by its URL.
-
-        Stores in the database if its cachable, otherwise
-        returns a dictionary of {names: encodings}
-
-        :param str url: the location of the namespace file
-        :rtype: Namespace or dict[str,str]
-        :raises: pybel.resources.exc.ResourceError
-        """
-        namespace = self.get_or_create_namespace(url)
-
-        if isinstance(namespace, dict):
-            log.debug('loaded uncached namespace: %s (%d)', url, len(namespace))
-            return namespace
-
-        log.debug('loaded namespace: %s', url)
 
         return namespace
 
@@ -303,7 +284,7 @@ class NamespaceManager(BaseManager):
         return namespace
 
     def get_namespace_entry(self, url, name):
-        """Gets a given NamespaceEntry object.
+        """Get a given NamespaceEntry object.
 
         :param str url: The url of the namespace source
         :param str name: The value of the namespace from the given url's document
@@ -331,7 +312,9 @@ class NamespaceManager(BaseManager):
         return self.session.query(NamespaceEntry).join(Namespace).filter(annotation_filter).one()
 
     def get_or_create_regex_namespace_entry(self, namespace, pattern, name):
-        """Gets a namespace entry from a regular expression. Need to commit after!
+        """Get a namespace entry from a regular expression.
+
+        Need to commit after!
 
         :param str namespace: The name of the namespace
         :param str pattern: The regular expression pattern for the namespace
@@ -354,28 +337,28 @@ class NamespaceManager(BaseManager):
         return name_model
 
     def list_annotations(self):
-        """Return a list of all annotations
+        """Return a list of all annotations.
 
         :rtype: list[Namespace]
         """
         return self.session.query(Namespace).filter(Namespace.is_annotation).all()
 
     def count_annotations(self):
-        """Count the number of annotations in the database
+        """Count the number of annotations in the database.
 
         :rtype: int
         """
         return self.session.query(Namespace).filter(Namespace.is_annotation).count()
 
     def count_annotation_entries(self):
-        """Count the number of annotation entries in the database
+        """Count the number of annotation entries in the database.
 
         :rtype: int
         """
         return self.session.query(NamespaceEntry).filter(NamespaceEntry.is_annotation).count()
 
     def get_or_create_annotation(self, url):
-        """Insert the namespace file at the given location to the cache
+        """Insert the namespace file at the given location to the cache.
 
         :param str url: the location of the namespace file
         :rtype: Namespace
@@ -715,7 +698,7 @@ class InsertManager(NamespaceManager, LookupManager):
             if namespace_url in graph.uncached_namespaces:
                 continue
 
-            self.ensure_namespace(namespace_url)
+            self.get_or_create_namespace(namespace_url)
 
         for keyword, pattern in graph.namespace_pattern.items():
             self.ensure_regex_namespace(keyword, pattern)
@@ -754,7 +737,7 @@ class InsertManager(NamespaceManager, LookupManager):
         :raises: EdgeAddError
         """
         # FIXME check if GOCC is needed
-        self.ensure_namespace(GOCC_LATEST)
+        self.get_or_create_namespace(GOCC_LATEST)
 
         log.debug('inserting %s into edge store', graph)
         log.debug('storing graph parts: nodes')
