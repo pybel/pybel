@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains functions that provide summaries of the nodes in a graph."""
-
-from collections import Counter, defaultdict
+"""Summary functions for nodes in BEL graphs."""
 
 import itertools as itt
+from collections import Counter, defaultdict
 
 from ..filters.node_predicates import has_variant
 from ...constants import FUNCTION, FUSION, IDENTIFIER, KIND, NAME, NAMESPACE, PARTNER_3P, PARTNER_5P, VARIANTS

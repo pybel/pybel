@@ -2,8 +2,8 @@
 
 """Mocks for PyBEL testing."""
 
-import os
 import itertools as itt
+import os
 
 from .constants import bel_dir_path, belanno_dir_path, belns_dir_path
 from .utils import get_uri_name

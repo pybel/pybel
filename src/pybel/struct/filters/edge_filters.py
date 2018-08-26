@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
-Edge Filters
-------------
+"""Filter functions for edges in BEL graphs.
 
 A edge predicate is a function that takes five arguments: a :class:`BELGraph`, a source node tuple, a target node
 tuple, a key, and a data dictionary. It returns a boolean representing whether the edge passed the given test.
@@ -33,10 +31,10 @@ def invert_edge_predicate(edge_predicate):
     :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
     """
 
-    def inverse_filter(graph, u, v, k):
+    def _inverse_filter(graph, u, v, k):
         return not edge_predicate(graph, u, v, k)
 
-    return inverse_filter
+    return _inverse_filter
 
 
 def and_edge_predicates(edge_predicates=None):

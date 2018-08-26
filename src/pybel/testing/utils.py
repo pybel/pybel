@@ -13,7 +13,7 @@ from ..struct.summary.node_summary import get_names
 
 
 def get_uri_name(url):
-    """Gets the file name from the end of the URL.
+    """Get the file name from the end of the URL.
 
     Only useful for PyBEL's testing though since it looks specifically if the file is from the weird owncloud
     resources distributed by Fraunhofer.
@@ -31,7 +31,7 @@ def get_uri_name(url):
 
 
 def n():
-    """Returns a UUID string for testing
+    """Return a UUID string for testing.
 
     :rtype: str
     """

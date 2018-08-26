@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Functions for summarizing the errors logged during BEL parsing and compilation."""
+"""Summary functions for errors and warnings encountered during the compilation of BEL script."""
 
 from collections import Counter, Iterable, defaultdict
 
@@ -19,8 +19,9 @@ __all__ = [
 
 
 def get_syntax_errors(graph):
-    """Gets a list of the syntax errors from the BEL script underlying the graph. Uses SyntaxError as a
-    stand-in for :exc:`pybel.parser.exc.BelSyntaxError`
+    """List the syntax errors encountered during compilation of a BEL script.
+
+    Uses SyntaxError as a stand-in for :exc:`pybel.parser.exc.BelSyntaxError`
 
     :param pybel.BELGraph graph: A BEL graph
     :return: A list of 4-tuples of line number, line text, exception, and annotations present in the parser
@@ -81,10 +82,9 @@ def _iterate_namespace_name(graph):
 
 
 def calculate_incorrect_name_dict(graph):
-    """Group all of the incorrect identifiers in a dict of {namespace: list of erroneous names}
+    """Get missing names grouped by namespace.
 
     :param pybel.BELGraph graph: A BEL graph
-    :return: A dictionary of {namespace: list of erroneous names}
     :rtype: dict[str, list[str]]
     """
     missing = defaultdict(list)
@@ -96,11 +96,11 @@ def calculate_incorrect_name_dict(graph):
 
 
 def calculate_error_by_annotation(graph, annotation):
-    """Group the graph by a given annotation and builds lists of errors for each.
+    """Group errors by a given annotation.
 
     :param pybel.BELGraph graph: A BEL graph
     :param str annotation: The annotation to group errors by
-    :return: A dictionary of {annotation value: list of errors}
+    :return: A dictionary from the value of the given annotation to a list of error names
     :rtype: dict[str, list[str]]
     """
     results = defaultdict(list)

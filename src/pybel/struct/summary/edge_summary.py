@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains functions that provide summaries of the edges in a graph."""
+"""Summary functions for edges in BEL graphs."""
 
 from collections import Counter, defaultdict
-import itertools as itt
+
 from ..filters.edge_predicates import edge_has_annotation
-from ...constants import ANNOTATIONS, RELATION, FUNCTION, PATHOLOGY
+from ...constants import ANNOTATIONS, RELATION
 
 __all__ = [
     'iter_annotation_value_pairs',

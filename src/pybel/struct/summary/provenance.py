@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Summary functions for citation and provenance information in BEL graphs."""
+
 from ..filters.edge_predicates import has_pubmed
 from ...constants import CITATION, CITATION_REFERENCE, CITATION_TYPE
 
