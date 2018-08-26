@@ -47,6 +47,7 @@ class MockResponse:
         for suffix, path in itt.chain(_responses, _r):
             if mock_url.endswith(suffix):
                 self.path = path
+                break
 
         if self.path is None:
             raise ValueError('missing file')
