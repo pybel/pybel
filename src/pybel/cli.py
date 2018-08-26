@@ -24,17 +24,15 @@ from pkg_resources import iter_entry_points
 
 from .canonicalize import to_bel
 from .constants import get_cache_connection
+from .examples import braf_graph, egf_graph, homology_graph, sialic_acid_graph, statin_graph
 from .io import from_path, from_pickle, to_csv, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif, to_web
 from .io.web import _get_host
 from .manager import Manager
 from .manager.database_io import to_database
-from .manager.models import Annotation, Edge, Namespace
+from .manager.models import Edge, Namespace
+from .utils import get_corresponding_pickle_path
 
 log = logging.getLogger(__name__)
-
-
-def _get_cached_path(path):
-    return '{path}.pickle'.format(path=path)
 
 
 def _page(it):
@@ -58,7 +56,7 @@ def _from_pickle_callback(ctx, param, file):
     if not path.endswith('.bel'):
         return from_pickle(file)
 
-    cache_path = _get_cached_path(path)
+    cache_path = get_corresponding_pickle_path(path)
 
     if not os.path.exists(cache_path):
         click.echo('The BEL script {path} has not yet been compiled. First, try running the following command:\n\n '
@@ -77,8 +75,7 @@ graph_pickle_argument = click.argument(
 
 
 @with_plugins(iter_entry_points('pybel.cli_plugins'))
-@click.group(help="PyBEL Command Line Utilities on {} using default "
-                  "connection {}".format(sys.executable, get_cache_connection()))
+@click.group(help="PyBEL Command Line Interface on {}".format(sys.executable))
 @click.version_option()
 @connection_option
 @click.pass_context
@@ -99,7 +96,7 @@ def main(ctx, connection):
 @click.pass_obj
 def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified_translocations,
             no_identifier_validation, no_citation_clearing, required_annotations):
-    """Compile a BEL script to a graph pickle."""
+    """Compile a BEL script to a graph."""
     graph = from_path(
         path,
         manager=manager,
@@ -111,7 +108,7 @@ def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified
         required_annotations=required_annotations,
         no_identifier_validation=no_identifier_validation,
     )
-    to_pickle(graph, _get_cached_path(path))
+    to_pickle(graph, get_corresponding_pickle_path(path))
     graph.describe()
 
     sys.exit(0 if 0 == len(graph.warnings) else 1)
@@ -120,14 +117,14 @@ def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified
 @main.command()
 @graph_pickle_argument
 def summarize(graph):
-    """Summarize a pre-compiled graph."""
+    """Summarize a graph."""
     graph.describe()
 
 
 @main.command()
 @graph_pickle_argument
 def warnings(graph):
-    """List warnings from a pre-compiled graph."""
+    """List warnings from a graph."""
     echo_warnings_via_pager(graph.warnings)
 
 
@@ -135,7 +132,7 @@ def warnings(graph):
 @graph_pickle_argument
 @click.pass_obj
 def insert(manager, graph):
-    """Insert a pre-compiled graph to the network store."""
+    """Insert a graph to the database."""
     to_database(graph, manager=manager)
 
 
@@ -143,7 +140,7 @@ def insert(manager, graph):
 @graph_pickle_argument
 @host_option
 def post(graph, host):
-    """Upload a pre-compiled graph to BEL Commons."""
+    """Upload a graph to BEL Commons."""
     resp = to_web(graph, host=host)
     resp.raise_for_status()
 
@@ -158,8 +155,8 @@ def post(graph, host):
 @click.option('--bel', type=click.File('w'), help='Output canonical BEL.')
 @click.option('--neo', help='Connection string for neo4j upload.')
 @click.option('--neo-context', help='Optional context for neo4j upload.')
-def convert(graph, csv, sif, gsea, graphml, json, bel, neo, neo_context):
-    """Convert a pre-compiled BEL script."""
+def serialize(graph, csv, sif, gsea, graphml, json, bel, neo, neo_context):
+    """Serialize a graph to various formats."""
     if csv:
         log.info('Outputting CSV to %s', csv)
         to_csv(graph, csv)
@@ -237,14 +234,21 @@ def drop(manager, yes):
         manager.drop_all()
 
 
+@manage.command()
+@click.pass_obj
+def examples(manager):
+    """Load examples to the database."""
+    for graph in (sialic_acid_graph, statin_graph, homology_graph, braf_graph, egf_graph):
+        if manager.has_name_version(graph.name, graph.version):
+            click.echo('already inserted {}'.format(graph))
+            continue
+        click.echo('inserting {}'.format(graph))
+        manager.insert_graph(graph, use_tqdm=True)
+
+
 @manage.group()
 def namespaces():
     """Manage namespaces."""
-
-
-@manage.group()
-def annotations():
-    """Manage annotations."""
 
 
 @namespaces.command()
@@ -252,15 +256,7 @@ def annotations():
 @click.pass_obj
 def insert(manager, url):
     """Add a namespace by URL."""
-    manager.ensure_namespace(url)
-
-
-@annotations.command()
-@click.argument('url')
-@click.pass_obj
-def insert(manager, url):
-    """Add an annotation by URL."""
-    manager.ensure_annotation(url)
+    manager.get_or_create_namespace(url)
 
 
 def _ls(manager, model_cls, model_id):
@@ -280,23 +276,10 @@ def _ls(manager, model_cls, model_id):
 def ls(manager, url, namespace_id):
     """List cached namespaces."""
     if url:
-        n = manager.ensure_namespace(url)
+        n = manager.get_or_create_namespace(url)
         _page(n.entries)
     else:
         _ls(manager, Namespace, namespace_id)
-
-
-@annotations.command()
-@click.option('--url', help='Specific resource URL to list')
-@click.option('-i', '--annotation-id', help='Specific resource URL to list')
-@click.pass_obj
-def ls(manager, url, annotation_id):
-    """List cached annotations."""
-    if url:
-        n = manager.ensure_annotation(url)
-        _page(n.entries)
-    else:
-        _ls(manager, Annotation, annotation_id)
 
 
 @namespaces.command()
@@ -305,14 +288,6 @@ def ls(manager, url, annotation_id):
 def drop(manager, url):
     """Drop a namespace by URL."""
     manager.drop_namespace_by_url(url)
-
-
-@annotations.command()
-@click.argument('url')
-@click.pass_obj
-def drop(manager, url):
-    """Drop an annotation by URL."""
-    manager.drop_annotation_by_url(url)
 
 
 @manage.group()

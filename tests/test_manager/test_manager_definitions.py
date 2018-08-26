@@ -48,12 +48,10 @@ class TestDefinitionManagers(TemporaryCacheClsMixin):
     def test_insert_namespace_persistent(self, mock_get):
         self.assertEqual(0, self.manager.count_namespaces())
         self.assertEqual(0, self.manager.count_namespace_entries())
-        self.manager.ensure_namespace(HGNC_URL)
+        self.manager.get_or_create_namespace(HGNC_URL)
         self._help_check_hgnc(self.manager)
 
-        self.manager.namespace_model.clear()
-
-        self.manager.ensure_namespace(HGNC_URL)
+        self.manager.get_or_create_namespace(HGNC_URL)
         self._help_check_hgnc(self.manager)
 
         self.manager.drop_namespace_by_url(HGNC_URL)
@@ -65,7 +63,7 @@ class TestDefinitionManagers(TemporaryCacheClsMixin):
         self.assertEqual(0, self.manager.count_namespaces())
         self.assertEqual(0, self.manager.count_namespace_entries())
 
-        self.manager.ensure_namespace(test_ns_nocache_path)
+        self.manager.get_or_create_namespace(test_ns_nocache_path)
 
         self.assertEqual(0, self.manager.count_namespaces())
         self.assertEqual(0, self.manager.count_namespace_entries())
@@ -74,20 +72,20 @@ class TestDefinitionManagers(TemporaryCacheClsMixin):
     def test_insert_annotation(self, mock_get):
         self.assertEqual(0, self.manager.count_annotations())
         self.assertEqual(0, self.manager.count_annotation_entries())
-        annotation = self.manager.ensure_annotation(CELL_LINE_URL)
+        annotation = self.manager.get_or_create_annotation(CELL_LINE_URL)
         self.assertIsNotNone(annotation)
         self.assertEqual(CELL_LINE_URL, annotation.url)
 
         entry = self.manager.get_annotation_entry_by_name(CELL_LINE_URL, '1321N1 cell')
         self.assertEqual('1321N1 cell', entry.name)
-        self.assertEqual('CLO_0001072', entry.label)
+        self.assertEqual('CLO_0001072', entry.identifier)
 
         entries = self.manager.get_annotation_entries_by_names(CELL_LINE_URL, ['1321N1 cell'])
         self.assertIsNotNone(entries)
         self.assertEqual(1, len(entries))
         entry = entries[0]
         self.assertEqual('1321N1 cell', entry.name)
-        self.assertEqual('CLO_0001072', entry.label)
+        self.assertEqual('CLO_0001072', entry.identifier)
 
         graph = BELGraph()
         graph.annotation_url[CELL_LINE_KEYWORD] = CELL_LINE_URL
@@ -109,9 +107,9 @@ class TestDefinitionManagers(TemporaryCacheClsMixin):
         self.assertEqual(1, len(entries))
         entry = entries[0]
         self.assertEqual('1321N1 cell', entry.name)
-        self.assertEqual('CLO_0001072', entry.label)
+        self.assertEqual('CLO_0001072', entry.identifier)
 
-        self.manager.drop_annotation_by_url(CELL_LINE_URL)
+        self.manager.drop_namespace_by_url(CELL_LINE_URL)
         self.assertEqual(0, self.manager.count_annotations())
         self.assertEqual(0, self.manager.count_annotation_entries())
 

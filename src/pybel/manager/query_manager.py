@@ -9,10 +9,10 @@ from six import string_types
 from sqlalchemy import and_, func, or_
 
 from .lookup_manager import LookupManager
-from .models import Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Namespace, NamespaceEntry, Node
+from .models import Author, Citation, Edge, Evidence, Namespace, NamespaceEntry, Node
 from ..constants import CITATION_TYPE_PUBMED
 from ..struct import BELGraph
-from ..utils import hash_node, parse_datetime
+from ..utils import parse_datetime
 
 __all__ = [
     'QueryManager',
@@ -45,7 +45,7 @@ class QueryManager(LookupManager):
         return self.session.query(func.count(Node.id)).scalar()
 
     def get_node_tuple_by_hash(self, node_hash):
-        """Looks up a node by the hash and returns the corresponding PyBEL node tuple
+        """Look up a node by the hash and returns the corresponding PyBEL node tuple.
 
         :param str node_hash: The hash of a PyBEL node tuple from :func:`pybel.utils.hash_node`
         :rtype: Optional[tuple]
@@ -56,15 +56,6 @@ class QueryManager(LookupManager):
             return
 
         return node.to_tuple()
-
-    def get_node_by_tuple(self, node):
-        """Looks up a node by the PyBEL node tuple
-
-        :param tuple node: A PyBEL node tuple
-        :rtype: Optional[Node]
-        """
-        node_hash = hash_node(node)
-        return self.get_node_by_hash(node_hash)
 
     def query_nodes(self, bel=None, type=None, namespace=None, name=None):
         """Query nodes in the database.
@@ -118,7 +109,7 @@ class QueryManager(LookupManager):
         return self.session.query(Edge).join(Evidence).filter(Evidence.citation.in_(citations)).all()
 
     def search_edges_with_evidence(self, evidence):
-        """Searches edges with the given evidence
+        """Search edges with the given evidence.
 
         :param str evidence: A string to search evidences. Can use wildcard percent symbol (%).
         :rtype: list[Edge]
@@ -126,7 +117,7 @@ class QueryManager(LookupManager):
         return self.session.query(Edge).join(Evidence).filter(Evidence.text.like(evidence)).all()
 
     def search_edges_with_bel(self, bel):
-        """Searches edges with given BEL
+        """Search edges with given BEL.
 
         :param str bel: A BEL string to use as a search
         :rtype: list[Edge]
@@ -134,14 +125,14 @@ class QueryManager(LookupManager):
         return self.session.query(Edge).filter(Edge.bel.like(bel)).all()
 
     def get_edges_with_annotation(self, annotation, value):
-        """
+        """Search edges with the given annotation/value pair.
 
         :param str annotation:
         :param str value:
         :rtype: list[Edge]
         """
-        query = self.session.query(Edge).join(AnnotationEntry, Edge.annotations).join(Annotation)
-        query = query.filter(Annotation.keyword == annotation).filter(AnnotationEntry.name == value)
+        query = self.session.query(Edge).join(NamespaceEntry, Edge.annotations).join(Namespace)
+        query = query.filter(Namespace.keyword == annotation).filter(NamespaceEntry.name == value)
         return query.all()
 
     @staticmethod

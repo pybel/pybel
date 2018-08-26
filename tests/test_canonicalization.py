@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
+"""Tests for canonicalization functions."""
+
 import unittest
 
 from pybel import BELGraph
-from pybel.canonicalize import _to_bel_lines_body
+from pybel.canonicalize import _to_bel_lines_body, postpend_location
 from pybel.constants import (
     ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, FRAGMENT, GENE, MODIFIER,
     PATHOLOGY, PMOD, PROTEIN, REACTION, RNA,
@@ -18,8 +20,12 @@ from pybel.utils import canonicalize_edge
 
 
 class TestCanonicalize(unittest.TestCase):
+    def test_postpend_location_failure(self):
+        with self.assertRaises(ValueError):
+            postpend_location('', dict(name='failure'))
+
     def test_canonicalize_variant_dsl(self):
-        """Uses the __str__ functions in the DSL to create BEL instead of external pybel.canonicalize"""
+        """Use the __str__ functions in the DSL to create BEL instead of external pybel.canonicalize."""
         self.assertEqual('var("p.Val600Glu")', str(hgvs('p.Val600Glu')))
         self.assertEqual('var("p.Val600Glu")', str(protein_substitution('Val', 600, 'Glu')))
 
@@ -40,10 +46,12 @@ class TestCanonicalize(unittest.TestCase):
         self.assertEqual('gmod(GO:"DNA Methylation")', str(gmod('DNA Methylation', namespace='GO')))
 
     def test_canonicalize_fusion_range_dsl(self):
+        """Test canonicalization of enumerated fusion ranges."""
         self.assertEqual('p.1_15', str(fusion_range('p', 1, 15)))
         self.assertEqual('p.*_15', str(fusion_range('p', '*', 15)))
 
     def test_abundance(self):
+        """Test canonicalization of abundances."""
         short = abundance(namespace='CHEBI', name='water')
         self.assertEqual('a(CHEBI:water)', str(short))
         self.assertEqual((ABUNDANCE, 'CHEBI', 'water'), short.as_tuple())

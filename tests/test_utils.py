@@ -8,10 +8,6 @@ import networkx as nx
 import time
 from six import string_types
 
-from pybel.canonicalize import postpend_location
-from pybel.constants import (
-    CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED,
-)
 from pybel.parser.exc import PlaceholderAminoAcidWarning
 from pybel.parser.modifiers.constants import amino_acid
 from pybel.parser.utils import nest
@@ -20,7 +16,7 @@ from pybel.resources.exc import EmptyResourceError
 from pybel.resources.utils import get_iso_8601_date
 from pybel.testing.constants import test_an_1, test_ns_empty
 from pybel.testing.mocks import mock_bel_resources
-from pybel.utils import expand_dict, flatten_citation, flatten_dict, flatten_graph_data, list2tuple, tokenize_version
+from pybel.utils import expand_dict, flatten_dict, flatten_graph_data, list2tuple, tokenize_version
 
 
 class TestTokenizeVersion(unittest.TestCase):
@@ -43,12 +39,6 @@ class TestTokenizeVersion(unittest.TestCase):
         version_str = '0.1.2-dev'
         version_tuple = 0, 1, 2
         self.assertEqual(version_tuple, tokenize_version(version_str))
-
-
-class TestCanonicalizeHelper(unittest.TestCase):
-    def test_postpend_location_failure(self):
-        with self.assertRaises(ValueError):
-            postpend_location('', dict(name='failure'))
 
 
 class TestRandom(unittest.TestCase):
@@ -170,49 +160,3 @@ class TestUtils(unittest.TestCase):
 
         for u, v, k in expected.edges(keys=True):
             self.assertEqual(expected[u][v][k], result[u][v][k])
-
-
-class TestFlattenCitation(unittest.TestCase):
-    def test_double(self):
-        d = {
-            CITATION_TYPE: CITATION_TYPE_PUBMED,
-            CITATION_REFERENCE: '1234',
-        }
-        self.assertEqual('"PubMed","1234"', flatten_citation(d))
-
-    def test_name(self):
-        d = {
-            CITATION_TYPE: CITATION_TYPE_PUBMED,
-            CITATION_REFERENCE: '1234',
-            CITATION_NAME: 'Test Name'
-        }
-        self.assertEqual('"PubMed","Test Name","1234"', flatten_citation(d))
-
-    def test_date(self):
-        d = {
-            CITATION_TYPE: CITATION_TYPE_PUBMED,
-            CITATION_REFERENCE: '1234',
-            CITATION_NAME: 'Test Name',
-            CITATION_DATE: '1999-01-01'
-        }
-        self.assertEqual('"PubMed","Test Name","1234","1999-01-01"', flatten_citation(d))
-
-    def test_authors(self):
-        d = {
-            CITATION_TYPE: CITATION_TYPE_PUBMED,
-            CITATION_REFERENCE: '1234',
-            CITATION_NAME: 'Test Name',
-            CITATION_DATE: '1999-01-01',
-            CITATION_AUTHORS: 'Author A|Author B'
-        }
-        self.assertEqual('"PubMed","Test Name","1234","1999-01-01","Author A|Author B"', flatten_citation(d))
-
-    def test_authors_list(self):
-        d = {
-            CITATION_TYPE: CITATION_TYPE_PUBMED,
-            CITATION_REFERENCE: '1234',
-            CITATION_NAME: 'Test Name',
-            CITATION_DATE: '1999-01-01',
-            CITATION_AUTHORS: ['Author A', 'Author B']
-        }
-        self.assertEqual('"PubMed","Test Name","1234","1999-01-01","Author A|Author B"', flatten_citation(d))

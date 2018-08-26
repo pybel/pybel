@@ -7,12 +7,13 @@ from collections import Counter
 
 from pybel import BELGraph
 from pybel.constants import ABUNDANCE, BIOPROCESS, COMPLEX, PROTEIN
-from pybel.dsl.nodes import fusion_range, protein, protein_fusion
+from pybel.dsl.nodes import fusion_range, pathology, protein, protein_fusion
 from pybel.examples import egf_graph, sialic_acid_graph
 from pybel.struct.summary.node_summary import (
-    count_functions, count_names_by_namespace, count_namespaces, count_variants, get_functions, get_names_by_namespace,
-    get_namespaces,
+    count_functions, count_names_by_namespace, count_namespaces, count_pathologies, count_variants, get_functions,
+    get_names_by_namespace, get_namespaces, get_top_hubs, get_top_pathologies,
 )
+from pybel.testing.utils import n
 
 
 class TestSummary(unittest.TestCase):
@@ -110,3 +111,39 @@ class TestSummary(unittest.TestCase):
         """Test counting the number of variants in a graph."""
         variants = count_variants(sialic_acid_graph)
         self.assertEqual(1, variants['pmod'])
+
+    def test_count_pathologies(self):
+        """Test counting pathologies in the graph."""
+        graph = BELGraph()
+        a, b, c, d = protein(n(), n()), protein(n(), n()), pathology(n(), n()), pathology(n(), n())
+
+        graph.add_association(a, c, n(), n())
+        graph.add_association(a, d, n(), n())
+        graph.add_association(b, d, n(), n())
+
+        pathology_counter = count_pathologies(graph)
+        self.assertIn(c.as_tuple(), pathology_counter)
+        self.assertIn(d.as_tuple(), pathology_counter)
+        self.assertEqual(1, pathology_counter[c.as_tuple()])
+        self.assertEqual(2, pathology_counter[d.as_tuple()])
+
+        top_pathology_counter = get_top_pathologies(graph, count=1)
+        self.assertEqual(1, len(top_pathology_counter))
+        node, count = top_pathology_counter[0]
+        self.assertEqual(d.as_tuple(), node)
+        self.assertEqual(2, count)
+
+    def test_get_top_hubs(self):
+        """Test counting pathologies in the graph."""
+        graph = BELGraph()
+        a, b, c = protein(n(), n()), protein(n(), n()), pathology(n(), n())
+
+        graph.add_association(a, b, n(), n())
+        graph.add_association(a, c, n(), n())
+
+        top_hubs = get_top_hubs(graph, count=1)
+        print(top_hubs[0])
+        self.assertEqual(1, len(top_hubs))
+        node, degree = top_hubs[0]
+        self.assertEqual(a.as_tuple(), node)
+        self.assertEqual(2, degree)

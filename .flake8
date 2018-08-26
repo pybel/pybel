@@ -5,7 +5,7 @@
 #########################
 
 [flake8]
-ignore = E501
+ignore = E501,F401,F403
 exclude =
     .tox,
     .git,

@@ -1,26 +1,28 @@
 # -*- coding: utf-8 -*-
 
+"""Utilities for PyBEL."""
+
 import hashlib
 import json
 import logging
-import pickle
 from collections import Iterable, MutableMapping, defaultdict
 from datetime import datetime
 
 import networkx as nx
 from six import string_types
+from six.moves.cPickle import dumps
 
 from .constants import (
-    ACTIVITY, CITATION, CITATION_AUTHORS, CITATION_ENTRIES, CITATION_REFERENCE, CITATION_TYPE,
-    DEGRADATION, EFFECT, EVIDENCE, FROM_LOC, LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT, PYBEL_EDGE_DATA_KEYS,
-    RELATION, SUBJECT, TO_LOC, TRANSLOCATION, VERSION, IDENTIFIER
+    ACTIVITY, CITATION, CITATION_AUTHORS, CITATION_ENTRIES, CITATION_REFERENCE, CITATION_TYPE, DEGRADATION, EFFECT,
+    EVIDENCE, FROM_LOC, IDENTIFIER, LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT, RELATION, SUBJECT, TO_LOC,
+    TRANSLOCATION, VERSION,
 )
 
 log = logging.getLogger(__name__)
 
 
 def expand_dict(flat_dict, sep='_'):
-    """Expands a flattened dictionary
+    """Expand a flattened dictionary.
 
     :param dict flat_dict: a nested dictionary that has been flattened so the keys are composite
     :param str sep: the separator between concatenated keys
@@ -42,11 +44,11 @@ def expand_dict(flat_dict, sep='_'):
     return res
 
 
-def flatten_dict(d, parent_key='', sep='_'):
-    """Flattens a nested dictionary.
+def flatten_dict(data, parent_key='', sep='_'):
+    """Flatten a nested dictionary.
 
-    :param d: A nested dictionary
-    :type d: dict or MutableMapping
+    :param data: A nested dictionary
+    :type data: dict or MutableMapping
     :param str parent_key: The parent's key. This is a value for tail recursion, so don't set it yourself.
     :param str sep: The separator used between dictionary levels
     :rtype: dict
@@ -54,7 +56,7 @@ def flatten_dict(d, parent_key='', sep='_'):
     .. seealso:: http://stackoverflow.com/a/6027615
     """
     items = []
-    for k, v in d.items():
+    for k, v in data.items():
         new_key = parent_key + sep + k if parent_key else k
         if isinstance(v, (dict, MutableMapping)):
             items.extend(flatten_dict(v, new_key, sep=sep).items())
@@ -66,7 +68,7 @@ def flatten_dict(d, parent_key='', sep='_'):
 
 
 def flatten_graph_data(graph):
-    """Returns a new graph with flattened edge data dictionaries.
+    """Return a new graph with flattened edge data dictionaries.
 
     :param nx.MultiDiGraph graph: A graph with nested edge data dictionaries
     :return: A graph with flattened edge data dictionaries
@@ -85,7 +87,7 @@ def flatten_graph_data(graph):
 
 
 def list2tuple(l):
-    """Recursively converts a nested list to a nested tuple
+    """Convert a nested list to a nested tuple, recursively.
 
     :type l: list
     :rtype: tuple
@@ -97,7 +99,7 @@ def list2tuple(l):
 
 
 def get_version():
-    """Gets the current PyBEL version
+    """Get the current PyBEL version.
     
     :return: The current PyBEL version
     :rtype: str
@@ -106,7 +108,9 @@ def get_version():
 
 
 def tokenize_version(version_string):
-    """Tokenizes a version string to a tuple. Truncates qualifiers like ``-dev``.
+    """Tokenize a version string to a tuple.
+
+    Truncates qualifiers like ``-dev``.
 
     :param str version_string: A version string
     :return: A tuple representing the version string
@@ -122,7 +126,7 @@ def tokenize_version(version_string):
 
 
 def citation_dict_to_tuple(citation):
-    """Convert the ``d[CITATION]`` entry in an edge data dictionary to a tuple
+    """Convert the ``d[CITATION]`` entry in an edge data dictionary to a tuple.
 
     :param dict citation:
     :rtype: tuple[str]
@@ -147,17 +151,8 @@ def citation_dict_to_tuple(citation):
     return tuple(citation[x] for x in CITATION_ENTRIES[:3])
 
 
-def flatten_citation(citation):
-    """Flattens a citation dict, from the ``d[CITATION]`` entry in an edge data dictionary
-
-    :param dict[str,str] citation: A PyBEL citation data dictionary
-    :rtype: str
-    """
-    return ','.join('"{}"'.format(e) for e in citation_dict_to_tuple(citation))
-
-
 def ensure_quotes(s):
-    """Quote a string that isn't solely alphanumeric
+    """Quote a string that isn't solely alphanumeric.
 
     :type s: str
     :rtype: str
@@ -172,7 +167,7 @@ DATE_VERSION_FMT = '%Y%m%d'
 
 
 def valid_date(s):
-    """Checks that a string represents a valid date in ISO 8601 format YYYY-MM-DD
+    """Check that a string represents a valid date in ISO 8601 format YYYY-MM-DD.
     
     :type s: str
     :rtype: bool
@@ -185,7 +180,7 @@ def valid_date(s):
 
 
 def valid_date_version(s):
-    """Checks that the string is a valid date versions string
+    """Check that the string is a valid date versions string.
 
     :type s: str
     :rtype: bool
@@ -198,7 +193,7 @@ def valid_date_version(s):
 
 
 def parse_datetime(s):
-    """Tries to parse a datetime object from a standard datetime format or date format
+    """Try to parse a datetime object from a standard datetime format or date format.
 
     :param str s: A string representing a date or datetime
     :return: A parsed date object
@@ -219,14 +214,8 @@ def parse_datetime(s):
                 raise ValueError('Incorrect datetime format for {}'.format(s))
 
 
-def hash_node(node_tuple):
-    """Convert a PyBEL node tuple to an SHA512 hash.
-
-    :param tuple node_tuple: A BEL node
-    :return: A hashed version of the node tuple using :func:`hashlib.sha512` hash of the binary pickle dump
-    :rtype: str
-    """
-    return hashlib.sha512(pickle.dumps(node_tuple)).hexdigest()
+def _hash_tuple(t):
+    return hashlib.sha512(dumps(t)).hexdigest()
 
 
 def _get_citation_tuple(data):
@@ -265,8 +254,7 @@ def hash_edge(u, v, data):
     :rtype: str
     """
     edge_tuple = _get_edge_tuple(u, v, data)
-    edge_tuple_bytes = pickle.dumps(edge_tuple)
-    return hashlib.sha512(edge_tuple_bytes).hexdigest()
+    return _hash_tuple(edge_tuple)
 
 
 def subdict_matches(target, query, partial_match=True):
@@ -306,7 +294,7 @@ def subdict_matches(target, query, partial_match=True):
 
 
 def hash_dump(data):
-    """Hashes an arbitrary JSON dictionary by dumping it in sorted order, encoding it in UTF-8, then hashing the bytes
+    """Hash an arbitrary JSON dictionary by dumping it in sorted order, encoding it in UTF-8, then hashing the bytes.
 
     :param data: An arbitrary JSON-serializable object
     :type data: dict or list or tuple
@@ -316,24 +304,26 @@ def hash_dump(data):
 
 
 def hash_citation(type, reference):
-    """Creates a hash for a type/reference pair of a citation
+    """Create a hash for a type/reference pair of a citation.
 
     :param str type: The corresponding citation type
     :param str reference: The citation reference
     :rtype: str
     """
-    return hash_dump((type, reference))
+    s = u'{type}:{reference}'.format(type=type, reference=reference)
+    return hashlib.sha512(s.encode('utf8')).hexdigest()
 
 
 def hash_evidence(text, type, reference):
-    """Creates a hash for an evidence and its citation
+    """Create a hash for an evidence and its citation.
 
     :param str text: The evidence text
     :param str type: The corresponding citation type
     :param str reference: The citation reference
     :rtype: str
     """
-    return hash_dump((type, reference, text))
+    s = u'{type}:{reference}:{text}'.format(type=type, reference=reference, text=text)
+    return hashlib.sha512(s.encode('utf8')).hexdigest()
 
 
 def canonicalize_edge(data):
@@ -380,7 +370,7 @@ def _canonicalize_edge_modifications(data):
             )
 
         else:
-            t = (ACTIVITY, )
+            t = (ACTIVITY,)
 
         result.append(t)
 
@@ -421,3 +411,12 @@ def _canonicalize_edge_modifications(data):
         raise ValueError('Invalid data: {}'.format(data))
 
     return tuple(result)
+
+
+def get_corresponding_pickle_path(path):
+    """Get the same path with a pickle extension.
+
+    :param str path: A path to a BEL file.
+    :rtype: str
+    """
+    return '{path}.pickle'.format(path=path)

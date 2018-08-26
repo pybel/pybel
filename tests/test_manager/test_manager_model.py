@@ -11,7 +11,7 @@ from pybel.constants import (
     METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER,
     METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAME, NAMESPACE, NAMESPACE_DOMAIN_OTHER,
 )
-from pybel.manager.models import Annotation, AnnotationEntry, Citation, Namespace, NamespaceEntry, Network
+from pybel.manager.models import Citation, Namespace, NamespaceEntry, Network
 from pybel.testing.utils import n
 
 
@@ -142,51 +142,6 @@ class TestModels(unittest.TestCase):
         self.assertEqual(model.to_json(include_id=True), expected)
 
         expected[IDENTIFIER] = model.identifier = 'test:00001'
-
-        self.assertEqual(model.to_json(include_id=True), expected)
-
-    def test_annotation(self):
-        uploaded = datetime.datetime.now()
-        model = Annotation(
-            uploaded=uploaded,
-            keyword='TEST',
-            url='http://test.com',
-            name='Test Namespace',
-            version='1.0.0',
-            author='Charles Tapley Hoyt',
-            contact='charles.hoyt@scai.fraunhofer.de',
-        )
-
-        expected = dict(
-            keyword='TEST',
-            url='http://test.com',
-            name='Test Namespace',
-            version='1.0.0',
-        )
-
-        self.assertEqual(model.to_json(), expected)
-
-        expected['id'] = model.id
-
-        self.assertEqual(model.to_json(include_id=True), expected)
-
-    def test_annotation_entry(self):
-        model = AnnotationEntry(
-            name='entry',
-            annotation=Annotation(
-                keyword='test'
-            )
-
-        )
-
-        expected = dict(
-            annotation_keyword='test',
-            annotation='entry'
-        )
-
-        self.assertEqual(model.to_json(), expected)
-
-        expected['id'] = model.id = 1
 
         self.assertEqual(model.to_json(include_id=True), expected)
 

@@ -178,7 +178,7 @@ class MetadataParser(BaseParser):
         if self.skip_validation:
             return tokens
 
-        namespace_result = self.manager.ensure_namespace(url)
+        namespace_result = self.manager.get_or_create_namespace(url)
 
         if isinstance(namespace_result, dict):
             self.namespace_dict[namespace] = namespace_result

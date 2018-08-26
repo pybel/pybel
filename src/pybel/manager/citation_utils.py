@@ -142,7 +142,7 @@ def enrich_citation_model(manager, citation, p):
 
 
 def get_citations_by_pmids(manager, pmids, group_size=None, sleep_time=None):
-    """Get citation information for the given list of PubMed identifiers using the NCBI's eutils service.
+    """Get citation information for the given list of PubMed identifiers using the NCBI's eUtils service.
 
     :type manager: pybel.Manager
     :param pmids: an iterable of PubMed identifiers

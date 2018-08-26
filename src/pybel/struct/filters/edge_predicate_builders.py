@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Functions for predicates for edge data from BEL graphs."""
+
 from collections import Iterable
 
 from six import string_types
@@ -19,7 +21,7 @@ __all__ = [
 
 
 def _annotation_dict_all_filter(data, query):
-    """A filter that matches edges with the given dictionary as a sub-dictionary
+    """Matches edges with the given dictionary as a sub-dictionary.
 
     :param dict data: A PyBEL edge data dictionary
     :param dict query: The annotation query dict to match
@@ -57,7 +59,7 @@ def build_annotation_dict_all_filter(annotations):
 
     @edge_predicate
     def annotation_dict_all_filter(data):
-        """Checks if the all of the annotations in the enclosed query match
+        """Check if the all of the annotations in the enclosed query match.
 
         :param dict data: A PyBEL edge data dictionary
         :rtype: bool
@@ -68,7 +70,7 @@ def build_annotation_dict_all_filter(annotations):
 
 
 def _annotation_dict_any_filter(data, query):
-    """A filter that matches edges with the given dictionary as a sub-dictionary
+    """Matches edges with the given dictionary as a sub-dictionary.
 
     :param dict data: A PyBEL edge data dictionary
     :param dict[str,iter[str]] query: The annotation query dict to match

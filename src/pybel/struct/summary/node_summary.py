@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains functions that provide summaries of the nodes in a graph."""
+"""Summary functions for nodes in BEL graphs."""
 
+import itertools as itt
 from collections import Counter, defaultdict
 
 from ..filters.node_predicates import has_variant
 from ...constants import FUNCTION, FUSION, IDENTIFIER, KIND, NAME, NAMESPACE, PARTNER_3P, PARTNER_5P, VARIANTS
+from ...dsl.nodes import Pathology
 
 __all__ = [
     'get_functions',
@@ -17,6 +19,9 @@ __all__ = [
     'get_unused_namespaces',
     'count_variants',
     'get_names',
+    'count_pathologies',
+    'get_top_pathologies',
+    'get_top_hubs',
 ]
 
 
@@ -168,3 +173,43 @@ def count_variants(graph):
         if has_variant(graph, node)
         for variant_data in data[VARIANTS]
     )
+
+
+def get_top_hubs(graph, count=15):
+    """Get the top hubs in the graph by BEL.
+
+    :param pybel.BELGraph graph: A BEL graph
+    :param Optional[int] count: The number of top hubs to return. If None, returns all nodes
+    :rtype: dict[tuple,int]
+    """
+    return Counter(dict(graph.degree())).most_common(count)
+
+
+def _pathology_iterator(graph):
+    """Iterate over edges in which either the source or target is a pathology node
+
+    :param pybel.BELGraph graph: A BEL graph
+    :rtype: iter
+    """
+    for node in itt.chain.from_iterable(graph.edges()):
+        if isinstance(graph.nodes[node], Pathology):
+            yield node
+
+
+def count_pathologies(graph):
+    """Count the number of edges in which each pathology is incident.
+
+    :param pybel.BELGraph graph: A BEL graph
+    :rtype: Counter
+    """
+    return Counter(_pathology_iterator(graph))
+
+
+def get_top_pathologies(graph, count=15):
+    """Get the top highest relationship-having edges in the graph by BEL.
+
+    :param pybel.BELGraph graph: A BEL graph
+    :param Optional[int] count:
+    :rtype: dict[tuple,int]
+    """
+    return count_pathologies(graph).most_common(count)

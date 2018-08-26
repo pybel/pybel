@@ -3,9 +3,11 @@
 """Internal DSL functions for nodes."""
 
 import abc
+import hashlib
 from operator import methodcaller
 
 import six
+from six.moves.cPickle import dumps
 
 from .exc import InferCentralDogmaException, PyBELDSLException
 from .utils import entity
@@ -16,7 +18,7 @@ from ..constants import (
     PMOD_CODE, PMOD_ORDER, PMOD_POSITION, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P, REACTANTS, REACTION, RNA, VARIANTS,
     rev_abundance_labels,
 )
-from ..utils import ensure_quotes, hash_node
+from ..utils import ensure_quotes
 
 __all__ = [
     'abundance',
@@ -95,7 +97,15 @@ class BaseEntity(dict):
 
         :rtype: str
         """
-        return hash_node(self.as_tuple())
+        return hashlib.sha512(dumps(self.as_tuple())).hexdigest()
+
+    @property
+    def sha512(self):
+        """The SHA512 hash of this node.
+
+        :rtype: str
+        """
+        return self.as_sha512()
 
     def __hash__(self):
         return hash(self.as_tuple())

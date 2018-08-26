@@ -4,11 +4,11 @@
 
 from __future__ import unicode_literals
 
-import time
 import unittest
 from collections import Counter
 
 import sqlalchemy.exc
+import time
 from sqlalchemy import not_
 
 from pybel import BELGraph, from_database, from_path, to_database
@@ -30,7 +30,7 @@ from pybel.testing.cases import FleetingTemporaryCacheMixin, TemporaryCacheClsMi
 from pybel.testing.constants import test_bel_simple
 from pybel.testing.mocks import mock_bel_resources
 from pybel.testing.utils import make_dummy_annotations, make_dummy_namespaces, n
-from pybel.utils import hash_citation, hash_evidence, hash_node
+from pybel.utils import hash_citation, hash_evidence
 from tests import constants
 from tests.constants import (
     BelReconstitutionMixin, expected_test_simple_metadata, test_citation_dict,
@@ -323,7 +323,7 @@ class TestEnsure(TemporaryCacheMixin):
             CITATION_REFERENCE: reference,
         }
 
-        citation_hash = hash_citation(citation_dict[CITATION_TYPE], citation_dict[CITATION_REFERENCE])
+        citation_hash = hash_citation(type=citation_dict[CITATION_TYPE], reference=citation_dict[CITATION_REFERENCE])
 
         citation = self.manager.get_or_create_citation(**citation_dict)
         self.manager.session.commit()
@@ -353,7 +353,7 @@ class TestEnsure(TemporaryCacheMixin):
             CITATION_AUTHORS: sorted(['Jackson M', 'Lajoie J'])
         }
 
-        citation_hash = hash_citation(citation_dict[CITATION_TYPE], citation_dict[CITATION_REFERENCE])
+        citation_hash = hash_citation(type=citation_dict[CITATION_TYPE], reference=citation_dict[CITATION_REFERENCE])
 
         citation = self.manager.get_or_create_citation(**citation_dict)
         self.manager.session.commit()
@@ -385,7 +385,7 @@ class TestEnsure(TemporaryCacheMixin):
 
     def test_get_or_create_evidence(self):
         basic_citation = self.manager.get_or_create_citation(**test_citation_dict)
-        utf8_test_evidence = "Yes, all the information is true! This contains a unicode alpha: α"
+        utf8_test_evidence = u"Yes, all the information is true! This contains a unicode alpha: α"
         evidence_hash = hash_evidence(
             text=utf8_test_evidence,
             type=CITATION_TYPE_PUBMED,
@@ -639,7 +639,6 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
         graph = BELGraph(name='test', version='0.0.0')
         node_tuple = graph.add_node_from_data(node_data)
-        node_sha512 = node_data.as_sha512()
 
         make_dummy_namespaces(self.manager, graph)
 
@@ -647,16 +646,13 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         self.assertEqual(number_nodes, self.manager.count_nodes())
         self.assertEqual(number_edges, self.manager.count_edges())
 
-        node = self.manager.get_or_create_node(graph, node_sha512, node_tuple)
+        node = self.manager.get_or_create_node(graph, node_data)
         self.manager.session.commit()
 
         self.assertEqual(node_data, node.to_json())
         self.assertEqual(node_tuple, node.to_tuple())
 
-        self.assertEqual(node, self.manager.get_node_by_tuple(node_tuple))
-
-        node_hash = hash_node(node_tuple)
-        self.assertEqual(node_tuple, self.manager.get_node_tuple_by_hash(node_hash))
+        self.assertEqual(node_tuple, self.manager.get_node_tuple_by_hash(node_data.as_sha512()))
 
     @mock_bel_resources
     def test_simple(self, mock):
@@ -1348,11 +1344,11 @@ class TestNoAddNode(TemporaryCacheMixin):
         rs1234 = gene(namespace=dbsnp, name='rs1234')
         rs1235 = gene(namespace=dbsnp, name='rs1235')
 
-        rs1234_tuple = graph.add_node_from_data(rs1234)
-        rs1235_tuple = graph.add_node_from_data(rs1235)
+        graph.add_node_from_data(rs1234)
+        graph.add_node_from_data(rs1235)
 
-        rs1234_hash = hash_node(rs1234_tuple)
-        rs1235_hash = hash_node(rs1235_tuple)
+        rs1234_hash = rs1234.as_sha512()
+        rs1235_hash = rs1235.as_sha512()
 
         self.manager.insert_graph(graph, store_parts=True)
 

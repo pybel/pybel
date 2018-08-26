@@ -16,13 +16,13 @@ from ..constants import (
     ANNOTATIONS, ASSOCIATION, CITATION, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, DECREASES, DESCRIPTION,
     DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO, EVIDENCE, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN,
     GRAPH_ANNOTATION_URL, GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, GRAPH_PYBEL_VERSION,
-    GRAPH_UNCACHED_NAMESPACES, HASH, HAS_COMPONENT, HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, IDENTIFIER,
+    GRAPH_UNCACHED_NAMESPACES, HAS_COMPONENT, HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, IDENTIFIER,
     INCREASES, IS_A, MEMBERS, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION,
     METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAME, NAMESPACE, OBJECT,
     ORTHOLOGOUS, PART_OF, PRODUCTS, REACTANTS, RELATION, SUBJECT, TRANSCRIBED_TO, TRANSLATED_TO, VARIANTS,
 )
 from ..dsl import BaseEntity, activity
-from ..utils import get_version, hash_edge, hash_node
+from ..utils import get_version, hash_edge
 
 __all__ = [
     'BELGraph',
@@ -350,7 +350,7 @@ class BELGraph(nx.MultiDiGraph):
         :param int line_number: The line number on which the exception occurred
         :param str line: The line on which the exception occurred
         :param Exception exception: The exception that occurred
-        :param Optional[dict] context: The context from the parser when the exeption occurred
+        :param Optional[dict] context: The context from the parser when the exception occurred
         """
         self.warnings.append((line_number, line, exception, {} if context is None else context))
 
@@ -1032,19 +1032,6 @@ class BELGraph(nx.MultiDiGraph):
             self._node_has_namespace_helper(n, namespace)
             for n in self.iter_equivalent_nodes(node)
         )
-
-    def hash_node(self, node_tuple):
-        """Hash the node.
-
-        :type node_tuple: tuple
-        :rtype: str
-        """
-        sha512 = self.node[node_tuple].get(HASH)
-
-        if sha512 is None:
-            return hash_node(node_tuple)
-
-        return sha512
 
     def describe(self, file=None):
         """Print a summary of the graph"""
