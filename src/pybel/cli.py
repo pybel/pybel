@@ -30,12 +30,9 @@ from .io.web import _get_host
 from .manager import Manager
 from .manager.database_io import to_database
 from .manager.models import Edge, Namespace
+from .utils import get_corresponding_pickle_path
 
 log = logging.getLogger(__name__)
-
-
-def _get_cached_path(path):
-    return '{path}.pickle'.format(path=path)
 
 
 def _page(it):
@@ -59,7 +56,7 @@ def _from_pickle_callback(ctx, param, file):
     if not path.endswith('.bel'):
         return from_pickle(file)
 
-    cache_path = _get_cached_path(path)
+    cache_path = get_corresponding_pickle_path(path)
 
     if not os.path.exists(cache_path):
         click.echo('The BEL script {path} has not yet been compiled. First, try running the following command:\n\n '
@@ -111,7 +108,7 @@ def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified
         required_annotations=required_annotations,
         no_identifier_validation=no_identifier_validation,
     )
-    to_pickle(graph, _get_cached_path(path))
+    to_pickle(graph, get_corresponding_pickle_path(path))
     graph.describe()
 
     sys.exit(0 if 0 == len(graph.warnings) else 1)
