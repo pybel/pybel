@@ -8,10 +8,6 @@ import networkx as nx
 import time
 from six import string_types
 
-from pybel.canonicalize import postpend_location
-from pybel.constants import (
-    CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED,
-)
 from pybel.parser.exc import PlaceholderAminoAcidWarning
 from pybel.parser.modifiers.constants import amino_acid
 from pybel.parser.utils import nest
@@ -20,7 +16,7 @@ from pybel.resources.exc import EmptyResourceError
 from pybel.resources.utils import get_iso_8601_date
 from pybel.testing.constants import test_an_1, test_ns_empty
 from pybel.testing.mocks import mock_bel_resources
-from pybel.utils import expand_dict, flatten_citation, flatten_dict, flatten_graph_data, list2tuple, tokenize_version
+from pybel.utils import expand_dict, flatten_dict, flatten_graph_data, list2tuple, tokenize_version
 
 
 class TestTokenizeVersion(unittest.TestCase):
@@ -43,12 +39,6 @@ class TestTokenizeVersion(unittest.TestCase):
         version_str = '0.1.2-dev'
         version_tuple = 0, 1, 2
         self.assertEqual(version_tuple, tokenize_version(version_str))
-
-
-class TestCanonicalizeHelper(unittest.TestCase):
-    def test_postpend_location_failure(self):
-        with self.assertRaises(ValueError):
-            postpend_location('', dict(name='failure'))
 
 
 class TestRandom(unittest.TestCase):

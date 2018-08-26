@@ -5,12 +5,12 @@
 import hashlib
 import json
 import logging
-import pickle
 from collections import Iterable, MutableMapping, defaultdict
 from datetime import datetime
 
 import networkx as nx
 from six import string_types
+from six.moves.cPickle import dumps
 
 from .constants import (
     ACTIVITY, CITATION, CITATION_AUTHORS, CITATION_ENTRIES, CITATION_REFERENCE, CITATION_TYPE, DEGRADATION, EFFECT,
@@ -214,14 +214,8 @@ def parse_datetime(s):
                 raise ValueError('Incorrect datetime format for {}'.format(s))
 
 
-def hash_node(node_tuple):
-    """Convert a PyBEL node tuple to an SHA512 hash.
-
-    :param tuple node_tuple: A BEL node
-    :return: A hashed version of the node tuple using :func:`hashlib.sha512` hash of the binary pickle dump
-    :rtype: str
-    """
-    return hashlib.sha512(pickle.dumps(node_tuple)).hexdigest()
+def _hash_tuple(t):
+    return hashlib.sha512(dumps(t)).hexdigest()
 
 
 def _get_citation_tuple(data):
@@ -260,8 +254,7 @@ def hash_edge(u, v, data):
     :rtype: str
     """
     edge_tuple = _get_edge_tuple(u, v, data)
-    edge_tuple_bytes = pickle.dumps(edge_tuple)
-    return hashlib.sha512(edge_tuple_bytes).hexdigest()
+    return _hash_tuple(edge_tuple)
 
 
 def subdict_matches(target, query, partial_match=True):
@@ -317,7 +310,7 @@ def hash_citation(type, reference):
     :param str reference: The citation reference
     :rtype: str
     """
-    return hash_node((type, reference))
+    return _hash_tuple((type, reference))
 
 
 def hash_evidence(text, type, reference):
@@ -328,7 +321,7 @@ def hash_evidence(text, type, reference):
     :param str reference: The citation reference
     :rtype: str
     """
-    return hash_node((type, reference, text))
+    return _hash_tuple((type, reference, text))
 
 
 def canonicalize_edge(data):

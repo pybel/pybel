@@ -10,7 +10,7 @@ from pybel.dsl import (
     abundance, complex_abundance, entity, fragment, fusion_range, gene, gene_fusion, missing_fusion_range, protein,
 )
 from pybel.testing.utils import n
-from pybel.utils import ensure_quotes, hash_node
+from pybel.utils import ensure_quotes
 
 
 class TestDSL(unittest.TestCase):
@@ -87,7 +87,6 @@ class TestDSL(unittest.TestCase):
 
         self.assertEqual(node_tuple, node.as_tuple())
         self.assertEqual(hash(node_tuple), hash(node))
-        self.assertEqual(hash_node(node_tuple), node.as_sha512())
 
     def test_complex_with_name(self):
         """Tests a what happens with a named complex
@@ -110,7 +109,6 @@ class TestDSL(unittest.TestCase):
 
         self.assertEqual(node_tuple, nine_one_one.as_tuple())
         self.assertEqual(hash(node_tuple), hash(nine_one_one))
-        self.assertEqual(hash_node(node_tuple), nine_one_one.as_sha512())
 
     def test_gene_fusion(self):
         """Test serialization of a gene fusion to BEL with a explicit fusion ranges."""

@@ -32,7 +32,7 @@ from ..constants import (
     ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR,
     CITATION_ISSUE, CITATION_LAST_AUTHOR, CITATION_NAME, CITATION_PAGES, CITATION_REFERENCE, CITATION_TITLE,
     CITATION_TYPE, CITATION_VOLUME, DEGRADATION, EFFECT, EVIDENCE, FRAGMENT, FRAGMENT_MISSING, FRAGMENT_START,
-    FRAGMENT_STOP, FUNCTION, FUSION, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, GOCC_KEYWORD, GOCC_LATEST, HGVS,
+    FRAGMENT_STOP, FUSION, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, GOCC_KEYWORD, GOCC_LATEST, HGVS,
     IDENTIFIER, KIND, LINE, LOCATION, METADATA_INSERT_KEYS, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P,
     PMOD, PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P, RELATION, SUBJECT, TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS,
     belns_encodings, get_cache_connection,
@@ -42,7 +42,7 @@ from ..language import (
 )
 from ..resources.definitions import get_bel_resource
 from ..struct import BELGraph, union
-from ..utils import hash_citation, hash_dump, hash_evidence, hash_node, parse_datetime
+from ..utils import hash_citation, hash_dump, hash_evidence, parse_datetime
 
 __all__ = [
     'Manager',
@@ -719,7 +719,7 @@ class InsertManager(NamespaceManager, LookupManager):
         network.store_bel(graph)
 
         if store_parts:
-            self._store_graph_parts(network, graph, use_tqdm=use_tqdm)
+            network.nodes, network.edges = self._store_graph_parts(graph, use_tqdm=use_tqdm)
 
         self.session.add(network)
         self.session.commit()
@@ -728,11 +728,11 @@ class InsertManager(NamespaceManager, LookupManager):
 
         return network
 
-    def _store_graph_parts(self, network, graph, use_tqdm=False):
+    def _store_graph_parts(self, graph, use_tqdm=False):
         """Store the given graph into the edge store.
 
-        :param Network network: A SQLAlchemy PyBEL Network object
         :param BELGraph graph: A BEL Graph
+        :rtype: tuple[list[Node],list[Edge]]
         :raises: pybel.resources.exc.ResourceError
         :raises: EdgeAddError
         """
@@ -740,56 +740,85 @@ class InsertManager(NamespaceManager, LookupManager):
         self.get_or_create_namespace(GOCC_LATEST)
 
         log.debug('inserting %s into edge store', graph)
-        log.debug('storing graph parts: nodes')
-        t = time.time()
+        log.debug('building node models')
+        node_model_build_start = time.time()
 
-        nodes = graph.nodes()
+        nodes = graph.nodes(data=True)
         if use_tqdm:
-            nodes = tqdm(nodes, total=graph.number_of_nodes(), desc='Nodes')
+            nodes = tqdm(nodes, total=graph.number_of_nodes(), desc='nodes')
 
-        for node_tuple in nodes:
-            namespace = graph.node[node_tuple].get(NAMESPACE)
+        tuple_model = {}
+        for node_tuple, node_data in nodes:
+            namespace = node_data.get(NAMESPACE)
 
             if graph.skip_storing_namespace(namespace):
                 continue  # already know this node won't be cached
 
-            sha512 = hash_node(node_tuple)
-            node_object = self.get_or_create_node(graph, sha512, node_tuple)
+            node_object = self.get_or_create_node(graph, node_data)
 
             if node_object is None:
                 log.warning('can not add node %s', node_tuple)
                 continue
 
-            network.nodes.append(node_object)
+            tuple_model[node_tuple] = node_object
 
-        log.debug('stored nodes in %.2f seconds', time.time() - t)
-        log.debug('storing graph parts: edges')
-        t = time.time()
-        c = 0
+        log.debug('built node models in %.2f seconds', time.time() - node_model_build_start)
+
+        node_model_commit_start = time.time()
+        node_models = list(tuple_model.values())
+        self.session.add_all(node_models)
+        self.session.commit()
+        log.debug('stored node models in %.2f seconds', time.time() - node_model_commit_start)
+
+        log.debug('building edge models')
+        edge_model_build_start = time.time()
 
         edges = graph.edges(keys=True, data=True)
         if use_tqdm:
-            edges = tqdm(edges, total=graph.number_of_edges(), desc='Edges')
+            edges = tqdm(edges, total=graph.number_of_edges(), desc='edges')
 
+        edge_models = list(self._get_edge_models(graph, tuple_model, edges))
+
+        log.debug('built edge models in %.2f seconds', time.time() - edge_model_build_start)
+
+        edge_model_commit_start = time.time()
+        self.session.add_all(edge_models)
+        self.session.commit()
+        log.debug('stored edge models in %.2f seconds', time.time() - edge_model_commit_start)
+
+        return node_models, edge_models
+
+    def _get_edge_models(self, graph, tuple_model, edges):
         for u, v, key, data in edges:
-            if hash_node(u) not in self.object_cache_node:
-                log.debug('Skipping uncached node: %s', u)
+            source = tuple_model.get(u)
+            if source is None or source.sha512 not in self.object_cache_node:
+                log.debug('skipping uncached source node: %s', u)
                 continue
 
-            if hash_node(v) not in self.object_cache_node:
-                log.debug('Skipping uncached node: %s', v)
+            target = tuple_model.get(v)
+            if target is None or target.sha512 not in self.object_cache_node:
+                log.debug('skipping uncached target node: %s', v)
                 continue
 
-            if RELATION not in data:
-                continue
+            relation = data[RELATION]
 
-            if data[RELATION] in UNQUALIFIED_EDGES:
+            if relation in UNQUALIFIED_EDGES:
                 try:
-                    self._add_unqualified_edge(network, graph, u, v, key, data)
+                    edge = self._add_unqualified_edge(
+                        source=source,
+                        target=target,
+                        bel=graph.edge_to_bel(u, v, data),
+                        key=key,
+                        data=data,
+                    )
+                    if edge is None:
+                        continue
                 except Exception as e:
                     self.session.rollback()
                     log.exception('error storing edge in database. edge data: %s', data)
                     six.raise_from(EdgeAddError(e, u, v, key, data), e)
+                else:
+                    yield edge
 
             elif EVIDENCE not in data or CITATION not in data:
                 continue
@@ -799,16 +828,23 @@ class InsertManager(NamespaceManager, LookupManager):
 
             else:
                 try:
-                    self._add_qualified_edge(network, graph, u, v, key, data)
+                    bel = graph.edge_to_bel(u, v, data)
+                    edge = self._add_qualified_edge(
+                        graph=graph,
+                        source=source,
+                        target=target,
+                        key=key,
+                        bel=bel,
+                        data=data,
+                    )
+                    if edge is None:
+                        continue
                 except Exception as e:
                     self.session.rollback()
                     log.exception('error storing edge in database. edge data: %s', data)
                     six.raise_from(EdgeAddError(e, u, v, key, data), e)
-
-        log.debug('stored edges in %.2f seconds', time.time() - t)
-
-        if c:
-            log.info('skipped %d edges', c)
+                else:
+                    yield edge
 
     @staticmethod
     def _iter_from_annotations_dict(graph, annotations_dict):
@@ -849,13 +885,14 @@ class InsertManager(NamespaceManager, LookupManager):
             for entry in self.get_annotation_entries_by_names(url, names)
         ]
 
-    def _add_qualified_edge(self, network, graph, u, v, key, data):
+    def _add_qualified_edge(self, graph, source, target, key, bel, data):
         """Add a qualified edge to the network.
 
-        :type network: Network
         :type graph: BELGraph
-        :type u: tuple
-        :type v: tuple
+        :type source: Node
+        :type target: Node
+        :type key: str
+        :type bel: str
         :type data: dict
         """
         citation_dict = data[CITATION]
@@ -882,10 +919,9 @@ class InsertManager(NamespaceManager, LookupManager):
 
         annotations = self._get_annotation_entries_from_data(graph, data)
 
-        bel = graph.edge_to_bel(u, v, data=data)
-        edge = self.get_or_create_edge(
-            source=self.object_cache_node[hash_node(u)],
-            target=self.object_cache_node[hash_node(v)],
+        return self.get_or_create_edge(
+            source=source,
+            target=target,
             relation=data[RELATION],
             bel=bel,
             sha512=key,
@@ -893,29 +929,26 @@ class InsertManager(NamespaceManager, LookupManager):
             properties=properties,
             annotations=annotations,
         )
-        network.edges.append(edge)
 
-    def _add_unqualified_edge(self, network, graph, u, v, key, data):
+    def _add_unqualified_edge(self, source, target, key, bel, data):
         """Add an unqualified edge to the network.
 
-        :type network: Network
-        :type graph: BELGraph
-        :type u: tuple
-        :type v: tuple
+        :type source: Node
+        :type target: Node
+        :type key: str
+        :type bel: str
         :type data: dict
         """
-        bel = graph.edge_to_bel(u, v, data=data)
-        edge = self.get_or_create_edge(
-            source=self.object_cache_node[hash_node(u)],
-            target=self.object_cache_node[hash_node(v)],
+        return self.get_or_create_edge(
+            source=source,
+            target=target,
             relation=data[RELATION],
             bel=bel,
             sha512=key,
         )
-        network.edges.append(edge)
 
     def get_or_create_evidence(self, citation, text):
-        """Creates entry and object for given evidence if it does not exist.
+        """Create an entry and object for given evidence if it does not exist.
 
         :param Citation citation: Citation object obtained from :func:`get_or_create_citation`
         :param str text: Evidence text
@@ -944,18 +977,17 @@ class InsertManager(NamespaceManager, LookupManager):
         self.object_cache_evidence[sha512] = evidence
         return evidence
 
-    def get_or_create_node(self, graph, sha512, node_tuple):
-        """Creates entry and object for given node if it does not exist.
+    def get_or_create_node(self, graph, node_data):
+        """Create an entry and object for given node if it does not exist.
 
         :param BELGraph graph: A BEL graph
-        :param str sha512: sha512 string
-        :param tuple node_tuple: A PyBEL node tuple
+        :param BaseEntity node_data: A PyBEL node tuple
         :rtype: Node
         """
+        sha512 = node_data.as_sha512()
         if sha512 in self.object_cache_node:
             return self.object_cache_node[sha512]
 
-        node_data = graph.node[node_tuple]
         bel = node_data.as_bel()
 
         node = self.get_node_by_hash(sha512)
@@ -964,11 +996,10 @@ class InsertManager(NamespaceManager, LookupManager):
             self.object_cache_node[sha512] = node
             return node
 
-        type = node_data[FUNCTION]
+        type = node_data.function
         node = Node(type=type, bel=bel, sha512=sha512)
 
         namespace = node_data.get(NAMESPACE)
-
         if namespace is None:
             pass
 
