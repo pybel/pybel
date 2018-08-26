@@ -14,24 +14,27 @@ Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
 
 import logging
-from pkg_resources import iter_entry_points
+import os
 import sys
-import time
 
 import click
+import time
 from click_plugins import with_plugins
+from pkg_resources import iter_entry_points
 
 from .canonicalize import to_bel
 from .constants import get_cache_connection
-from .io import (
-    from_lines, from_path, from_pickle, to_csv, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif,
-)
+from .io import from_path, from_pickle, to_csv, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif, to_web
 from .io.web import _get_host
 from .manager import Manager
 from .manager.database_io import to_database
-from .manager.models import Annotation, Base, Edge, Namespace
+from .manager.models import Annotation, Edge, Namespace
 
 log = logging.getLogger(__name__)
+
+
+def _get_cached_path(path):
+    return '{path}.pickle'.format(path=path)
 
 
 def _page(it):
@@ -42,7 +45,34 @@ connection_option = click.option(
     '-c',
     '--connection',
     default=get_cache_connection(),
-    help='Connection to cache. Defaults to {}'.format(get_cache_connection()),
+    show_default=True,
+    help='Database connection string.',
+)
+
+host_option = click.option('--host', help='URL of BEL Commons. Defaults to {}'.format(_get_host()))
+
+
+def _from_pickle_callback(ctx, param, file):
+    path = file.name
+
+    if not path.endswith('.bel'):
+        return from_pickle(file)
+
+    cache_path = _get_cached_path(path)
+
+    if not os.path.exists(cache_path):
+        click.echo('The BEL script {path} has not yet been compiled. First, try running the following command:\n\n '
+                   'pybel compile {path}\n'.format(path=path))
+        sys.exit(1)
+
+    return from_pickle(cache_path)
+
+
+graph_pickle_argument = click.argument(
+    'graph',
+    metavar='path',
+    type=click.File('rb'),
+    callback=_from_pickle_callback,
 )
 
 
@@ -50,134 +80,127 @@ connection_option = click.option(
 @click.group(help="PyBEL Command Line Utilities on {} using default "
                   "connection {}".format(sys.executable, get_cache_connection()))
 @click.version_option()
-def main():
+@connection_option
+@click.pass_context
+def main(ctx, connection):
     """PyBEL Command Line."""
+    ctx.obj = Manager(connection=connection)
+    ctx.obj.bind()  # add the engine to the metadata and query property to the session
 
 
 @main.command()
 @click.argument('path')
-@connection_option
-def compile(path, connection):
-    """Compile a BEL script to a graph pickle."""
-    manager = Manager(connection=connection)
-    graph = from_path(path, manager=manager, use_tqdm=True)
-    to_pickle(graph, '{path}.pickle'.format(path=path))
-    graph.describe()
-
-
-@main.command()
-@click.argument('path', type=click.File('rb'))
-def summarize(path):
-    """Summarize a pre-compiled graph."""
-    graph = from_pickle(path)
-    graph.describe()
-
-
-@main.command()
-@click.argument('path', type=click.File('rb'))
-def errors(path):
-    """Summarize errors from a pre-compiled graph."""
-    graph = from_pickle(path)
-    _warning_helper(graph.warnings)
-
-
-@main.command()
-@click.option('-p', '--path', type=click.File('r'), default=sys.stdin, help='Input BEL file file path')
-@connection_option
-@click.option('--csv', type=click.File('w'), help='Path to output a CSV file.')
-@click.option('--sif', type=click.File('w'), help='Path to output an SIF file.')
-@click.option('--gsea', type=click.File('w'), help='Path to output a GRP file for gene set enrichment analysis')
-@click.option('--graphml', help='Path to output a GraphML file. Use .graphml for Cytoscape')
-@click.option('--json', type=click.File('w'), help='Path to output a node-link JSON file.')
-@click.option('--pickle', help='Path to output a pickle file.')
-@click.option('--bel', type=click.File('w'), help='Output canonical BEL')
-@click.option('--neo', help="Connection string for neo4j upload")
-@click.option('--neo-context', help="Optional context for neo4j upload")
-@click.option('-s', '--store', is_flag=True, help='Stores to database specified by -c')
 @click.option('--allow-naked-names', is_flag=True, help="Enable lenient parsing for naked names")
 @click.option('--allow-nested', is_flag=True, help="Enable lenient parsing for nested statements")
-@click.option('--disallow-unqualified-translocations', is_flag=True,
-              help="Disable lenient parsing for unqualified translocations")
+@click.option('--disallow-unqualified-translocations', is_flag=True, help="Disallow unqualified translocations")
 @click.option('--no-identifier-validation', is_flag=True, help='Turn off identifier validation')
 @click.option('--no-citation-clearing', is_flag=True, help='Turn off citation clearing')
 @click.option('-r', '--required-annotations', multiple=True, help='Specify multiple required annotations')
-def convert(path, connection, csv, sif, gsea, graphml, json, pickle, bel, neo, neo_context, store, allow_naked_names,
-            allow_nested, disallow_unqualified_translocations, no_identifier_validation, no_citation_clearing,
-            required_annotations):
-    """Compile a BEL script and convert."""
-    manager = Manager(connection=connection)
-
-    g = from_lines(
+@click.pass_obj
+def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified_translocations,
+            no_identifier_validation, no_citation_clearing, required_annotations):
+    """Compile a BEL script to a graph pickle."""
+    graph = from_path(
         path,
         manager=manager,
+        use_tqdm=True,
         allow_nested=allow_nested,
         allow_naked_names=allow_naked_names,
         disallow_unqualified_translocations=disallow_unqualified_translocations,
         citation_clearing=(not no_citation_clearing),
         required_annotations=required_annotations,
         no_identifier_validation=no_identifier_validation,
-        use_tqdm=True,
     )
+    to_pickle(graph, _get_cached_path(path))
+    graph.describe()
 
+    sys.exit(0 if 0 == len(graph.warnings) else 1)
+
+
+@main.command()
+@graph_pickle_argument
+def summarize(graph):
+    """Summarize a pre-compiled graph."""
+    graph.describe()
+
+
+@main.command()
+@graph_pickle_argument
+def warnings(graph):
+    """List warnings from a pre-compiled graph."""
+    echo_warnings_via_pager(graph.warnings)
+
+
+@main.command()
+@graph_pickle_argument
+@click.pass_obj
+def insert(manager, graph):
+    """Insert a pre-compiled graph to the network store."""
+    to_database(graph, manager=manager)
+
+
+@main.command()
+@graph_pickle_argument
+@host_option
+def post(graph, host):
+    """Upload a pre-compiled graph to BEL Commons."""
+    resp = to_web(graph, host=host)
+    resp.raise_for_status()
+
+
+@main.command()
+@graph_pickle_argument
+@click.option('--csv', type=click.File('w'), help='Path to output a CSV file.')
+@click.option('--sif', type=click.File('w'), help='Path to output an SIF file.')
+@click.option('--gsea', type=click.File('w'), help='Path to output a GRP file for gene set enrichment analysis.')
+@click.option('--graphml', help='Path to output a GraphML file. Use .graphml for Cytoscape.')
+@click.option('--json', type=click.File('w'), help='Path to output a node-link JSON file.')
+@click.option('--bel', type=click.File('w'), help='Output canonical BEL.')
+@click.option('--neo', help='Connection string for neo4j upload.')
+@click.option('--neo-context', help='Optional context for neo4j upload.')
+def convert(graph, csv, sif, gsea, graphml, json, bel, neo, neo_context):
+    """Convert a pre-compiled BEL script."""
     if csv:
         log.info('Outputting CSV to %s', csv)
-        to_csv(g, csv)
+        to_csv(graph, csv)
 
     if sif:
         log.info('Outputting SIF to %s', sif)
-        to_sif(g, sif)
+        to_sif(graph, sif)
 
     if graphml:
         log.info('Outputting GraphML to %s', graphml)
-        to_graphml(g, graphml)
+        to_graphml(graph, graphml)
 
     if gsea:
         log.info('Outputting GRP to %s', gsea)
-        to_gsea(g, gsea)
+        to_gsea(graph, gsea)
 
     if json:
         log.info('Outputting JSON to %s', json)
-        to_json_file(g, json)
-
-    if pickle:
-        log.info('Outputting pickle to %s', pickle)
-        to_pickle(g, pickle)
+        to_json_file(graph, json)
 
     if bel:
         log.info('Outputting BEL to %s', bel)
-        to_bel(g, bel)
-
-    if store:
-        log.info('Storing to database')
-        to_database(g, manager=manager, store_parts=True)
+        to_bel(graph, bel)
 
     if neo:
         import py2neo
         log.info('Uploading to neo4j with context %s', neo_context)
         neo_graph = py2neo.Graph(neo)
         assert neo_graph.data('match (n) return count(n) as count')[0]['count'] is not None
-        to_neo4j(g, neo_graph, neo_context)
-
-    click.secho('Statistics', bold=True)
-    click.secho('Number of Nodes: ', nl=False, color='green')
-    click.echo(g.number_of_nodes())
-    click.secho('Number of Edges: ', nl=False, color='green')
-    click.echo(g.number_of_edges())
-    click.secho('Number of Errors: ', nl=False, color='green')
-    click.echo(len(g.warnings))
-
-    sys.exit(0 if 0 == len(g.warnings) else 1)
+        to_neo4j(graph, neo_graph, neo_context)
 
 
 @main.command()
+@click.pass_obj
 @click.argument('agents', nargs=-1)
 @click.option('--local', is_flag=True, help='Upload to local database.')
-@connection_option
-@click.option('--host', help='URL of BEL Commons. Defaults to {}'.format(_get_host()))
-def machine(agents, local, connection, host):
+@host_option
+def machine(manager, agents, local, host):
     """Get content from the INDRA machine and upload to BEL Commons."""
     from indra.sources import indra_db_rest
-    from pybel import from_indra_statements, to_web
+    from pybel import from_indra_statements
 
     statements = indra_db_rest.get_statements(agents=agents)
     click.echo('got {} statements from INDRA'.format(len(statements)))
@@ -194,7 +217,6 @@ def machine(agents, local, connection, host):
         sys.exit(-1)
 
     if local:
-        manager = Manager(connection=connection)
         to_database(graph, manager=manager)
     else:
         resp = to_web(graph, host=host)
@@ -202,20 +224,8 @@ def machine(agents, local, connection, host):
 
 
 @main.group()
-@connection_option
-@click.pass_context
-def manage(ctx, connection):
+def manage():
     """Manage the database."""
-    ctx.obj = Manager(connection=connection)
-    Base.metadata.bind = ctx.obj.engine
-    Base.query = ctx.obj.session.query_property()
-
-
-@manage.command()
-@click.pass_obj
-def setup(manager):
-    """Create the database, if it doesn't exist."""
-    manager.create_all()
 
 
 @manage.command()
@@ -367,7 +377,12 @@ def summarize(manager):
     click.echo('Annotation entries: {}'.format(manager.count_annotation_entries()))
 
 
-def _warning_helper(warnings, sep='\t'):
+def echo_warnings_via_pager(warnings, sep='\t'):
+    """Output the warnings from a BEL graph with Click and the system's pager.
+
+    :param warnings: A list of 4-tuples reprenting the warnings
+    :param str sep: The separator. Defaults to tab.
+    """
     # Exit if no warnings
     if not warnings:
         click.echo('Congratulations! No warnings.')
