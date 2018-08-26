@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains functions that provide summaries of the edges in a graph"""
+"""This module contains functions that provide summaries of the edges in a graph."""
 
-from collections import defaultdict
-
+from collections import Counter, defaultdict
+import itertools as itt
 from ..filters.edge_predicates import edge_has_annotation
-from ...constants import ANNOTATIONS
+from ...constants import ANNOTATIONS, RELATION, FUNCTION, PATHOLOGY
 
 __all__ = [
     'iter_annotation_value_pairs',
     'iter_annotation_values',
     'get_annotation_values_by_annotation',
     'get_annotation_values',
+    'count_relations',
 ]
 
 
 def iter_annotation_value_pairs(graph):
-    """Iterates over the key/value pairs, with duplicates, for each annotation used in a BEL graph
+    """Iterate over the key/value pairs, with duplicates, for each annotation used in a BEL graph.
 
     :param pybel.BELGraph graph: A BEL graph
     :rtype: iter[tuple[str,str]]
@@ -31,7 +32,7 @@ def iter_annotation_value_pairs(graph):
 
 
 def iter_annotation_values(graph, annotation):
-    """Iterates over all of the values for an annotation used in the graph
+    """Iterate over all of the values for an annotation used in the graph.
 
     :param pybel.BELGraph graph: A BEL graph
     :param str annotation: The annotation to grab
@@ -46,7 +47,7 @@ def iter_annotation_values(graph, annotation):
 
 
 def _group_dict_set(iterator):
-    """Makes a dict that accumulates the values for each key in an iterator of doubles
+    """Make a dict that accumulates the values for each key in an iterator of doubles.
 
     :param iter[tuple[A,B]] iterator: An iterator
     :rtype: dict[A,set[B]]
@@ -58,7 +59,7 @@ def _group_dict_set(iterator):
 
 
 def get_annotation_values_by_annotation(graph):
-    """Gets the set of values for each annotation used in a BEL graph
+    """Get the set of values for each annotation used in a BEL graph.
 
     :param pybel.BELGraph graph: A BEL graph
     :return: A dictionary of {annotation key: set of annotation values}
@@ -68,7 +69,7 @@ def get_annotation_values_by_annotation(graph):
 
 
 def get_annotation_values(graph, annotation):
-    """Get all values for the given annotation
+    """Get all values for the given annotation.
 
     :param pybel.BELGraph graph: A BEL graph
     :param str annotation: The annotation to summarize
@@ -76,3 +77,16 @@ def get_annotation_values(graph, annotation):
     :rtype: set[str]
     """
     return set(iter_annotation_values(graph, annotation))
+
+
+def count_relations(graph):
+    """Return a histogram over all relationships in a graph.
+
+    :param pybel.BELGraph graph: A BEL graph
+    :return: A Counter from {relation type: frequency}
+    :rtype: collections.Counter
+    """
+    return Counter(
+        data[RELATION]
+        for _, _, data in graph.edges(data=True)
+    )
