@@ -79,7 +79,7 @@ def make_dummy_annotations(manager, graph):
         url = n()
         graph.annotation_url[keyword] = url
 
-        namespace = Namespace(keyword=keyword, url=url)
+        namespace = Namespace(keyword=keyword, url=url, is_annotation=True)
         manager.session.add(namespace)
 
         for name in names:

@@ -392,6 +392,7 @@ class NamespaceManager(BaseManager):
 
         result = Namespace(
             url=url,
+            is_annotation=True,
             **_get_annotation_insert_values(bel_resource)
         )
         result.entries = [
