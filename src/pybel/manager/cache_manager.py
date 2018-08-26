@@ -673,7 +673,7 @@ class NetworkManager(NamespaceManager):
 
 
 class InsertManager(NamespaceManager, LookupManager):
-    """Manages inserting data into the edge store"""
+    """Manages inserting data into the edge store."""
 
     def __init__(self, *args, **kwargs):
         super(InsertManager, self).__init__(*args, **kwargs)
@@ -688,7 +688,7 @@ class InsertManager(NamespaceManager, LookupManager):
         self.object_cache_author = {}
 
     def insert_graph(self, graph, store_parts=True, use_tqdm=False):
-        """Inserts a graph in the database and returns the corresponding Network model.
+        """Insert a graph in the database and returns the corresponding Network model.
 
         :param BELGraph graph: A BEL graph
         :param bool store_parts: Should the graph be stored in the edge store?
@@ -707,17 +707,25 @@ class InsertManager(NamespaceManager, LookupManager):
 
         self.ensure_default_namespace()
 
-        for url in graph.namespace_url.values():
-            if url in graph.uncached_namespaces:
+        namespace_urls = graph.namespace_url.values()
+        if use_tqdm:
+            namespace_urls = tqdm(namespace_urls, desc='namespaces')
+
+        for namespace_url in namespace_urls:
+            if namespace_url in graph.uncached_namespaces:
                 continue
 
-            self.ensure_namespace(url)
+            self.ensure_namespace(namespace_url)
 
         for keyword, pattern in graph.namespace_pattern.items():
             self.ensure_regex_namespace(keyword, pattern)
 
-        for url in graph.annotation_url.values():
-            self.get_or_create_annotation(url)
+        annotation_urls = graph.annotation_url.values()
+        if use_tqdm:
+            annotation_urls = tqdm(annotation_urls, desc='annotations')
+
+        for annotation_url in annotation_urls:
+            self.get_or_create_annotation(annotation_url)
 
         network = Network(**{
             key: value
@@ -738,7 +746,7 @@ class InsertManager(NamespaceManager, LookupManager):
         return network
 
     def _store_graph_parts(self, network, graph, use_tqdm=False):
-        """Stores the given graph into the edge store.
+        """Store the given graph into the edge store.
 
         :param Network network: A SQLAlchemy PyBEL Network object
         :param BELGraph graph: A BEL Graph
