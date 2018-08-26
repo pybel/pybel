@@ -3,6 +3,7 @@
 """This module contains the SQLAlchemy database models that support the definition cache and graph cache."""
 
 import datetime
+import hashlib
 
 from sqlalchemy import (
     Boolean, Column, Date, DateTime, ForeignKey, Integer, LargeBinary, String, Table, Text, UniqueConstraint,
@@ -210,15 +211,17 @@ class NamespaceEntry(Base):
     )
 
     def to_json(self, include_id=False):
-        """Describes the namespaceEntry as dictionary of Namespace-Keyword and Name.
+        """Describe the namespaceEntry as dictionary of Namespace-Keyword and Name.
 
         :param bool include_id: If true, includes the model identifier
         :rtype: dict[str,str]
         """
         result = {
             NAMESPACE: self.namespace.keyword,
-            NAME: self.name
         }
+
+        if self.name:
+            result[NAME] = self.name
 
         if self.identifier:
             result[IDENTIFIER] = self.identifier
@@ -237,7 +240,12 @@ class NamespaceEntry(Base):
         return cls.name.contains(name_query)
 
     def __str__(self):
-        return '[{}]{}:[{}]{}'.format(self.namespace.id, self.namespace, self.identifier, self.name)
+        return '[{namespace_id}]{namespace_name}:[{identifier}]{name}'.format(
+            namespace_id=self.namespace.id,
+            namespace_name=self.namespace.keyword,
+            identifier=self.identifier,
+            name=self.name,
+        )
 
 
 network_edge = Table(
@@ -317,26 +325,29 @@ class Network(Base):
 
         return result
 
-    @staticmethod
-    def name_contains(name_query):
-        """
+    @classmethod
+    def name_contains(cls, name_query):
+        """Build a filter for networks whose names contain the query.
+
         :param str name_query:
         """
-        return Network.name.contains(name_query)
+        return cls.name.contains(name_query)
 
-    @staticmethod
-    def description_contains(description_query):
-        """
+    @classmethod
+    def description_contains(cls, description_query):
+        """Build a filter for networks whose descriptions contain the query.
+
         :param str description_query:
         """
-        return Network.description.contains(description_query)
+        return cls.description.contains(description_query)
 
-    @staticmethod
-    def id_in(network_ids):
-        """
+    @classmethod
+    def id_in(cls, network_ids):
+        """Build a filter for networks whose identifiers appear in the given sequence.
+
         :param iter[int] network_ids:
         """
-        return Network.id.in_(network_ids)
+        return cls.id.in_(network_ids)
 
     def __repr__(self):
         return '{} v{}'.format(self.name, self.version)
@@ -366,6 +377,108 @@ node_modification = Table(
 )
 
 
+class Modification(Base):
+    """The modifications that are present in the network are stored in this table."""
+
+    __tablename__ = MODIFICATION_TABLE_NAME
+
+    id = Column(Integer, primary_key=True)
+
+    type = Column(String(255), nullable=False, doc='Type of the stored modification e.g. Fusion, gmod, pmod, etc')
+
+    variantString = Column(String(255), nullable=True, doc='HGVS string if sequence modification')
+
+    p3_partner_id = Column(Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), nullable=True)
+    p3_partner = relationship(NamespaceEntry, foreign_keys=[p3_partner_id])
+
+    p3_reference = Column(String(10), nullable=True)
+    p3_start = Column(String(255), nullable=True)
+    p3_stop = Column(String(255), nullable=True)
+
+    p5_partner_id = Column(Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), nullable=True)
+    p5_partner = relationship(NamespaceEntry, foreign_keys=[p5_partner_id])
+
+    p5_reference = Column(String(10), nullable=True)
+    p5_start = Column(String(255), nullable=True)
+    p5_stop = Column(String(255), nullable=True)
+
+    identifier_id = Column(Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), nullable=True)
+    identifier = relationship(NamespaceEntry, foreign_keys=[identifier_id])
+
+    residue = Column(String(3), nullable=True, doc='Three letter amino acid code if PMOD')
+    position = Column(Integer, nullable=True, doc='Position of PMOD or GMOD')
+
+    sha512 = Column(String(255), index=True)
+
+    def _fusion_to_json(self):
+        """Convert this modification to a FUSION data dictionary.
+
+        Don't use this without checking ``self.type == FUSION`` first.
+
+        :rtype: dict
+        """
+        if self.p5_reference:
+            range_5p = fusion_range(
+                reference=str(self.p5_reference),
+                start=int_or_str(self.p5_start),
+                stop=int_or_str(self.p5_stop),
+            )
+        else:
+            range_5p = missing_fusion_range()
+
+        if self.p3_reference:
+            range_3p = fusion_range(
+                reference=str(self.p3_reference),
+                start=int_or_str(self.p3_start),
+                stop=int_or_str(self.p3_stop),
+            )
+        else:
+            range_3p = missing_fusion_range()
+
+        return {
+            PARTNER_5P: self.p5_partner.to_json(),  # just the identifier pair
+            PARTNER_3P: self.p3_partner.to_json(),  # just the identifier pair
+            RANGE_5P: range_5p,
+            RANGE_3P: range_3p,
+        }
+
+    def to_json(self):
+        """Recreate a is_variant dictionary for :class:`BELGraph`.
+
+        :return: Dictionary that describes a variant or a fusion.
+        :rtype: Variant or FusionBase
+        """
+        if self.type == FUSION:
+            return self._fusion_to_json()
+
+        if self.type == FRAGMENT:
+            return fragment(
+                start=int_or_str(self.p3_start),
+                stop=int_or_str(self.p3_stop),
+            )
+
+        if self.type == HGVS:
+            return hgvs(str(self.variantString))
+
+        if self.type == GMOD:
+            return gmod(
+                namespace=self.identifier.namespace.keyword,
+                name=self.identifier.name,
+                identifier=self.identifier.identifier,
+            )
+
+        if self.type == PMOD:
+            return pmod(
+                namespace=self.identifier.namespace.keyword,
+                name=self.identifier.name,
+                identifier=self.identifier.identifier,
+                code=self.residue,
+                position=self.position
+            )
+
+        raise TypeError('unhandled type ({}) for modification {}'.format(self.type, self))
+
+
 class Node(Base):
     """Represents a BEL Term."""
 
@@ -380,14 +493,18 @@ class Node(Base):
     sha512 = Column(String(255), nullable=True, index=True)
 
     namespace_entry_id = Column(Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), nullable=True)
-    namespace_entry = relationship('NamespaceEntry', foreign_keys=[namespace_entry_id])
+    namespace_entry = relationship(NamespaceEntry, foreign_keys=[namespace_entry_id])
 
-    modifications = relationship("Modification", secondary=node_modification, lazy='dynamic',
+    modifications = relationship(Modification, secondary=node_modification, lazy='dynamic',
                                  backref=backref('nodes', lazy='dynamic'))
 
-    @staticmethod
-    def bel_contains(bel_query):
-        return Node.bel.contains(bel_query)
+    @classmethod
+    def bel_contains(cls, bel_query):
+        """Build a filter for nodes whose BEL contain the query.
+
+        :type bel_query: str
+        """
+        return cls.bel.contains(bel_query)
 
     def __str__(self):
         return self.bel
@@ -480,108 +597,6 @@ class Node(Base):
         return self.to_json().as_tuple()
 
 
-class Modification(Base):
-    """The modifications that are present in the network are stored in this table."""
-
-    __tablename__ = MODIFICATION_TABLE_NAME
-
-    id = Column(Integer, primary_key=True)
-
-    type = Column(String(255), nullable=False, doc='Type of the stored modification e.g. Fusion, gmod, pmod, etc')
-
-    variantString = Column(String(255), nullable=True, doc='HGVS string if sequence modification')
-
-    p3_partner_id = Column(Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), nullable=True)
-    p3_partner = relationship("NamespaceEntry", foreign_keys=[p3_partner_id])
-
-    p3_reference = Column(String(10), nullable=True)
-    p3_start = Column(String(255), nullable=True)
-    p3_stop = Column(String(255), nullable=True)
-
-    p5_partner_id = Column(Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), nullable=True)
-    p5_partner = relationship("NamespaceEntry", foreign_keys=[p5_partner_id])
-
-    p5_reference = Column(String(10), nullable=True)
-    p5_start = Column(String(255), nullable=True)
-    p5_stop = Column(String(255), nullable=True)
-
-    identifier_id = Column(Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), nullable=True)
-    identifier = relationship("NamespaceEntry", foreign_keys=[identifier_id])
-
-    residue = Column(String(3), nullable=True, doc='Three letter amino acid code if PMOD')
-    position = Column(Integer, nullable=True, doc='Position of PMOD or GMOD')
-
-    sha512 = Column(String(255), index=True)
-
-    def _fusion_to_json(self):
-        """Converts this modification to a FUSION data dictionary.
-
-        Don't use this without checking ``self.type == FUSION`` first.
-
-        :rtype: dict
-        """
-        if self.p5_reference:
-            range_5p = fusion_range(
-                reference=str(self.p5_reference),
-                start=int_or_str(self.p5_start),
-                stop=int_or_str(self.p5_stop),
-            )
-        else:
-            range_5p = missing_fusion_range()
-
-        if self.p3_reference:
-            range_3p = fusion_range(
-                reference=str(self.p3_reference),
-                start=int_or_str(self.p3_start),
-                stop=int_or_str(self.p3_stop),
-            )
-        else:
-            range_3p = missing_fusion_range()
-
-        return {
-            PARTNER_5P: self.p5_partner.to_json(),  # just the identifier pair
-            PARTNER_3P: self.p3_partner.to_json(),  # just the identifier pair
-            RANGE_5P: range_5p,
-            RANGE_3P: range_3p,
-        }
-
-    def to_json(self):
-        """Recreate a is_variant dictionary for :class:`BELGraph`.
-
-        :return: Dictionary that describes a variant or a fusion.
-        :rtype: Variant or FusionBase
-        """
-        if self.type == FUSION:
-            return self._fusion_to_json()
-
-        if self.type == FRAGMENT:
-            return fragment(
-                start=int_or_str(self.p3_start),
-                stop=int_or_str(self.p3_stop),
-            )
-
-        if self.type == HGVS:
-            return hgvs(str(self.variantString))
-
-        if self.type == GMOD:
-            return gmod(
-                namespace=self.identifier.namespace.keyword,
-                name=self.identifier.name,
-                identifier=self.identifier.identifier,
-            )
-
-        if self.type == PMOD:
-            return pmod(
-                namespace=self.identifier.namespace.keyword,
-                name=self.identifier.name,
-                identifier=self.identifier.identifier,
-                code=self.residue,
-                position=self.position
-            )
-
-        raise TypeError('unhandled type ({}) for modification {}'.format(self.type, self))
-
-
 author_citation = Table(
     AUTHOR_CITATION_TABLE_NAME, Base.metadata,
     Column('author_id', Integer, ForeignKey('{}.id'.format(AUTHOR_TABLE_NAME)), primary_key=True),
@@ -596,14 +611,33 @@ class Author(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False, unique=True, index=True)
+    sha512 = Column(String(255), nullable=False, index=True, unique=True, )
+
+    @classmethod
+    def from_name(cls, name):
+        return Author(name=name, sha512=cls.hash_name(name))
 
     @staticmethod
-    def name_contains(name_query):
+    def hash_name(name):
+        """Hash a name.
+
+        :param str name: Name of an author
+        :rtype: str
+        """
+        return hashlib.sha512(name.encode('utf-8'))
+
+    @classmethod
+    def name_contains(cls, name_query):
         """Build a filter for authors whose names contain the given query.
 
-        :param name_query:
+        :type name_query: str
         """
-        return Author.name.contains(name_query)
+        return cls.name.contains(name_query)
+
+    @classmethod
+    def has_name(cls, name):
+        """Build a filter for if an author has a name."""
+        return cls.sha512 == cls.hash_name(name)
 
     def __str__(self):
         return self.name
@@ -628,12 +662,12 @@ class Citation(Base):
     date = Column(Date, nullable=True, doc='Publication date')
 
     first_id = Column(Integer, ForeignKey('{}.id'.format(AUTHOR_TABLE_NAME)), nullable=True, doc='First author')
-    first = relationship("Author", foreign_keys=[first_id])
+    first = relationship(Author, foreign_keys=[first_id])
 
     last_id = Column(Integer, ForeignKey('{}.id'.format(AUTHOR_TABLE_NAME)), nullable=True, doc='Last author')
-    last = relationship("Author", foreign_keys=[last_id])
+    last = relationship(Author, foreign_keys=[last_id])
 
-    authors = relationship("Author", secondary=author_citation, backref='citations')
+    authors = relationship(Author, secondary=author_citation, backref='citations')
 
     __table_args__ = (
         UniqueConstraint(CITATION_TYPE, CITATION_REFERENCE),
@@ -711,12 +745,12 @@ class Evidence(Base):
     text = Column(Text, nullable=False, doc='Supporting text from a given publication')
 
     citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)), nullable=False)
-    citation = relationship('Citation', backref=backref('evidences'))
+    citation = relationship(Citation, backref=backref('evidences'))
 
     sha512 = Column(String(255), index=True)
 
     def __str__(self):
-        return '{}:{}'.format(self.citation, self.text)
+        return '{}:{}'.format(self.citation, self.sha512[:8])
 
     def to_json(self, include_id=False):
         """Create a dictionary that is used to recreate the edge data dictionary for a :class:`BELGraph`.
@@ -763,7 +797,7 @@ class Property(Base):
     sha512 = Column(String(255), index=True)
 
     effect_id = Column(Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), nullable=True)
-    effect = relationship('NamespaceEntry')
+    effect = relationship(NamespaceEntry)
 
     @property
     def side(self):
