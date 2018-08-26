@@ -76,6 +76,9 @@ def build_engine_session(connection, echo=False, autoflush=None, autocommit=None
 class BaseManager(object):
     """A wrapper around a SQLAlchemy engine and session."""
 
+    #: The declarative base for this manager
+    base = Base
+
     def __init__(self, engine, session):
         """Instantiate a manager from an engine and session."""
         self.engine = engine
@@ -86,14 +89,19 @@ class BaseManager(object):
 
         :param bool checkfirst: Check if the database exists before trying to re-make it
         """
-        Base.metadata.create_all(bind=self.engine, checkfirst=checkfirst)
+        self.base.metadata.create_all(bind=self.engine, checkfirst=checkfirst)
 
     def drop_all(self, checkfirst=True):
         """Drop all data, tables, and databases for the PyBEL cache.
 
         :param bool checkfirst: Check if the database exists before trying to drop it
         """
-        Base.metadata.drop_all(bind=self.engine, checkfirst=checkfirst)
+        self.base.metadata.drop_all(bind=self.engine, checkfirst=checkfirst)
+
+    def bind(self):
+        """Bind the metadata to the engine and session."""
+        self.base.metadata.bind = self.engine
+        self.base.query = self.session.query_property()
 
     def __repr__(self):
         return '<{} connection={}>'.format(self.__class__.__name__, self.engine.url)
