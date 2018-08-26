@@ -624,7 +624,7 @@ class Author(Base):
         :param str name: Name of an author
         :rtype: str
         """
-        return hashlib.sha512(name.encode('utf-8'))
+        return hashlib.sha512(name.encode('utf-8')).hexdigest()
 
     @classmethod
     def name_contains(cls, name_query):
