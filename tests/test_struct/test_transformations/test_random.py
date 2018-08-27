@@ -9,6 +9,8 @@ from collections import Counter
 
 import networkx as nx
 
+from pybel.examples import sialic_acid_graph, statin_graph
+from pybel.struct.mutation.induction.paths import get_random_path
 from pybel.struct.mutation.induction.random_subgraph import (
     _helper, get_graph_with_random_edges, get_random_node, get_random_subgraph,
 )
@@ -121,3 +123,13 @@ class TestRandom(unittest.TestCase):
         )
 
         self.assertNotIn(3, result)
+
+
+class TestRandomPath(unittest.TestCase):
+    """Test getting random paths."""
+
+    def test_get_random_path(self):
+        """Test getting random paths doesn't crash."""
+        for graph in (sialic_acid_graph, statin_graph):
+            for _ in range(100):
+                get_random_path(graph)
