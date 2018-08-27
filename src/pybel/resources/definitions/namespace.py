@@ -147,8 +147,8 @@ def write_namespace_body(values, delimiter='|', functions=None, file=None, value
     :param values: An iterable of values (strings) or dictionary of {label:encodings}
     :type values: iter[str] or dict[str,str]
     :param str delimiter: The delimiter between names and labels in this config file
-    :param str functions: The encoding for the elements in this namespace. See :data:`pybel.constants.belns_encodings`
-    :param file file: A writable file or file-like
+    :param Optional[str] functions: The encoding for the elements in this namespace. See :data:`pybel.constants.belns_encodings`
+    :param Optional[file] file: A writable file or file-like
     :param str value_prefix: a prefix for each name
     :param sort_key: A function to sort the values with :func:`sorted`. Give ``False`` to not sort
     """
@@ -176,7 +176,7 @@ def write_namespace_body(values, delimiter='|', functions=None, file=None, value
         print('{}{}{}{}'.format(value_prefix, label, delimiter, encodings), file=file)
 
 
-def write_namespace(namespace_name, namespace_keyword, namespace_domain, author_name, citation_name, values,
+def write_namespace(values, namespace_name, namespace_keyword, namespace_domain=None, author_name=None, citation_name=None,
                     namespace_description=None, namespace_species=None, namespace_version=None,
                     namespace_query_url=None, namespace_created=None, author_contact=None, author_copyright=None,
                     citation_description=None, citation_url=None, citation_version=None, citation_date=None,
@@ -184,32 +184,31 @@ def write_namespace(namespace_name, namespace_keyword, namespace_domain, author_
                     sort_key=None):
     """Writes a BEL namespace (BELNS) to a file
 
-    :param str namespace_name: The namespace name
-    :param str namespace_keyword: Preferred BEL Keyword, maximum length of 8
-    :param str namespace_domain: One of: :data:`pybel.constants.NAMESPACE_DOMAIN_BIOPROCESS`,
-                            :data:`pybel.constants.NAMESPACE_DOMAIN_CHEMICAL`,
-                            :data:`pybel.constants.NAMESPACE_DOMAIN_GENE`, or
-                            :data:`pybel.constants.NAMESPACE_DOMAIN_OTHER`
-    :param str author_name: The namespace's authors
-    :param str citation_name: The name of the citation
     :param values: An iterable of values (strings) or dictionary of values to their encodings
     :type values: iter[str] or dict[str,str]
-    :param str namespace_query_url: HTTP URL to query for details on namespace values (must be valid URL)
-    :param str namespace_description: Namespace description
-    :param str namespace_species: Comma-separated list of species taxonomy id's
-    :param str namespace_version: Namespace version
-    :param str namespace_created: Namespace public timestamp, ISO 8601 datetime
-    :param str author_contact: Namespace author's contact info/email address
-    :param str author_copyright: Namespace's copyright/license information
-    :param str citation_description: Citation description
-    :param str citation_url: URL to more citation information
-    :param str citation_version: Citation version
-    :param str citation_date: Citation publish timestamp, ISO 8601 Date
+    :param str namespace_name: The namespace nam
+    :param str namespace_keyword: Preferred BEL Keyword, maximum length of 8 (corresponds to MIRIAM namespace)
+    :param Optional[str] namespace_domain: One of: :data:`pybel.constants.NAMESPACE_DOMAIN_BIOPROCESS`,
+     :data:`pybel.constants.NAMESPACE_DOMAIN_CHEMICAL`, :data:`pybel.constants.NAMESPACE_DOMAIN_GENE`, or
+     :data:`pybel.constants.NAMESPACE_DOMAIN_OTHER`
+    :param Optional[str] author_name: The namespace's authors
+    :param Optional[str] citation_name: The name of the citation
+    :param Optional[str] namespace_query_url: HTTP URL to query for details on namespace values (must be valid URL)
+    :param Optional[str] namespace_description: Namespace description
+    :param Optional[str] namespace_species: Comma-separated list of species taxonomy id's
+    :param Optional[str] namespace_version: Namespace version
+    :param Optional[str] namespace_created: Namespace public timestamp, ISO 8601 datetime
+    :param Optional[str] author_contact: Namespace author's contact info/email address
+    :param Optional[str] author_copyright: Namespace's copyright/license information
+    :param Optional[str] citation_description: Citation description
+    :param Optional[str] citation_url: URL to more citation information
+    :param Optional[str] citation_version: Citation version
+    :param Optional[str] citation_date: Citation publish timestamp, ISO 8601 Date
     :param bool case_sensitive: Should this config file be interpreted as case-sensitive?
     :param str delimiter: The delimiter between names and labels in this config file
     :param bool cacheable: Should this config file be cached?
-    :param str functions: The encoding for the elements in this namespace. See :data:`pybel.constants.belns_encodings`
-    :param file file: A writable file or file-like
+    :param Optional[str] functions: The encoding for the elements in this namespace. See :data:`pybel.constants.belns_encodings`
+    :param Optional[file] file: A writable file or file-like
     :param str value_prefix: a prefix for each name
     :param sort_key: A function to sort the values with :func:`sorted`. Give ``False`` to not sort
     """
