@@ -96,6 +96,7 @@ class BaseManager(object):
 
         :param bool checkfirst: Check if the database exists before trying to drop it
         """
+        self.session.close()
         self.base.metadata.drop_all(bind=self.engine, checkfirst=checkfirst)
 
     def bind(self):
