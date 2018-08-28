@@ -53,22 +53,22 @@ log = logging.getLogger(__name__)
 
 DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
 
-_namespace_mapping = {
+_optional_namespace_entries_mapping = {
     'species': ('Namespace', 'SpeciesString'),
-    'query_url': ('Namespace', 'QueryValueURL')
+    'query_url': ('Namespace', 'QueryValueURL'),
+    'domain': ('Namespace', 'DomainString'),
 }
 
 
 def _get_namespace_insert_values(bel_resource):
     namespace_insert_values = {
         'name': bel_resource['Namespace']['NameString'],
-        'domain': bel_resource['Namespace']['DomainString']
     }
 
     namespace_insert_values.update(extract_shared_required(bel_resource, 'Namespace'))
     namespace_insert_values.update(extract_shared_optional(bel_resource, 'Namespace'))
 
-    update_insert_values(bel_resource, _namespace_mapping, namespace_insert_values)
+    update_insert_values(bel_resource, _optional_namespace_entries_mapping, namespace_insert_values)
 
     return namespace_insert_values
 
