@@ -7,7 +7,7 @@ from collections import Counter
 
 from pybel import BELGraph
 from pybel.constants import ABUNDANCE, BIOPROCESS, COMPLEX, PROTEIN
-from pybel.dsl.nodes import fusion_range, pathology, protein, protein_fusion
+from pybel.dsl import fusion_range, pathology, protein, protein_fusion
 from pybel.examples import egf_graph, sialic_acid_graph
 from pybel.struct.summary.node_summary import (
     count_functions, count_names_by_namespace, count_namespaces, count_pathologies, count_variants, get_functions,

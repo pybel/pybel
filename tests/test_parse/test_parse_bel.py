@@ -14,10 +14,10 @@ from pybel.constants import (
     RELATION, RNA, SUBJECT, TARGET, TO_LOC, TRANSLOCATION, VARIANTS,
 )
 from pybel.dsl import (
-    cell_surface_expression, complex_abundance, composite_abundance, entity, fragment, fusion_range, gene_fusion, mirna,
-    named_complex_abundance, pathology, protein, protein_fusion, reaction, rna, rna_fusion, secretion, translocation,
+    abundance, bioprocess, cell_surface_expression, complex_abundance, composite_abundance, entity,
+    fragment, fusion_range, gene, gene_fusion, gmod, hgvs, mirna, named_complex_abundance, pathology, pmod, protein,
+    protein_fusion, reaction, rna, rna_fusion, secretion, translocation,
 )
-from pybel.dsl.nodes import abundance, bioprocess, gene, gmod, hgvs, pmod
 from pybel.parser import BELParser
 from pybel.parser.exc import MalformedTranslocationWarning
 from pybel.parser.parse_bel import modifier_po_to_dict
@@ -76,7 +76,6 @@ class TestAbundance(TestTokenParserBase):
             LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
         }
         self.assertEqual(expected_modifier, modifier)
-
 
     def test_abundance_with_location(self):
         """Test short/long abundance name and short/long location name."""
@@ -1346,7 +1345,8 @@ class TestComposite(TestTokenParserBase):
         self.assertEqual(il6, self.graph.node[expected_node][MEMBERS][1])
         self.assertEqual(expected_node_data, self.graph.node[expected_node])
 
-        self.assertEqual('composite(complex(GOCC:"interleukin-23 complex"), p(HGNC:IL6))', self.graph.node_to_bel(expected_node))
+        self.assertEqual('composite(complex(GOCC:"interleukin-23 complex"), p(HGNC:IL6))',
+                         self.graph.node_to_bel(expected_node))
 
         self.assertEqual(3, self.parser.graph.number_of_nodes())
         self.assert_has_node(expected_node)

@@ -2,12 +2,13 @@
 
 """Summary functions for nodes in BEL graphs."""
 
-import itertools as itt
 from collections import Counter, defaultdict
+
+import itertools as itt
 
 from ..filters.node_predicates import has_variant
 from ...constants import FUNCTION, FUSION, IDENTIFIER, KIND, NAME, NAMESPACE, PARTNER_3P, PARTNER_5P, VARIANTS
-from ...dsl.nodes import Pathology
+from ...dsl import pathology
 
 __all__ = [
     'get_functions',
@@ -192,7 +193,7 @@ def _pathology_iterator(graph):
     :rtype: iter
     """
     for node in itt.chain.from_iterable(graph.edges()):
-        if isinstance(graph.nodes[node], Pathology):
+        if isinstance(graph.nodes[node], pathology):
             yield node
 
 

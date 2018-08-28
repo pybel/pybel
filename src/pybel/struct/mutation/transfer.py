@@ -3,7 +3,7 @@
 """This module facilitates the transfer of knowledge through ontological relationships."""
 
 from ...constants import ANNOTATIONS, CAUSAL_RELATIONS, CITATION, EVIDENCE, IS_A, OBJECT, RELATION, SUBJECT
-from ...dsl.nodes import BaseEntity
+from ...dsl import BaseEntity
 
 __all__ = [
     'infer_child_relations'

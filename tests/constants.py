@@ -17,8 +17,7 @@ from pybel.constants import (
     OPENBEL_NAMESPACE_RESOURCES, PATHOLOGY, PMOD, POSITIVE_CORRELATION, PROTEIN, RATE_LIMITING_STEP_OF, REACTION,
     REGULATES, RELATION, RNA, SUBJECT, SUBPROCESS_OF, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION,
 )
-from pybel.dsl import complex_abundance, pathology, protein, translocation
-from pybel.dsl.nodes import BaseEntity
+from pybel.dsl import BaseEntity, complex_abundance, pathology, protein, translocation
 from pybel.parser.exc import (
     BelSyntaxError, IllegalAnnotationValueWarning, InvalidCitationLengthException, InvalidCitationType,
     InvalidFunctionSemantic, InvalidPubMedIdentifierWarning, MalformedTranslocationWarning, MissingAnnotationKeyWarning,

@@ -2,7 +2,7 @@
 
 """An example describing statins."""
 
-from ..dsl.nodes import abundance, protein
+from ..dsl import abundance, protein
 from ..struct.graph import BELGraph
 
 __all__ = [
