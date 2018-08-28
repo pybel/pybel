@@ -369,10 +369,10 @@ class ProteinModification(Variant):
         """Build a protein modification variant data dictionary.
 
         :param str name: The name of the modification
-        :param str code: The three letter amino acid code for the affected residue. Capital first letter.
-        :param int position: The position of the affected residue
-        :param str namespace: The namespace to which the name of this modification belongs
-        :param str identifier: The identifier of the name of the modification
+        :param Optional[str] code: The three letter amino acid code for the affected residue. Capital first letter.
+        :param Optional[int] position: The position of the affected residue
+        :param Optional[str] namespace: The namespace to which the name of this modification belongs
+        :param Optional[str] identifier: The identifier of the name of the modification
 
         Either the name or the identifier must be used. If the namespace is omitted, it is assumed that a name is
         specified from the BEL default namespace.
@@ -439,11 +439,11 @@ class GeneModification(Variant):
 
         Example from BEL default namespace:
 
-        >>> gmod(name='Me')
+        >>> GeneModification(name='Me')
 
         Example from custom namespace:
 
-        >>> gmod(name='DNA methylation', namespace='GO', identifier='GO:0006306',)
+        >>> GeneModification(name='DNA methylation', namespace='GO', identifier='GO:0006306',)
         """
         super(GeneModification, self).__init__(GMOD)
 
@@ -468,9 +468,6 @@ class GeneModification(Variant):
         :rtype: str
         """
         return 'gmod({})'.format(str(self[IDENTIFIER]))
-
-
-gmod = GeneModification
 
 
 class Hgvs(Variant):
@@ -605,7 +602,7 @@ class _Transcribable(CentralDogma):
     def get_gene(self):
         """Get the corresponding gene or raise an exception if it's not the reference node.
 
-        :rtype: pybel.dsl.gene
+        :rtype: pybel.dsl.Gene
         :raises: InferCentralDogmaException
         """
         if self.variants:
@@ -625,8 +622,8 @@ class Rna(_Transcribable):
         """Build an RNA node data dictionary.
 
         :param str namespace: The name of the database used to identify this entity
-        :param str name: The database's preferred name or label for this entity
-        :param str identifier: The database's identifier for this entity
+        :param Optional[str] name: The database's preferred name or label for this entity
+        :param Optional[str] identifier: The database's identifier for this entity
         :param variants: An optional variant or list of variants
         :type variants: None or Variant or list[Variant]
 
@@ -648,8 +645,8 @@ class MicroRna(_Transcribable):
         """Build an miRNA node data dictionary.
 
         :param str namespace: The name of the database used to identify this entity
-        :param str name: The database's preferred name or label for this entity
-        :param str identifier: The database's identifier for this entity
+        :param Optional[str] name: The database's preferred name or label for this entity
+        :param Optional[str] identifier: The database's identifier for this entity
         :param variants: A list of variants
         :type variants: None or Variant or list[Variant]
 
@@ -678,8 +675,8 @@ class Protein(CentralDogma):
         """Build a protein node data dictionary.
 
         :param str namespace: The name of the database used to identify this entity
-        :param str name: The database's preferred name or label for this entity
-        :param str identifier: The database's identifier for this entity
+        :param Optional[str] name: The database's preferred name or label for this entity
+        :param Optional[str] identifier: The database's identifier for this entity
         :param variants: An optional variant or list of variants
         :type variants: None or Variant or list[Variant]
 
@@ -700,7 +697,7 @@ class Protein(CentralDogma):
     def get_rna(self):
         """Get the corresponding RNA or raise an exception if it's not the reference node.
 
-        :rtype: pybel.dsl.rna
+        :rtype: pybel.dsl.Rna
         :raises: InferCentralDogmaException
         """
         if self.variants:
@@ -925,9 +922,9 @@ class FusionRangeBase(dict):
 
     @abc.abstractmethod
     def as_bel(self):
-        """Return this fusion range as a tuple.
+        """Return this fusion range as BEL.
 
-        :rtype: tuple
+        :rtype: str
         """
 
 
@@ -940,13 +937,17 @@ class MissingFusionRange(FusionRangeBase):
         })
 
     def as_tuple(self):
-        """Return this fusion range as a tuple.
+        """Return this missing fusion range as a tuple.
 
         :rtype: tuple
         """
         return self[FUSION_MISSING],
 
     def as_bel(self):
+        """Return this missing fusion range as BEL.
+
+        :rtype: tuple
+        """
         return '?'
 
     def __str__(self):
@@ -954,10 +955,11 @@ class MissingFusionRange(FusionRangeBase):
 
 
 class EnumeratedFusionRange(FusionRangeBase):
-    """Creates a fusion range data dictionary."""
+    """Represents an enumerated fusion range."""
 
     def __init__(self, reference, start, stop):
-        """
+        """Build an enumerated fusion range.
+
         :param str reference: The reference code
         :param int or str start: The start position, either specified by its integer position, or '?'
         :param int or str stop: The stop position, either specified by its integer position, '?', or '*
@@ -1092,8 +1094,8 @@ class ProteinFusion(FusionBase):
     def __init__(self, partner_5p, partner_3p, range_5p=None, range_3p=None):
         """Build a protein fusion node data dictionary.
 
-        :param pybel.dsl.protein partner_5p: A PyBEL node data dictionary for the 5-prime partner
-        :param pybel.dsl.protein partner_3p: A PyBEL node data dictionary for the 3-prime partner
+        :param pybel.dsl.Protein partner_5p: A PyBEL node data dictionary for the 5-prime partner
+        :param pybel.dsl.Protein partner_3p: A PyBEL node data dictionary for the 3-prime partner
         :param Optional[FusionRangeBase] range_5p: A fusion range for the 5-prime partner
         :param Optional[FusionRangeBase] range_3p: A fusion range for the 3-prime partner
         """
@@ -1112,8 +1114,8 @@ class RnaFusion(FusionBase):
     def __init__(self, partner_5p, partner_3p, range_5p=None, range_3p=None):
         """Build an RNA fusion node data dictionary.
 
-        :param pybel.dsl.rna partner_5p: A PyBEL node data dictionary for the 5-prime partner
-        :param pybel.dsl.rna partner_3p: A PyBEL node data dictionary for the 3-prime partner
+        :param pybel.dsl.Rna partner_5p: A PyBEL node data dictionary for the 5-prime partner
+        :param pybel.dsl.Rna partner_3p: A PyBEL node data dictionary for the 3-prime partner
         :param Optional[FusionRangeBase] range_5p: A fusion range for the 5-prime partner
         :param Optional[FusionRangeBase] range_3p: A fusion range for the 3-prime partner
 
@@ -1149,8 +1151,8 @@ class GeneFusion(FusionBase):
     def __init__(self, partner_5p, partner_3p, range_5p=None, range_3p=None):
         """Build a gene fusion node data dictionary.
 
-        :param pybel.dsl.gene partner_5p: A PyBEL node data dictionary for the 5-prime partner
-        :param pybel.dsl.gene partner_3p: A PyBEL node data dictionary for the 3-prime partner
+        :param pybel.dsl.Gene partner_5p: A PyBEL node data dictionary for the 5-prime partner
+        :param pybel.dsl.Gene partner_3p: A PyBEL node data dictionary for the 3-prime partner
         :param Optional[FusionRangeBase] range_5p: A fusion range for the 5-prime partner
         :param Optional[FusionRangeBase] range_3p: A fusion range for the 3-prime partner
 
