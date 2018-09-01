@@ -1396,8 +1396,8 @@ class InsertManager(NamespaceManager, LookupManager):
                     'modifier': modifier
                 }
 
-                if modifier == TRANSLOCATION and EFFECT in participant_data:
-                    for effect_type, effect_value in participant_data[EFFECT].items():
+                if modifier == TRANSLOCATION:
+                    for effect_type, effect_value in participant_data.get(EFFECT, {}).items():
                         tmp_dict = deepcopy(modifier_property_dict)
                         tmp_dict['relative_key'] = effect_type
 
