@@ -133,7 +133,7 @@ def warnings(graph):
 @click.pass_obj
 def insert(manager, graph):
     """Insert a graph to the database."""
-    to_database(graph, manager=manager)
+    to_database(graph, manager=manager, use_tqdm=True)
 
 
 @main.command()

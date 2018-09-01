@@ -16,7 +16,7 @@ __all__ = [
 log = logging.getLogger(__name__)
 
 
-def to_database(graph, manager=None, store_parts=True):
+def to_database(graph, manager=None, store_parts=True, use_tqdm=False):
     """Store a graph in a database.
 
     :param BELGraph graph: A BEL graph
@@ -29,7 +29,7 @@ def to_database(graph, manager=None, store_parts=True):
         manager = Manager()
 
     try:
-        return manager.insert_graph(graph, store_parts=store_parts)
+        return manager.insert_graph(graph, store_parts=store_parts, use_tqdm=use_tqdm)
     except (IntegrityError, OperationalError):
         manager.session.rollback()
         log.exception('Error storing graph')
