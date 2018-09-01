@@ -2,7 +2,12 @@
 
 """Output functions for BEL graphs to Neo4j."""
 
-from ..constants import FUNCTION, NAME, PYBEL_CONTEXT_TAG, RELATION
+from six import string_types
+
+from ..constants import (
+    ANNOTATIONS, CITATION, CITATION_REFERENCE, CITATION_TYPE, EVIDENCE, FUSION, MEMBERS, NAMESPACE, OBJECT,
+    RELATION, SUBJECT, VARIANTS,
+)
 from ..utils import flatten_dict
 
 __all__ = [
@@ -10,47 +15,73 @@ __all__ = [
 ]
 
 
-def to_neo4j(graph, neo_connection, context=None):
+def to_neo4j(graph, neo_connection):
     """Upload a BEL graph to a Neo4j graph database using :mod:`py2neo`.
 
     :param BELGraph graph: A BEL Graph
     :param neo_connection: A :mod:`py2neo` connection object. Refer to the
-                          `py2neo documentation <http://py2neo.org/v3/database.html#the-graph>`_
-                          for how to build this object.
-    :type neo_connection: :class:`py2neo.Graph`
-    :param str context: A disease context to allow for multiple disease models in one neo4j instance.
-                        Each edge will be assigned an attribute :code:`pybel_context` with this value
+     `py2neo documentation <http://py2neo.org/v3/database.html#the-graph>`_ for how to build this object.
+    :type neo_connection: str or py2neo.Graph
 
     Example Usage:
 
-    >>> import pybel, py2neo
-    >>> url = 'http://resource.belframework.org/belframework/1.0/knowledge/small_corpus.bel'
-    >>> g = pybel.from_url(url)
+    >>> import py2neo
+    >>> import pybel
+    >>> from pybel.examples import sialic_acid_graph
     >>> neo_graph = py2neo.Graph("http://localhost:7474/db/data/")  # use your own connection settings
-    >>> pybel.to_neo4j(g, neo_graph)
+    >>> pybel.to_neo4j(sialic_acid_graph, neo_graph)
     """
     import py2neo
+
+    if isinstance(neo_connection, string_types):
+        neo_connection = py2neo.Graph(neo_connection)
 
     tx = neo_connection.begin()
 
     node_map = {}
     for node, data in graph.nodes(data=True):
-        node_type = data[FUNCTION]
-        attrs = {k: v for k, v in data.items() if k not in {FUNCTION, NAME}}
-        attrs['name'] = data.as_bel()
+        if NAMESPACE not in data or VARIANTS in data or MEMBERS in data or FUSION in data:
+            attrs = {'name': data.as_bel()}
+        else:
+            attrs = {'namespace': data.namespace}
 
-        if NAME in data:
-            attrs['identifier'] = data[NAME]
+            if data.name and data.identifier:
+                attrs['name'] = data.name
+                attrs['identifier'] = data.identifier
+            elif data.identifier and not data.name:
+                attrs['name'] = data.identifier
+            elif data.name and not data.identifier:
+                attrs['name'] = data.name
 
-        node_map[node] = py2neo.Node(node_type, bel=graph.node_to_bel(data), **attrs)
+        node_map[node] = py2neo.Node(data.function, **attrs)
 
         tx.create(node_map[node])
 
     for u, v, data in graph.edges(data=True):
         rel_type = data[RELATION]
-        attrs = flatten_dict(data)
-        if context is not None:
-            attrs[PYBEL_CONTEXT_TAG] = str(context)
+
+        d = data.copy()
+        del d[RELATION]
+
+        attrs = {}
+
+        annotations = d.pop(ANNOTATIONS, None)
+        if annotations:
+            for annotation, values in annotations.items():
+                attrs[annotation] = list(values)
+
+        citation = d.pop(CITATION, None)
+        if citation:
+            attrs[CITATION] = '{}:{}'.format(citation[CITATION_TYPE], citation[CITATION_REFERENCE])
+
+        if EVIDENCE in d:
+            attrs[EVIDENCE] = d[EVIDENCE]
+
+        for side in (SUBJECT, OBJECT):
+            side_data = d.get(side)
+            if side_data:
+                attrs.update(flatten_dict(side_data, parent_key=side))
+
         rel = py2neo.Relationship(node_map[u], rel_type, node_map[v], **attrs)
         tx.create(rel)
 
