@@ -8,14 +8,12 @@ import logging
 from collections import Iterable, MutableMapping, defaultdict
 from datetime import datetime
 
-import networkx as nx
 from six import string_types
 from six.moves.cPickle import dumps
 
 from .constants import (
-    ACTIVITY, CITATION, CITATION_AUTHORS, CITATION_ENTRIES, CITATION_REFERENCE, CITATION_TYPE, DEGRADATION, EFFECT,
-    EVIDENCE, FROM_LOC, IDENTIFIER, LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT, RELATION, SUBJECT, TO_LOC,
-    TRANSLOCATION, VERSION,
+    ACTIVITY, CITATION, CITATION_REFERENCE, CITATION_TYPE, DEGRADATION, EFFECT, EVIDENCE, FROM_LOC, IDENTIFIER,
+    LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT, RELATION, SUBJECT, TO_LOC, TRANSLOCATION, VERSION,
 )
 
 log = logging.getLogger(__name__)
@@ -55,47 +53,20 @@ def flatten_dict(data, parent_key='', sep='_'):
 
     .. seealso:: http://stackoverflow.com/a/6027615
     """
-    items = []
-    for k, v in data.items():
-        new_key = parent_key + sep + k if parent_key else k
-        if isinstance(v, (dict, MutableMapping)):
-            items.extend(flatten_dict(v, new_key, sep=sep).items())
-        elif isinstance(v, (set, list)):
-            items.append((new_key, ','.join(v)))
+    items = {}
+
+    for key, value in data.items():
+        # prepend the parent key
+        key = parent_key + sep + key if parent_key else key
+
+        if isinstance(value, (dict, MutableMapping)):
+            items.update(flatten_dict(value, key, sep=sep))
+        elif isinstance(value, (set, list)):
+            items[key] = ','.join(value)
         else:
-            items.append((new_key, v))
-    return dict(items)
+            items[key] = value
 
-
-def flatten_graph_data(graph):
-    """Return a new graph with flattened edge data dictionaries.
-
-    :param nx.MultiDiGraph graph: A graph with nested edge data dictionaries
-    :return: A graph with flattened edge data dictionaries
-    :rtype: nx.MultiDiGraph
-    """
-    g = nx.MultiDiGraph(**graph.graph)
-
-    for node, data in graph.nodes(data=True):
-        g.add_node(node)
-        g._node[node] = data
-
-    for u, v, key, data in graph.edges(data=True, keys=True):
-        g.add_edge(u, v, key=key, **flatten_dict(data))
-
-    return g
-
-
-def list2tuple(l):
-    """Convert a nested list to a nested tuple, recursively.
-
-    :type l: list
-    :rtype: tuple
-    """
-    if isinstance(l, list):
-        return tuple(list2tuple(e) for e in l)
-    else:
-        return l
+    return items
 
 
 def get_version():
@@ -123,32 +94,6 @@ def tokenize_version(version_string):
     before_dash = version_string.split('-')[0]
     version_tuple = before_dash.split('.')[:3]  # take only the first 3 in case there's an extension like -dev.0
     return tuple(map(int, version_tuple))
-
-
-def citation_dict_to_tuple(citation):
-    """Convert the ``d[CITATION]`` entry in an edge data dictionary to a tuple.
-
-    :param dict citation:
-    :rtype: tuple[str]
-    """
-    if len(citation) == 2 and CITATION_TYPE in citation and CITATION_REFERENCE in citation:
-        return citation[CITATION_TYPE], citation[CITATION_REFERENCE]
-
-    if all(x in citation for x in CITATION_ENTRIES):
-        return tuple(citation[x] for x in CITATION_ENTRIES)
-
-    if all(x in citation for x in CITATION_ENTRIES[3:5]):
-        ff = tuple(citation[x] for x in CITATION_ENTRIES[:4])
-
-        if isinstance(citation[CITATION_AUTHORS], string_types):
-            return ff + (citation[CITATION_AUTHORS],)
-        else:
-            return ff + ('|'.join(citation[CITATION_AUTHORS]),)
-
-    if all(x in citation for x in CITATION_ENTRIES[3:4]):
-        return tuple(citation[x] for x in CITATION_ENTRIES[:4])
-
-    return tuple(citation[x] for x in CITATION_ENTRIES[:3])
 
 
 def ensure_quotes(s):
