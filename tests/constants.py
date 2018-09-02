@@ -370,19 +370,19 @@ class BelReconstitutionMixin(TestGraphMixin):
         for _, data in graph.nodes(data=True):
             self.assertIsInstance(data, BaseEntity)
 
-        self.assertEqual(set(BEL_THOROUGH_NODES), set(graph))
+        self.assertEqual({node.as_tuple() for node in BEL_THOROUGH_NODES}, set(graph), msg='Nodes not equal')
 
         # FIXME
         # self.assertEqual(set((u, v) for u, v, _ in e), set(g.edges()))
 
         self.assertLess(0, graph.number_of_edges())
 
-        for u, v, d in BEL_THOROUGH_EDGES:
-            if not check_citation_name and CITATION in d and CITATION_NAME in d[CITATION]:
-                d[CITATION] = d[CITATION].copy()
-                del d[CITATION][CITATION_NAME]
+        for u, v, data in BEL_THOROUGH_EDGES:
+            if not check_citation_name and CITATION in data and CITATION_NAME in data[CITATION]:
+                data[CITATION] = data[CITATION].copy()
+                del data[CITATION][CITATION_NAME]
 
-            assert_has_edge(self, u, v, graph, permissive=True, **d)
+            assert_has_edge(self, u, v, graph, permissive=True, **data)
 
     def bel_slushy_reconstituted(self, graph, check_metadata=True, check_warnings=True):
         """Check that slushy.bel was loaded properly.
