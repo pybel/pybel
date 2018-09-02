@@ -7,8 +7,9 @@ Also provided for backwards compatibility.
 
 from .node_classes import (
     Abundance, BiologicalProcess, ComplexAbundance, CompositeAbundance, EnumeratedFusionRange, Fragment, Gene,
-    GeneFusion, GeneModification, Hgvs, MicroRna, MissingFusionRange, NamedComplexAbundance, Pathology, Protein,
-    ProteinFusion, ProteinModification, ProteinSubstitution, Reaction, Rna, RnaFusion,
+    GeneFusion, GeneModification, Hgvs, HgvsReference, HgvsUnspecified, MicroRna, MissingFusionRange,
+    NamedComplexAbundance, Pathology, Protein, ProteinFusion, ProteinModification, ProteinSubstitution, Reaction, Rna,
+    RnaFusion,
 )
 
 __all__ = [
@@ -26,6 +27,8 @@ __all__ = [
     'pmod',
     'gmod',
     'hgvs',
+    'hgvs_reference',
+    'hgvs_unspecified',
     'protein_substitution',
     'fragment',
     'fusion_range',
@@ -46,6 +49,8 @@ pmod = ProteinModification
 gmod = GeneModification
 
 hgvs = Hgvs
+hgvs_unspecified = HgvsUnspecified
+hgvs_reference = HgvsReference
 
 protein_substitution = ProteinSubstitution
 

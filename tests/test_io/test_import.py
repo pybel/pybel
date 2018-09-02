@@ -18,7 +18,7 @@ from pybel.constants import (
     ANNOTATIONS, CITATION, DECREASES, DIRECTLY_DECREASES, EVIDENCE, GENE, GRAPH_PYBEL_VERSION, INCREASES,
     PYBEL_MINIMUM_IMPORT_VERSION, RELATION,
 )
-from pybel.dsl import gene, BaseEntity
+from pybel.dsl import BaseEntity, gene
 from pybel.examples import sialic_acid_graph
 from pybel.io.exc import ImportVersionWarning, import_version_message_fmt
 from pybel.parser import BELParser
@@ -30,7 +30,7 @@ from pybel.testing.constants import (
 )
 from pybel.testing.mocks import mock_bel_resources
 from tests.constants import (
-    AKT1, BelReconstitutionMixin, CASP8, EGFR, FADD, TestTokenParserBase, citation_1, evidence_1, test_citation_dict,
+    BelReconstitutionMixin, TestTokenParserBase, akt1, casp8, citation_1, egfr, evidence_1, fadd, test_citation_dict,
     test_evidence_text, test_set_evidence,
 )
 
@@ -229,7 +229,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
                 'TESTAN1': {testan1: True}
             }
         }
-        self.assert_has_edge(self.misordered_graph, AKT1, EGFR, **e1)
+        self.assert_has_edge(self.misordered_graph, akt1, egfr, **e1)
 
         e2 = {
             RELATION: DECREASES,
@@ -239,7 +239,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
                 'TESTAN1': {testan1: True}
             }
         }
-        self.assert_has_edge(self.misordered_graph, EGFR, FADD, **e2)
+        self.assert_has_edge(self.misordered_graph, egfr, fadd, **e2)
 
         e3 = {
             RELATION: DIRECTLY_DECREASES,
@@ -249,7 +249,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
                 'TESTAN1': {testan1: True}
             }
         }
-        self.assert_has_edge(self.misordered_graph, EGFR, CASP8, **e3)
+        self.assert_has_edge(self.misordered_graph, egfr, casp8, **e3)
 
 
 namespaces = {

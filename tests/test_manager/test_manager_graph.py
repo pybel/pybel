@@ -14,9 +14,8 @@ from sqlalchemy import not_
 from pybel import BELGraph, from_database, from_path, to_database
 from pybel.constants import (
     ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_REFERENCE,
-    CITATION_TYPE, CITATION_TYPE_OTHER, CITATION_TYPE_PUBMED, DECREASES, HAS_COMPONENT, HAS_PRODUCT,
-    HAS_REACTANT, INCREASES, LOCATION, METADATA_NAME, METADATA_VERSION, PATHOLOGY, PROTEIN,
-    RELATION,
+    CITATION_TYPE, CITATION_TYPE_OTHER, CITATION_TYPE_PUBMED, DECREASES, HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT,
+    INCREASES, LOCATION, METADATA_NAME, METADATA_VERSION, PATHOLOGY, PROTEIN, RELATION,
 )
 from pybel.dsl import (
     BaseEntity, activity, complex_abundance, composite_abundance, degradation, entity, fragment, fusion_range, gene,
@@ -32,9 +31,8 @@ from pybel.testing.constants import test_bel_simple
 from pybel.testing.mocks import mock_bel_resources
 from pybel.testing.utils import make_dummy_annotations, make_dummy_namespaces, n
 from pybel.utils import hash_citation, hash_evidence
-from tests import constants
 from tests.constants import (
-    BelReconstitutionMixin, expected_test_simple_metadata, test_citation_dict,
+    BelReconstitutionMixin, akt1, casp8, egfr, expected_test_simple_metadata, fadd, test_citation_dict,
     test_evidence_text,
 )
 
@@ -42,7 +40,6 @@ fos = hgnc('FOS')
 jun = hgnc('JUN')
 ap1_complex = complex_abundance([fos, jun])
 
-egfr = hgnc('EGFR')
 egfr_dimer = complex_abundance([egfr, egfr])
 
 yfg_data = hgnc('YFG')
@@ -476,14 +473,13 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
 
         x = Counter((e.source.bel, e.target.bel) for e in edges)
 
-        pfmt = 'p(HGNC:{})'
         d = {
-            (pfmt.format(constants.AKT1[2]), pfmt.format(constants.EGFR[2])): 1,
-            (pfmt.format(constants.EGFR[2]), pfmt.format(constants.FADD[2])): 1,
-            (pfmt.format(constants.EGFR[2]), pfmt.format(constants.CASP8[2])): 1,
-            (pfmt.format(constants.FADD[2]), pfmt.format(constants.CASP8[2])): 1,
-            (pfmt.format(constants.AKT1[2]), pfmt.format(constants.CASP8[2])): 1,  # two way association
-            (pfmt.format(constants.CASP8[2]), pfmt.format(constants.AKT1[2])): 1  # two way association
+            (akt1.as_bel(), egfr.as_bel()): 1,
+            (egfr.as_bel(), fadd.as_bel()): 1,
+            (egfr.as_bel(), casp8.as_bel()): 1,
+            (fadd.as_bel(), casp8.as_bel()): 1,
+            (akt1.as_bel(), casp8.as_bel()): 1,  # two way association
+            (casp8.as_bel(), akt1.as_bel()): 1  # two way association
         }
 
         self.assertEqual(dict(x), d)

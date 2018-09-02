@@ -51,6 +51,8 @@ __all__ = [
     'ProteinModification',
     'GeneModification',
     'Hgvs',
+    'HgvsReference',
+    'HgvsUnspecified',
     'ProteinSubstitution',
     'Fragment',
 
@@ -500,6 +502,20 @@ class Hgvs(Variant):
         :rtype: str
         """
         return 'var("{}")'.format(self[IDENTIFIER])
+
+
+class HgvsReference(Hgvs):
+    """Represents the "reference" variant in HGVS."""
+
+    def __init__(self):
+        super(HgvsReference, self).__init__('=')
+
+
+class HgvsUnspecified(Hgvs):
+    """Represents an unspecified variant in HGVS."""
+
+    def __init__(self):
+        super(HgvsUnspecified, self).__init__('?')
 
 
 class ProteinSubstitution(Hgvs):

@@ -28,7 +28,7 @@ class PyBelParserWarning(PyBELWarning):
         return 'General Parser Failure on line {} at pos {}: {}'.format(self.line_number, self.position, self.line)
 
 
-class BelSyntaxError(PyBelParserWarning, SyntaxError):
+class BELSyntaxError(PyBelParserWarning, SyntaxError):
     """For general syntax errors"""
 
 
