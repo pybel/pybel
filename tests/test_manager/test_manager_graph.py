@@ -162,7 +162,8 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         self.assertEqual([(network.name, '1.0.1')], [(n.name, n.version) for n in recent_networks])
         self.assertEqual('1.0.1', recent_networks[0].version)
 
-    def test_upload_with_tloc(self):
+    @mock_bel_resources
+    def test_upload_with_tloc(self, mock_get):
         """Test that the RAS translocation example graph can be uploaded."""
         make_dummy_namespaces(self.manager, ras_tloc_graph)
         to_database(ras_tloc_graph, manager=self.manager)
@@ -184,7 +185,7 @@ class TestTemporaryInsertNetwork(TemporaryCacheMixin):
             annotations={'TEST': 'a'}
         )
 
-        make_dummy_namespaces(self.manager, graph, {'HGNC': ['FOS', 'JUN']})
+        make_dummy_namespaces(self.manager, graph)
 
         self.manager.insert_graph(graph, store_parts=True)
 
@@ -850,10 +851,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             subject_modifier=secretion()
         )
 
-        make_dummy_namespaces(self.manager, self.graph, {
-            'HGNC': ['F2', 'EDN1'],
-            'GOCC': ['intracellular', 'cell surface', 'extracellular space']
-        })
+        make_dummy_namespaces(self.manager, self.graph)
 
         network = self.manager.insert_graph(self.graph, store_parts=True)
         self.assertEqual(2, network.nodes.count())
@@ -875,10 +873,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             )
         )
 
-        make_dummy_namespaces(self.manager, self.graph, {
-            'HGNC': ['F2', 'EDN1'],
-            'GOCC': ['extracellular space'], 'TEST': ['A']
-        })
+        make_dummy_namespaces(self.manager, self.graph)
 
         network = self.manager.insert_graph(self.graph, store_parts=True)
         self.assertEqual(2, network.nodes.count())
@@ -930,9 +925,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             subject_modifier=activity(name=dummy_activity_name, namespace=dummy_activity_namespace)
         )
 
-        make_dummy_namespaces(self.manager, self.graph, {
-            'HGNC': [p1_name, p2_name], dummy_activity_namespace: [dummy_activity_name]
-        })
+        make_dummy_namespaces(self.manager, self.graph)
 
         network = self.manager.insert_graph(self.graph, store_parts=True)
         self.assertEqual(2, network.nodes.count())
@@ -990,9 +983,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             object_modifier=activity(name=dummy_activity_name, namespace=dummy_activity_namespace)
         )
 
-        make_dummy_namespaces(self.manager, self.graph, {
-            'HGNC': [p1_name, p2_name], dummy_activity_namespace: [dummy_activity_name]
-        })
+        make_dummy_namespaces(self.manager, self.graph)
 
         network = self.manager.insert_graph(self.graph, store_parts=True)
         self.assertEqual(2, network.nodes.count())
@@ -1007,8 +998,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         effects = self.manager.session.query(Property).join(NamespaceEntry).filter(Property.effect == kin)
         self.assertEqual(1, effects.count())
 
-    @mock_bel_resources
-    def test_subject_degradation(self, mock):
+    def test_subject_degradation(self):
         self.graph.add_association(
             protein(name='YFG', namespace='HGNC'),
             protein(name='YFG2', namespace='HGNC'),
@@ -1016,7 +1006,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             citation=n(),
             subject_modifier=degradation(),
         )
-        make_dummy_namespaces(self.manager, self.graph, {'HGNC': ['YFG', 'YFG2']})
+        make_dummy_namespaces(self.manager, self.graph)
 
         network = self.manager.insert_graph(self.graph, store_parts=True)
 
@@ -1026,8 +1016,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         edge = network.edges.first()
         self.assertEqual(1, edge.properties.count())
 
-    @mock_bel_resources
-    def test_object_degradation(self, mock):
+    def test_object_degradation(self):
         self.graph.add_association(
             protein(name='YFG', namespace='HGNC'),
             protein(name='YFG2', namespace='HGNC'),
@@ -1035,7 +1024,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             citation=n(),
             object_modifier=degradation(),
         )
-        make_dummy_namespaces(self.manager, self.graph, {'HGNC': ['YFG', 'YFG2']})
+        make_dummy_namespaces(self.manager, self.graph)
 
         network = self.manager.insert_graph(self.graph, store_parts=True)
 
@@ -1045,8 +1034,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         edge = network.edges.first()
         self.assertEqual(1, edge.properties.count())
 
-    @mock_bel_resources
-    def test_subject_location(self, mock):
+    def test_subject_location(self):
         self.graph.add_association(
             protein(name='YFG', namespace='HGNC'),
             protein(name='YFG2', namespace='HGNC'),
@@ -1064,10 +1052,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         edge = network.edges.first()
         self.assertEqual(1, edge.properties.count())
 
-    @mock_bel_resources
-    def test_mixed_1(self, mock):
+    def test_mixed_1(self):
         """Test mixed having location and something else."""
-
         self.graph.add_increases(
             protein(namespace='HGNC', name='CDC42'),
             protein(namespace='HGNC', name='PAK2'),
@@ -1106,8 +1092,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         self.assertIsNotNone(object.effect.namespace)
         self.assertEqual(BEL_DEFAULT_NAMESPACE, object.effect.namespace.keyword)
 
-    @mock_bel_resources
-    def test_mixed_2(self, mock):
+    def test_mixed_2(self):
         """Tests both subject and object activity with location information as well."""
         self.graph.add_directly_increases(
             protein(namespace='HGNC', name='HDAC4'),
@@ -1121,11 +1106,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             object_modifier=activity('tscript', location=entity(namespace='GOCC', name='nucleus'))
         )
 
-        make_dummy_namespaces(self.manager, self.graph, {
-            'HGNC': ['HDAC4', 'MEF2A'],
-            'GOCC': ['nucleus']
-        })
-
+        make_dummy_namespaces(self.manager, self.graph)
         make_dummy_annotations(self.manager, self.graph)
 
         network = self.manager.insert_graph(self.graph, store_parts=True)
@@ -1265,7 +1246,7 @@ class TestNoAddNode(TemporaryCacheMixin):
             ),
         )
 
-        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG', 'YFG2'], 'GOCC': ['extracellular space']})
+        make_dummy_namespaces(self.manager, graph)
 
         network = self.manager.insert_graph(graph, store_parts=True)
 
@@ -1291,7 +1272,7 @@ class TestNoAddNode(TemporaryCacheMixin):
             },
         )
 
-        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG', 'YFG2']})
+        make_dummy_namespaces(self.manager, graph)
 
         network = self.manager.insert_graph(graph, store_parts=True)
 
@@ -1316,7 +1297,7 @@ class TestNoAddNode(TemporaryCacheMixin):
             subject_modifier=activity(name='dummy', namespace=dummy_namespace_name)
         )
 
-        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG', 'YFG2']})
+        make_dummy_namespaces(self.manager, graph)
 
         network = self.manager.insert_graph(graph, store_parts=True)
 

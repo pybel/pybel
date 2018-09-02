@@ -38,19 +38,13 @@ def n():
     return str(uuid4())[:15]
 
 
-def make_dummy_namespaces(manager, graph, namespace_dict=None):
+def make_dummy_namespaces(manager, graph):
     """Make dummy namespaces for the test.
 
     :type manager: pybel.manager.Manager
     :type graph: pybel.BELGraph
-    :type namespace_dict: dict[str,iter[str]]
     """
-    node_names = get_names(graph)
-
-    if namespace_dict:
-        node_names.update(namespace_dict)
-
-    for keyword, names in node_names.items():
+    for keyword, names in get_names(graph).items():
         if keyword == BEL_DEFAULT_NAMESPACE:
             continue
 
