@@ -20,12 +20,13 @@ from pybel.constants import (
 )
 from pybel.dsl import (
     BaseEntity, activity, complex_abundance, composite_abundance, degradation, entity, fragment, fusion_range, gene,
-    gene_fusion, gmod, hgvs, named_complex_abundance, pmod, protein, protein_fusion, reaction, secretion, translocation,
+    gene_fusion, gmod, hgvs, location, named_complex_abundance, pmod, protein, protein_fusion, reaction, secretion,
+    translocation,
 )
 from pybel.dsl.namespaces import chebi, hgnc
-from pybel.examples import sialic_acid_graph
+from pybel.examples import ras_tloc_graph, sialic_acid_graph
 from pybel.manager import models
-from pybel.manager.models import Author, Evidence
+from pybel.manager.models import Author, Citation, Edge, Evidence, NamespaceEntry, Node, Property
 from pybel.testing.cases import FleetingTemporaryCacheMixin, TemporaryCacheClsMixin, TemporaryCacheMixin
 from pybel.testing.constants import test_bel_simple
 from pybel.testing.mocks import mock_bel_resources
@@ -160,6 +161,11 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         self.assertIsNotNone(recent_networks)
         self.assertEqual([(network.name, '1.0.1')], [(n.name, n.version) for n in recent_networks])
         self.assertEqual('1.0.1', recent_networks[0].version)
+
+    def test_upload_with_tloc(self):
+        """Test that the RAS translocation example graph can be uploaded."""
+        make_dummy_namespaces(self.manager, ras_tloc_graph)
+        to_database(ras_tloc_graph, manager=self.manager)
 
 
 class TestTemporaryInsertNetwork(TemporaryCacheMixin):
@@ -328,7 +334,7 @@ class TestEnsure(TemporaryCacheMixin):
         citation = self.manager.get_or_create_citation(**citation_dict)
         self.manager.session.commit()
 
-        self.assertIsInstance(citation, models.Citation)
+        self.assertIsInstance(citation, Citation)
         self.assertEqual(citation_dict, citation.to_json())
 
         citation_reloaded_from_reference = self.manager.get_citation_by_pmid(reference)
@@ -358,7 +364,7 @@ class TestEnsure(TemporaryCacheMixin):
         citation = self.manager.get_or_create_citation(**citation_dict)
         self.manager.session.commit()
 
-        self.assertIsInstance(citation, models.Citation)
+        self.assertIsInstance(citation, Citation)
         self.assertEqual(citation_dict, citation.to_json())
 
         citation_reloaded_from_reference = self.manager.get_citation_by_reference(CITATION_TYPE_OTHER, reference)
@@ -434,7 +440,7 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
             cls.network = cls.manager.insert_graph(cls.graph, store_parts=True)
 
     def test_citations(self):
-        citations = self.manager.session.query(models.Citation).all()
+        citations = self.manager.session.query(Citation).all()
         self.assertEqual(2, len(citations), msg='Citations: {}'.format(citations))
 
         citation_references = {'123455', '123456'}
@@ -447,11 +453,11 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         authors = {'Example Author', 'Example Author2'}
         self.assertEqual(authors, {
             author.name
-            for author in self.manager.session.query(models.Author).all()
+            for author in self.manager.session.query(Author).all()
         })
 
     def test_evidences(self):
-        evidences = self.manager.session.query(models.Evidence).all()
+        evidences = self.manager.session.query(Evidence).all()
         self.assertEqual(3, len(evidences))
 
         evidences_texts = {'Evidence 1 w extra notes', 'Evidence 2', 'Evidence 3'}
@@ -461,11 +467,11 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         })
 
     def test_nodes(self):
-        nodes = self.manager.session.query(models.Node).all()
+        nodes = self.manager.session.query(Node).all()
         self.assertEqual(4, len(nodes))
 
     def test_edges(self):
-        edges = self.manager.session.query(models.Edge).all()
+        edges = self.manager.session.query(Edge).all()
 
         x = Counter((e.source.bel, e.target.bel) for e in edges)
 
@@ -894,23 +900,19 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             subject_modifier=activity('kin')
         )
 
-        make_dummy_namespaces(self.manager, self.graph, {
-            'HGNC': [p1_name, p2_name],
-        })
+        make_dummy_namespaces(self.manager, self.graph)
 
         network = self.manager.insert_graph(self.graph, store_parts=True)
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
-        kin_list = self.manager.session.query(models.NamespaceEntry).filter(
-            models.NamespaceEntry.name == 'kin').all()
+        kin_list = self.manager.session.query(NamespaceEntry).filter(NamespaceEntry.name == 'kin').all()
         self.assertEqual(1, len(kin_list))
 
         kin = list(kin_list)[0]
         self.assertEqual('kin', kin.name)
 
-        effects = self.manager.session.query(models.Property).join(models.NamespaceEntry).filter(
-            models.Property.effect == kin)
+        effects = self.manager.session.query(Property).join(NamespaceEntry).filter(Property.effect == kin)
         self.assertEqual(1, effects.count())
 
     @mock_bel_resources
@@ -936,15 +938,13 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
-        kin_list = self.manager.session.query(models.NamespaceEntry).filter(
-            models.NamespaceEntry.name == dummy_activity_name).all()
+        kin_list = self.manager.session.query(NamespaceEntry).filter(NamespaceEntry.name == dummy_activity_name).all()
         self.assertEqual(1, len(kin_list))
 
         kin = list(kin_list)[0]
         self.assertEqual(dummy_activity_name, kin.name)
 
-        effects = self.manager.session.query(models.Property).join(models.NamespaceEntry).filter(
-            models.Property.effect == kin)
+        effects = self.manager.session.query(Property).join(NamespaceEntry).filter(Property.effect == kin)
         self.assertEqual(1, effects.count())
 
     @mock_bel_resources
@@ -960,23 +960,19 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             object_modifier=activity('kin')
         )
 
-        make_dummy_namespaces(self.manager, self.graph, {
-            'HGNC': [p1_name, p2_name],
-        })
+        make_dummy_namespaces(self.manager, self.graph)
 
         network = self.manager.insert_graph(self.graph, store_parts=True)
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
-        kin_list = self.manager.session.query(models.NamespaceEntry).filter(
-            models.NamespaceEntry.name == 'kin').all()
+        kin_list = self.manager.session.query(NamespaceEntry).filter(NamespaceEntry.name == 'kin').all()
         self.assertEqual(1, len(kin_list))
 
         kin = list(kin_list)[0]
         self.assertEqual('kin', kin.name)
 
-        effects = self.manager.session.query(models.Property).join(models.NamespaceEntry).filter(
-            models.Property.effect == kin)
+        effects = self.manager.session.query(Property).join(NamespaceEntry).filter(Property.effect == kin)
         self.assertEqual(1, effects.count())
 
     @mock_bel_resources
@@ -1002,15 +998,13 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
-        kin_list = self.manager.session.query(models.NamespaceEntry).filter(
-            models.NamespaceEntry.name == dummy_activity_name).all()
+        kin_list = self.manager.session.query(NamespaceEntry).filter(NamespaceEntry.name == dummy_activity_name).all()
         self.assertEqual(1, len(kin_list))
 
         kin = list(kin_list)[0]
         self.assertEqual(dummy_activity_name, kin.name)
 
-        effects = self.manager.session.query(models.Property).join(models.NamespaceEntry).filter(
-            models.Property.effect == kin)
+        effects = self.manager.session.query(Property).join(NamespaceEntry).filter(Property.effect == kin)
         self.assertEqual(1, effects.count())
 
     @mock_bel_resources
@@ -1058,11 +1052,9 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             protein(name='YFG2', namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            subject_modifier={
-                LOCATION: entity(namespace='GOCC', name='nucleus')
-            },
+            subject_modifier=location(entity(namespace='GO', name='nucleus', identifier='GO:0005634'))
         )
-        make_dummy_namespaces(self.manager, self.graph, {'HGNC': ['YFG', 'YFG2'], 'GOCC': ['nucleus']})
+        make_dummy_namespaces(self.manager, self.graph)
 
         network = self.manager.insert_graph(self.graph, store_parts=True)
 
@@ -1102,13 +1094,13 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         edge = network.edges.first()
         self.assertEqual(2, edge.properties.count())
 
-        subject = edge.properties.filter(models.Property.is_subject).one()
+        subject = edge.properties.filter(Property.is_subject).one()
         self.assertTrue(subject.is_subject)
         self.assertEqual('gtp', subject.effect.name)
         self.assertIsNotNone(subject.effect.namespace)
         self.assertEqual(BEL_DEFAULT_NAMESPACE, subject.effect.namespace.keyword)
 
-        object = edge.properties.filter(not_(models.Property.is_subject)).one()
+        object = edge.properties.filter(not_(Property.is_subject)).one()
         self.assertFalse(object.is_subject)
         self.assertEqual('kin', object.effect.name)
         self.assertIsNotNone(object.effect.namespace)
@@ -1142,8 +1134,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
         edge = network.edges.first()
         self.assertEqual(4, edge.properties.count())
-        self.assertEqual(2, edge.properties.filter(models.Property.is_subject).count())
-        self.assertEqual(2, edge.properties.filter(not_(models.Property.is_subject)).count())
+        self.assertEqual(2, edge.properties.filter(Property.is_subject).count())
+        self.assertEqual(2, edge.properties.filter(not_(Property.is_subject)).count())
 
 
 class TestNoAddNode(TemporaryCacheMixin):

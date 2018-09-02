@@ -64,7 +64,7 @@ class TestSummary(unittest.TestCase):
     def test_names_sialic(self):
         """Test getting and counting names by namespace."""
         result = {
-            'CD33': 2,
+            'CD33': 3, # once as reference, once in complex, and once as variant
             'TYROBP': 1,
             'SYK': 1,
             'PTPN6': 1,
@@ -73,7 +73,7 @@ class TestSummary(unittest.TestCase):
         }
 
         self.assertEqual(set(result), get_names_by_namespace(sialic_acid_graph, 'HGNC'))
-        self.assertEqual(Counter(result), count_names_by_namespace(sialic_acid_graph, 'HGNC'))
+        self.assertEqual(result, dict(count_names_by_namespace(sialic_acid_graph, 'HGNC')))
 
     def test_names_fusions(self):
         """Test that names inside fusions are still found by the iterator."""
