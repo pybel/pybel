@@ -67,18 +67,18 @@ class TestNodePredicates(unittest.TestCase):
     def test_p1_tuple_variants(self):
         """Test node predicates on the node tuple from BRAF.s"""
         g = BELGraph()
-        p1_tuple = g.add_node_from_data(p1)
+        g.add_node_from_data(p1)
 
-        self.assertFalse(is_abundance(g, p1_tuple))
-        self.assertFalse(is_gene(g, p1_tuple))
-        self.assertTrue(is_protein(g, p1_tuple))
-        self.assertFalse(is_pathology(g, p1_tuple))
-        self.assertTrue(not_pathology(g, p1_tuple))
+        self.assertFalse(is_abundance(g, p1))
+        self.assertFalse(is_gene(g, p1))
+        self.assertTrue(is_protein(g, p1))
+        self.assertFalse(is_pathology(g, p1))
+        self.assertTrue(not_pathology(g, p1))
 
-        self.assertFalse(has_variant(g, p1_tuple))
-        self.assertFalse(has_protein_modification(g, p1_tuple))
-        self.assertFalse(has_gene_modification(g, p1_tuple))
-        self.assertFalse(has_hgvs(g, p1_tuple))
+        self.assertFalse(has_variant(g, p1))
+        self.assertFalse(has_protein_modification(g, p1))
+        self.assertFalse(has_gene_modification(g, p1))
+        self.assertFalse(has_hgvs(g, p1))
 
     def test_p2_data_variants(self):
         self.assertFalse(is_abundance(p2))
@@ -94,18 +94,18 @@ class TestNodePredicates(unittest.TestCase):
 
     def test_p2_tuple_variants(self):
         g = BELGraph()
-        p2_tuple = g.add_node_from_data(p2)
+        g.add_node_from_data(p2)
 
-        self.assertFalse(is_abundance(g, p2_tuple))
-        self.assertFalse(is_gene(g, p2_tuple))
-        self.assertTrue(is_protein(g, p2_tuple))
-        self.assertFalse(is_pathology(g, p2_tuple))
-        self.assertTrue(not_pathology(g, p2_tuple))
+        self.assertFalse(is_abundance(g, p2))
+        self.assertFalse(is_gene(g, p2))
+        self.assertTrue(is_protein(g, p2))
+        self.assertFalse(is_pathology(g, p2))
+        self.assertTrue(not_pathology(g, p2))
 
-        self.assertTrue(has_variant(g, p2_tuple))
-        self.assertFalse(has_gene_modification(g, p2_tuple))
-        self.assertTrue(has_protein_modification(g, p2_tuple))
-        self.assertTrue(has_hgvs(g, p2_tuple))
+        self.assertTrue(has_variant(g, p2))
+        self.assertFalse(has_gene_modification(g, p2))
+        self.assertTrue(has_protein_modification(g, p2))
+        self.assertTrue(has_hgvs(g, p2))
 
     def test_p3(self):
         self.assertFalse(is_abundance(p3))
@@ -380,17 +380,17 @@ class TestNodePredicates(unittest.TestCase):
         g.add_increases(a, b, n(), n())
         g.add_increases(b, c, n(), n())
 
-        self.assertTrue(is_causal_source(g, a.as_tuple()))
-        self.assertFalse(is_causal_central(g, a.as_tuple()))
-        self.assertFalse(is_causal_sink(g, a.as_tuple()))
+        self.assertTrue(is_causal_source(g, a))
+        self.assertFalse(is_causal_central(g, a))
+        self.assertFalse(is_causal_sink(g, a))
 
-        self.assertFalse(is_causal_source(g, b.as_tuple()))
-        self.assertTrue(is_causal_central(g, b.as_tuple()))
-        self.assertFalse(is_causal_sink(g, b.as_tuple()))
+        self.assertFalse(is_causal_source(g, b))
+        self.assertTrue(is_causal_central(g, b))
+        self.assertFalse(is_causal_sink(g, b))
 
-        self.assertFalse(is_causal_source(g, c.as_tuple()))
-        self.assertFalse(is_causal_central(g, c.as_tuple()))
-        self.assertTrue(is_causal_sink(g, c.as_tuple()))
+        self.assertFalse(is_causal_source(g, c))
+        self.assertFalse(is_causal_central(g, c))
+        self.assertTrue(is_causal_sink(g, c))
 
 
 class TestEdgePredicate(unittest.TestCase):
@@ -404,10 +404,10 @@ class TestEdgePredicate(unittest.TestCase):
         g = BELGraph()
         a, b, c = (protein(n(), n()) for _ in range(3))
         key1 = g.add_increases(a, b, n(), n())
-        self.assertTrue(has_polarity(g, a.as_tuple(), b.as_tuple(), key1))
+        self.assertTrue(has_polarity(g, a, b, key1))
 
         key2 = g.add_association(b, c, n(), n())
-        self.assertFalse(has_polarity(g, b.as_tuple(), c.as_tuple(), key2))
+        self.assertFalse(has_polarity(g, b, c, key2))
 
     def test_has_provenance(self):
         self.assertFalse(has_provenance({}))
@@ -458,24 +458,24 @@ class TestEdgePredicate(unittest.TestCase):
         alternate_is_associative_relation = build_relation_predicate(ASSOCIATION)
 
         g = BELGraph()
-        g.add_edge(p1.as_tuple(), p2.as_tuple(), key=0, **{RELATION: ASSOCIATION})
-        g.add_edge(p2.as_tuple(), p3.as_tuple(), key=0, **{RELATION: INCREASES})
+        g.add_edge(p1, p2, key=0, **{RELATION: ASSOCIATION})
+        g.add_edge(p2, p3, key=0, **{RELATION: INCREASES})
 
-        self.assertTrue(alternate_is_associative_relation(g, p1.as_tuple(), p2.as_tuple(), 0))
-        self.assertFalse(alternate_is_associative_relation(g, p2.as_tuple(), p3.as_tuple(), 0))
+        self.assertTrue(alternate_is_associative_relation(g, p1, p2, 0))
+        self.assertFalse(alternate_is_associative_relation(g, p2, p3, 0))
 
     def test_build_is_increases_or_decreases(self):
         """Test build_relation_predicate with multiple relations."""
         is_increase_or_decrease = build_relation_predicate([INCREASES, DECREASES])
 
         g = BELGraph()
-        g.add_edge(p1.as_tuple(), p2.as_tuple(), key=0, **{RELATION: ASSOCIATION})
-        g.add_edge(p2.as_tuple(), p3.as_tuple(), key=0, **{RELATION: INCREASES})
-        g.add_edge(p3.as_tuple(), p4.as_tuple(), key=0, **{RELATION: DECREASES})
+        g.add_edge(p1, p2, key=0, **{RELATION: ASSOCIATION})
+        g.add_edge(p2, p3, key=0, **{RELATION: INCREASES})
+        g.add_edge(p3, p4, key=0, **{RELATION: DECREASES})
 
-        self.assertFalse(is_increase_or_decrease(g, p1.as_tuple(), p2.as_tuple(), 0))
-        self.assertTrue(is_increase_or_decrease(g, p2.as_tuple(), p3.as_tuple(), 0))
-        self.assertTrue(is_increase_or_decrease(g, p3.as_tuple(), p4.as_tuple(), 0))
+        self.assertFalse(is_increase_or_decrease(g, p1, p2, 0))
+        self.assertTrue(is_increase_or_decrease(g, p2, p3, 0))
+        self.assertTrue(is_increase_or_decrease(g, p3, p4, 0))
 
     def test_has_degradation(self):
         self.assertTrue(edge_has_degradation({SUBJECT: {MODIFIER: DEGRADATION}}))

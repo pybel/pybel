@@ -122,15 +122,15 @@ class TestSummary(unittest.TestCase):
         graph.add_association(b, d, n(), n())
 
         pathology_counter = count_pathologies(graph)
-        self.assertIn(c.as_tuple(), pathology_counter)
-        self.assertIn(d.as_tuple(), pathology_counter)
-        self.assertEqual(1, pathology_counter[c.as_tuple()])
-        self.assertEqual(2, pathology_counter[d.as_tuple()])
+        self.assertIn(c, pathology_counter)
+        self.assertIn(d, pathology_counter)
+        self.assertEqual(1, pathology_counter[c])
+        self.assertEqual(2, pathology_counter[d])
 
         top_pathology_counter = get_top_pathologies(graph, count=1)
         self.assertEqual(1, len(top_pathology_counter))
         node, count = top_pathology_counter[0]
-        self.assertEqual(d.as_tuple(), node)
+        self.assertEqual(d, node)
         self.assertEqual(2, count)
 
     def test_get_top_hubs(self):
@@ -145,5 +145,5 @@ class TestSummary(unittest.TestCase):
         print(top_hubs[0])
         self.assertEqual(1, len(top_hubs))
         node, degree = top_hubs[0]
-        self.assertEqual(a.as_tuple(), node)
+        self.assertEqual(a, node)
         self.assertEqual(2, degree)

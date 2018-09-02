@@ -367,12 +367,16 @@ class BELGraph(nx.MultiDiGraph):
         if not isinstance(v, BaseEntity):
             raise TypeError('object is not BaseEntity: {}'.format(v))
 
-        u_tuple = self.add_node_from_data(u)
-        v_tuple = self.add_node_from_data(v)
-        key = hash_edge(u_tuple, v_tuple, attr)
+        self.add_node_from_data(u)
+        self.add_node_from_data(v)
 
-        if not self.has_edge(u_tuple, v_tuple, key):
-            self.add_edge(u_tuple, v_tuple, key=key, **attr)
+        return self._help_add_edge_helper(u, v, attr)
+
+    def _help_add_edge_helper(self, u, v, attr):
+        key = hash_edge(u, v, attr)
+
+        if not self.has_edge(u, v, key):
+            self.add_edge(u, v, key=key, **attr)
 
         return key
 
@@ -583,22 +587,18 @@ class BELGraph(nx.MultiDiGraph):
                                        annotations=annotations, subject_modifier=subject_modifier,
                                        object_modifier=object_modifier, **attr)
 
-    def __contains__(self, n):
-        if isinstance(n, BaseEntity):
-            n = n.as_tuple()
-        return super(BELGraph, self).__contains__(n)
-
     def has_node(self, n):
         """Check if the graph contains the given node tuple or BaseEntity.
 
         :param n: A node
         :rtype: bool
         """
-        if isinstance(n, BaseEntity):
-            n = n.as_tuple()
+        if not isinstance(n, BaseEntity):
+            raise TypeError('Not a base entity: {}'.format(n))
+
         return super(BELGraph, self).has_node(n)
 
-    def copy(self, as_view=False):
+    def copy(self, as_view=False):  # TODO delete this so it uses base implementation
         """Copy this graph.
 
         Implementation almost the same as the base implementation from MultiDiGraph, but deals with the node data
@@ -611,9 +611,8 @@ class BELGraph(nx.MultiDiGraph):
         G = self.fresh_copy()
         G.graph.update(self.graph)
 
-        for n, d in self._node.items():
-            G.add_node(n)
-            G._node[n] = d
+        for node in self:
+            G.add_node(node)
 
         G.add_edges_from((u, v, key, datadict.copy())
                          for u, nbrs in self._adj.items()
@@ -621,37 +620,35 @@ class BELGraph(nx.MultiDiGraph):
                          for key, datadict in keydict.items())
         return G
 
-    def add_node_from_data(self, attr_dict):
+    def add_node_from_data(self, node):
         """Convert a PyBEL node data dictionary to a canonical PyBEL node tuple and ensures it is in the graph.
 
-        :param BaseEntity attr_dict: A PyBEL node data dictionary
+        :param BaseEntity node: A PyBEL node data dictionary
+        :rtype: BaseEntity
         """
-        if not isinstance(attr_dict, BaseEntity):
-            raise TypeError('not BaseEntity: {}'.format(attr_dict))
+        if not isinstance(node, BaseEntity):
+            raise TypeError('not BaseEntity: {}'.format(node))
 
-        node_tuple = attr_dict.as_tuple()
+        if node in self:
+            return node
 
-        if node_tuple in self:
-            return node_tuple
+        self.add_node(node)
 
-        self.add_node(node_tuple)
-        self._node[node_tuple] = attr_dict
+        if VARIANTS in node:
+            self.add_has_variant(node.get_parent(), node)
 
-        if VARIANTS in attr_dict:
-            self.add_has_variant(attr_dict.get_parent(), attr_dict)
+        elif MEMBERS in node:
+            for member in node[MEMBERS]:
+                self.add_has_component(node, member)
 
-        elif MEMBERS in attr_dict:
-            for member in attr_dict[MEMBERS]:
-                self.add_has_component(attr_dict, member)
+        elif PRODUCTS in node and REACTANTS in node:
+            for reactant_tokens in node[REACTANTS]:
+                self.add_unqualified_edge(node, reactant_tokens, HAS_REACTANT)
 
-        elif PRODUCTS in attr_dict and REACTANTS in attr_dict:
-            for reactant_tokens in attr_dict[REACTANTS]:
-                self.add_unqualified_edge(attr_dict, reactant_tokens, HAS_REACTANT)
+            for product_tokens in node[PRODUCTS]:
+                self.add_unqualified_edge(node, product_tokens, HAS_PRODUCT)
 
-            for product_tokens in attr_dict[PRODUCTS]:
-                self.add_unqualified_edge(attr_dict, product_tokens, HAS_PRODUCT)
-
-        return node_tuple
+        return node
 
     def add_qualified_edge(self, u, v, relation, evidence, citation, annotations=None, subject_modifier=None,
                            object_modifier=None, **attr):
@@ -739,8 +736,8 @@ class BELGraph(nx.MultiDiGraph):
         :type attr: str
         :rtype: bool
         """
-        if isinstance(u, BaseEntity):
-            u = u.as_tuple()
+        if not isinstance(u, BaseEntity):
+            raise TypeError
 
         return attr in self[u][v][key]
 
@@ -783,35 +780,21 @@ class BELGraph(nx.MultiDiGraph):
         return self._get_edge_attr(u, v, key, ANNOTATIONS)
 
     def _get_node_attr(self, node, attr):
-        if isinstance(node, BaseEntity):
-            node = node.as_tuple()
-        return self.node[node].get(attr)
+        if not isinstance(node, BaseEntity):
+            raise TypeError
+
+        return self.nodes[node].get(attr)
 
     def _has_node_attr(self, node, attr):
-        if isinstance(node, BaseEntity):
-            node = node.as_tuple()
-        return attr in self.node[node]
+        if not isinstance(node, BaseEntity):
+            raise TypeError
+        return attr in self.nodes[node]
 
     def _set_node_attr(self, node, attr, value):
-        if isinstance(node, BaseEntity):
-            node = node.as_tuple()
-        self.node[node][attr] = value
+        if not isinstance(node, BaseEntity):
+            raise TypeError
+        self.nodes[node][attr] = value
 
-    def get_node_name(self, node):
-        """Get the node's name, or return None if no name.
-
-        :type node: BaseEntity or tuple
-        :rtype: Optional[str]
-        """
-        return self._get_node_attr(node, NAME)
-
-    def get_node_identifier(self, node):
-        """Get the identifier for a given node from the database (not the same as the node hash).
-
-        :type node: BaseEntity or tuple
-        :rtype: Optional[str]
-        """
-        return self._get_node_attr(node, IDENTIFIER)
 
     def get_node_description(self, node):
         """Get the description for a given node.
@@ -943,10 +926,10 @@ class BELGraph(nx.MultiDiGraph):
         :type n: tuple or BaseEntity
         :rtype: str
         """
-        if isinstance(n, BaseEntity):
-            return n.as_bel()
+        if not isinstance(n, BaseEntity):
+            raise TypeError
 
-        return self.node[n].as_bel()
+        return n.as_bel()
 
     def edge_to_bel(self, u, v, data, sep=None):
         """Serialize a pair of nodes and related edge data as a BEL relation.
@@ -970,8 +953,8 @@ class BELGraph(nx.MultiDiGraph):
     def _equivalent_node_iterator_helper(self, node, visited):
         """Iterate over nodes and their data that are equal to the given node, starting with the original.
 
-        :param tuple node: A PyBEL node tuple
-        :rtype: iter[tuple]
+        :param BaseEntity node: A PyBEL node tuple
+        :rtype: iter[BaseEntity]
         """
         for v in self[node]:
             if v in visited:
@@ -989,8 +972,8 @@ class BELGraph(nx.MultiDiGraph):
     def iter_equivalent_nodes(self, node):
         """Iterate over node tuples that are equivalent to the given node, including the original,
 
-        :param tuple node: A PyBEL node tuple
-        :rtype: iter[tuple]
+        :param BaseEntity node: A PyBEL node tuple
+        :rtype: iter[BaseEntity]
         """
         yield node
 
@@ -1005,7 +988,7 @@ class BELGraph(nx.MultiDiGraph):
         :rtype: set[tuple]
         """
         if isinstance(node, BaseEntity):
-            return set(self.iter_equivalent_nodes(node.as_tuple()))
+            return set(self.iter_equivalent_nodes(node))
 
         return set(self.iter_equivalent_nodes(node))
 
@@ -1014,17 +997,17 @@ class BELGraph(nx.MultiDiGraph):
 
         Might have cross references in future.
 
-        :param tuple node: A PyBEL node tuple
+        :param BaseEntity node: A PyBEL node tuple
         :rtype: bool
         """
-        return namespace == self.node[node].get(NAMESPACE)
+        return namespace == node.get(NAMESPACE)
 
     def node_has_namespace(self, node, namespace):
         """Check if the node have the given namespace?
 
         This also should look in the equivalent nodes.
 
-        :param tuple node: A PyBEL node tuple
+        :param BaseEntity node: A PyBEL node tuple
         :param str namespace: A namespace
         :rtype: bool
         """

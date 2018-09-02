@@ -41,25 +41,25 @@ def to_neo4j(graph, neo_connection, use_tqdm=False):
 
     node_map = {}
 
-    nodes = graph.nodes(data=True)
+    nodes = list(graph)
     if use_tqdm:
         nodes = tqdm(nodes, desc='nodes')
 
-    for node, data in nodes:
-        if NAMESPACE not in data or VARIANTS in data or MEMBERS in data or FUSION in data:
-            attrs = {'name': data.as_bel()}
+    for node in nodes:
+        if NAMESPACE not in node or VARIANTS in node or MEMBERS in node or FUSION in node:
+            attrs = {'name': node.as_bel()}
         else:
-            attrs = {'namespace': data.namespace}
+            attrs = {'namespace': node.namespace}
 
-            if data.name and data.identifier:
-                attrs['name'] = data.name
-                attrs['identifier'] = data.identifier
-            elif data.identifier and not data.name:
-                attrs['name'] = data.identifier
-            elif data.name and not data.identifier:
-                attrs['name'] = data.name
+            if node.name and node.identifier:
+                attrs['name'] = node.name
+                attrs['identifier'] = node.identifier
+            elif node.identifier and not node.name:
+                attrs['name'] = node.identifier
+            elif node.name and not node.identifier:
+                attrs['name'] = node.name
 
-        node_map[node] = py2neo.Node(data.function, **attrs)
+        node_map[node] = py2neo.Node(node.function, **attrs)
 
         tx.create(node_map[node])
 
@@ -67,10 +67,10 @@ def to_neo4j(graph, neo_connection, use_tqdm=False):
     if use_tqdm:
         edges = tqdm(edges, desc='edges')
 
-    for u, v, key, data in edges:
-        rel_type = data[RELATION]
+    for u, v, key, node in edges:
+        rel_type = node[RELATION]
 
-        d = data.copy()
+        d = node.copy()
         del d[RELATION]
 
         attrs = {}

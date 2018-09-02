@@ -37,9 +37,8 @@ def update_node_helper(source, target):
     :param nx.Graph target: The target BEL graph
     """
     for node in target:
-        if node not in source:
-            continue
-        target._node[node] = source._node[node]
+        if node in source:
+            target.nodes[node].update(source.nodes[node])
 
 
 def ensure_node_from_universe(source, target, node):

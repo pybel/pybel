@@ -519,7 +519,7 @@ class Node(Base):
             for edge in self.out_edges.filter(Edge.relation == relation)
         ]
 
-    def to_json(self):
+    def as_bel(self):
         """Serialize this node as a PyBEL DSL object.
 
         :rtype: pybel.dsl.BaseEntity
@@ -590,12 +590,8 @@ class Node(Base):
             identifier=self.namespace_entry.identifier,
         )
 
-    def to_tuple(self):
-        """Convert this node to a PyBEL tuple.
-
-        :rtype: tuple
-        """
-        return self.to_json().as_tuple()
+    def to_json(self):
+        return self.as_bel()
 
 
 author_citation = Table(

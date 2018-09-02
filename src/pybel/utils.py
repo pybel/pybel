@@ -224,20 +224,20 @@ def _get_citation_tuple(data):
     if citation is None:
         return None, None
 
-    return citation[CITATION_TYPE], citation[CITATION_REFERENCE]
+    return '{type}:{reference}'.format(type=citation[CITATION_TYPE], reference=citation[CITATION_REFERENCE])
 
 
 def _get_edge_tuple(u, v, data):
     """Convert an edge to a consistent tuple.
 
-    :param tuple u: The source BEL node
-    :param tuple v: The target BEL node
+    :param BaseEntity u: The source BEL node
+    :param BaseEntity v: The target BEL node
     :param dict data: The edge's data dictionary
     :return: A tuple that can be hashed representing this edge. Makes no promises to its structure.
     """
     return (
-        u,
-        v,
+        u.as_bel(),
+        v.as_bel(),
         _get_citation_tuple(data),
         data.get(EVIDENCE),
         canonicalize_edge(data),
@@ -247,8 +247,8 @@ def _get_edge_tuple(u, v, data):
 def hash_edge(u, v, data):
     """Convert an edge tuple to a SHA512 hash.
     
-    :param tuple u: The source BEL node
-    :param tuple v: The target BEL node
+    :param BaseEntity u: The source BEL node
+    :param BaseEntity v: The target BEL node
     :param dict data: The edge's data dictionary
     :return: A hashed version of the edge tuple using md5 hash of the binary pickle dump of u, v, and the json dump of d
     :rtype: str

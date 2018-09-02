@@ -48,8 +48,8 @@ class TestExampleInterchange(unittest.TestCase):
 
         :type graph: pybel.BELGraph
         """
-        for _, data in graph.nodes(data=True):
-            self.assertIsInstance(data, BaseEntity)
+        for node in graph:
+            self.assertIsInstance(node, BaseEntity)
 
         self.assertEqual(set(sialic_acid_graph), set(graph))
         self.assertEqual(set(sialic_acid_graph.edges()), set(graph.edges()))
@@ -281,8 +281,8 @@ class TestFull(TestTokenParserBase):
         line = 'g(dbSNP:rs10234) -- g(dbSNP:rs10235)'
         self.add_default_provenance()
         self.parser.parseString(line)
-        self.assertIn((GENE, 'dbSNP', 'rs10234'), self.parser.graph)
-        self.assertIn((GENE, 'dbSNP', 'rs10235'), self.parser.graph)
+        self.assertIn(gene('dbSNP', 'rs10234'), self.parser.graph)
+        self.assertIn(gene('dbSNP', 'rs10235'), self.parser.graph)
 
     def test_regex_mismatch(self):
         line = 'g(dbSNP:10234) -- g(dbSNP:rr10235)'
@@ -317,15 +317,12 @@ class TestFull(TestTokenParserBase):
 
         self.parser.parse_lines(statements)
 
-        test_node_1_dict = gene(namespace='TESTNS', name='1')
-        test_node_2_dict = gene(namespace='TESTNS', name='2')
+        test_node_1 = gene(namespace='TESTNS', name='1')
+        test_node_2 = gene(namespace='TESTNS', name='2')
 
         self.assertEqual(2, self.graph.number_of_nodes())
-        self.assertIn(test_node_1_dict, self.graph)
-        self.assertIn(test_node_2_dict, self.graph)
-
-        test_node_1 = test_node_1_dict.as_tuple()
-        test_node_2 = test_node_2_dict.as_tuple()
+        self.assertIn(test_node_1, self.graph)
+        self.assertIn(test_node_2, self.graph)
 
         self.assertEqual(1, self.parser.graph.number_of_edges())
 

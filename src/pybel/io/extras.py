@@ -30,21 +30,20 @@ def to_graphml(graph, file):
     :param BELGraph graph: A BEL graph
     :param file file: A file or file-like object
     """
-    g = nx.MultiDiGraph()
+    graph = nx.MultiDiGraph()
 
-    for node, data in graph.nodes(data=True):
-        bel = graph.node_to_bel(node)
-        g.add_node(bel, function=data[FUNCTION])
+    for node in graph:
+        graph.add_node(node.as_bel(), function=node.function)
 
-    for u, v, key, data in graph.edges(data=True, keys=True):
-        g.add_edge(
-            graph.node_to_bel(u),
-            graph.node_to_bel(v),
+    for u, v, key, node in graph.edges(data=True, keys=True):
+        graph.add_edge(
+            u.as_bel(),
+            v.as_bel(),
             key=key,
-            interaction=data[RELATION],
+            interaction=node[RELATION],
         )
 
-    nx.write_graphml(g, file)
+    nx.write_graphml(graph, file)
 
 
 def to_csv(graph, file=None, sep='\t'):
@@ -111,8 +110,8 @@ def to_gsea(graph, file=None):
     print('# {}'.format(graph.name), file=file)
     nodes = {
         data[NAME]
-        for _, data in graph.nodes(data=True)
-        if NAMESPACE in data and data[NAMESPACE] == 'HGNC'
+        for data in graph
+        if NAMESPACE in data and data[NAMESPACE] == 'HGNC' and NAME in data
     }
     for node in sorted(nodes):
         print(node, file=file)

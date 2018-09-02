@@ -129,17 +129,17 @@ def node_link_data(graph):
     :param pybel.BELGraph graph:
     :rtype: dict
     """
-    nodes = sorted(graph.nodes(data=True), key=lambda node_data: node_data[1].as_bel())
+    nodes = sorted(graph, key=methodcaller('as_bel'))
 
-    mapping = dict(zip(map(itemgetter(0), nodes), count()))
+    mapping = dict(zip(nodes, count()))
 
     return {
         'directed': True,
         'multigraph': True,
         'graph': graph.graph,
         'nodes': [
-            _augment_node_with_sha512(data)
-            for node, data in nodes
+            _augment_node_with_sha512(node)
+            for node in nodes
         ],
         'links': [
             dict(chain(

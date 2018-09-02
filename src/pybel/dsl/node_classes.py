@@ -7,15 +7,14 @@ import hashlib
 from operator import methodcaller
 
 import six
-from six.moves.cPickle import dumps
 
 from .exc import InferCentralDogmaException, PyBELDSLException
 from .utils import entity
 from ..constants import (
     ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING,
     FRAGMENT_START, FRAGMENT_STOP, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GENE,
-    GMOD, GMOD_ORDER, HGVS, IDENTIFIER, KIND, MEMBERS, MIRNA, NAME, NAMESPACE, PARTNER_3P, PARTNER_5P, PATHOLOGY, PMOD,
-    PMOD_CODE, PMOD_ORDER, PMOD_POSITION, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P, REACTANTS, REACTION, RNA, VARIANTS,
+    GMOD, HGVS, IDENTIFIER, KIND, MEMBERS, MIRNA, NAME, NAMESPACE, PARTNER_3P, PARTNER_5P, PATHOLOGY, PMOD, PMOD_CODE,
+    PMOD_ORDER, PMOD_POSITION, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P, REACTANTS, REACTION, RNA, VARIANTS,
     rev_abundance_labels,
 )
 from ..utils import ensure_quotes
@@ -65,6 +64,8 @@ __all__ = [
     'FusionRangeBase',
 ]
 
+_as_bel = methodcaller('as_bel')
+
 
 @six.add_metaclass(abc.ABCMeta)
 class BaseEntity(dict):
@@ -90,13 +91,6 @@ class BaseEntity(dict):
         return rev_abundance_labels[self.function]
 
     @abc.abstractmethod
-    def as_tuple(self):
-        """Return this entity as a PyBEL tuple.
-
-        :rtype: tuple
-        """
-
-    @abc.abstractmethod
     def as_bel(self):
         """Return this entity as a BEL string.
 
@@ -108,7 +102,7 @@ class BaseEntity(dict):
 
         :rtype: str
         """
-        return hashlib.sha512(dumps(self.as_tuple())).hexdigest()
+        return hashlib.sha512(self.as_bel().encode('utf8')).hexdigest()
 
     @property
     def sha512(self):
@@ -119,7 +113,13 @@ class BaseEntity(dict):
         return self.as_sha512()
 
     def __hash__(self):  # noqa: D105
-        return hash(self.as_tuple())
+        return hash(self.as_bel())
+
+    def __eq__(self, other):
+        return isinstance(other, BaseEntity) and self.as_bel() == other.as_bel()
+
+    def __repr__(self):
+        return '<BEL {bel}>'.format(bel=self.as_bel())
 
     def __str__(self):  # noqa: D105
         return self.as_bel()
@@ -169,13 +169,6 @@ class BaseAbundance(BaseEntity):
     @property
     def _priority_id(self):
         return self.name or self.identifier
-
-    def as_tuple(self):
-        """Return this node as a PyBEL node tuple.
-
-        :rtype: tuple
-        """
-        return self.function, self.namespace, self._priority_id
 
     def as_bel(self):
         """Return this node as a BEL string.
@@ -258,7 +251,7 @@ class CentralDogma(BaseAbundance):
             self[VARIANTS] = (
                 [variants]
                 if isinstance(variants, Variant) else
-                sorted(variants, key=methodcaller('as_tuple'))
+                sorted(variants, key=_as_bel)
             )
 
     @property
@@ -268,18 +261,6 @@ class CentralDogma(BaseAbundance):
         :rtype: Optional[list[Variant]]
         """
         return self.get(VARIANTS)
-
-    def as_tuple(self):
-        """Return this node as a PyBEL node tuple.
-
-        :rtype: tuple
-        """
-        t = super(CentralDogma, self).as_tuple()
-
-        if self.variants:
-            return t + _tuplable_list_as_tuple(self.variants)
-
-        return t
 
     def as_bel(self):
         """Return this node as a BEL string.
@@ -348,13 +329,6 @@ class Variant(dict):
         super(Variant, self).__init__({KIND: kind})
 
     @abc.abstractmethod
-    def as_tuple(self):
-        """Return this node as a tuple.
-
-        :rtype: tuple
-        """
-
-    @abc.abstractmethod
     def as_bel(self):
         """Return this variant as a BEL string.
 
@@ -407,15 +381,6 @@ class ProteinModification(Variant):
         if position:
             self[PMOD_POSITION] = position
 
-    def as_tuple(self):
-        """Return this protein modification variant as a tuple.
-
-        :rtype: tuple
-        """
-        identifier = self[IDENTIFIER][NAMESPACE], self[IDENTIFIER][NAME]
-        params = tuple(self[key] for key in PMOD_ORDER[2:] if key in self)
-        return (PMOD,) + (identifier,) + params
-
     def as_bel(self):
         """Return this protein modification variant as a BEL string.
 
@@ -456,15 +421,6 @@ class GeneModification(Variant):
             identifier=identifier
         )
 
-    def as_tuple(self):
-        """Return this gene modification variant as a tuple.
-
-        :rtype: tuple
-        """
-        identifier = self[IDENTIFIER][NAMESPACE], self[IDENTIFIER][NAME]
-        params = tuple(self[key] for key in GMOD_ORDER[2:] if key in self)
-        return (GMOD,) + (identifier,) + params
-
     def as_bel(self):
         """Return this gene modification variant as a BEL string.
 
@@ -488,13 +444,6 @@ class Hgvs(Variant):
         super(Hgvs, self).__init__(HGVS)
 
         self[IDENTIFIER] = variant
-
-    def as_tuple(self):
-        """Return this HGVS variant as a tuple.
-
-        :rtype: tuple
-        """
-        return self[KIND], self[IDENTIFIER]
 
     def as_bel(self):
         """Return this HGVS variant as a BEL string.
@@ -565,21 +514,6 @@ class Fragment(Variant):
 
         if description:
             self[FRAGMENT_DESCRIPTION] = description
-
-    def as_tuple(self):
-        """Return this fragment variant as a tuple.
-
-        :rtype: tuple
-        """
-        if FRAGMENT_MISSING in self:
-            result = FRAGMENT, '?'
-        else:
-            result = FRAGMENT, (self[FRAGMENT_START], self[FRAGMENT_STOP])
-
-        if FRAGMENT_DESCRIPTION in self:
-            return result + (self[FRAGMENT_DESCRIPTION],)
-
-        return result
 
     def as_bel(self):
         """Return this fragment variant as a BEL string.
@@ -726,27 +660,6 @@ class Protein(CentralDogma):
         )
 
 
-def _tuplable_list_as_tuple(entities):
-    """Convert a reaction list to tuples.
-
-    :type entities: iter[BaseEntity]
-    :rtype: tuple[tuple]
-    """
-    return tuple(e.as_tuple() for e in entities)
-
-
-def _entity_list_as_tuple(entities):
-    """Convert a reaction list to tuples.
-
-    :type entities: iter[BaseEntity]
-    :rtype: tuple
-    """
-    return tuple(sorted(
-        e.as_tuple()
-        for e in entities
-    ))
-
-
 def _entity_list_as_bel(entities):
     """Stringify a list of BEL entities.
 
@@ -779,12 +692,12 @@ class Reaction(BaseEntity):
         if isinstance(reactants, BaseEntity):
             reactants = [reactants]
         else:
-            reactants = sorted(reactants, key=methodcaller('as_tuple'))
+            reactants = sorted(reactants, key=_as_bel)
 
         if isinstance(products, BaseEntity):
             products = [products]
         else:
-            products = sorted(products, key=methodcaller('as_tuple'))
+            products = sorted(products, key=_as_bel)
 
         self.update({
             REACTANTS: reactants,
@@ -806,17 +719,6 @@ class Reaction(BaseEntity):
         :rtype: list[BaseAbundance]
         """
         return self[PRODUCTS]
-
-    def as_tuple(self):
-        """Return this reaction as a tuple.
-
-        :rtype: tuple
-        """
-        return (
-            self.function,
-            _entity_list_as_tuple(self.reactants),
-            _entity_list_as_tuple(self.products),
-        )
 
     def as_bel(self):
         """Return this reaction as a BEL string.
@@ -846,7 +748,7 @@ class ListAbundance(BaseEntity):
         self[MEMBERS] = (
             [members]
             if isinstance(members, BaseEntity) else
-            sorted(members, key=methodcaller('as_tuple'))
+            sorted(members, key=_as_bel)
         )
 
     @property
@@ -856,13 +758,6 @@ class ListAbundance(BaseEntity):
         :rtype: list[BaseAbundance]
         """
         return self[MEMBERS]
-
-    def as_tuple(self):
-        """Return this list abundance as a tuple.
-
-        :rtype: tuple
-        """
-        return (self.function,) + _entity_list_as_tuple(self.members)
 
     def as_bel(self):
         """Return this list abundance as a BEL string.
@@ -930,18 +825,14 @@ class FusionRangeBase(dict):
     """The superclass for fusion range data dictionaries."""
 
     @abc.abstractmethod
-    def as_tuple(self):
-        """Return this fusion range as a tuple.
-
-        :rtype: tuple
-        """
-
-    @abc.abstractmethod
     def as_bel(self):
         """Return this fusion range as BEL.
 
         :rtype: str
         """
+
+    def __str__(self):  # noqa: D105
+        return self.as_bel()
 
 
 class MissingFusionRange(FusionRangeBase):
@@ -953,22 +844,12 @@ class MissingFusionRange(FusionRangeBase):
             FUSION_MISSING: '?'
         })
 
-    def as_tuple(self):
-        """Return this missing fusion range as a tuple.
-
-        :rtype: tuple
-        """
-        return self[FUSION_MISSING],
-
     def as_bel(self):
         """Return this missing fusion range as BEL.
 
         :rtype: tuple
         """
         return '?'
-
-    def __str__(self):  # noqa: D105
-        return self.as_bel()
 
 
 class EnumeratedFusionRange(FusionRangeBase):
@@ -992,17 +873,6 @@ class EnumeratedFusionRange(FusionRangeBase):
             FUSION_STOP: stop
         })
 
-    def as_tuple(self):
-        """Return this fusion range as a tuple.
-
-        :rtype: tuple
-        """
-        return (
-            self[FUSION_REFERENCE],
-            self[FUSION_START],
-            self[FUSION_STOP]
-        )
-
     def as_bel(self):
         """Return this fusion range as a BEL string.
 
@@ -1013,9 +883,6 @@ class EnumeratedFusionRange(FusionRangeBase):
             start=self[FUSION_START],
             stop=self[FUSION_STOP]
         )
-
-    def __str__(self):  # noqa: D105
-        return self.as_bel()
 
 
 class FusionBase(BaseEntity):
@@ -1069,25 +936,6 @@ class FusionBase(BaseEntity):
         :rtype: FusionRangeBase
         """
         return self[FUSION][RANGE_3P]
-
-    def as_tuple(self):
-        """Return this fusion as a tuple.
-
-        :rtype: tuple
-        """
-        return (
-            self.function,
-            (
-                self.partner_5p.namespace,
-                self.partner_5p._priority_id,
-            ),
-            self.range_5p.as_tuple(),
-            (
-                self.partner_3p.namespace,
-                self.partner_3p._priority_id,
-            ),
-            self.range_3p.as_tuple(),
-        )
 
     def as_bel(self):
         """Return this fusion as a BEL string.

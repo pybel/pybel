@@ -62,10 +62,10 @@ def assert_unqualified_edge(self, u, v, rel):
     :return:
     """
     if isinstance(u, BaseEntity):
-        u = u.as_tuple()
+        u = u
     self.assertIn(u, self.graph)
     if isinstance(v, BaseEntity):
-        v = v.as_tuple()
+        v = v
     self.assertIn(v, self.graph[u])
     edges = list(self.graph[u][v].values())
     self.assertEqual(1, len(edges))
@@ -506,20 +506,16 @@ class TestAddNodeFromData(unittest.TestCase):
 
     def test_simple(self):
         self.graph.add_node_from_data(yfg_data)
-        self.assertIn(yfg_data.as_tuple(), self.graph)
+        self.assertIn(yfg_data, self.graph)
         self.assertEqual(1, self.graph.number_of_nodes())
 
     def test_single_variant(self):
         node_data = gene('HGNC', 'AKT1', variants=hgvs('p.Phe508del'))
-        node_tuple = node_data.as_tuple()
         node_parent_data = node_data.get_parent()
-        node_parent_tuple = node_parent_data.as_tuple()
 
         self.graph.add_node_from_data(node_data)
-        self.assertIn(node_tuple, self.graph)
-        self.assertEqual(node_data, self.graph.node[node_tuple])
-        self.assertIn(node_parent_tuple, self.graph)
-        self.assertEqual(node_parent_data, self.graph.node[node_parent_tuple])
+        self.assertIn(node_data, self.graph)
+        self.assertIn(node_parent_data, self.graph)
         self.assertEqual(2, self.graph.number_of_nodes())
         self.assertEqual(1, self.graph.number_of_edges())
 
@@ -527,16 +523,12 @@ class TestAddNodeFromData(unittest.TestCase):
         node_data = gene('HGNC', 'AKT1', variants=[
             hgvs('p.Phe508del'), hgvs('p.Phe509del')
         ])
-        node_tuple = node_data.as_tuple()
-
         node_parent_data = node_data.get_parent()
-        node_parent_tuple = node_parent_data.as_tuple()
+        node_parent_tuple = node_parent_data
 
         self.graph.add_node_from_data(node_data)
-        self.assertIn(node_tuple, self.graph)
-        self.assertEqual(node_data, self.graph.node[node_tuple])
+        self.assertIn(node_data, self.graph)
         self.assertIn(node_parent_tuple, self.graph)
-        self.assertEqual(node_parent_data, self.graph.node[node_parent_tuple])
         self.assertEqual(2, self.graph.number_of_nodes())
         self.assertEqual(1, self.graph.number_of_edges())
 
@@ -547,11 +539,10 @@ class TestAddNodeFromData(unittest.TestCase):
             range_5p=fusion_range('c', 1, 79),
             range_3p=fusion_range('c', 312, 5034)
         )
-        node_tuple = node_data.as_tuple()
+        node_data = node_data
 
         self.graph.add_node_from_data(node_data)
-        self.assertIn(node_tuple, self.graph)
-        self.assertEqual(node_data, self.graph.node[node_tuple])
+        self.assertIn(node_data, self.graph)
         self.assertEqual(1, self.graph.number_of_nodes())
         self.assertEqual(0, self.graph.number_of_edges())
 
@@ -561,39 +552,39 @@ class TestAddNodeFromData(unittest.TestCase):
         node_data = composite_abundance([il23, il6])
 
         self.graph.add_node_from_data(node_data)
-        self.assertIn(node_data.as_tuple(), self.graph)
+        self.assertIn(node_data, self.graph)
         self.assertEqual(3, self.graph.number_of_nodes())
-        self.assertIn(il6.as_tuple(), self.graph, msg='Nodes:\n'.format('\n'.join(map(str, self.graph))))
-        self.assertIn(il23.as_tuple(), self.graph)
+        self.assertIn(il6, self.graph, msg='Nodes:\n'.format('\n'.join(map(str, self.graph))))
+        self.assertIn(il23, self.graph)
         self.assertEqual(2, self.graph.number_of_edges())
 
-        self.assertIn(il6.as_tuple(), self.graph[node_data.as_tuple()])
-        edges = list(self.graph[node_data.as_tuple()][il6.as_tuple()].values())
+        self.assertIn(il6, self.graph[node_data])
+        edges = list(self.graph[node_data][il6].values())
         self.assertEqual(1, len(edges))
         data = edges[0]
         self.assertEqual(HAS_COMPONENT, data[RELATION])
 
-        self.assertIn(il23.as_tuple(), self.graph[node_data.as_tuple()])
-        edges = list(self.graph[node_data.as_tuple()][il23.as_tuple()].values())
+        self.assertIn(il23, self.graph[node_data])
+        edges = list(self.graph[node_data][il23].values())
         self.assertEqual(1, len(edges))
         data = edges[0]
         self.assertEqual(HAS_COMPONENT, data[RELATION])
 
     def test_reaction(self):
         self.graph.add_node_from_data(superoxide_decomposition)
-        self.assertIn(superoxide_decomposition.as_tuple(), self.graph)
+        self.assertIn(superoxide_decomposition, self.graph)
         self.assertEqual(4, self.graph.number_of_nodes())
         self.assertEqual(3, self.graph.number_of_edges())
 
-        assert_unqualified_edge(self, superoxide_decomposition.as_tuple(), superoxide.as_tuple(), HAS_REACTANT)
-        assert_unqualified_edge(self, superoxide_decomposition.as_tuple(), hydrogen_peroxide.as_tuple(), HAS_PRODUCT)
-        assert_unqualified_edge(self, superoxide_decomposition.as_tuple(), oxygen.as_tuple(), HAS_PRODUCT)
+        assert_unqualified_edge(self, superoxide_decomposition, superoxide, HAS_REACTANT)
+        assert_unqualified_edge(self, superoxide_decomposition, hydrogen_peroxide, HAS_PRODUCT)
+        assert_unqualified_edge(self, superoxide_decomposition, oxygen, HAS_PRODUCT)
 
     def test_complex(self):
         node = complex_abundance(members=[fos, jun])
 
         self.graph.add_node_from_data(node)
-        self.assertIn(node.as_tuple(), self.graph)
+        self.assertIn(node, self.graph)
         self.assertEqual(3, self.graph.number_of_nodes())
         self.assertEqual(2, self.graph.number_of_edges())
 
@@ -604,8 +595,8 @@ class TestAddNodeFromData(unittest.TestCase):
         """Tests what happens if a BEL statement complex(p(X), p(X)) is added"""
         self.graph.add_node_from_data(egfr_dimer)
 
-        self.assertIn(egfr.as_tuple(), self.graph)
-        self.assertIn(egfr_dimer.as_tuple(), self.graph)
+        self.assertIn(egfr, self.graph)
+        self.assertIn(egfr_dimer, self.graph)
         self.assertEqual(2, self.graph.number_of_nodes())
         self.assertEqual(1, self.graph.number_of_edges())
 
@@ -614,12 +605,12 @@ class TestAddNodeFromData(unittest.TestCase):
     def test_nested_complex(self):
         """Checks what happens if a theoretical BEL statement `complex(p(X), complex(p(Y), p(Z)))` is added"""
         self.graph.add_node_from_data(bound_ap1_e2f4)
-        self.assertIn(bound_ap1_e2f4.as_tuple(), self.graph)
+        self.assertIn(bound_ap1_e2f4, self.graph)
         self.assertEqual(5, self.graph.number_of_nodes())
-        self.assertIn(fos.as_tuple(), self.graph)
-        self.assertIn(jun.as_tuple(), self.graph)
-        self.assertIn(e2f4_data.as_tuple(), self.graph)
-        self.assertIn(ap1_complex.as_tuple(), self.graph)
+        self.assertIn(fos, self.graph)
+        self.assertIn(jun, self.graph)
+        self.assertIn(e2f4_data, self.graph)
+        self.assertIn(ap1_complex, self.graph)
         self.assertEqual(4, self.graph.number_of_edges())
 
         assert_unqualified_edge(self, ap1_complex, fos, HAS_COMPONENT)
@@ -631,17 +622,17 @@ class TestAddNodeFromData(unittest.TestCase):
 class TestReconstituteNodeTuples(TemporaryCacheMixin):
     """Tests the ability to go from PyBEL to relational database"""
 
-    def help_reconstitute(self, node_data, number_nodes, number_edges):
+    def help_reconstitute(self, node, number_nodes, number_edges):
         """Help test the round-trip conversion from PyBEL data dictionary to node model.
 
-        :param BaseEntity node_data: PyBEL node data dictionary
+        :param BaseEntity node: PyBEL node data dictionary
         :param int number_nodes:
         :param int number_edges:
         """
-        self.assertIsInstance(node_data, BaseEntity)
+        self.assertIsInstance(node, BaseEntity)
 
         graph = BELGraph(name='test', version='0.0.0')
-        node_tuple = graph.add_node_from_data(node_data)
+        graph.add_node_from_data(node)
 
         make_dummy_namespaces(self.manager, graph)
 
@@ -649,13 +640,12 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         self.assertEqual(number_nodes, self.manager.count_nodes())
         self.assertEqual(number_edges, self.manager.count_edges())
 
-        node = self.manager.get_or_create_node(graph, node_data)
+        node_model = self.manager.get_or_create_node(graph, node)
+        self.assertEqual(node.sha512, node_model.sha512)
         self.manager.session.commit()
 
-        self.assertEqual(node_data, node.to_json())
-        self.assertEqual(node_tuple, node.to_tuple())
-
-        self.assertEqual(node_tuple, self.manager.get_node_tuple_by_hash(node_data.as_sha512()))
+        self.assertEqual(node, node_model.to_json())
+        self.assertEqual(node, self.manager.get_dsl_by_hash(node.as_sha512()))
 
     @mock_bel_resources
     def test_simple(self, mock):
@@ -1372,8 +1362,8 @@ class TestEquivalentNodes(unittest.TestCase):
 
         graph.add_equivalence(a_node, b_node)
 
-        a = a_node.as_tuple()
-        b = b_node.as_tuple()
+        a = a_node
+        b = b_node
 
         self.assertEqual({a, b}, graph.get_equivalent_nodes(a_node))
         self.assertEqual({a, b}, graph.get_equivalent_nodes(b_node))

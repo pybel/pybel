@@ -747,29 +747,29 @@ class InsertManager(NamespaceManager, LookupManager):
         log.debug('building node models')
         node_model_build_start = time.time()
 
-        nodes = graph.nodes(data=True)
+        nodes = list(graph)
         if use_tqdm:
             nodes = tqdm(nodes, total=graph.number_of_nodes(), desc='nodes')
 
-        tuple_model = {}
-        for node_tuple, node_data in nodes:
-            namespace = node_data.get(NAMESPACE)
+        node_model = {}
+        for node in nodes:
+            namespace = node.get(NAMESPACE)
 
             if graph.skip_storing_namespace(namespace):
                 continue  # already know this node won't be cached
 
-            node_object = self.get_or_create_node(graph, node_data)
+            node_object = self.get_or_create_node(graph, node)
 
             if node_object is None:
-                log.warning('can not add node %s', node_tuple)
+                log.warning('can not add node %s', node)
                 continue
 
-            tuple_model[node_tuple] = node_object
+            node_model[node] = node_object
 
         log.debug('built node models in %.2f seconds', time.time() - node_model_build_start)
 
         node_model_commit_start = time.time()
-        node_models = list(tuple_model.values())
+        node_models = list(node_model.values())
         self.session.add_all(node_models)
         self.session.commit()
         log.debug('stored node models in %.2f seconds', time.time() - node_model_commit_start)
@@ -781,7 +781,7 @@ class InsertManager(NamespaceManager, LookupManager):
         if use_tqdm:
             edges = tqdm(edges, total=graph.number_of_edges(), desc='edges')
 
-        edge_models = list(self._get_edge_models(graph, tuple_model, edges))
+        edge_models = list(self._get_edge_models(graph, node_model, edges))
 
         log.debug('built edge models in %.2f seconds', time.time() - edge_model_build_start)
 

@@ -2,15 +2,16 @@
 
 """Summary functions for nodes in BEL graphs."""
 
-import itertools as itt
 from collections import Counter, defaultdict
+
+import itertools as itt
 
 from ..filters.node_predicates import has_variant
 from ...constants import (
-    ACTIVITY, EFFECT, FROM_LOC, FUNCTION, FUSION, IDENTIFIER, KIND, LOCATION, MEMBERS, MODIFIER, NAME, NAMESPACE,
+    ACTIVITY, EFFECT, FROM_LOC, FUSION, IDENTIFIER, KIND, LOCATION, MEMBERS, MODIFIER, NAME, NAMESPACE,
     OBJECT, PARTNER_3P, PARTNER_5P, SUBJECT, TO_LOC, TRANSLOCATION, VARIANTS,
 )
-from ...dsl import pathology
+from ...dsl import Pathology
 
 __all__ = [
     'get_functions',
@@ -29,10 +30,13 @@ __all__ = [
 
 
 def _function_iterator(graph):
-    """Iterate over the functions in a graph."""
+    """Iterate over the functions in a graph.
+
+    :rtype: iter[str]
+    """
     return (
-        data[FUNCTION]
-        for _, data in graph.nodes(data=True)
+        node.function
+        for node in graph
     )
 
 
@@ -58,9 +62,9 @@ def count_functions(graph):
 
 def _iterate_namespaces(graph):
     return (
-        data[NAMESPACE]
-        for _, data in graph.nodes(data=True)
-        if NAMESPACE in data
+        node[NAMESPACE]
+        for node in graph
+        if NAMESPACE in node
     )
 
 
@@ -108,7 +112,7 @@ def get_names(graph):
 
 def _identifier_filtered_iterator(graph):
     """Iterate over names in the given namespace."""
-    for _, data in graph.nodes(data=True):
+    for data in graph:
         for pair in _get_node_names(data):
             yield pair
 
@@ -203,8 +207,8 @@ def count_variants(graph):
     """
     return Counter(
         variant_data[KIND]
-        for node, data in graph.nodes(data=True)
-        if has_variant(graph, node)
+        for data in graph
+        if has_variant(graph, data)
         for variant_data in data[VARIANTS]
     )
 
@@ -226,7 +230,7 @@ def _pathology_iterator(graph):
     :rtype: iter
     """
     for node in itt.chain.from_iterable(graph.edges()):
-        if isinstance(graph.nodes[node], pathology):
+        if isinstance(node, Pathology):
             yield node
 
 

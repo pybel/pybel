@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 """Functions for enriching the origins of Proteins, RNAs, and miRNAs."""
-
+from pybel.dsl import Protein
 from ...pipeline import in_place_transformation
 from ...pipeline.decorators import register_deprecated
-from ....constants import FUNCTION, FUSION, MIRNA, PROTEIN, RNA, VARIANTS
+from ....constants import FUNCTION, FUSION, MIRNA, RNA, VARIANTS
 
 __all__ = [
     'enrich_rnas_with_genes',
@@ -20,8 +20,11 @@ def enrich_proteins_with_rnas(graph):
 
     :param pybel.BELGraph graph: A BEL graph
     """
-    for _, protein_node in list(graph.nodes(data=True)):
-        if protein_node[FUNCTION] != PROTEIN or FUSION in protein_node or VARIANTS in protein_node:
+    for protein_node in list(graph):
+        if not isinstance(protein_node, Protein):
+            continue
+
+        if protein_node.variants:
             continue
 
         rna_node = protein_node.get_rna()
@@ -35,7 +38,7 @@ def enrich_rnas_with_genes(graph):
 
     :param pybel.BELGraph graph: A BEL graph
     """
-    for _, rna_node in list(graph.nodes(data=True)):
+    for rna_node in list(graph):
         if rna_node[FUNCTION] not in {MIRNA, RNA} or FUSION in rna_node or VARIANTS in rna_node:
             continue
 

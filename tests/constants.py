@@ -69,8 +69,7 @@ def assert_has_node(self, node, graph, **kwargs):
     :type graph: BELGraph
     :param kwargs:
     """
-    if isinstance(node, BaseEntity):
-        node = node.as_tuple()
+    self.assertIsInstance(node, BaseEntity)
 
     self.assertIn(
         node,
@@ -127,11 +126,8 @@ def assert_has_edge(self, u, v, graph, permissive=True, **kwargs):
     :type v: BaseEntity or tuple
     :param BELGraph graph: underlying graph
     """
-    if isinstance(u, BaseEntity):
-        u = u.as_tuple()
-
-    if isinstance(v, BaseEntity):
-        v = v.as_tuple()
+    self.assertIsInstance(u, BaseEntity)
+    self.assertIsInstance(v, BaseEntity)
 
     self.assertTrue(
         graph.has_edge(u, v),
@@ -262,8 +258,8 @@ class BelReconstitutionMixin(TestGraphMixin):
         # self.assertEqual(6, graph.number_of_edges(),
         #                  msg='Edges:\n{}'.format('\n'.join(map(str, graph.edges(keys=True, data=True)))))
 
-        for _, data in graph.nodes(data=True):
-            self.assertIsInstance(data, BaseEntity)
+        for node in graph:
+            self.assertIsInstance(node, BaseEntity)
 
         self.assertIn(akt1, graph)
         self.assertIn(egfr, graph)
@@ -367,10 +363,10 @@ class BelReconstitutionMixin(TestGraphMixin):
             self.assertEqual({'TESTAN1', 'TESTAN2'}, set(graph.annotation_list))
             self.assertEqual({'TestRegex'}, set(graph.annotation_pattern))
 
-        for _, data in graph.nodes(data=True):
-            self.assertIsInstance(data, BaseEntity)
+        for node in graph:
+            self.assertIsInstance(node, BaseEntity)
 
-        self.assertEqual({node.as_tuple() for node in BEL_THOROUGH_NODES}, set(graph), msg='Nodes not equal')
+        self.assertEqual(set(BEL_THOROUGH_NODES), set(graph), msg='Nodes not equal')
 
         # FIXME
         # self.assertEqual(set((u, v) for u, v, _ in e), set(g.edges()))
@@ -443,8 +439,8 @@ class BelReconstitutionMixin(TestGraphMixin):
                 self.assertEqual(el, l, msg="Expected different error on line {}. Check line {}".format(el, l))
                 self.assertIsInstance(w, ew, msg='Line: {}'.format(el))
 
-        for _, data in graph.nodes(data=True):
-            self.assertIsInstance(data, BaseEntity)
+        for node in graph:
+            self.assertIsInstance(node, BaseEntity)
 
         self.assertIn(akt1, graph)
         self.assertIn(egfr, graph)
@@ -471,8 +467,8 @@ class BelReconstitutionMixin(TestGraphMixin):
         adgrb_complex = complex_abundance([adgrb1, adgrb2])
         achlorhydria = pathology(namespace='MESHD', name='Achlorhydria')
 
-        for _, data in graph.nodes(data=True):
-            self.assertIsInstance(data, BaseEntity)
+        for node in graph:
+            self.assertIsInstance(node, BaseEntity)
 
         self.assertIn(adgrb1, graph)
         self.assertIn(adgrb2, graph)

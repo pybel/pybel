@@ -13,9 +13,9 @@ __all__ = [
 def iter_children(graph, node):
     """Iterate over children of the node.
 
-    :param pybel.BELGraph graph:
-    :param tuple node:
-    :rtype: iter[tuple]
+    :type graph: pybel.BELGraph
+    :type node: BaseEntity
+    :rtype: iter[BaseEntity]
     """
     for u, _, d in graph.in_edges(node, data=True):
         if d[RELATION] != IS_A:
@@ -27,39 +27,37 @@ def transfer_causal_edges(graph, source, target):
     """Transfer causal edges that the source has to the target.
 
     :param pybel.BELGraph graph:
-    :param tuple source:
-    :param tuple target:
+    :type source: BaseEntity
+    :type target: BaseEntity
     """
-    target_node = graph.node[target]
-
-    for _, v, k, d in graph.out_edges(source, keys=True, data=True):
-        if d[RELATION] not in CAUSAL_RELATIONS:
+    for _, v, data in graph.out_edges(source, data=True):
+        if data[RELATION] not in CAUSAL_RELATIONS:
             continue
 
         graph.add_qualified_edge(
-            target_node,
-            graph.node[v],
-            relation=d[RELATION],
-            evidence=d[EVIDENCE],
-            citation=d[CITATION],
-            annotations=d.get(ANNOTATIONS),
-            subject_modifier=d.get(SUBJECT),
-            object_modifier=d.get(OBJECT)
+            target,
+            v,
+            relation=data[RELATION],
+            evidence=data[EVIDENCE],
+            citation=data[CITATION],
+            annotations=data.get(ANNOTATIONS),
+            subject_modifier=data.get(SUBJECT),
+            object_modifier=data.get(OBJECT)
         )
 
-    for u, _, k, d in graph.in_edges(source, keys=True, data=True):
-        if d[RELATION] not in CAUSAL_RELATIONS:
+    for u, _, data in graph.in_edges(source, data=True):
+        if data[RELATION] not in CAUSAL_RELATIONS:
             continue
 
         graph.add_qualified_edge(
-            graph.node[u],
-            target_node,
-            relation=d[RELATION],
-            evidence=d[EVIDENCE],
-            citation=d[CITATION],
-            annotations=d.get(ANNOTATIONS),
-            subject_modifier=d.get(SUBJECT),
-            object_modifier=d.get(OBJECT)
+            u,
+            target,
+            relation=data[RELATION],
+            evidence=data[EVIDENCE],
+            citation=data[CITATION],
+            annotations=data.get(ANNOTATIONS),
+            subject_modifier=data.get(SUBJECT),
+            object_modifier=data.get(OBJECT)
         )
 
 
@@ -70,8 +68,8 @@ def infer_child_relations(graph, node):
     :param node: A PyBEL node tuple, on which to propagate the children's relations
     :type node: tuple or BaseEntity
     """
-    if isinstance(node, BaseEntity):
-        node = node.as_tuple()
+    if not isinstance(node, BaseEntity):
+        raise TypeError
 
     for child in iter_children(graph, node):
         transfer_causal_edges(graph, node, child)
