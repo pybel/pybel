@@ -25,7 +25,7 @@ class TemporaryCacheMixin(unittest.TestCase):
     """A test case that has a connection and a manager that is created for each test function."""
 
     def setUp(self):
-        """Setup the test function with a connection and manager."""
+        """Set up the test function with a connection and manager."""
         if TEST_CONNECTION:
             self.connection = TEST_CONNECTION
         else:
@@ -54,7 +54,7 @@ class TemporaryCacheClsMixin(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """Setup the test class with a connection and manager."""
+        """Set up the test class with a connection and manager."""
         if TEST_CONNECTION:
             cls.connection = TEST_CONNECTION
         else:
@@ -81,7 +81,7 @@ class FleetingTemporaryCacheMixin(TemporaryCacheClsMixin):
     """A test case that clears the database before each function."""
 
     def setUp(self):
-        """Setup the function by clearing the database."""
+        """Set up the function by clearing the database."""
         super(FleetingTemporaryCacheMixin, self).setUp()
 
         self.manager.drop_networks()

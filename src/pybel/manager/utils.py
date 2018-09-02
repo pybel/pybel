@@ -20,7 +20,7 @@ def extract_shared_required(config, definition_header='Namespace'):
 
 def extract_shared_optional(bel_resource, definition_header='Namespace'):
     """Get the optional annotations shared by BEL namespace and annotation resource documents.
-    
+
     :param dict bel_resource: A configuration dictionary representing a BEL resource
     :param str definition_header: ``Namespace`` or ``AnnotationDefinition``
     :rtype: dict
@@ -41,16 +41,22 @@ def extract_shared_optional(bel_resource, definition_header='Namespace'):
 
     update_insert_values(bel_resource, shared_mapping, result)
 
-    if 'PublishedDate' in bel_resource['Citation']:
+    if 'PublishedDate' in bel_resource.get('Citation', {}):
         result['citation_published'] = parse_datetime(bel_resource['Citation']['PublishedDate'])
 
     return result
 
 
-def update_insert_values(bel_resource, m, d):
-    for database_column, (section, key) in m.items():
+def update_insert_values(bel_resource, mapping, values):
+    """Update the value dictionary with a BEL resource dictionary.
+
+    :param dict bel_resource:
+    :param dict[str,tuple[str,str]] mapping:
+    :param dict[str,str] values:
+    """
+    for database_column, (section, key) in mapping.items():
         if section in bel_resource and key in bel_resource[section]:
-            d[database_column] = bel_resource[section][key]
+            values[database_column] = bel_resource[section][key]
 
 
 def int_or_str(v):

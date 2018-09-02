@@ -12,7 +12,7 @@ from sqlalchemy.exc import OperationalError
 from tqdm import tqdm
 
 from ..constants import GRAPH_METADATA, INVERSE_DOCUMENT_KEYS, REQUIRED_METADATA
-from ..exceptions import PyBelWarning
+from ..exceptions import PyBELWarning
 from ..manager import Manager
 from ..parser import BELParser, MetadataParser
 from ..parser.exc import (
@@ -206,7 +206,7 @@ def parse_statements(graph, statements, bel_parser, use_tqdm=False):
             parse_log.error('Line %07d - General Parser Failure: %s', line_number, line)
             graph.add_warning(line_number, line, BelSyntaxError(line_number, line, e.loc),
                               bel_parser.get_annotations())
-        except PyBelWarning as e:
+        except PyBELWarning as e:
             parse_log.warning('Line %07d - %s: %s', line_number, e.__class__.__name__, e)
             graph.add_warning(line_number, line, e, bel_parser.get_annotations())
         except Exception as e:

@@ -2,7 +2,6 @@
 
 """An example describing a translocation.
 
-
 .. code-block:: none
 
     SET Citation = {"PubMed", "16170185"}

@@ -2,12 +2,12 @@
 
 """Exceptions for input/output."""
 
-from ..exceptions import PyBelWarning
+from ..exceptions import PyBELWarning
 
 import_version_message_fmt = 'Tried importing from PyBEL v{}. Need at least v{}'
 
 
-class ImportVersionWarning(PyBelWarning, ValueError):
+class ImportVersionWarning(PyBELWarning, ValueError):
     """Raised when trying to import data from an old version of PyBEL."""
 
     def __init__(self, actual_version_tuple, minimum_version_tuple):

@@ -6,10 +6,10 @@ A message for "General Parser Failure" is displayed when a problem was caused du
 number and original statement are printed for the user to debug.
 """
 
-from ..exceptions import PyBelWarning
+from ..exceptions import PyBELWarning
 
 
-class PyBelParserWarning(PyBelWarning):
+class PyBelParserWarning(PyBELWarning):
     """Base PyBEL parser exception, which holds the line and position where a parsing problem occurred"""
 
     def __init__(self, line_number, line, position, *args):
@@ -185,7 +185,7 @@ class VersionFormatWarning(PyBelParserWarning):
         )
 
 
-class MetadataException(PyBelWarning):
+class MetadataException(PyBELWarning):
     """Base exception for issues with document metadata"""
 
     def __init__(self, line_number, line, *args):
@@ -225,7 +225,7 @@ class InvalidMetadataException(PyBelParserWarning):
         return 'Invalid document metadata key: {}'.format(self.key)
 
 
-class MissingMetadataException(PyBelWarning):
+class MissingMetadataException(PyBELWarning):
     """Raised when a BEL Script is missing critical metadata."""
 
     def __init__(self, key):
@@ -363,7 +363,7 @@ class NestedRelationWarning(PyBelParserWarning):
         return 'Nesting is not supported. Split this statement: {}'.format(self.line)
 
 
-class LexicographyWarning(PyBelWarning):
+class LexicographyWarning(PyBELWarning):
     """Raised when encountering improper capitalization of namespace/annotation names."""
 
 

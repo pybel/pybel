@@ -4,11 +4,11 @@
 
 import datetime
 import hashlib
+from collections import defaultdict
 
 from sqlalchemy import (
     Boolean, Column, Date, DateTime, ForeignKey, Integer, LargeBinary, String, Table, Text, UniqueConstraint,
 )
-from collections import defaultdict
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import backref, relationship
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Clases for DSL nodes."""
+"""Classes for DSL nodes."""
 
 import abc
 import hashlib
@@ -69,7 +69,8 @@ class BaseEntity(dict):
     """This class represents all BEL nodes. It can be converted to a tuple and hashed."""
 
     def __init__(self, func):
-        """
+        """Build a PyBEL node data dictionary.
+
         :param str func: The PyBEL function
         """
         super(BaseEntity, self).__init__(**{FUNCTION: func})
@@ -115,10 +116,10 @@ class BaseEntity(dict):
         """
         return self.as_sha512()
 
-    def __hash__(self):
+    def __hash__(self):  # noqa: D105
         return hash(self.as_tuple())
 
-    def __str__(self):
+    def __str__(self):  # noqa: D105
         return self.as_bel()
 
 
@@ -358,7 +359,7 @@ class Variant(dict):
         :rtype: str
         """
 
-    def __str__(self):
+    def __str__(self):  # noqa: D105
         return self.as_bel()
 
 
@@ -596,8 +597,7 @@ class Gene(CentralDogma):
 
 
 class _Transcribable(CentralDogma):
-    """An intermediate class between the CentralDogma and rna/mirna because both of them share the ability to
-    get their corresponding gene"""
+    """A base class for RNA and micro-RNA to share getting of their corresponding genes."""
 
     def get_gene(self):
         """Get the corresponding gene or raise an exception if it's not the reference node.
@@ -929,9 +929,10 @@ class FusionRangeBase(dict):
 
 
 class MissingFusionRange(FusionRangeBase):
-    """Builds a missing fusion range data dictionary."""
+    """Represents a fusion range with no defined start or end."""
 
     def __init__(self):
+        """Build a missing fusion range."""
         super(MissingFusionRange, self).__init__({
             FUSION_MISSING: '?'
         })
@@ -950,7 +951,7 @@ class MissingFusionRange(FusionRangeBase):
         """
         return '?'
 
-    def __str__(self):
+    def __str__(self):  # noqa: D105
         return self.as_bel()
 
 
@@ -997,7 +998,7 @@ class EnumeratedFusionRange(FusionRangeBase):
             stop=self[FUSION_STOP]
         )
 
-    def __str__(self):
+    def __str__(self):  # noqa: D105
         return self.as_bel()
 
 
@@ -1023,7 +1024,7 @@ class FusionBase(BaseEntity):
 
     @property
     def partner_5p(self):
-        """
+        """The 5' partner.
 
         :rtype: CentralDogma
         """
@@ -1031,7 +1032,7 @@ class FusionBase(BaseEntity):
 
     @property
     def partner_3p(self):
-        """
+        """The 3' partner.
 
         :rtype: CentralDogma
         """
@@ -1039,7 +1040,7 @@ class FusionBase(BaseEntity):
 
     @property
     def range_5p(self):
-        """
+        """The 5' partner's range.
 
         :rtype: FusionRangeBase
         """
@@ -1047,7 +1048,7 @@ class FusionBase(BaseEntity):
 
     @property
     def range_3p(self):
-        """
+        """The 3' partner's range.
 
         :rtype: FusionRangeBase
         """

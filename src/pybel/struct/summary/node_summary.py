@@ -2,9 +2,8 @@
 
 """Summary functions for nodes in BEL graphs."""
 
-from collections import Counter, defaultdict
-
 import itertools as itt
+from collections import Counter, defaultdict
 
 from ..filters.node_predicates import has_variant
 from ...constants import (
@@ -221,7 +220,7 @@ def get_top_hubs(graph, count=15):
 
 
 def _pathology_iterator(graph):
-    """Iterate over edges in which either the source or target is a pathology node
+    """Iterate over edges in which either the source or target is a pathology node.
 
     :param pybel.BELGraph graph: A BEL graph
     :rtype: iter
