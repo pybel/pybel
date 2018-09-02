@@ -42,6 +42,7 @@ from ..language import (
 )
 from ..resources.definitions import get_bel_resource
 from ..struct import BELGraph, union
+from ..struct.summary.node_summary import get_names
 from ..utils import hash_citation, hash_dump, hash_evidence, parse_datetime
 
 __all__ = [
@@ -675,6 +676,7 @@ class InsertManager(NamespaceManager, LookupManager):
 
         :param BELGraph graph: A BEL graph
         :param bool store_parts: Should the graph be stored in the edge store?
+        :param bool use_tqdm: Should progress be displayed with tqdm?
         :rtype: Network
         :raises: pybel.resources.exc.ResourceError
         """
@@ -736,8 +738,9 @@ class InsertManager(NamespaceManager, LookupManager):
         :raises: pybel.resources.exc.ResourceError
         :raises: EdgeAddError
         """
-        # FIXME check if GOCC is needed
-        self.get_or_create_namespace(GOCC_LATEST)
+        names = get_names(graph)
+        if 'GOCC' in names and 'GOCC' not in graph.namespace_url:  # means it got thrown in there!
+            self.get_or_create_namespace(GOCC_LATEST)
 
         log.debug('inserting %s into edge store', graph)
         log.debug('building node models')
