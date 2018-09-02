@@ -9,8 +9,6 @@
     immunoreceptor tyrosine-based inhibitory motif (ITIM) domains and activation of the SHP-1 and
     SHP-2 tyrosine phosphatases [66, 67]."
 
-
-
     complex(p(HGNC:CD33),a(CHEBI:"sialic acid")) -> p(HGNC:CD33, pmod(P))
     act(p(HGNC:CD33, pmod(P))) => act(p(HGNC:PTPN6), ma(phos))
     act(p(HGNC:CD33, pmod(P))) => act(p(HGNC:PTPN11), ma(phos))
@@ -31,21 +29,14 @@
     UNSET ALL
 """
 
-from ..constants import (
-    ACTIVITY, BEL_DEFAULT_NAMESPACE, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, EFFECT, MODIFIER, NAME,
-    NAMESPACE,
-)
-from ..dsl import abundance, bioprocess, complex_abundance, pmod, protein, activity
+from ..dsl import abundance, activity, bioprocess, complex_abundance, pmod, protein
 from ..struct.graph import BELGraph
 
 __all__ = [
     'sialic_acid_graph'
 ]
 
-citation = {
-    CITATION_TYPE: CITATION_TYPE_PUBMED,
-    CITATION_REFERENCE: '26438529'
-}
+citation = '26438529'
 
 evidence_1 = """
 Sialic acid binding activates CD33, resulting in phosphorylation of the CD33 immunoreceptor tyrosine-based inhibitory
@@ -115,13 +106,7 @@ sialic_acid_graph.add_directly_increases(
     evidence=evidence_1,
     annotations={'Species': '9606', 'Confidence': 'High'},
     subject_modifier=activity(),
-    object_modifier={
-        MODIFIER: ACTIVITY,
-        EFFECT: {
-            NAMESPACE: BEL_DEFAULT_NAMESPACE,
-            NAME: 'phos'
-        }
-    }
+    object_modifier=activity('phos'),
 )
 
 sialic_acid_graph.add_directly_increases(
@@ -131,13 +116,7 @@ sialic_acid_graph.add_directly_increases(
     evidence=evidence_1,
     annotations={'Species': '9606', 'Confidence': 'High'},
     subject_modifier=activity(),
-    object_modifier={
-        MODIFIER: ACTIVITY,
-        EFFECT: {
-            NAMESPACE: BEL_DEFAULT_NAMESPACE,
-            NAME: 'phos'
-        }
-    }
+    object_modifier=activity('phos'),
 )
 
 sialic_acid_graph.add_directly_decreases(

@@ -20,6 +20,7 @@ Changed
 Removed
 ~~~~~~~
 - Remove ``pybel.tokens.node_to_tuple`` function and ``pybel.tokens.node_to_bel`` functions
+- All tuple-related functions in the DSL (AKA the tupleectomy)
 
 `0.11.11 <https://github.com/pybel/pybel/compare/v0.11.10...0.11.11>`_ - 2018-07-31
 -----------------------------------------------------------------------------------

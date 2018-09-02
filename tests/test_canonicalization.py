@@ -6,10 +6,7 @@ import unittest
 
 from pybel import BELGraph
 from pybel.canonicalize import _to_bel_lines_body, postpend_location
-from pybel.constants import (
-    ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, FRAGMENT, GENE, MODIFIER,
-    PATHOLOGY, PMOD, PROTEIN, REACTION, RNA,
-)
+from pybel.constants import BEL_DEFAULT_NAMESPACE, MODIFIER
 from pybel.dsl import (
     abundance, activity, bioprocess, complex_abundance, composite_abundance, degradation, entity, extracellular,
     fragment, fusion_range, gene, gene_fusion, gmod, hgvs, intracellular, mirna, named_complex_abundance, pathology,
@@ -54,31 +51,25 @@ class TestCanonicalize(unittest.TestCase):
         """Test canonicalization of abundances."""
         short = abundance(namespace='CHEBI', name='water')
         self.assertEqual('a(CHEBI:water)', str(short))
-        self.assertEqual((ABUNDANCE, 'CHEBI', 'water'), short.as_tuple())
 
         long = abundance(namespace='CHEBI', name='test name')
         self.assertEqual('a(CHEBI:"test name")', str(long))
-        self.assertEqual((ABUNDANCE, 'CHEBI', 'test name'), long.as_tuple())
 
     def test_protein_reference(self):
         self.assertEqual('p(HGNC:AKT1)', str(protein(namespace='HGNC', name='AKT1')))
 
     def test_gene_reference(self):
         node = gene(namespace='EGID', name='780')
-
         self.assertEqual('g(EGID:780)', str(node))
-        self.assertEqual((GENE, 'EGID', '780'), node.as_tuple())
 
     def test_protein_pmod(self):
         node = protein(name='PLCG1', namespace='HGNC', variants=[pmod(name='Ph', code='Tyr')])
         self.assertEqual('p(HGNC:PLCG1, pmod(Ph, Tyr))', str(node))
-        self.assertEqual((PROTEIN, 'HGNC', 'PLCG1', (PMOD, (BEL_DEFAULT_NAMESPACE, 'Ph'), 'Tyr')), node.as_tuple())
 
     def test_protein_fragment(self):
         node = protein(name='APP', namespace='HGNC', variants=[fragment(start=672, stop=713)])
 
         self.assertEqual('p(HGNC:APP, frag("672_713"))', str(node))
-        self.assertEqual((PROTEIN, 'HGNC', 'APP', ((FRAGMENT, (672, 713)))), node.as_tuple())
 
     def test_mirna_reference(self):
         self.assertEqual('m(HGNC:MIR1)', str(mirna(namespace='HGNC', name='MIR1')))
@@ -99,9 +90,6 @@ class TestCanonicalize(unittest.TestCase):
         )
         self.assertEqual('r(fus(HGNC:TMPRSS2, "?", HGNC:ERG, "?"))', str(node))
 
-        t = RNA, ('HGNC', 'TMPRSS2'), ('?',), ('HGNC', 'ERG'), ('?',)
-        self.assertEqual(t, node.as_tuple())
-
     def test_gene_fusion_specified(self):
         node = gene_fusion(
             partner_5p=gene(namespace='HGNC', name='TMPRSS2'),
@@ -111,48 +99,37 @@ class TestCanonicalize(unittest.TestCase):
         )
 
         self.assertEqual('g(fus(HGNC:TMPRSS2, "c.1_79", HGNC:ERG, "c.312_5034"))', str(node))
-        t = GENE, ('HGNC', 'TMPRSS2'), ('c', 1, 79), ('HGNC', 'ERG'), ('c', 312, 5034)
-        self.assertEqual(t, node.as_tuple())
 
     def test_pathology(self):
         node = pathology(namespace='DO', name='Alzheimer disease')
         self.assertEqual('path(DO:"Alzheimer disease")', str(node))
-        self.assertEqual((PATHOLOGY, 'DO', 'Alzheimer disease'), node.as_tuple())
 
     def test_bioprocess(self):
         node = bioprocess(namespace='GO', name='apoptosis')
         self.assertEqual('bp(GO:apoptosis)', str(node))
-        self.assertEqual((BIOPROCESS, 'GO', 'apoptosis'), node.as_tuple())
 
     def test_named_complex_abundance(self):
         node = named_complex_abundance(namespace='SCOMP', name='Calcineurin Complex')
 
         self.assertEqual('complex(SCOMP:"Calcineurin Complex")', str(node))
-        self.assertEqual((COMPLEX, 'SCOMP', 'Calcineurin Complex'), node.as_tuple())
 
     def test_complex_abundance(self):
         node = complex_abundance(members=[protein(namespace='HGNC', name='FOS'), protein(namespace='HGNC', name='JUN')])
-        t = COMPLEX, (PROTEIN, 'HGNC', 'FOS'), (PROTEIN, 'HGNC', 'JUN')
         self.assertEqual('complex(p(HGNC:FOS), p(HGNC:JUN))', str(node))
-        self.assertEqual(t, node.as_tuple())
 
     def test_composite_abundance(self):
         node = composite_abundance(members=[
             protein(namespace='HGNC', name='FOS'),
             protein(namespace='HGNC', name='JUN')
         ])
-        t = COMPOSITE, (PROTEIN, 'HGNC', 'FOS'), (PROTEIN, 'HGNC', 'JUN')
         self.assertEqual('composite(p(HGNC:FOS), p(HGNC:JUN))', str(node))
-        self.assertEqual(t, node.as_tuple())
 
     def test_reaction(self):
         node = reaction(
             reactants=[abundance(namespace='CHEBI', name='A')],
             products=[abundance(namespace='CHEBI', name='B')]
         )
-        t = REACTION, ((ABUNDANCE, 'CHEBI', 'A'),), ((ABUNDANCE, 'CHEBI', 'B'),)
         self.assertEqual('rxn(reactants(a(CHEBI:A)), products(a(CHEBI:B)))', str(node))
-        self.assertEqual(t, node.as_tuple())
 
 
 class TestCanonicalizeEdge(unittest.TestCase):
@@ -167,7 +144,7 @@ class TestCanonicalizeEdge(unittest.TestCase):
         self.g.add_node_from_data(self.v)
 
     def get_data(self, k):
-        return self.g[self.u.as_tuple()][self.v.as_tuple()][k]
+        return self.g[self.u][self.v][k]
 
     def add_edge(self, subject_modifier=None, object_modifier=None, annotations=None):
         key = self.g.add_increases(

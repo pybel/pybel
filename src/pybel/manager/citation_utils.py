@@ -71,7 +71,7 @@ def sanitize_date(publication_date):
 
 
 def grouper(n, iterable, fillvalue=None):
-    """Groups iterables into tuples.
+    """Group iterables into tuples.
 
     grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx
     """
@@ -80,7 +80,7 @@ def grouper(n, iterable, fillvalue=None):
 
 
 def clean_pubmed_identifiers(pmids):
-    """Cleans a list of PubMed identifiers with string strips, deduplicates, and sorting.
+    """Clean a list of PubMed identifiers with string strips, deduplicates, and sorting.
 
     :param iter[str] pmids: An iterable of PubMed identifiers
     :return:

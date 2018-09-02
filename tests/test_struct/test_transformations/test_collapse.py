@@ -50,13 +50,13 @@ class TestCollapse(unittest.TestCase):
         self.assertEqual(2, graph.number_of_edges())
 
         d = {
-            p1.as_tuple(): {p2.as_tuple()}
+            p1: {p2}
         }
 
         collapse_nodes(graph, d)
 
-        self.assertEqual({p1.as_tuple(), p3.as_tuple()}, set(graph))
-        self.assertEqual({(p1.as_tuple(), p3.as_tuple()), (p1.as_tuple(), p3.as_tuple())}, set(graph.edges()))
+        self.assertEqual({p1, p3}, set(graph))
+        self.assertEqual({(p1, p3), (p1, p3)}, set(graph.edges()))
         self.assertEqual(2, graph.number_of_edges(), msg=graph.edges(data=True, keys=True))
 
     def test_collapse_dogma_1(self):
@@ -117,6 +117,6 @@ class TestCollapse(unittest.TestCase):
         self.assertEqual(2, graph.number_of_nodes())
         self.assertEqual(1, graph.number_of_edges())
 
-        self.assertIn(p1.as_tuple(), graph)
-        self.assertNotIn(p1_phosphorylated.as_tuple(), graph)
-        self.assertIn(p2.as_tuple(), graph)
+        self.assertIn(p1, graph)
+        self.assertNotIn(p1_phosphorylated, graph)
+        self.assertIn(p2, graph)

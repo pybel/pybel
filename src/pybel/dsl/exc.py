@@ -2,7 +2,7 @@
 
 """Exceptions for the internal DSL."""
 
-from ..exceptions import PyBelWarning
+from ..exceptions import PyBELWarning
 
 __all__ = [
     'PyBELDSLException',
@@ -10,7 +10,7 @@ __all__ = [
 ]
 
 
-class PyBELDSLException(PyBelWarning, ValueError):
+class PyBELDSLException(PyBELWarning, ValueError):
     """Raised when problems with the DSL."""
 
 

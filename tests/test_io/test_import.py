@@ -18,7 +18,7 @@ from pybel.constants import (
     ANNOTATIONS, CITATION, DECREASES, DIRECTLY_DECREASES, EVIDENCE, GENE, GRAPH_PYBEL_VERSION, INCREASES,
     PYBEL_MINIMUM_IMPORT_VERSION, RELATION,
 )
-from pybel.dsl import gene, BaseEntity
+from pybel.dsl import BaseEntity, gene
 from pybel.examples import sialic_acid_graph
 from pybel.io.exc import ImportVersionWarning, import_version_message_fmt
 from pybel.parser import BELParser
@@ -30,7 +30,7 @@ from pybel.testing.constants import (
 )
 from pybel.testing.mocks import mock_bel_resources
 from tests.constants import (
-    AKT1, BelReconstitutionMixin, CASP8, EGFR, FADD, TestTokenParserBase, citation_1, evidence_1, test_citation_dict,
+    BelReconstitutionMixin, TestTokenParserBase, akt1, casp8, citation_1, egfr, evidence_1, fadd, test_citation_dict,
     test_evidence_text, test_set_evidence,
 )
 
@@ -48,8 +48,8 @@ class TestExampleInterchange(unittest.TestCase):
 
         :type graph: pybel.BELGraph
         """
-        for _, data in graph.nodes(data=True):
-            self.assertIsInstance(data, BaseEntity)
+        for node in graph:
+            self.assertIsInstance(node, BaseEntity)
 
         self.assertEqual(set(sialic_acid_graph), set(graph))
         self.assertEqual(set(sialic_acid_graph.edges()), set(graph.edges()))
@@ -229,7 +229,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
                 'TESTAN1': {testan1: True}
             }
         }
-        self.assert_has_edge(self.misordered_graph, AKT1, EGFR, **e1)
+        self.assert_has_edge(self.misordered_graph, akt1, egfr, **e1)
 
         e2 = {
             RELATION: DECREASES,
@@ -239,7 +239,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
                 'TESTAN1': {testan1: True}
             }
         }
-        self.assert_has_edge(self.misordered_graph, EGFR, FADD, **e2)
+        self.assert_has_edge(self.misordered_graph, egfr, fadd, **e2)
 
         e3 = {
             RELATION: DIRECTLY_DECREASES,
@@ -249,7 +249,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
                 'TESTAN1': {testan1: True}
             }
         }
-        self.assert_has_edge(self.misordered_graph, EGFR, CASP8, **e3)
+        self.assert_has_edge(self.misordered_graph, egfr, casp8, **e3)
 
 
 namespaces = {
@@ -281,8 +281,8 @@ class TestFull(TestTokenParserBase):
         line = 'g(dbSNP:rs10234) -- g(dbSNP:rs10235)'
         self.add_default_provenance()
         self.parser.parseString(line)
-        self.assertIn((GENE, 'dbSNP', 'rs10234'), self.parser.graph)
-        self.assertIn((GENE, 'dbSNP', 'rs10235'), self.parser.graph)
+        self.assertIn(gene('dbSNP', 'rs10234'), self.parser.graph)
+        self.assertIn(gene('dbSNP', 'rs10235'), self.parser.graph)
 
     def test_regex_mismatch(self):
         line = 'g(dbSNP:10234) -- g(dbSNP:rr10235)'
@@ -317,15 +317,12 @@ class TestFull(TestTokenParserBase):
 
         self.parser.parse_lines(statements)
 
-        test_node_1_dict = gene(namespace='TESTNS', name='1')
-        test_node_2_dict = gene(namespace='TESTNS', name='2')
+        test_node_1 = gene(namespace='TESTNS', name='1')
+        test_node_2 = gene(namespace='TESTNS', name='2')
 
         self.assertEqual(2, self.graph.number_of_nodes())
-        self.assertIn(test_node_1_dict, self.graph)
-        self.assertIn(test_node_2_dict, self.graph)
-
-        test_node_1 = test_node_1_dict.as_tuple()
-        test_node_2 = test_node_2_dict.as_tuple()
+        self.assertIn(test_node_1, self.graph)
+        self.assertIn(test_node_2, self.graph)
 
         self.assertEqual(1, self.parser.graph.number_of_edges())
 

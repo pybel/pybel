@@ -5,7 +5,7 @@
 import unittest
 
 from pybel import BELGraph
-from pybel.constants import ABUNDANCE, COMPLEX, NAME
+from pybel.constants import NAME
 from pybel.dsl import (
     abundance, complex_abundance, entity, fragment, fusion_range, gene, gene_fusion, missing_fusion_range, protein,
 )
@@ -23,7 +23,7 @@ class TestDSL(unittest.TestCase):
         node = protein(namespace=namespace, name=name, identifier=identifier)
 
         graph.add_node_from_data(node)
-        self.assertEqual(node, graph.node[node.as_tuple()])
+        self.assertIn(node, graph)
 
     def test_add_identified_node(self):
         """Test what happens when a node with only an identifier is added to a graph."""
@@ -32,9 +32,8 @@ class TestDSL(unittest.TestCase):
         node = protein(namespace=namespace, identifier=identifier)
         self.assertNotIn(NAME, node)
 
-        t = graph.add_node_from_data(node)
-
-        self.assertEqual(node, graph.node[t])
+        graph.add_node_from_data(node)
+        self.assertIn(node, graph)
 
     def test_add_named_node(self):
         """Test adding a named node to a BEL graph."""
@@ -43,7 +42,7 @@ class TestDSL(unittest.TestCase):
         node = protein(namespace=namespace, name=name)
 
         graph.add_node_from_data(node)
-        self.assertEqual(node, graph.node[node.as_tuple()])
+        self.assertIn(node, graph)
 
     def test_missing_information(self):
         """Test that entity and abundance functions raise on missing name/identifier."""
@@ -81,15 +80,11 @@ class TestDSL(unittest.TestCase):
 
     def test_as_tuple(self):
         namespace, name = n(), n()
-
-        node_tuple = ABUNDANCE, namespace, name
         node = abundance(namespace=namespace, name=name)
-
-        self.assertEqual(node_tuple, node.as_tuple())
-        self.assertEqual(hash(node_tuple), hash(node))
+        self.assertEqual(hash(node), hash(node.as_bel()))
 
     def test_complex_with_name(self):
-        """Tests a what happens with a named complex
+        """Test what happens with a named complex.
 
         .. code-block::
 
@@ -105,10 +100,13 @@ class TestDSL(unittest.TestCase):
 
         nine_one_one = complex_abundance(members=members, namespace='SCOMP', name='9-1-1 Complex')
 
-        node_tuple = (COMPLEX,) + tuple(member.as_tuple() for member in members)
+        graph = BELGraph()
 
-        self.assertEqual(node_tuple, nine_one_one.as_tuple())
-        self.assertEqual(hash(node_tuple), hash(nine_one_one))
+        graph.add_node_from_data(nine_one_one)
+        self.assertIn(nine_one_one, graph)
+        self.assertIn(hus1, graph)
+        self.assertIn(rad1, graph)
+        self.assertIn(rad9a, graph)
 
     def test_gene_fusion(self):
         """Test serialization of a gene fusion to BEL with a explicit fusion ranges."""

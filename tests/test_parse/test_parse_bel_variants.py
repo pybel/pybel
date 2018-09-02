@@ -10,7 +10,7 @@ from pybel.constants import (
     FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, IDENTIFIER, KIND, LOCATION, NAME, NAMESPACE,
     PARTNER_3P, PARTNER_5P, PMOD, PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P,
 )
-from pybel.dsl.nodes import entity, gmod, hgvs, pmod
+from pybel.dsl import entity, gmod, hgvs, pmod
 from pybel.parser.modifiers import (
     get_fragment_language, get_fusion_language, get_gene_modification_language, get_gene_substitution_language,
     get_hgvs_language, get_location_language, get_protein_modification_language, get_protein_substitution_language,

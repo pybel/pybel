@@ -15,10 +15,14 @@ from pybel.constants import (
     PRODUCTS, PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, SUBPROCESS_OF, TARGET, TO_LOC,
     TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, VARIANTS,
 )
+
 from pybel.dsl import (
     abundance, activity, bioprocess, complex_abundance, composite_abundance, entity, gene, hgvs, pmod, protein,
-    reaction, rna,
+    reaction, rna, Pathology,
+    named_complex_abundance,
+    gmod,
 )
+from pybel.dsl.namespaces import hgnc
 from pybel.parser import BELParser
 from pybel.parser.exc import (
     MissingNamespaceNameWarning, NestedRelationWarning, RelabelWarning, UndefinedNamespaceWarning,
@@ -54,10 +58,10 @@ class TestRelations(TestTokenParserBase):
         self.parser.degradation.addParseAction(self.parser.handle_term)
         self.parser.degradation.parseString('deg(g(HGNC:AKT1))')
 
-        gene = GENE, 'HGNC', 'AKT1'
+        akt1_gene = gene('HGNC', 'AKT1')
 
         self.assertEqual(1, self.parser.graph.number_of_nodes())
-        self.assert_has_node(gene, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
+        self.assert_has_node(akt1_gene)
 
     def test_singleton(self):
         """Test singleton composite in subject."""
@@ -236,9 +240,12 @@ class TestRelations(TestTokenParserBase):
                 MODIFIER: ACTIVITY,
                 EFFECT: {
                     NAME: 'pep',
-                    NAMESPACE: BEL_DEFAULT_NAMESPACE
+                    NAMESPACE: BEL_DEFAULT_NAMESPACE,
                 },
-                LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
+                LOCATION: {
+                    NAMESPACE: 'GOCC',
+                    NAME: 'intracellular',
+                }
             }
         }
 
@@ -318,10 +325,10 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        sub = GENE, 'HGNC', 'CAT'
+        sub = gene('HGNC', 'CAT')
         self.assert_has_node(sub)
 
-        obj = ABUNDANCE, 'CHEBI', 'hydrogen peroxide'
+        obj = abundance('CHEBI', 'hydrogen peroxide')
         self.assert_has_node(obj)
 
         expected_attrs = {
@@ -376,10 +383,10 @@ class TestRelations(TestTokenParserBase):
 
         self.assert_has_edge(sub, obj, relation=expected_dict[RELATION])
 
-    def test_cnc_withSubjectVariant(self):
-        """
-        3.1.6 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xcnc
-        Test SNP annotation
+    def test_cnc_with_subject_variant(self):
+        """Test a causesNoChange relationship with a variant in the subject.
+
+        See also: 3.1.6 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xcnc
         """
         statement = 'g(HGNC:APP,sub(G,275341,C)) cnc path(MESHD:"Alzheimer Disease")'
         result = self.parser.relation.parseString(statement)
@@ -405,15 +412,17 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        sub = GENE, 'HGNC', 'APP', (HGVS, 'c.275341G>C')
+        app_gene = gene(namespace='HGNC', name='APP')
+        self.assert_has_node(app_gene)
+        sub = app_gene.with_variants(hgvs('c.275341G>C'))
         self.assert_has_node(sub)
 
-        obj = PATHOLOGY, 'MESHD', 'Alzheimer Disease'
+        obj = Pathology('MESHD', 'Alzheimer Disease')
         self.assert_has_node(obj)
 
         self.assert_has_edge(sub, obj, relation=expected_dict[RELATION])
 
-    def test_regulates_multipleAnnotations(self):
+    def test_regulates_with_multiple_nnotations(self):
         """
         3.1.7 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_regulates_reg
         Test nested definitions"""
@@ -580,10 +589,10 @@ class TestRelations(TestTokenParserBase):
         expected_result = [[GENE, 'HGNC', 'AKT1'], ORTHOLOGOUS, [GENE, 'MGI', 'AKT1']]
         self.assertEqual(expected_result, result.asList())
 
-        sub = GENE, 'HGNC', 'AKT1'
+        sub = gene('HGNC', 'AKT1')
         self.assert_has_node(sub)
 
-        obj = GENE, 'MGI', 'AKT1'
+        obj = gene('MGI', 'AKT1')
         self.assert_has_node(obj)
 
         self.assert_has_edge(sub, obj, relation=ORTHOLOGOUS)
@@ -599,10 +608,10 @@ class TestRelations(TestTokenParserBase):
         expected_result = [[GENE, 'HGNC', 'AKT1'], TRANSCRIBED_TO, [RNA, 'HGNC', 'AKT1']]
         self.assertEqual(expected_result, result.asList())
 
-        sub = GENE, 'HGNC', 'AKT1'
+        sub = gene('HGNC', 'AKT1')
         self.assert_has_node(sub)
 
-        obj = RNA, 'HGNC', 'AKT1'
+        obj = rna('HGNC', 'AKT1')
         self.assert_has_node(obj)
 
         self.assert_has_edge(sub, obj, **{RELATION: TRANSCRIBED_TO})
@@ -636,18 +645,16 @@ class TestRelations(TestTokenParserBase):
 
         self.assertEqual(2, self.graph.number_of_nodes())
 
-        source_dict = rna(name='AKT1', namespace='HGNC')
-        self.assertIn(source_dict, self.graph)
-        self.assertEqual(source_dict, self.graph.node[source_dict.as_tuple()])
+        source = rna(name='AKT1', namespace='HGNC')
+        self.assertIn(source, self.graph)
 
-        target_dict = protein(name='AKT1', namespace='HGNC')
-        self.assertIn(target_dict, self.graph)
-        self.assertEqual(target_dict, self.graph.node[target_dict.as_tuple()])
+        target = protein(name='AKT1', namespace='HGNC')
+        self.assertIn(target, self.graph)
 
         self.assertEqual(1, self.graph.number_of_edges())
-        self.assertTrue(self.graph.has_edge(source_dict.as_tuple(), target_dict.as_tuple()))
+        self.assertTrue(self.graph.has_edge(source, target))
 
-        key_data = self.parser.graph[source_dict.as_tuple()][target_dict.as_tuple()]
+        key_data = self.parser.graph[source][target]
         self.assertEqual(1, len(key_data))
 
         key = list(key_data)[0]
@@ -656,13 +663,7 @@ class TestRelations(TestTokenParserBase):
         self.assertIn(RELATION, data)
         self.assertEqual(TRANSLATED_TO, data[RELATION])
 
-        calculated_source_data = self.graph.node[source_dict.as_tuple()]
-        self.assertTrue(calculated_source_data)
-
-        calculated_target_data = self.graph.node[target_dict.as_tuple()]
-        self.assertTrue(calculated_target_data)
-
-        calculated_edge_bel = edge_to_bel(calculated_source_data, calculated_target_data, data=data)
+        calculated_edge_bel = edge_to_bel(source, target, data=data)
         self.assertEqual('r(HGNC:AKT1, loc(GOCC:intracellular)) translatedTo p(HGNC:AKT1)', calculated_edge_bel)
 
     def test_component_list(self):
@@ -679,12 +680,12 @@ class TestRelations(TestTokenParserBase):
         ]
         self.assertEqual(expected_result_list, result.asList())
 
-        sub = COMPLEX, 'SCOMP', 'C1 Complex'
+        sub = named_complex_abundance('SCOMP', 'C1 Complex')
         self.assert_has_node(sub)
-        child_1 = PROTEIN, 'HGNC', 'C1QB'
+        child_1 = hgnc('C1QB')
         self.assert_has_node(child_1)
         self.assert_has_edge(sub, child_1, **{RELATION: HAS_COMPONENT})
-        child_2 = PROTEIN, 'HGNC', 'C1S'
+        child_2 = hgnc('C1S')
         self.assert_has_node(child_2)
         self.assert_has_edge(sub, child_2, **{RELATION: HAS_COMPONENT})
 
@@ -706,11 +707,11 @@ class TestRelations(TestTokenParserBase):
         ]
         self.assertEqual(expected_result, result.asList())
 
-        sub = PROTEIN, 'PKC', 'a'
-        obj1 = PROTEIN, 'HGNC', 'PRKCA'
-        obj2 = PROTEIN, 'HGNC', 'PRKCB'
-        obj3 = PROTEIN, 'HGNC', 'PRKCD'
-        obj4 = PROTEIN, 'HGNC', 'PRKCE'
+        sub = protein('PKC', 'a')
+        obj1 = protein('HGNC', 'PRKCA')
+        obj2 = protein('HGNC', 'PRKCB')
+        obj3 = protein('HGNC', 'PRKCD')
+        obj4 = protein('HGNC', 'PRKCE')
 
         self.assert_has_node(sub)
 
@@ -736,10 +737,10 @@ class TestRelations(TestTokenParserBase):
         expected_result = [[PATHOLOGY, 'MESH', 'Psoriasis'], 'isA', [PATHOLOGY, 'MESH', 'Skin Diseases']]
         self.assertEqual(expected_result, result.asList())
 
-        sub = PATHOLOGY, 'MESH', 'Psoriasis'
+        sub = Pathology('MESH', 'Psoriasis')
         self.assert_has_node(sub)
 
-        obj = PATHOLOGY, 'MESH', 'Skin Diseases'
+        obj = Pathology('MESH', 'Skin Diseases')
         self.assert_has_node(obj)
 
         self.assert_has_edge(sub, obj, relation=IS_A)
@@ -805,10 +806,10 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_result, result.asDict())
 
-        sub = GENE, 'dbSNP', 'rs123456'
+        sub = gene('dbSNP', 'rs123456')
         self.assert_has_node(sub)
 
-        obj = GENE, 'HGNC', 'YFG', (HGVS, 'c.123G>A')
+        obj = gene('HGNC', 'YFG', variants=hgvs('c.123G>A'))
         self.assert_has_node(obj)
 
         self.assert_has_edge(sub, obj, **{RELATION: EQUIVALENT_TO})
@@ -825,7 +826,7 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_node(basal_ganglion)
         self.assert_has_edge(corpus_striatum, basal_ganglion, relation=PART_OF)
 
-        v = list(self.parser.graph[corpus_striatum.as_tuple()][basal_ganglion.as_tuple()].values())
+        v = list(self.parser.graph[corpus_striatum][basal_ganglion].values())
         self.assertEqual(1, len(v))
 
         v = v[0]
@@ -894,10 +895,10 @@ class TestRelations(TestTokenParserBase):
         statement = 'g(HGNC:AKT1) hasVariant g(HGNC:AKT1, gmod(M))'
         self.parser.relation.parseString(statement)
 
-        expected_parent = GENE, 'HGNC', 'AKT1'
-        expected_child = GENE, 'HGNC', 'AKT1', (GMOD, (BEL_DEFAULT_NAMESPACE, 'Me'))
+        expected_parent = gene('HGNC', 'AKT1')
+        expected_child = expected_parent.with_variants(gmod('Me'))
 
-        self.assert_has_node(expected_parent, **{FUNCTION: GENE, NAMESPACE: 'HGNC', NAME: 'AKT1'})
+        self.assert_has_node(expected_parent)
         self.assert_has_node(expected_child)
 
         self.assertEqual('g(HGNC:AKT1)', self.graph.node_to_bel(expected_parent))

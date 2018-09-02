@@ -4,7 +4,6 @@
 
 import unittest
 
-import networkx as nx
 import time
 from six import string_types
 
@@ -16,7 +15,7 @@ from pybel.resources.exc import EmptyResourceError
 from pybel.resources.utils import get_iso_8601_date
 from pybel.testing.constants import test_an_1, test_ns_empty
 from pybel.testing.mocks import mock_bel_resources
-from pybel.utils import expand_dict, flatten_dict, flatten_graph_data, list2tuple, tokenize_version
+from pybel.utils import expand_dict, flatten_dict, tokenize_version
 
 
 class TestTokenizeVersion(unittest.TestCase):
@@ -49,11 +48,6 @@ class TestRandom(unittest.TestCase):
     def test_bad_aminoAcid(self):
         with self.assertRaises(PlaceholderAminoAcidWarning):
             amino_acid.parseString('X')
-
-    def test_list2tuple(self):
-        deeply_nested_list = [None, 1, 's', [1, 2, [4], [[]]]]
-        expected_tuple = (None, 1, 's', (1, 2, (4,), ((),)))
-        self.assertEqual(expected_tuple, list2tuple(deeply_nested_list))
 
     def test_get_date(self):
         d = get_iso_8601_date()
@@ -142,21 +136,3 @@ class TestUtils(unittest.TestCase):
             'C_E': 'e'
         }
         self.assertEqual(expected, flatten_dict(d))
-
-    def test_flatten_edges(self):
-        g = nx.MultiDiGraph()
-        g.add_edge(1, 2, key=5, **{'A': 'a', 'B': {'C': 'c', 'D': 'd'}})
-
-        result = flatten_graph_data(g)
-
-        expected = nx.MultiDiGraph()
-        expected.add_edge(1, 2, key=5, **{'A': 'a', 'B_C': 'c', 'B_D': 'd'})
-
-        self.assertEqual(set(result.nodes()), set(expected.nodes()))
-
-        res_edges = result.edges(keys=True)
-        exp_edges = expected.edges(keys=True)
-        self.assertEqual(set(res_edges), set(exp_edges))
-
-        for u, v, k in expected.edges(keys=True):
-            self.assertEqual(expected[u][v][k], result[u][v][k])

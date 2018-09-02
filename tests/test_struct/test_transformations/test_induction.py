@@ -35,12 +35,12 @@ class TestGraphMixin(unittest.TestCase):
         :type graph: pybel.BELGraph
         :rtype: bool
         """
-        self.assertIn(target.as_tuple(), graph[source.as_tuple()])
+        self.assertIn(target, graph[source])
 
     def assert_all_nodes_are_base_entities(self, graph):
         """Assert that all nodes are base entities."""
-        for _, data in graph.nodes(data=True):
-            self.assertIsInstance(data, BaseEntity)
+        for node in graph:
+            self.assertIsInstance(node, BaseEntity)
 
 
 class TestInduction(TestGraphMixin):
@@ -57,7 +57,7 @@ class TestInduction(TestGraphMixin):
         graph.add_directly_increases(c, d, n(), n())
         graph.add_increases(a, d, n(), n())
 
-        nodes = [b.as_tuple(), c.as_tuple()]
+        nodes = [b, c]
         subgraph = get_subgraph_by_induction(graph, nodes)
 
         self.assertIsInstance(subgraph, BELGraph)
@@ -85,13 +85,13 @@ class TestInduction(TestGraphMixin):
         graph.add_increases(e, f, n(), n())
         graph.add_increases(f, d, n(), n())
 
-        query_nodes = [a.as_tuple(), d.as_tuple()]
+        query_nodes = [a, d]
         shortest_paths_nodes = get_nodes_in_all_shortest_paths(graph, query_nodes)
 
-        self.assertIn(a.as_tuple(), shortest_paths_nodes)
-        self.assertIn(b.as_tuple(), shortest_paths_nodes)
-        self.assertIn(c.as_tuple(), shortest_paths_nodes)
-        self.assertIn(d.as_tuple(), shortest_paths_nodes)
+        self.assertIn(a, shortest_paths_nodes)
+        self.assertIn(b, shortest_paths_nodes)
+        self.assertIn(c, shortest_paths_nodes)
+        self.assertIn(d, shortest_paths_nodes)
 
         subgraph = get_subgraph_by_all_shortest_paths(graph, query_nodes)
         self.assert_all_nodes_are_base_entities(subgraph)
@@ -119,7 +119,7 @@ class TestInduction(TestGraphMixin):
         universe.add_qualified_edge(e, a, INCREASES, citation, evidence)
         universe.add_qualified_edge(f, b, DECREASES, citation, evidence)
 
-        subgraph = get_upstream_causal_subgraph(universe, [a.as_tuple(), b.as_tuple()])
+        subgraph = get_upstream_causal_subgraph(universe, [a, b])
 
         self.assertIsInstance(subgraph, BELGraph)
         self.assert_all_nodes_are_base_entities(subgraph)
@@ -128,15 +128,11 @@ class TestInduction(TestGraphMixin):
         self.assertEqual('test-url', subgraph.namespace_pattern['test'])
 
         self.assertIn(a, subgraph)
-        self.assertIn(FUNCTION, subgraph.node[a.as_tuple()])
-        self.assertEqual(PROTEIN, subgraph.node[a.as_tuple()][FUNCTION])
         self.assertIn(b, subgraph)
         self.assertNotIn(c, subgraph)
         self.assertNotIn(d, subgraph)
         self.assertIn(e, subgraph)
         self.assertIn(f, subgraph)
-        self.assertIn(FUNCTION, subgraph.node[f.as_tuple()])
-        self.assertEqual(PROTEIN, subgraph.node[f.as_tuple()][FUNCTION])
         self.assertEqual(4, subgraph.number_of_nodes())
 
         self.assert_in_edge(e, a, subgraph)
@@ -164,21 +160,17 @@ class TestInduction(TestGraphMixin):
         self.assert_all_nodes_are_base_entities(subgraph)
 
         self.assertIn(a, subgraph)
-        self.assertIn(FUNCTION, subgraph.node[a.as_tuple()])
-        self.assertEqual(PROTEIN, subgraph.node[a.as_tuple()][FUNCTION])
         self.assertIn(b, subgraph)
         self.assertNotIn(c, subgraph)
         self.assertNotIn(d, subgraph)
         self.assertIn(e, subgraph)
         self.assertIn(f, subgraph)
-        self.assertIn(FUNCTION, subgraph.node[f.as_tuple()])
-        self.assertEqual(PROTEIN, subgraph.node[f.as_tuple()][FUNCTION])
         self.assertEqual(4, subgraph.number_of_nodes())
 
         self.assert_in_edge(e, a, subgraph)
         self.assert_in_edge(a, b, subgraph)
         self.assert_in_edge(f, b, subgraph)
-        self.assertEqual(2, len(subgraph[a.as_tuple()][b.as_tuple()]))
+        self.assertEqual(2, len(subgraph[a][b]))
         self.assertEqual(4, subgraph.number_of_edges(), msg='\n'.join(map(str, subgraph.edges())))
 
 
@@ -374,10 +366,10 @@ class TestEdgeInduction(unittest.TestCase):
 
         self.assertIn(a, subgraph)
         self.assertIn(b, subgraph)
-        self.assertIn(b.as_tuple(), subgraph[a.as_tuple()])
-        self.assertIn(k1, subgraph[a.as_tuple()][b.as_tuple()])
-        self.assertNotIn(k2, subgraph[a.as_tuple()][b.as_tuple()])
-        self.assertIn(k3, subgraph[a.as_tuple()][b.as_tuple()])
+        self.assertIn(b, subgraph[a])
+        self.assertIn(k1, subgraph[a][b])
+        self.assertNotIn(k2, subgraph[a][b])
+        self.assertIn(k3, subgraph[a][b])
 
     def test_get_subgraph_by_annotation_values(self):
         """Test getting a subgraph by multiple annotation value."""
@@ -405,8 +397,8 @@ class TestEdgeInduction(unittest.TestCase):
 
         self.assertIn(a, subgraph)
         self.assertIn(b, subgraph)
-        self.assertIn(b.as_tuple(), subgraph[a.as_tuple()])
-        self.assertIn(k1, subgraph[a.as_tuple()][b.as_tuple()])
-        self.assertNotIn(k2, subgraph[a.as_tuple()][b.as_tuple()])
-        self.assertIn(k3, subgraph[a.as_tuple()][b.as_tuple()])
-        self.assertIn(k4, subgraph[a.as_tuple()][b.as_tuple()])
+        self.assertIn(b, subgraph[a])
+        self.assertIn(k1, subgraph[a][b])
+        self.assertNotIn(k2, subgraph[a][b])
+        self.assertIn(k3, subgraph[a][b])
+        self.assertIn(k4, subgraph[a][b])

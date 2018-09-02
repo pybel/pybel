@@ -54,7 +54,7 @@ def node_predicate(f):
         x = args[0]
 
         if isinstance(x, BELGraph):
-            return f(x.node[args[1]], *args[2:])
+            return f(args[1], *args[2:])
 
         # Assume:
         # if isinstance(x, dict):
@@ -287,34 +287,23 @@ def has_causal_out_edges(graph, node):
     )
 
 
-def _hash_node_list(nodes):
-    return {
-        (
-            node.as_tuple()
-            if isinstance(node, BaseEntity) else
-            node
-        )
-        for node in nodes
-    }
-
-
 def node_exclusion_predicate_builder(nodes):
     """Build a node predicate that returns false for the given nodes.
 
     :param nodes: A list of PyBEL node data dictionaries or PyBEL node tuples
-    :type nodes: list[tuple] or list[data]
-    :rtype: types.FunctionType
+    :type nodes: iter[BaseEntity]
+    :rtype: (BELGraph, BaseEntity) -> bool
     """
-    nodes = _hash_node_list(nodes)
+    nodes = set(nodes)
 
     @node_predicate
-    def node_exclusion_predicate(data):
+    def node_exclusion_predicate(node):
         """Returns true if the node is not in the given set of nodes
 
-        :param BaseEntity data: A PyBEL data dictionary
+        :param BaseEntity node: A PyBEL data dictionary
         :rtype: bool
         """
-        return data.as_tuple() not in nodes
+        return node not in nodes
 
     return node_exclusion_predicate
 
@@ -323,19 +312,19 @@ def node_inclusion_predicate_builder(nodes):
     """Build a function that returns true for the given nodes.
 
     :param nodes: A list of PyBEL node data dictionaries or PyBEL node tuples
-    :type nodes: list[tuple] or list[data]
-    :rtype: types.FunctionType
+    :type nodes: iter[BaseEntity]
+    :rtype: (BELGraph, BaseEntity) -> bool
     """
-    nodes = _hash_node_list(nodes)
+    nodes = set(nodes)
 
     @node_predicate
-    def node_inclusion_predicate(data):
+    def node_inclusion_predicate(node):
         """Returns true if the node is in the given set of nodes
 
-        :param BaseEntity data: A PyBEL data dictionary
+        :param BaseEntity node: A PyBEL data dictionary
         :rtype: bool
         """
-        return data.as_tuple() in nodes
+        return node in nodes
 
     return node_inclusion_predicate
 

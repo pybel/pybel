@@ -2,12 +2,16 @@
 
 """Summary functions for nodes in BEL graphs."""
 
-import itertools as itt
 from collections import Counter, defaultdict
 
+import itertools as itt
+
 from ..filters.node_predicates import has_variant
-from ...constants import FUNCTION, FUSION, IDENTIFIER, KIND, NAME, NAMESPACE, PARTNER_3P, PARTNER_5P, VARIANTS
-from ...dsl.nodes import Pathology
+from ...constants import (
+    ACTIVITY, EFFECT, FROM_LOC, FUSION, IDENTIFIER, KIND, LOCATION, MEMBERS, MODIFIER, NAME, NAMESPACE,
+    OBJECT, PARTNER_3P, PARTNER_5P, SUBJECT, TO_LOC, TRANSLOCATION, VARIANTS,
+)
+from ...dsl import Pathology
 
 __all__ = [
     'get_functions',
@@ -26,10 +30,13 @@ __all__ = [
 
 
 def _function_iterator(graph):
-    """Iterate over the functions in a graph."""
+    """Iterate over the functions in a graph.
+
+    :rtype: iter[str]
+    """
     return (
-        data[FUNCTION]
-        for _, data in graph.nodes(data=True)
+        node.function
+        for node in graph
     )
 
 
@@ -55,9 +62,9 @@ def count_functions(graph):
 
 def _iterate_namespaces(graph):
     return (
-        data[NAMESPACE]
-        for _, data in graph.nodes(data=True)
-        if NAMESPACE in data
+        node[NAMESPACE]
+        for node in graph
+        if NAMESPACE in node
     )
 
 
@@ -91,25 +98,6 @@ def get_unused_namespaces(graph):
     return graph.defined_namespace_keywords - get_namespaces(graph)
 
 
-def _identifier_filtered_iterator(graph):
-    """Iterate over names in the given namespace."""
-    for _, data in graph.nodes(data=True):
-        if NAMESPACE in data:
-            yield data[NAMESPACE], data[NAME]
-
-        elif FUSION in data:
-            yield data[FUSION][PARTNER_3P][NAMESPACE], data[FUSION][PARTNER_3P][NAME]
-            yield data[FUSION][PARTNER_5P][NAMESPACE], data[FUSION][PARTNER_5P][NAME]
-
-        if VARIANTS in data:
-            for variant in data[VARIANTS]:
-                identifier = variant.get(IDENTIFIER)
-                if identifier is not None and NAMESPACE in identifier and NAME in identifier:
-                    yield identifier[NAMESPACE], identifier[NAME]
-
-        # FIXME recur on list abundances!!!
-
-
 def get_names(graph):
     """Get all names for each namespace.
 
@@ -120,6 +108,56 @@ def get_names(graph):
     for namespace, name in _identifier_filtered_iterator(graph):
         rv[namespace].add(name)
     return dict(rv)
+
+
+def _identifier_filtered_iterator(graph):
+    """Iterate over names in the given namespace."""
+    for data in graph:
+        for pair in _get_node_names(data):
+            yield pair
+
+        for member in data.get(MEMBERS, []):
+            for pair in _get_node_names(member):
+                yield pair
+
+    for ((_, _, data), side) in itt.product(graph.edges(data=True), (SUBJECT, OBJECT)):
+        side_data = data.get(side)
+        if side_data is None:
+            continue
+
+        modifier = side_data.get(MODIFIER)
+        effect = side_data.get(EFFECT)
+
+        if modifier == ACTIVITY and effect is not None and NAMESPACE in effect and NAME in effect:
+            yield effect[NAMESPACE], effect[NAME]
+
+        elif modifier == TRANSLOCATION and effect is not None:
+            from_loc = effect.get(FROM_LOC)
+            if NAMESPACE in from_loc and NAME in from_loc:
+                yield from_loc[NAMESPACE], from_loc[NAME]
+
+            to_loc = effect.get(TO_LOC)
+            if NAMESPACE in to_loc and NAME in to_loc:
+                yield to_loc[NAMESPACE], to_loc[NAME]
+
+        location = side_data.get(LOCATION)
+        if location is not None and NAMESPACE in location and NAME in location:
+            yield location[NAMESPACE], location[NAME]
+
+
+def _get_node_names(data):
+    if NAMESPACE in data:
+        yield data[NAMESPACE], data[NAME]
+
+    elif FUSION in data:
+        yield data[FUSION][PARTNER_3P][NAMESPACE], data[FUSION][PARTNER_3P][NAME]
+        yield data[FUSION][PARTNER_5P][NAMESPACE], data[FUSION][PARTNER_5P][NAME]
+
+    if VARIANTS in data:
+        for variant in data[VARIANTS]:
+            identifier = variant.get(IDENTIFIER)
+            if identifier is not None and NAMESPACE in identifier and NAME in identifier:
+                yield identifier[NAMESPACE], identifier[NAME]
 
 
 def _namespace_filtered_iterator(graph, namespace):
@@ -169,8 +207,8 @@ def count_variants(graph):
     """
     return Counter(
         variant_data[KIND]
-        for node, data in graph.nodes(data=True)
-        if has_variant(graph, node)
+        for data in graph
+        if has_variant(graph, data)
         for variant_data in data[VARIANTS]
     )
 
@@ -186,13 +224,13 @@ def get_top_hubs(graph, count=15):
 
 
 def _pathology_iterator(graph):
-    """Iterate over edges in which either the source or target is a pathology node
+    """Iterate over edges in which either the source or target is a pathology node.
 
     :param pybel.BELGraph graph: A BEL graph
     :rtype: iter
     """
     for node in itt.chain.from_iterable(graph.edges()):
-        if isinstance(graph.nodes[node], Pathology):
+        if isinstance(node, Pathology):
             yield node
 
 

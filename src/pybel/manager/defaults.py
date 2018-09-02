@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-"""
+"""Default namespaces and annotations from OpenBEL and Fraunhofer SCAI.
+
 This file contains a listing of the default namespaces released in each version of OpenBEL, and other
 common namespaces used to load into a new PyBEL namespace store.
 

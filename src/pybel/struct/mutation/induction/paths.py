@@ -3,8 +3,9 @@
 """Induction methods for graphs over shortest paths."""
 
 import itertools as itt
-
 import logging
+import random
+
 import networkx as nx
 
 from .utils import get_subgraph_by_induction
@@ -14,6 +15,7 @@ from ....constants import FUNCTION, PATHOLOGY
 __all__ = [
     'get_nodes_in_all_shortest_paths',
     'get_subgraph_by_all_shortest_paths',
+    'get_random_path',
 ]
 
 log = logging.getLogger(__name__)
@@ -95,3 +97,40 @@ def get_subgraph_by_all_shortest_paths(graph, nodes, weight=None, remove_patholo
         return
 
     return get_subgraph_by_induction(graph, induced_nodes)
+
+
+def get_random_path(graph):
+    """Get a random path from the graph as a list of nodes.
+
+    :param pybel.BELGraph graph: A BEL graph
+    :rtype: list[BaseEntity]
+    """
+    wg = graph.to_undirected()
+
+    nodes = wg.nodes()
+
+    def pick_random_pair():
+        """Get a pair of random nodes.
+
+        :rtype: tuple
+        """
+        return random.sample(nodes, k=2)
+
+    source, target = pick_random_pair()
+
+    tries = 0
+    sentinel_tries = 5
+
+    while not nx.has_path(wg, source, target) and tries < sentinel_tries:
+        tries += 1
+        source, target = pick_random_pair()
+
+    if tries == sentinel_tries:
+        return [source]
+
+    shortest_path = nx.shortest_path(wg, source=source, target=target)
+
+    return [
+        graph.nodes[node]
+        for node in shortest_path
+    ]

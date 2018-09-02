@@ -14,10 +14,12 @@ from pybel.constants import (
     RELATION, RNA, SUBJECT, TARGET, TO_LOC, TRANSLOCATION, VARIANTS,
 )
 from pybel.dsl import (
-    cell_surface_expression, complex_abundance, composite_abundance, entity, fragment, fusion_range, gene_fusion, mirna,
-    named_complex_abundance, pathology, protein, protein_fusion, reaction, rna, rna_fusion, secretion, translocation,
+    abundance, bioprocess, cell_surface_expression, complex_abundance, composite_abundance, entity,
+    fragment, fusion_range, gene, gene_fusion, gmod, hgvs, mirna, named_complex_abundance, pathology, pmod, protein,
+    protein_fusion, reaction, rna, rna_fusion, secretion, translocation,
+    Fragment,
 )
-from pybel.dsl.nodes import abundance, bioprocess, gene, gmod, hgvs, pmod
+from pybel.dsl.namespaces import hgnc
 from pybel.parser import BELParser
 from pybel.parser.exc import MalformedTranslocationWarning
 from pybel.parser.parse_bel import modifier_po_to_dict
@@ -76,7 +78,6 @@ class TestAbundance(TestTokenParserBase):
             LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
         }
         self.assertEqual(expected_modifier, modifier)
-
 
     def test_abundance_with_location(self):
         """Test short/long abundance name and short/long location name."""
@@ -843,7 +844,7 @@ class TestProtein(TestTokenParserBase):
         self.assert_has_node(expected_node)
         self.assertEqual('p(HGNC:AKT1, pmod(Ph, Ser, 473))', self.graph.node_to_bel(expected_node))
 
-        self.assert_has_node(parent, **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'AKT1'})
+        self.assert_has_node(parent)
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_protein_pmod_3(self):
@@ -1318,45 +1319,21 @@ class TestComposite(TestTokenParserBase):
 
         il23 = named_complex_abundance('GOCC', 'interleukin-23 complex')
         il6 = protein('HGNC', 'IL6')
-        expected_node_data = composite_abundance([il23, il6])
-        self.assert_has_node(expected_node_data)
+        expected_node = composite_abundance([il23, il6])
+        self.assert_has_node(expected_node)
 
-        expected_node = expected_node_data.as_tuple()
-        expected_node_dict = {
-            FUNCTION: COMPOSITE,
-            MEMBERS: [
-                {
-                    FUNCTION: COMPLEX,
-                    NAMESPACE: 'GOCC',
-                    NAME: 'interleukin-23 complex'
-                },
-                {
-                    FUNCTION: PROTEIN,
-                    NAMESPACE: 'HGNC',
-                    NAME: 'IL6'
-                }
-            ]
-        }
-        self.assertIn(FUNCTION, self.graph.node[expected_node])
-        self.assertIn(COMPOSITE, self.graph.node[expected_node][FUNCTION])
-        self.assertIn(MEMBERS, self.graph.node[expected_node])
-        self.assertIsInstance(self.graph.node[expected_node][MEMBERS], (list, tuple))
-        self.assertEqual(2, len(self.graph.node[expected_node][MEMBERS]))
-        self.assertEqual(il23, self.graph.node[expected_node][MEMBERS][0])
-        self.assertEqual(il6, self.graph.node[expected_node][MEMBERS][1])
-        self.assertEqual(expected_node_data, self.graph.node[expected_node])
 
-        self.assertEqual('composite(complex(GOCC:"interleukin-23 complex"), p(HGNC:IL6))', self.graph.node_to_bel(expected_node))
+        self.assertEqual(2, len(expected_node[MEMBERS]))
+        self.assertEqual(il23, expected_node[MEMBERS][0])
+        self.assertEqual(il6, expected_node[MEMBERS][1])
+
+        self.assertEqual('composite(complex(GOCC:"interleukin-23 complex"), p(HGNC:IL6))',
+                         self.graph.node_to_bel(expected_node))
 
         self.assertEqual(3, self.parser.graph.number_of_nodes())
         self.assert_has_node(expected_node)
-        self.assert_has_node((PROTEIN, 'HGNC', 'IL6'), **{FUNCTION: PROTEIN, NAMESPACE: 'HGNC', NAME: 'IL6'})
-        self.assert_has_node((COMPLEX, 'GOCC', 'interleukin-23 complex'), **{
-            FUNCTION: COMPLEX,
-            NAMESPACE: 'GOCC',
-            NAME: 'interleukin-23 complex'
-        })
-
+        self.assert_has_node(il23)
+        self.assert_has_node(il6)
         self.assertEqual(2, self.parser.graph.number_of_edges())
 
 
@@ -1635,10 +1612,10 @@ class TestTranslocationPermissive(unittest.TestCase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        sub = ABUNDANCE, 'ADO', 'Abeta_42'
+        sub = abundance('ADO', 'Abeta_42')
         self.assert_has_node(sub)
 
-        obj = ABUNDANCE, 'CHEBI', 'calcium(2+)'
+        obj = abundance('CHEBI', 'calcium(2+)')
         self.assert_has_node(obj)
 
         expected_annotations = {
@@ -1851,15 +1828,15 @@ class TestTransformation(TestTokenParserBase):
 
     def test_reaction_2(self):
         statement = 'rxn(reactants(p(HGNC:APP)), products(p(HGNC:APP, frag(672_713))))'
-        result = self.parser.transformation.parseString(statement)
+        self.parser.transformation.parseString(statement)
 
-        app_tuple = PROTEIN, 'HGNC', 'APP'
-        self.assertIn(app_tuple, self.graph)
+        app = hgnc('APP')
+        self.assertIn(app, self.graph)
 
-        app_frag_tuple = PROTEIN, 'HGNC', 'APP', (FRAGMENT, (672, 713))
-        self.assertIn(app_frag_tuple, self.graph)
+        amyloid_beta_42 = app.with_variants(Fragment(start=672, stop=713))
+        self.assertIn(amyloid_beta_42, self.graph)
 
-        expected_node = REACTION, (app_tuple,), (app_frag_tuple,)
+        expected_node = reaction(app, amyloid_beta_42)
         self.assertIn(expected_node, self.graph)
 
     def test_clearance(self):

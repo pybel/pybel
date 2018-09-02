@@ -9,6 +9,7 @@ JSON. Interchange with this format provides compatibilty with other software and
 
 import logging
 from collections import defaultdict
+from operator import methodcaller
 
 from pyparsing import ParseException
 
@@ -317,15 +318,14 @@ def to_jgif(graph):
     nodes_entry = []
     edges_entry = []
 
-    for i, (node, node_data) in enumerate(graph.nodes(data=True)):
-        bel = node_data.as_bel()
-        node_bel[node] = bel
+    for i, node in enumerate(sorted(graph, key=methodcaller('as_bel'))):
+        node_bel[node] = bel = node.as_bel()
 
         nodes_entry.append({
             'id': bel,
             'label': bel,
             'nodeId': i,
-            'bel_function_type': node_data[FUNCTION],
+            'bel_function_type': node[FUNCTION],
             'metadata': {}
         })
 

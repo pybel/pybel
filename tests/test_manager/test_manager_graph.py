@@ -14,26 +14,25 @@ from sqlalchemy import not_
 from pybel import BELGraph, from_database, from_path, to_database
 from pybel.constants import (
     ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_REFERENCE,
-    CITATION_TYPE, CITATION_TYPE_OTHER, CITATION_TYPE_PUBMED, DECREASES, HAS_COMPONENT, HAS_PRODUCT,
-    HAS_REACTANT, INCREASES, LOCATION, METADATA_NAME, METADATA_VERSION, PATHOLOGY, PROTEIN,
-    RELATION,
+    CITATION_TYPE, CITATION_TYPE_OTHER, CITATION_TYPE_PUBMED, DECREASES, HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT,
+    INCREASES, LOCATION, METADATA_NAME, METADATA_VERSION, PATHOLOGY, PROTEIN, RELATION,
 )
 from pybel.dsl import (
     BaseEntity, activity, complex_abundance, composite_abundance, degradation, entity, fragment, fusion_range, gene,
-    gene_fusion, gmod, hgvs, named_complex_abundance, pmod, protein, protein_fusion, reaction, secretion, translocation,
+    gene_fusion, gmod, hgvs, location, named_complex_abundance, pmod, protein, protein_fusion, reaction, secretion,
+    translocation,
 )
 from pybel.dsl.namespaces import chebi, hgnc
-from pybel.examples import sialic_acid_graph
+from pybel.examples import ras_tloc_graph, sialic_acid_graph
 from pybel.manager import models
-from pybel.manager.models import Author, Evidence
+from pybel.manager.models import Author, Citation, Edge, Evidence, NamespaceEntry, Node, Property
 from pybel.testing.cases import FleetingTemporaryCacheMixin, TemporaryCacheClsMixin, TemporaryCacheMixin
 from pybel.testing.constants import test_bel_simple
 from pybel.testing.mocks import mock_bel_resources
 from pybel.testing.utils import make_dummy_annotations, make_dummy_namespaces, n
 from pybel.utils import hash_citation, hash_evidence
-from tests import constants
 from tests.constants import (
-    BelReconstitutionMixin, expected_test_simple_metadata, test_citation_dict,
+    BelReconstitutionMixin, akt1, casp8, egfr, expected_test_simple_metadata, fadd, test_citation_dict,
     test_evidence_text,
 )
 
@@ -41,7 +40,6 @@ fos = hgnc('FOS')
 jun = hgnc('JUN')
 ap1_complex = complex_abundance([fos, jun])
 
-egfr = hgnc('EGFR')
 egfr_dimer = complex_abundance([egfr, egfr])
 
 yfg_data = hgnc('YFG')
@@ -64,10 +62,10 @@ def assert_unqualified_edge(self, u, v, rel):
     :return:
     """
     if isinstance(u, BaseEntity):
-        u = u.as_tuple()
+        u = u
     self.assertIn(u, self.graph)
     if isinstance(v, BaseEntity):
-        v = v.as_tuple()
+        v = v
     self.assertIn(v, self.graph[u])
     edges = list(self.graph[u][v].values())
     self.assertEqual(1, len(edges))
@@ -161,6 +159,12 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         self.assertEqual([(network.name, '1.0.1')], [(n.name, n.version) for n in recent_networks])
         self.assertEqual('1.0.1', recent_networks[0].version)
 
+    @mock_bel_resources
+    def test_upload_with_tloc(self, mock_get):
+        """Test that the RAS translocation example graph can be uploaded."""
+        make_dummy_namespaces(self.manager, ras_tloc_graph)
+        to_database(ras_tloc_graph, manager=self.manager)
+
 
 class TestTemporaryInsertNetwork(TemporaryCacheMixin):
     @mock_bel_resources
@@ -178,7 +182,7 @@ class TestTemporaryInsertNetwork(TemporaryCacheMixin):
             annotations={'TEST': 'a'}
         )
 
-        make_dummy_namespaces(self.manager, graph, {'HGNC': ['FOS', 'JUN']})
+        make_dummy_namespaces(self.manager, graph)
 
         self.manager.insert_graph(graph, store_parts=True)
 
@@ -328,7 +332,7 @@ class TestEnsure(TemporaryCacheMixin):
         citation = self.manager.get_or_create_citation(**citation_dict)
         self.manager.session.commit()
 
-        self.assertIsInstance(citation, models.Citation)
+        self.assertIsInstance(citation, Citation)
         self.assertEqual(citation_dict, citation.to_json())
 
         citation_reloaded_from_reference = self.manager.get_citation_by_pmid(reference)
@@ -358,7 +362,7 @@ class TestEnsure(TemporaryCacheMixin):
         citation = self.manager.get_or_create_citation(**citation_dict)
         self.manager.session.commit()
 
-        self.assertIsInstance(citation, models.Citation)
+        self.assertIsInstance(citation, Citation)
         self.assertEqual(citation_dict, citation.to_json())
 
         citation_reloaded_from_reference = self.manager.get_citation_by_reference(CITATION_TYPE_OTHER, reference)
@@ -434,7 +438,7 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
             cls.network = cls.manager.insert_graph(cls.graph, store_parts=True)
 
     def test_citations(self):
-        citations = self.manager.session.query(models.Citation).all()
+        citations = self.manager.session.query(Citation).all()
         self.assertEqual(2, len(citations), msg='Citations: {}'.format(citations))
 
         citation_references = {'123455', '123456'}
@@ -447,11 +451,11 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         authors = {'Example Author', 'Example Author2'}
         self.assertEqual(authors, {
             author.name
-            for author in self.manager.session.query(models.Author).all()
+            for author in self.manager.session.query(Author).all()
         })
 
     def test_evidences(self):
-        evidences = self.manager.session.query(models.Evidence).all()
+        evidences = self.manager.session.query(Evidence).all()
         self.assertEqual(3, len(evidences))
 
         evidences_texts = {'Evidence 1 w extra notes', 'Evidence 2', 'Evidence 3'}
@@ -461,22 +465,21 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         })
 
     def test_nodes(self):
-        nodes = self.manager.session.query(models.Node).all()
+        nodes = self.manager.session.query(Node).all()
         self.assertEqual(4, len(nodes))
 
     def test_edges(self):
-        edges = self.manager.session.query(models.Edge).all()
+        edges = self.manager.session.query(Edge).all()
 
         x = Counter((e.source.bel, e.target.bel) for e in edges)
 
-        pfmt = 'p(HGNC:{})'
         d = {
-            (pfmt.format(constants.AKT1[2]), pfmt.format(constants.EGFR[2])): 1,
-            (pfmt.format(constants.EGFR[2]), pfmt.format(constants.FADD[2])): 1,
-            (pfmt.format(constants.EGFR[2]), pfmt.format(constants.CASP8[2])): 1,
-            (pfmt.format(constants.FADD[2]), pfmt.format(constants.CASP8[2])): 1,
-            (pfmt.format(constants.AKT1[2]), pfmt.format(constants.CASP8[2])): 1,  # two way association
-            (pfmt.format(constants.CASP8[2]), pfmt.format(constants.AKT1[2])): 1  # two way association
+            (akt1.as_bel(), egfr.as_bel()): 1,
+            (egfr.as_bel(), fadd.as_bel()): 1,
+            (egfr.as_bel(), casp8.as_bel()): 1,
+            (fadd.as_bel(), casp8.as_bel()): 1,
+            (akt1.as_bel(), casp8.as_bel()): 1,  # two way association
+            (casp8.as_bel(), akt1.as_bel()): 1  # two way association
         }
 
         self.assertEqual(dict(x), d)
@@ -503,20 +506,16 @@ class TestAddNodeFromData(unittest.TestCase):
 
     def test_simple(self):
         self.graph.add_node_from_data(yfg_data)
-        self.assertIn(yfg_data.as_tuple(), self.graph)
+        self.assertIn(yfg_data, self.graph)
         self.assertEqual(1, self.graph.number_of_nodes())
 
     def test_single_variant(self):
         node_data = gene('HGNC', 'AKT1', variants=hgvs('p.Phe508del'))
-        node_tuple = node_data.as_tuple()
         node_parent_data = node_data.get_parent()
-        node_parent_tuple = node_parent_data.as_tuple()
 
         self.graph.add_node_from_data(node_data)
-        self.assertIn(node_tuple, self.graph)
-        self.assertEqual(node_data, self.graph.node[node_tuple])
-        self.assertIn(node_parent_tuple, self.graph)
-        self.assertEqual(node_parent_data, self.graph.node[node_parent_tuple])
+        self.assertIn(node_data, self.graph)
+        self.assertIn(node_parent_data, self.graph)
         self.assertEqual(2, self.graph.number_of_nodes())
         self.assertEqual(1, self.graph.number_of_edges())
 
@@ -524,16 +523,12 @@ class TestAddNodeFromData(unittest.TestCase):
         node_data = gene('HGNC', 'AKT1', variants=[
             hgvs('p.Phe508del'), hgvs('p.Phe509del')
         ])
-        node_tuple = node_data.as_tuple()
-
         node_parent_data = node_data.get_parent()
-        node_parent_tuple = node_parent_data.as_tuple()
+        node_parent_tuple = node_parent_data
 
         self.graph.add_node_from_data(node_data)
-        self.assertIn(node_tuple, self.graph)
-        self.assertEqual(node_data, self.graph.node[node_tuple])
+        self.assertIn(node_data, self.graph)
         self.assertIn(node_parent_tuple, self.graph)
-        self.assertEqual(node_parent_data, self.graph.node[node_parent_tuple])
         self.assertEqual(2, self.graph.number_of_nodes())
         self.assertEqual(1, self.graph.number_of_edges())
 
@@ -544,11 +539,10 @@ class TestAddNodeFromData(unittest.TestCase):
             range_5p=fusion_range('c', 1, 79),
             range_3p=fusion_range('c', 312, 5034)
         )
-        node_tuple = node_data.as_tuple()
+        node_data = node_data
 
         self.graph.add_node_from_data(node_data)
-        self.assertIn(node_tuple, self.graph)
-        self.assertEqual(node_data, self.graph.node[node_tuple])
+        self.assertIn(node_data, self.graph)
         self.assertEqual(1, self.graph.number_of_nodes())
         self.assertEqual(0, self.graph.number_of_edges())
 
@@ -558,39 +552,39 @@ class TestAddNodeFromData(unittest.TestCase):
         node_data = composite_abundance([il23, il6])
 
         self.graph.add_node_from_data(node_data)
-        self.assertIn(node_data.as_tuple(), self.graph)
+        self.assertIn(node_data, self.graph)
         self.assertEqual(3, self.graph.number_of_nodes())
-        self.assertIn(il6.as_tuple(), self.graph, msg='Nodes:\n'.format('\n'.join(map(str, self.graph))))
-        self.assertIn(il23.as_tuple(), self.graph)
+        self.assertIn(il6, self.graph, msg='Nodes:\n'.format('\n'.join(map(str, self.graph))))
+        self.assertIn(il23, self.graph)
         self.assertEqual(2, self.graph.number_of_edges())
 
-        self.assertIn(il6.as_tuple(), self.graph[node_data.as_tuple()])
-        edges = list(self.graph[node_data.as_tuple()][il6.as_tuple()].values())
+        self.assertIn(il6, self.graph[node_data])
+        edges = list(self.graph[node_data][il6].values())
         self.assertEqual(1, len(edges))
         data = edges[0]
         self.assertEqual(HAS_COMPONENT, data[RELATION])
 
-        self.assertIn(il23.as_tuple(), self.graph[node_data.as_tuple()])
-        edges = list(self.graph[node_data.as_tuple()][il23.as_tuple()].values())
+        self.assertIn(il23, self.graph[node_data])
+        edges = list(self.graph[node_data][il23].values())
         self.assertEqual(1, len(edges))
         data = edges[0]
         self.assertEqual(HAS_COMPONENT, data[RELATION])
 
     def test_reaction(self):
         self.graph.add_node_from_data(superoxide_decomposition)
-        self.assertIn(superoxide_decomposition.as_tuple(), self.graph)
+        self.assertIn(superoxide_decomposition, self.graph)
         self.assertEqual(4, self.graph.number_of_nodes())
         self.assertEqual(3, self.graph.number_of_edges())
 
-        assert_unqualified_edge(self, superoxide_decomposition.as_tuple(), superoxide.as_tuple(), HAS_REACTANT)
-        assert_unqualified_edge(self, superoxide_decomposition.as_tuple(), hydrogen_peroxide.as_tuple(), HAS_PRODUCT)
-        assert_unqualified_edge(self, superoxide_decomposition.as_tuple(), oxygen.as_tuple(), HAS_PRODUCT)
+        assert_unqualified_edge(self, superoxide_decomposition, superoxide, HAS_REACTANT)
+        assert_unqualified_edge(self, superoxide_decomposition, hydrogen_peroxide, HAS_PRODUCT)
+        assert_unqualified_edge(self, superoxide_decomposition, oxygen, HAS_PRODUCT)
 
     def test_complex(self):
         node = complex_abundance(members=[fos, jun])
 
         self.graph.add_node_from_data(node)
-        self.assertIn(node.as_tuple(), self.graph)
+        self.assertIn(node, self.graph)
         self.assertEqual(3, self.graph.number_of_nodes())
         self.assertEqual(2, self.graph.number_of_edges())
 
@@ -601,8 +595,8 @@ class TestAddNodeFromData(unittest.TestCase):
         """Tests what happens if a BEL statement complex(p(X), p(X)) is added"""
         self.graph.add_node_from_data(egfr_dimer)
 
-        self.assertIn(egfr.as_tuple(), self.graph)
-        self.assertIn(egfr_dimer.as_tuple(), self.graph)
+        self.assertIn(egfr, self.graph)
+        self.assertIn(egfr_dimer, self.graph)
         self.assertEqual(2, self.graph.number_of_nodes())
         self.assertEqual(1, self.graph.number_of_edges())
 
@@ -611,12 +605,12 @@ class TestAddNodeFromData(unittest.TestCase):
     def test_nested_complex(self):
         """Checks what happens if a theoretical BEL statement `complex(p(X), complex(p(Y), p(Z)))` is added"""
         self.graph.add_node_from_data(bound_ap1_e2f4)
-        self.assertIn(bound_ap1_e2f4.as_tuple(), self.graph)
+        self.assertIn(bound_ap1_e2f4, self.graph)
         self.assertEqual(5, self.graph.number_of_nodes())
-        self.assertIn(fos.as_tuple(), self.graph)
-        self.assertIn(jun.as_tuple(), self.graph)
-        self.assertIn(e2f4_data.as_tuple(), self.graph)
-        self.assertIn(ap1_complex.as_tuple(), self.graph)
+        self.assertIn(fos, self.graph)
+        self.assertIn(jun, self.graph)
+        self.assertIn(e2f4_data, self.graph)
+        self.assertIn(ap1_complex, self.graph)
         self.assertEqual(4, self.graph.number_of_edges())
 
         assert_unqualified_edge(self, ap1_complex, fos, HAS_COMPONENT)
@@ -628,17 +622,17 @@ class TestAddNodeFromData(unittest.TestCase):
 class TestReconstituteNodeTuples(TemporaryCacheMixin):
     """Tests the ability to go from PyBEL to relational database"""
 
-    def help_reconstitute(self, node_data, number_nodes, number_edges):
+    def help_reconstitute(self, node, number_nodes, number_edges):
         """Help test the round-trip conversion from PyBEL data dictionary to node model.
 
-        :param BaseEntity node_data: PyBEL node data dictionary
+        :param BaseEntity node: PyBEL node data dictionary
         :param int number_nodes:
         :param int number_edges:
         """
-        self.assertIsInstance(node_data, BaseEntity)
+        self.assertIsInstance(node, BaseEntity)
 
         graph = BELGraph(name='test', version='0.0.0')
-        node_tuple = graph.add_node_from_data(node_data)
+        graph.add_node_from_data(node)
 
         make_dummy_namespaces(self.manager, graph)
 
@@ -646,13 +640,12 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         self.assertEqual(number_nodes, self.manager.count_nodes())
         self.assertEqual(number_edges, self.manager.count_edges())
 
-        node = self.manager.get_or_create_node(graph, node_data)
+        node_model = self.manager.get_or_create_node(graph, node)
+        self.assertEqual(node.sha512, node_model.sha512)
         self.manager.session.commit()
 
-        self.assertEqual(node_data, node.to_json())
-        self.assertEqual(node_tuple, node.to_tuple())
-
-        self.assertEqual(node_tuple, self.manager.get_node_tuple_by_hash(node_data.as_sha512()))
+        self.assertEqual(node, node_model.to_json())
+        self.assertEqual(node, self.manager.get_dsl_by_hash(node.as_sha512()))
 
     @mock_bel_resources
     def test_simple(self, mock):
@@ -844,10 +837,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             subject_modifier=secretion()
         )
 
-        make_dummy_namespaces(self.manager, self.graph, {
-            'HGNC': ['F2', 'EDN1'],
-            'GOCC': ['intracellular', 'cell surface', 'extracellular space']
-        })
+        make_dummy_namespaces(self.manager, self.graph)
 
         network = self.manager.insert_graph(self.graph, store_parts=True)
         self.assertEqual(2, network.nodes.count())
@@ -869,10 +859,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             )
         )
 
-        make_dummy_namespaces(self.manager, self.graph, {
-            'HGNC': ['F2', 'EDN1'],
-            'GOCC': ['extracellular space'], 'TEST': ['A']
-        })
+        make_dummy_namespaces(self.manager, self.graph)
 
         network = self.manager.insert_graph(self.graph, store_parts=True)
         self.assertEqual(2, network.nodes.count())
@@ -894,23 +881,19 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             subject_modifier=activity('kin')
         )
 
-        make_dummy_namespaces(self.manager, self.graph, {
-            'HGNC': [p1_name, p2_name],
-        })
+        make_dummy_namespaces(self.manager, self.graph)
 
         network = self.manager.insert_graph(self.graph, store_parts=True)
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
-        kin_list = self.manager.session.query(models.NamespaceEntry).filter(
-            models.NamespaceEntry.name == 'kin').all()
+        kin_list = self.manager.session.query(NamespaceEntry).filter(NamespaceEntry.name == 'kin').all()
         self.assertEqual(1, len(kin_list))
 
         kin = list(kin_list)[0]
         self.assertEqual('kin', kin.name)
 
-        effects = self.manager.session.query(models.Property).join(models.NamespaceEntry).filter(
-            models.Property.effect == kin)
+        effects = self.manager.session.query(Property).join(NamespaceEntry).filter(Property.effect == kin)
         self.assertEqual(1, effects.count())
 
     @mock_bel_resources
@@ -928,23 +911,19 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             subject_modifier=activity(name=dummy_activity_name, namespace=dummy_activity_namespace)
         )
 
-        make_dummy_namespaces(self.manager, self.graph, {
-            'HGNC': [p1_name, p2_name], dummy_activity_namespace: [dummy_activity_name]
-        })
+        make_dummy_namespaces(self.manager, self.graph)
 
         network = self.manager.insert_graph(self.graph, store_parts=True)
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
-        kin_list = self.manager.session.query(models.NamespaceEntry).filter(
-            models.NamespaceEntry.name == dummy_activity_name).all()
+        kin_list = self.manager.session.query(NamespaceEntry).filter(NamespaceEntry.name == dummy_activity_name).all()
         self.assertEqual(1, len(kin_list))
 
         kin = list(kin_list)[0]
         self.assertEqual(dummy_activity_name, kin.name)
 
-        effects = self.manager.session.query(models.Property).join(models.NamespaceEntry).filter(
-            models.Property.effect == kin)
+        effects = self.manager.session.query(Property).join(NamespaceEntry).filter(Property.effect == kin)
         self.assertEqual(1, effects.count())
 
     @mock_bel_resources
@@ -960,23 +939,19 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             object_modifier=activity('kin')
         )
 
-        make_dummy_namespaces(self.manager, self.graph, {
-            'HGNC': [p1_name, p2_name],
-        })
+        make_dummy_namespaces(self.manager, self.graph)
 
         network = self.manager.insert_graph(self.graph, store_parts=True)
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
-        kin_list = self.manager.session.query(models.NamespaceEntry).filter(
-            models.NamespaceEntry.name == 'kin').all()
+        kin_list = self.manager.session.query(NamespaceEntry).filter(NamespaceEntry.name == 'kin').all()
         self.assertEqual(1, len(kin_list))
 
         kin = list(kin_list)[0]
         self.assertEqual('kin', kin.name)
 
-        effects = self.manager.session.query(models.Property).join(models.NamespaceEntry).filter(
-            models.Property.effect == kin)
+        effects = self.manager.session.query(Property).join(NamespaceEntry).filter(Property.effect == kin)
         self.assertEqual(1, effects.count())
 
     @mock_bel_resources
@@ -994,27 +969,22 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             object_modifier=activity(name=dummy_activity_name, namespace=dummy_activity_namespace)
         )
 
-        make_dummy_namespaces(self.manager, self.graph, {
-            'HGNC': [p1_name, p2_name], dummy_activity_namespace: [dummy_activity_name]
-        })
+        make_dummy_namespaces(self.manager, self.graph)
 
         network = self.manager.insert_graph(self.graph, store_parts=True)
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
-        kin_list = self.manager.session.query(models.NamespaceEntry).filter(
-            models.NamespaceEntry.name == dummy_activity_name).all()
+        kin_list = self.manager.session.query(NamespaceEntry).filter(NamespaceEntry.name == dummy_activity_name).all()
         self.assertEqual(1, len(kin_list))
 
         kin = list(kin_list)[0]
         self.assertEqual(dummy_activity_name, kin.name)
 
-        effects = self.manager.session.query(models.Property).join(models.NamespaceEntry).filter(
-            models.Property.effect == kin)
+        effects = self.manager.session.query(Property).join(NamespaceEntry).filter(Property.effect == kin)
         self.assertEqual(1, effects.count())
 
-    @mock_bel_resources
-    def test_subject_degradation(self, mock):
+    def test_subject_degradation(self):
         self.graph.add_association(
             protein(name='YFG', namespace='HGNC'),
             protein(name='YFG2', namespace='HGNC'),
@@ -1022,7 +992,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             citation=n(),
             subject_modifier=degradation(),
         )
-        make_dummy_namespaces(self.manager, self.graph, {'HGNC': ['YFG', 'YFG2']})
+        make_dummy_namespaces(self.manager, self.graph)
 
         network = self.manager.insert_graph(self.graph, store_parts=True)
 
@@ -1032,8 +1002,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         edge = network.edges.first()
         self.assertEqual(1, edge.properties.count())
 
-    @mock_bel_resources
-    def test_object_degradation(self, mock):
+    def test_object_degradation(self):
         self.graph.add_association(
             protein(name='YFG', namespace='HGNC'),
             protein(name='YFG2', namespace='HGNC'),
@@ -1041,7 +1010,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             citation=n(),
             object_modifier=degradation(),
         )
-        make_dummy_namespaces(self.manager, self.graph, {'HGNC': ['YFG', 'YFG2']})
+        make_dummy_namespaces(self.manager, self.graph)
 
         network = self.manager.insert_graph(self.graph, store_parts=True)
 
@@ -1051,18 +1020,15 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         edge = network.edges.first()
         self.assertEqual(1, edge.properties.count())
 
-    @mock_bel_resources
-    def test_subject_location(self, mock):
+    def test_subject_location(self):
         self.graph.add_association(
             protein(name='YFG', namespace='HGNC'),
             protein(name='YFG2', namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            subject_modifier={
-                LOCATION: entity(namespace='GOCC', name='nucleus')
-            },
+            subject_modifier=location(entity(namespace='GO', name='nucleus', identifier='GO:0005634'))
         )
-        make_dummy_namespaces(self.manager, self.graph, {'HGNC': ['YFG', 'YFG2'], 'GOCC': ['nucleus']})
+        make_dummy_namespaces(self.manager, self.graph)
 
         network = self.manager.insert_graph(self.graph, store_parts=True)
 
@@ -1072,10 +1038,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         edge = network.edges.first()
         self.assertEqual(1, edge.properties.count())
 
-    @mock_bel_resources
-    def test_mixed_1(self, mock):
+    def test_mixed_1(self):
         """Test mixed having location and something else."""
-
         self.graph.add_increases(
             protein(namespace='HGNC', name='CDC42'),
             protein(namespace='HGNC', name='PAK2'),
@@ -1102,20 +1066,19 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         edge = network.edges.first()
         self.assertEqual(2, edge.properties.count())
 
-        subject = edge.properties.filter(models.Property.is_subject).one()
+        subject = edge.properties.filter(Property.is_subject).one()
         self.assertTrue(subject.is_subject)
         self.assertEqual('gtp', subject.effect.name)
         self.assertIsNotNone(subject.effect.namespace)
         self.assertEqual(BEL_DEFAULT_NAMESPACE, subject.effect.namespace.keyword)
 
-        object = edge.properties.filter(not_(models.Property.is_subject)).one()
+        object = edge.properties.filter(not_(Property.is_subject)).one()
         self.assertFalse(object.is_subject)
         self.assertEqual('kin', object.effect.name)
         self.assertIsNotNone(object.effect.namespace)
         self.assertEqual(BEL_DEFAULT_NAMESPACE, object.effect.namespace.keyword)
 
-    @mock_bel_resources
-    def test_mixed_2(self, mock):
+    def test_mixed_2(self):
         """Tests both subject and object activity with location information as well."""
         self.graph.add_directly_increases(
             protein(namespace='HGNC', name='HDAC4'),
@@ -1129,11 +1092,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             object_modifier=activity('tscript', location=entity(namespace='GOCC', name='nucleus'))
         )
 
-        make_dummy_namespaces(self.manager, self.graph, {
-            'HGNC': ['HDAC4', 'MEF2A'],
-            'GOCC': ['nucleus']
-        })
-
+        make_dummy_namespaces(self.manager, self.graph)
         make_dummy_annotations(self.manager, self.graph)
 
         network = self.manager.insert_graph(self.graph, store_parts=True)
@@ -1142,8 +1101,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
         edge = network.edges.first()
         self.assertEqual(4, edge.properties.count())
-        self.assertEqual(2, edge.properties.filter(models.Property.is_subject).count())
-        self.assertEqual(2, edge.properties.filter(not_(models.Property.is_subject)).count())
+        self.assertEqual(2, edge.properties.filter(Property.is_subject).count())
+        self.assertEqual(2, edge.properties.filter(not_(Property.is_subject)).count())
 
 
 class TestNoAddNode(TemporaryCacheMixin):
@@ -1273,7 +1232,7 @@ class TestNoAddNode(TemporaryCacheMixin):
             ),
         )
 
-        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG', 'YFG2'], 'GOCC': ['extracellular space']})
+        make_dummy_namespaces(self.manager, graph)
 
         network = self.manager.insert_graph(graph, store_parts=True)
 
@@ -1299,7 +1258,7 @@ class TestNoAddNode(TemporaryCacheMixin):
             },
         )
 
-        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG', 'YFG2']})
+        make_dummy_namespaces(self.manager, graph)
 
         network = self.manager.insert_graph(graph, store_parts=True)
 
@@ -1324,7 +1283,7 @@ class TestNoAddNode(TemporaryCacheMixin):
             subject_modifier=activity(name='dummy', namespace=dummy_namespace_name)
         )
 
-        make_dummy_namespaces(self.manager, graph, {'HGNC': ['YFG', 'YFG2']})
+        make_dummy_namespaces(self.manager, graph)
 
         network = self.manager.insert_graph(graph, store_parts=True)
 
@@ -1403,8 +1362,8 @@ class TestEquivalentNodes(unittest.TestCase):
 
         graph.add_equivalence(a_node, b_node)
 
-        a = a_node.as_tuple()
-        b = b_node.as_tuple()
+        a = a_node
+        b = b_node
 
         self.assertEqual({a, b}, graph.get_equivalent_nodes(a_node))
         self.assertEqual({a, b}, graph.get_equivalent_nodes(b_node))

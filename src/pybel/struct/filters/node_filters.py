@@ -30,8 +30,8 @@ def invert_node_predicate(node_predicate):
     """Build a node predicate that is the inverse of the given node predicate.
 
     :param node_predicate: An edge predicate
-    :type node_predicate: (pybel.BELGraph, tuple) -> bool
-    :rtype: (pybel.BELGraph, tuple) -> bool
+    :type node_predicate: (pybel.BELGraph, BaseEntity) -> bool
+    :rtype: (pybel.BELGraph, BaseEntity) -> bool
     """
 
     def inverse_predicate(graph, node):
@@ -50,9 +50,9 @@ def concatenate_node_predicates(node_predicates=None):
     """Concatenate multiple node predicates to a new predicate that requires all predicates to be met.
 
     :param node_predicates: A predicate or list of predicates (graph, node) -> bool
-    :type node_predicates: None or (pybel.BELGraph, tuple) -> bool or iter[(pybel.BELGraph, tuple) -> bool]
+    :type node_predicates: None or (pybel.BELGraph, BaseEntity) -> bool or iter[(pybel.BELGraph, BaseEntity) -> bool]
     :return: A combine predicate (graph, node) -> bool
-    :rtype: (pybel.BELGraph, tuple) -> bool
+    :rtype: (pybel.BELGraph, BaseEntity) -> bool
 
     Example usage:
 
@@ -98,7 +98,7 @@ def filter_nodes(graph, node_predicates=None):
 
     :param BELGraph graph: A BEL graph
     :param node_predicates: A node predicate or list/tuple of node predicates
-    :type node_predicates: None or ((pybel.BELGraph, tuple) -> bool) or iter[(pybel.BELGraph, tuple) -> bool]
+    :type node_predicates: None or ((pybel.BELGraph, BaseEntity) -> bool) or iter[(pybel.BELGraph, BaseEntity) -> bool]
     :return: An iterable of nodes that pass all predicates
     :rtype: iter[tuple]
     """
@@ -117,7 +117,7 @@ def get_nodes(graph, node_predicates=None):
 
     :param BELGraph graph: A BEL graph
     :param node_predicates: A node predicate or list/tuple of node predicates
-    :type node_predicates: None or ((pybel.BELGraph, tuple) -> bool) or iter[(pybel.BELGraph, tuple) -> bool]
+    :type node_predicates: None or ((pybel.BELGraph, BaseEntity) -> bool) or iter[(pybel.BELGraph, BaseEntity) -> bool]
     :return: The set of nodes passing the predicates
     :rtype: set[tuple]
     """
@@ -129,7 +129,7 @@ def count_passed_node_filter(graph, node_predicates=None):
 
     :param pybel.BELGraph graph: A BEL graph
     :param node_predicates: A node predicate or list/tuple of node predicates
-    :type node_predicates: None or ((pybel.BELGraph, tuple) -> bool) or iter[(pybel.BELGraph, tuple) -> bool]
+    :type node_predicates: None or ((pybel.BELGraph, BaseEntity) -> bool) or iter[(pybel.BELGraph, BaseEntity) -> bool]
     :return: The number of nodes passing the given set of predicates
     :rtype: int
     """

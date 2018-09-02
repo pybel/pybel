@@ -7,7 +7,7 @@ from collections import Counter
 
 from pybel import BELGraph
 from pybel.constants import ABUNDANCE, BIOPROCESS, COMPLEX, PROTEIN
-from pybel.dsl.nodes import fusion_range, pathology, protein, protein_fusion
+from pybel.dsl import fusion_range, pathology, protein, protein_fusion
 from pybel.examples import egf_graph, sialic_acid_graph
 from pybel.struct.summary.node_summary import (
     count_functions, count_names_by_namespace, count_namespaces, count_pathologies, count_variants, get_functions,
@@ -64,7 +64,7 @@ class TestSummary(unittest.TestCase):
     def test_names_sialic(self):
         """Test getting and counting names by namespace."""
         result = {
-            'CD33': 2,
+            'CD33': 3, # once as reference, once in complex, and once as variant
             'TYROBP': 1,
             'SYK': 1,
             'PTPN6': 1,
@@ -73,7 +73,7 @@ class TestSummary(unittest.TestCase):
         }
 
         self.assertEqual(set(result), get_names_by_namespace(sialic_acid_graph, 'HGNC'))
-        self.assertEqual(Counter(result), count_names_by_namespace(sialic_acid_graph, 'HGNC'))
+        self.assertEqual(result, dict(count_names_by_namespace(sialic_acid_graph, 'HGNC')))
 
     def test_names_fusions(self):
         """Test that names inside fusions are still found by the iterator."""
@@ -122,15 +122,15 @@ class TestSummary(unittest.TestCase):
         graph.add_association(b, d, n(), n())
 
         pathology_counter = count_pathologies(graph)
-        self.assertIn(c.as_tuple(), pathology_counter)
-        self.assertIn(d.as_tuple(), pathology_counter)
-        self.assertEqual(1, pathology_counter[c.as_tuple()])
-        self.assertEqual(2, pathology_counter[d.as_tuple()])
+        self.assertIn(c, pathology_counter)
+        self.assertIn(d, pathology_counter)
+        self.assertEqual(1, pathology_counter[c])
+        self.assertEqual(2, pathology_counter[d])
 
         top_pathology_counter = get_top_pathologies(graph, count=1)
         self.assertEqual(1, len(top_pathology_counter))
         node, count = top_pathology_counter[0]
-        self.assertEqual(d.as_tuple(), node)
+        self.assertEqual(d, node)
         self.assertEqual(2, count)
 
     def test_get_top_hubs(self):
@@ -145,5 +145,5 @@ class TestSummary(unittest.TestCase):
         print(top_hubs[0])
         self.assertEqual(1, len(top_hubs))
         node, degree = top_hubs[0]
-        self.assertEqual(a.as_tuple(), node)
+        self.assertEqual(a, node)
         self.assertEqual(2, degree)

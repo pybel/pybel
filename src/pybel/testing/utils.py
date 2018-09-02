@@ -6,7 +6,7 @@ from uuid import uuid4
 
 from requests.compat import urlparse
 
-from ..constants import FRAUNHOFER_RESOURCES
+from ..constants import BEL_DEFAULT_NAMESPACE, FRAUNHOFER_RESOURCES
 from ..manager.models import Namespace, NamespaceEntry
 from ..struct.summary import get_annotation_values_by_annotation
 from ..struct.summary.node_summary import get_names
@@ -38,24 +38,20 @@ def n():
     return str(uuid4())[:15]
 
 
-def make_dummy_namespaces(manager, graph, namespace_dict=None):
+def make_dummy_namespaces(manager, graph):
     """Make dummy namespaces for the test.
 
-    :param pybel.manager.Manager manager:
-    :type namespaces: dict[str,iter[str]]
-    :param pybel.BELGraph graph:
+    :type manager: pybel.manager.Manager
+    :type graph: pybel.BELGraph
     """
-    node_names = get_names(graph)
+    for keyword, names in get_names(graph).items():
+        if keyword == BEL_DEFAULT_NAMESPACE:
+            continue
 
-    if namespace_dict:
-        node_names.update(namespace_dict)
-
-    for keyword, names in node_names.items():
         if keyword in graph.namespace_url and graph.namespace_url[keyword] in graph.uncached_namespaces:
             continue
 
-        url = n()
-        graph.namespace_url[keyword] = url
+        graph.namespace_url[keyword] = url = n()
 
         namespace = Namespace(keyword=keyword, url=url)
         manager.session.add(namespace)
@@ -64,7 +60,7 @@ def make_dummy_namespaces(manager, graph, namespace_dict=None):
             entry = NamespaceEntry(name=name, namespace=namespace)
             manager.session.add(entry)
 
-        manager.session.commit()
+    manager.session.commit()
 
 
 def make_dummy_annotations(manager, graph):
@@ -76,8 +72,7 @@ def make_dummy_annotations(manager, graph):
     annotation_names = get_annotation_values_by_annotation(graph)
 
     for keyword, names in annotation_names.items():
-        url = n()
-        graph.annotation_url[keyword] = url
+        graph.annotation_url[keyword] = url = n()
 
         namespace = Namespace(keyword=keyword, url=url, is_annotation=True)
         manager.session.add(namespace)
@@ -86,4 +81,4 @@ def make_dummy_annotations(manager, graph):
             entry = NamespaceEntry(name=name, namespace=namespace)
             manager.session.add(entry)
 
-        manager.session.commit()
+    manager.session.commit()

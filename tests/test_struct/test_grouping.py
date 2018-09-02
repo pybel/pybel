@@ -46,17 +46,15 @@ class TestAnnotation(unittest.TestCase):
         self.assertIn('subgraph', subgraph_1.annotation_url)
 
         self.assertIn(a, subgraph_1)
-        self.assertIn(FUNCTION, subgraph_1.node[a.as_tuple()])
-        self.assertEqual(PROTEIN, subgraph_1.node[a.as_tuple()][FUNCTION])
         self.assertIn(b, subgraph_1)
         self.assertIn(c, subgraph_1)
         self.assertIn(d, subgraph_1)
 
-        self.assertIn(b.as_tuple(), subgraph_1[a.as_tuple()])
-        self.assertIn(c.as_tuple(), subgraph_1[a.as_tuple()])
-        self.assertIn(d.as_tuple(), subgraph_1[b.as_tuple()])
-        self.assertNotIn(d.as_tuple(), subgraph_1[a.as_tuple()])
-        self.assertNotIn(d.as_tuple(), subgraph_1[c.as_tuple()])
+        self.assertIn(b, subgraph_1[a])
+        self.assertIn(c, subgraph_1[a])
+        self.assertIn(d, subgraph_1[b])
+        self.assertNotIn(d, subgraph_1[a])
+        self.assertNotIn(d, subgraph_1[c])
 
         subgraph_2 = subgraphs['2']
         self.assertIsInstance(subgraph_2, BELGraph)
@@ -69,10 +67,10 @@ class TestAnnotation(unittest.TestCase):
         self.assertNotIn(c, subgraph_2)
         self.assertIn(d, subgraph_2)
 
-        self.assertIn(b.as_tuple(), subgraph_2[a.as_tuple()])
-        self.assertNotIn(c.as_tuple(), subgraph_2[a.as_tuple()])
-        self.assertIn(d.as_tuple(), subgraph_2[b.as_tuple()])
-        self.assertIn(d.as_tuple(), subgraph_2[a.as_tuple()])
+        self.assertIn(b, subgraph_2[a])
+        self.assertNotIn(c, subgraph_2[a])
+        self.assertIn(d, subgraph_2[b])
+        self.assertIn(d, subgraph_2[a])
 
     def test_get_subgraphs_by_annotation_with_sentinel(self):
         sentinel = n()
