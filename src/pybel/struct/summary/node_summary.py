@@ -122,7 +122,7 @@ def _identifier_filtered_iterator(graph):
         if side_data is None:
             continue
 
-        modifier = side_data[MODIFIER]
+        modifier = side_data.get(MODIFIER)
         effect = side_data.get(EFFECT)
 
         if modifier == ACTIVITY and effect is not None and NAMESPACE in effect and NAME in effect:
@@ -137,7 +137,7 @@ def _identifier_filtered_iterator(graph):
             if NAMESPACE in to_loc and NAME in to_loc:
                 yield to_loc[NAMESPACE], to_loc[NAME]
 
-        location = data.get(LOCATION)
+        location = side_data.get(LOCATION)
         if location is not None and NAMESPACE in location and NAME in location:
             yield location[NAMESPACE], location[NAME]
 
