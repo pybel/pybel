@@ -153,9 +153,7 @@ def post(graph, host):
 @click.option('--graphml', help='Path to output a GraphML file. Use .graphml for Cytoscape.')
 @click.option('--json', type=click.File('w'), help='Path to output a node-link JSON file.')
 @click.option('--bel', type=click.File('w'), help='Output canonical BEL.')
-@click.option('--neo', help='Connection string for neo4j upload.')
-@click.option('--neo-context', help='Optional context for neo4j upload.')
-def serialize(graph, csv, sif, gsea, graphml, json, bel, neo, neo_context):
+def serialize(graph, csv, sif, gsea, graphml, json, bel):
     """Serialize a graph to various formats."""
     if csv:
         log.info('Outputting CSV to %s', csv)
@@ -181,12 +179,16 @@ def serialize(graph, csv, sif, gsea, graphml, json, bel, neo, neo_context):
         log.info('Outputting BEL to %s', bel)
         to_bel(graph, bel)
 
-    if neo:
-        import py2neo
-        log.info('Uploading to neo4j with context %s', neo_context)
-        neo_graph = py2neo.Graph(neo)
-        assert neo_graph.data('match (n) return count(n) as count')[0]['count'] is not None
-        to_neo4j(graph, neo_graph, neo_context)
+
+@main.command()
+@graph_pickle_argument
+@click.option('--connection', default='http://localhost:7474/db/data/', help='Connection string for neo4j upload.')
+@click.password_option()
+def neo(graph, connection, password):
+    """Upload to neo4j."""
+    import py2neo
+    neo_graph = py2neo.Graph(connection, password=password)
+    to_neo4j(graph, neo_graph)
 
 
 @main.command()
