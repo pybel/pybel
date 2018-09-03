@@ -128,9 +128,4 @@ def get_random_path(graph):
     if tries == sentinel_tries:
         return [source]
 
-    shortest_path = nx.shortest_path(wg, source=source, target=target)
-
-    return [
-        graph.nodes[node]
-        for node in shortest_path
-    ]
+    return nx.shortest_path(wg, source=source, target=target)
