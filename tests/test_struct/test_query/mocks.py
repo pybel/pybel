@@ -1,15 +1,9 @@
 # -*- coding: utf-8 -*-
 
+"""Mocks for testing the PyBEL Query Builder."""
+
 from pybel.manager.models import Network
 from pybel.struct import union
-
-
-class MockNetwork:
-    """A mock network."""
-
-    def __init__(self, id):
-        """Build a mock network with the given identifier."""
-        self.id = id
 
 
 class MockQueryManager:
@@ -40,7 +34,7 @@ class MockQueryManager:
         return len(self.graphs)
 
     def insert_graph(self, graph):
-        """Insert a graph.
+        """Insert a graph and ensure its nodes are cached.
 
         :param pybel.BELGraph graph:
         :rtype: Network
@@ -49,10 +43,10 @@ class MockQueryManager:
         self.graphs.append(graph)
         self.id_graph[network_id] = graph
 
-        for node, data in graph.nodes(data=True):
-            self.hash_to_tuple[data.sha512] = node
+        for node in graph:
+            self.hash_to_tuple[node.sha512] = node
 
-        return MockNetwork(id=network_id)
+        return Network(id=network_id)
 
     def get_graph_by_ids(self, network_ids):
         """Get a graph from the union of multiple networks.

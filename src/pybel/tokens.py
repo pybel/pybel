@@ -20,9 +20,9 @@ __all__ = [
 
 
 def parse_result_to_dsl(tokens):
-    """Convert a ParseResult to a PyBEL DSL object
+    """Convert a ParseResult to a PyBEL DSL object.
 
-    :type tokens: pyparsing.ParseResults
+    :type tokens: dict or pyparsing.ParseResults
     :rtype: BaseEntity
     """
     if MODIFIER in tokens:

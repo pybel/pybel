@@ -114,7 +114,7 @@ class TestPipeline(TestEgfExample):
         pipeline = Pipeline.from_functions([
             'infer_central_dogma',
         ])
-        result = pipeline(self.graph, in_place=False)
+        result = pipeline(self.graph)
 
         self.assertEqual(32, result.number_of_nodes())
 
@@ -127,7 +127,7 @@ class TestPipeline(TestEgfExample):
         pipeline = Pipeline.from_functions([
             enrich_protein_and_rna_origins,
         ])
-        result = pipeline(self.graph, in_place=False)
+        result = pipeline(self.graph)
 
         self.assertEqual(32, result.number_of_nodes())
 
