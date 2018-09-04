@@ -11,6 +11,7 @@ from ...constants import (
     CITATION_TYPE_PUBMED, DEGRADATION, DIRECT_CAUSAL_RELATIONS, EVIDENCE, OBJECT, POLAR_RELATIONS, RELATION, SUBJECT,
     TRANSLOCATION,
 )
+from ...dsl import BiologicalProcess, Pathology
 
 __all__ = [
     'edge_predicate',
@@ -26,6 +27,7 @@ __all__ = [
     'edge_has_degradation',
     'edge_has_translocation',
     'edge_has_annotation',
+    'has_pathology_causal',
 ]
 
 
@@ -203,3 +205,20 @@ def edge_has_annotation(data, key):
         return
 
     return annotations.get(key)
+
+
+def has_pathology_causal(graph, u, v, k):
+    """Check if the subject is a pathology and has a causal relationship with a non bioprocess/pathology.
+
+    :param pybel.BELGraph graph: A BEL Graph
+    :param BaseEntity u: A BEL node
+    :param BaseEntity v: A BEL node
+    :param str k: The edge key between the given nodes
+    :return: If the subject of this edge is a pathology and it participates in a causal reaction.
+    :rtype: bool
+    """
+    return (
+        isinstance(u, Pathology) and
+        is_causal_relation(graph, u, v, k) and
+        not isinstance(v, (Pathology, BiologicalProcess))
+    )
