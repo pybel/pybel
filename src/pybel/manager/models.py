@@ -270,7 +270,7 @@ class Network(Base):
     id = Column(Integer, primary_key=True)
 
     name = Column(String(255), nullable=False, index=True, doc='Name of the given Network (from the BEL file)')
-    version = Column(String(16), nullable=False, doc='Release version of the given Network (from the BEL file)')
+    version = Column(String(255), nullable=False, doc='Release version of the given Network (from the BEL file)')
 
     authors = Column(Text, nullable=True, doc='Authors of the underlying BEL file')
     contact = Column(String(255), nullable=True, doc='Contact email from the underlying BEL file')
