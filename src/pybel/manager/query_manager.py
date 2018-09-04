@@ -211,7 +211,7 @@ class QueryManager(LookupManager):
             if isinstance(author, string_types):
                 query = query.filter(Author.name.like(author))
             elif isinstance(author, Iterable):
-                query = query.filter(Author.name.in_(set(author)))
+                query = query.filter(Author.has_name_in(set(author)))
             else:
                 raise TypeError
 
