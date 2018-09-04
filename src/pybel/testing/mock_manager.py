@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-"""Mocks for testing the PyBEL Query Builder."""
+"""Mocks for PyBEL testing."""
 
-from pybel.manager.models import Network
-from pybel.struct import union
+from ..manager.models import Network
+from ..struct import union
 
 
 class MockQueryManager:
@@ -17,7 +17,7 @@ class MockQueryManager:
         self.graphs = []
 
         #: A lookup for nodes from the node hash (string) to the node tuple
-        self.hash_to_tuple = {}
+        self.hash_to_node = {}
 
         #: A lookup from network identifier to graph
         self.id_graph = {}
@@ -44,7 +44,7 @@ class MockQueryManager:
         self.id_graph[network_id] = graph
 
         for node in graph:
-            self.hash_to_tuple[node.sha512] = node
+            self.hash_to_node[node.sha512] = node
 
         return Network(id=network_id)
 
@@ -65,3 +65,11 @@ class MockQueryManager:
         ]
 
         return union(graphs)
+
+    def get_dsl_by_hash(self, sha512):
+        """Get a DSL by its hash.
+
+        :param str sha512:
+        :rtype: Optional[BaseEntity]
+        """
+        return self.hash_to_node.get(sha512)

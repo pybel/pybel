@@ -5,7 +5,7 @@
 import unittest
 
 from pybel.examples import egf_graph
-from tests.test_struct.test_query.mocks import MockQueryManager
+from pybel.testing.mock_manager import MockQueryManager
 
 
 class TestMockManager(unittest.TestCase):

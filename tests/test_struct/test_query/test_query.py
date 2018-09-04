@@ -16,8 +16,8 @@ from pybel.struct import get_subgraph_by_annotation_value
 from pybel.struct.mutation import collapse_to_genes, enrich_protein_and_rna_origins
 from pybel.struct.query import Query, Seeding
 from pybel.testing.generate import generate_random_graph
+from pybel.testing.mock_manager import MockQueryManager
 from pybel.testing.utils import n
-from tests.test_struct.test_query.mocks import MockQueryManager
 
 log = logging.getLogger(__name__)
 
