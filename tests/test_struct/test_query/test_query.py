@@ -12,7 +12,7 @@ from pybel.examples.homology_example import (
     homology_graph, mouse_csf1_protein, mouse_csf1_rna, mouse_mapk1_protein, mouse_mapk1_rna,
 )
 from pybel.examples.sialic_acid_example import (dap12, shp1, shp2, sialic_acid_graph, syk, trem2, cd33_phosphorylated)
-from pybel.struct import expand_nodes_neighborhoods
+from pybel.struct import expand_nodes_neighborhoods, expand_node_neighborhood
 from pybel.struct import get_subgraph_by_annotation_value
 from pybel.struct.mutation import collapse_to_genes, enrich_protein_and_rna_origins
 from pybel.struct.query import Query, Seeding
@@ -286,19 +286,20 @@ class QueryTest(unittest.TestCase):
         test_network_1 = self.manager.insert_graph(homology_graph.copy())
 
         pipeline = Pipeline()
-        pipeline.append(get_subgraph_by_annotation_value, 'Species', '10090')
+        pipeline.append(expand_node_neighborhood, mouse_mapk1_protein)
 
         query = Query(
             network_ids=[test_network_1.id],
             pipeline=pipeline
         )
-        query.append_seeding_neighbors([mouse_csf1_rna, mouse_mapk1_rna])
+        query.append_seeding_annotation('Species', {'10090'})
 
-        result = query.run(self.manager, in_place=False)
+        result = query.run(self.manager)
+
         self.assertIsNotNone(result, msg='Query returned none')
 
-        self.assertEqual(2, result.number_of_nodes())
+        self.assertEqual(3, result.number_of_nodes())
         self.assertIn(mouse_mapk1_protein, result)
         self.assertIn(mouse_csf1_protein, result)
 
-        self.assertEqual(1, result.number_of_edges())
+        self.assertEqual(2, result.number_of_edges())
