@@ -175,7 +175,8 @@ class QueryTest(unittest.TestCase):
             32,  # 10 protein nodes already there + complex + bp +  2*10 (genes and rnas)
             test_graph_1.number_of_nodes()
         )
-        self.assertEqual(31, test_graph_1.number_of_edges())  # 6 already there + 5 complex hasComponent edges + new 2*10 edges
+        self.assertEqual(31,
+                         test_graph_1.number_of_edges())  # 6 already there + 5 complex hasComponent edges + new 2*10 edges
 
         network = self.manager.insert_graph(test_graph_1)
 
@@ -242,6 +243,7 @@ class QueryTest(unittest.TestCase):
 
         self.assertIsNotNone(result, msg='Query returned none')
         self.assertIsInstance(result, BELGraph)
+        self.assertLess(0, result.number_of_nodes())
 
         self.assertIn(mouse_mapk1_protein, result, msg='nodes:\n{}'.format(list(map(repr, graph))))
         self.assertIn(mouse_csf1_protein, result)
