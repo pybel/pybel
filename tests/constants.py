@@ -74,10 +74,10 @@ def assert_has_node(self, node, graph, **kwargs):
     self.assertIn(
         node,
         graph,
-        msg='{} not found in graph. Other nodes:\n{}'.format(graph.node_to_bel(node), '\n'.join(
-            graph.node_to_bel(node)
-            for node in graph
-        ))
+        msg='{} not found in graph. Other nodes:\n{}'.format(node.as_bel(), '\n'.join(
+            n.as_bel()
+            for n in graph
+        )),
     )
 
     if kwargs:
@@ -132,7 +132,7 @@ def assert_has_edge(self, u, v, graph, permissive=True, **kwargs):
     self.assertTrue(
         graph.has_edge(u, v),
         msg='Edge ({}, {}) not in graph. Other edges:\n{}'.format(u, v, '\n'.join(
-            '{} {} {}'.format(graph.node_to_bel(u), d[RELATION], graph.node_to_bel(v))
+            '{} {} {}'.format(u.as_bel(), d[RELATION], v.as_bel())
             for u, v, d in graph.edges(data=True)
         ))
     )

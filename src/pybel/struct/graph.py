@@ -16,9 +16,9 @@ from ..constants import (
     ANNOTATIONS, ASSOCIATION, CITATION, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, DECREASES, DESCRIPTION,
     DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO, EVIDENCE, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN,
     GRAPH_ANNOTATION_URL, GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, GRAPH_PYBEL_VERSION,
-    GRAPH_UNCACHED_NAMESPACES, HAS_COMPONENT, HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, IDENTIFIER,
-    INCREASES, IS_A, MEMBERS, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION,
-    METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAME, NAMESPACE, OBJECT,
+    GRAPH_UNCACHED_NAMESPACES, HAS_COMPONENT, HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A,
+    MEMBERS, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION,
+    METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAMESPACE, OBJECT,
     ORTHOLOGOUS, PART_OF, PRODUCTS, REACTANTS, RELATION, SUBJECT, TRANSCRIBED_TO, TRANSLATED_TO, VARIANTS,
 )
 from ..dsl import BaseEntity, activity
@@ -362,11 +362,6 @@ class BELGraph(nx.MultiDiGraph):
         :type attr: dict
         :return: str
         """
-        if not isinstance(u, BaseEntity):
-            raise TypeError('subject is not BaseEntity: {}'.format(u))
-        if not isinstance(v, BaseEntity):
-            raise TypeError('object is not BaseEntity: {}'.format(v))
-
         self.add_node_from_data(u)
         self.add_node_from_data(v)
 
@@ -587,17 +582,6 @@ class BELGraph(nx.MultiDiGraph):
                                        annotations=annotations, subject_modifier=subject_modifier,
                                        object_modifier=object_modifier, **attr)
 
-    def has_node(self, n):
-        """Check if the graph contains the given node tuple or BaseEntity.
-
-        :param n: A node
-        :rtype: bool
-        """
-        if not isinstance(n, BaseEntity):
-            raise TypeError('Not a base entity: {}'.format(n))
-
-        return super(BELGraph, self).has_node(n)
-
     def copy(self, as_view=False):  # TODO delete this so it uses base implementation
         """Copy this graph.
 
@@ -626,8 +610,7 @@ class BELGraph(nx.MultiDiGraph):
         :param BaseEntity node: A PyBEL node data dictionary
         :rtype: BaseEntity
         """
-        if not isinstance(node, BaseEntity):
-            raise TypeError('not BaseEntity: {}'.format(node))
+        assert isinstance(node, BaseEntity)
 
         if node in self:
             return node
@@ -729,15 +712,14 @@ class BELGraph(nx.MultiDiGraph):
 
     def _has_edge_attr(self, u, v, key, attr):
         """
-
-        :type u: BaseEntity or tuple
-        :type v: BaseEntity or tuple
+        :type u: BaseEntity
+        :type v: BaseEntity
         :type key: str
         :type attr: str
         :rtype: bool
         """
-        if not isinstance(u, BaseEntity):
-            raise TypeError
+        assert isinstance(u, BaseEntity)
+        assert isinstance(v, BaseEntity)
 
         return attr in self[u][v][key]
 
@@ -780,21 +762,16 @@ class BELGraph(nx.MultiDiGraph):
         return self._get_edge_attr(u, v, key, ANNOTATIONS)
 
     def _get_node_attr(self, node, attr):
-        if not isinstance(node, BaseEntity):
-            raise TypeError
-
+        assert isinstance(node, BaseEntity)
         return self.nodes[node].get(attr)
 
     def _has_node_attr(self, node, attr):
-        if not isinstance(node, BaseEntity):
-            raise TypeError
+        assert isinstance(node, BaseEntity)
         return attr in self.nodes[node]
 
     def _set_node_attr(self, node, attr, value):
-        if not isinstance(node, BaseEntity):
-            raise TypeError
+        assert isinstance(node, BaseEntity)
         self.nodes[node][attr] = value
-
 
     def get_node_description(self, node):
         """Get the description for a given node.
@@ -926,23 +903,18 @@ class BELGraph(nx.MultiDiGraph):
         :type n: tuple or BaseEntity
         :rtype: str
         """
-        if not isinstance(n, BaseEntity):
-            raise TypeError
-
         return n.as_bel()
 
     def edge_to_bel(self, u, v, data, sep=None):
         """Serialize a pair of nodes and related edge data as a BEL relation.
 
-        :type u: BaseEntity or tuple
-        :type v: BaseEntity or tuple
+        :type u: BaseEntity
+        :type v: BaseEntity
         :param dict data: A PyBEL edge data dictionary
         :param Optional[str] sep: The separator between the source, relation, and target. Defaults to ' '
         :rtype: str
         """
-        source = u if isinstance(u, BaseEntity) else self.node[u]
-        target = v if isinstance(v, BaseEntity) else self.node[v]
-        return edge_to_bel(source, target, data=data, sep=sep)
+        return edge_to_bel(u, v, data=data, sep=sep)
 
     def _has_no_equivalent_edge(self, u, v):
         return not any(

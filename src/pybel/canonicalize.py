@@ -286,10 +286,10 @@ def _to_bel_lines_footer(graph):
         yield 'SET SupportingText = "{}"'.format(PYBEL_AUTOEVIDENCE)
 
         for u, v, data in unqualified_edges_to_serialize:
-            yield '{} {} {}'.format(graph.node_to_bel(u), data[RELATION], graph.node_to_bel(v))
+            yield '{} {} {}'.format(u.as_bel(), data[RELATION], v.as_bel())
 
         for node in isolated_nodes_to_serialize:
-            yield graph.node_to_bel(node)
+            yield node.as_bel()
 
         yield 'UNSET SupportingText'
         yield 'UNSET Citation'

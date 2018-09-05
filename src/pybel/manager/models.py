@@ -270,7 +270,7 @@ class Network(Base):
     id = Column(Integer, primary_key=True)
 
     name = Column(String(255), nullable=False, index=True, doc='Name of the given Network (from the BEL file)')
-    version = Column(String(16), nullable=False, doc='Release version of the given Network (from the BEL file)')
+    version = Column(String(255), nullable=False, doc='Release version of the given Network (from the BEL file)')
 
     authors = Column(Text, nullable=True, doc='Authors of the underlying BEL file')
     contact = Column(String(255), nullable=True, doc='Contact email from the underlying BEL file')
@@ -608,10 +608,11 @@ class Author(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False, unique=True, index=True)
-    sha512 = Column(String(255), nullable=False, index=True, unique=True, )
+    sha512 = Column(String(255), nullable=False, index=True, unique=True)
 
     @classmethod
     def from_name(cls, name):
+        """Create an author by name, automatically populating the hash."""
         return Author(name=name, sha512=cls.hash_name(name))
 
     @staticmethod
@@ -633,8 +634,19 @@ class Author(Base):
 
     @classmethod
     def has_name(cls, name):
-        """Build a filter for if an author has a name."""
+        """Build a filter for if an author has a name.
+
+        :type name: str
+        """
         return cls.sha512 == cls.hash_name(name)
+
+    @classmethod
+    def has_name_in(cls, names):
+        """Build a filter if the author has any of the given names"""
+        return cls.sha512.in_({
+            cls.hash_name(name)
+            for name in names
+        })
 
     def __str__(self):
         return self.name

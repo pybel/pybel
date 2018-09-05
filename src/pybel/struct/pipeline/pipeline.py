@@ -11,6 +11,7 @@ from .decorators import get_transformation, in_place_map, mapped, universe_map
 from .exc import MetaValueError, MissingPipelineFunctionError, MissingUniverseError
 from ..operations import node_intersection, union
 
+
 __all__ = [
     'Pipeline',
 ]
@@ -30,7 +31,7 @@ def _get_protocol_tuple(data):
     return data['function'], data.get('args', []), data.get('kwargs', {})
 
 
-class Pipeline(object):
+class Pipeline:
     """Builds and runs analytical pipelines on BEL graphs.
 
     Example usage:
@@ -45,13 +46,12 @@ class Pipeline(object):
     >>> result = example.run(graph)
     """
 
-    def __init__(self, protocol=None, universe=None):
+    def __init__(self, protocol=None):
         """
         :param iter[dict] protocol: An iterable of dictionaries describing how to transform a network
-        :param pybel.BELGraph universe: The entire set of known knowledge to draw from
         """
-        self.universe = universe
-        self.protocol = [] if protocol is None else protocol
+        self.universe = None
+        self.protocol = protocol or []
 
     def __len__(self):
         return len(self.protocol)
@@ -200,19 +200,7 @@ class Pipeline(object):
 
         return result
 
-    def _can_be_run_in_place(self):
-        """Checks if this pipeline can be run in place.
-
-        Requirements:
-
-        - All functions have the "in place" tag
-        - No splitting, unioning, or other exotic things happen.
-
-        :rtype: bool
-        """
-        raise NotImplementedError  # TODO implement
-
-    def run(self, graph, universe=None, in_place=True):
+    def run(self, graph, universe=None):
         """Run the contained protocol on a seed graph.
 
         :param pybel.BELGraph graph: The seed BEL graph
@@ -222,13 +210,10 @@ class Pipeline(object):
         :return: The new graph is returned if not applied in-place
         :rtype: pybel.BELGraph
         """
-        self.universe = graph.copy() if universe is None else universe
+        self.universe = universe or graph.copy()
+        return self._run_helper(graph.copy(), self.protocol)
 
-        result = graph if in_place else graph.copy()
-        result = self._run_helper(result, self.protocol)
-        return result
-
-    def __call__(self, graph, universe=None, in_place=True):
+    def __call__(self, graph, universe=None):
         """Call :meth:`Pipeline.run`.
 
         :param pybel.BELGraph graph: The seed BEL graph
@@ -247,7 +232,7 @@ class Pipeline(object):
         >>> graph = BELGraph() ...
         >>> new_graph = pipe(graph)
         """
-        return self.run(graph=graph, universe=universe, in_place=in_place)
+        return self.run(graph=graph, universe=universe)
 
     def _wrap_universe(self, func):
         """Take a function that needs a universe graph as the first argument and returns a wrapped one."""
@@ -275,19 +260,26 @@ class Pipeline(object):
 
         return wrapper
 
+    def to_json(self):
+        """Return this pipeline as a JSON list.
+
+        :rtype: list
+        """
+        return self.protocol
+
     def dumps(self, **kwargs):
-        """Give this pipeline as a JSON string.
+        """Dump this pipeline as a JSON string.
 
         :rtype: str
         """
-        return json.dumps(self.protocol, **kwargs)
+        return json.dumps(self.to_json(), **kwargs)
 
-    def dump(self, file):
+    def dump(self, file, **kwargs):
         """Dump this protocol to a file in JSON.
 
         :param file: A file or file-like to pass to :func:`json.dump`
         """
-        return json.dump(self.protocol, file)
+        return json.dump(self.to_json(), file, **kwargs)
 
     @staticmethod
     def load(file):
@@ -298,7 +290,7 @@ class Pipeline(object):
         :rtype: Pipeline
         :raises MissingPipelineFunctionError: If any functions are not registered
         """
-        return Pipeline(protocol=json.load(file))
+        return Pipeline(json.load(file))
 
     @staticmethod
     def loads(s):
@@ -309,7 +301,7 @@ class Pipeline(object):
         :rtype: Pipeline
         :raises MissingPipelineFunctionError: If any functions are not registered
         """
-        return Pipeline(protocol=json.loads(s))
+        return Pipeline(json.loads(s))
 
     def __str__(self):
         return json.dumps(self.protocol, indent=2)

@@ -27,18 +27,10 @@ def get_subgraph_by_neighborhood(graph, nodes):
         return
 
     rv = graph.fresh_copy()
-
-    rv.add_edges_from(
-        (
-            (u, v, k, d)
-            if k < 0 else
-            (u, v, d)
-        )
-        for u, v, k, d in itt.chain(
-            graph.in_edges_iter(nodes, keys=True, data=True),
-            graph.out_edges_iter(nodes, keys=True, data=True)
-        )
-    )
+    rv.add_edges_from(itt.chain(
+        graph.in_edges(nodes, keys=True, data=True),
+        graph.out_edges(nodes, keys=True, data=True),
+    ))
 
     update_node_helper(graph, rv)
     update_metadata(graph, rv)
