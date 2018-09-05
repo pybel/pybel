@@ -39,17 +39,17 @@ def get_subgraph_by_annotations(graph, annotations, or_=None):
 
 
 @transformation
-def get_subgraph_by_annotation_value(graph, annotation, value):
+def get_subgraph_by_annotation_value(graph, annotation, values):
     """Induce a sub-graph over all edges whose annotations match the given key and value.
 
     :param pybel.BELGraph graph: A BEL graph
     :param str annotation: The annotation to group by
-    :param value: The value(s) for the annotation
-    :type value: str or iter[str]
+    :param values: The value(s) for the annotation
+    :type values: str or iter[str]
     :return: A subgraph of the original BEL graph
     :rtype: pybel.BELGraph
     """
-    if isinstance(value, string_types):
-        value = set(value)
+    if isinstance(values, string_types):
+        values = {values}
 
-    return get_subgraph_by_annotations(graph, {annotation: value})
+    return get_subgraph_by_annotations(graph, {annotation: values})
