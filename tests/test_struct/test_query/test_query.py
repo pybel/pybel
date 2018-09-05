@@ -171,8 +171,11 @@ class QueryTest(unittest.TestCase):
         test_graph_1 = egf_graph.copy()
         enrich_protein_and_rna_origins(test_graph_1)
 
-        self.assertEqual(9, test_graph_1.number_of_nodes())  # 4 nodes already there +  2*2 proteins + 1 (rna)
-        self.assertEqual(8, test_graph_1.number_of_edges())  # 3 already there + 2*2 proteins + 1 (rna)
+        self.assertEqual(
+            32,  # 10 protein nodes already there + complex + bp +  2*10 (genes and rnas)
+            test_graph_1.number_of_nodes()
+        )
+        self.assertEqual(31, test_graph_1.number_of_edges())  # 6 already there + 5 complex hasComponent edges + new 2*10 edges
 
         network = self.manager.insert_graph(test_graph_1)
 
@@ -185,8 +188,8 @@ class QueryTest(unittest.TestCase):
         )
         result_graph = query.run(self.manager)
 
-        self.assertEqual(4, result_graph.number_of_nodes())  # same number of nodes than there were
-        self.assertEqual(3, result_graph.number_of_edges())  # same number of edges than there were
+        self.assertEqual(12, result_graph.number_of_nodes())  # same number of nodes than there were
+        self.assertEqual(11, result_graph.number_of_edges())  # same number of edges than there were
 
     def test_pipeline_2(self):
         test_network = egf_graph.copy()
@@ -205,7 +208,7 @@ class QueryTest(unittest.TestCase):
         ])
         query.pipeline = pipeline
 
-        result = query.run(self.manager, in_place=False)
+        result = query.run(self.manager)
         self.assertIsNotNone(result, msg='Query returned none')
 
         self.assertEqual(3, result.number_of_nodes())  # only expanded to node protein_a and gene_c
@@ -236,6 +239,7 @@ class QueryTest(unittest.TestCase):
         graph = homology_graph.copy()
 
         result = get_subgraph_by_annotation_value(graph, 'Species', '10090')
+
         self.assertIsNotNone(result, msg='Query returned none')
         self.assertIsInstance(result, BELGraph)
 
