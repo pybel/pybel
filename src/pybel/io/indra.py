@@ -4,11 +4,11 @@
 
 After assembling a model with `INDRA <https://github.com/sorgerlab/indra>`_, a list of
 :class:`indra.statements.Statement` can be converted to a :class:`pybel.BELGraph` with
-:class:`indra.assemblers.PybelAssembler`.
+:class:`indra.assemblers.pybel.PybelAssembler`.
 
 .. code-block:: python
 
-    from indra.assemblers import PybelAssembler
+    from indra.assemblers.pybel import PybelAssembler
     import pybel
 
     stmts = [
@@ -59,7 +59,7 @@ def from_indra_statements(stmts, name=None, version=None, description=None, auth
     :param str disclaimer: The disclaimer for this graph
     :rtype: pybel.BELGraph
     """
-    from indra.assemblers import PybelAssembler
+    from indra.assemblers.pybel import PybelAssembler
 
     pba = PybelAssembler(
         stmts=stmts,
@@ -123,7 +123,7 @@ def from_biopax(path, name=None, version=None, description=None):
 
     .. warning:: Not compatible with all BioPAX! See INDRA documentation.
     """
-    from indra.sources.biopax.biopax_api import process_owl
+    from indra.sources.biopax import process_owl
 
     model = process_owl(path)
 

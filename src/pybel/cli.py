@@ -93,20 +93,27 @@ def main(ctx, connection):
 @click.option('--no-identifier-validation', is_flag=True, help='Turn off identifier validation')
 @click.option('--no-citation-clearing', is_flag=True, help='Turn off citation clearing')
 @click.option('-r', '--required-annotations', multiple=True, help='Specify multiple required annotations')
+@click.option('-v', '--verbose', is_flag=True)
 @click.pass_obj
 def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified_translocations,
-            no_identifier_validation, no_citation_clearing, required_annotations):
+            no_identifier_validation, no_citation_clearing, required_annotations, verbose):
     """Compile a BEL script to a graph."""
+    if verbose:
+        logging.basicConfig(level=logging.DEBUG)
+        log.setLevel(logging.DEBUG)
+        log.debug('using connection: %s', manager.engine.url)
+
     graph = from_path(
         path,
         manager=manager,
-        use_tqdm=True,
+        use_tqdm=(not verbose),
         allow_nested=allow_nested,
         allow_naked_names=allow_naked_names,
         disallow_unqualified_translocations=disallow_unqualified_translocations,
         citation_clearing=(not no_citation_clearing),
         required_annotations=required_annotations,
         no_identifier_validation=no_identifier_validation,
+        allow_definition_failures=True,
     )
     to_pickle(graph, get_corresponding_pickle_path(path))
     graph.describe()
