@@ -7,8 +7,7 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import (
-    ASSOCIATION, CITATION_AUTHORS, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED,
-    DECREASES, FUNCTION, INCREASES, PROTEIN,
+    ASSOCIATION, CITATION_AUTHORS, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, DECREASES, INCREASES,
 )
 from pybel.dsl import BaseEntity, gene, protein, rna
 from pybel.struct.mutation.expansion import expand_upstream_causal

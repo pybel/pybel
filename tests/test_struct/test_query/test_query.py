@@ -7,15 +7,14 @@ import unittest
 
 from pybel import BELGraph, Pipeline
 from pybel.dsl import Protein
-from pybel.examples.egf_example import egf_graph
+from pybel.examples.egf_example import egf_graph, vcp
 from pybel.examples.homology_example import (
     homology_graph, mouse_csf1_protein, mouse_csf1_rna, mouse_mapk1_protein, mouse_mapk1_rna,
 )
-from pybel.examples.sialic_acid_example import (dap12, shp1, shp2, sialic_acid_graph, syk, trem2, cd33_phosphorylated)
-from pybel.struct import expand_nodes_neighborhoods, expand_node_neighborhood
-from pybel.struct import get_subgraph_by_annotation_value
+from pybel.examples.sialic_acid_example import (cd33_phosphorylated, dap12, shp1, shp2, sialic_acid_graph, syk, trem2)
+from pybel.struct import expand_node_neighborhood, expand_nodes_neighborhoods, get_subgraph_by_annotation_value
 from pybel.struct.mutation import collapse_to_genes, enrich_protein_and_rna_origins
-from pybel.struct.query import Query, Seeding
+from pybel.struct.query import Query, QueryMissingNetworksError, Seeding
 from pybel.testing.generate import generate_random_graph
 from pybel.testing.mock_manager import MockQueryManager
 from pybel.testing.utils import n
@@ -93,6 +92,10 @@ class QueryTestEgf(unittest.TestCase):
     def run_query(self):
         return self.query.run(self.manager)
 
+    def test_fail_run_with_no_networks(self):
+        with self.assertRaises(QueryMissingNetworksError):
+            self.run_query()
+
     def test_no_seeding_no_pipeline(self):
         graph = egf_graph.copy()
 
@@ -168,17 +171,18 @@ class QueryTest(unittest.TestCase):
         self.manager = MockQueryManager()
 
     def test_pipeline(self):
-        test_graph_1 = egf_graph.copy()
-        enrich_protein_and_rna_origins(test_graph_1)
+        graph = egf_graph.copy()
+        enrich_protein_and_rna_origins(graph)
 
         self.assertEqual(
             32,  # 10 protein nodes already there + complex + bp +  2*10 (genes and rnas)
-            test_graph_1.number_of_nodes()
+            graph.number_of_nodes()
         )
-        self.assertEqual(31,
-                         test_graph_1.number_of_edges())  # 6 already there + 5 complex hasComponent edges + new 2*10 edges
 
-        network = self.manager.insert_graph(test_graph_1)
+        # 6 already there + 5 complex hasComponent edges + new 2*10 edges
+        self.assertEqual(31, graph.number_of_edges())
+
+        network = self.manager.insert_graph(graph)
 
         pipeline = Pipeline()
         pipeline.append(collapse_to_genes)
@@ -193,35 +197,27 @@ class QueryTest(unittest.TestCase):
         self.assertEqual(11, result_graph.number_of_edges())  # same number of edges than there were
 
     def test_pipeline_2(self):
-        test_network = egf_graph.copy()
+        graph = egf_graph.copy()
 
-        enrich_protein_and_rna_origins(test_network)
-
-        network = self.manager.insert_graph(test_network)
+        network = self.manager.insert_graph(graph)
         network_id = network.id
 
-        pipeline = Pipeline()
-        pipeline.append(get_subgraph_by_annotation_value, 'Annotation', 'foo')
-
         query = Query(network_ids=[network_id])
-        query.append_seeding_neighbors([
-            protein_a
-        ])
-        query.pipeline = pipeline
+        query.append_seeding_neighbors(vcp)
+        query.append_pipeline(get_subgraph_by_annotation_value, 'Species', '9606')
 
         result = query.run(self.manager)
         self.assertIsNotNone(result, msg='Query returned none')
 
-        self.assertEqual(3, result.number_of_nodes())  # only expanded to node protein_a and gene_c
-        self.assertEqual(2, result.number_of_edges())  # three nodes with two relationships
+        self.assertEqual(3, result.number_of_nodes())
 
     def test_query_multiple_networks(self):
-        egf_network = self.manager.insert_graph(sialic_acid_graph.copy())
-        sialic_acid_network = self.manager.insert_graph(egf_graph.copy())
+        sialic_acid_graph_id = self.manager.insert_graph(sialic_acid_graph.copy()).id
+        egf_graph_id = self.manager.insert_graph(egf_graph.copy()).id
 
         query = Query()
-        query.append_network(egf_network.id)
-        query.append_network(sialic_acid_network.id)
+        query.append_network(sialic_acid_graph_id)
+        query.append_network(egf_graph_id)
         query.append_seeding_neighbors([syk])
         query.append_pipeline(enrich_protein_and_rna_origins)
 
