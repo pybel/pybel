@@ -4,6 +4,7 @@
 
 import json
 import logging
+import random
 from collections import UserList
 
 from .constants import (
@@ -65,7 +66,7 @@ class Seeding(UserList):
         :rtype: Seeding
         """
         data = {
-            'seed': _get_random_int()
+            'seed': random.randint(0, 1000000)
         }
         data.update(kwargs)
 
@@ -176,11 +177,3 @@ def _handle_nodes(nodes):
         )
         for node in nodes
     ]
-
-
-def _get_random_int():
-    try:
-        import numpy as np
-        return np.random.randint(0, np.iinfo('i').max)
-    except ImportError:
-        raise NotImplementedError
