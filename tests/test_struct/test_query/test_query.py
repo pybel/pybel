@@ -11,7 +11,8 @@ from pybel.examples.egf_example import egf_graph
 from pybel.examples.homology_example import (
     homology_graph, mouse_csf1_protein, mouse_csf1_rna, mouse_mapk1_protein, mouse_mapk1_rna,
 )
-from pybel.examples.sialic_acid_example import dap12, shp1, shp2, sialic_acid_graph, syk, trem2
+from pybel.examples.sialic_acid_example import (dap12, shp1, shp2, sialic_acid_graph, syk, trem2, cd33_phosphorylated)
+from pybel.struct import expand_nodes_neighborhoods
 from pybel.struct import get_subgraph_by_annotation_value
 from pybel.struct.mutation import collapse_to_genes, enrich_protein_and_rna_origins
 from pybel.struct.query import Query, Seeding
@@ -124,7 +125,7 @@ class QueryTestEgf(unittest.TestCase):
 
     def test_seed_by_neighbors(self):
         graph = BELGraph()
-        a, b, c, d, e = (Protein(namespace=n(), name=str(i)) for i in range(4))
+        a, b, c, d, e = (Protein(namespace=n(), name=str(i)) for i in range(5))
 
         graph.add_increases(a, b, n(), n())
         graph.add_increases(b, c, n(), n())
@@ -263,22 +264,23 @@ class QueryTest(unittest.TestCase):
         self.assertEqual(4, result.number_of_edges())
 
     def test_seeding_with_pipeline(self):
-        test_network_1 = self.manager.insert_graph(homology_graph.copy())
+        test_network_1 = self.manager.insert_graph(sialic_acid_graph.copy())
 
         query = Query(network_ids=[test_network_1.id])
-        query.append_seeding_neighbors([mouse_csf1_rna, mouse_mapk1_rna])
-        query.append_pipeline(expand_internal)
-        result = query.run(self.manager, in_place=False)
+        query.append_seeding_neighbors([trem2, dap12, shp2])
+        query.append_pipeline(expand_nodes_neighborhoods, [trem2, dap12, shp2])
+        result = query.run(self.manager)
         self.assertIsNotNone(result, msg='Query returned none')
         self.assertIsInstance(result, BELGraph)
 
-        self.assertIn(mouse_mapk1_rna, result)
-        self.assertIn(mouse_csf1_rna, result)
-        self.assertIn(mouse_mapk1_protein, result)
-        self.assertIn(mouse_csf1_protein, result)
+        self.assertIn(trem2, result)
+        self.assertIn(dap12, result)
+        self.assertIn(shp2, result)
+        self.assertIn(syk, result)
+        self.assertIn(cd33_phosphorylated, result)
 
-        self.assertEqual(6, result.number_of_nodes())
-        self.assertEqual(5, result.number_of_edges())
+        self.assertEqual(5, result.number_of_nodes())
+        self.assertEqual(4, result.number_of_edges())
 
     def test_query_multiple_networks_with_api(self):
         test_network_1 = self.manager.insert_graph(homology_graph.copy())
