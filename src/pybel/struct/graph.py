@@ -582,28 +582,6 @@ class BELGraph(nx.MultiDiGraph):
                                        annotations=annotations, subject_modifier=subject_modifier,
                                        object_modifier=object_modifier, **attr)
 
-    def copy(self, as_view=False):  # TODO delete this so it uses base implementation
-        """Copy this graph.
-
-        Implementation almost the same as the base implementation from MultiDiGraph, but deals with the node data
-        better.
-
-        :rtype: pybel.BELGraph
-        """
-        if as_view is True:
-            return nx.graphviews.MultiDiGraphView(self)
-        G = self.fresh_copy()
-        G.graph.update(self.graph)
-
-        for node in self:
-            G.add_node(node)
-
-        G.add_edges_from((u, v, key, datadict.copy())
-                         for u, nbrs in self._adj.items()
-                         for v, keydict in nbrs.items()
-                         for key, datadict in keydict.items())
-        return G
-
     def add_node_from_data(self, node):
         """Convert a PyBEL node data dictionary to a canonical PyBEL node tuple and ensures it is in the graph.
 
