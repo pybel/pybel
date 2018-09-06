@@ -10,8 +10,8 @@ from .constants import (
     REACTION, TARGET, VARIANTS,
 )
 from .dsl import (
-    BaseAbundance, BaseEntity, CentralDogma, FUNC_TO_DSL, FUNC_TO_FUSION_DSL, FUNC_TO_LIST_DSL, FusionBase, Variant,
-    fragment, fusion_range, gmod, hgvs, missing_fusion_range, pmod, reaction,
+    BaseAbundance, BaseEntity, CentralDogma, FUNC_TO_DSL, FUNC_TO_FUSION_DSL, FUNC_TO_LIST_DSL, FusionBase, Reaction,
+    Variant, fragment, fusion_range, gmod, hgvs, missing_fusion_range, pmod,
 )
 
 __all__ = [
@@ -164,11 +164,12 @@ def _variant_to_dsl_helper(tokens):
 
 
 def _reaction_po_to_dict(tokens):
-    """
+    """Convert a reaction parse object to a DSL.
+
     :type tokens: ParseResult
-    :rtype: dict
+    :rtype: Reaction
     """
-    return reaction(
+    return Reaction(
         reactants=_reaction_part_po_to_dict(tokens[REACTANTS]),
         products=_reaction_part_po_to_dict(tokens[PRODUCTS]),
     )
@@ -184,9 +185,10 @@ def _reaction_part_po_to_dict(tokens):
 
 
 def _list_po_to_dict(tokens):
-    """
+    """Convert a list parse object to a node.
+
     :param tokens: PyParsing ParseObject
-    :rtype: dict
+    :rtype: ListAbundance
     """
     func = tokens[FUNCTION]
     dsl = FUNC_TO_LIST_DSL[func]

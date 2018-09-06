@@ -158,7 +158,7 @@ def _citation_sort_key(t):
 
 
 def _evidence_sort_key(t):
-    """Make a confusing 4 tuple sortable by citation,
+    """Make a confusing 4 tuple sortable by citation.
 
     :param tuple t: A 4-tuple of source node, target node, key, and data
     :rtype: str
@@ -331,7 +331,7 @@ def to_bel_path(graph, path, mode='w', **kwargs):
 
 
 def calculate_canonical_name(data):
-    """Calculates the canonical name for a given node.
+    """Calculate the canonical name for a given node.
 
     If it is a simple node, uses the already given name. Otherwise, it uses the BEL string.
 

@@ -71,7 +71,7 @@ def flatten_dict(data, parent_key='', sep='_'):
 
 def get_version():
     """Get the current PyBEL version.
-    
+
     :return: The current PyBEL version
     :rtype: str
     """
@@ -144,19 +144,15 @@ def parse_datetime(s):
     :return: A parsed date object
     :rtype: datetime.date
     """
-    try:
-        dt = datetime.strptime(s, CREATION_DATE_FMT)
-        return dt
-    except:
+    for fmt in (CREATION_DATE_FMT, PUBLISHED_DATE_FMT, PUBLISHED_DATE_FMT_2):
         try:
-            dt = datetime.strptime(s, PUBLISHED_DATE_FMT)
+            dt = datetime.strptime(s, fmt)
+        except ValueError:
+            pass
+        else:
             return dt
-        except:
-            try:
-                dt = datetime.strptime(s, PUBLISHED_DATE_FMT_2)
-                return dt
-            except:
-                raise ValueError('Incorrect datetime format for {}'.format(s))
+
+    raise ValueError('Incorrect datetime format for {}'.format(s))
 
 
 def _hash_tuple(t):
@@ -191,7 +187,7 @@ def _get_edge_tuple(u, v, data):
 
 def hash_edge(u, v, data):
     """Convert an edge tuple to a SHA512 hash.
-    
+
     :param BaseEntity u: The source BEL node
     :param BaseEntity v: The target BEL node
     :param dict data: The edge's data dictionary

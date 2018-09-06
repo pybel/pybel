@@ -77,7 +77,7 @@ config = {
 
 
 def get_config_path():
-    """Returns the path of the configuration file.
+    """Return the path of the configuration file.
 
     By default, should just be a file called ``config.json`` inside the directory returned by :func:`get_config_dir`.
 
