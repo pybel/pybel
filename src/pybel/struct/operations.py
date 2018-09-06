@@ -15,18 +15,24 @@ __all__ = [
 
 
 def subgraph(graph, nodes):
-    subgraph = graph.subgraph(nodes)
+    """Induce a sub-graph over the given nodes.
+
+    :param BELGraph graph:
+    :param set[BaseEntity] nodes:
+    :rtype: BELGraph
+    """
+    sg = graph.subgraph(nodes)
 
     # see implementation for .copy()
     result = graph.fresh_copy()
-    result.graph.update(subgraph.graph)
+    result.graph.update(sg.graph)
 
-    for node, data in subgraph.nodes(data=True):
+    for node, data in sg.nodes(data=True):
         result.add_node(node, **data)
 
     result.add_edges_from(
         (u, v, key, datadict.copy())
-        for u, v, key, datadict in subgraph.edges(keys=True, data=True)
+        for u, v, key, datadict in sg.edges(keys=True, data=True)
     )
 
     return result
