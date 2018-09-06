@@ -4,7 +4,7 @@
 
 import unittest
 
-from six import string_types
+from six import StringIO, string_types
 
 from pybel import BELGraph
 from pybel.constants import CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED
@@ -79,7 +79,7 @@ class TestStruct(unittest.TestCase):
 
     def test_add_simple(self):
         """Test that a simple node can be added, but not duplicated."""
-        graph = BELGraph()
+        graph = BELGraph(name='Test',version='0.0.0')
 
         namespace, name = n(), n()
 
@@ -88,6 +88,15 @@ class TestStruct(unittest.TestCase):
 
         graph.add_node_from_data(protein(namespace=namespace, name=name))
         self.assertEqual(1, graph.number_of_nodes())
+
+        sio = StringIO()
+        graph.summarize(file=sio)
+        test_str = """Test v0.0.0
+Number of Nodes: 1
+Number of Edges: 0
+Network Density: 0.00E+00
+Number of Components: 1"""
+        self.assertEqual(test_str.strip(), sio.getvalue().strip())
 
     def test_citation_type_error(self):
         """Test error handling on adding qualified edges."""

@@ -583,9 +583,9 @@ class BELGraph(nx.MultiDiGraph):
                                        object_modifier=object_modifier, **attr)
 
     def add_node_from_data(self, node):
-        """Convert a PyBEL node data dictionary to a canonical PyBEL node tuple and ensures it is in the graph.
+        """Convert a PyBEL node data dictionary to a canonical PyBEL node and ensures it is in the graph.
 
-        :param BaseEntity node: A PyBEL node data dictionary
+        :param BaseEntity node: A PyBEL node
         :rtype: BaseEntity
         """
         assert isinstance(node, BaseEntity)
@@ -754,7 +754,7 @@ class BELGraph(nx.MultiDiGraph):
     def get_node_description(self, node):
         """Get the description for a given node.
 
-        :type node: BaseEntity or tuple
+        :type node: BaseEntity
         :rtype: Optional[str]
         """
         return self._get_node_attr(node, DESCRIPTION)
@@ -762,8 +762,7 @@ class BELGraph(nx.MultiDiGraph):
     def has_node_description(self, node):
         """Check if a node description is already present.
 
-        :param node: A PyBEL node tuple
-        :type node: BaseEntity or tuple
+        :param BaseEntity node: A PyBEL node tuple
         :rtype: bool
         """
         return self._has_node_attr(node, DESCRIPTION)
@@ -771,8 +770,7 @@ class BELGraph(nx.MultiDiGraph):
     def set_node_description(self, node, description):
         """Set the description for a given node.
 
-        :param node: A PyBEL node tuple
-        :type node: BaseEntity or tuple
+        :param BaseEntity node: A PyBEL node
         :type description: str
         """
         self._set_node_attr(node, DESCRIPTION, description)
@@ -874,16 +872,17 @@ class BELGraph(nx.MultiDiGraph):
 
         return left_node_intersection_join(self, other)
 
-    def node_to_bel(self, n):
+    @staticmethod
+    def node_to_bel(n):
         """Serialize a node as BEL.
 
-        :param n: A PyBEL node tuple
-        :type n: tuple or BaseEntity
+        :param BaseEntity n: A PyBEL node
         :rtype: str
         """
         return n.as_bel()
 
-    def edge_to_bel(self, u, v, data, sep=None):
+    @staticmethod
+    def edge_to_bel(u, v, data, sep=None):
         """Serialize a pair of nodes and related edge data as a BEL relation.
 
         :type u: BaseEntity
@@ -903,7 +902,7 @@ class BELGraph(nx.MultiDiGraph):
     def _equivalent_node_iterator_helper(self, node, visited):
         """Iterate over nodes and their data that are equal to the given node, starting with the original.
 
-        :param BaseEntity node: A PyBEL node tuple
+        :param BaseEntity node: A PyBEL node
         :rtype: iter[BaseEntity]
         """
         for v in self[node]:
@@ -920,9 +919,9 @@ class BELGraph(nx.MultiDiGraph):
                 yield w
 
     def iter_equivalent_nodes(self, node):
-        """Iterate over node tuples that are equivalent to the given node, including the original,
+        """Iterate over nodes that are equivalent to the given node, including the original,
 
-        :param BaseEntity node: A PyBEL node tuple
+        :param BaseEntity node: A PyBEL node
         :rtype: iter[BaseEntity]
         """
         yield node
@@ -933,9 +932,9 @@ class BELGraph(nx.MultiDiGraph):
     def get_equivalent_nodes(self, node):
         """Get a set of equivalent nodes to this node, excluding the given node.
 
-        :param node: A PyBEL node tuple
-        :type node: tuple or BaseEntity
-        :rtype: set[tuple]
+        :param node: A PyBEL node
+        :type node: BaseEntity
+        :rtype: set[BaseEntity]
         """
         if isinstance(node, BaseEntity):
             return set(self.iter_equivalent_nodes(node))
@@ -947,7 +946,7 @@ class BELGraph(nx.MultiDiGraph):
 
         Might have cross references in future.
 
-        :param BaseEntity node: A PyBEL node tuple
+        :param BaseEntity node: A PyBEL node
         :rtype: bool
         """
         return namespace == node.get(NAMESPACE)
@@ -957,7 +956,7 @@ class BELGraph(nx.MultiDiGraph):
 
         This also should look in the equivalent nodes.
 
-        :param BaseEntity node: A PyBEL node tuple
+        :param BaseEntity node: A PyBEL node
         :param str namespace: A namespace
         :rtype: bool
         """
@@ -966,13 +965,44 @@ class BELGraph(nx.MultiDiGraph):
             for n in self.iter_equivalent_nodes(node)
         )
 
-    def describe(self, file=None):
-        """Print a summary of the graph"""
+    def _describe_list(self):
+        """Return useful information about the graph as a list of tuples.
+
+        :rtype: list[tuple[str,float]]
+        """
         number_nodes = self.number_of_nodes()
-        print(self, file=file)
+        result = [
+            ('Number of Nodes', number_nodes),
+            ('Number of Edges', self.number_of_edges()),
+            ('Network Density', '{:.2E}'.format(nx.density(self))),
+            ('Number of Components', nx.number_weakly_connected_components(self)),
+        ]
+
         if self.warnings:
-            print('Number of Warnings: {}'.format(len(self.warnings)), file=file)
-        print('Number of Nodes: {}'.format(number_nodes), file=file)
-        print('Number of Edges: {}'.format(self.number_of_edges()), file=file)
-        print('Network Density: {}'.format(nx.density(self)), file=file)
-        print('Number of Components: {}'.format(nx.number_weakly_connected_components(self)), file=file)
+            result.append(('Number of Warnings', len(self.warnings)))
+
+        return result
+
+    def summary_dict(self):
+        """Return a dictionary that summarizes the graph.
+
+        :rtype: dict[str,float]
+        """
+        return dict(self._describe_list())
+
+    def summary_str(self):
+        """Return a string that summarizes the graph.
+
+        :rtype: str
+        """
+        return '{}\n'.format(self) + '\n'.join(
+            '{}: {}'.format(label, value)
+            for label, value in self._describe_list()
+        )
+
+    def summarize(self, file=None):
+        """Print a summary of the graph.
+
+        :param Optional[file] file: A file or file-like to print to. Defaults to standard out.
+        """
+        print(self.summary_str(), file=file)
