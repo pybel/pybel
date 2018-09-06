@@ -5,12 +5,13 @@
 #########################
 
 [flake8]
-ignore = E501
+ignore = E501,F401,F403,D105
 exclude =
     .tox,
     .git,
     __pycache__,
     docs/source/conf.py,
+    src/pybel/cli.py
     build,
     dist,
     tests/fixtures/*,
@@ -19,6 +20,6 @@ exclude =
     .cache,
     .eggs
 max-complexity = 10
-import-order-style = google
-application-import-names = flake8
+import-order-style = pycharm
+application-import-names = pybel
 format = ${cyan}%(path)s${reset}:${yellow_bold}%(row)d${reset}:${green_bold}%(col)d${reset}: ${red_bold}%(code)s${reset} %(text)s

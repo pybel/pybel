@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Functions for predicates for edge data from BEL graphs."""
+
 from collections import Iterable
 
 from six import string_types
@@ -19,7 +21,7 @@ __all__ = [
 
 
 def _annotation_dict_all_filter(data, query):
-    """A filter that matches edges with the given dictionary as a sub-dictionary
+    """Match edges with the given dictionary as a sub-dictionary.
 
     :param dict data: A PyBEL edge data dictionary
     :param dict query: The annotation query dict to match
@@ -49,15 +51,15 @@ def build_annotation_dict_all_filter(annotations):
 
     If no annotations are given, will always evaluate to true.
 
-    :param dict annotations: The annotation query dict to match
-    :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
+    :param dict[str,iter[str]] annotations: The annotation query dict to match
+    :rtype: (pybel.BELGraph, BaseEntity, BaseEntity, str) -> bool
     """
     if not annotations:
         return keep_edge_permissive
 
     @edge_predicate
     def annotation_dict_all_filter(data):
-        """Checks if the all of the annotations in the enclosed query match
+        """Check if the all of the annotations in the enclosed query match.
 
         :param dict data: A PyBEL edge data dictionary
         :rtype: bool
@@ -68,10 +70,10 @@ def build_annotation_dict_all_filter(annotations):
 
 
 def _annotation_dict_any_filter(data, query):
-    """A filter that matches edges with the given dictionary as a sub-dictionary
+    """Match edges with the given dictionary as a sub-dictionary.
 
     :param dict data: A PyBEL edge data dictionary
-    :param dict query: The annotation query dict to match
+    :param dict[str,iter[str]] query: The annotation query dict to match
     :rtype: bool
     """
     annotations = data.get(ANNOTATIONS)
@@ -91,8 +93,8 @@ def build_annotation_dict_any_filter(annotations):
 
     If the given dictionary is empty, will always evaluate to true.
 
-    :param dict annotations: The annotation query dict to match
-    :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
+    :param dict[str,iter[str]] annotations: The annotation query dict to match
+    :rtype: (pybel.BELGraph, BaseEntity, BaseEntity, str) -> bool
     """
     if not annotations:
         return keep_edge_permissive
@@ -113,7 +115,7 @@ def build_upstream_edge_predicate(nodes):
     """Build an edge predicate that pass for relations for which one of the given nodes is the object.
 
     :param iter[tuple] nodes: An iterable of PyBEL node tuples
-    :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
+    :rtype: (pybel.BELGraph, BaseEntity, BaseEntity, str) -> bool
     """
     nodes = set(nodes)
 
@@ -135,7 +137,7 @@ def build_downstream_edge_predicate(nodes):
     """Build an edge predicate that passes for edges for which one of the given nodes is the subject.
 
     :param iter[tuple] nodes: An iterable of PyBEL node tuples
-    :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
+    :rtype: (pybel.BELGraph, BaseEntity, BaseEntity, str) -> bool
     """
     nodes = set(nodes)
 
@@ -158,7 +160,7 @@ def build_relation_predicate(relations):
 
     :param relations: A relation string
     :type relations: str or iter[str]
-    :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
+    :rtype: (pybel.BELGraph, BaseEntity, BaseEntity, str) -> bool
     """
     if isinstance(relations, str):
         @edge_predicate
@@ -198,7 +200,7 @@ def build_pmid_inclusion_filter(pmids):
     :param pmids: A PubMed identifier or list of PubMed identifiers to filter for
     :type pmids: str or iter[str]
     :return: An edge predicate
-    :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
+    :rtype: (pybel.BELGraph, BaseEntity, BaseEntity, str) -> bool
     """
     if isinstance(pmids, string_types):
         @edge_predicate
@@ -233,7 +235,7 @@ def build_author_inclusion_filter(authors):
     :param authors: An author or list of authors
     :type authors: str or iter[str]
     :return: An edge predicate
-    :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
+    :rtype: (pybel.BELGraph, BaseEntity, BaseEntity, str) -> bool
     """
     if isinstance(authors, string_types):
         @edge_predicate

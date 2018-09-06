@@ -21,7 +21,7 @@ class TestMetadata(unittest.TestCase):
         y = protein(namespace='HGNC', name='X')
 
         graph = BELGraph()
-        graph.add_qualified_edge(
+        key = graph.add_qualified_edge(
             x,
             y,
             relation=INCREASES,
@@ -30,13 +30,12 @@ class TestMetadata(unittest.TestCase):
             annotations={
                 'A': {'B': True}
             },
-            key=1
         )
 
-        self.assertIn(ANNOTATIONS, graph.edge[x.as_tuple()][y.as_tuple()][1])
+        self.assertIn(ANNOTATIONS, graph[x][y][key])
 
         strip_annotations(graph)
-        self.assertNotIn(ANNOTATIONS, graph.edge[x.as_tuple()][y.as_tuple()][1])
+        self.assertNotIn(ANNOTATIONS, graph[x][y][key])
 
     def test_add_and_remove_annotation(self):
         """Test adding and removing annotations.

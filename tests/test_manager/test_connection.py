@@ -54,7 +54,7 @@ class TestInstantiation(unittest.TestCase):
         self.assertEqual(self.connection, str(manager.engine.url))
 
     def test_instantiate_manager_positional_with_keyword(self):
-        manager = Manager(self.connection, echo=True)
+        manager = Manager(self.connection, echo=False)
         self.assertEqual(self.connection, str(manager.engine.url))
 
     def test_instantiate_manager_fail_positional(self):
@@ -71,7 +71,7 @@ class TestInstantiation(unittest.TestCase):
 
     def test_instantiate_manager_engine_fail_too_many_keywords(self):
         with self.assertRaises(ValueError):
-            Manager(engine='something', session='something', echo=True)
+            Manager(engine='something', session='something', echo=False)
 
     def test_instantiate_manager_engine_missing(self):
         with self.assertRaises(ValueError):

@@ -11,7 +11,7 @@ from ...constants import (
     ABUNDANCE, ACTIVITY, CAUSAL_RELATIONS, DEGRADATION, FRAGMENT, FUNCTION, GENE, GMOD, HGVS, KIND, MIRNA, OBJECT,
     PATHOLOGY, PMOD, PROTEIN, RELATION, RNA, SUBJECT, TRANSLOCATION, VARIANTS,
 )
-from ...tokens import node_to_tuple
+from ...dsl import BaseEntity
 
 __all__ = [
     'node_predicate',
@@ -54,7 +54,7 @@ def node_predicate(f):
         x = args[0]
 
         if isinstance(x, BELGraph):
-            return f(x.node[args[1]], *args[2:])
+            return f(args[1], *args[2:])
 
         # Assume:
         # if isinstance(x, dict):
@@ -217,12 +217,12 @@ def _node_has_modifier(graph, node, modifier):
     """
     modifier_in_subject = any(
         part_has_modifier(d, SUBJECT, modifier)
-        for _, _, d in graph.out_edges_iter(node, data=True)
+        for _, _, d in graph.out_edges(node, data=True)
     )
 
     modifier_in_object = any(
         part_has_modifier(d, OBJECT, modifier)
-        for _, _, d in graph.in_edges_iter(node, data=True)
+        for _, _, d in graph.in_edges(node, data=True)
     )
 
     return modifier_in_subject or modifier_in_object
@@ -270,7 +270,7 @@ def has_causal_in_edges(graph, node):
     """
     return any(
         data[RELATION] in CAUSAL_RELATIONS
-        for _, _, data in graph.in_edges_iter(node, data=True)
+        for _, _, data in graph.in_edges(node, data=True)
     )
 
 
@@ -283,34 +283,27 @@ def has_causal_out_edges(graph, node):
     """
     return any(
         data[RELATION] in CAUSAL_RELATIONS
-        for _, _, data in graph.out_edges_iter(node, data=True)
+        for _, _, data in graph.out_edges(node, data=True)
     )
-
-
-def _hash_node_list(nodes):
-    return {
-        node_to_tuple(node) if isinstance(node, dict) else node
-        for node in nodes
-    }
 
 
 def node_exclusion_predicate_builder(nodes):
     """Build a node predicate that returns false for the given nodes.
 
     :param nodes: A list of PyBEL node data dictionaries or PyBEL node tuples
-    :type nodes: list[tuple] or list[data]
-    :rtype: types.FunctionType
+    :type nodes: iter[BaseEntity]
+    :rtype: (BELGraph, BaseEntity) -> bool
     """
-    nodes = _hash_node_list(nodes)
+    nodes = set(nodes)
 
     @node_predicate
-    def node_exclusion_predicate(data):
+    def node_exclusion_predicate(node):
         """Returns true if the node is not in the given set of nodes
 
-        :param dict data: A PyBEL data dictionary
+        :param BaseEntity node: A PyBEL data dictionary
         :rtype: bool
         """
-        return node_to_tuple(data) not in nodes
+        return node not in nodes
 
     return node_exclusion_predicate
 
@@ -319,19 +312,19 @@ def node_inclusion_predicate_builder(nodes):
     """Build a function that returns true for the given nodes.
 
     :param nodes: A list of PyBEL node data dictionaries or PyBEL node tuples
-    :type nodes: list[tuple] or list[data]
-    :rtype: types.FunctionType
+    :type nodes: iter[BaseEntity]
+    :rtype: (BELGraph, BaseEntity) -> bool
     """
-    nodes = _hash_node_list(nodes)
+    nodes = set(nodes)
 
     @node_predicate
-    def node_inclusion_predicate(data):
+    def node_inclusion_predicate(node):
         """Returns true if the node is in the given set of nodes
 
-        :param dict data: A PyBEL data dictionary
+        :param BaseEntity node: A PyBEL data dictionary
         :rtype: bool
         """
-        return node_to_tuple(data) in nodes
+        return node in nodes
 
     return node_inclusion_predicate
 

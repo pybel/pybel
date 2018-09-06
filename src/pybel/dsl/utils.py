@@ -6,8 +6,13 @@ from .exc import PyBELDSLException
 from ..constants import BEL_DEFAULT_NAMESPACE, IDENTIFIER, NAME, NAMESPACE
 from ..utils import ensure_quotes
 
+__all__ = [
+    'Entity',
+    'entity',
+]
 
-class entity(dict):
+
+class Entity(dict):
     """Represents a named entity with a namespace and name/identifier."""
 
     def __init__(self, namespace, name=None, identifier=None):
@@ -21,7 +26,7 @@ class entity(dict):
         if name is None and identifier is None:
             raise PyBELDSLException('cannot create an entity with neither a name nor identifier')
 
-        super(entity, self).__init__({
+        super(Entity, self).__init__({
             NAMESPACE: namespace,
         })
 
@@ -31,8 +36,11 @@ class entity(dict):
         if identifier is not None:
             self[IDENTIFIER] = identifier
 
-    def __str__(self):
+    def __str__(self):  # noqa: D105
         if self[NAMESPACE] == BEL_DEFAULT_NAMESPACE:
             return self[NAME]
 
         return '{}:{}'.format(self[NAMESPACE], ensure_quotes(self[NAME]))
+
+
+entity = Entity

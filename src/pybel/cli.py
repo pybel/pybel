@@ -14,20 +14,23 @@ Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
 
 import logging
-from pkg_resources import iter_entry_points
+import os
 import sys
-import time
 
 import click
+import time
 from click_plugins import with_plugins
+from pkg_resources import iter_entry_points
 
 from .canonicalize import to_bel
 from .constants import get_cache_connection
-from .io import from_lines, to_csv, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif
+from .examples import braf_graph, egf_graph, homology_graph, sialic_acid_graph, statin_graph
+from .io import from_path, from_pickle, to_csv, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif, to_web
 from .io.web import _get_host
 from .manager import Manager
 from .manager.database_io import to_database
-from .manager.models import Annotation, Base, Edge, Namespace
+from .manager.models import Edge, Namespace
+from .utils import get_corresponding_pickle_path
 
 log = logging.getLogger(__name__)
 
@@ -40,107 +43,170 @@ connection_option = click.option(
     '-c',
     '--connection',
     default=get_cache_connection(),
-    help='Connection to cache. Defaults to {}'.format(get_cache_connection()),
+    show_default=True,
+    help='Database connection string.',
+)
+
+host_option = click.option('--host', help='URL of BEL Commons. Defaults to {}'.format(_get_host()))
+
+
+def _from_pickle_callback(ctx, param, file):
+    path = file.name
+
+    if not path.endswith('.bel'):
+        return from_pickle(file)
+
+    cache_path = get_corresponding_pickle_path(path)
+
+    if not os.path.exists(cache_path):
+        click.echo('The BEL script {path} has not yet been compiled. First, try running the following command:\n\n '
+                   'pybel compile {path}\n'.format(path=path))
+        sys.exit(1)
+
+    return from_pickle(cache_path)
+
+
+graph_pickle_argument = click.argument(
+    'graph',
+    metavar='path',
+    type=click.File('rb'),
+    callback=_from_pickle_callback,
 )
 
 
 @with_plugins(iter_entry_points('pybel.cli_plugins'))
-@click.group(help="PyBEL Command Line Utilities on {} using default "
-                  "connection {}".format(sys.executable, get_cache_connection()))
+@click.group(help="PyBEL Command Line Interface on {}".format(sys.executable))
 @click.version_option()
-def main():
+@connection_option
+@click.pass_context
+def main(ctx, connection):
     """PyBEL Command Line."""
+    ctx.obj = Manager(connection=connection)
+    ctx.obj.bind()  # add the engine to the metadata and query property to the session
 
 
 @main.command()
-@click.option('-p', '--path', type=click.File('r'), default=sys.stdin, help='Input BEL file file path')
-@connection_option
-@click.option('--csv', type=click.File('w'), help='Path to output a CSV file.')
-@click.option('--sif', type=click.File('w'), help='Path to output an SIF file.')
-@click.option('--gsea', type=click.File('w'), help='Path to output a GRP file for gene set enrichment analysis')
-@click.option('--graphml', help='Path to output a GraphML file. Use .graphml for Cytoscape')
-@click.option('--json', type=click.File('w'), help='Path to output a node-link JSON file.')
-@click.option('--pickle', help='Path to output a pickle file.')
-@click.option('--bel', type=click.File('w'), help='Output canonical BEL')
-@click.option('--neo', help="Connection string for neo4j upload")
-@click.option('--neo-context', help="Optional context for neo4j upload")
-@click.option('-s', '--store', is_flag=True, help='Stores to database specified by -c')
+@click.argument('path')
 @click.option('--allow-naked-names', is_flag=True, help="Enable lenient parsing for naked names")
 @click.option('--allow-nested', is_flag=True, help="Enable lenient parsing for nested statements")
-@click.option('--allow-unqualified-translocations', is_flag=True,
-              help="Enable lenient parsing for unqualified translocations")
+@click.option('--disallow-unqualified-translocations', is_flag=True, help="Disallow unqualified translocations")
 @click.option('--no-identifier-validation', is_flag=True, help='Turn off identifier validation')
 @click.option('--no-citation-clearing', is_flag=True, help='Turn off citation clearing')
 @click.option('-r', '--required-annotations', multiple=True, help='Specify multiple required annotations')
-def convert(path, connection, csv, sif, gsea, graphml, json, pickle, bel, neo, neo_context, store, allow_naked_names,
-            allow_nested, allow_unqualified_translocations, no_identifier_validation, no_citation_clearing,
-            required_annotations):
-    """Convert BEL."""
-    manager = Manager(connection=connection)
+@click.option('-v', '--verbose', is_flag=True)
+@click.pass_obj
+def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified_translocations,
+            no_identifier_validation, no_citation_clearing, required_annotations, verbose):
+    """Compile a BEL script to a graph."""
+    if verbose:
+        logging.basicConfig(level=logging.DEBUG)
+        log.setLevel(logging.DEBUG)
+        log.debug('using connection: %s', manager.engine.url)
 
-    g = from_lines(
+    graph = from_path(
         path,
         manager=manager,
+        use_tqdm=(not verbose),
         allow_nested=allow_nested,
         allow_naked_names=allow_naked_names,
-        allow_unqualified_translocations=allow_unqualified_translocations,
+        disallow_unqualified_translocations=disallow_unqualified_translocations,
         citation_clearing=(not no_citation_clearing),
         required_annotations=required_annotations,
         no_identifier_validation=no_identifier_validation,
-        use_tqdm=True,
+        allow_definition_failures=True,
     )
+    to_pickle(graph, get_corresponding_pickle_path(path))
+    graph.describe()
 
-    if csv:
-        log.info('Outputting CSV to %s', csv)
-        to_csv(g, csv)
-
-    if sif:
-        log.info('Outputting SIF to %s', sif)
-        to_sif(g, sif)
-
-    if graphml:
-        log.info('Outputting GraphML to %s', graphml)
-        to_graphml(g, graphml)
-
-    if gsea:
-        log.info('Outputting GRP to %s', gsea)
-        to_gsea(g, gsea)
-
-    if json:
-        log.info('Outputting JSON to %s', json)
-        to_json_file(g, json)
-
-    if pickle:
-        log.info('Outputting pickle to %s', pickle)
-        to_pickle(g, pickle)
-
-    if bel:
-        log.info('Outputting BEL to %s', bel)
-        to_bel(g, bel)
-
-    if store:
-        log.info('Storing to database')
-        to_database(g, manager=manager, store_parts=True)
-
-    if neo:
-        import py2neo
-        log.info('Uploading to neo4j with context %s', neo_context)
-        neo_graph = py2neo.Graph(neo)
-        assert neo_graph.data('match (n) return count(n) as count')[0]['count'] is not None
-        to_neo4j(g, neo_graph, neo_context)
-
-    sys.exit(0 if 0 == len(g.warnings) else 1)
+    sys.exit(0 if 0 == len(graph.warnings) else 1)
 
 
 @main.command()
+@graph_pickle_argument
+def summarize(graph):
+    """Summarize a graph."""
+    graph.describe()
+
+
+@main.command()
+@graph_pickle_argument
+def warnings(graph):
+    """List warnings from a graph."""
+    echo_warnings_via_pager(graph.warnings)
+
+
+@main.command()
+@graph_pickle_argument
+@click.pass_obj
+def insert(manager, graph):
+    """Insert a graph to the database."""
+    to_database(graph, manager=manager, use_tqdm=True)
+
+
+@main.command()
+@graph_pickle_argument
+@host_option
+def post(graph, host):
+    """Upload a graph to BEL Commons."""
+    resp = to_web(graph, host=host)
+    resp.raise_for_status()
+
+
+@main.command()
+@graph_pickle_argument
+@click.option('--csv', type=click.File('w'), help='Path to output a CSV file.')
+@click.option('--sif', type=click.File('w'), help='Path to output an SIF file.')
+@click.option('--gsea', type=click.File('w'), help='Path to output a GRP file for gene set enrichment analysis.')
+@click.option('--graphml', help='Path to output a GraphML file. Use .graphml for Cytoscape.')
+@click.option('--json', type=click.File('w'), help='Path to output a node-link JSON file.')
+@click.option('--bel', type=click.File('w'), help='Output canonical BEL.')
+def serialize(graph, csv, sif, gsea, graphml, json, bel):
+    """Serialize a graph to various formats."""
+    if csv:
+        log.info('Outputting CSV to %s', csv)
+        to_csv(graph, csv)
+
+    if sif:
+        log.info('Outputting SIF to %s', sif)
+        to_sif(graph, sif)
+
+    if graphml:
+        log.info('Outputting GraphML to %s', graphml)
+        to_graphml(graph, graphml)
+
+    if gsea:
+        log.info('Outputting GRP to %s', gsea)
+        to_gsea(graph, gsea)
+
+    if json:
+        log.info('Outputting JSON to %s', json)
+        to_json_file(graph, json)
+
+    if bel:
+        log.info('Outputting BEL to %s', bel)
+        to_bel(graph, bel)
+
+
+@main.command()
+@graph_pickle_argument
+@click.option('--connection', default='http://localhost:7474/db/data/', help='Connection string for neo4j upload.')
+@click.password_option()
+def neo(graph, connection, password):
+    """Upload to neo4j."""
+    import py2neo
+    neo_graph = py2neo.Graph(connection, password=password)
+    to_neo4j(graph, neo_graph)
+
+
+@main.command()
+@click.pass_obj
 @click.argument('agents', nargs=-1)
 @click.option('--local', is_flag=True, help='Upload to local database.')
-@connection_option
-@click.option('--host', help='URL of BEL Commons. Defaults to {}'.format(_get_host()))
-def machine(agents, local, connection, host):
+@host_option
+def machine(manager, agents, local, host):
     """Get content from the INDRA machine and upload to BEL Commons."""
     from indra.sources import indra_db_rest
-    from pybel import from_indra_statements, to_web
+    from pybel import from_indra_statements
 
     statements = indra_db_rest.get_statements(agents=agents)
     click.echo('got {} statements from INDRA'.format(len(statements)))
@@ -157,7 +223,6 @@ def machine(agents, local, connection, host):
         sys.exit(-1)
 
     if local:
-        manager = Manager(connection=connection)
         to_database(graph, manager=manager)
     else:
         resp = to_web(graph, host=host)
@@ -165,20 +230,8 @@ def machine(agents, local, connection, host):
 
 
 @main.group()
-@connection_option
-@click.pass_context
-def manage(ctx, connection):
+def manage():
     """Manage the database."""
-    ctx.obj = Manager(connection=connection)
-    Base.metadata.bind = ctx.obj.engine
-    Base.query = ctx.obj.session.query_property()
-
-
-@manage.command()
-@click.pass_obj
-def setup(manager):
-    """Create the database, if it doesn't exist."""
-    manager.create_all()
 
 
 @manage.command()
@@ -190,14 +243,21 @@ def drop(manager, yes):
         manager.drop_all()
 
 
+@manage.command()
+@click.pass_obj
+def examples(manager):
+    """Load examples to the database."""
+    for graph in (sialic_acid_graph, statin_graph, homology_graph, braf_graph, egf_graph):
+        if manager.has_name_version(graph.name, graph.version):
+            click.echo('already inserted {}'.format(graph))
+            continue
+        click.echo('inserting {}'.format(graph))
+        manager.insert_graph(graph, use_tqdm=True)
+
+
 @manage.group()
 def namespaces():
     """Manage namespaces."""
-
-
-@manage.group()
-def annotations():
-    """Manage annotations."""
 
 
 @namespaces.command()
@@ -205,15 +265,7 @@ def annotations():
 @click.pass_obj
 def insert(manager, url):
     """Add a namespace by URL."""
-    manager.ensure_namespace(url)
-
-
-@annotations.command()
-@click.argument('url')
-@click.pass_obj
-def insert(manager, url):
-    """Add an annotation by URL."""
-    manager.ensure_annotation(url)
+    manager.get_or_create_namespace(url)
 
 
 def _ls(manager, model_cls, model_id):
@@ -233,23 +285,10 @@ def _ls(manager, model_cls, model_id):
 def ls(manager, url, namespace_id):
     """List cached namespaces."""
     if url:
-        n = manager.ensure_namespace(url)
+        n = manager.get_or_create_namespace(url)
         _page(n.entries)
     else:
         _ls(manager, Namespace, namespace_id)
-
-
-@annotations.command()
-@click.option('--url', help='Specific resource URL to list')
-@click.option('-i', '--annotation-id', help='Specific resource URL to list')
-@click.pass_obj
-def ls(manager, url, annotation_id):
-    """List cached annotations."""
-    if url:
-        n = manager.ensure_annotation(url)
-        _page(n.entries)
-    else:
-        _ls(manager, Annotation, annotation_id)
 
 
 @namespaces.command()
@@ -258,14 +297,6 @@ def ls(manager, url, annotation_id):
 def drop(manager, url):
     """Drop a namespace by URL."""
     manager.drop_namespace_by_url(url)
-
-
-@annotations.command()
-@click.argument('url')
-@click.pass_obj
-def drop(manager, url):
-    """Drop an annotation by URL."""
-    manager.drop_annotation_by_url(url)
 
 
 @manage.group()
@@ -328,6 +359,48 @@ def summarize(manager):
     click.echo('Namespaces entries: {}'.format(manager.count_namespace_entries()))
     click.echo('Annotations: {}'.format(manager.count_annotations()))
     click.echo('Annotation entries: {}'.format(manager.count_annotation_entries()))
+
+
+def echo_warnings_via_pager(warnings, sep='\t'):
+    """Output the warnings from a BEL graph with Click and the system's pager.
+
+    :param warnings: A list of 4-tuples reprenting the warnings
+    :param str sep: The separator. Defaults to tab.
+    """
+    # Exit if no warnings
+    if not warnings:
+        click.echo('Congratulations! No warnings.')
+        sys.exit(0)
+
+    max_line_width = max(
+        len(str(line_number))
+        for line_number, _, _, _ in warnings
+    )
+
+    max_warning_width = max(
+        len(exc.__class__.__name__)
+        for _, _, exc, _ in warnings
+    )
+
+    s1 = '{:>' + str(max_line_width) + '}' + sep
+    s2 = '{:>' + str(max_warning_width) + '}' + sep
+
+    def _make_line(line_number, line, exc):
+        s = click.style(s1.format(line_number), fg='blue', bold=True)
+
+        if exc.__class__.__name__.endswith('Error'):
+            s += click.style(s2.format(exc.__class__.__name__), fg='red')
+        else:
+            s += click.style(s2.format(exc.__class__.__name__), fg='yellow')
+
+        s += click.style(line, bold=True) + sep
+        s += click.style(str(exc))
+        return s
+
+    click.echo_via_pager('\n'.join(
+        _make_line(line_number, line, exc)
+        for line_number, line, exc, _ in warnings
+    ))
 
 
 if __name__ == '__main__':

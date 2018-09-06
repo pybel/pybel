@@ -10,6 +10,9 @@ the `Biological Expression Language <http://openbel.org/language/version_2.0/bel
 Its companion package, `PyBEL Tools <http://pybel-tools.readthedocs.io/>`_, contains a
 suite of functions and pipelines for analyzing the resulting biological networks.
 
+We realize there we have a name conflict with the python wrapper for the cheminformatics package, OpenBabel. If you're
+looking for their python wrapper, see `here <https://github.com/openbabel/openbabel/tree/master/scripts/python>`_.
+
 =========== =============== ======================= ================== =======================
 Stable      |stable_build|  |stable_windows_build|  |stable_coverage|  |stable_documentation|
 Development |develop_build| |develop_windows_build| |develop_coverage| |develop_documentation|
@@ -23,17 +26,17 @@ If you use PyBEL in your work, please cite:
 
 Getting Started
 ---------------
-In this example, the
-`Selventa Small Corpus <https://wiki.openbel.org/display/home/Summary+of+Large+and+Small+BEL+Corpuses>`_ is loaded and
-visualized in a Jupyter Notebook.
+This example illustrates how the `Selventa Small Corpus <https://wiki.openbel.org/display/home/Summary+of+Large+and+Small+BEL+Corpuses>`_
+can be loaded and visualized in a Jupyter Notebook. Note that this requires an extension, the ``pybel-jupyter``
+repository. This is not included by default because installing the Jupyter and iPython stack has a large footprint.
 
 .. code-block:: python
 
-   >>> import pybel, pybel_tools
+   >>> import pybel, pybel_jupyter
    >>> graph = pybel.from_url('http://resources.openbel.org/belframework/20150611/knowledge/small_corpus.bel')
    >>> graph.number_of_nodes()  # Will be smaller than expected because we have the most strict settings enabled
    1207
-   >>> pybel_tools.visualization.to_jupyter(graph)
+   >>> pybel_jupyter.to_jupyter(graph)  # Need to pip install pybel-jupyter first
 
 More examples can be found in the `documentation <http://pybel.readthedocs.io>`_ and in the
 `PyBEL Notebooks <https://github.com/pybel/pybel-notebooks>`_ repository.

@@ -5,7 +5,7 @@
 from ...filters import filter_edges
 from ...filters.edge_predicate_builders import build_relation_predicate
 from ...pipeline import in_place_transformation
-from ....constants import HAS_VARIANT, RELATION, unqualified_edges
+from ....constants import HAS_VARIANT
 
 __all__ = [
     'collapse_pair',
@@ -34,23 +34,17 @@ def collapse_pair(graph, survivor, victim):
     :param tuple survivor: The BEL node to collapse all edges on the synonym to
     :param tuple victim: The BEL node to collapse into the surviving node
     """
-    for _, successor, key, data in graph.out_edges(victim, keys=True, data=True):
-        if successor == survivor:
-            continue
+    graph.add_edges_from(
+        (survivor, successor, key, data)
+        for _, successor, key, data in graph.out_edges(victim, keys=True, data=True)
+        if successor != survivor
+    )
 
-        if data[RELATION] in unqualified_edges:
-            graph.add_unqualified_edge(survivor, successor, data[RELATION])
-        else:
-            graph.add_edge(survivor, successor, key=key, **data)
-
-    for predecessor, _, key, data in graph.in_edges(victim, keys=True, data=True):
-        if predecessor == survivor:
-            continue
-
-        if data[RELATION] in unqualified_edges:
-            graph.add_unqualified_edge(predecessor, survivor, data[RELATION])
-        else:
-            graph.add_edge(predecessor, survivor, key=key, **data)
+    graph.add_edges_from(
+        (predecessor, survivor, key, data)
+        for predecessor, _, key, data in graph.in_edges(victim, keys=True, data=True)
+        if predecessor != survivor
+    )
 
     graph.remove_node(victim)
 

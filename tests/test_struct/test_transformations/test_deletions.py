@@ -38,11 +38,11 @@ class TestDeletions(unittest.TestCase):
 
         self.assertEqual(5, g.number_of_nodes())
         self.assertEqual(7, g.number_of_edges())
-        self.assertEqual(2, len(g[p2.as_tuple()][d1.as_tuple()]))
+        self.assertEqual(2, len(g[p2][d1]))
 
         remove_associations(g)
 
-        relations = list(g[p2.as_tuple()][d1.as_tuple()].values())
+        relations = list(g[p2][d1].values())
         self.assertEqual(1, len(relations))
         self.assertEqual(POSITIVE_CORRELATION, relations[0][RELATION])
 
@@ -52,9 +52,9 @@ class TestDeletions(unittest.TestCase):
 
         remove_pathologies(g)
 
-        self.assertTrue(g.has_node_with_data(p1))
-        self.assertTrue(g.has_node_with_data(p2))
-        self.assertTrue(g.has_node_with_data(p3))
+        self.assertTrue(p1, g)
+        self.assertTrue(p2, g)
+        self.assertTrue(p3, g)
         self.assertEqual(3, g.number_of_nodes())
         self.assertEqual(2, g.number_of_edges())
 
@@ -95,7 +95,7 @@ class TestProcessing(unittest.TestCase):
         :type graph: pybel.BELGraph
         :rtype: bool
         """
-        self.assertTrue(graph.has_node_with_data(node))
+        self.assertIn(node, graph)
 
     def assert_not_in_graph(self, node, graph):
         """Assert the node is not in the graph.
@@ -104,7 +104,7 @@ class TestProcessing(unittest.TestCase):
         :type graph: pybel.BELGraph
         :rtype: bool
         """
-        self.assertFalse(graph.has_node_with_data(node))
+        self.assertNotIn(node, graph)
 
     def test_infer_on_sialic_acid_example(self):
         """Test infer_central_dogma on the sialic acid example."""
@@ -125,9 +125,6 @@ class TestProcessing(unittest.TestCase):
         self.assert_not_in_graph(trem2_gene, graph)
         self.assert_not_in_graph(trem2_rna, graph)
         self.assert_in_graph(trem2_protein, graph)
-
-        self.assertIn(FUNCTION, graph.node[trem2_protein.as_tuple()])
-        self.assertIn(PROTEIN, graph.node[trem2_protein.as_tuple()][FUNCTION])
 
     def test_no_infer_on_protein_variants(self):
         """Test that expansion doesn't occur on protein variants."""

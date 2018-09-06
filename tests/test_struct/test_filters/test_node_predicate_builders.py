@@ -10,7 +10,7 @@ from pybel.dsl import bioprocess, gene, protein
 from pybel.struct import filter_nodes
 from pybel.struct.filters import invert_node_predicate
 from pybel.struct.filters.node_predicate_builders import (
-    build_node_data_search, build_node_key_search, build_node_name_search, data_missing_key_builder,
+    build_node_graph_data_search, build_node_key_search, build_node_name_search, data_missing_key_builder,
     function_inclusion_filter_builder,
 )
 from pybel.testing.utils import n
@@ -40,16 +40,16 @@ class TestFunctionInclusionFilterBuilder(unittest.TestCase):
         g.add_node_from_data(p1)
         g.add_node_from_data(g1)
 
-        self.assertIn(p1.as_tuple(), g)
-        self.assertIn(g1.as_tuple(), g)
+        self.assertIn(p1, g)
+        self.assertIn(g1, g)
 
-        self.assertFalse(f(g, p1.as_tuple()))
-        self.assertTrue(f(g, g1.as_tuple()))
+        self.assertFalse(f(g, p1))
+        self.assertTrue(f(g, g1))
 
         f = invert_node_predicate(f)
 
-        self.assertTrue(f(g, p1.as_tuple()))
-        self.assertFalse(f(g, g1.as_tuple()))
+        self.assertTrue(f(g, p1))
+        self.assertFalse(f(g, g1))
 
     def test_multiple(self):
         """Test building a node predicate with multiple functions."""
@@ -64,19 +64,19 @@ class TestFunctionInclusionFilterBuilder(unittest.TestCase):
         g.add_node_from_data(g1)
         g.add_node_from_data(b1)
 
-        self.assertIn(p1.as_tuple(), g)
-        self.assertIn(g1.as_tuple(), g)
-        self.assertIn(b1.as_tuple(), g)
+        self.assertIn(p1, g)
+        self.assertIn(g1, g)
+        self.assertIn(b1, g)
 
-        self.assertTrue(f(g, p1.as_tuple()))
-        self.assertTrue(f(g, g1.as_tuple()))
-        self.assertFalse(f(g, b1.as_tuple()))
+        self.assertTrue(f(g, p1))
+        self.assertTrue(f(g, g1))
+        self.assertFalse(f(g, b1))
 
         f = invert_node_predicate(f)
 
-        self.assertFalse(f(g, p1.as_tuple()))
-        self.assertFalse(f(g, g1.as_tuple()))
-        self.assertTrue(f(g, b1.as_tuple()))
+        self.assertFalse(f(g, p1))
+        self.assertFalse(f(g, g1))
+        self.assertTrue(f(g, b1))
 
 
 class TestNodePredicateBuilders(unittest.TestCase):
@@ -94,16 +94,17 @@ class TestNodePredicateBuilders(unittest.TestCase):
 
         data_missing_key = data_missing_key_builder(key)
 
-        graph.node[p1.as_tuple()][key] = n()
-        graph.node[p2.as_tuple()][other_key] = n()
+        graph.nodes[p1][key] = n()
+        graph.nodes[p2][other_key] = n()
 
         nodes = set(filter_nodes(graph, data_missing_key))
 
-        self.assertNotIn(p1.as_tuple(), nodes)
-        self.assertIn(p2.as_tuple(), nodes)
+        self.assertNotIn(p1, nodes)
+        self.assertIn(p2, nodes)
 
     def test_build_node_data_search(self):
         """Test build_node_data_search."""
+
         def test_key_predicate(datum):
             """Check the data is greater than zero.
 
@@ -113,23 +114,23 @@ class TestNodePredicateBuilders(unittest.TestCase):
 
         key = n()
 
-        data_predicate = build_node_data_search(key, test_key_predicate)
+        data_predicate = build_node_graph_data_search(key, test_key_predicate)
 
         graph = BELGraph()
 
         p1 = protein('HGNC', n())
         graph.add_node_from_data(p1)
-        graph.node[p1.as_tuple()][key] = 0
-        self.assertFalse(data_predicate(graph, p1.as_tuple()))
+        graph.nodes[p1][key] = 0
+        self.assertFalse(data_predicate(graph, p1))
 
         p2 = protein('HGNC', n())
         graph.add_node_from_data(p2)
-        graph.node[p2.as_tuple()][key] = 5
-        self.assertTrue(data_predicate(graph, p2.as_tuple()))
+        graph.nodes[p2][key] = 5
+        self.assertTrue(data_predicate(graph, p2))
 
         p3 = protein('HGNC', n())
         graph.add_node_from_data(p3)
-        self.assertFalse(data_predicate(graph, p3.as_tuple()))
+        self.assertFalse(data_predicate(graph, p3))
 
     def test_build_node_key_search(self):
         """Test build_node_key_search."""
@@ -140,15 +141,15 @@ class TestNodePredicateBuilders(unittest.TestCase):
 
         p1 = protein('HGNC', 'APP')
         graph.add_node_from_data(p1)
-        self.assertTrue(node_key_search(graph, p1.as_tuple()))
-        self.assertTrue(node_name_search(graph, p1.as_tuple()))
+        self.assertTrue(node_key_search(graph, p1))
+        self.assertTrue(node_name_search(graph, p1))
 
         p2 = protein('MGI', 'app')
         graph.add_node_from_data(p2)
-        self.assertTrue(node_key_search(graph, p2.as_tuple()))
-        self.assertTrue(node_name_search(graph, p2.as_tuple()))
+        self.assertTrue(node_key_search(graph, p2))
+        self.assertTrue(node_name_search(graph, p2))
 
         p3 = protein('HGNC', 'nope')
         graph.add_node_from_data(p3)
-        self.assertFalse(node_key_search(graph, p3.as_tuple()))
-        self.assertFalse(node_name_search(graph, p3.as_tuple()))
+        self.assertFalse(node_key_search(graph, p3))
+        self.assertFalse(node_name_search(graph, p3))

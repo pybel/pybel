@@ -5,10 +5,12 @@
 import unittest
 
 from pybel import BELGraph
-from pybel.constants import ABUNDANCE, COMPLEX, FUNCTION, IDENTIFIER, NAME, NAMESPACE, PROTEIN
-from pybel.dsl import abundance, complex_abundance, entity, fragment, protein
+from pybel.constants import NAME
+from pybel.dsl import (
+    abundance, complex_abundance, entity, fragment, fusion_range, gene, gene_fusion, missing_fusion_range, protein,
+)
 from pybel.testing.utils import n
-from pybel.utils import ensure_quotes, hash_node
+from pybel.utils import ensure_quotes
 
 
 class TestDSL(unittest.TestCase):
@@ -21,16 +23,7 @@ class TestDSL(unittest.TestCase):
         node = protein(namespace=namespace, name=name, identifier=identifier)
 
         graph.add_node_from_data(node)
-
-        self.assertEqual(
-            {
-                FUNCTION: PROTEIN,
-                NAMESPACE: namespace,
-                NAME: name,
-                IDENTIFIER: identifier,
-            },
-            graph.node[node.as_tuple()]
-        )
+        self.assertIn(node, graph)
 
     def test_add_identified_node(self):
         """Test what happens when a node with only an identifier is added to a graph."""
@@ -39,45 +32,37 @@ class TestDSL(unittest.TestCase):
         node = protein(namespace=namespace, identifier=identifier)
         self.assertNotIn(NAME, node)
 
-        t = graph.add_node_from_data(node)
-
-        self.assertEqual(
-            {
-                FUNCTION: PROTEIN,
-                NAMESPACE: namespace,
-                IDENTIFIER: identifier,
-            },
-            graph.node[t]
-        )
+        graph.add_node_from_data(node)
+        self.assertIn(node, graph)
 
     def test_add_named_node(self):
+        """Test adding a named node to a BEL graph."""
         graph = BELGraph()
         namespace, name = n(), n()
         node = protein(namespace=namespace, name=name)
 
         graph.add_node_from_data(node)
-
-        self.assertEqual(
-            {
-                FUNCTION: PROTEIN,
-                NAMESPACE: namespace,
-                NAME: name,
-            },
-            graph.node[node.as_tuple()]
-        )
+        self.assertIn(node, graph)
 
     def test_missing_information(self):
-        """Check that entity and abundance functions raise on missing name/identifier."""
+        """Test that entity and abundance functions raise on missing name/identifier."""
         with self.assertRaises(ValueError):
             entity(namespace='test')
 
         with self.assertRaises(ValueError):
             protein(namespace='test')
 
-    def test_str_has_name(self):
-        namespace, name = n(), n()
+    def test_abundance_as_bel_quoted(self):
+        """Test converting an abundance to BEL with a name that needs quotation."""
+        namespace, name = 'HGNC', 'YFG-1'
         node = abundance(namespace=namespace, name=name)
-        self.assertEqual('a({namespace}:{name})'.format(namespace=namespace, name=ensure_quotes(name)), node.as_bel())
+        self.assertEqual('a(HGNC:"YFG-1")', node.as_bel())
+
+    def test_abundance_as_bel(self):
+        """Test converting an abundance to BEL with a name that does not need quotation."""
+        namespace, name = 'HGNC', 'YFG'
+        node = abundance(namespace=namespace, name=name)
+        self.assertEqual('a(HGNC:YFG)', node.as_bel())
 
     def test_str_has_identifier(self):
         namespace, identifier = n(), n()
@@ -95,16 +80,11 @@ class TestDSL(unittest.TestCase):
 
     def test_as_tuple(self):
         namespace, name = n(), n()
-
-        node_tuple = ABUNDANCE, namespace, name
         node = abundance(namespace=namespace, name=name)
-
-        self.assertEqual(node_tuple, node.as_tuple())
-        self.assertEqual(hash(node_tuple), hash(node))
-        self.assertEqual(hash_node(node_tuple), node.as_sha512())
+        self.assertEqual(hash(node), hash(node.as_bel()))
 
     def test_complex_with_name(self):
-        """Tests a what happens with a named complex
+        """Test what happens with a named complex.
 
         .. code-block::
 
@@ -120,11 +100,41 @@ class TestDSL(unittest.TestCase):
 
         nine_one_one = complex_abundance(members=members, namespace='SCOMP', name='9-1-1 Complex')
 
-        node_tuple = (COMPLEX,) + tuple(member.as_tuple() for member in members)
+        graph = BELGraph()
 
-        self.assertEqual(node_tuple, nine_one_one.as_tuple())
-        self.assertEqual(hash(node_tuple), hash(nine_one_one))
-        self.assertEqual(hash_node(node_tuple), nine_one_one.as_sha512())
+        graph.add_node_from_data(nine_one_one)
+        self.assertIn(nine_one_one, graph)
+        self.assertIn(hus1, graph)
+        self.assertIn(rad1, graph)
+        self.assertIn(rad9a, graph)
+
+    def test_gene_fusion(self):
+        """Test serialization of a gene fusion to BEL with a explicit fusion ranges."""
+        dsl = gene_fusion(
+            gene('HGNC', 'TMPRSS2'),
+            gene('HGNC', 'ERG'),
+            fusion_range('c', 1, 79),
+            fusion_range('c', 312, 5034)
+        )
+        self.assertEqual('g(fus(HGNC:TMPRSS2, "c.1_79", HGNC:ERG, "c.312_5034"))', dsl.as_bel())
+
+    def test_gene_fusion_missing_implicit(self):
+        """Test serialization of a gene fusion to BEL with a implicit missing fusion ranges."""
+        dsl = gene_fusion(
+            gene('HGNC', 'TMPRSS2'),
+            gene('HGNC', 'ERG'),
+        )
+        self.assertEqual('g(fus(HGNC:TMPRSS2, "?", HGNC:ERG, "?"))', dsl.as_bel())
+
+    def test_gene_fusion_missing_explicit(self):
+        """Test serialization of a gene fusion to BEL with an explicit missing fusion ranges."""
+        dsl = gene_fusion(
+            gene('HGNC', 'TMPRSS2'),
+            gene('HGNC', 'ERG'),
+            missing_fusion_range(),
+            missing_fusion_range(),
+        )
+        self.assertEqual('g(fus(HGNC:TMPRSS2, "?", HGNC:ERG, "?"))', dsl.as_bel())
 
 
 class TestCentralDogma(unittest.TestCase):
@@ -135,21 +145,21 @@ class TestCentralDogma(unittest.TestCase):
         ab42 = protein(name='APP', namespace='HGNC', variants=[fragment(start=672, stop=713)])
         app = ab42.get_parent()
         self.assertEqual('p(HGNC:APP)', app.as_bel())
-        self.assertEqual('p(HGNC:APP, frag(672_713))', ab42.as_bel())
+        self.assertEqual('p(HGNC:APP, frag("672_713"))', ab42.as_bel())
 
     def test_with_variants(self):
         """Test the `with_variant` function in :class:`CentralDogmaAbundance`s."""
         app = protein(name='APP', namespace='HGNC')
         ab42 = app.with_variants(fragment(start=672, stop=713))
         self.assertEqual('p(HGNC:APP)', app.as_bel())
-        self.assertEqual('p(HGNC:APP, frag(672_713))', ab42.as_bel())
+        self.assertEqual('p(HGNC:APP, frag("672_713"))', ab42.as_bel())
 
     def test_with_variants_list(self):
         """Test the `with_variant` function in :class:`CentralDogmaAbundance`s."""
         app = protein(name='APP', namespace='HGNC')
         ab42 = app.with_variants([fragment(start=672, stop=713)])
         self.assertEqual('p(HGNC:APP)', app.as_bel())
-        self.assertEqual('p(HGNC:APP, frag(672_713))', ab42.as_bel())
+        self.assertEqual('p(HGNC:APP, frag("672_713"))', ab42.as_bel())
 
 
 if __name__ == '__main__':

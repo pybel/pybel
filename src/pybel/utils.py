@@ -1,25 +1,26 @@
 # -*- coding: utf-8 -*-
 
-from collections import Iterable, MutableMapping, defaultdict
+"""Utilities for PyBEL."""
 
 import hashlib
 import json
 import logging
-import networkx as nx
-import pickle
+from collections import Iterable, MutableMapping, defaultdict
 from datetime import datetime
+
 from six import string_types
+from six.moves.cPickle import dumps
 
 from .constants import (
-    CITATION_AUTHORS, CITATION_ENTRIES, CITATION_REFERENCE, CITATION_TYPE,
-    PYBEL_EDGE_DATA_KEYS, VERSION,
+    ACTIVITY, CITATION, CITATION_REFERENCE, CITATION_TYPE, DEGRADATION, EFFECT, EVIDENCE, FROM_LOC, IDENTIFIER,
+    LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT, RELATION, SUBJECT, TO_LOC, TRANSLOCATION, VERSION,
 )
 
 log = logging.getLogger(__name__)
 
 
 def expand_dict(flat_dict, sep='_'):
-    """Expands a flattened dictionary
+    """Expand a flattened dictionary.
 
     :param dict flat_dict: a nested dictionary that has been flattened so the keys are composite
     :param str sep: the separator between concatenated keys
@@ -41,62 +42,36 @@ def expand_dict(flat_dict, sep='_'):
     return res
 
 
-def flatten_dict(d, parent_key='', sep='_'):
-    """Flattens a nested dictionary.
+def flatten_dict(data, parent_key='', sep='_'):
+    """Flatten a nested dictionary.
 
-    :param d: A nested dictionary
-    :type d: dict or MutableMapping
+    :param data: A nested dictionary
+    :type data: dict or MutableMapping
     :param str parent_key: The parent's key. This is a value for tail recursion, so don't set it yourself.
     :param str sep: The separator used between dictionary levels
     :rtype: dict
 
     .. seealso:: http://stackoverflow.com/a/6027615
     """
-    items = []
-    for k, v in d.items():
-        new_key = parent_key + sep + k if parent_key else k
-        if isinstance(v, (dict, MutableMapping)):
-            items.extend(flatten_dict(v, new_key, sep=sep).items())
-        elif isinstance(v, (set, list)):
-            items.append((new_key, ','.join(v)))
+    items = {}
+
+    for key, value in data.items():
+        # prepend the parent key
+        key = parent_key + sep + key if parent_key else key
+
+        if isinstance(value, (dict, MutableMapping)):
+            items.update(flatten_dict(value, key, sep=sep))
+        elif isinstance(value, (set, list)):
+            items[key] = ','.join(value)
         else:
-            items.append((new_key, v))
-    return dict(items)
+            items[key] = value
 
-
-def flatten_graph_data(graph):
-    """Returns a new graph with flattened edge data dictionaries.
-
-    :param nx.MultiDiGraph graph: A graph with nested edge data dictionaries
-    :return: A graph with flattened edge data dictionaries
-    :rtype: nx.MultiDiGraph
-    """
-    g = nx.MultiDiGraph(**graph.graph)
-
-    for node, data in graph.nodes(data=True):
-        g.add_node(node, data)
-
-    for u, v, key, data in graph.edges(data=True, keys=True):
-        g.add_edge(u, v, key=key, attr_dict=flatten_dict(data))
-
-    return g
-
-
-def list2tuple(l):
-    """Recursively converts a nested list to a nested tuple
-
-    :type l: list
-    :rtype: tuple
-    """
-    if isinstance(l, list):
-        return tuple(list2tuple(e) for e in l)
-    else:
-        return l
+    return items
 
 
 def get_version():
-    """Gets the current PyBEL version
-    
+    """Get the current PyBEL version.
+
     :return: The current PyBEL version
     :rtype: str
     """
@@ -104,7 +79,9 @@ def get_version():
 
 
 def tokenize_version(version_string):
-    """Tokenizes a version string to a tuple. Truncates qualifiers like ``-dev``.
+    """Tokenize a version string to a tuple.
+
+    Truncates qualifiers like ``-dev``.
 
     :param str version_string: A version string
     :return: A tuple representing the version string
@@ -119,43 +96,8 @@ def tokenize_version(version_string):
     return tuple(map(int, version_tuple))
 
 
-def citation_dict_to_tuple(citation):
-    """Convert the ``d[CITATION]`` entry in an edge data dictionary to a tuple
-
-    :param dict citation:
-    :rtype: tuple[str]
-    """
-    if len(citation) == 2 and CITATION_TYPE in citation and CITATION_REFERENCE in citation:
-        return citation[CITATION_TYPE], citation[CITATION_REFERENCE]
-
-    if all(x in citation for x in CITATION_ENTRIES):
-        return tuple(citation[x] for x in CITATION_ENTRIES)
-
-    if all(x in citation for x in CITATION_ENTRIES[3:5]):
-        ff = tuple(citation[x] for x in CITATION_ENTRIES[:4])
-
-        if isinstance(citation[CITATION_AUTHORS], string_types):
-            return ff + (citation[CITATION_AUTHORS],)
-        else:
-            return ff + ('|'.join(citation[CITATION_AUTHORS]),)
-
-    if all(x in citation for x in CITATION_ENTRIES[3:4]):
-        return tuple(citation[x] for x in CITATION_ENTRIES[:4])
-
-    return tuple(citation[x] for x in CITATION_ENTRIES[:3])
-
-
-def flatten_citation(citation):
-    """Flattens a citation dict, from the ``d[CITATION]`` entry in an edge data dictionary
-
-    :param dict[str,str] citation: A PyBEL citation data dictionary
-    :rtype: str
-    """
-    return ','.join('"{}"'.format(e) for e in citation_dict_to_tuple(citation))
-
-
 def ensure_quotes(s):
-    """Quote a string that isn't solely alphanumeric
+    """Quote a string that isn't solely alphanumeric.
 
     :type s: str
     :rtype: str
@@ -170,7 +112,7 @@ DATE_VERSION_FMT = '%Y%m%d'
 
 
 def valid_date(s):
-    """Checks that a string represents a valid date in ISO 8601 format YYYY-MM-DD
+    """Check that a string represents a valid date in ISO 8601 format YYYY-MM-DD.
     
     :type s: str
     :rtype: bool
@@ -183,7 +125,7 @@ def valid_date(s):
 
 
 def valid_date_version(s):
-    """Checks that the string is a valid date versions string
+    """Check that the string is a valid date versions string.
 
     :type s: str
     :rtype: bool
@@ -196,74 +138,64 @@ def valid_date_version(s):
 
 
 def parse_datetime(s):
-    """Tries to parse a datetime object from a standard datetime format or date format
+    """Try to parse a datetime object from a standard datetime format or date format.
 
     :param str s: A string representing a date or datetime
     :return: A parsed date object
     :rtype: datetime.date
     """
-    try:
-        dt = datetime.strptime(s, CREATION_DATE_FMT)
-        return dt
-    except:
+    for fmt in (CREATION_DATE_FMT, PUBLISHED_DATE_FMT, PUBLISHED_DATE_FMT_2):
         try:
-            dt = datetime.strptime(s, PUBLISHED_DATE_FMT)
+            dt = datetime.strptime(s, fmt)
+        except ValueError:
+            pass
+        else:
             return dt
-        except:
-            try:
-                dt = datetime.strptime(s, PUBLISHED_DATE_FMT_2)
-                return dt
-            except:
-                raise ValueError('Incorrect datetime format for {}'.format(s))
+
+    raise ValueError('Incorrect datetime format for {}'.format(s))
 
 
-def hash_node(node_tuple):
-    """Converts a PyBEL node tuple to a hash
-
-    :param tuple node_tuple: A BEL node
-    :return: A hashed version of the node tuple using :func:`hashlib.sha512` hash of the binary pickle dump
-    :rtype: str
-    """
-    return hashlib.sha512(pickle.dumps(node_tuple)).hexdigest()
+def _hash_tuple(t):
+    return hashlib.sha512(dumps(t)).hexdigest()
 
 
-def _extract_pybel_data(data):
-    """Extracts only the PyBEL-specific data from the given edge data dictionary
+def _get_citation_tuple(data):
+    citation = data.get(CITATION)
 
-    :param dict data: An edge data dictionary
-    :rtype: dict
-    """
-    return {
-        key: value
-        for key, value in data.items()
-        if key in PYBEL_EDGE_DATA_KEYS
-    }
+    if citation is None:
+        return None, None
+
+    return '{type}:{reference}'.format(type=citation[CITATION_TYPE], reference=citation[CITATION_REFERENCE])
 
 
-def _edge_to_tuple(u, v, data):
-    """Converts an edge to tuple
+def _get_edge_tuple(u, v, data):
+    """Convert an edge to a consistent tuple.
 
-    :param tuple u: The source BEL node
-    :param tuple v: The target BEL node
+    :param BaseEntity u: The source BEL node
+    :param BaseEntity v: The target BEL node
     :param dict data: The edge's data dictionary
     :return: A tuple that can be hashed representing this edge. Makes no promises to its structure.
     """
-    extracted_data_dict = _extract_pybel_data(data)
-    return u, v, json.dumps(extracted_data_dict, ensure_ascii=False, sort_keys=True)
+    return (
+        u.as_bel(),
+        v.as_bel(),
+        _get_citation_tuple(data),
+        data.get(EVIDENCE),
+        canonicalize_edge(data),
+    )
 
 
 def hash_edge(u, v, data):
-    """Converts an edge tuple to a hash
-    
-    :param tuple u: The source BEL node
-    :param tuple v: The target BEL node
+    """Convert an edge tuple to a SHA512 hash.
+
+    :param BaseEntity u: The source BEL node
+    :param BaseEntity v: The target BEL node
     :param dict data: The edge's data dictionary
     :return: A hashed version of the edge tuple using md5 hash of the binary pickle dump of u, v, and the json dump of d
     :rtype: str
     """
-    edge_tuple = _edge_to_tuple(u, v, data)
-    edge_tuple_bytes = pickle.dumps(edge_tuple)
-    return hashlib.sha512(edge_tuple_bytes).hexdigest()
+    edge_tuple = _get_edge_tuple(u, v, data)
+    return _hash_tuple(edge_tuple)
 
 
 def subdict_matches(target, query, partial_match=True):
@@ -303,7 +235,7 @@ def subdict_matches(target, query, partial_match=True):
 
 
 def hash_dump(data):
-    """Hashes an arbitrary JSON dictionary by dumping it in sorted order, encoding it in UTF-8, then hashing the bytes
+    """Hash an arbitrary JSON dictionary by dumping it in sorted order, encoding it in UTF-8, then hashing the bytes.
 
     :param data: An arbitrary JSON-serializable object
     :type data: dict or list or tuple
@@ -313,21 +245,119 @@ def hash_dump(data):
 
 
 def hash_citation(type, reference):
-    """Creates a hash for a type/reference pair of a citation
+    """Create a hash for a type/reference pair of a citation.
 
     :param str type: The corresponding citation type
     :param str reference: The citation reference
     :rtype: str
     """
-    return hash_dump((type, reference))
+    s = u'{type}:{reference}'.format(type=type, reference=reference)
+    return hashlib.sha512(s.encode('utf8')).hexdigest()
 
 
 def hash_evidence(text, type, reference):
-    """Creates a hash for an evidence and its citation
+    """Create a hash for an evidence and its citation.
 
     :param str text: The evidence text
     :param str type: The corresponding citation type
     :param str reference: The citation reference
     :rtype: str
     """
-    return hash_dump((type, reference, text))
+    s = u'{type}:{reference}:{text}'.format(type=type, reference=reference, text=text)
+    return hashlib.sha512(s.encode('utf8')).hexdigest()
+
+
+def canonicalize_edge(data):
+    """Canonicalize the edge to a tuple based on the relation, subject modifications, and object modifications.
+
+    :param dict data: A PyBEL edge data dictionary
+    :return: A 3-tuple that's specific for the edge (relation, subject, object)
+    :rtype: tuple
+    """
+    return (
+        data[RELATION],
+        _canonicalize_edge_modifications(data.get(SUBJECT)),
+        _canonicalize_edge_modifications(data.get(OBJECT)),
+    )
+
+
+def _canonicalize_edge_modifications(data):
+    """Return the SUBJECT or OBJECT entry of a PyBEL edge data dictionary as a canonical tuple.
+
+    :param dict data: A PyBEL edge data dictionary
+    :rtype: tuple
+    """
+    if data is None:
+        return
+
+    modifier = data.get(MODIFIER)
+    location = data.get(LOCATION)
+    effect = data.get(EFFECT)
+
+    if modifier is None and location is None:
+        return
+
+    result = []
+
+    if modifier == ACTIVITY:
+        if effect:
+            effect_name = effect.get(NAME)
+            effect_identifier = effect.get(IDENTIFIER)
+
+            t = (
+                ACTIVITY,
+                effect[NAMESPACE],
+                effect_name or effect_identifier,
+            )
+
+        else:
+            t = (ACTIVITY,)
+
+        result.append(t)
+
+    elif modifier == DEGRADATION:
+        t = (DEGRADATION,)
+        result.append(t)
+
+    elif modifier == TRANSLOCATION:
+        if effect:
+            from_loc_name = effect[FROM_LOC].get(NAME)
+            from_loc_identifier = effect[FROM_LOC].get(IDENTIFIER)
+            to_loc_name = effect[TO_LOC].get(NAME)
+            to_loc_identifier = effect[TO_LOC].get(IDENTIFIER)
+
+            t = (
+                TRANSLOCATION,
+                data[EFFECT][FROM_LOC][NAMESPACE],
+                from_loc_name or from_loc_identifier,
+                data[EFFECT][TO_LOC][NAMESPACE],
+                to_loc_name or to_loc_identifier,
+            )
+        else:
+            t = (TRANSLOCATION,)
+        result.append(t)
+
+    if location:
+        location_name = location.get(NAME)
+        location_identifier = location.get(IDENTIFIER)
+
+        t = (
+            LOCATION,
+            location[NAMESPACE],
+            location_name or location_identifier,
+        )
+        result.append(t)
+
+    if not result:
+        raise ValueError('Invalid data: {}'.format(data))
+
+    return tuple(result)
+
+
+def get_corresponding_pickle_path(path):
+    """Get the same path with a pickle extension.
+
+    :param str path: A path to a BEL file.
+    :rtype: str
+    """
+    return '{path}.pickle'.format(path=path)

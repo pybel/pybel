@@ -9,12 +9,11 @@ enable this option, but can specify a database location if they choose.
 from __future__ import unicode_literals
 
 import logging
-import time
-from collections import defaultdict
 from copy import deepcopy
-from itertools import chain
 
 import six
+import time
+from itertools import chain
 from six import string_types
 from sqlalchemy import and_, exists, func
 from sqlalchemy.orm import aliased
@@ -24,27 +23,27 @@ from .base_manager import BaseManager, build_engine_session
 from .exc import EdgeAddError
 from .lookup_manager import LookupManager
 from .models import (
-    Annotation, AnnotationEntry, Author, Citation, Edge, Evidence, Modification, Namespace, NamespaceEntry, Network,
-    Node, Property, edge_annotation, edge_property, network_edge, network_node,
+    Author, Citation, Edge, Evidence, Modification, Namespace, NamespaceEntry, Network, Node, Property, edge_annotation,
+    edge_property, network_edge, network_node,
 )
 from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, update_insert_values
-from ..canonicalize import node_to_bel
 from ..constants import (
     ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR,
     CITATION_ISSUE, CITATION_LAST_AUTHOR, CITATION_NAME, CITATION_PAGES, CITATION_REFERENCE, CITATION_TITLE,
-    CITATION_TYPE, CITATION_VOLUME, DEGRADATION, EFFECT, EVIDENCE, FRAGMENT, FRAGMENT_MISSING, FRAGMENT_START,
-    FRAGMENT_STOP, FUNCTION, FUSION, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, GOCC_KEYWORD, GOCC_LATEST, HGVS,
-    IDENTIFIER, KIND, LINE, LOCATION, METADATA_INSERT_KEYS, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P,
-    PMOD, PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P, RELATION, SUBJECT, TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS,
-    belns_encodings, config, get_cache_connection,
+    CITATION_TYPE, CITATION_TYPE_PUBMED, CITATION_VOLUME, DEGRADATION, EFFECT, EVIDENCE, FRAGMENT, FRAGMENT_MISSING,
+    FRAGMENT_START, FRAGMENT_STOP, FUSION, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, GOCC_KEYWORD, GOCC_LATEST,
+    HGVS, IDENTIFIER, KIND, LINE, LOCATION, METADATA_INSERT_KEYS, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P,
+    PARTNER_5P, PMOD, PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P, RELATION, SUBJECT, TRANSLOCATION, UNQUALIFIED_EDGES,
+    VARIANTS, belns_encodings, get_cache_connection,
 )
 from ..language import (
     BEL_DEFAULT_NAMESPACE_URL, BEL_DEFAULT_NAMESPACE_VERSION, activity_mapping, gmod_mappings, pmod_mappings,
 )
 from ..resources.definitions import get_bel_resource
 from ..struct import BELGraph, union
-from ..utils import hash_citation, hash_dump, hash_edge, hash_evidence, hash_node, parse_datetime
+from ..struct.summary.node_summary import get_names
+from ..utils import hash_citation, hash_dump, hash_evidence, parse_datetime
 
 __all__ = [
     'Manager',
@@ -55,22 +54,23 @@ log = logging.getLogger(__name__)
 
 DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
 
-_namespace_mapping = {
+_optional_namespace_entries_mapping = {
     'species': ('Namespace', 'SpeciesString'),
-    'query_url': ('Namespace', 'QueryValueURL')
+    'query_url': ('Namespace', 'QueryValueURL'),
+    'domain': ('Namespace', 'DomainString'),
 }
 
 
 def _get_namespace_insert_values(bel_resource):
     namespace_insert_values = {
         'name': bel_resource['Namespace']['NameString'],
-        'domain': bel_resource['Namespace']['DomainString']
     }
 
     namespace_insert_values.update(extract_shared_required(bel_resource, 'Namespace'))
     namespace_insert_values.update(extract_shared_optional(bel_resource, 'Namespace'))
 
-    update_insert_values(bel_resource, _namespace_mapping, namespace_insert_values)
+    update_insert_values(bel_resource=bel_resource, mapping=_optional_namespace_entries_mapping,
+                         values=namespace_insert_values)
 
     return namespace_insert_values
 
@@ -81,19 +81,17 @@ _annotation_mapping = {
 
 
 def _get_annotation_insert_values(bel_resource):
-    annotation_insert_values = {
-        'type': bel_resource['AnnotationDefinition']['TypeString'],
-    }
-    annotation_insert_values.update(extract_shared_required(bel_resource, 'AnnotationDefinition'))
+    annotation_insert_values = extract_shared_required(bel_resource, 'AnnotationDefinition')
     annotation_insert_values.update(extract_shared_optional(bel_resource, 'AnnotationDefinition'))
-
-    update_insert_values(bel_resource, _annotation_mapping, annotation_insert_values)
-
+    update_insert_values(bel_resource=bel_resource, mapping=_annotation_mapping, values=annotation_insert_values)
     return annotation_insert_values
 
 
 def not_resource_cachable(bel_resource):
-    """Checks if the BEL resource is cachable. Takes in a dictionary from :func:`get_bel_resource`"""
+    """Check if the BEL resource is cacheable.
+
+    :param dict bel_resource: A dictionary returned by :func:`get_bel_resource`.
+    """
     return bel_resource['Processing'].get('CacheableFlag') not in {'yes', 'Yes', 'True', 'true'}
 
 
@@ -121,66 +119,31 @@ def _normalize_url(graph, keyword):  # FIXME move to utilities and unit test
 
 
 class NamespaceManager(BaseManager):
-    """Manages BEL namespaces"""
-
-    def __init__(self, use_namespace_cache=False, *args, **kwargs):
-        """
-        :param use_namespace_cache: Should namespaces be cached in-memory?
-        """
-        super(NamespaceManager, self).__init__(*args, **kwargs)
-
-        self.use_namespace_cache = (
-            use_namespace_cache
-            if use_namespace_cache is not None
-            else config.get('PYBEL_IN_MEMORY_NAMESPACE_CACHE', False)
-        )
-        self._namespace_model = {}
-        self._namespace_object_cache = defaultdict(dict)
-
-        log.debug('namespace manager caching: %s', self.use_namespace_cache)
-
-    @property
-    def namespace_model(self):
-        """A dictionary from {namespace URL: Namespace}
-
-        :rtype: dict[str,Namespace]
-        """
-        return self._namespace_model
-
-    @property
-    def namespace_object_cache(self):
-        """A dictionary from {namespace URL: {entry name: NamespaceEntry}}
-
-        :rtype: dict[str,dict[str,NamespaceEntry]]
-        """
-        return self._namespace_object_cache
+    """Manages BEL namespaces."""
 
     def list_namespaces(self):
-        """Returns a list of all namespaces
+        """List all namespaces.
 
         :rtype: list[Namespace]
         """
         return self.session.query(Namespace).all()
 
     def count_namespaces(self):
-        """Count the number of namespaces in the database
+        """Count the number of namespaces in the database.
 
         :rtype: int
         """
         return self.session.query(Namespace).count()
 
     def count_namespace_entries(self):
-        """Count the number of namespace entries in the database
+        """Count the number of namespace entries in the database.
 
         :rtype: int
         """
         return self.session.query(NamespaceEntry).count()
 
     def drop_namespaces(self):
-        """Drops all namespaces"""
-        self.namespace_object_cache.clear()
-        self.namespace_model.clear()
-
+        """Drop all namespaces."""
         for namespace in self.session.query(NamespaceEntry).all():
             namespace.children[:] = []
             self.session.commit()
@@ -190,7 +153,9 @@ class NamespaceManager(BaseManager):
         self.session.commit()
 
     def drop_namespace_by_url(self, url):
-        """Drops the namespace at the given URL. Won't work if the edge store is in use.
+        """Drop the namespace at the given URL.
+
+        Won't work if the edge store is in use.
 
         :param str url: The URL of the namespace to drop
         """
@@ -200,15 +165,15 @@ class NamespaceManager(BaseManager):
         self.session.commit()
 
     def get_namespace_by_url(self, url):
-        """Looks up a namespace by url. Fails if not inserted already into database.
+        """Look up a namespace by url.
 
         :param str url: The URL of the namespace
-        :rtype: Namespace
+        :rtype: Optional[Namespace]
         """
         return self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
 
     def get_namespace_by_keyword_version(self, keyword, version):
-        """Gets a namespace with a given keyword and version
+        """Get a namespace with a given keyword and version.
 
         :param str keyword: The keyword to search
         :param str version: The version to search
@@ -218,7 +183,7 @@ class NamespaceManager(BaseManager):
         return self.session.query(Namespace).filter(filt).one_or_none()
 
     def ensure_default_namespace(self):
-        """Creates or gets the BEL default namespace
+        """Get or create the BEL default namespace.
 
         :rtype: Namespace
         """
@@ -243,11 +208,11 @@ class NamespaceManager(BaseManager):
         return namespace
 
     def get_or_create_namespace(self, url):
-        """Inserts the namespace file at the given location to the cache. If not cachable, returns the dict of
-        the values of this namespace.
+        """Insert the namespace file at the given location to the cache.
+
+        If not cachable, returns the dict of the values of this namespace.
 
         :param str url: the location of the namespace file
-        :return: SQL Alchemy model instance, populated with data from URL
         :rtype: Namespace or dict
         :raises: pybel.resources.exc.ResourceError
         """
@@ -266,6 +231,7 @@ class NamespaceManager(BaseManager):
 
         if not_resource_cachable(bel_resource):
             log.debug('not caching namespace: %s (%d terms in %.2f seconds)', url, len(values), time.time() - t)
+            log.debug('loaded uncached namespace: %s (%d)', url, len(values))
             return values
 
         namespace_insert_values = _get_namespace_insert_values(bel_resource)
@@ -286,49 +252,8 @@ class NamespaceManager(BaseManager):
 
         return namespace
 
-    def _cache_namespace(self, namespace):
-        """Caches a namespace's model
-
-        :param Namespace namespace:
-        """
-        self.namespace_model[namespace.url] = namespace
-
-    def _cache_namespace_entries(self, namespace):
-        """Caches a namespace's entries' models
-
-        :param Namespace namespace:
-        """
-        for entry in namespace.entries:
-            self.namespace_object_cache[namespace.url][entry.name] = entry
-
-    def ensure_namespace(self, url):
-        """Gets or creates a namespace by its URL. Stores in the database and cache if it's cachable, otherwise
-        returns a dictionary of {names: encodings}
-
-        :param str url: the location of the namespace file
-        :rtype: Namespace or dict[str,str]
-        :raises: pybel.resources.exc.ResourceError
-        """
-        if self.use_namespace_cache and url in self.namespace_model:
-            log.debug('already in memory: %s', url)
-            return self.namespace_model[url]
-
-        namespace = self.get_or_create_namespace(url)
-
-        if isinstance(namespace, dict):
-            log.debug('loaded uncached namespace: %s (%d)', url, len(namespace))
-            return namespace
-
-        log.debug('loaded namespace: %s', url)
-
-        if self.use_namespace_cache:
-            self._cache_namespace(namespace)
-            self._cache_namespace_entries(namespace)
-
-        return namespace
-
     def get_namespace_by_keyword_pattern(self, keyword, pattern):
-        """Gets a namespace with a given keyword and pattern
+        """Get a namespace with a given keyword and pattern.
 
         :param str keyword: The keyword to search
         :param str pattern: The pattern to search
@@ -338,7 +263,7 @@ class NamespaceManager(BaseManager):
         return self.session.query(Namespace).filter(filt).one_or_none()
 
     def ensure_regex_namespace(self, keyword, pattern):
-        """Gets or creates a regular expression namespace
+        """Get or create a regular expression namespace.
 
         :param str keyword: The keyword of a regular expression namespace
         :param str pattern: The pattern for a regular expression namespace
@@ -361,17 +286,13 @@ class NamespaceManager(BaseManager):
         return namespace
 
     def get_namespace_entry(self, url, name):
-        """Gets a given NamespaceEntry object.
+        """Get a given NamespaceEntry object.
 
         :param str url: The url of the namespace source
         :param str name: The value of the namespace from the given url's document
         :rtype: Optional[NamespaceEntry]
         """
-        if self.namespace_object_cache and url in self.namespace_object_cache:
-            return self.namespace_object_cache[url][name]
-
         entry_filter = and_(Namespace.url == url, NamespaceEntry.name == name)
-
         result = self.session.query(NamespaceEntry).join(Namespace).filter(entry_filter).all()
 
         if 0 == len(result):
@@ -382,8 +303,20 @@ class NamespaceManager(BaseManager):
 
         return result[0]
 
+    def get_annotation_entry_by_name(self, url, name):
+        """Get an annotation entry by URL and name.
+
+        :param str url: The url of the annotation source
+        :param str name: The name of the annotation entry from the given url's document
+        :rtype: NamespaceEntry
+        """
+        annotation_filter = and_(Namespace.url == url, NamespaceEntry.name == name)
+        return self.session.query(NamespaceEntry).join(Namespace).filter(annotation_filter).one()
+
     def get_or_create_regex_namespace_entry(self, namespace, pattern, name):
-        """Gets a namespace entry from a regular expression. Need to commit after!
+        """Get a namespace entry from a regular expression.
+
+        Need to commit after!
 
         :param str namespace: The name of the namespace
         :param str pattern: The regular expression pattern for the namespace
@@ -405,160 +338,61 @@ class NamespaceManager(BaseManager):
 
         return name_model
 
-
-class AnnotationManager(BaseManager):
-    """Manages BEL annotations"""
-
-    def __init__(self, use_annotation_cache=None, *args, **kwargs):
-        super(AnnotationManager, self).__init__(*args, **kwargs)
-
-        self.use_annotation_cache = (
-            use_annotation_cache
-            if use_annotation_cache is not None
-            else config.get('PYBEL_IN_MEMORY_ANNOTATION_CACHE', False)
-        )
-        self._annotation_model = {}
-        self._annotation_object_cache = defaultdict(dict)
-
-        log.debug('annotation manager caching: %s', self.use_annotation_cache)
-
-    @property
-    def annotation_model(self):
-        """A dictionary from {annotation URL: Annotation}
-
-        :rtype: dict[str:Annotation]
-        """
-        return self._annotation_model
-
-    @property
-    def annotation_object_cache(self):
-        """A dictionary from {annotation URL: {name: AnnotationEntry}}
-
-        :rtype: dict[str,dict[str,AnnotationEntry]]
-        """
-        return self._annotation_object_cache
-
     def list_annotations(self):
-        """Return a list of all annotations
+        """Return a list of all annotations.
 
-        :rtype: list[Annotation]
+        :rtype: list[Namespace]
         """
-        return self.session.query(Annotation).all()
+        return self.session.query(Namespace).filter(Namespace.is_annotation).all()
 
     def count_annotations(self):
-        """Count the number of annotations in the database
+        """Count the number of annotations in the database.
 
         :rtype: int
         """
-        return self.session.query(Annotation).count()
+        return self.session.query(Namespace).filter(Namespace.is_annotation).count()
 
     def count_annotation_entries(self):
-        """Count the number of annotation entries in the database
+        """Count the number of annotation entries in the database.
 
         :rtype: int
         """
-        return self.session.query(AnnotationEntry).count()
-
-    def drop_annotations(self):
-        """Drops all annotations"""
-        self.annotation_object_cache.clear()
-        self.annotation_model.clear()
-
-        for annotation in self.session.query(AnnotationEntry).all():
-            annotation.children[:] = []
-            self.session.commit()
-
-        self.session.query(AnnotationEntry).delete()
-        self.session.query(Annotation).delete()
-        self.session.commit()
-
-    def drop_annotation_by_url(self, url):
-        """Drops the annotation at the given URL. Won't work if the edge store is in use.
-
-        :param str url: The URL of the annotation to drop
-        """
-        annotation = self.get_annotation_by_url(url)
-        self.session.query(AnnotationEntry).filter(AnnotationEntry.annotation == annotation).delete()
-        self.session.delete(annotation)
-        self.session.commit()
-
-    def _cache_annotation(self, annotation):
-        """Caches an annotation
-
-        :param Annotation annotation:
-        """
-        url = annotation.url
-
-        if url in self.annotation_model:
-            return
-
-        self.annotation_model[url] = annotation
-
-        for entry in annotation.entries:
-            self.annotation_object_cache[url][entry.name] = entry
-
-    def get_annotation_by_url(self, url):
-        """Gets an annotation by URL
-
-        :param str url:
-        :rtype: Optional[Annotation]
-        """
-        return self.session.query(Annotation).filter(Annotation.url == url).one_or_none()
+        return self.session.query(NamespaceEntry).filter(NamespaceEntry.is_annotation).count()
 
     def get_or_create_annotation(self, url):
-        """Inserts the namespace file at the given location to the cache
+        """Insert the namespace file at the given location to the cache.
 
         :param str url: the location of the namespace file
-        :rtype: Annotation
+        :rtype: Namespace
         :raises: pybel.resources.exc.ResourceError
         """
-        annotation = self.get_annotation_by_url(url)
+        result = self.get_namespace_by_url(url)
 
-        if annotation is not None:
-            return annotation
+        if result is not None:
+            return result
 
         t = time.time()
 
         bel_resource = get_bel_resource(url)
 
-        annotation = Annotation(
+        result = Namespace(
             url=url,
+            is_annotation=True,
             **_get_annotation_insert_values(bel_resource)
         )
-        annotation.entries = [
-            AnnotationEntry(name=name, label=label)
+        result.entries = [
+            NamespaceEntry(name=name, identifier=label)
             for name, label in bel_resource['Values'].items()
             if name
         ]
 
-        self._cache_annotation(annotation)
-        self.session.add(annotation)
+        self.session.add(result)
         self.session.commit()
 
         log.info('inserted annotation: %s (%d terms in %.2f seconds)', url, len(bel_resource['Values']),
                  time.time() - t)
 
-        return annotation
-
-    def ensure_annotation(self, url):
-        """Caches an annotation file if not already in the cache
-
-        :param str url: the location of the annotation file
-        :rtype: Annotation
-        :raises: pybel.resources.exc.ResourceError
-        """
-        if url in self.annotation_model:
-            log.debug('already in memory: %s (%d)', url, len(self.annotation_object_cache[url]))
-            return self.annotation_model[url]
-
-        result = self.session.query(Annotation).filter(Annotation.url == url).one_or_none()
-
-        if result is not None:
-            self._cache_annotation(result)
-            log.debug('cached annotation: %s (%d)', url, len(self.annotation_object_cache[url]))
-            return result
-
-        return self.get_or_create_annotation(url)
+        return result
 
     def get_annotation_entry_names(self, url):
         """Return a dict of annotations and their labels for the given annotation file.
@@ -566,52 +400,39 @@ class AnnotationManager(BaseManager):
         :param str url: the location of the annotation file
         :rtype: set[str]
         """
-        annotation = self.ensure_annotation(url)
-        return annotation.get_entry_names()
-
-    def get_annotation_entry_by_name(self, url, name):
-        """Get an annotation entry by URL and name.
-
-        :param str url: The url of the annotation source
-        :param str name: The name of the annotation entry from the given url's document
-        :rtype: AnnotationEntry
-        """
-        if self.annotation_object_cache and url in self.annotation_object_cache:
-            return self.annotation_object_cache[url][name]
-
-        annotation_filter = and_(Annotation.url == url, AnnotationEntry.name == name)
-        return self.session.query(AnnotationEntry).join(Annotation).filter(annotation_filter).one()
+        annotation = self.get_or_create_annotation(url)
+        return set(annotation.get_entry_names())
 
     def get_annotation_entries_by_names(self, url, names):
         """Get annotation entries by URL and names.
 
         :param str url: The url of the annotation source
         :param list[str] names: The names of the annotation entries from the given url's document
-        :rtype: list[AnnotationEntry]
+        :rtype: list[NamespaceEntry]
         """
-        annotation_filter = and_(Annotation.url == url, AnnotationEntry.name.in_(names))
-        return self.session.query(AnnotationEntry).join(Annotation).filter(annotation_filter).all()
+        annotation_filter = and_(Namespace.url == url, NamespaceEntry.name.in_(names))
+        return self.session.query(NamespaceEntry).join(Namespace).filter(annotation_filter).all()
 
 
-class NetworkManager(NamespaceManager, AnnotationManager):
+class NetworkManager(NamespaceManager):
     """Groups functions for inserting and querying networks in the database's network store."""
 
     def count_networks(self):
-        """Counts the number of networks in the cache
+        """Count the networks in the database.
 
         :rtype: int
         """
         return self.session.query(func.count(Network.id)).scalar()
 
     def list_networks(self):
-        """Lists all networks in the cache
+        """List all networks in the database.
 
         :rtype: list[Network]
         """
         return self.session.query(Network).all()
 
     def list_recent_networks(self):
-        """Lists the most recently created version of each network (by name)
+        """List the most recently created version of each network (by name).
 
         :rtype: list[Network]
         """
@@ -624,18 +445,17 @@ class NetworkManager(NamespaceManager, AnnotationManager):
                 .subquery('most_recent_times')
         )
 
-        most_recent_networks = (
-            self.session.query(Network)
-                .join(most_recent_times, and_(
-                most_recent_times.c.network_name == Network.name,
-                most_recent_times.c.max_created == Network.created
-            ))
+        and_condition = and_(
+            most_recent_times.c.network_name == Network.name,
+            most_recent_times.c.max_created == Network.created
         )
+
+        most_recent_networks = self.session.query(Network).join(most_recent_times, and_condition)
 
         return most_recent_networks.all()
 
     def has_name_version(self, name, version):
-        """Checks if the name/version combination is already in the database
+        """Check if there exists a network with the name/version combination in the database.
 
         :param str name: The network name
         :param str version: The network version
@@ -643,29 +463,21 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         """
         return self.session.query(exists().where(and_(Network.name == name, Network.version == version))).scalar()
 
-    def query_singleton_edges_from_network(self, network):
-        """Returns a query selecting all edge ids that only belong to the given network
+    def drop_networks(self):
+        """Drop all networks."""
+        for network in self.session.query(Network).all():
+            self.drop_network(network)
 
-        :type network: Network
-        :rtype: sqlalchemy.orm.query.Query
+    def drop_network_by_id(self, network_id):
+        """Drop a network by its database identifier.
+
+        :param int network_id: The network's database identifier
         """
-        ne1 = aliased(network_edge, name='ne1')
-        ne2 = aliased(network_edge, name='ne2')
-        singleton_edge_ids_for_network = (
-            self.session.query(ne1.c.edge_id)
-                .outerjoin(ne2, and_(
-                ne1.c.edge_id == ne2.c.edge_id,
-                ne1.c.network_id != ne2.c.network_id
-            ))
-                .filter(and_(
-                ne1.c.network_id == network.id,
-                ne2.c.edge_id == None
-            ))
-        )
-        return singleton_edge_ids_for_network
+        network = self.session.query(Network).get(network_id)
+        self.drop_network(network)
 
     def drop_network(self, network):
-        """Drops a network, while also cleaning up any edges that are no longer part of any network.
+        """Drop a network, while also cleaning up any edges that are no longer part of any network.
 
         :type network: Network
         """
@@ -698,21 +510,29 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         # commit it!
         self.session.commit()
 
-    def drop_network_by_id(self, network_id):
-        """Drops a network by its database identifier
+    def query_singleton_edges_from_network(self, network):
+        """Return a query selecting all edge ids that only belong to the given network.
 
-        :param int network_id: The network's database identifier
+        :type network: Network
+        :rtype: sqlalchemy.orm.query.Query
         """
-        network = self.session.query(Network).get(network_id)
-        self.drop_network(network)
-
-    def drop_networks(self):
-        """Drops all networks"""
-        for network in self.session.query(Network).all():
-            self.drop_network(network)
+        ne1 = aliased(network_edge, name='ne1')
+        ne2 = aliased(network_edge, name='ne2')
+        singleton_edge_ids_for_network = (
+            self.session.query(ne1.c.edge_id)
+                .outerjoin(ne2, and_(
+                ne1.c.edge_id == ne2.c.edge_id,
+                ne1.c.network_id != ne2.c.network_id
+            ))
+                .filter(and_(
+                ne1.c.network_id == network.id,
+                ne2.c.edge_id == None
+            ))
+        )
+        return singleton_edge_ids_for_network
 
     def get_network_versions(self, name):
-        """Returns all of the versions of a network with the given name
+        """Return all of the versions of a network with the given name.
 
         :param str name: The name of the network to query
         :rtype: set[str]
@@ -723,7 +543,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         }
 
     def get_network_by_name_version(self, name, version):
-        """Loads most network with the given name and version
+        """Load most network with the given name and version.
 
         :param str name: The name of the network.
         :param str version: The version string of the network.
@@ -734,7 +554,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         return network
 
     def get_graph_by_name_version(self, name, version):
-        """Loads most recently added graph with the given name, or allows for specification of version
+        """Load most recently added graph with the given name, or allows for specification of version.
 
         :param str name: The name of the network.
         :param str version: The version string of the network.
@@ -748,7 +568,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         return network.as_bel()
 
     def get_networks_by_name(self, name):
-        """Gets all networks with the given name. Useful for getting all versions of a given network.
+        """Get all networks with the given name. Useful for getting all versions of a given network.
 
         :param str name: The name of the network
         :rtype: list[Network]
@@ -756,7 +576,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         return self.session.query(Network).filter(Network.name.like(name)).all()
 
     def get_most_recent_network_by_name(self, name):
-        """Gets the most recently created network with the given name.
+        """Get the most recently created network with the given name.
 
         :param str name: The name of the network
         :rtype: Optional[Network]
@@ -765,7 +585,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         return network
 
     def get_graph_by_most_recent(self, name):
-        """Gets the most recently created network with the given name as a :class:`pybel.BELGraph`.
+        """Get the most recently created network with the given name as a :class:`pybel.BELGraph`.
 
         :param str name: The name of the network
         :rtype: Optional[BELGraph]
@@ -778,7 +598,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         return network.as_bel()
 
     def get_network_by_id(self, network_id):
-        """Gets a network from the database by its identifier.
+        """Get a network from the database by its identifier.
 
         :param int network_id: The network's database identifier
         :rtype: Network
@@ -786,7 +606,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         return self.session.query(Network).get(network_id)
 
     def get_graph_by_id(self, network_id):
-        """Gets a network from the database by its identifier and converts it to a BEL graph
+        """Get a network from the database by its identifier and converts it to a BEL graph.
 
         :param int network_id: The network's database identifier
         :rtype: BELGraph
@@ -796,7 +616,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         return network.as_bel()
 
     def get_networks_by_ids(self, network_ids):
-        """Gets a list of networks with the given identifiers. Note: order is not necessarily preserved.
+        """Get a list of networks with the given identifiers. Note: order is not necessarily preserved.
 
         :param iter[int] network_ids: The identifiers of networks in the database
         :rtype: list[Network]
@@ -805,8 +625,9 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         return self.session.query(Network).filter(Network.id_in(network_ids)).all()
 
     def get_graphs_by_ids(self, network_ids):
-        """Gets a list of networks with the given identifiers and converts to BEL graphs. Note: order is not
-        necessarily preserved.
+        """Get a list of networks with the given identifiers and converts to BEL graphs.
+
+        Note: order is not necessarily preserved.
 
         :param iter[int] network_ids: The identifiers of networks in the database
         :rtype: list[BELGraph]
@@ -819,7 +640,7 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         return rv
 
     def get_graph_by_ids(self, network_ids):
-        """Gets a combine BEL Graph from a list of network identifiers
+        """Get a combine BEL Graph from a list of network identifiers.
 
         :param list[int] network_ids: A list of network identifiers
         :rtype: BELGraph
@@ -836,8 +657,8 @@ class NetworkManager(NamespaceManager, AnnotationManager):
         return rv
 
 
-class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
-    """Manages inserting data into the edge store"""
+class InsertManager(NamespaceManager, LookupManager):
+    """Manages inserting data into the edge store."""
 
     def __init__(self, *args, **kwargs):
         super(InsertManager, self).__init__(*args, **kwargs)
@@ -852,10 +673,11 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         self.object_cache_author = {}
 
     def insert_graph(self, graph, store_parts=True, use_tqdm=False):
-        """Inserts a graph in the database and returns the corresponding Network model.
+        """Insert a graph in the database and returns the corresponding Network model.
 
         :param BELGraph graph: A BEL graph
         :param bool store_parts: Should the graph be stored in the edge store?
+        :param bool use_tqdm: Should progress be displayed with tqdm?
         :rtype: Network
         :raises: pybel.resources.exc.ResourceError
         """
@@ -871,17 +693,25 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
         self.ensure_default_namespace()
 
-        for url in graph.namespace_url.values():
-            if url in graph.uncached_namespaces:
+        namespace_urls = graph.namespace_url.values()
+        if use_tqdm:
+            namespace_urls = tqdm(namespace_urls, desc='namespaces')
+
+        for namespace_url in namespace_urls:
+            if namespace_url in graph.uncached_namespaces:
                 continue
 
-            self.ensure_namespace(url)
+            self.get_or_create_namespace(namespace_url)
 
         for keyword, pattern in graph.namespace_pattern.items():
             self.ensure_regex_namespace(keyword, pattern)
 
-        for url in graph.annotation_url.values():
-            self.ensure_annotation(url)
+        annotation_urls = graph.annotation_url.values()
+        if use_tqdm:
+            annotation_urls = tqdm(annotation_urls, desc='annotations')
+
+        for annotation_url in annotation_urls:
+            self.get_or_create_annotation(annotation_url)
 
         network = Network(**{
             key: value
@@ -892,7 +722,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         network.store_bel(graph)
 
         if store_parts:
-            self._store_graph_parts(network, graph, use_tqdm=use_tqdm)
+            network.nodes, network.edges = self._store_graph_parts(graph, use_tqdm=use_tqdm)
 
         self.session.add(network)
         self.session.commit()
@@ -901,29 +731,29 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
         return network
 
-    def _store_graph_parts(self, network, graph, use_tqdm=False):
-        """Stores the given graph into the edge store.
+    def _store_graph_parts(self, graph, use_tqdm=False):
+        """Store the given graph into the edge store.
 
-        :param Network network: A SQLAlchemy PyBEL Network object
         :param BELGraph graph: A BEL Graph
+        :rtype: tuple[list[Node],list[Edge]]
         :raises: pybel.resources.exc.ResourceError
         :raises: EdgeAddError
         """
-        # FIXME check if GOCC is needed
-        self.ensure_namespace(GOCC_LATEST)
+        names = get_names(graph)
+        if 'GOCC' in names and 'GOCC' not in graph.namespace_url:  # means it got thrown in there!
+            self.get_or_create_namespace(GOCC_LATEST)
 
         log.debug('inserting %s into edge store', graph)
-        log.debug('storing graph parts: nodes')
-        t = time.time()
+        log.debug('building node models')
+        node_model_build_start = time.time()
 
-        nodes_iter = (
-            tqdm(graph, total=graph.number_of_nodes(), desc='Nodes')
-            if use_tqdm else
-            graph
-        )
+        nodes = list(graph)
+        if use_tqdm:
+            nodes = tqdm(nodes, total=graph.number_of_nodes(), desc='nodes')
 
-        for node in nodes_iter:
-            namespace = graph.node[node].get(NAMESPACE)
+        node_model = {}
+        for node in nodes:
+            namespace = node.get(NAMESPACE)
 
             if graph.skip_storing_namespace(namespace):
                 continue  # already know this node won't be cached
@@ -934,38 +764,65 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                 log.warning('can not add node %s', node)
                 continue
 
-            network.nodes.append(node_object)
+            node_model[node] = node_object
 
-        log.debug('stored nodes in %.2f seconds', time.time() - t)
-        log.debug('storing graph parts: edges')
-        t = time.time()
-        c = 0
+        log.debug('built node models in %.2f seconds', time.time() - node_model_build_start)
 
-        edges = (
-            tqdm(graph.edges(data=True), total=graph.number_of_edges(), desc='Edges')
-            if use_tqdm else
-            graph.edges(data=True)
-        )
+        node_model_commit_start = time.time()
+        node_models = list(node_model.values())
+        self.session.add_all(node_models)
+        self.session.commit()
+        log.debug('stored node models in %.2f seconds', time.time() - node_model_commit_start)
 
-        for u, v, data in edges:
-            if hash_node(u) not in self.object_cache_node:
-                log.debug('Skipping uncached node: %s', u)
+        log.debug('building edge models')
+        edge_model_build_start = time.time()
+
+        edges = graph.edges(keys=True, data=True)
+        if use_tqdm:
+            edges = tqdm(edges, total=graph.number_of_edges(), desc='edges')
+
+        edge_models = list(self._get_edge_models(graph, node_model, edges))
+
+        log.debug('built edge models in %.2f seconds', time.time() - edge_model_build_start)
+
+        edge_model_commit_start = time.time()
+        self.session.add_all(edge_models)
+        self.session.commit()
+        log.debug('stored edge models in %.2f seconds', time.time() - edge_model_commit_start)
+
+        return node_models, edge_models
+
+    def _get_edge_models(self, graph, tuple_model, edges):
+        for u, v, key, data in edges:
+            source = tuple_model.get(u)
+            if source is None or source.sha512 not in self.object_cache_node:
+                log.debug('skipping uncached source node: %s', u)
                 continue
 
-            if hash_node(v) not in self.object_cache_node:
-                log.debug('Skipping uncached node: %s', v)
+            target = tuple_model.get(v)
+            if target is None or target.sha512 not in self.object_cache_node:
+                log.debug('skipping uncached target node: %s', v)
                 continue
 
-            if RELATION not in data:
-                continue
+            relation = data[RELATION]
 
-            if data[RELATION] in UNQUALIFIED_EDGES:
+            if relation in UNQUALIFIED_EDGES:
                 try:
-                    self._add_unqualified_edge(network, graph, u, v, data)
+                    edge = self._add_unqualified_edge(
+                        source=source,
+                        target=target,
+                        bel=graph.edge_to_bel(u, v, data),
+                        key=key,
+                        data=data,
+                    )
+                    if edge is None:
+                        continue
                 except Exception as e:
                     self.session.rollback()
                     log.exception('error storing edge in database. edge data: %s', data)
-                    six.raise_from(EdgeAddError(e, u, v, data), e)
+                    six.raise_from(EdgeAddError(e, u, v, key, data), e)
+                else:
+                    yield edge
 
             elif EVIDENCE not in data or CITATION not in data:
                 continue
@@ -975,16 +832,23 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
             else:
                 try:
-                    self._add_qualified_edge(network, graph, u, v, data)
+                    bel = graph.edge_to_bel(u, v, data)
+                    edge = self._add_qualified_edge(
+                        graph=graph,
+                        source=source,
+                        target=target,
+                        key=key,
+                        bel=bel,
+                        data=data,
+                    )
+                    if edge is None:
+                        continue
                 except Exception as e:
                     self.session.rollback()
                     log.exception('error storing edge in database. edge data: %s', data)
-                    six.raise_from(EdgeAddError(e, u, v, data), e)
-
-        log.debug('stored edges in %.2f seconds', time.time() - t)
-
-        if c:
-            log.info('skipped %d edges', c)
+                    six.raise_from(EdgeAddError(e, u, v, key, data), e)
+                else:
+                    yield edge
 
     @staticmethod
     def _iter_from_annotations_dict(graph, annotations_dict):
@@ -1025,13 +889,14 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             for entry in self.get_annotation_entries_by_names(url, names)
         ]
 
-    def _add_qualified_edge(self, network, graph, u, v, data):
+    def _add_qualified_edge(self, graph, source, target, key, bel, data):
         """Add a qualified edge to the network.
 
-        :type network: Network
         :type graph: BELGraph
-        :type u: tuple
-        :type v: tuple
+        :type source: Node
+        :type target: Node
+        :type key: str
+        :type bel: str
         :type data: dict
         """
         citation_dict = data[CITATION]
@@ -1058,42 +923,36 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
         annotations = self._get_annotation_entries_from_data(graph, data)
 
-        bel = graph.edge_to_bel(u, v, data=data)
-        sha512 = hash_edge(u, v, data)
-        edge = self.get_or_create_edge(
-            source=self.object_cache_node[hash_node(u)],
-            target=self.object_cache_node[hash_node(v)],
+        return self.get_or_create_edge(
+            source=source,
+            target=target,
             relation=data[RELATION],
             bel=bel,
-            sha512=sha512,
+            sha512=key,
             evidence=evidence,
             properties=properties,
             annotations=annotations,
         )
-        network.edges.append(edge)
 
-    def _add_unqualified_edge(self, network, graph, u, v, data):
+    def _add_unqualified_edge(self, source, target, key, bel, data):
         """Add an unqualified edge to the network.
 
-        :type network: Network
-        :type graph: BELGraph
-        :type u: tuple
-        :type v: tuple
+        :type source: Node
+        :type target: Node
+        :type key: str
+        :type bel: str
         :type data: dict
         """
-        bel = graph.edge_to_bel(u, v, data=data)
-        sha512 = hash_edge(u, v, data)
-        edge = self.get_or_create_edge(
-            source=self.object_cache_node[hash_node(u)],
-            target=self.object_cache_node[hash_node(v)],
+        return self.get_or_create_edge(
+            source=source,
+            target=target,
             relation=data[RELATION],
             bel=bel,
-            sha512=sha512,
+            sha512=key,
         )
-        network.edges.append(edge)
 
     def get_or_create_evidence(self, citation, text):
-        """Creates entry and object for given evidence if it does not exist.
+        """Create an entry and object for given evidence if it does not exist.
 
         :param Citation citation: Citation object obtained from :func:`get_or_create_citation`
         :param str text: Evidence text
@@ -1122,19 +981,18 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         self.object_cache_evidence[sha512] = evidence
         return evidence
 
-    def get_or_create_node(self, graph, node_tuple):
-        """Creates entry and object for given node if it does not exist.
+    def get_or_create_node(self, graph, node_data):
+        """Create an entry and object for given node if it does not exist.
 
         :param BELGraph graph: A BEL graph
-        :param tuple node_tuple: A PyBEL node tuple
+        :param BaseEntity node_data: A PyBEL node tuple
         :rtype: Node
         """
-        sha512 = hash_node(node_tuple)
+        sha512 = node_data.as_sha512()
         if sha512 in self.object_cache_node:
             return self.object_cache_node[sha512]
 
-        node_data = graph.node[node_tuple]
-        bel = node_to_bel(node_data)
+        bel = node_data.as_bel()
 
         node = self.get_node_by_hash(sha512)
 
@@ -1142,11 +1000,13 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             self.object_cache_node[sha512] = node
             return node
 
-        type = node_data[FUNCTION]
-        node = Node(type=type, bel=bel, sha512=sha512)
+        node = Node(
+            type=node_data.function,
+            bel=bel,
+            sha512=sha512,
+        )
 
         namespace = node_data.get(NAMESPACE)
-
         if namespace is None:
             pass
 
@@ -1191,7 +1051,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         return node
 
     def drop_nodes(self):
-        """Drops all nodes in RDB"""
+        """Drop all nodes in the database."""
         t = time.time()
 
         self.session.query(Node).delete()
@@ -1200,7 +1060,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         log.info('dropped all nodes in %.2f seconds', time.time() - t)
 
     def drop_edges(self):
-        """Drops all edges in RDB"""
+        """Drop all edges in the database"""
         t = time.time()
 
         self.session.query(Edge).delete()
@@ -1210,7 +1070,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
     def get_or_create_edge(self, source, target, relation, bel, sha512, evidence=None, annotations=None,
                            properties=None):
-        """Creates entry for given edge if it does not exist.
+        """Create an edge if it does not exist, or return it if it does.
 
         :param Node source: Source node of the relation
         :param Node target: Target node of the relation
@@ -1252,9 +1112,9 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         self.object_cache_edge[sha512] = edge
         return edge
 
-    def get_or_create_citation(self, type, reference, name=None, title=None, volume=None, issue=None, pages=None,
+    def get_or_create_citation(self, reference, type=None, name=None, title=None, volume=None, issue=None, pages=None,
                                date=None, first=None, last=None, authors=None):
-        """Create an entry for given citation if it does not exist, or return it if it does.
+        """Create a citation if it does not exist, or return it if it does.
 
         :param str type: Citation type (e.g. PubMed)
         :param str reference: Identifier of the given citation (e.g. PubMed id)
@@ -1270,8 +1130,8 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         :type authors: None or str or list[str]
         :rtype: Citation
         """
-        type = type.strip()
-        reference = reference.strip()
+        if type is None:
+            type = CITATION_TYPE_PUBMED
 
         sha512 = hash_citation(type=type, reference=reference)
 
@@ -1333,7 +1193,7 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
             self.object_cache_author[name] = author
             return author
 
-        author = self.object_cache_author[name] = Author(name=name)
+        author = self.object_cache_author[name] = Author.from_name(name=name)
         self.session.add(author)
         return author
 
@@ -1346,7 +1206,9 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         return self.session.query(Modification).filter(Modification.sha512 == sha512).one_or_none()
 
     def get_or_create_modification(self, graph, node_data):
-        """Creates a list of modification objects that belong to the node described by node_data.
+        """Create a list of node modification objects that belong to the node described by node_data.
+
+        Return None if the list can not be constructed, and the node should also be skipped.
 
         :param BELGraph graph: A BEL graph
         :param dict node_data: Describes the given node and contains is_variant information
@@ -1496,8 +1358,9 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
         return edge_property_model
 
     def get_or_create_properties(self, graph, edge_data):  # TODO make for just single property then loop with other fn.
-        """Creates a list of all subject and object related properties of the edge. Returns None if the property cannot
-        be constructed due to missing cache entries.
+        """Create a list of edge subject/object property models.
+
+        Return None if the property cannot be constructed due to missing cache entries.
 
         :param BELGraph graph: A BEL graph
         :param dict edge_data: Describes the context of the given edge.
@@ -1543,8 +1406,8 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
                     'modifier': modifier
                 }
 
-                if modifier == TRANSLOCATION and EFFECT in participant_data:
-                    for effect_type, effect_value in participant_data[EFFECT].items():
+                if modifier == TRANSLOCATION:
+                    for effect_type, effect_value in participant_data.get(EFFECT, {}).items():
                         tmp_dict = deepcopy(modifier_property_dict)
                         tmp_dict['relative_key'] = effect_type
 
@@ -1603,6 +1466,12 @@ class InsertManager(NamespaceManager, AnnotationManager, LookupManager):
 
 class _Manager(QueryManager, InsertManager, NetworkManager):
     """A wrapper around PyBEL managers that can be directly instantiated with an engine and session."""
+
+    def count_citations(self):
+        return self._count_model(Citation)
+
+    def list_citations(self):
+        return self._list_model(Citation)
 
 
 class Manager(_Manager):

@@ -9,15 +9,15 @@ JSON. Interchange with this format provides compatibilty with other software and
 
 import logging
 from collections import defaultdict
+from operator import methodcaller
 
 from pyparsing import ParseException
 
-from ..canonicalize import node_to_bel
 from ..constants import (
     ANNOTATIONS, CITATION, CITATION_REFERENCE, CITATION_TYPE, EVIDENCE, FUNCTION, METADATA_AUTHORS, METADATA_CONTACT,
     METADATA_INSERT_KEYS, METADATA_LICENSES, RELATION, UNQUALIFIED_EDGES,
 )
-from ..parser import BelParser
+from ..parser import BELParser
 from ..parser.exc import NakedNameWarning
 from ..struct import BELGraph
 
@@ -220,7 +220,7 @@ def from_jgif(graph_jgif_dict):
             if key in metadata:
                 graph.document[key] = metadata[key]
 
-    parser = BelParser(graph)
+    parser = BELParser(graph)
     parser.bel_term.addParseAction(parser.handle_term)
 
     for node in root['nodes']:
@@ -318,15 +318,14 @@ def to_jgif(graph):
     nodes_entry = []
     edges_entry = []
 
-    for i, (node, node_data) in enumerate(graph.iter_node_data_pairs()):
-        bel = node_to_bel(node_data)
-        node_bel[node] = bel
+    for i, node in enumerate(sorted(graph, key=methodcaller('as_bel'))):
+        node_bel[node] = bel = node.as_bel()
 
         nodes_entry.append({
             'id': bel,
             'label': bel,
             'nodeId': i,
-            'bel_function_type': node_data[FUNCTION],
+            'bel_function_type': node[FUNCTION],
             'metadata': {}
         })
 

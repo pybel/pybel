@@ -16,10 +16,10 @@ from os import environ, makedirs, mkdir, path
 
 log = getLogger(__name__)
 
-VERSION = '0.11.11'
+VERSION = '0.12.0'
 
 #: The last PyBEL version where the graph data definition changed
-PYBEL_MINIMUM_IMPORT_VERSION = 0, 11, 0
+PYBEL_MINIMUM_IMPORT_VERSION = 0, 12, 0
 
 BELFRAMEWORK_DOMAIN = 'http://resource.belframework.org'
 OPENBEL_DOMAIN = 'http://resources.openbel.org'
@@ -77,7 +77,7 @@ config = {
 
 
 def get_config_path():
-    """Returns the path of the configuration file.
+    """Return the path of the configuration file.
 
     By default, should just be a file called ``config.json`` inside the directory returned by :func:`get_config_dir`.
 
@@ -433,9 +433,11 @@ CAUSAL_DECREASE_RELATIONS = {DECREASES, DIRECTLY_DECREASES}
 #: A set of direct causal relations
 DIRECT_CAUSAL_RELATIONS = {DIRECTLY_DECREASES, DIRECTLY_INCREASES}
 #: A set of direct causal relations
-INDIRECT_CAUSAL_RELATIONS = {DECREASES, INCREASES}
+INDIRECT_CAUSAL_RELATIONS = {DECREASES, INCREASES, REGULATES}
+#: A set of causal relationships that are polar
+CAUSAL_POLAR_RELATIONS = CAUSAL_INCREASE_RELATIONS | CAUSAL_DECREASE_RELATIONS
 #: A set of all causal relationships
-CAUSAL_RELATIONS = {INCREASES, DIRECTLY_INCREASES, DECREASES, DIRECTLY_DECREASES}
+CAUSAL_RELATIONS = CAUSAL_INCREASE_RELATIONS | CAUSAL_DECREASE_RELATIONS | {REGULATES}
 
 #: A set of all relationships that are inherently directionless, and are therefore added to the graph twice
 TWO_WAY_RELATIONS = {
@@ -454,12 +456,10 @@ CORRELATIVE_RELATIONS = {
 }
 
 #: A set of polar relations
-POLAR_RELATIONS = CAUSAL_RELATIONS | CORRELATIVE_RELATIONS
+POLAR_RELATIONS = CAUSAL_POLAR_RELATIONS | CORRELATIVE_RELATIONS
 
 #: A list of relationship types that don't require annotations or evidence
-#: This must be maintained as a list, since the :data:`unqualified_edge_code` is calculated based on the order
-#: and needs to be consistent
-unqualified_edges = [
+UNQUALIFIED_EDGES = {
     HAS_REACTANT,
     HAS_PRODUCT,
     HAS_COMPONENT,
@@ -471,12 +471,7 @@ unqualified_edges = [
     EQUIVALENT_TO,
     PART_OF,
     ORTHOLOGOUS,
-]
-
-UNQUALIFIED_EDGES = set(unqualified_edges)
-
-#: Unqualified edges are given negative keys since the standard NetworkX edge key factory starts at 0 and counts up
-unqualified_edge_code = {relation: -i for i, relation in enumerate(unqualified_edges, start=1)}
+}
 
 # BEL Keywords
 

@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
+"""Functions for enriching the origins of Proteins, RNAs, and miRNAs."""
+from pybel.dsl import Protein
 from ...pipeline import in_place_transformation
 from ...pipeline.decorators import register_deprecated
-from ....constants import FUNCTION, IDENTIFIER, MIRNA, NAME, NAMESPACE, PROTEIN, RNA, VARIANTS
-from ....dsl import gene, rna
+from ....constants import FUNCTION, FUSION, MIRNA, RNA, VARIANTS
 
 __all__ = [
     'enrich_rnas_with_genes',
@@ -19,22 +20,14 @@ def enrich_proteins_with_rnas(graph):
 
     :param pybel.BELGraph graph: A BEL graph
     """
-    for protein_node, data in graph.nodes(data=True):
-        if data[FUNCTION] != PROTEIN:
+    for protein_node in list(graph):
+        if not isinstance(protein_node, Protein):
             continue
 
-        namespace = data.get(NAMESPACE)
-        if namespace is None:
+        if protein_node.variants:
             continue
 
-        if VARIANTS in data:
-            continue
-
-        rna_node = rna(
-            namespace=namespace,
-            name=data.get(NAME),
-            identifier=data.get(IDENTIFIER),
-        )
+        rna_node = protein_node.get_rna()
         graph.add_translation(rna_node, protein_node)
 
 
@@ -45,22 +38,11 @@ def enrich_rnas_with_genes(graph):
 
     :param pybel.BELGraph graph: A BEL graph
     """
-    for rna_node, data in graph.nodes(data=True):
-        if data[FUNCTION] not in {MIRNA, RNA}:
+    for rna_node in list(graph):
+        if rna_node[FUNCTION] not in {MIRNA, RNA} or FUSION in rna_node or VARIANTS in rna_node:
             continue
 
-        namespace = data.get(NAMESPACE)
-        if namespace is None:
-            continue
-
-        if VARIANTS in data:
-            continue
-
-        gene_node = gene(
-            namespace=namespace,
-            name=data.get(NAME),
-            identifier=data.get(IDENTIFIER),
-        )
+        gene_node = rna_node.get_gene()
         graph.add_transcription(gene_node, rna_node)
 
 

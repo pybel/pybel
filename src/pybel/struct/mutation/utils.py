@@ -48,11 +48,7 @@ def expand_by_edge_filter(source, target, edge_predicates=None):
     :rtype: pybel.BELGraph
     """
     target.add_edges_from(
-        (
-            (u, v, k, source[u][v][k])  # keep negative keys, which represent "unqualified edges"
-            if k < 0 else
-            (u, v, source[u][v][k])  # other edges aren't currently indexed.
-        )
+        (u, v, k, source[u][v][k])
         for u, v, k in filter_edges(source, edge_predicates=edge_predicates)
     )
 

@@ -28,7 +28,7 @@ Identifier Parser
 
 BEL Parser
 ----------
-.. autoclass:: pybel.parser.parse_bel.BelParser
+.. autoclass:: pybel.parser.parse_bel.BELParser
     :members:
 
 Sub-Parsers

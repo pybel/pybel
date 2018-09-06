@@ -27,21 +27,19 @@ The previous statements both produce the underlying data:
 .. seealso::
 
     - BEL 2.0 specification on `gene substitutions <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_variants_2>`_
-    - PyBEL module :py:class:`pybel.parser.modifiers.GeneSubstitutionParser`
+    - PyBEL module :py:class:`pybel.parser.modifiers.get_gene_substitution_language`
 """
 
 import logging
 
 from pyparsing import oneOf, pyparsing_common as ppc
 
-from ..baseparser import BaseParser
 from ..utils import nest, one_of_tags
 from ... import language
 from ...constants import GSUB_POSITION, GSUB_REFERENCE, GSUB_VARIANT, HGVS, IDENTIFIER, KIND
 
 __all__ = [
-    'gsub_tag',
-    'GeneSubstitutionParser',
+    'get_gene_substitution_language',
 ]
 
 log = logging.getLogger(__name__)
@@ -50,21 +48,21 @@ dna_nucleotide = oneOf(list(language.dna_nucleotide_labels.keys()))
 gsub_tag = one_of_tags(tags=['sub', 'substitution'], canonical_tag=HGVS, name=KIND)
 
 
-class GeneSubstitutionParser(BaseParser):
-    def __init__(self):
-        self.language = gsub_tag + nest(dna_nucleotide(GSUB_REFERENCE),
-                                        ppc.integer(GSUB_POSITION),
-                                        dna_nucleotide(GSUB_VARIANT))
-        self.language.setParseAction(self.handle_gsub)
+def _handle_gsub(line, position, tokens):
+    upgraded = 'c.{}{}>{}'.format(tokens[GSUB_POSITION], tokens[GSUB_REFERENCE], tokens[GSUB_VARIANT])
+    log.debug('legacy sub() %s upgraded to %s', line, upgraded)
+    tokens[IDENTIFIER] = upgraded
+    del tokens[GSUB_POSITION]
+    del tokens[GSUB_REFERENCE]
+    del tokens[GSUB_VARIANT]
+    return tokens
 
-        super(GeneSubstitutionParser, self).__init__(self.language)
 
-    @staticmethod
-    def handle_gsub(line, position, tokens):
-        upgraded = 'c.{}{}>{}'.format(tokens[GSUB_POSITION], tokens[GSUB_REFERENCE], tokens[GSUB_VARIANT])
-        log.debug('legacy sub() %s upgraded to %s', line, upgraded)
-        tokens[IDENTIFIER] = upgraded
-        del tokens[GSUB_POSITION]
-        del tokens[GSUB_REFERENCE]
-        del tokens[GSUB_VARIANT]
-        return tokens
+def get_gene_substitution_language():
+    language = gsub_tag + nest(
+        dna_nucleotide(GSUB_REFERENCE),
+        ppc.integer(GSUB_POSITION),
+        dna_nucleotide(GSUB_VARIANT),
+    )
+    language.setParseAction(_handle_gsub)
+    return language

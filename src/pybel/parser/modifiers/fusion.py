@@ -33,13 +33,12 @@ it is shown with uppercase letters referring to constants from :code:`pybel.cons
 .. seealso::
 
     - BEL 2.0 specification on `fusions (2.6.1) <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_fusion_fus>`_
-    - PyBEL module :py:class:`pybel.parser.modifiers.FusionParser`
+    - PyBEL module :py:class:`pybel.parser.modifiers.get_fusion_language`
+    - PyBEL module :py:class:`pybel.parser.modifiers.get_legacy_fusion_language`
 """
 
 from pyparsing import Group, Keyword, Optional, Suppress, oneOf, pyparsing_common, pyparsing_common as ppc, replaceWith
 
-from ..baseparser import BaseParser
-from ..parse_identifier import IdentifierParser
 from ..utils import WCW, nest
 from ...constants import (
     FUSION, FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, PARTNER_3P, PARTNER_5P,
@@ -48,42 +47,57 @@ from ...constants import (
 
 __all__ = [
     'fusion_tags',
-    'FusionParser'
+    'get_fusion_language',
+    'get_legacy_fusion_langauge',
 ]
 
 fusion_tags = oneOf(['fus', 'fusion']).setParseAction(replaceWith(FUSION))
+reference_seq = oneOf(['r', 'p', 'c'])
+coordinate = pyparsing_common.integer | '?'
+missing = Keyword('?')
+range_coordinate_unquoted = (
+    missing(FUSION_MISSING) |
+    (
+        reference_seq(FUSION_REFERENCE) +
+        Suppress('.') +
+        coordinate(FUSION_START) +
+        Suppress('_') +
+        coordinate(FUSION_STOP)
+    )
+)
 
 
-class FusionParser(BaseParser):
-    """Parses the BEL representation of gene and gene product fusions"""
+def get_fusion_language(identifier, permissive=True):
+    range_coordinate = Suppress('"') + range_coordinate_unquoted + Suppress('"')
 
-    def __init__(self, identifier_parser=None):
-        """
-        :param IdentifierParser identifier_parser: An identifier parser for checking the 3P and 5P partners
-        """
-        self.identifier_parser = identifier_parser if identifier_parser is not None else IdentifierParser()
-        identifier = self.identifier_parser.language
+    if permissive:  # permissive to wrong quoting
+        range_coordinate = range_coordinate | range_coordinate_unquoted
 
-        reference_seq = oneOf(['r', 'p', 'c'])
-        coordinate = pyparsing_common.integer | '?'
-        missing = Keyword('?')
-
-        range_coordinate = missing(FUSION_MISSING) | (
-            reference_seq(FUSION_REFERENCE) + Suppress('.') + coordinate(FUSION_START) + Suppress('_') + coordinate(
-                FUSION_STOP))
-
-        self.language = fusion_tags + nest(Group(identifier)(PARTNER_5P), Group(range_coordinate)(RANGE_5P),
-                                           Group(identifier)(PARTNER_3P), Group(range_coordinate)(RANGE_3P))
-
-        super(FusionParser, self).__init__(self.language)
+    return fusion_tags + nest(
+        Group(identifier)(PARTNER_5P),
+        Group(range_coordinate)(RANGE_5P),
+        Group(identifier)(PARTNER_3P),
+        Group(range_coordinate)(RANGE_3P),
+    )
 
 
-def build_legacy_fusion(identifier, reference):
+def get_legacy_fusion_langauge(identifier, reference):
     break_start = (ppc.integer | '?').setParseAction(fusion_break_handler_wrapper(reference, start=True))
     break_end = (ppc.integer | '?').setParseAction(fusion_break_handler_wrapper(reference, start=False))
 
-    res = identifier(PARTNER_5P) + WCW + fusion_tags + nest(identifier(PARTNER_3P) + Optional(
-        WCW + Group(break_start)(RANGE_5P) + WCW + Group(break_end)(RANGE_3P)))
+    res = (
+            identifier(PARTNER_5P) +
+            WCW +
+            fusion_tags +
+            nest(
+                identifier(PARTNER_3P) +
+                Optional(
+                    WCW +
+                    Group(break_start)(RANGE_5P)
+                    + WCW + Group(break_end)(RANGE_3P)
+                )
+            )
+    )
 
     res.setParseAction(fusion_legacy_handler)
 

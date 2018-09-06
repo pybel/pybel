@@ -4,17 +4,12 @@
 
 import unittest
 
-from six import string_types
+from six import StringIO, string_types
 
 from pybel import BELGraph
-from pybel.constants import (
-    CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, IDENTIFIER, PART_OF,
-    unqualified_edge_code,
-)
+from pybel.constants import CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED
 from pybel.dsl import hgvs, protein
 from pybel.testing.utils import n
-
-PART_OF_CODE = unqualified_edge_code[PART_OF]
 
 
 class TestGraphProperties(unittest.TestCase):
@@ -84,7 +79,7 @@ class TestStruct(unittest.TestCase):
 
     def test_add_simple(self):
         """Test that a simple node can be added, but not duplicated."""
-        graph = BELGraph()
+        graph = BELGraph(name='Test',version='0.0.0')
 
         namespace, name = n(), n()
 
@@ -93,6 +88,15 @@ class TestStruct(unittest.TestCase):
 
         graph.add_node_from_data(protein(namespace=namespace, name=name))
         self.assertEqual(1, graph.number_of_nodes())
+
+        sio = StringIO()
+        graph.summarize(file=sio)
+        test_str = """Test v0.0.0
+Number of Nodes: 1
+Number of Edges: 0
+Network Density: 0.00E+00
+Number of Components: 1"""
+        self.assertEqual(test_str.strip(), sio.getvalue().strip())
 
     def test_citation_type_error(self):
         """Test error handling on adding qualified edges."""
@@ -122,11 +126,10 @@ class TestGetGraphProperties(unittest.TestCase):
         self.graph.add_node_from_data(test_source)
         self.graph.add_node_from_data(test_target)
 
-        test_key = n()
         test_evidence = n()
         test_pmid = n()
 
-        self.graph.add_increases(
+        test_key = self.graph.add_increases(
             test_source,
             test_target,
             citation=test_pmid,
@@ -135,10 +138,9 @@ class TestGetGraphProperties(unittest.TestCase):
                 'Species': '9606',
                 'Confidence': 'Very High'
             },
-            key=test_key,
         )
 
-        citation = self.graph.get_edge_citation(test_source.as_tuple(), test_target.as_tuple(), test_key)
+        citation = self.graph.get_edge_citation(test_source, test_target, test_key)
 
         self.assertIsNotNone(citation)
         self.assertIsInstance(citation, dict)
@@ -147,13 +149,13 @@ class TestGetGraphProperties(unittest.TestCase):
         self.assertIn(CITATION_REFERENCE, citation)
         self.assertEqual(test_pmid, citation[CITATION_REFERENCE])
 
-        evidence = self.graph.get_edge_evidence(test_source.as_tuple(), test_target.as_tuple(), test_key)
+        evidence = self.graph.get_edge_evidence(test_source, test_target, test_key)
 
         self.assertIsNotNone(evidence)
         self.assertIsInstance(evidence, string_types)
         self.assertEqual(test_evidence, evidence)
 
-        annotations = self.graph.get_edge_annotations(test_source.as_tuple(), test_target.as_tuple(), test_key)
+        annotations = self.graph.get_edge_annotations(test_source, test_target, test_key)
         self.assertIsNotNone(annotations)
         self.assertIsInstance(annotations, dict)
         self.assertIn('Species', annotations)
@@ -168,32 +170,16 @@ class TestGetGraphProperties(unittest.TestCase):
         test_source = protein(namespace='TEST', name='YFG')
         test_target = protein(namespace='TEST', name='YFG2')
 
-        self.graph.add_part_of(test_source, test_target)
+        key = self.graph.add_part_of(test_source, test_target)
 
-        citation = self.graph.get_edge_citation(test_source.as_tuple(), test_target.as_tuple(), PART_OF_CODE)
+        citation = self.graph.get_edge_citation(test_source, test_target, key)
         self.assertIsNone(citation)
 
-        evidence = self.graph.get_edge_evidence(test_source.as_tuple(), test_target.as_tuple(), PART_OF_CODE)
+        evidence = self.graph.get_edge_evidence(test_source, test_target, key)
         self.assertIsNone(evidence)
 
-        annotations = self.graph.get_edge_annotations(test_source.as_tuple(), test_target.as_tuple(), PART_OF_CODE)
+        annotations = self.graph.get_edge_annotations(test_source, test_target, key)
         self.assertIsNone(annotations)
-
-    def test_get_node_name(self):
-        """Test looking up the node name from the graph."""
-        test_identifier = n()
-        node = protein(namespace='TEST', identifier=test_identifier)
-        node_tuple = self.graph.add_node_from_data(node)
-        self.assertIsNone(self.graph.get_node_name(node_tuple))
-        self.assertIsNotNone(self.graph.get_node_identifier(node_tuple))
-
-    def test_get_node_identifier(self):
-        """Test looking up the node identifier from the graph."""
-        test_name = n()
-        node = protein(namespace='TEST', name=test_name)
-        self.graph.add_node_from_data(node)
-        self.assertIsNotNone(self.graph.get_node_name(node.as_tuple()))
-        self.assertIsNone(self.graph.get_node_identifier(node.as_tuple()))
 
     def test_get_node_properties(self):
         """Test looking up node properties."""
@@ -203,14 +189,11 @@ class TestGetGraphProperties(unittest.TestCase):
         node = protein(namespace='TEST', name=test_name, identifier=test_identifier)
         self.graph.add_node_from_data(node)
 
-        self.assertEqual(test_name, self.graph.get_node_name(node.as_tuple()))
-        self.assertEqual(test_identifier, self.graph.get_node_identifier(node.as_tuple()))
-
-        self.assertIsNone(self.graph.get_node_description(node.as_tuple()))
+        self.assertIsNone(self.graph.get_node_description(node))
 
         test_description = n()
-        self.graph.set_node_description(node.as_tuple(), test_description)
-        self.assertEqual(test_description, self.graph.get_node_description(node.as_tuple()))
+        self.graph.set_node_description(node, test_description)
+        self.assertEqual(test_description, self.graph.get_node_description(node))
 
     def test_add_node_with_variant(self):
         """Test that the identifier is carried through to the child."""
@@ -222,6 +205,3 @@ class TestGetGraphProperties(unittest.TestCase):
         graph.add_node_from_data(node)
 
         self.assertEqual(2, graph.number_of_nodes())
-
-        self.assertIn(IDENTIFIER, graph.node[node.as_tuple()])
-        self.assertIn(IDENTIFIER, graph.node[parent.as_tuple()])

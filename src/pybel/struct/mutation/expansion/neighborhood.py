@@ -30,14 +30,10 @@ def expand_node_predecessors(universe, graph, node):
             skip_successors.add(successor)
             continue
 
-        graph.add_node(successor, universe.node[successor])
+        graph.add_node(successor, **universe.node[successor])
 
     graph.add_edges_from(
-        (
-            (source, successor, key, data)
-            if key < 0 else
-            (source, successor, data)
-        )
+        (source, successor, key, data)
         for source, successor, key, data in universe.out_edges(node, data=True, keys=True)
         if successor not in skip_successors
     )
@@ -61,14 +57,10 @@ def expand_node_successors(universe, graph, node):
             skip_predecessors.add(predecessor)
             continue
 
-        graph.add_node(predecessor, universe.node[predecessor])
+        graph.add_node(predecessor, **universe.node[predecessor])
 
     graph.add_edges_from(
-        (
-            (predecessor, target, key, data)
-            if key < 0 else
-            (predecessor, target, data)
-        )
+        (predecessor, target, key, data)
         for predecessor, target, key, data in universe.in_edges(node, data=True, keys=True)
         if predecessor not in skip_predecessors
     )

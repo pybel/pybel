@@ -71,7 +71,7 @@ twice to become active. This results in the following:
 .. seealso::
 
    - BEL 2.0 specification on `protein modifications <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_proteinmodification_pmod>`_
-   - PyBEL module :py:class:`pybel.parser.modifiers.ProteinModificationParser`
+   - PyBEL module :py:class:`pybel.parser.modifiers.get_protein_modification_language`
 """
 
 import logging
@@ -79,56 +79,56 @@ import logging
 from pyparsing import Group, MatchFirst, Optional, oneOf, pyparsing_common as ppc
 
 from .constants import amino_acid
-from ..baseparser import BaseParser
-from ..parse_identifier import IdentifierParser
 from ..utils import WCW, nest, one_of_tags
-from ... import language
-from ...constants import (
-    BEL_DEFAULT_NAMESPACE, IDENTIFIER, KIND, NAMESPACE, PMOD, PMOD_CODE, PMOD_POSITION,
-)
+from ...constants import BEL_DEFAULT_NAMESPACE, IDENTIFIER, KIND, NAME, NAMESPACE, PMOD, PMOD_CODE, PMOD_POSITION
+from ...language import pmod_legacy_labels, pmod_namespace
 
 __all__ = [
-    'pmod_tag',
-    'ProteinModificationParser',
-    'amino_acid',
+    'get_protein_modification_language',
 ]
 
 log = logging.getLogger(__name__)
 
+
+def _handle_pmod_default_ns(line, position, tokens):
+    tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
+    tokens['name'] = pmod_namespace[tokens[0]]
+    return tokens
+
+
+def _handle_pmod_legacy_ns(line, position, tokens):
+    upgraded = pmod_legacy_labels[tokens[0]]
+    log.log(5, 'legacy pmod() value %s upgraded to %s', line, upgraded)
+    tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
+    tokens[NAME] = upgraded
+    return tokens
+
+
 pmod_tag = one_of_tags(tags=['pmod', 'proteinModification'], canonical_tag=PMOD, name=KIND)
+pmod_default_ns = oneOf(list(pmod_namespace)).setParseAction(_handle_pmod_default_ns)
+pmod_legacy_ns = oneOf(list(pmod_legacy_labels)).setParseAction(_handle_pmod_legacy_ns)
 
 
-class ProteinModificationParser(BaseParser):
-    def __init__(self, identifier_parser=None):
-        """
-        :param IdentifierParser identifier_parser: An identifier parser for checking the 3P and 5P partners
-        """
-        self.identifier_parser = identifier_parser if identifier_parser is not None else IdentifierParser()
+def get_protein_modification_language(identifier_qualified):
+    """
 
-        pmod_default_ns = oneOf(list(language.pmod_namespace.keys())).setParseAction(self.handle_pmod_default_ns)
-        pmod_legacy_ns = oneOf(list(language.pmod_legacy_labels.keys())).setParseAction(self.handle_pmod_legacy_ns)
+    :param pyparsing.ParseElement identifier_qualified:
+    :rtype: pyparsing.ParseElement
+    """
+    pmod_identifier = MatchFirst([
+        identifier_qualified,
+        pmod_default_ns,
+        pmod_legacy_ns
+    ])
 
-        pmod_identifier = MatchFirst([
-            Group(self.identifier_parser.identifier_qualified),
-            Group(pmod_default_ns),
-            Group(pmod_legacy_ns)
-        ])
-
-        self.language = pmod_tag + nest(pmod_identifier(IDENTIFIER) + Optional(
-            WCW + amino_acid(PMOD_CODE) + Optional(WCW + ppc.integer(PMOD_POSITION))))
-
-        super(ProteinModificationParser, self).__init__(self.language)
-
-    @staticmethod
-    def handle_pmod_default_ns(line, position, tokens):
-        tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
-        tokens['name'] = language.pmod_namespace[tokens[0]]
-        return tokens
-
-    @staticmethod
-    def handle_pmod_legacy_ns(line, position, tokens):
-        upgraded = language.pmod_legacy_labels[tokens[0]]
-        log.log(5, 'legacy pmod() value %s upgraded to %s', line, upgraded)
-        tokens['namespace'] = BEL_DEFAULT_NAMESPACE
-        tokens['name'] = upgraded
-        return tokens
+    return pmod_tag + nest(
+        Group(pmod_identifier)(IDENTIFIER) +
+        Optional(
+            WCW +
+            amino_acid(PMOD_CODE) +
+            Optional(
+                WCW +
+                ppc.integer(PMOD_POSITION)
+            )
+        )
+    )

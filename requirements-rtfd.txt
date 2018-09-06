@@ -1,6 +1,6 @@
 # This requirements file does not contain the extras
 
-networkx==1.11
+networkx>=2.1
 sqlalchemy
 click
 click-plugins

@@ -2,7 +2,7 @@
 
 """An example describing statins."""
 
-from ..dsl.nodes import abundance, protein
+from ..dsl import abundance, protein
 from ..struct.graph import BELGraph
 
 __all__ = [
@@ -11,7 +11,7 @@ __all__ = [
 
 statin_graph = BELGraph(
     name='Statin Graph',
-    version='1.0.0',
+    version='1.0.1',
     description="The effects of statins from ChEBI",
     authors='Charles Tapley Hoyt',
     contact='charles.hoyt@scai.fraunhofer.de',
@@ -33,7 +33,7 @@ synthetic_statin = abundance(namespace='CHEBI', name='statin (synthetic)', ident
 statin = abundance(namespace='CHEBI', name='statin', identifier='87631')
 mevinolinic_acid = abundance(namespace='CHEBI', name='mevinolinic acid', identifier='82985')
 hmgcr_inhibitor = abundance(namespace='CHEBI', identifier='35664',
-                            name='EC 1.1.1.34/EC 1.1.1.88 (hydroxymethylglutaryl-CoA reductase) inhibitor ')
+                            name='EC 1.1.1.34/EC 1.1.1.88 (hydroxymethylglutaryl-CoA reductase) inhibitor')
 ec_11134 = protein(namespace='EC', name='1.1.1.34')
 ec_11188 = protein(namespace='EC', name='1.1.1.88')
 

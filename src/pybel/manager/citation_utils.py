@@ -71,7 +71,7 @@ def sanitize_date(publication_date):
 
 
 def grouper(n, iterable, fillvalue=None):
-    """Groups iterables into tuples.
+    """Group iterables into tuples.
 
     grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx
     """
@@ -80,7 +80,7 @@ def grouper(n, iterable, fillvalue=None):
 
 
 def clean_pubmed_identifiers(pmids):
-    """Cleans a list of PubMed identifiers with string strips, deduplicates, and sorting.
+    """Clean a list of PubMed identifiers with string strips, deduplicates, and sorting.
 
     :param iter[str] pmids: An iterable of PubMed identifiers
     :return:
@@ -142,7 +142,7 @@ def enrich_citation_model(manager, citation, p):
 
 
 def get_citations_by_pmids(manager, pmids, group_size=None, sleep_time=None):
-    """Get citation information for the given list of PubMed identifiers using the NCBI's eutils service.
+    """Get citation information for the given list of PubMed identifiers using the NCBI's eUtils service.
 
     :type manager: pybel.Manager
     :param pmids: an iterable of PubMed identifiers
@@ -232,13 +232,13 @@ def enrich_pubmed_citations(manager, graph, group_size=None, sleep_time=None):
     pmid_data, errors = get_citations_by_pmids(manager, pmids=pmids, group_size=group_size, sleep_time=sleep_time)
 
     for u, v, k in filter_edges(graph, has_pubmed):
-        pmid = graph.edge[u][v][k][CITATION][CITATION_REFERENCE].strip()
+        pmid = graph[u][v][k][CITATION][CITATION_REFERENCE].strip()
 
         if pmid not in pmid_data:
             log.warning('Missing data for PubMed identifier: %s', pmid)
             errors.add(pmid)
             continue
 
-        graph.edge[u][v][k][CITATION].update(pmid_data[pmid])
+        graph[u][v][k][CITATION].update(pmid_data[pmid])
 
     return errors

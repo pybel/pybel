@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
-Edge Filters
-------------
+"""Filter functions for edges in BEL graphs.
 
 A edge predicate is a function that takes five arguments: a :class:`BELGraph`, a source node tuple, a target node
 tuple, a key, and a data dictionary. It returns a boolean representing whether the edge passed the given test.
@@ -29,23 +27,23 @@ def invert_edge_predicate(edge_predicate):
     """Build an edge predicate that is the inverse of the given edge predicate.
 
     :param edge_predicate: An edge predicate
-    :type edge_predicate: (pybel.BELGraph, tuple, tuple, int) -> bool
-    :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
+    :type edge_predicate: (pybel.BELGraph, BaseEntity, BaseEntity, str) -> bool
+    :rtype: (pybel.BELGraph, BaseEntity, BaseEntity, str) -> bool
     """
 
-    def inverse_filter(graph, u, v, k):
+    def _inverse_filter(graph, u, v, k):
         return not edge_predicate(graph, u, v, k)
 
-    return inverse_filter
+    return _inverse_filter
 
 
 def and_edge_predicates(edge_predicates=None):
     """Concatenate multiple edge predicates to a new predicate that requires all predicates to be met.
 
     :param edge_predicates: a list of predicates (graph, node, node, key, data) -> bool
-    :type edge_predicates: Optional[(pybel.BELGraph, tuple, tuple, int) -> bool or iter[(pybel.BELGraph, tuple, tuple, int) -> bool]]
+    :type edge_predicates: Optional[(pybel.BELGraph, BaseEntity, BaseEntity, str) -> bool or iter[(pybel.BELGraph, BaseEntity, BaseEntity, str) -> bool]]
     :return: A combine filter
-    :rtype: (pybel.BELGraph, tuple, tuple, int) -> bool
+    :rtype: (pybel.BELGraph, BaseEntity, BaseEntity, str) -> bool
     """
 
     # If no filters are given, then return the trivially permissive filter
@@ -66,9 +64,9 @@ def and_edge_predicates(edge_predicates=None):
         """Pass only for an edge that pass all enclosed predicates.
 
         :param BELGraph graph: A BEL Graph
-        :param tuple u: A BEL node
-        :param tuple v: A BEL node
-        :param int k: The edge key between the given nodes
+        :param BaseEntity u: A BEL node
+        :param BaseEntity v: A BEL node
+        :param str k: The edge key between the given nodes
         :return: If the edge passes all enclosed predicates
         :rtype: bool
         """
@@ -85,9 +83,9 @@ def filter_edges(graph, edge_predicates=None):
 
     :param BELGraph graph: A BEL graph
     :param edge_predicates: A predicate or list of predicates
-    :type edge_predicates: None or ((pybel.BELGraph, tuple, tuple, int) -> bool) or iter[(pybel.BELGraph, tuple, tuple, int) -> bool]
+    :type edge_predicates: None or ((pybel.BELGraph, BaseEntity, BaseEntity, str) -> bool) or iter[(pybel.BELGraph, BaseEntity, BaseEntity, str) -> bool]
     :return: An iterable of edges that pass all predicates
-    :rtype: iter[tuple,tuple,int]
+    :rtype: iter[BaseEntity, BaseEntity, str]
     """
 
     # If no predicates are given, return the standard edge iterator
@@ -106,7 +104,7 @@ def count_passed_edge_filter(graph, edge_predicates=None):
 
     :param pybel.BELGraph graph: A BEL graph
     :param edge_predicates: A predicate or list of predicates
-    :type edge_predicates: Optional[(pybel.BELGraph, tuple, tuple, int) -> bool or iter[(pybel.BELGraph, tuple, tuple, int) -> bool]]
+    :type edge_predicates: Optional[(pybel.BELGraph, BaseEntity, BaseEntity, str) -> bool or iter[(pybel.BELGraph, BaseEntity, BaseEntity, str) -> bool]]
     :return: The number of edges passing a given set of predicates
     :rtype: int
     """

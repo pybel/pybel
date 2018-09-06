@@ -76,16 +76,16 @@ class TestSeeding(TemporaryCacheClsMixin):
 
     def test_seed_by_induction_raise_length_one(self):
         """Test that seeding by induction fails when a list of length one is given."""
-        shp2_model = self.manager.get_node_by_dict(shp2)
+        shp2_model = self.manager.get_node_by_dsl(shp2)
 
         with self.assertRaises(ValueError):
             self.manager.query_induction([shp2_model])
 
     def test_seed_by_induction(self):
         """Test seeding by inducing over a list of nodes."""
-        shp2_model = self.manager.get_node_by_dict(shp2)
-        syk_model = self.manager.get_node_by_dict(syk)
-        trem2_model = self.manager.get_node_by_dict(trem2)
+        shp2_model = self.manager.get_node_by_dsl(shp2)
+        syk_model = self.manager.get_node_by_dsl(syk)
+        trem2_model = self.manager.get_node_by_dsl(trem2)
 
         edges = self.manager.query_induction([shp2_model, syk_model, trem2_model])
         self.assertEqual(2, len(edges))
@@ -94,15 +94,15 @@ class TestSeeding(TemporaryCacheClsMixin):
 
         self.assertEqual(3, graph.number_of_nodes(), msg='Nodes: {}'.format(graph.nodes()))
 
-        self.assertTrue(graph.has_node_with_data(trem2))
-        self.assertTrue(graph.has_node_with_data(syk))
-        self.assertTrue(graph.has_node_with_data(shp2))
+        self.assertIn(trem2, graph)
+        self.assertIn(syk, graph)
+        self.assertIn(shp2, graph)
 
         self.assertEqual(2, graph.number_of_edges())
 
     def test_seed_by_neighbors(self):
         """Test seeding a graph by neighbors of a list of nodes."""
-        node = self.manager.get_node_by_dict(shp2)
+        node = self.manager.get_node_by_dsl(shp2)
         edges = self.manager.query_neighbors([node])
         self.assertEqual(2, len(edges))
 
@@ -110,9 +110,9 @@ class TestSeeding(TemporaryCacheClsMixin):
 
         self.assertEqual(4, graph.number_of_nodes(), msg='Nodes: {}'.format(graph.nodes()))
 
-        self.assertTrue(graph.has_node_with_data(cd33_phosphorylated))
-        self.assertTrue(graph.has_node_with_data(cd33))
-        self.assertTrue(graph.has_node_with_data(syk))
-        self.assertTrue(graph.has_node_with_data(shp2))
+        self.assertIn(cd33_phosphorylated, graph)
+        self.assertIn(cd33, graph)
+        self.assertIn(syk,graph)
+        self.assertIn(shp2, graph)
 
         self.assertEqual(3, graph.number_of_edges())

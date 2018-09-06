@@ -19,7 +19,8 @@ __all__ = [
 log = logging.getLogger(__name__)
 
 
-def from_lines(lines, manager=None, allow_nested=False, citation_clearing=True, use_tqdm=False, **kwargs):
+def from_lines(lines, manager=None, allow_nested=False, citation_clearing=True, use_tqdm=False,
+               disallow_unqualified_translocations=False, **kwargs):
     """Load a BEL graph from an iterable over the lines of a BEL script.
 
     :param iter[str] lines: An iterable of strings (the lines in a BEL script)
@@ -28,8 +29,10 @@ def from_lines(lines, manager=None, allow_nested=False, citation_clearing=True, 
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                 Delegated to :class:`pybel.parser.ControlParser`
     :param bool use_tqdm: If true, use tqdm for logging
-    :param dict kwargs: keyword arguments to :func:`pybel.io.line_utils.parse_lines`
+    :param bool disallow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
     :rtype: BELGraph
+
+    The remaining keyword arguments to :func:`pybel.io.line_utils.parse_lines`.
     """
     graph = BELGraph()
     parse_lines(
@@ -39,13 +42,14 @@ def from_lines(lines, manager=None, allow_nested=False, citation_clearing=True, 
         allow_nested=allow_nested,
         citation_clearing=citation_clearing,
         use_tqdm=use_tqdm,
+        disallow_unqualified_translocations=disallow_unqualified_translocations,
         **kwargs
     )
     return graph
 
 
 def from_path(path, manager=None, allow_nested=False, citation_clearing=True, encoding='utf-8', use_tqdm=False,
-              **kwargs):
+              disallow_unqualified_translocations=False, **kwargs):
     """Load a BEL graph from a file resource. This function is a thin wrapper around :func:`from_lines`.
 
     :param str path: A file path
@@ -58,8 +62,10 @@ def from_path(path, manager=None, allow_nested=False, citation_clearing=True, en
                      list of standard encodings. For example, files starting with a UTF-8 BOM should use
                      :code:`utf_8_sig`
     :param bool use_tqdm: If true, use tqdm for logging
-    :param dict kwargs: keyword arguments to :func:`pybel.io.line_utils.parse_lines`
+    :param bool disallow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
     :rtype: BELGraph
+
+    The remaining keyword arguments to :func:`pybel.io.line_utils.parse_lines`.
     """
     log.info('Loading from path: %s', path)
     with codecs.open(os.path.expanduser(path), encoding=encoding) as file:
@@ -69,6 +75,7 @@ def from_path(path, manager=None, allow_nested=False, citation_clearing=True, en
             allow_nested=allow_nested,
             citation_clearing=citation_clearing,
             use_tqdm=use_tqdm,
+            disallow_unqualified_translocations=disallow_unqualified_translocations,
             **kwargs
         )
 

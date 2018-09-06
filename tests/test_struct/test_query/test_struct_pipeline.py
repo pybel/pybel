@@ -114,7 +114,7 @@ class TestPipeline(TestEgfExample):
         pipeline = Pipeline.from_functions([
             'infer_central_dogma',
         ])
-        result = pipeline(self.graph, in_place=False)
+        result = pipeline(self.graph)
 
         self.assertEqual(32, result.number_of_nodes())
 
@@ -127,7 +127,7 @@ class TestPipeline(TestEgfExample):
         pipeline = Pipeline.from_functions([
             enrich_protein_and_rna_origins,
         ])
-        result = pipeline(self.graph, in_place=False)
+        result = pipeline(self.graph)
 
         self.assertEqual(32, result.number_of_nodes())
 
@@ -144,7 +144,7 @@ class TestDeprecation(unittest.TestCase):
 
         @transformation
         def test_function_1():
-            pass
+            """Test doing nothing."""
 
         self.assertNotIn('test_function_1', deprecated)
         self.assertIn('test_function_1', mapped)
@@ -155,7 +155,7 @@ class TestDeprecation(unittest.TestCase):
             @register_deprecated('test_function_1')
             @transformation
             def test_function_1_new():
-                pass
+                """Test bad uage of register_deprecated."""
 
         self.assertNotIn('test_function_1', deprecated)
 
@@ -165,7 +165,7 @@ class TestDeprecation(unittest.TestCase):
         @register_deprecated('test_function_2_old')
         @transformation
         def test_function_2():
-            pass
+            """Test usage of register_deprecated."""
 
         self.assertNotIn('test_function_2', deprecated)
         self.assertIn('test_function_2', mapped)
@@ -184,7 +184,7 @@ class TestDeprecation(unittest.TestCase):
         with self.assertRaises(MissingPipelineFunctionError):
             @register_deprecated('test_function_3_old')
             def test_function_3():
-                pass
+                """Test bad usage of register_deprecated that throws a MissingPipelineFunctionError."""
 
         self.assertNotIn('test_function_3', mapped)
         self.assertNotIn('test_function_3', universe_map)

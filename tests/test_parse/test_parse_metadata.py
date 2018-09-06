@@ -106,7 +106,7 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
 
     @unittest.skipUnless('PYBEL_BASE' in os.environ, "Need local files to test local files")
     def test_squiggly_filepath(self):
-        line = 'DEFINE NAMESPACE {} AS URL "~/dev/pybel/tests/belns/hgnc-human-genes.belns"'.format(HGNC_KEYWORD)
+        line = 'DEFINE NAMESPACE {} AS URL "~/dev/pybel/src/pybel/testing/resources/belns/hgnc-human-genes.belns"'.format(HGNC_KEYWORD)
         self.parser.parseString(line)
         help_check_hgnc(self, self.parser.namespace_dict)
 
