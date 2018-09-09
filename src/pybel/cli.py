@@ -116,7 +116,7 @@ def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified
         allow_definition_failures=True,
     )
     to_pickle(graph, get_corresponding_pickle_path(path))
-    graph.describe()
+    graph.summarize()
 
     sys.exit(0 if 0 == len(graph.warnings) else 1)
 
@@ -125,7 +125,7 @@ def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified
 @graph_pickle_argument
 def summarize(graph):
     """Summarize a graph."""
-    graph.describe()
+    graph.summarize()
 
 
 @main.command()
