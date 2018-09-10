@@ -85,31 +85,31 @@ def split_file_to_annotations_and_definitions(file):
     :rtype: tuple[iter[str],iter[str],iter[str]]
     """
     line_number_line_pairs = iter(sanitize_file_lines(file))
-    last_value = None
+
+    last_value = {0: (None, None)}  # just do this because python2 doesn't allow nonlocal variables
 
     def document_metadata():
         """Iterate over the document metadata lines."""
-        nonlocal last_value
         for i, line in line_number_line_pairs:
             if not line.startswith('SET DOCUMENT'):
-                last_value = i, line
+                last_value[0] = i, line
                 return
             yield i, line
 
     def definitions():
         """Iterate over the resource definition lines."""
-        nonlocal last_value
-        yield last_value
+        yield last_value[0]
         for i, line in line_number_line_pairs:
             if not METADATA_LINE_RE.match(line):
-                last_value = i, line
+                last_value[0] = i, line
                 return
             yield i, line
 
     def statements():
         """Iterate over the statement lines."""
-        yield last_value
-        yield from line_number_line_pairs
+        yield last_value[0]
+        for line_number_line_pari in line_number_line_pairs:
+            yield line_number_line_pari
 
     return document_metadata(), definitions(), statements()
 
