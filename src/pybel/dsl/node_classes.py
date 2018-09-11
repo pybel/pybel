@@ -59,6 +59,7 @@ __all__ = [
     'BaseEntity',
     'BaseAbundance',
     'CentralDogma',
+    'ListAbundance',
     'Variant',
     'FusionBase',
     'FusionRangeBase',
