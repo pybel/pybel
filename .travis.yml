@@ -35,6 +35,7 @@ jobs:
     - env: TOXENV=pylint
     - env: TOXENV=xenon
     - env: TOXENV=vulture
+    - env: TOXENV=pyroma
 
     # docs stage
     - stage: docs
@@ -48,6 +49,7 @@ matrix:
       - env: TOXENV=pylint
       - env: TOXENV=xenon
       - env: TOXENV=vulture
+      - env: TOXENV=pyroma
 
 install:
     - sh -c 'if [ "$TOXENV" = "py" ]; then pip install tox codecov; else pip install tox; fi'
