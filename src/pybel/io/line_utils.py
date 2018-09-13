@@ -104,16 +104,16 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
     log.info('Network has %d nodes and %d edges', graph.number_of_nodes(), graph.number_of_edges())
 
 
-def parse_document(graph, document_metadata, metadata_parser):
+def parse_document(graph, lines, metadata_parser):
     """Parse the lines in the document section of a BEL script.
 
     :param BELGraph graph: A BEL graph
-    :param iter[str] document_metadata: An enumerated iterable over the lines in the document section of a BEL script
+    :param iter[tuple[int, str]] lines: An enumerated iterable over the lines in the document section of a BEL script
     :param MetadataParser metadata_parser: A metadata parser
     """
     parse_document_start_time = time.time()
 
-    for line_number, line in document_metadata:
+    for line_number, line in lines:
         try:
             metadata_parser.parseString(line, line_number=line_number)
         except VersionFormatWarning as e:
@@ -132,16 +132,16 @@ def parse_document(graph, document_metadata, metadata_parser):
         graph.warnings.insert(0, (0, '', MissingMetadataException(required_metadatum_key), {}))
         log.error('Missing required document metadata: %s', required_metadatum_key)
 
-    graph.graph[GRAPH_METADATA] = metadata_parser.document_metadata
+    graph.document.update(metadata_parser.document_metadata)
 
     log.info('Finished parsing document section in %.02f seconds', time.time() - parse_document_start_time)
 
 
-def parse_definitions(graph, definitions, metadata_parser, allow_failures=False, use_tqdm=False):
+def parse_definitions(graph, lines, metadata_parser, allow_failures=False, use_tqdm=False):
     """Parse the lines in the definitions section of a BEL script.
 
     :param pybel.BELGraph graph: A BEL graph
-    :param list[str] definitions: An enumerated iterable over the lines in the definitions section of a BEL script
+    :param iter[tuple[int,str]] lines: An enumerated iterable over the lines in the definitions section of a BEL script
     :param MetadataParser metadata_parser: A metadata parser
     :param bool allow_failures: If true, allows parser to continue past strange failures
     :param bool use_tqdm: Use :mod:`tqdm` to show a progress bar?
@@ -152,16 +152,16 @@ def parse_definitions(graph, definitions, metadata_parser, allow_failures=False,
     parse_definitions_start_time = time.time()
 
     if use_tqdm:
-        definitions = tqdm(definitions, total=len(definitions), desc='Definitions')
+        lines = tqdm(list(lines), desc='Definitions')
 
-    for line_number, line in definitions:
+    for line_number, line in lines:
         try:
             metadata_parser.parseString(line, line_number=line_number)
         except InconsistentDefinitionError as e:
             parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
             raise e
         except ResourceError as e:
-            parse_log.warning("Line %07d - Can't use resouce - %s", line_number, line)
+            parse_log.warning("Line %07d - Can't use resource - %s", line_number, line)
             raise e
         except OperationalError as e:
             parse_log.warning('Need to upgrade database. See '
@@ -186,20 +186,20 @@ def parse_definitions(graph, definitions, metadata_parser, allow_failures=False,
     log.info('Finished parsing definitions section in %.02f seconds', time.time() - parse_definitions_start_time)
 
 
-def parse_statements(graph, statements, bel_parser, use_tqdm=False):
+def parse_statements(graph, lines, bel_parser, use_tqdm=False):
     """Parse a list of statements from a BEL Script.
 
     :param BELGraph graph: A BEL graph
-    :param iter[str] statements: An enumerated iterable over the lines in the statements section of a BEL script
+    :param iter[tuple[int,str]] lines: An enumerated iterable over the lines in the statements section of a BEL script
     :param BELParser bel_parser: A BEL parser
-    :param bool use_tqdm: Use :mod:`tqdm` to show a progress bar?
+    :param bool use_tqdm: Use :mod:`tqdm` to show a progress bar? Requires reading whole file to memory.
     """
     parse_statements_start_time = time.time()
 
     if use_tqdm:
-        statements = tqdm(statements, desc='Statements', total=len(statements))
+        lines = tqdm(list(lines), desc='Statements')
 
-    for line_number, line in statements:
+    for line_number, line in lines:
         try:
             bel_parser.parseString(line, line_number=line_number)
         except ParseException as e:

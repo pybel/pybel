@@ -24,11 +24,12 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 
 class TestSplitLines(unittest.TestCase):
     def test_parts(self):
-        with open(test_bel_simple) as f:
-            docs, definitions, statements = split_file_to_annotations_and_definitions(f)
-        self.assertEqual(8, len(docs))
-        self.assertEqual(4, len(definitions))
-        self.assertEqual(14, len(statements))
+        with open(test_bel_simple) as lines:
+            docs, definitions, statements = split_file_to_annotations_and_definitions(lines)
+
+            self.assertEqual(8, len(list(docs)))
+            self.assertEqual(4, len(list(definitions)))
+            self.assertEqual(14, len(list(statements)))
 
 
 class TestParseMetadata(FleetingTemporaryCacheMixin):

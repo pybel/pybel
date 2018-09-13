@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Functions for inducing up/downstream causal subgraphs."""
+
 import logging
 
 from .utils import get_subgraph_by_edge_filter
@@ -18,9 +20,8 @@ log = logging.getLogger(__name__)
 def get_upstream_causal_subgraph(graph, nbunch):
     """Induce a sub-graph from all of the upstream causal entities of the nodes in the nbunch.
 
-    :param pybel.BELGraph graph: A BEL graph
-    :param nbunch: A BEL node or iterable of BEL nodes
-    :type nbunch: tuple or iter[tuple]
+    :type graph: pybel.BELGraph
+    :type nbunch: BaseEntity or iter[BaseEntity]
     :rtype: pybel.BELGraph
     """
     return get_subgraph_by_edge_filter(graph, build_upstream_edge_predicate(nbunch))
@@ -30,9 +31,8 @@ def get_upstream_causal_subgraph(graph, nbunch):
 def get_downstream_causal_subgraph(graph, nbunch):
     """Induce a sub-graph from all of the downstream causal entities of the nodes in the nbunch.
 
-    :param pybel.BELGraph graph: A BEL graph
-    :param nbunch: A BEL node or iterable of BEL nodes
-    :type nbunch: tuple or iter[tuple]
+    :type graph: pybel.BELGraph
+    :type nbunch: BaseEntity or iter[BaseEntity]
     :rtype: pybel.BELGraph
     """
     return get_subgraph_by_edge_filter(graph, build_downstream_edge_predicate(nbunch))

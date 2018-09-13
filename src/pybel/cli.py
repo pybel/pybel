@@ -16,9 +16,9 @@ Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
 import logging
 import os
 import sys
+import time
 
 import click
-import time
 from click_plugins import with_plugins
 from pkg_resources import iter_entry_points
 
@@ -30,6 +30,7 @@ from .io.web import _get_host
 from .manager import Manager
 from .manager.database_io import to_database
 from .manager.models import Edge, Namespace
+from .struct import get_unused_annotations, get_unused_namespaces
 from .utils import get_corresponding_pickle_path
 
 log = logging.getLogger(__name__)
@@ -93,20 +94,24 @@ def main(ctx, connection):
 @click.option('--no-identifier-validation', is_flag=True, help='Turn off identifier validation')
 @click.option('--no-citation-clearing', is_flag=True, help='Turn off citation clearing')
 @click.option('-r', '--required-annotations', multiple=True, help='Specify multiple required annotations')
+@click.option('--skip-tqdm', is_flag=True)
 @click.option('-v', '--verbose', is_flag=True)
 @click.pass_obj
 def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified_translocations,
-            no_identifier_validation, no_citation_clearing, required_annotations, verbose):
+            no_identifier_validation, no_citation_clearing, required_annotations, skip_tqdm, verbose):
     """Compile a BEL script to a graph."""
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
         log.setLevel(logging.DEBUG)
         log.debug('using connection: %s', manager.engine.url)
 
+    click.secho('Compilation', fg='red', bold=True)
+    if skip_tqdm:
+        click.echo('```')
     graph = from_path(
         path,
         manager=manager,
-        use_tqdm=(not verbose),
+        use_tqdm=(not (skip_tqdm or verbose)),
         allow_nested=allow_nested,
         allow_naked_names=allow_naked_names,
         disallow_unqualified_translocations=disallow_unqualified_translocations,
@@ -115,8 +120,12 @@ def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified
         no_identifier_validation=no_identifier_validation,
         allow_definition_failures=True,
     )
+    if skip_tqdm:
+        click.echo('```')
     to_pickle(graph, get_corresponding_pickle_path(path))
-    graph.describe()
+
+    click.echo('')
+    _print_summary(graph, ticks=skip_tqdm)
 
     sys.exit(0 if 0 == len(graph.warnings) else 1)
 
@@ -125,7 +134,29 @@ def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified
 @graph_pickle_argument
 def summarize(graph):
     """Summarize a graph."""
-    graph.describe()
+    _print_summary(graph)
+
+
+def _print_summary(graph, ticks=False):
+    if not ticks:
+        click.secho('Summary', fg='red', bold=True)
+        graph.summarize()
+
+    click.secho('\nUnused Namespaces', fg='red', bold=True)
+    if ticks:
+        click.echo('```')
+    for namespace in sorted(get_unused_namespaces(graph)):
+        click.echo(namespace)
+    if ticks:
+        click.echo('```')
+
+    click.secho('\nUnused Annotations', fg='red', bold=True)
+    if ticks:
+        click.echo('```')
+    for annotation in sorted(get_unused_annotations(graph)):
+        click.echo(annotation)
+    if ticks:
+        click.echo('```')
 
 
 @main.command()

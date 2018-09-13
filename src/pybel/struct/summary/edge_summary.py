@@ -13,6 +13,9 @@ __all__ = [
     'get_annotation_values_by_annotation',
     'get_annotation_values',
     'count_relations',
+    'get_annotations',
+    'count_annotations',
+    'get_unused_annotations',
 ]
 
 
@@ -89,4 +92,48 @@ def count_relations(graph):
     return Counter(
         data[RELATION]
         for _, _, data in graph.edges(data=True)
+    )
+
+
+def get_unused_annotations(graph):
+    """Get the set of all annotations that are defined in a graph, but are never used.
+
+    :param pybel.BELGraph graph: A BEL graph
+    :return: A set of annotations
+    :rtype: set[str]
+    """
+    return graph.defined_annotation_keywords - get_annotations(graph)
+
+
+def get_annotations(graph):
+    """Get the set of annotations used in the graph.
+
+    :param pybel.BELGraph graph: A BEL graph
+    :return: A set of annotation keys
+    :rtype: set[str]
+    """
+    return set(_annotation_iter_helper(graph))
+
+
+def count_annotations(graph):
+    """Count how many times each annotation is used in the graph.
+
+    :param pybel.BELGraph graph: A BEL graph
+    :return: A Counter from {annotation key: frequency}
+    :rtype: collections.Counter
+    """
+    return Counter(_annotation_iter_helper(graph))
+
+
+def _annotation_iter_helper(graph):
+    """Iterate over the annotation keys.
+
+    :type graph: pybel.BELGraph
+    :rtype: iter[str]
+    """
+    return (
+        key
+        for _, _, data in graph.edges(data=True)
+        if ANNOTATIONS in data
+        for key in data[ANNOTATIONS]
     )

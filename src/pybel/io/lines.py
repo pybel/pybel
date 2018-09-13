@@ -63,7 +63,7 @@ def from_path(path, manager=None, allow_nested=False, citation_clearing=True, en
                      :code:`utf_8_sig`
     :param bool use_tqdm: If true, use tqdm for logging
     :param bool disallow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
-    :rtype: BELGraph
+    :rtype: pybel.BELGraph
 
     The remaining keyword arguments to :func:`pybel.io.line_utils.parse_lines`.
     """

@@ -2,14 +2,15 @@
 
 """Test summary functions for edges."""
 
-from collections import Counter
 import unittest
+from collections import Counter
 
 from pybel import BELGraph
 from pybel.dsl import protein
 from pybel.examples import sialic_acid_graph
 from pybel.struct.summary.edge_summary import (
-    get_annotation_values, get_annotation_values_by_annotation, iter_annotation_value_pairs, iter_annotation_values,
+    count_annotations, get_annotation_values, get_annotation_values_by_annotation, get_annotations,
+    get_unused_annotations, iter_annotation_value_pairs, iter_annotation_values,
 )
 from pybel.testing.utils import n
 
@@ -78,8 +79,30 @@ class TestEdgeSummary(unittest.TestCase):
             'Confidence': {'High', 'Low'},
             'Species': {'9606'}
         }
+
+        self.assertEqual({'Confidence', 'Species'}, get_annotations(sialic_acid_graph))
+        self.assertEqual({'Confidence': 8, 'Species': 8}, dict(count_annotations(sialic_acid_graph)))
+
         annotation_values_by_annotation = get_annotation_values_by_annotation(sialic_acid_graph)
         self.assertEqual(expected, annotation_values_by_annotation)
 
         annotation_values = get_annotation_values(sialic_acid_graph, 'Confidence')
         self.assertEqual(expected['Confidence'], annotation_values)
+
+    def test_get_unused_annotation_url(self):
+        graph = BELGraph()
+        name = n()
+        graph.annotation_url[name] = n()
+        self.assertEqual({name}, get_unused_annotations(graph))
+
+    def test_get_unused_annotation_pattern(self):
+        graph = BELGraph()
+        name = n()
+        graph.annotation_pattern[name] = n()
+        self.assertEqual({name}, get_unused_annotations(graph))
+
+    def test_get_unused_annotation_list(self):
+        graph = BELGraph()
+        name = n()
+        graph.annotation_pattern[name] = {n(), n(), n()}
+        self.assertEqual({name}, get_unused_annotations(graph))

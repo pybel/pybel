@@ -5,7 +5,6 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import itertools as itt
-
 import logging
 import time
 
@@ -82,30 +81,37 @@ def sanitize_file_lines(file):
 def split_file_to_annotations_and_definitions(file):
     """Enumerate a line iterable and splits into 3 parts.
 
-    :param iter[str] file:
-    :rtype: tuple[list[str],list[str],list[str]]
+    :param iter[str] file: An iterable over lines in a BEL document
+    :rtype: tuple[iter[str],iter[str],iter[str]]
     """
-    content = list(sanitize_file_lines(file))
+    line_number_line_pairs = iter(sanitize_file_lines(file))
 
-    end_document_section_index = 1 + max(
-        index
-        for index, (_, line) in enumerate(content)
-        if line.startswith('SET DOCUMENT')
-    )
+    last_value = {0: (None, None)}  # just do this because python2 doesn't allow nonlocal variables
 
-    end_definitions_section_index = 1 + max(
-        index
-        for index, (_, line)
-        in enumerate(content)
-        if METADATA_LINE_RE.match(line)
-    )
+    def document_metadata():
+        """Iterate over the document metadata lines."""
+        for i, line in line_number_line_pairs:
+            if not line.startswith('SET DOCUMENT'):
+                last_value[0] = i, line
+                return
+            yield i, line
 
-    log.info('File length: %d lines', len(content))
-    documents = content[:end_document_section_index]
-    definitions = content[end_document_section_index:end_definitions_section_index]
-    statements = content[end_definitions_section_index:]
+    def definitions():
+        """Iterate over the resource definition lines."""
+        yield last_value[0]
+        for i, line in line_number_line_pairs:
+            if not METADATA_LINE_RE.match(line):
+                last_value[0] = i, line
+                return
+            yield i, line
 
-    return documents, definitions, statements
+    def statements():
+        """Iterate over the statement lines."""
+        yield last_value[0]
+        for line_number_line_pari in line_number_line_pairs:
+            yield line_number_line_pari
+
+    return document_metadata(), definitions(), statements()
 
 
 def make_document_metadata(name, version=None, contact=None, description=None, authors=None, copyright=None,
