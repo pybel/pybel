@@ -6,7 +6,7 @@ from collections import Iterable
 
 from six import string_types
 
-from ...constants import NAME
+from ...constants import NAME, NAMESPACE
 from ...dsl import BaseEntity
 
 __all__ = [
@@ -16,6 +16,7 @@ __all__ = [
     'build_node_graph_data_search',
     'build_node_key_search',
     'build_node_name_search',
+    'namespace_inclusion_builder',
 ]
 
 
@@ -180,3 +181,39 @@ def build_node_name_search(query):
     :rtype: (pybel.BELGraph, BaseEntity) -> bool
     """
     return build_node_key_search(query=query, key=NAME)
+
+
+def namespace_inclusion_builder(namespace):
+    """Build a predicate for namespace inclusion.
+
+    :param namespace: A namespace or iter of namespaces
+    :type namespace: str or iter[str]
+    :rtype: (pybel.BELGraph, BaseEntity) -> bool
+    """
+    if isinstance(namespace, str):
+        def namespace_filter(graph, node):
+            """Passes only for a node that has the enclosed namespace
+
+            :param pybel.BELGraph graph: A BEL Graph
+            :param BaseEntity node:: A BEL node
+            :rtype: bool
+            """
+            return NAMESPACE in node and node[NAMESPACE] == namespace
+
+        return namespace_filter
+
+    elif isinstance(namespace, Iterable):
+        namespaces = set(namespace)
+
+        def namespaces_filter(graph, node):
+            """Pass only for a node that has a namespace in the enclosed set.
+
+            :param pybel.BELGraph graph: A BEL Graph
+            :param BaseEntity node:: A BEL node
+            :rtype: bool
+            """
+            return NAMESPACE in node and node[NAMESPACE] in namespaces
+
+        return namespaces_filter
+
+    raise ValueError('Invalid type for argument: {}'.format(namespace))
