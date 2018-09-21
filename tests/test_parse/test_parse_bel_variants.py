@@ -354,6 +354,20 @@ class TestTruncationParser(unittest.TestCase):
         expected = hgvs('p.40*')
         self.assertEqual(expected, result.asDict())
 
+    def test_trunc_2(self):
+        """Test a truncation in which the amino acid is specified."""
+        statement = 'trunc(Gly40)'
+        result = self.parser.parseString(statement)
+
+        expected = hgvs('p.Gly40*')
+        self.assertEqual(expected, result.asDict())
+
+    def test_trunc_missing_number(self):
+        """Test that an error is raised for a truncation in which the position is omitted."""
+        statement = 'trunc(Gly)'
+        with self.assertRaises(Exception):
+            result = self.parser.parseString(statement)
+
 
 class TestFusionParser(unittest.TestCase):
     def setUp(self):
