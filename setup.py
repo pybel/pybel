@@ -23,9 +23,9 @@ CLASSIFIERS = [
     'Operating System :: OS Independent',
     'Programming Language :: Python',
     'Programming Language :: Python :: 2.7',
-    'Programming Language :: Python :: 3.4',
     'Programming Language :: Python :: 3.5',
     'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 3.7',
     'Topic :: Scientific/Engineering :: Bio-Informatics'
 ]
 INSTALL_REQUIRES = [
@@ -40,7 +40,7 @@ INSTALL_REQUIRES = [
     'tqdm',
 ]
 
-if sys.version_info < (3, ):
+if sys.version_info < (3,):
     INSTALL_REQUIRES.append('configparser')
     INSTALL_REQUIRES.append('enum34')  # Only necessary for NDEx?
     INSTALL_REQUIRES.append('functools32')
@@ -57,7 +57,27 @@ TESTS_REQUIRE = [
 ENTRY_POINTS = {
     'console_scripts': [
         'pybel = pybel.cli:main',
-    ]
+    ],
+    'pybel.object_importer': [
+        'nodelink = pybel.io:from_json',
+        'bytes = pybel.io:from_bytes',
+        'bel = pybel:from_path',
+    ],
+    'pybel.file_importer': [
+        'nodelink = pybel.io:from_json_file',
+        'bytes = pybel.io:from_pickle',
+        'bel = pybel:from_lines',
+    ],
+    'pybel.object_exporter': [
+        'nodelink = pybel.io:to_json',
+        'bytes = pybel.io:to_bytes',
+        'bel = pybel.canonicalize:to_bel_lines',
+    ],
+    'pybel.file_exporter': [
+        'nodelink = pybel.io:to_json_file',
+        'bytes = pybel.io:to_pickle',
+        'bel = pybel.canonicalize:to_bel',
+    ],
 }
 DEPENDENCY_LINKS = [
 ]
