@@ -38,13 +38,11 @@ INSTALL_REQUIRES = [
     'pyparsing',
     'six',
     'tqdm',
+    'configparser; python_version < "3"',
+    'enum34; python_version < "3"',  # Only necessary for NDEx?
+    'functools32; python_version < "3"',
+    'funcsigs; python_version < "3"',
 ]
-
-if sys.version_info < (3, ):
-    INSTALL_REQUIRES.append('configparser')
-    INSTALL_REQUIRES.append('enum34')  # Only necessary for NDEx?
-    INSTALL_REQUIRES.append('functools32')
-    INSTALL_REQUIRES.append('funcsigs')
 
 EXTRAS_REQUIRE = {
     'indra': ['indra'],
