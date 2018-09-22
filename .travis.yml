@@ -32,7 +32,6 @@ jobs:
     - stage: lint
       env: TOXENV=manifest
     - env: TOXENV=flake8
-    - env: TOXENV=pylint
     - env: TOXENV=xenon
     - env: TOXENV=vulture
     - env: TOXENV=pyroma
@@ -46,7 +45,6 @@ jobs:
 matrix:
   allow_failures:
       - env: TOXENV=flake8
-      - env: TOXENV=pylint
       - env: TOXENV=xenon
       - env: TOXENV=vulture
       - env: TOXENV=pyroma
