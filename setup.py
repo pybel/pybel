@@ -39,7 +39,6 @@ INSTALL_REQUIRES = [
     'six',
     'tqdm',
     'configparser; python_version < "3"',
-    'enum34; python_version < "3"',  # Only necessary for NDEx?
     'functools32; python_version < "3"',
     'funcsigs; python_version < "3"',
 ]
