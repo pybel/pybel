@@ -6,6 +6,9 @@ environment:
     - PYTHON: "C:\\Python35"
     - PYTHON: "C:\\Python35-x64"
 
+# See: https://help.appveyor.com/discussions/problems/12705-custom-build-script-script-mode
+build: off
+
 install:
   - "%PYTHON%\\python.exe -m pip install tox"
 
