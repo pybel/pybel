@@ -43,7 +43,7 @@ def add_annotation_value(graph, annotation, value):
             continue
 
         if annotation not in graph[u][v][k][ANNOTATIONS]:
-            graph[u][v][k][ANNOTATIONS] = {annotation: {}}
+            graph[u][v][k][ANNOTATIONS][annotation] = {}
 
         graph[u][v][k][ANNOTATIONS][annotation][value] = True
 
