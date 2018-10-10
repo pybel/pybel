@@ -100,7 +100,7 @@ def filter_nodes(graph, node_predicates=None):
     :param node_predicates: A node predicate or list/tuple of node predicates
     :type node_predicates: None or ((pybel.BELGraph, BaseEntity) -> bool) or iter[(pybel.BELGraph, BaseEntity) -> bool]
     :return: An iterable of nodes that pass all predicates
-    :rtype: iter[tuple]
+    :rtype: iter[BaseEntity]
     """
     if not node_predicates: # If no predicates are given, return the standard node iterator
         for node in graph:
@@ -119,7 +119,7 @@ def get_nodes(graph, node_predicates=None):
     :param node_predicates: A node predicate or list/tuple of node predicates
     :type node_predicates: None or ((pybel.BELGraph, BaseEntity) -> bool) or iter[(pybel.BELGraph, BaseEntity) -> bool]
     :return: The set of nodes passing the predicates
-    :rtype: set[tuple]
+    :rtype: set[BaseEntity]
     """
     return set(filter_nodes(graph, node_predicates=node_predicates))
 
