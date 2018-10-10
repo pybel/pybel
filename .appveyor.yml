@@ -1,41 +1,16 @@
+# See: https://packaging.python.org/guides/supporting-windows-using-appveyor/
 environment:
-  # SDK v7.0 MSVC Express 2008's SetEnv.cmd script will fail if the
-  # /E:ON and /V:ON options are not enabled in the batch script intepreter
-  # See: http://stackoverflow.com/a/13751649/163740
-  CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\appveyor\\run_with_env.cmd"
-  TOX_ENV: "pywin"
-
   matrix:
     - PYTHON: "C:\\Python27"
-      PYTHON_VERSION: "2.7.8"
-      PYTHON_ARCH: "32"
-
     - PYTHON: "C:\\Python27-x64"
-      PYTHON_VERSION: "2.7.8"
-      PYTHON_ARCH: "64"
+    - PYTHON: "C:\\Python35"
+    - PYTHON: "C:\\Python35-x64"
+
+# See: https://help.appveyor.com/discussions/problems/12705-custom-build-script-script-mode
+build: off
 
 install:
-  # Download setup scripts and unzip
-  - ps: "wget https://github.com/cloudify-cosmo/appveyor-utils/archive/master.zip -OutFile ./master.zip"
-  - "7z e master.zip */appveyor/* -oappveyor"
-
-  # Install Python (from the official .msi of http://python.org) and pip when
-  # not already installed.
-  - "powershell ./appveyor/install.ps1"
-
-  # Prepend newly installed Python to the PATH of this build (this cannot be
-  # done from inside the powershell script as it would require to restart
-  # the parent CMD process).
-  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
-
-  # Check that we have the expected version and architecture for Python
-  - "python --version"
-  - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
-
-build: false  # Not a C# project, build stuff at the test step instead.
-
-before_test:
-  - "%CMD_IN_ENV% pip install tox"
+  - "%PYTHON%\\python.exe -m pip install tox"
 
 test_script:
-  - "%CMD_IN_ENV% tox"
+  - "%PYTHON%\\python.exe -m tox -e py"
