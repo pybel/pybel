@@ -136,4 +136,5 @@ if __name__ == '__main__':
         tests_require=TESTS_REQUIRE,
         entry_points=ENTRY_POINTS,
         dependency_links=DEPENDENCY_LINKS,
+        zip_safe=False,
     )
