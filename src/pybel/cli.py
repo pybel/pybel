@@ -30,7 +30,7 @@ from .io.web import _get_host
 from .manager import Manager
 from .manager.database_io import to_database
 from .manager.models import Edge, Namespace
-from .struct import get_unused_annotations, get_unused_namespaces
+from .struct import get_unused_annotations, get_unused_list_annotation_values, get_unused_namespaces
 from .utils import get_corresponding_pickle_path
 
 log = logging.getLogger(__name__)
@@ -142,21 +142,35 @@ def _print_summary(graph, ticks=False):
         click.secho('Summary', fg='red', bold=True)
         graph.summarize()
 
-    click.secho('\nUnused Namespaces', fg='red', bold=True)
-    if ticks:
-        click.echo('```')
-    for namespace in sorted(get_unused_namespaces(graph)):
-        click.echo(namespace)
-    if ticks:
-        click.echo('```')
+    unused_namespaces = get_unused_namespaces(graph)
+    if unused_namespaces:
+        click.secho('\nUnused Namespaces', fg='red', bold=True)
+        if ticks:
+            click.echo('```')
+        for namespace in sorted(unused_namespaces):
+            click.echo(namespace)
+        if ticks:
+            click.echo('```')
 
-    click.secho('\nUnused Annotations', fg='red', bold=True)
-    if ticks:
-        click.echo('```')
-    for annotation in sorted(get_unused_annotations(graph)):
-        click.echo(annotation)
-    if ticks:
-        click.echo('```')
+    unused_annotations = get_unused_annotations(graph)
+    if unused_annotations:
+        click.secho('\nUnused Annotations', fg='red', bold=True)
+        if ticks:
+            click.echo('```')
+        for annotation in sorted(unused_annotations):
+            click.echo(annotation)
+        if ticks:
+            click.echo('```')
+
+    unused_annotation_list_values = get_unused_list_annotation_values(graph)
+    if unused_annotation_list_values:
+        click.secho('\nUnused List Annotation Values', fg='red', bold=True)
+        if ticks:
+            click.echo('```')
+        for annotation, values in sorted(unused_annotation_list_values.items()):
+            click.echo('{}: {}'.format(annotation, ''.join(values)))
+        if ticks:
+            click.echo('```')
 
 
 @main.command()

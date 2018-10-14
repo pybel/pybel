@@ -10,7 +10,7 @@ from pybel.dsl import protein
 from pybel.examples import sialic_acid_graph
 from pybel.struct.summary.edge_summary import (
     count_annotations, get_annotation_values, get_annotation_values_by_annotation, get_annotations,
-    get_unused_annotations, iter_annotation_value_pairs, iter_annotation_values,
+    get_unused_annotations, get_unused_list_annotation_values, iter_annotation_value_pairs, iter_annotation_values,
 )
 from pybel.testing.utils import n
 
@@ -106,3 +106,12 @@ class TestEdgeSummary(unittest.TestCase):
         name = n()
         graph.annotation_pattern[name] = {n(), n(), n()}
         self.assertEqual({name}, get_unused_annotations(graph))
+
+    def test_get_unused_annotation_list_values(self):
+        """Test getting unused annotation list values."""
+        graph = BELGraph()
+        name = 'test'
+        a, b, c = 'abc'
+        graph.annotation_list[name] = {a, b, c}
+        graph.add_increases(protein(n(), n()), protein(n(), n()), n(), n(), annotations={name: {a}})
+        self.assertEqual({name: {b, c}}, get_unused_list_annotation_values(graph))
