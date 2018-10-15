@@ -972,17 +972,13 @@ class BELGraph(nx.MultiDiGraph):
         :rtype: list[tuple[str,float]]
         """
         number_nodes = self.number_of_nodes()
-        result = [
+        return [
             ('Number of Nodes', number_nodes),
             ('Number of Edges', self.number_of_edges()),
             ('Network Density', '{:.2E}'.format(nx.density(self))),
             ('Number of Components', nx.number_weakly_connected_components(self)),
+            ('Number of Warnings', len(self.warnings)),
         ]
-
-        if self.warnings:
-            result.append(('Number of Warnings', len(self.warnings)))
-
-        return result
 
     def summary_dict(self):
         """Return a dictionary that summarizes the graph.
