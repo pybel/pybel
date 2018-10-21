@@ -12,6 +12,8 @@ Code Contributors
 - `Scott Colby <https://github.com/scolby33>`_
 - `Daniel Domingo-Fernández <https://github.com/ddomingof>`_
 - `Ben Gyori <https://github.com/bgyori>`_
+- `Nicola Soranzo <https://github.com/nsoranzo>`_
+- `Steffen Möller <https://github.com/smoe>`_
 
 Other Contributors
 ------------------
