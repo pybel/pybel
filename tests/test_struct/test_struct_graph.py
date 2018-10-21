@@ -95,7 +95,8 @@ class TestStruct(unittest.TestCase):
 Number of Nodes: 1
 Number of Edges: 0
 Network Density: 0.00E+00
-Number of Components: 1"""
+Number of Components: 1
+Number of Warnings: 0"""
         self.assertEqual(test_str.strip(), sio.getvalue().strip())
 
     def test_citation_type_error(self):
