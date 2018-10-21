@@ -1007,8 +1007,12 @@ class BELGraph(nx.MultiDiGraph):
     def serialize(self, fmt='nodelink', file=None):
         """Serialize the graph to an object or file if given."""
         if file is None:
-            return self._serialize_object(fmt)
-        self._serialize_file(fmt, file)
+            return self._serialize_object(fmt=fmt)
+        elif isinstance(file, string_types):
+            with open(file, 'w') as file_obj:
+                self._serialize_file(fmt=fmt, file=file_obj)
+        else:
+            self._serialize_file(fmt=fmt, file=file)
 
     def _serialize_object(self, fmt):
         object_exporter = self._get_serialize_entry_point('pybel.object_exporter', fmt)
