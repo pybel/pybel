@@ -168,7 +168,9 @@ def _print_summary(graph, ticks=False):
         if ticks:
             click.echo('```')
         for annotation, values in sorted(unused_annotation_list_values.items()):
-            click.echo('{}: {}'.format(annotation, ''.join(values)))
+            click.echo('{} ({})'.format(annotation, len(values)))
+            for value in sorted(values):
+                click.echo('  {}'.format(value))
         if ticks:
             click.echo('```')
 
