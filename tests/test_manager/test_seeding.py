@@ -112,7 +112,7 @@ class TestSeeding(TemporaryCacheClsMixin):
 
         self.assertIn(cd33_phosphorylated, graph)
         self.assertIn(cd33, graph)
-        self.assertIn(syk,graph)
+        self.assertIn(syk, graph)
         self.assertIn(shp2, graph)
 
         self.assertEqual(3, graph.number_of_edges())

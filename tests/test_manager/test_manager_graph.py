@@ -1044,11 +1044,11 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             protein(namespace='HGNC', name='CDC42'),
             protein(namespace='HGNC', name='PAK2'),
             evidence="""Summary: PAK proteins, a family of serine/threonine p21-activating kinases, include PAK1, PAK2,
-         PAK3 and PAK4. PAK proteins are critical effectors that link Rho GTPases to cytoskeleton reorganization 
-         and nuclear signaling. They serve as targets for the small GTP binding proteins Cdc42 and Rac and have 
-         been implicated in a wide range of biological activities. PAK4 interacts specifically with the GTP-bound 
-         form of Cdc42Hs and weakly activates the JNK family of MAP kinases. PAK4 is a mediator of filopodia 
-         formation and may play a role in the reorganization of the actin cytoskeleton. Multiple alternatively 
+         PAK3 and PAK4. PAK proteins are critical effectors that link Rho GTPases to cytoskeleton reorganization
+         and nuclear signaling. They serve as targets for the small GTP binding proteins Cdc42 and Rac and have
+         been implicated in a wide range of biological activities. PAK4 interacts specifically with the GTP-bound
+         form of Cdc42Hs and weakly activates the JNK family of MAP kinases. PAK4 is a mediator of filopodia
+         formation and may play a role in the reorganization of the actin cytoskeleton. Multiple alternatively
          spliced transcript variants encoding distinct isoforms have been found for this gene.""",
             citation={CITATION_TYPE: "Online Resource", CITATION_REFERENCE: "PAK4 Hs ENTREZ Gene Summary"},
             annotations={'Species': '9606'},
@@ -1084,8 +1084,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             protein(namespace='HGNC', name='HDAC4'),
             protein(namespace='HGNC', name='MEF2A'),
             citation='10487761',
-            evidence=""""In the nucleus, HDAC4 associates with the myocyte enhancer factor MEF2A. Binding of HDAC4 to 
-        MEF2A results in the repression of MEF2A transcriptional activation, a function that requires the 
+            evidence=""""In the nucleus, HDAC4 associates with the myocyte enhancer factor MEF2A. Binding of HDAC4 to
+        MEF2A results in the repression of MEF2A transcriptional activation, a function that requires the
         deacetylase domain of HDAC4.""",
             annotations={'Species': '9606'},
             subject_modifier=activity('cat', location=entity(namespace='GOCC', name='nucleus')),
