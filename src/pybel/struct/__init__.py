@@ -21,11 +21,11 @@ from .pipeline import Pipeline
 from .summary import *
 
 __all__ = (
-        graph.__all__ +
-        grouping.__all__ +
-        operations.__all__ +
-        filters.__all__ +
-        summary.__all__ +
-        mutation.__all__ +
-        ['Pipeline']
+    graph.__all__ +
+    grouping.__all__ +
+    operations.__all__ +
+    filters.__all__ +
+    summary.__all__ +
+    mutation.__all__ +
+    ['Pipeline']
 )
