@@ -479,17 +479,13 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_edge(sub, obj, relation=expected_dict[RELATION])
 
     def test_nested_failure(self):
-        """
-        3.1 \
-        Test nested statement"""
+        """Test nested statement (3.1)."""
         statement = 'p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process"))'
         with self.assertRaises(NestedRelationWarning):
             self.parser.relation.parseString(statement)
 
     def test_nested_lenient(self):
-        """
-        3.1 \
-        Test nested statement"""
+        """Test nested statement (3.1)."""
         statement = 'p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process"))'
         self.parser.allow_nested = True
 
