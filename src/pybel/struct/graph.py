@@ -249,9 +249,7 @@ class BELGraph(nx.MultiDiGraph):
 
         :rtype: set[str]
         """
-        return (
-            set(self.namespace_pattern) | set(self.namespace_url)
-        )
+        return (set(self.namespace_pattern) | set(self.namespace_url))
 
     @property
     def uncached_namespaces(self):
