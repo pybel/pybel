@@ -201,7 +201,7 @@ class TestGetGraphProperties(unittest.TestCase):
         graph = BELGraph()
         namespace, name, identifier, variant_name = n(), n(), n(), n()
         node = protein(namespace=namespace, name=name, identifier=identifier, variants=hgvs(variant_name))
-        # parent = node.get_parent()  # assigned to but never used
+        node.get_parent()
 
         graph.add_node_from_data(node)
 

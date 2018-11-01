@@ -908,7 +908,7 @@ class TestRelations(TestTokenParserBase):
         statement = 'rxn(reactants(a(CHEBI:"(S)-3-hydroxy-3-methylglutaryl-CoA"),a(CHEBI:NADPH), \
                     a(CHEBI:hydron)),products(a(CHEBI:mevalonate), a(CHEBI:"CoA-SH"), a(CHEBI:"NADP(+)"))) \
                     hasReactant a(CHEBI:"(S)-3-hydroxy-3-methylglutaryl-CoA")'
-        result = self.parser.relation.parseString(statement)  # assigned to but never used
+        self.parser.relation.parseString(statement)
 
         sub_reactant_1 = abundance('CHEBI', '(S)-3-hydroxy-3-methylglutaryl-CoA')
         sub_reactant_2 = abundance('CHEBI', 'NADPH')
