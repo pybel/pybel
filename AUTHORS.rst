@@ -6,15 +6,13 @@ Maintainer
 ----------
 `Charles Tapley Hoyt <https://github.com/cthoyt>`_
 
-Code Contributors
------------------
+Contributors
+------------
 - `Andrej Konotopez <https://github.com/lekono>`_
+- `Christian Ebeling <https://github.com/cebel>`_
 - `Scott Colby <https://github.com/scolby33>`_
 - `Daniel Domingo-Fernández <https://github.com/ddomingof>`_
 - `Ben Gyori <https://github.com/bgyori>`_
 - `Nicola Soranzo <https://github.com/nsoranzo>`_
 - `Steffen Möller <https://github.com/smoe>`_
-
-Other Contributors
-------------------
-- `Christian Ebeling <https://github.com/cebel>`_
+- `tehw0lf <https://github.com/tehw0lf>`_
