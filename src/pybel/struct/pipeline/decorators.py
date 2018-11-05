@@ -40,8 +40,8 @@ deprecated = {}
 def _has_arguments(func, universe):
     sig = signature(func)
     return (
-            (universe and 3 <= len(sig.parameters)) or
-            (not universe and 2 <= len(sig.parameters))
+        (universe and 3 <= len(sig.parameters)) or
+        (not universe and 2 <= len(sig.parameters))
     )
 
 

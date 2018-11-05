@@ -64,7 +64,7 @@ class TestSummary(unittest.TestCase):
     def test_names_sialic(self):
         """Test getting and counting names by namespace."""
         result = {
-            'CD33': 3, # once as reference, once in complex, and once as variant
+            'CD33': 3,  # once as reference, once in complex, and once as variant
             'TYROBP': 1,
             'SYK': 1,
             'PTPN6': 1,

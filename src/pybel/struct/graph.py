@@ -122,7 +122,7 @@ class BELGraph(nx.MultiDiGraph):
 
     def fresh_copy(self):
         """Create an unfilled :class:`BELGraph` as a hook for other :mod:`networkx` functions.
-    
+
         Is necessary for .copy() to work.
 
         :rtype: BELGraph
@@ -249,10 +249,7 @@ class BELGraph(nx.MultiDiGraph):
 
         :rtype: set[str]
         """
-        return (
-                set(self.namespace_pattern) |
-                set(self.namespace_url)
-        )
+        return set(self.namespace_pattern) | set(self.namespace_url)
 
     @property
     def uncached_namespaces(self):
@@ -306,9 +303,9 @@ class BELGraph(nx.MultiDiGraph):
         :rtype: set[str]
         """
         return (
-                set(self.annotation_pattern) |
-                set(self.annotation_url) |
-                set(self.annotation_list)
+            set(self.annotation_pattern) |
+            set(self.annotation_url) |
+            set(self.annotation_list)
         )
 
     @property
@@ -340,9 +337,9 @@ class BELGraph(nx.MultiDiGraph):
         :rtype: bool
         """
         return (
-                namespace is not None and
-                namespace in self.namespace_url and
-                self.namespace_url[namespace] in self.uncached_namespaces
+            namespace is not None and
+            namespace in self.namespace_url and
+            self.namespace_url[namespace] in self.uncached_namespaces
         )
 
     def add_warning(self, line_number, line, exception, context=None):
