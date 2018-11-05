@@ -746,11 +746,13 @@ class ListAbundance(BaseEntity):
         :type members: BaseAbundance or list[BaseAbundance]
         """
         super(ListAbundance, self).__init__(func=func)
-        self[MEMBERS] = (
-            [members]
-            if isinstance(members, BaseEntity) else
-            sorted(members, key=_as_bel)
-        )
+
+        if isinstance(members, BaseEntity):
+            self[MEMBERS] = [members]
+        elif 0 == len(members):
+            raise ValueError('List abundance can not be instantiated with an empty members list.')
+        else:
+            self[MEMBERS] = sorted(members, key=_as_bel)
 
     @property
     def members(self):
