@@ -303,8 +303,8 @@ class BELGraph(nx.MultiDiGraph):
         :rtype: set[str]
         """
         return (
-            set(self.annotation_pattern) | 
-            set(self.annotation_url) | 
+            set(self.annotation_pattern) |
+            set(self.annotation_url) |
             set(self.annotation_list)
         )
 
