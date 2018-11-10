@@ -2,7 +2,7 @@
 
 from __future__ import print_function
 
-from collections import Iterable, Mapping
+from collections.abc import Iterable, Mapping
 
 import time
 
