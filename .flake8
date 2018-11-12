@@ -5,7 +5,13 @@
 #########################
 
 [flake8]
-ignore = E501,F401,F403,D105
+ignore =
+    E501
+    F401
+    F403
+    D105
+    # Line break after operator
+    W504
 exclude =
     .tox,
     .git,
@@ -21,5 +27,7 @@ exclude =
     .eggs
 max-complexity = 10
 import-order-style = pycharm
-application-import-names = pybel
+application-import-names =
+    pybel
+    tests
 format = ${cyan}%(path)s${reset}:${yellow_bold}%(row)d${reset}:${green_bold}%(col)d${reset}: ${red_bold}%(code)s${reset} %(text)s
