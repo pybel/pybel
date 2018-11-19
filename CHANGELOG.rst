@@ -5,8 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-Unreleased
-----------
+`0.12.2 <https://github.com/pybel/pybel/compare/v0.12.1...0.12.2>`_ - 2018-11-19
+--------------------------------------------------------------------------------
+Added
+~~~~~
+- Serialization functions can be accessed directly from the BELGraph class (https://github.com/pybel/pybel/pull/344)
+- Added several useful node filter functions (Thanks @ddomingof; https://github.com/pybel/pybel/pull/347)
+- Add a function for removing extraneous citation metadata
+
+Changed
+~~~~~~~
+- pybel.struct.graph.BELgraph.summarize() now prints the number of warnings, even if it is zero
+
+Fixed
+~~~~~
+- Platform specificity for requirements in setup.py (Thanks @scolby33; https://github.com/pybel/pybel/pull/346)
+- Print statement problem (Thanks @smoe; https://github.com/pybel/pybel/pull/351)
+- Import paths for INDRA (Thanks @bgyori; https://github.com/pybel/pybel/pull/339
+- Improvements on flake8 status (Thanks @tehw0lf; https://github.com/pybel/pybel/pull/353)
+- Ensure complexes have at least one member (Thanks @10mubeen for pointing this out)
+- Make "Other" as the default namespace domain for generating BEL namespace files
 
 `0.12.1 <https://github.com/pybel/pybel/compare/v0.12.0...0.12.1>`_ - 2018-09-13
 --------------------------------------------------------------------------------
