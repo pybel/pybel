@@ -102,7 +102,7 @@ def filter_nodes(graph, node_predicates=None):
     :return: An iterable of nodes that pass all predicates
     :rtype: iter[BaseEntity]
     """
-    if not node_predicates: # If no predicates are given, return the standard node iterator
+    if not node_predicates:  # If no predicates are given, return the standard node iterator
         for node in graph:
             yield node
     else:

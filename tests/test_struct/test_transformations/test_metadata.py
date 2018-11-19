@@ -5,10 +5,14 @@
 import unittest
 
 from pybel import BELGraph
-from pybel.constants import ANNOTATIONS, INCREASES
+from pybel.constants import (
+    ANNOTATIONS, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED,
+)
 from pybel.dsl import protein
 from pybel.examples import sialic_acid_graph
-from pybel.struct.mutation import add_annotation_value, remove_annotation_value, strip_annotations
+from pybel.struct.mutation import (
+    add_annotation_value, remove_annotation_value, remove_citation_metadata, strip_annotations,
+)
 from pybel.testing.utils import n
 
 
@@ -21,10 +25,9 @@ class TestMetadata(unittest.TestCase):
         y = protein(namespace='HGNC', name='X')
 
         graph = BELGraph()
-        key = graph.add_qualified_edge(
+        key = graph.add_increases(
             x,
             y,
-            relation=INCREASES,
             citation='123456',
             evidence='Fake',
             annotations={
@@ -75,3 +78,45 @@ class TestMetadata(unittest.TestCase):
                 continue
 
             self.assertNotIn(value, annotation_values)
+
+    def test_remove_citation_metadata(self):
+        """Test removing citation metadata from a graph."""
+        x = protein(namespace='HGNC', name='X')
+        y = protein(namespace='HGNC', name='X')
+
+        graph = BELGraph()
+
+        k0 = graph.add_part_of(x, y)
+        k1 = graph.add_increases(
+            x,
+            y,
+            citation='123456',
+            evidence='Fake',
+            annotations={
+                'A': {'B': True}
+            },
+        )
+        k2 = graph.add_increases(
+            x,
+            y,
+            citation={
+                CITATION_TYPE: CITATION_TYPE_PUBMED,
+                CITATION_REFERENCE: '12345678',
+                CITATION_DATE: '2018-12-10',
+            },
+            evidence='Fake',
+            annotations={
+                'A': {'B': True}
+            },
+        )
+
+        remove_citation_metadata(graph)
+
+        self.assertNotIn(CITATION, graph[x][y][k0])
+
+        for k in k1, k2:
+            self.assertIn(CITATION, graph[x][y][k])
+            self.assertIn(CITATION_TYPE, graph[x][y][k][CITATION])
+            self.assertIn(CITATION_REFERENCE, graph[x][y][k][CITATION])
+            self.assertNotIn(CITATION_DATE, graph[x][y][k][CITATION])
+            self.assertNotIn(CITATION_AUTHORS, graph[x][y][k][CITATION])

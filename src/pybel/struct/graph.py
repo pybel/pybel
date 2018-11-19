@@ -6,6 +6,7 @@ from __future__ import print_function
 
 import logging
 from copy import deepcopy
+from pkg_resources import iter_entry_points
 
 import networkx as nx
 from six import string_types
@@ -17,9 +18,9 @@ from ..constants import (
     DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO, EVIDENCE, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN,
     GRAPH_ANNOTATION_URL, GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, GRAPH_PYBEL_VERSION,
     GRAPH_UNCACHED_NAMESPACES, HAS_COMPONENT, HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A,
-    MEMBERS, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION,
-    METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAMESPACE, OBJECT,
-    ORTHOLOGOUS, PART_OF, PRODUCTS, REACTANTS, RELATION, SUBJECT, TRANSCRIBED_TO, TRANSLATED_TO, VARIANTS,
+    MEMBERS, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER,
+    METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAMESPACE, OBJECT, ORTHOLOGOUS, PART_OF, PRODUCTS, REACTANTS,
+    RELATION, SUBJECT, TRANSCRIBED_TO, TRANSLATED_TO, VARIANTS,
 )
 from ..dsl import BaseEntity, activity
 from ..utils import get_version, hash_edge
@@ -121,7 +122,7 @@ class BELGraph(nx.MultiDiGraph):
 
     def fresh_copy(self):
         """Create an unfilled :class:`BELGraph` as a hook for other :mod:`networkx` functions.
-    
+
         Is necessary for .copy() to work.
 
         :rtype: BELGraph
@@ -248,10 +249,7 @@ class BELGraph(nx.MultiDiGraph):
 
         :rtype: set[str]
         """
-        return (
-                set(self.namespace_pattern) |
-                set(self.namespace_url)
-        )
+        return set(self.namespace_pattern) | set(self.namespace_url)
 
     @property
     def uncached_namespaces(self):
@@ -305,9 +303,9 @@ class BELGraph(nx.MultiDiGraph):
         :rtype: set[str]
         """
         return (
-                set(self.annotation_pattern) |
-                set(self.annotation_url) |
-                set(self.annotation_list)
+            set(self.annotation_pattern) |
+            set(self.annotation_url) |
+            set(self.annotation_list)
         )
 
     @property
@@ -339,9 +337,9 @@ class BELGraph(nx.MultiDiGraph):
         :rtype: bool
         """
         return (
-                namespace is not None and
-                namespace in self.namespace_url and
-                self.namespace_url[namespace] in self.uncached_namespaces
+            namespace is not None and
+            namespace in self.namespace_url and
+            self.namespace_url[namespace] in self.uncached_namespaces
         )
 
     def add_warning(self, line_number, line, exception, context=None):
@@ -971,17 +969,13 @@ class BELGraph(nx.MultiDiGraph):
         :rtype: list[tuple[str,float]]
         """
         number_nodes = self.number_of_nodes()
-        result = [
+        return [
             ('Number of Nodes', number_nodes),
             ('Number of Edges', self.number_of_edges()),
             ('Network Density', '{:.2E}'.format(nx.density(self))),
             ('Number of Components', nx.number_weakly_connected_components(self)),
+            ('Number of Warnings', len(self.warnings)),
         ]
-
-        if self.warnings:
-            result.append(('Number of Warnings', len(self.warnings)))
-
-        return result
 
     def summary_dict(self):
         """Return a dictionary that summarizes the graph.
@@ -1006,3 +1000,30 @@ class BELGraph(nx.MultiDiGraph):
         :param Optional[file] file: A file or file-like to print to. Defaults to standard out.
         """
         print(self.summary_str(), file=file)
+
+    def serialize(self, fmt='nodelink', file=None):
+        """Serialize the graph to an object or file if given."""
+        if file is None:
+            return self._serialize_object(fmt=fmt)
+        elif isinstance(file, string_types):
+            with open(file, 'w') as file_obj:
+                self._serialize_file(fmt=fmt, file=file_obj)
+        else:
+            self._serialize_file(fmt=fmt, file=file)
+
+    def _serialize_object(self, fmt):
+        object_exporter = self._get_serialize_entry_point('pybel.object_exporter', fmt)
+        return object_exporter(self)
+
+    def _serialize_file(self, fmt, file):
+        file_exporter = self._get_serialize_entry_point('pybel.file_exporter', fmt)
+        return file_exporter(self, file)
+
+    @staticmethod
+    def _get_serialize_entry_point(group, name):
+        entry_points = list(iter_entry_points(group=group, name=name))
+
+        if 0 == len(entry_points):
+            raise ValueError('no format {}'.format(name))
+
+        return entry_points[0].load()

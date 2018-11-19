@@ -7,6 +7,6 @@ from .protein_rna_origins import *
 from .collapse import *
 
 __all__ = (
-        protein_rna_origins.__all__ +
-        collapse.__all__
+    protein_rna_origins.__all__ +
+    collapse.__all__
 )

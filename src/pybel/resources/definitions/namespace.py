@@ -2,11 +2,10 @@
 
 from __future__ import print_function
 
+import time
 from collections import Iterable, Mapping
 
-import time
-
-from pybel.constants import NAMESPACE_DOMAIN_TYPES, belns_encodings
+from pybel.constants import NAMESPACE_DOMAIN_OTHER, NAMESPACE_DOMAIN_TYPES, belns_encodings
 from pybel.resources.utils import get_iso_8601_date
 from .write_utils import DATETIME_FMT, make_author_header, make_citation_header, make_properties_header
 
@@ -155,7 +154,7 @@ def write_namespace_header(namespace_name, namespace_keyword, namespace_domain=N
     namespace_header_lines = make_namespace_header(
         namespace_name,
         namespace_keyword,
-        namespace_domain,
+        namespace_domain=namespace_domain,
         query_url=namespace_query_url,
         description=namespace_description,
         species=namespace_species,
@@ -204,13 +203,13 @@ def write_namespace_header(namespace_name, namespace_keyword, namespace_domain=N
     print(file=file)
 
 
-def make_namespace_header(name, keyword, domain=None, query_url=None, description=None, species=None, version=None,
-                          created=None):
+def make_namespace_header(name, keyword, namespace_domain=None, query_url=None, description=None, species=None,
+                          version=None, created=None):
     """Make the ``[Namespace]`` section of a BELNS file.
 
     :param str name: The namespace name
     :param str keyword: Preferred BEL Keyword, maximum length of 8
-    :param Optional[str] domain: One of: :data:`pybel.constants.NAMESPACE_DOMAIN_BIOPROCESS`,
+    :param Optional[str] namespace_domain: One of: :data:`pybel.constants.NAMESPACE_DOMAIN_BIOPROCESS`,
      :data:`pybel.constants.NAMESPACE_DOMAIN_CHEMICAL`, :data:`pybel.constants.NAMESPACE_DOMAIN_GENE`, or
      :data:`pybel.constants.NAMESPACE_DOMAIN_OTHER`
     :param Optional[str] query_url: HTTP URL to query for details on namespace values (must be valid URL)
@@ -221,15 +220,18 @@ def make_namespace_header(name, keyword, domain=None, query_url=None, descriptio
     :return: An iterator over the lines of the ``[Namespace]`` section of a BELNS file
     :rtype: iter[str]
     """
-    if domain is not None and domain not in NAMESPACE_DOMAIN_TYPES:
-        raise ValueError('Invalid domain: {}. Should be one of: {}'.format(domain, NAMESPACE_DOMAIN_TYPES))
+    if namespace_domain is None:
+        namespace_domain = NAMESPACE_DOMAIN_OTHER
+
+    if namespace_domain is not None and namespace_domain not in NAMESPACE_DOMAIN_TYPES:
+        raise ValueError('Invalid domain: {}. Should be one of: {}'.format(namespace_domain, NAMESPACE_DOMAIN_TYPES))
 
     yield '[Namespace]'
     yield 'Keyword={}'.format(keyword)
     yield 'NameString={}'.format(name)
 
-    if domain:
-        yield 'DomainString={}'.format(domain)
+    if namespace_domain:
+        yield 'DomainString={}'.format(namespace_domain)
 
     yield 'VersionString={}'.format(version if version else get_iso_8601_date())
     yield 'CreatedDateTime={}'.format(created if created else time.strftime(DATETIME_FMT))

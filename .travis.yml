@@ -21,7 +21,7 @@ env:
   - TOXENV=py DB=mysql PYBEL_TEST_CONNECTOR=mysqlclient
     PYBEL_TEST_CONNECTION=mysql+mysqldb://travis@localhost/test?charset=utf8
 
-  - TOXENV=py DB=postgresql PYBEL_TEST_CONNECTOR=psycopg2
+  - TOXENV=py DB=postgresql PYBEL_TEST_CONNECTOR=psycopg2-binary
     PYBEL_TEST_CONNECTION=postgresql+psycopg2://travis@localhost/tests
 
   - TOXENV=py DB=sqlite
@@ -32,7 +32,6 @@ jobs:
     - stage: lint
       env: TOXENV=manifest
     - env: TOXENV=flake8
-    - env: TOXENV=pylint
     - env: TOXENV=xenon
     - env: TOXENV=vulture
     - env: TOXENV=pyroma
@@ -46,7 +45,6 @@ jobs:
 matrix:
   allow_failures:
       - env: TOXENV=flake8
-      - env: TOXENV=pylint
       - env: TOXENV=xenon
       - env: TOXENV=vulture
       - env: TOXENV=pyroma

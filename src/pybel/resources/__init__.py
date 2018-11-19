@@ -5,6 +5,5 @@ writing BEL Script."""
 
 from . import constants, definitions, document, exc
 from .definitions import *
-from .definitions import *
 from .document import *
 from .exc import *

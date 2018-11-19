@@ -16,6 +16,7 @@ __all__ = [
     'get_annotations',
     'count_annotations',
     'get_unused_annotations',
+    'get_unused_list_annotation_values',
 ]
 
 
@@ -137,3 +138,19 @@ def _annotation_iter_helper(graph):
         if ANNOTATIONS in data
         for key in data[ANNOTATIONS]
     )
+
+
+def get_unused_list_annotation_values(graph):
+    """Get all of the unused values for list annotations.
+
+    :param pybel.BELGraph graph: A BEL graph
+    :return: A dictionary of {str annotation: set of str values that aren't used}
+    :rtype: dict[str,set[str]]
+    """
+    result = {}
+    for annotation, values in graph.annotation_list.items():
+        used_values = get_annotation_values(graph, annotation)
+        if len(used_values) == len(values):  # all values have been used
+            continue
+        result[annotation] = set(values) - used_values
+    return result

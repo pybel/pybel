@@ -7,7 +7,8 @@ import unittest
 from pybel import BELGraph
 from pybel.constants import NAME
 from pybel.dsl import (
-    abundance, complex_abundance, entity, fragment, fusion_range, gene, gene_fusion, missing_fusion_range, protein,
+    abundance, complex_abundance, composite_abundance, entity, fragment, fusion_range, gene, gene_fusion,
+    missing_fusion_range, protein,
 )
 from pybel.testing.utils import n
 from pybel.utils import ensure_quotes
@@ -82,6 +83,16 @@ class TestDSL(unittest.TestCase):
         namespace, name = n(), n()
         node = abundance(namespace=namespace, name=name)
         self.assertEqual(hash(node), hash(node.as_bel()))
+
+    def test_empty_complex(self):
+        """Test that an empty complex causes a failure."""
+        with self.assertRaises(ValueError):
+            complex_abundance(members=[])
+
+    def test_empty_composite(self):
+        """Test that an empty complex causes a failure."""
+        with self.assertRaises(ValueError):
+            composite_abundance(members=[])
 
     def test_complex_with_name(self):
         """Test what happens with a named complex.

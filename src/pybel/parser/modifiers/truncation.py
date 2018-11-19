@@ -40,6 +40,7 @@ import logging
 
 from pyparsing import pyparsing_common as ppc
 
+from .constants import amino_acid
 from ..utils import nest, one_of_tags
 from ...constants import HGVS, IDENTIFIER, KIND, TRUNCATION_POSITION
 
@@ -51,6 +52,16 @@ log = logging.getLogger(__name__)
 
 truncation_tag = one_of_tags(tags=['trunc', 'truncation'], canonical_tag=HGVS, name=KIND)
 
+AMINO_ACID = 'aminoacid'
+
+
+def get_truncation_language():
+    l1 = truncation_tag + nest(amino_acid(AMINO_ACID) + ppc.integer(TRUNCATION_POSITION))
+    l1.setParseAction(_handle_trunc)
+    l2 = truncation_tag + nest(ppc.integer(TRUNCATION_POSITION))
+    l2.setParseAction(_handle_trunc_legacy)
+    return l1 | l2
+
 
 def _handle_trunc_legacy(line, position, tokens):
     # FIXME this isn't correct HGVS nomenclature, but truncation isn't forward compatible without more information
@@ -61,7 +72,9 @@ def _handle_trunc_legacy(line, position, tokens):
     return tokens
 
 
-def get_truncation_language():
-    language = truncation_tag + nest(ppc.integer(TRUNCATION_POSITION))
-    language.setParseAction(_handle_trunc_legacy)
-    return language
+def _handle_trunc(line, position, tokens):
+    aa, position = tokens[AMINO_ACID], tokens[TRUNCATION_POSITION]
+    tokens[IDENTIFIER] = 'p.{aa}{position}*'.format(aa=aa, position=position)
+    del tokens[AMINO_ACID]
+    del tokens[TRUNCATION_POSITION]
+    return tokens

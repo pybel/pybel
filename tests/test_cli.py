@@ -98,7 +98,7 @@ class TestCli(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
             neo.data('match (n)-[r]->() where r.{}="{}" detach delete n'.format(PYBEL_CONTEXT_TAG, test_context))
         except GraphError:
             self.skipTest("Can't query Neo4J ")
-        except:
+        except Exception:
             self.skipTest("Can't connect to Neo4J server")
         else:
             with self.runner.isolated_filesystem():

@@ -1322,7 +1322,6 @@ class TestComposite(TestTokenParserBase):
         expected_node = composite_abundance([il23, il6])
         self.assert_has_node(expected_node)
 
-
         self.assertEqual(2, len(expected_node[MEMBERS]))
         self.assertEqual(il23, expected_node[MEMBERS][0])
         self.assertEqual(il6, expected_node[MEMBERS][1])

@@ -79,7 +79,7 @@ class TestStruct(unittest.TestCase):
 
     def test_add_simple(self):
         """Test that a simple node can be added, but not duplicated."""
-        graph = BELGraph(name='Test',version='0.0.0')
+        graph = BELGraph(name='Test', version='0.0.0')
 
         namespace, name = n(), n()
 
@@ -95,7 +95,8 @@ class TestStruct(unittest.TestCase):
 Number of Nodes: 1
 Number of Edges: 0
 Network Density: 0.00E+00
-Number of Components: 1"""
+Number of Components: 1
+Number of Warnings: 0"""
         self.assertEqual(test_str.strip(), sio.getvalue().strip())
 
     def test_citation_type_error(self):
@@ -200,7 +201,7 @@ class TestGetGraphProperties(unittest.TestCase):
         graph = BELGraph()
         namespace, name, identifier, variant_name = n(), n(), n(), n()
         node = protein(namespace=namespace, name=name, identifier=identifier, variants=hgvs(variant_name))
-        parent = node.get_parent()
+        node.get_parent()
 
         graph.add_node_from_data(node)
 
