@@ -8,6 +8,7 @@ enable this option, but can specify a database location if they choose.
 
 from __future__ import unicode_literals
 
+import json
 import logging
 from copy import deepcopy
 
@@ -929,6 +930,7 @@ class InsertManager(NamespaceManager, LookupManager):
             relation=data[RELATION],
             bel=bel,
             sha512=key,
+            data=data,
             evidence=evidence,
             properties=properties,
             annotations=annotations,
@@ -949,6 +951,7 @@ class InsertManager(NamespaceManager, LookupManager):
             relation=data[RELATION],
             bel=bel,
             sha512=key,
+            data=data,
         )
 
     def get_or_create_evidence(self, citation, text):
@@ -1062,7 +1065,7 @@ class InsertManager(NamespaceManager, LookupManager):
 
         log.info('dropped all edges in %.2f seconds', time.time() - t)
 
-    def get_or_create_edge(self, source, target, relation, bel, sha512, evidence=None, annotations=None,
+    def get_or_create_edge(self, source, target, relation, bel, sha512, data, evidence=None, annotations=None,
                            properties=None):
         """Create an edge if it does not exist, or return it if it does.
 
@@ -1071,6 +1074,7 @@ class InsertManager(NamespaceManager, LookupManager):
         :param str relation: Type of the relation between source and target node
         :param str bel: BEL statement that describes the relation
         :param str sha512: The SHA512 hash of the edge as a string
+        :param dict data: The PyBEL data dictionary
         :param Evidence evidence: Evidence object that proves the given relation
         :param Optional[list[Property]] properties: List of all properties that belong to the edge
         :param Optional[list[AnnotationEntry]] annotations: List of all annotations that belong to the edge
@@ -1093,6 +1097,7 @@ class InsertManager(NamespaceManager, LookupManager):
             relation=relation,
             bel=bel,
             sha512=sha512,
+            data=json.dumps(data),
         )
 
         if evidence is not None:

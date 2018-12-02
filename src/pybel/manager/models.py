@@ -15,16 +15,15 @@ from sqlalchemy.orm import backref, relationship
 
 from .utils import int_or_str
 from ..constants import (
-    ANNOTATIONS, BELNS_ENCODING_STR, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR,
+    BELNS_ENCODING_STR, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR,
     CITATION_LAST_AUTHOR, CITATION_NAME, CITATION_PAGES, CITATION_REFERENCE, CITATION_TITLE, CITATION_TYPE,
-    CITATION_TYPE_PUBMED, CITATION_VOLUME, COMPLEX, COMPOSITE, EFFECT, EVIDENCE, FRAGMENT, FUSION, GMOD, HAS_COMPONENT,
-    HAS_PRODUCT, HAS_REACTANT, HGVS, IDENTIFIER, LOCATION, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT,
-    METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, MODIFIER, NAME,
-    NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PMOD, RANGE_3P, RANGE_5P, REACTION, RELATION, SUBJECT,
+    CITATION_TYPE_PUBMED, CITATION_VOLUME, EFFECT, EVIDENCE, FRAGMENT, FUSION, GMOD, HGVS, IDENTIFIER, LOCATION,
+    METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER,
+    METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PMOD,
+    RANGE_3P, RANGE_5P, SUBJECT,
 )
 from ..dsl import (
-    FUNC_TO_DSL, FUNC_TO_FUSION_DSL, complex_abundance, composite_abundance, fragment, fusion_range, gmod, hgvs,
-    missing_fusion_range, named_complex_abundance, pmod, reaction,
+    fragment, fusion_range, gmod, hgvs, missing_fusion_range, pmod,
 )
 from ..io.gpickle import from_bytes, to_bytes
 from ..tokens import parse_result_to_dsl
@@ -829,6 +828,8 @@ class Edge(Base):
 
     sha512 = Column(String(255), index=True, doc='The hash of the source, target, and associated metadata')
 
+    data = Column(Text, nullable=False, doc='The stringified JSON representing this edge')
+
     def __str__(self):
         return self.bel
 
@@ -847,30 +848,6 @@ class Edge(Base):
 
         return dict(annotations) or None
 
-    def get_data_json(self):
-        """Get the PyBEL edge data dictionary this edge represents.
-
-        :rtype: dict
-        """
-        data = {
-            RELATION: self.relation,
-        }
-
-        annotations = self.get_annotations_json()
-        if annotations:
-            data[ANNOTATIONS] = annotations
-
-        if self.evidence:
-            data.update(self.evidence.to_json())
-
-        for prop in self.properties:  # FIXME this is also probably broken for translocations or mixed activity/degrad
-            if prop.side not in data:
-                data[prop.side] = prop.to_json()
-            else:
-                data[prop.side].update(prop.to_json())
-
-        return data
-
     def to_json(self, include_id=False):
         """Create a dictionary of one BEL Edge that can be used to create an edge in a :class:`BELGraph`.
 
@@ -883,7 +860,7 @@ class Edge(Base):
             'source': self.source.to_json(),
             'target': self.target.to_json(),
             'key': self.sha512,
-            'data': self.get_data_json(),
+            'data': json.loads(self.data),
         }
 
         if include_id:
@@ -896,7 +873,10 @@ class Edge(Base):
 
         :param pybel.BELGraph graph: A BEL graph
         """
-        u = graph.add_node_from_data(self.source.to_json())
-        v = graph.add_node_from_data(self.target.to_json())
+        u = self.source.as_bel()
+        v = self.target.as_bel()
 
-        graph.add_edge(u, v, key=self.sha512, **self.get_data_json())
+        if self.evidence:
+            return graph.add_qualified_edge(u, v, **json.loads(self.data))
+        else:
+            return graph.add_unqualified_edge(u, v, self.relation)
