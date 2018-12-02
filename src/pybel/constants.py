@@ -19,7 +19,7 @@ log = getLogger(__name__)
 VERSION = '0.12.3-dev'
 
 #: The last PyBEL version where the graph data definition changed
-PYBEL_MINIMUM_IMPORT_VERSION = 0, 12, 0
+PYBEL_MINIMUM_IMPORT_VERSION = 0, 13, 0
 
 BELFRAMEWORK_DOMAIN = 'http://resource.belframework.org'
 OPENBEL_DOMAIN = 'http://resources.openbel.org'
