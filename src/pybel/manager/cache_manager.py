@@ -984,15 +984,13 @@ class InsertManager(NamespaceManager, LookupManager):
     def get_or_create_node(self, graph, node_data):
         """Create an entry and object for given node if it does not exist.
 
-        :param BELGraph graph: A BEL graph
-        :param BaseEntity node_data: A PyBEL node tuple
+        :type graph: BELGraph
+        :type node_data: pybel.dsl.BaseEntity
         :rtype: Node
         """
         sha512 = node_data.as_sha512()
         if sha512 in self.object_cache_node:
             return self.object_cache_node[sha512]
-
-        bel = node_data.as_bel()
 
         node = self.get_node_by_hash(sha512)
 
@@ -1000,11 +998,7 @@ class InsertManager(NamespaceManager, LookupManager):
             self.object_cache_node[sha512] = node
             return node
 
-        node = Node(
-            type=node_data.function,
-            bel=bel,
-            sha512=sha512,
-        )
+        node = Node._start_from_base_entity(node_data)
 
         namespace = node_data.get(NAMESPACE)
         if namespace is None:
@@ -1041,7 +1035,7 @@ class InsertManager(NamespaceManager, LookupManager):
             modifications = self.get_or_create_modification(graph, node_data)
 
             if modifications is None:
-                log.warning('could not create %s because had an uncachable modification', bel)
+                log.warning('could not create %s because had an uncachable modification', node_data.as_bel())
                 return
 
             node.modifications = modifications

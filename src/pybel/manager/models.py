@@ -4,6 +4,7 @@
 
 import datetime
 import hashlib
+import json
 from collections import defaultdict
 
 from sqlalchemy import (
@@ -26,6 +27,7 @@ from ..dsl import (
     missing_fusion_range, named_complex_abundance, pmod, reaction,
 )
 from ..io.gpickle import from_bytes, to_bytes
+from ..tokens import parse_result_to_dsl
 
 __all__ = [
     'Base',
@@ -499,6 +501,22 @@ class Node(Base):
     modifications = relationship(Modification, secondary=node_modification, lazy='dynamic',
                                  backref=backref('nodes', lazy='dynamic'))
 
+    data = Column(Text, nullable=False, doc='PyBEL BaseEntity as JSON')
+
+    @staticmethod
+    def _start_from_base_entity(base_entity):
+        """Convert a base entity to a node model.
+
+        :type base_entity: pybel.dsl.BaseEntity
+        :rtype: Node
+        """
+        return Node(
+            type=base_entity.function,
+            bel=base_entity.as_bel(),
+            sha512=base_entity.sha512,
+            data=json.dumps(base_entity),
+        )
+
     @classmethod
     def bel_contains(cls, bel_query):
         """Build a filter for nodes whose BEL contain the query.
@@ -524,71 +542,7 @@ class Node(Base):
 
         :rtype: pybel.dsl.BaseEntity
         """
-        func = self.type
-
-        if self.has_fusion:
-            j = self.modifications[0].to_json()
-            fusion_dsl = FUNC_TO_FUSION_DSL[func]
-            member_dsl = FUNC_TO_DSL[func]
-            partner_5p = member_dsl(**j[PARTNER_5P])
-            partner_3p = member_dsl(**j[PARTNER_3P])
-
-            return fusion_dsl(
-                partner_5p=partner_5p,
-                partner_3p=partner_3p,
-                range_5p=j.get(RANGE_5P),
-                range_3p=j.get(RANGE_3P),
-            )
-
-        if func == REACTION:
-            return reaction(
-                reactants=self._get_list_by_relation(HAS_REACTANT),
-                products=self._get_list_by_relation(HAS_PRODUCT)
-            )
-
-        if func in {COMPLEX, COMPOSITE}:
-            members = self._get_list_by_relation(HAS_COMPONENT)
-
-            if self.type == COMPOSITE:
-                return composite_abundance(members)
-
-            if self.namespace_entry and members:
-                return complex_abundance(
-                    members=members,
-                    namespace=self.namespace_entry.namespace.keyword,
-                    name=self.namespace_entry.name,
-                    identifier=self.namespace_entry.identifier,
-                )
-            if self.namespace_entry and not members:
-                return named_complex_abundance(
-                    namespace=self.namespace_entry.namespace.keyword,
-                    name=self.namespace_entry.name,
-                    identifier=self.namespace_entry.identifier,
-                )
-
-            if members:
-                return complex_abundance(members=members)
-
-            raise ValueError('complex can not be nameless and have no members')
-
-        dsl = FUNC_TO_DSL[func]
-
-        if self.is_variant:
-            return dsl(
-                namespace=self.namespace_entry.namespace.keyword,
-                name=self.namespace_entry.name,
-                identifier=self.namespace_entry.identifier,
-                variants=[
-                    modification.to_json()
-                    for modification in self.modifications
-                ]
-            )
-
-        return dsl(
-            namespace=self.namespace_entry.namespace.keyword,
-            name=self.namespace_entry.name,
-            identifier=self.namespace_entry.identifier,
-        )
+        return parse_result_to_dsl(json.loads(self.data))
 
     def to_json(self):
         return self.as_bel()

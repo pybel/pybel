@@ -11,6 +11,7 @@ from tests.constants import test_citation_dict, test_evidence_text
 
 yfg1 = protein(name='YFG1', namespace='HGNC')
 yfg2 = protein(name='YFG1', namespace='HGNC')
+yfg3 = protein(name='YFG3', namespace='HGNC')
 
 
 class TestReconstituteNodeTuples(TemporaryCacheMixin):
@@ -41,12 +42,12 @@ class TestCascades(TemporaryCacheMixin):
     def setUp(self):
         super(TestCascades, self).setUp()
 
-        self.n1 = Node(type=PROTEIN, bel='p(HGNC:A)')
-        self.n2 = Node(type=PROTEIN, bel='p(HGNC:B)')
-        self.n3 = Node(type=PROTEIN, bel='p(HGNC:C)')
-        self.e1 = Edge(source=self.n1, target=self.n2, relation=INCREASES, bel='p(HGNC:A) increases p(HGNC:B)')
-        self.e2 = Edge(source=self.n2, target=self.n3, relation=INCREASES, bel='p(HGNC:B) increases p(HGNC:C)')
-        self.e3 = Edge(source=self.n1, target=self.n3, relation=INCREASES, bel='p(HGNC:A) increases p(HGNC:C)')
+        self.n1 = Node._start_from_base_entity(yfg1)
+        self.n2 = Node._start_from_base_entity(yfg2)
+        self.n3 = Node._start_from_base_entity(yfg3)
+        self.e1 = Edge(source=self.n1, target=self.n2, relation=INCREASES, bel='p(HGNC:YFG1) increases p(HGNC:YFG2)')
+        self.e2 = Edge(source=self.n2, target=self.n3, relation=INCREASES, bel='p(HGNC:YFG2) increases p(HGNC:YFG3)')
+        self.e3 = Edge(source=self.n1, target=self.n3, relation=INCREASES, bel='p(HGNC:YFG1) increases p(HGNC:YFG3)')
         self.g1 = Network(name=n(), version=n(), edges=[self.e1, self.e2, self.e3])
         self.g2 = Network(name=n(), version=n(), edges=[self.e1])
 
