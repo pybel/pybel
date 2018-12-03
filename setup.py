@@ -46,8 +46,11 @@ INSTALL_REQUIRES = [
 EXTRAS_REQUIRE = {
     'indra': ['indra'],
     'neo4j': ['py2neo==3.1.2'],
+    'schema': ['jsonschema'],
     'docs': [
+        'sphinx',
         'sphinx-click',
+        'sphinx-rtd-theme',
     ],
 }
 TESTS_REQUIRE = [
