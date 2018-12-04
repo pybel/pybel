@@ -4,6 +4,9 @@
   "description": "A schema for BEL nodes in PyBEL",
   "type": "object",
   "properties": {
+    "type": {
+      "type": "string"
+    },
     "namespace": {
       "type": "string"
     },
@@ -14,7 +17,7 @@
       "type": "string"
     }
   },
-  "required": [ "namespace" ],
+  "required": [ "type", "namespace" ],
   "dependencies": {
   }
 }
