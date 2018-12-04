@@ -12,7 +12,8 @@ __all__ = [
 ]
 
 HERE = os.path.abspath(os.path.dirname(__file__))
-NODES_SCHEMA_PATH = os.path.join(HERE, 'nodes.schema.json')
+#NODES_SCHEMA_PATH = os.path.join(HERE, 'nodes.schema.json')
+NODES_SCHEMA_PATH = os.path.join(HERE, 'nodes_v2.schema.json')
 
 with open(NODES_SCHEMA_PATH) as file:
     NODES_SCHEMA = json.load(file)
