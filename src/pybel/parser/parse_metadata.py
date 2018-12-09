@@ -30,9 +30,9 @@ define_tag = Suppress(BEL_KEYWORD_DEFINE)
 function_tags = Word(''.join(belns_encodings))
 
 SEMANTIC_VERSION_STRING_RE = re.compile(
-    '(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(?:-(?P<release>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+(?P<build>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?')
+    r'(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(?:-(?P<release>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+(?P<build>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?')
 
-MALFORMED_VERSION_STRING_RE = re.compile('(?P<major>\d+)(\.(?P<minor>\d+)(\.(?P<patch>\d+))?)?')
+MALFORMED_VERSION_STRING_RE = re.compile(r'(?P<major>\d+)(\.(?P<minor>\d+)(\.(?P<patch>\d+))?)?')
 
 
 class MetadataParser(BaseParser):

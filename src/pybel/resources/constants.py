@@ -2,7 +2,7 @@
 
 import re
 
-METADATA_LINE_RE = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
+METADATA_LINE_RE = re.compile(r"(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
 
 citation_format = 'SET Citation = {{"PubMed","{}","{}"}}'
 evidence_format = 'SET Evidence = "{}"'

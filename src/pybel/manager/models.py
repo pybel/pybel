@@ -101,7 +101,7 @@ class Namespace(Base):
                      doc="Contains regex pattern for value identification.")
 
     miriam_id = Column(String(16), nullable=True,
-                       doc='MIRIAM resource identifier matching the regular expression ``^MIR:001\d{5}$``')
+                       doc=r'MIRIAM resource identifier matching the regular expression ``^MIR:001\d{5}$``')
     miriam_name = Column(String(255), nullable=True)
     miriam_namespace = Column(String(255), nullable=True)
     miriam_uri = Column(String(255), nullable=True)

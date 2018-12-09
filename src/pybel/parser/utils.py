@@ -13,7 +13,7 @@ from ..constants import OBJECT, RELATION, SUBJECT
 
 log = logging.getLogger('pybel')
 
-re_match_bel_header = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
+re_match_bel_header = re.compile(r"(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
 
 
 def is_int(s):

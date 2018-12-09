@@ -24,13 +24,13 @@ log = logging.getLogger(__name__)
 
 EUTILS_URL_FMT = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&retmode=json&id={}"
 
-re1 = re.compile('^[12][0-9]{3} [a-zA-Z]{3} \d{1,2}$')
-re2 = re.compile('^[12][0-9]{3} [a-zA-Z]{3}$')
-re3 = re.compile('^[12][0-9]{3}$')
-re4 = re.compile('^[12][0-9]{3} [a-zA-Z]{3}-[a-zA-Z]{3}$')
-re5 = re.compile('^([12][0-9]{3}) (Spring|Fall|Winter|Summer)$')
-re6 = re.compile('^[12][0-9]{3} [a-zA-Z]{3} \d{1,2}-(\d{1,2})$')
-re7 = re.compile('^[12][0-9]{3} [a-zA-Z]{3} \d{1,2}-([a-zA-Z]{3} \d{1,2})$')
+re1 = re.compile(r'^[12][0-9]{3} [a-zA-Z]{3} \d{1,2}$')
+re2 = re.compile(r'^[12][0-9]{3} [a-zA-Z]{3}$')
+re3 = re.compile(r'^[12][0-9]{3}$')
+re4 = re.compile(r'^[12][0-9]{3} [a-zA-Z]{3}-[a-zA-Z]{3}$')
+re5 = re.compile(r'^([12][0-9]{3}) (Spring|Fall|Winter|Summer)$')
+re6 = re.compile(r'^[12][0-9]{3} [a-zA-Z]{3} \d{1,2}-(\d{1,2})$')
+re7 = re.compile(r'^[12][0-9]{3} [a-zA-Z]{3} \d{1,2}-([a-zA-Z]{3} \d{1,2})$')
 
 season_map = {'Spring': '03', 'Summer': '06', 'Fall': '09', 'Winter': '12'}
 
