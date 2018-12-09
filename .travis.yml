@@ -33,7 +33,6 @@ jobs:
       env: TOXENV=manifest
     - env: TOXENV=flake8
     - env: TOXENV=xenon
-    - env: TOXENV=vulture
     - env: TOXENV=pyroma
 
     # docs stage
@@ -46,7 +45,6 @@ matrix:
   allow_failures:
       - env: TOXENV=flake8
       - env: TOXENV=xenon
-      - env: TOXENV=vulture
       - env: TOXENV=pyroma
 
 install:
