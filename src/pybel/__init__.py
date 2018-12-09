@@ -103,15 +103,3 @@ __all__ = (
         'get_version',
     ]
 )
-
-__version__ = '0.13.0-dev'
-
-__title__ = 'PyBEL'
-__description__ = 'Parsing, validation, compilation, and data exchange of Biological Expression Language (BEL)'
-__url__ = 'https://github.com/pybel/pybel'
-
-__author__ = 'Charles Tapley Hoyt'
-__email__ = 'charles.hoyt@scai.fraunhofer.de'
-
-__license__ = 'Apache 2.0 License'
-__copyright__ = 'Copyright (c) 2016-2018 Charles Tapley Hoyt'
