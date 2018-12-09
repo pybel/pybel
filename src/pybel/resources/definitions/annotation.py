@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Utilities for writing BEL annotation files."""
+
 from __future__ import print_function
 
 import time

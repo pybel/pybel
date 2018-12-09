@@ -6,9 +6,9 @@ from __future__ import print_function
 
 import logging
 from copy import deepcopy
-from pkg_resources import iter_entry_points
 
 import networkx as nx
+from pkg_resources import iter_entry_points
 from six import string_types
 
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
@@ -61,7 +61,7 @@ class BELGraph(nx.MultiDiGraph):
 
     def __init__(self, name=None, version=None, description=None, authors=None, contact=None, license=None,
                  copyright=None, disclaimer=None, data=None, **kwargs):
-        """The default constructor parses a BEL graph using the built-in :mod:`networkx` methods.
+        """Initialize a BEL graph with its associated metadata.
 
         :param str name: The graph's name
         :param str version: The graph's version. Recommended to use `semantic versioning <http://semver.org/>`_ or
@@ -131,8 +131,9 @@ class BELGraph(nx.MultiDiGraph):
 
     @property
     def document(self):
-        """A dictionary holding the metadata from the "Document" section of the BEL script. All keys are normalized
-        according to :data:`pybel.constants.DOCUMENT_KEYS`
+        """Get the dictionary holding the metadata from the ``SET DOCUMENT`` statements in the source BEL script.
+
+        All keys are normalized according to :data:`pybel.constants.DOCUMENT_KEYS`.
 
         :rtype: dict[str,str]
         """
@@ -140,7 +141,9 @@ class BELGraph(nx.MultiDiGraph):
 
     @property
     def name(self, *attrs):  # Needs *attrs since it's an override
-        """The graph's name, from the ``SET DOCUMENT Name = "..."`` entry in the source BEL script
+        """Get the graph's name.
+
+        .. hint:: Can be set with the ``SET DOCUMENT Name = "..."`` entry in the source BEL script.
 
         :rtype: str
         """
@@ -148,11 +151,14 @@ class BELGraph(nx.MultiDiGraph):
 
     @name.setter
     def name(self, *attrs, **kwargs):  # Needs *attrs and **kwargs since it's an override
+        """Set the graph's name."""
         self.document[METADATA_NAME] = attrs[0]
 
     @property
     def version(self):
-        """The graph's version, from the ``SET DOCUMENT Version = "..."`` entry in the source BEL script
+        """Get the graph's version.
+
+        .. hint:: Can be set with the ``SET DOCUMENT Version = "..."`` entry in the source BEL script.
 
         :rtype: str
         """
@@ -160,11 +166,14 @@ class BELGraph(nx.MultiDiGraph):
 
     @version.setter
     def version(self, version):
+        """Set the graph's version."""
         self.document[METADATA_VERSION] = version
 
     @property
     def description(self):
-        """The graph's description, from the ``SET DOCUMENT Description = "..."`` entry in the source BEL Script
+        """Get the graph's description.
+
+        .. hint:: Can be set with the ``SET DOCUMENT Description = "..."`` entry in the source BEL document.
 
         :rtype: str
         """
@@ -172,11 +181,14 @@ class BELGraph(nx.MultiDiGraph):
 
     @description.setter
     def description(self, description):
+        """Set the graph's description."""
         self.document[METADATA_DESCRIPTION] = description
 
     @property
     def authors(self):
-        """The graph's description, from the ``SET DOCUMENT Authors = "..."`` entry in the source BEL Script
+        """Get the graph's description.
+
+        .. hint:: Can be set with the ``SET DOCUMENT Authors = "..."`` entry in the source BEL document.
 
         :rtype: str
         """
@@ -184,11 +196,14 @@ class BELGraph(nx.MultiDiGraph):
 
     @authors.setter
     def authors(self, authors):
+        """Set the graph's authors."""
         self.document[METADATA_AUTHORS] = authors
 
     @property
     def contact(self):
-        """The graph's description, from the ``SET DOCUMENT ContactInfo = "..."`` entry in the source BEL Script
+        """Get the graph's contact information.
+
+        .. hint:: Can be set with the ``SET DOCUMENT ContactInfo = "..."`` entry in the source BEL document.
 
         :rtype: str
         """
@@ -200,7 +215,9 @@ class BELGraph(nx.MultiDiGraph):
 
     @property
     def license(self):
-        """The graph's license, from the `SET DOCUMENT Licenses = "..."`` entry in the source BEL Script
+        """Get the graph's license.
+
+         .. hint:: Can be set with the ``SET DOCUMENT Licenses = "..."`` entry in the source BEL document
 
         :rtype: Optional[str]
         """
@@ -208,11 +225,14 @@ class BELGraph(nx.MultiDiGraph):
 
     @license.setter
     def license(self, license):
+        """Set the graph's license."""
         self.document[METADATA_LICENSES] = license
 
     @property
     def copyright(self):
-        """The graph's copyright, from the `SET DOCUMENT Copyright = "..."`` entry in the source BEL Script
+        """Get the graph's copyright.
+
+        .. hint:: Can be set with the ``SET DOCUMENT Copyright = "..."`` entry in the source BEL document
 
         :rtype: Optional[str]
         """
@@ -224,7 +244,9 @@ class BELGraph(nx.MultiDiGraph):
 
     @property
     def disclaimer(self):
-        """The graph's disclaimer, from the `SET DOCUMENT Disclaimer = "..."`` entry in the source BEL Script
+        """Get the graph's disclaimer.
+
+        .. hint:: Can be set with the ``SET DOCUMENT Disclaimer = "..."`` entry in the source BEL document.
 
         :rtype: Optional[str]
         """
@@ -232,12 +254,15 @@ class BELGraph(nx.MultiDiGraph):
 
     @disclaimer.setter
     def disclaimer(self, disclaimer):
+        """Set the graph's disclaimer."""
         self.document[METADATA_DISCLAIMER] = disclaimer
 
     @property
     def namespace_url(self):
-        """A dictionary mapping the keywords used to create this graph to the URLs of the BELNS files from the
-        ``DEFINE NAMESPACE [key] AS URL "[value]"`` entries in the definitions section.
+        """Get the mapping from the keywords used in this graph to their respective BEL namespace URLs.
+
+        .. hint:: Can be appended with the ``DEFINE NAMESPACE [key] AS URL "[value]"`` entries in the definitions
+                  section of the source BEL document.
 
         :rtype: dict[str,str]
         """
@@ -245,7 +270,7 @@ class BELGraph(nx.MultiDiGraph):
 
     @property
     def defined_namespace_keywords(self):
-        """Returns the set of all keywords defined as namespaces in this graph
+        """Get the set of all keywords defined as namespaces in this graph.
 
         :rtype: set[str]
         """
@@ -253,8 +278,9 @@ class BELGraph(nx.MultiDiGraph):
 
     @property
     def uncached_namespaces(self):
-        """Returns a list of namespaces's URLs that are present in the graph, but cannot be cached due to their
-        corresponding resources' cachable flags being set to "no."
+        """Get the set of namespaces URLs that are present in the graph, but cannot be cached.
+
+        Namespaces are added to this set when their corresponding resources' cachable flags being set to "no."
 
         :rtype: set[str]
         """
@@ -262,8 +288,10 @@ class BELGraph(nx.MultiDiGraph):
 
     @property
     def namespace_pattern(self):
-        """A dictionary mapping the namespace keywords used to create this graph to their regex patterns from the
-        ``DEFINE NAMESPACE [key] AS PATTERN "[value]"`` entries in the definitions section
+        """Get the mapping from the namespace keywords used to create this graph to their regex patterns.
+
+        .. hint:: Can be appended with the ``DEFINE NAMESPACE [key] AS PATTERN "[value]"`` entries in the definitions
+                  section of the source BEL document.
 
         :rtype: dict[str,str]
         """
@@ -271,8 +299,10 @@ class BELGraph(nx.MultiDiGraph):
 
     @property
     def annotation_url(self):
-        """A dictionary mapping the annotation keywords used to create this graph to the URLs of the BELANNO files
-        from the ``DEFINE ANNOTATION [key] AS URL "[value]"`` entries in the definitions section
+        """Get the mapping from the annotation keywords used to create this graph to the URLs of the BELANNO files.
+
+        .. hint:: Can be appended with the ``DEFINE ANNOTATION [key] AS URL "[value]"`` entries in the definitions
+                  section of the source BEL document.
 
         :rtype: dict[str,str]
         """
@@ -280,8 +310,10 @@ class BELGraph(nx.MultiDiGraph):
 
     @property
     def annotation_pattern(self):
-        """A dictionary mapping the annotation keywords used to create this graph to their regex patterns
-        from the ``DEFINE ANNOTATION [key] AS PATTERN "[value]"`` entries in the definitions section
+        """Get the mapping from the annotation keywords used to create this graph to their regex patterns as strings.
+
+        .. hint:: Can be appended with the ``DEFINE ANNOTATION [key] AS PATTERN "[value]"`` entries in the definitions
+                  section of the source BEL document.
 
         :rtype: dict[str,str]
         """
@@ -289,8 +321,10 @@ class BELGraph(nx.MultiDiGraph):
 
     @property
     def annotation_list(self):
-        """A dictionary mapping the keywords of locally defined annotations to a set of their values
-        from the ``DEFINE ANNOTATION [key] AS LIST {"[value]", ...}`` entries in the definitions section
+        """Get the mapping from the keywords of locally defined annotations to their respective sets of values.
+
+        .. hint:: Can be appended with the ``DEFINE ANNOTATION [key] AS LIST {"[value]", ...}`` entries in the
+                  definitions section of the source BEL document.
 
         :rtype: dict[str,set[str]]
         """
@@ -298,7 +332,7 @@ class BELGraph(nx.MultiDiGraph):
 
     @property
     def defined_annotation_keywords(self):
-        """Returns the set of all keywords defined as annotations in this graph
+        """Get the set of all keywords defined as annotations in this graph.
 
         :rtype: set[str]
         """
@@ -310,7 +344,7 @@ class BELGraph(nx.MultiDiGraph):
 
     @property
     def pybel_version(self):
-        """Stores the version of PyBEL with which this graph was produced as a string
+        """Get the version of PyBEL with which this graph was produced as a string.
 
         :rtype: str
         """
@@ -318,7 +352,8 @@ class BELGraph(nx.MultiDiGraph):
 
     @property
     def warnings(self):
-        """Warnings are stored in a list of 4-tuples that is a property of the graph object.
+        """Get the warnings stored in a list of 4-tuples that is a property of the graph object.
+
         This tuple respectively contains the line number, the line text, the exception instance, and the context
         dictionary from the parser at the time of error.
 
@@ -327,11 +362,10 @@ class BELGraph(nx.MultiDiGraph):
         return self._warnings
 
     def __str__(self):
-        """Stringifies this graph as its name and version pair"""
         return '{} v{}'.format(self.name, self.version)
 
     def skip_storing_namespace(self, namespace):
-        """Checks if the namespace should be skipped
+        """Check if the namespace should be skipped.
 
         :param Optional[str] namespace:
         :rtype: bool
@@ -389,16 +423,17 @@ class BELGraph(nx.MultiDiGraph):
     def add_transcription(self, u, v):
         """Add a transcription relation from a gene to an RNA or miRNA node.
 
-        :param BaseEntity u: The source node
-        :param BaseEntity v: The target node
+        :param pybel.dsl.Gene u: The source node
+        :param v: The target node
+        :type v: pybel.dsl.Rna or pybel.dsl.MicroRna
         """
         return self.add_unqualified_edge(u, v, TRANSCRIBED_TO)
 
     def add_translation(self, u, v):
         """Add a translation relation from a RNA to a protein.
 
-        :param BaseEntity u: The source node
-        :param BaseEntity v: The target node
+        :param pybel.dsl.Rna u: The source node
+        :param pybel.dsl.Protein v: The target node
         """
         return self.add_unqualified_edge(u, v, TRANSLATED_TO)
 
@@ -432,7 +467,7 @@ class BELGraph(nx.MultiDiGraph):
         return self.add_unqualified_edge(u, v, IS_A)
 
     def add_part_of(self, u, v):
-        """Add an partOf relationship such that ``u partOf v``.
+        """Add a ``partOf`` relationship such that ``u partOf v``.
 
         :param BaseEntity u: The source node
         :param BaseEntity v: The target node
@@ -440,7 +475,7 @@ class BELGraph(nx.MultiDiGraph):
         return self.add_unqualified_edge(u, v, PART_OF)
 
     def add_has_member(self, u, v):
-        """Add an hasMember relationship such that ``u hasMember v``.
+        """Add a ``hasMember`` relationship such that ``u hasMember v``.
 
         :param BaseEntity u: The source node
         :param BaseEntity v: The target node
@@ -465,7 +500,7 @@ class BELGraph(nx.MultiDiGraph):
 
     def add_increases(self, u, v, evidence, citation, annotations=None, subject_modifier=None, object_modifier=None,
                       **attr):
-        """Add an increases relationship with :meth:`add_qualified_edge` using :data:`pybel.constants.INCREASES`.
+        """Add an ``increases`` relationship with :meth:`add_qualified_edge` using :data:`pybel.constants.INCREASES`.
 
         :param BaseEntity u: The source node
         :param BaseEntity v: The target node
@@ -687,16 +722,8 @@ class BELGraph(nx.MultiDiGraph):
         )
 
     def _has_edge_attr(self, u, v, key, attr):
-        """
-        :type u: BaseEntity
-        :type v: BaseEntity
-        :type key: str
-        :type attr: str
-        :rtype: bool
-        """
         assert isinstance(u, BaseEntity)
         assert isinstance(v, BaseEntity)
-
         return attr in self[u][v][key]
 
     def has_edge_citation(self, u, v, key):
@@ -774,8 +801,7 @@ class BELGraph(nx.MultiDiGraph):
         self._set_node_attr(node, DESCRIPTION, description)
 
     def __add__(self, other):
-        """Creates a deep copy of this graph and full joins another graph with it using
-        :func:`pybel.struct.left_full_join`.
+        """Copy this graph and join it with another graph with it using :func:`pybel.struct.left_full_join`.
 
         :param BELGraph other: Another BEL graph
         :rtype: BELGraph
@@ -795,7 +821,7 @@ class BELGraph(nx.MultiDiGraph):
         return result
 
     def __iadd__(self, other):
-        """Full joins another graph into this one using :func:`pybel.struct.left_full_join`.
+        """Join another graph into this one, in-place, using :func:`pybel.struct.left_full_join`.
 
         :param BELGraph other: Another BEL graph
         :rtype: BELGraph
@@ -814,8 +840,9 @@ class BELGraph(nx.MultiDiGraph):
         return self
 
     def __and__(self, other):
-        """Creates a deep copy of this graph and outer joins another graph with it using
-        :func:`pybel.struct.left_outer_join`.
+        """Create a deep copy of this graph and left outer joins another graph.
+
+        Uses :func:`pybel.struct.left_outer_join`.
 
         :param BELGraph other: Another BEL graph
         :rtype: BELGraph
@@ -835,7 +862,7 @@ class BELGraph(nx.MultiDiGraph):
         return result
 
     def __iand__(self, other):
-        """Outer joins another graph into this one using :func:`pybel.struct.left_outer_join`.
+        """Join another graph into this one, in-place, using :func:`pybel.struct.left_outer_join`.
 
         :param BELGraph other: Another BEL graph
         :rtype: BELGraph
@@ -854,7 +881,7 @@ class BELGraph(nx.MultiDiGraph):
         return self
 
     def __xor__(self, other):
-        """Node intersection joins another graph using :func:`pybel.struct.left_node_intersection_join`
+        """Join this graph with another using :func:`pybel.struct.left_node_intersection_join`.
 
         :param BELGraph other: Another BEL graph
 
@@ -917,7 +944,7 @@ class BELGraph(nx.MultiDiGraph):
                 yield w
 
     def iter_equivalent_nodes(self, node):
-        """Iterate over nodes that are equivalent to the given node, including the original,
+        """Iterate over nodes that are equivalent to the given node, including the original.
 
         :param BaseEntity node: A PyBEL node
         :rtype: iter[BaseEntity]
@@ -939,7 +966,8 @@ class BELGraph(nx.MultiDiGraph):
 
         return set(self.iter_equivalent_nodes(node))
 
-    def _node_has_namespace_helper(self, node, namespace):
+    @staticmethod
+    def _node_has_namespace_helper(node, namespace):
         """Check that the node has namespace information.
 
         Might have cross references in future.
@@ -950,7 +978,7 @@ class BELGraph(nx.MultiDiGraph):
         return namespace == node.get(NAMESPACE)
 
     def node_has_namespace(self, node, namespace):
-        """Check if the node have the given namespace?
+        """Check if the node have the given namespace.
 
         This also should look in the equivalent nodes.
 

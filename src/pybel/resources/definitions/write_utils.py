@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Shared utilities for writing BEL namespace and annotation files."""
+
 import getpass
 
 DATETIME_FMT = '%Y-%m-%dT%H:%M:%S'

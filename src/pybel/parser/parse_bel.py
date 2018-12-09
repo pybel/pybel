@@ -5,9 +5,9 @@
 This module handles parsing BEL relations and validation of semantics.
 """
 
-import itertools as itt
 import logging
 
+import itertools as itt
 from pyparsing import And, Group, Keyword, MatchFirst, Optional, StringEnd, Suppress, delimitedList, oneOf, replaceWith
 
 from .baseparser import BaseParser
@@ -216,23 +216,22 @@ partof_tag = Keyword(PART_OF)
 
 
 class BELParser(BaseParser):
-    """Build a parser backed by a given dictionary of namespaces"""
+    """Build a parser backed by a given dictionary of namespaces."""
 
-    def __init__(
-            self,
-            graph,
-            namespace_dict=None,
-            annotation_dict=None,
-            namespace_regex=None,
-            annotation_regex=None,
-            allow_naked_names=False,
-            allow_nested=False,
-            disallow_unqualified_translocations=False,
-            citation_clearing=True,
-            skip_validation=False,
-            autostreamline=True,
-            required_annotations=None
-    ):
+    def __init__(self,
+                 graph,
+                 namespace_dict=None,
+                 annotation_dict=None,
+                 namespace_regex=None,
+                 annotation_regex=None,
+                 allow_naked_names=False,
+                 allow_nested=False,
+                 disallow_unqualified_translocations=False,
+                 citation_clearing=True,
+                 skip_validation=False,
+                 autostreamline=True,
+                 required_annotations=None
+                 ):
         """Build a BEL parser.
 
         :param pybel.BELGraph graph: The BEL Graph to use to store the network
@@ -612,7 +611,7 @@ class BELParser(BaseParser):
 
     @property
     def namespace_regex(self):
-        """The dictionary of {namespace keyword: compiled regular expression} stored the internal identifier parser
+        """Return the dictionary of {namespace keyword: compiled regular expression} in the internal identifier parser.
 
         :rtype: dict[str,re]
         """
@@ -620,7 +619,7 @@ class BELParser(BaseParser):
 
     @property
     def annotation_dict(self):
-        """A dictionary of annotations to their set of values
+        """Return the dictionary of annotations to their set of values.
 
         :rtype: dict[str,set[str]]
         """
@@ -628,7 +627,7 @@ class BELParser(BaseParser):
 
     @property
     def annotation_regex(self):
-        """A dictionary of annotations defined by regular expressions {annotation keyword: string regular expression}
+        """Return the dictionary of annotations defined by regular expressions.
 
         :rtype: dict[str,str]
         """
@@ -636,26 +635,28 @@ class BELParser(BaseParser):
 
     @property
     def allow_naked_names(self):
-        """Should naked names be parsed, or should errors be thrown?
+        """Return if naked names should be parsed (``True``), or if errors should be thrown (``False``).
 
         :rtype: bool
         """
         return self.identifier_parser.allow_naked_names
 
     def get_annotations(self):
-        """Get current annotations in this parser
+        """Get the current annotations in this parser.
 
         :rtype: dict
         """
         return self.control_parser.get_annotations()
 
     def clear(self):
-        """Clears the graph and all control parser data (current citation, annotations, and statement group)"""
+        """Clear the graph and all control parser data (current citation, annotations, and statement group)."""
         self.graph.clear()
         self.control_parser.clear()
 
     def handle_nested_relation(self, line, position, tokens):
-        """Handles nested statements. If :code:`allow_nested` is False, raises a warning.
+        """Handle nested statements.
+
+        If :code:`allow_nested` is False, raises a ``NestedRelationWarning``.
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
@@ -679,7 +680,7 @@ class BELParser(BaseParser):
         return tokens
 
     def check_function_semantics(self, line, position, tokens):
-        """Raises an exception if the function used on the tokens is wrong
+        """Raise an exception if the function used on the tokens is wrong.
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
@@ -941,7 +942,7 @@ def handle_legacy_tloc(line, position, tokens):
 
 
 def modifier_po_to_dict(tokens):
-    """Get location, activity, and/or transformation information as a dictionary.
+    """Get the location, activity, and/or transformation information as a dictionary.
 
     :return: a dictionary describing the modifier
     :rtype: dict

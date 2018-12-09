@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Mutations that induce a sub-graph."""
+
 from . import annotations, citation, neighborhood, paths, random_subgraph, upstream, utils
 from .annotations import *
 from .citation import *

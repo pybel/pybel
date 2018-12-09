@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Mutations that expand the graph."""
+
 from . import neighborhood, upstream
 from .neighborhood import *
 from .upstream import *

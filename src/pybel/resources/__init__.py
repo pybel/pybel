@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains utilities for download, parsing and writing BEL resource files as well as utilities for
-writing BEL Script."""
+"""Utilities for downloading, reading, and writing BEL script, namespace files, and annotation files."""
 
 from . import constants, definitions, document, exc
 from .definitions import *

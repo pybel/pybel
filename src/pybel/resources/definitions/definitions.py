@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
+"""Shared utilities for reading BEL namespace and annotation files."""
+
 import logging
 import os
+from configparser import ConfigParser
+
 import requests.exceptions
 import six
-from configparser import ConfigParser
 
 from ..exc import EmptyResourceError, InvalidResourceError, MissingResourceError
 from ..utils import download, is_url
