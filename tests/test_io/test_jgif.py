@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 import json
 import logging
+import sys
 import unittest
 
 from pybel import from_cbn_jgif, to_jgif
@@ -120,6 +121,7 @@ jgif_expected_edges = [
 class TestJgif(TestGraphMixin):
     """Tests data interchange of """
 
+    @unittest.skipIf(sys.platform.startswith("win"), "does not work on Windows")
     def test_jgif_interchange(self):
         """Tests data from CBN"""
         with open(test_jgif_path) as f:
@@ -135,7 +137,3 @@ class TestJgif(TestGraphMixin):
         # TODO test more thoroughly?
         export_jgif = to_jgif(graph)
         self.assertIsInstance(export_jgif, dict)
-
-
-if __name__ == '__main__':
-    unittest.main()

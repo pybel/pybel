@@ -84,31 +84,38 @@ class TestSeeding(TemporaryCacheClsMixin):
     def test_seed_by_induction(self):
         """Test seeding by inducing over a list of nodes."""
         shp2_model = self.manager.get_node_by_dsl(shp2)
+        self.assertIsNotNone(shp2_model)
         syk_model = self.manager.get_node_by_dsl(syk)
+        self.assertIsNotNone(syk_model)
         trem2_model = self.manager.get_node_by_dsl(trem2)
+        self.assertIsNotNone(trem2_model)
 
         edges = self.manager.query_induction([shp2_model, syk_model, trem2_model])
         self.assertEqual(2, len(edges))
 
         graph = graph_from_edges(edges)
 
-        self.assertEqual(3, graph.number_of_nodes(), msg='Nodes: {}'.format(graph.nodes()))
+        self.assertEqual(3, graph.number_of_nodes())
 
         self.assertIn(trem2, graph)
         self.assertIn(syk, graph)
         self.assertIn(shp2, graph)
 
+        self.assertEqual(3, graph.number_of_nodes())
         self.assertEqual(2, graph.number_of_edges())
 
     def test_seed_by_neighbors(self):
         """Test seeding a graph by neighbors of a list of nodes."""
-        node = self.manager.get_node_by_dsl(shp2)
-        edges = self.manager.query_neighbors([node])
+        shp2_model = self.manager.get_node_by_dsl(shp2)
+        self.assertIsNotNone(shp2_model)
+
+        edges = self.manager.query_neighbors([shp2_model])
         self.assertEqual(2, len(edges))
 
         graph = graph_from_edges(edges)
+        self.assertEqual(3, graph.number_of_edges())
 
-        self.assertEqual(4, graph.number_of_nodes(), msg='Nodes: {}'.format(graph.nodes()))
+        self.assertEqual(4, graph.number_of_nodes())
 
         self.assertIn(cd33_phosphorylated, graph)
         self.assertIn(cd33, graph)
