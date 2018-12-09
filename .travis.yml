@@ -8,9 +8,8 @@ services:
 language: python
 
 python:
-    - 3.6
-    - 2.7
-
+  - 3.6
+  - 3.5
 
 stages:
   - lint
@@ -33,7 +32,6 @@ jobs:
       env: TOXENV=manifest
     - env: TOXENV=flake8
     - env: TOXENV=xenon
-    - env: TOXENV=vulture
     - env: TOXENV=pyroma
 
     # docs stage
@@ -44,13 +42,11 @@ jobs:
 
 matrix:
   allow_failures:
-      - env: TOXENV=flake8
-      - env: TOXENV=xenon
-      - env: TOXENV=vulture
-      - env: TOXENV=pyroma
+    - env: TOXENV=flake8
+    - env: TOXENV=xenon
 
 install:
-    - sh -c 'if [ "$TOXENV" = "py" ]; then pip install tox codecov; else pip install tox; fi'
+  - sh -c 'if [ "$TOXENV" = "py" ]; then pip install tox codecov; else pip install tox; fi'
 
 before_script:
   - sh -c "if [ '$DB' = 'postgresql' ]; then psql -c 'DROP DATABASE IF EXISTS tests;' -U postgres; fi"
@@ -62,10 +58,10 @@ before_script:
   - sh -c "if [ '$DB' = 'mysql' ]; then mysql -e \"GRANT ALL PRIVILEGES ON test.* to 'travis'@'%' WITH GRANT OPTION;\"; fi"
 
 script:
-    - tox
+  - tox
 
 after_success:
-    - sh -c 'if [ "$TOXENV" = "py" ]; then tox -e coverage-report; codecov; fi'
+  - sh -c 'if [ "$TOXENV" = "py" ]; then tox -e coverage-report; codecov; fi'
 
 notifications:
   slack: pybel:n2KbWKBum3musnBg3L76gGwq
