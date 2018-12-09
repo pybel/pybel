@@ -23,7 +23,7 @@ class TestRandom(unittest.TestCase):
 
     def setUp(self):
         """Set the random seed before each test."""
-        random.seed(127)  # love that number
+        random.seed(126)  # love that number
 
     def test_random_edges(self):
         """Test getting a graph by random edges."""
