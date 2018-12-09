@@ -2,8 +2,9 @@
 
 """Utilities for reading and writing BEL script, namespace files, and annotation files."""
 
-import requests
 import time
+
+import requests
 from requests.compat import urlparse
 from requests_file import FileAdapter
 

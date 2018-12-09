@@ -438,12 +438,13 @@ class NetworkManager(NamespaceManager):
         :rtype: list[Network]
         """
         most_recent_times = (
-            self.session.query(
+            self.session
+            .query(
                 Network.name.label('network_name'),
                 func.max(Network.created).label('max_created')
             )
-                .group_by(Network.name)
-                .subquery('most_recent_times')
+            .group_by(Network.name)
+            .subquery('most_recent_times')
         )
 
         and_condition = and_(
@@ -520,12 +521,13 @@ class NetworkManager(NamespaceManager):
         ne1 = aliased(network_edge, name='ne1')
         ne2 = aliased(network_edge, name='ne2')
         singleton_edge_ids_for_network = (
-            self.session.query(ne1.c.edge_id)
-                .outerjoin(ne2, and_(
+            self.session
+            .query(ne1.c.edge_id)
+            .outerjoin(ne2, and_(
                 ne1.c.edge_id == ne2.c.edge_id,
                 ne1.c.network_id != ne2.c.network_id
             ))
-                .filter(and_(
+            .filter(and_(
                 ne1.c.network_id == network.id,
                 ne2.c.edge_id == None
             ))
@@ -582,8 +584,7 @@ class NetworkManager(NamespaceManager):
         :param str name: The name of the network
         :rtype: Optional[Network]
         """
-        network = self.session.query(Network).filter(Network.name == name).order_by(Network.created.desc()).first()
-        return network
+        return self.session.query(Network).filter(Network.name == name).order_by(Network.created.desc()).first()
 
     def get_graph_by_most_recent(self, name):
         """Get the most recently created network with the given name as a :class:`pybel.BELGraph`.

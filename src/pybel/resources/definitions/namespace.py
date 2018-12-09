@@ -2,15 +2,12 @@
 
 """Utilities for writing BEL namespace files."""
 
-from __future__ import print_function
-
+import time
 from collections.abc import Iterable, Mapping
 
-import time
-
-from pybel.constants import NAMESPACE_DOMAIN_OTHER, NAMESPACE_DOMAIN_TYPES, belns_encodings
-from pybel.resources.utils import get_iso_8601_date
 from .write_utils import DATETIME_FMT, make_author_header, make_citation_header, make_properties_header
+from ..utils import get_iso_8601_date
+from ...constants import NAMESPACE_DOMAIN_OTHER, NAMESPACE_DOMAIN_TYPES, belns_encodings
 
 __all__ = [
     'write_namespace',

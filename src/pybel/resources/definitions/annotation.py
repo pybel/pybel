@@ -2,8 +2,6 @@
 
 """Utilities for writing BEL annotation files."""
 
-from __future__ import print_function
-
 import time
 
 from .write_utils import DATETIME_FMT, make_author_header, make_properties_header
