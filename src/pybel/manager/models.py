@@ -4,6 +4,7 @@
 
 import datetime
 import hashlib
+import json
 from collections import defaultdict
 
 from sqlalchemy import (
@@ -14,18 +15,18 @@ from sqlalchemy.orm import backref, relationship
 
 from .utils import int_or_str
 from ..constants import (
-    ANNOTATIONS, BELNS_ENCODING_STR, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR,
+    BELNS_ENCODING_STR, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR,
     CITATION_LAST_AUTHOR, CITATION_NAME, CITATION_PAGES, CITATION_REFERENCE, CITATION_TITLE, CITATION_TYPE,
-    CITATION_TYPE_PUBMED, CITATION_VOLUME, COMPLEX, COMPOSITE, EFFECT, EVIDENCE, FRAGMENT, FUSION, GMOD, HAS_COMPONENT,
-    HAS_PRODUCT, HAS_REACTANT, HGVS, IDENTIFIER, LOCATION, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT,
-    METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, MODIFIER, NAME,
-    NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PMOD, RANGE_3P, RANGE_5P, REACTION, RELATION, SUBJECT,
+    CITATION_TYPE_PUBMED, CITATION_VOLUME, EFFECT, EVIDENCE, FRAGMENT, FUSION, GMOD, HGVS, IDENTIFIER, LOCATION,
+    METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER,
+    METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PMOD,
+    RANGE_3P, RANGE_5P, SUBJECT,
 )
 from ..dsl import (
-    FUNC_TO_DSL, FUNC_TO_FUSION_DSL, complex_abundance, composite_abundance, fragment, fusion_range, gmod, hgvs,
-    missing_fusion_range, named_complex_abundance, pmod, reaction,
+    fragment, fusion_range, gmod, hgvs, missing_fusion_range, pmod,
 )
 from ..io.gpickle import from_bytes, to_bytes
+from ..tokens import parse_result_to_dsl
 
 __all__ = [
     'Base',
@@ -499,6 +500,22 @@ class Node(Base):
     modifications = relationship(Modification, secondary=node_modification, lazy='dynamic',
                                  backref=backref('nodes', lazy='dynamic'))
 
+    data = Column(Text, nullable=False, doc='PyBEL BaseEntity as JSON')
+
+    @staticmethod
+    def _start_from_base_entity(base_entity):
+        """Convert a base entity to a node model.
+
+        :type base_entity: pybel.dsl.BaseEntity
+        :rtype: Node
+        """
+        return Node(
+            type=base_entity.function,
+            bel=base_entity.as_bel(),
+            sha512=base_entity.sha512,
+            data=json.dumps(base_entity),
+        )
+
     @classmethod
     def bel_contains(cls, bel_query):
         """Build a filter for nodes whose BEL contain the query.
@@ -524,71 +541,7 @@ class Node(Base):
 
         :rtype: pybel.dsl.BaseEntity
         """
-        func = self.type
-
-        if self.has_fusion:
-            j = self.modifications[0].to_json()
-            fusion_dsl = FUNC_TO_FUSION_DSL[func]
-            member_dsl = FUNC_TO_DSL[func]
-            partner_5p = member_dsl(**j[PARTNER_5P])
-            partner_3p = member_dsl(**j[PARTNER_3P])
-
-            return fusion_dsl(
-                partner_5p=partner_5p,
-                partner_3p=partner_3p,
-                range_5p=j.get(RANGE_5P),
-                range_3p=j.get(RANGE_3P),
-            )
-
-        if func == REACTION:
-            return reaction(
-                reactants=self._get_list_by_relation(HAS_REACTANT),
-                products=self._get_list_by_relation(HAS_PRODUCT)
-            )
-
-        if func in {COMPLEX, COMPOSITE}:
-            members = self._get_list_by_relation(HAS_COMPONENT)
-
-            if self.type == COMPOSITE:
-                return composite_abundance(members)
-
-            if self.namespace_entry and members:
-                return complex_abundance(
-                    members=members,
-                    namespace=self.namespace_entry.namespace.keyword,
-                    name=self.namespace_entry.name,
-                    identifier=self.namespace_entry.identifier,
-                )
-            if self.namespace_entry and not members:
-                return named_complex_abundance(
-                    namespace=self.namespace_entry.namespace.keyword,
-                    name=self.namespace_entry.name,
-                    identifier=self.namespace_entry.identifier,
-                )
-
-            if members:
-                return complex_abundance(members=members)
-
-            raise ValueError('complex can not be nameless and have no members')
-
-        dsl = FUNC_TO_DSL[func]
-
-        if self.is_variant:
-            return dsl(
-                namespace=self.namespace_entry.namespace.keyword,
-                name=self.namespace_entry.name,
-                identifier=self.namespace_entry.identifier,
-                variants=[
-                    modification.to_json()
-                    for modification in self.modifications
-                ]
-            )
-
-        return dsl(
-            namespace=self.namespace_entry.namespace.keyword,
-            name=self.namespace_entry.name,
-            identifier=self.namespace_entry.identifier,
-        )
+        return parse_result_to_dsl(json.loads(self.data))
 
     def to_json(self):
         return self.as_bel()
@@ -875,6 +828,8 @@ class Edge(Base):
 
     sha512 = Column(String(255), index=True, doc='The hash of the source, target, and associated metadata')
 
+    data = Column(Text, nullable=False, doc='The stringified JSON representing this edge')
+
     def __str__(self):
         return self.bel
 
@@ -893,30 +848,6 @@ class Edge(Base):
 
         return dict(annotations) or None
 
-    def get_data_json(self):
-        """Get the PyBEL edge data dictionary this edge represents.
-
-        :rtype: dict
-        """
-        data = {
-            RELATION: self.relation,
-        }
-
-        annotations = self.get_annotations_json()
-        if annotations:
-            data[ANNOTATIONS] = annotations
-
-        if self.evidence:
-            data.update(self.evidence.to_json())
-
-        for prop in self.properties:  # FIXME this is also probably broken for translocations or mixed activity/degrad
-            if prop.side not in data:
-                data[prop.side] = prop.to_json()
-            else:
-                data[prop.side].update(prop.to_json())
-
-        return data
-
     def to_json(self, include_id=False):
         """Create a dictionary of one BEL Edge that can be used to create an edge in a :class:`BELGraph`.
 
@@ -929,7 +860,7 @@ class Edge(Base):
             'source': self.source.to_json(),
             'target': self.target.to_json(),
             'key': self.sha512,
-            'data': self.get_data_json(),
+            'data': json.loads(self.data),
         }
 
         if include_id:
@@ -942,7 +873,10 @@ class Edge(Base):
 
         :param pybel.BELGraph graph: A BEL graph
         """
-        u = graph.add_node_from_data(self.source.to_json())
-        v = graph.add_node_from_data(self.target.to_json())
+        u = self.source.as_bel()
+        v = self.target.as_bel()
 
-        graph.add_edge(u, v, key=self.sha512, **self.get_data_json())
+        if self.evidence:
+            return graph.add_qualified_edge(u, v, **json.loads(self.data))
+        else:
+            return graph.add_unqualified_edge(u, v, self.relation)
