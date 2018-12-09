@@ -27,10 +27,9 @@ def _random_edge_iterator(graph, n_edges):
     :param int n_edges: Number of edges to randomly select from the given graph
     :rtype: iter[tuple[tuple,tuple,int,dict]]
     """
-    universe_edges = list(graph.edges())
-    random.shuffle(universe_edges)
-
-    for u, v in universe_edges[:n_edges]:
+    edges = list(graph.edges())
+    edge_sample = random.sample(edges, n_edges)
+    for u, v in edge_sample:
         keys = list(graph[u][v])
         k = random.choice(keys)
         yield u, v, k, graph[u][v][k]

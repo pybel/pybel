@@ -3,7 +3,7 @@
 """Utilities for PyBEL testing."""
 
 import itertools as itt
-from random import shuffle
+import random
 
 from .utils import n
 from ..dsl import protein
@@ -29,11 +29,10 @@ def generate_random_graph(n_nodes, n_edges, namespace='NS'):
         for i in range(1, n_nodes)
     ]
 
-    # TODO is there a better way to randomly sample without replacement from an iterator?
     edges = list(itt.combinations(nodes, r=2))
-    shuffle(edges)
+    edge_sample = random.sample(edges, n_edges)
 
-    for u, v in edges[:n_edges]:
+    for u, v in edge_sample:
         graph.add_increases(u, v, citation=n(), evidence=n())
 
     return graph
