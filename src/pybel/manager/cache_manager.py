@@ -8,6 +8,7 @@ enable this option, but can specify a database location if they choose.
 
 from __future__ import unicode_literals
 
+import json
 import logging
 from copy import deepcopy
 
@@ -929,6 +930,7 @@ class InsertManager(NamespaceManager, LookupManager):
             relation=data[RELATION],
             bel=bel,
             sha512=key,
+            data=data,
             evidence=evidence,
             properties=properties,
             annotations=annotations,
@@ -949,6 +951,7 @@ class InsertManager(NamespaceManager, LookupManager):
             relation=data[RELATION],
             bel=bel,
             sha512=key,
+            data=data,
         )
 
     def get_or_create_evidence(self, citation, text):
@@ -984,15 +987,13 @@ class InsertManager(NamespaceManager, LookupManager):
     def get_or_create_node(self, graph, node_data):
         """Create an entry and object for given node if it does not exist.
 
-        :param BELGraph graph: A BEL graph
-        :param BaseEntity node_data: A PyBEL node tuple
+        :type graph: BELGraph
+        :type node_data: pybel.dsl.BaseEntity
         :rtype: Node
         """
         sha512 = node_data.as_sha512()
         if sha512 in self.object_cache_node:
             return self.object_cache_node[sha512]
-
-        bel = node_data.as_bel()
 
         node = self.get_node_by_hash(sha512)
 
@@ -1000,11 +1001,7 @@ class InsertManager(NamespaceManager, LookupManager):
             self.object_cache_node[sha512] = node
             return node
 
-        node = Node(
-            type=node_data.function,
-            bel=bel,
-            sha512=sha512,
-        )
+        node = Node._start_from_base_entity(node_data)
 
         namespace = node_data.get(NAMESPACE)
         if namespace is None:
@@ -1041,7 +1038,7 @@ class InsertManager(NamespaceManager, LookupManager):
             modifications = self.get_or_create_modification(graph, node_data)
 
             if modifications is None:
-                log.warning('could not create %s because had an uncachable modification', bel)
+                log.warning('could not create %s because had an uncachable modification', node_data.as_bel())
                 return
 
             node.modifications = modifications
@@ -1068,7 +1065,7 @@ class InsertManager(NamespaceManager, LookupManager):
 
         log.info('dropped all edges in %.2f seconds', time.time() - t)
 
-    def get_or_create_edge(self, source, target, relation, bel, sha512, evidence=None, annotations=None,
+    def get_or_create_edge(self, source, target, relation, bel, sha512, data, evidence=None, annotations=None,
                            properties=None):
         """Create an edge if it does not exist, or return it if it does.
 
@@ -1077,6 +1074,7 @@ class InsertManager(NamespaceManager, LookupManager):
         :param str relation: Type of the relation between source and target node
         :param str bel: BEL statement that describes the relation
         :param str sha512: The SHA512 hash of the edge as a string
+        :param dict data: The PyBEL data dictionary
         :param Evidence evidence: Evidence object that proves the given relation
         :param Optional[list[Property]] properties: List of all properties that belong to the edge
         :param Optional[list[AnnotationEntry]] annotations: List of all annotations that belong to the edge
@@ -1099,6 +1097,7 @@ class InsertManager(NamespaceManager, LookupManager):
             relation=relation,
             bel=bel,
             sha512=sha512,
+            data=json.dumps(data),
         )
 
         if evidence is not None:
