@@ -60,6 +60,7 @@ class TestNodeSchema(unittest.TestCase):
 
     def test_enumerated_complex(self):
         """Test a reaction."""
+        print('Log> ', type(enumerated_complex_1))
         self.assertValidNode(enumerated_complex_1)
 
     def test_simple_fail(self):

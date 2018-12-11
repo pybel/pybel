@@ -1,23 +1,97 @@
 {
-  "$id": "https://pybel.github.io/nodes.schema.json",
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "description": "A schema for BEL nodes in PyBEL",
+  "$id": "https://pybel.github.io/nodes.schema.json",
+  "title": "BEL node schema",
+  "description": "Schema to validate JSON files describing a BEL node",
   "type": "object",
   "properties": {
-    "type": {
-      "type": "string"
+    "function": {
+      "description": "Function of the node, e.g. protein or gene",
+      "enum": ["Protein", "Gene", "Complex", "Composite", "RNA", "miRNA", "Pathology", "BiologicalProcess"]
     },
     "namespace": {
+      "description": "Namespace of the node, e.g. ChemBL",
       "type": "string"
     },
     "name": {
+      "description": "Name of the node, e.g. protein name",
       "type": "string"
     },
-    "identifier": {
-      "type": "string"
+    "variants": {
+      "description": "List of sequence variants of this node",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+        "kind": {
+          "description": "Kind of sequence variation",
+          "type": "string"
+        },
+        "identifier": {
+          "description": "Explanation on the sequence change"
+        },
+        "pmod_code": {
+          "description": "Amino acid code of the modification",
+          "type": "string"
+        },
+        "pmod_position": {
+          "description": "Position of the modification",
+          "type": "number"
+        },
+        "fragment_start": {
+          "description": "Start position of the sequence fragment",
+          "type": "number"
+        },
+        "fragment_end": {
+          "description": "End position of the sequence fragment",
+          "type": "number"
+        }
+      },
+      "required": ["kind"]
+      }
+    },
+    "fusion": {
+      "properties": {
+        "partner_5p": {
+          "description": "5' fusion partner",
+          "type": "object",
+          "properties": {
+            "function": {"type": "string"},
+            "namespace": {"type": "string"},
+            "name": {"type": "string"}
+          }
+        },
+        "partner_3p": {
+          "description": "3' fusion partner",
+          "type": "object",
+          "properties": {
+            "function": {"type": "string"},
+            "namespace": {"type": "string"},
+            "name": {"type": "string"}
+          }
+        },
+        "range_5p": {
+          "description": "sequence coordinates of the 5' partner",
+          "type": "object",
+          "properties": {
+            "fusion_reference": {"type": "string"},
+            "fusion_start": {"type": ["string", "integer"]},
+            "fusion_stop": {"type": ["string", "integer"]}
+          }
+        },
+        "range_3p": {
+          "description": "sequence coordinates of the 3' partner",
+          "type": "object",
+          "properties": {
+            "fusion_reference": {"type": "string"},
+            "fusion_start": {"type": ["string", "integer"]},
+            "fusion_stop": {"type": ["string", "integer"]}
+          }
+        }
+      },
+      "$comment": "ToDo: Replace explicit description by reference e.g. '$ref': 'https://pybel.github.io/nodes.schema.json'",
+      "required": ["partner_5p", "partner_3p", "range_5p", "range_3p"]
     }
   },
-  "required": [ "type", "namespace" ],
-  "dependencies": {
-  }
+  "required": ["function", "namespace", "name"]
 }
