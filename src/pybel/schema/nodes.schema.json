@@ -91,7 +91,40 @@
       },
       "$comment": "ToDo: Replace explicit description by reference e.g. '$ref': 'https://pybel.github.io/nodes.schema.json'",
       "required": ["partner_5p", "partner_3p", "range_5p", "range_3p"]
+    },
+    "members": {
+      "description": "Member list of a complex/composite",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+            "function": {"type": "string"},
+            "namespace": {"type": "string"},
+            "name": {"type": "string"}
+        },
+        "required": ["function", "namespace", "name"]
+      }
     }
   },
-  "required": ["function", "namespace", "name"]
+  "required": ["function"],
+  "anyOf": [
+    {
+      "properties": {
+        "function": { "enum": ["Protein", "Gene", "RNA", "miRNA"]}
+      },
+      "required": ["namespace", "name"]
+    },
+    {
+      "properties": {
+        "function": { "enum": ["Complex", "Composite"]}
+      },
+      "required": ["members"]
+    },
+    {
+      "properties": {
+        "function": { "enum": ["Pathology", "BiologicalProcess"]}
+      },
+      "required": ["function"]
+    }
+  ]
 }
