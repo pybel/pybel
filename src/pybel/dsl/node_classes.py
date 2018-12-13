@@ -516,15 +516,20 @@ class Fragment(Variant):
         if description:
             self[FRAGMENT_DESCRIPTION] = description
 
+    @property
+    def range(self):
+        """The range of this fragment."""
+        if FRAGMENT_MISSING in self:
+            return '?'
+
+        return '{}_{}'.format(self[FRAGMENT_START], self[FRAGMENT_STOP])
+
     def as_bel(self):
         """Return this fragment variant as a BEL string.
 
         :rtype: str
         """
-        if FRAGMENT_MISSING in self:
-            res = '"?"'
-        else:
-            res = '"{}_{}"'.format(self[FRAGMENT_START], self[FRAGMENT_STOP])
+        res = '"{}"'.format(self.range)
 
         if FRAGMENT_DESCRIPTION in self:
             res += ', "{}"'.format(self[FRAGMENT_DESCRIPTION])
