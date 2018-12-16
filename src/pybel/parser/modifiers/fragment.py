@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
-Fragments
-~~~~~~~~~
+"""Fragments.
 
 The addition of a fragment results in an entry called :data:`pybel.constants.VARIANTS`
 in the data dictionary associated with a given node. This entry is a list with dictionaries
@@ -72,14 +70,13 @@ missing_fragment = Keyword('?')(FRAGMENT_MISSING)
 
 
 def get_fragment_language():
+    """Build a protein fragment parser.
+
+    :rtype: pyparsing.ParseElement
+    """
     _fragment_value_inner = fragment_range | missing_fragment(FRAGMENT_MISSING)
+    _fragment_value = _fragment_value_inner | And([Suppress('"'), _fragment_value_inner, Suppress('"')])
 
-    _fragment_value = (
-            _fragment_value_inner |
-            And([Suppress('"'), _fragment_value_inner, Suppress('"')])
-    )
-
-    language = fragment_tag + nest(
-        _fragment_value + Optional(WCW + quote(FRAGMENT_DESCRIPTION)))
+    language = fragment_tag + nest(_fragment_value + Optional(WCW + quote(FRAGMENT_DESCRIPTION)))
 
     return language

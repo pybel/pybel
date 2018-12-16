@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-"""
-Control Parser
-~~~~~~~~~~~~~~
+"""Control parser.
+
 This module handles parsing control statement, which add annotations and namespaces to the document.
 
 .. see also::
@@ -49,11 +48,13 @@ class ControlParser(BaseParser):
 
     .. seealso::
 
-        BEL 1.0 specification on `control records <http://openbel.org/language/version_1.0/bel_specification_version_1.0.html#_control_records>`_
+        BEL 1.0 specification on `control records
+        <http://openbel.org/language/version_1.0/bel_specification_version_1.0.html#_control_records>`_
     """
 
     def __init__(self, annotation_dict=None, annotation_regex=None, citation_clearing=True, required_annotations=None):
-        """
+        """Initialize the control statement parser.
+
         :param annotation_dict: A dictionary of {annotation: set of valid values} for parsing
         :type annotation_dict: Optional[dict[str,set[str]]]
         :param annotation_regex: A dictionary of {annotation: regular expression string}
@@ -129,7 +130,7 @@ class ControlParser(BaseParser):
 
     @property
     def annotation_dict(self):
-        """A dictionary of annotaions to their set of values
+        """Get the dictionary of annotaions to their set of values.
 
         :rtype: dict[str,set[str]]
         """
@@ -137,7 +138,9 @@ class ControlParser(BaseParser):
 
     @property
     def annotation_regex(self):
-        """A dictioary of annotations defined by regular expressions {annotation keyword: string regular expression}
+        """Get the dictionary of annotations defined by regular expressions.
+
+        Contains: {annotation keyword: string regular expression}
 
         :return: dict[str,str]
         """
@@ -145,7 +148,9 @@ class ControlParser(BaseParser):
 
     @property
     def annotation_regex_compiled(self):
-        """A dictionary of annotations defined by regular expressions {annotation keyword: compiled regular expression}
+        """Get the dictionary of annotations defined by regular expressions.
+
+        Contains: {annotation keyword: compiled regular expression}
 
         :rtype: dict[str,re]
         """
@@ -156,13 +161,15 @@ class ControlParser(BaseParser):
         return not self.annotation_dict and not self.annotation_regex
 
     def has_enumerated_annotation(self, annotation):
+        """Check if the annotation is defined as an enumeration."""
         return annotation in self.annotation_dict
 
     def has_regex_annotation(self, annotation):
+        """Check if the annotation is defined as a regular expression."""
         return annotation in self.annotation_regex
 
     def raise_for_undefined_annotation(self, line, position, annotation):
-        """Raises is an annotation is not defined
+        """Raise an exception if the annotation is not defined.
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
@@ -176,7 +183,7 @@ class ControlParser(BaseParser):
             raise UndefinedAnnotationWarning(self.line_number, line, position, annotation)
 
     def raise_for_invalid_annotation_value(self, line, position, key, value):
-        """Raises is an annotation is not defined
+        """Raise an exception if the annotation is not defined.
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
@@ -194,7 +201,7 @@ class ControlParser(BaseParser):
             raise MissingAnnotationRegexWarning(self.line_number, line, position, key, value)
 
     def raise_for_missing_citation(self, line, position):
-        """Raises if there is no citation present in the parser
+        """Raise an exception if there is no citation present in the parser.
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
@@ -204,7 +211,7 @@ class ControlParser(BaseParser):
             raise MissingCitationException(self.line_number, line, position)
 
     def handle_annotation_key(self, line, position, tokens):
-        """Called on all annotation keys before parsing to validate that it's either enumerated or as a regex
+        """Handle an annotation key before parsing to validate that it's either enumerated or as a regex.
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
@@ -216,11 +223,13 @@ class ControlParser(BaseParser):
         self.raise_for_undefined_annotation(line, position, key)
         return tokens
 
-    def handle_set_statement_group(self, line, position, tokens):
+    def handle_set_statement_group(self, _, __, tokens):
+        """Handle a ``SET STATEMENT_GROUP = "X"`` statement."""
         self.statement_group = tokens['group']
         return tokens
 
     def handle_set_citation(self, line, position, tokens):
+        """Handle a ``SET Citation = {"X", "Y", "Z", ...}`` statement."""
         self.clear_citation()
 
         values = tokens['values']
@@ -256,6 +265,7 @@ class ControlParser(BaseParser):
         return tokens
 
     def handle_set_citation_double(self, line, position, tokens):
+        """Handle a ``SET Citation = {"X", "Y"}`` statement."""
         values = tokens['values']
 
         if values[0] == CITATION_TYPE_PUBMED and not is_int(values[1]):
@@ -265,11 +275,13 @@ class ControlParser(BaseParser):
 
         return tokens
 
-    def handle_set_evidence(self, line, position, tokens):
+    def handle_set_evidence(self, _, __, tokens):
+        """Handle a ``SET Evidence = ""`` statement."""
         self.evidence = tokens['value']
         return tokens
 
     def handle_set_command(self, line, position, tokens):
+        """Handle a ``SET X = "Y"`` statement."""
         key = tokens['key']
         value = tokens['value']
 
@@ -279,6 +291,7 @@ class ControlParser(BaseParser):
         return tokens
 
     def handle_set_command_list(self, line, position, tokens):
+        """Handle a ``SET X = {"Y", "Z", ...}`` statement."""
         key = tokens['key']
         values = tokens['values']
 
@@ -289,7 +302,7 @@ class ControlParser(BaseParser):
         return tokens
 
     def handle_unset_statement_group(self, line, position, tokens):
-        """Unsets the statement group, or raises an exception if it is not set.
+        """Unset the statement group, or raises an exception if it is not set.
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
@@ -302,7 +315,7 @@ class ControlParser(BaseParser):
         return tokens
 
     def handle_unset_citation(self, line, position, tokens):
-        """Unsets the citation, or raises an exception if it is not set
+        """Unset the citation, or raise an exception if it is not set.
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
@@ -317,8 +330,10 @@ class ControlParser(BaseParser):
         return tokens
 
     def handle_unset_evidence(self, line, position, tokens):
-        """Unsets the evidence, or throws an exception if it is not already set. The value for ``tokens[EVIDENCE]``
-        corresponds to which alternate of SupportingText or Evidence was used in the BEL script.
+        """Unset the evidence, or throws an exception if it is not already set.
+
+        The value for ``tokens[EVIDENCE]`` corresponds to which alternate of SupportingText or Evidence was used in
+        the BEL script.
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
@@ -331,7 +346,7 @@ class ControlParser(BaseParser):
         return tokens
 
     def validate_unset_command(self, line, position, key):
-        """Raises an exception when trying to ``UNSET X`` if ``X`` is not already set.
+        """Raise an exception when trying to ``UNSET X`` if ``X`` is not already set.
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
@@ -342,7 +357,7 @@ class ControlParser(BaseParser):
             raise MissingAnnotationKeyWarning(self.line_number, line, position, key)
 
     def handle_unset_command(self, line, position, tokens):
-        """Handles ``UNSET X`` or raises an exception if it is not already set.
+        """Handle an ``UNSET X`` statement or raises an exception if it is not already set.
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
@@ -355,8 +370,9 @@ class ControlParser(BaseParser):
         return tokens
 
     def handle_unset_list(self, line, position, tokens):
-        """Handles ``UNSET {A, B, ...}`` or raises an exception of any of them are not present. Consider that all
-        unsets are in peril if just one of them is wrong!
+        """Handle ``UNSET {A, B, ...}`` or raises an exception of any of them are not present.
+
+        Consider that all unsets are in peril if just one of them is wrong!
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
@@ -372,13 +388,13 @@ class ControlParser(BaseParser):
 
         return tokens
 
-    def handle_unset_all(self, line, position, tokens):
-        """Handles ``UNSET_ALL``"""
+    def handle_unset_all(self, _, __, tokens):
+        """Handle an ``UNSET_ALL`` statement."""
         self.clear()
         return tokens
 
     def get_annotations(self):
-        """Gets the current annotations
+        """Get the current annotations.
 
         :return: The currently stored BEL annotations
         :rtype: dict
@@ -401,7 +417,10 @@ class ControlParser(BaseParser):
         ]
 
     def clear_citation(self):
-        """Clears the citation. Additionally, if citation clearing is enabled, clears the evidence and annotations."""
+        """Clear the citation.
+
+        Additionally, if citation clearing is enabled, clears the evidence and annotations.
+        """
         self.citation.clear()
 
         if self.citation_clearing:
@@ -409,7 +428,7 @@ class ControlParser(BaseParser):
             self.annotations.clear()
 
     def clear(self):
-        """Clears the statement_group, citation, evidence, and annotations"""
+        """Clear the statement_group, citation, evidence, and annotations."""
         self.statement_group = None
         self.citation.clear()
         self.evidence = None

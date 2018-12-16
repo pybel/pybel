@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 
-"""
-Fusions
-~~~~~~~
+"""Fusions.
 
-Gene, RNA, protein, and miRNA fusions are all represented with the same underlying data structure. Below
+Gene, RNA, miRNA, and protein  fusions are all represented with the same underlying data structure. Below
 it is shown with uppercase letters referring to constants from :code:`pybel.constants` and. For example,
 :code:`g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))` is represented as:
 
@@ -32,7 +30,8 @@ it is shown with uppercase letters referring to constants from :code:`pybel.cons
 
 .. seealso::
 
-    - BEL 2.0 specification on `fusions (2.6.1) <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_fusion_fus>`_
+    - BEL 2.0 specification on `fusions (2.6.1)
+      <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_fusion_fus>`_
     - PyBEL module :py:class:`pybel.parser.modifiers.get_fusion_language`
     - PyBEL module :py:class:`pybel.parser.modifiers.get_legacy_fusion_language`
 """
@@ -68,6 +67,10 @@ range_coordinate_unquoted = (
 
 
 def get_fusion_language(identifier, permissive=True):
+    """Build a fusion parser.
+
+    :rtype: pyparsing.ParseElement
+    """
     range_coordinate = Suppress('"') + range_coordinate_unquoted + Suppress('"')
 
     if permissive:  # permissive to wrong quoting
@@ -82,29 +85,30 @@ def get_fusion_language(identifier, permissive=True):
 
 
 def get_legacy_fusion_langauge(identifier, reference):
-    break_start = (ppc.integer | '?').setParseAction(fusion_break_handler_wrapper(reference, start=True))
-    break_end = (ppc.integer | '?').setParseAction(fusion_break_handler_wrapper(reference, start=False))
+    """Build a legacy fusion parser.
+
+    :rtype: pyparsing.ParseElement
+    """
+    break_start = (ppc.integer | '?').setParseAction(_fusion_break_handler_wrapper(reference, start=True))
+    break_end = (ppc.integer | '?').setParseAction(_fusion_break_handler_wrapper(reference, start=False))
 
     res = (
-            identifier(PARTNER_5P) +
-            WCW +
-            fusion_tags +
-            nest(
-                identifier(PARTNER_3P) +
-                Optional(
-                    WCW +
-                    Group(break_start)(RANGE_5P)
-                    + WCW + Group(break_end)(RANGE_3P)
-                )
-            )
+        identifier(PARTNER_5P) +
+        WCW +
+        fusion_tags +
+        nest(
+            identifier(PARTNER_3P) +
+            Optional(WCW + Group(break_start)(RANGE_5P) + WCW + Group(break_end)(RANGE_3P))
+        )
     )
 
-    res.setParseAction(fusion_legacy_handler)
+    res.setParseAction(_fusion_legacy_handler)
 
     return res
 
 
-def fusion_legacy_handler(line, position, tokens):
+def _fusion_legacy_handler(_, __, tokens):
+    """Handle a legacy fusion."""
     if RANGE_5P not in tokens:
         tokens[RANGE_5P] = {FUSION_MISSING: '?'}
     if RANGE_3P not in tokens:
@@ -112,8 +116,8 @@ def fusion_legacy_handler(line, position, tokens):
     return tokens
 
 
-def fusion_break_handler_wrapper(reference, start):
-    def fusion_break_handler(line, position, tokens):
+def _fusion_break_handler_wrapper(reference, start):
+    def fusion_break_handler(_, __, tokens):
         if tokens[0] == '?':
             tokens[FUSION_MISSING] = '?'
             return tokens

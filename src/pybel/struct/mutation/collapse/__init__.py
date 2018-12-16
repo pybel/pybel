@@ -2,9 +2,9 @@
 
 """Functions for collapsing nodes."""
 
-from . import protein_rna_origins, collapse
-from .protein_rna_origins import *
+from . import collapse, protein_rna_origins
 from .collapse import *
+from .protein_rna_origins import *
 
 __all__ = (
     protein_rna_origins.__all__ +

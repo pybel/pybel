@@ -113,7 +113,7 @@ DATE_VERSION_FMT = '%Y%m%d'
 
 def valid_date(s):
     """Check that a string represents a valid date in ISO 8601 format YYYY-MM-DD.
-    
+
     :type s: str
     :rtype: bool
     """
@@ -186,7 +186,7 @@ def _get_edge_tuple(u, v, data):
 
 
 def hash_edge(u, v, data):
-    """Convert an edge tuple to a SHA512 hash.
+    """Convert an edge tuple to a SHA-512 hash.
 
     :param BaseEntity u: The source BEL node
     :param BaseEntity v: The target BEL node
@@ -199,7 +199,7 @@ def hash_edge(u, v, data):
 
 
 def subdict_matches(target, query, partial_match=True):
-    """Checks if all the keys in the query dict are in the target dict, and that their values match
+    """Check if all the keys in the query dict are in the target dict, and that their values match.
 
     1. Checks that all keys in the query dict are in the target dict
     2. Matches the values of the keys in the query dict

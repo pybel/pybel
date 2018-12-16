@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Operations for BEL graphs."""
+
 import networkx as nx
 
 from .utils import update_metadata, update_node_helper
@@ -39,7 +41,7 @@ def subgraph(graph, nodes):
 
 
 def left_full_join(g, h):
-    """Add all nodes and edges from ``h`` to ``g``, in-place for ``g``
+    """Add all nodes and edges from ``h`` to ``g``, in-place for ``g``.
 
     :param pybel.BELGraph g: A BEL network
     :param pybel.BELGraph h: A BEL network
@@ -101,8 +103,9 @@ def _left_outer_join_networks(target, networks):
 
 
 def union(networks):
-    """Take the union over a collection of networks into a new network. Assumes iterator is longer than 2, but not
-    infinite.
+    """Take the union over a collection of networks into a new network.
+
+    Assumes iterator is longer than 2, but not infinite.
 
     :param iter[BELGraph] networks: An iterator over BEL networks. Can't be infinite.
     :return: A merged network
@@ -135,8 +138,9 @@ def union(networks):
 
 
 def left_node_intersection_join(g, h):
-    """Take the intersection over two networks. This intersection of two graphs is defined by the
-     union of the subgraphs induced over the intersection of their nodes
+    """Take the intersection over two networks.
+
+    This intersection of two graphs is defined by the union of the subgraphs induced over the intersection of their nodes
 
     :param BELGraph g: A BEL network
     :param BELGraph h: A BEL network
@@ -160,8 +164,9 @@ def left_node_intersection_join(g, h):
 
 
 def node_intersection(networks):
-    """Take the node intersection over a collection of networks into a new network. This intersection is defined
-    the same way as by :func:`left_node_intersection_join`
+    """Take the node intersection over a collection of networks into a new network.
+
+    This intersection is defined the same way as by :func:`left_node_intersection_join`
 
     :param iter[BELGraph] networks: An iterable of networks. Since it's iterated over twice, it gets converted to a
                                     tuple first, so this isn't a safe operation for infinite lists.

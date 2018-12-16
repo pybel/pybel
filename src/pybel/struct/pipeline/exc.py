@@ -12,7 +12,7 @@ __all__ = [
 
 
 class MissingPipelineFunctionError(KeyError):
-    """Raised when trying to run the pipeline with a function that isn't registered"""
+    """Raised when trying to run the pipeline with a function that isn't registered."""
 
 
 class MetaValueError(ValueError):
@@ -24,7 +24,7 @@ class MissingUniverseError(ValueError):
 
 
 class DeprecationMappingError(ValueError):
-    """Raised when appplyng the deprecation function annotation and the given name already is being used."""
+    """Raised when applying the deprecation function annotation and the given name already is being used."""
 
 
 class PipelineNameError(ValueError):

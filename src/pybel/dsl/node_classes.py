@@ -107,7 +107,7 @@ class BaseEntity(dict):
 
     @property
     def sha512(self):
-        """The SHA512 hash of this node.
+        """Get the SHA512 hash of this node.
 
         :rtype: str
         """
@@ -518,7 +518,7 @@ class Fragment(Variant):
 
     @property
     def range(self):
-        """The range of this fragment."""
+        """Get the range of this fragment."""
         if FRAGMENT_MISSING in self:
             return '?'
 
@@ -915,7 +915,7 @@ class FusionBase(BaseEntity):
 
     @property
     def partner_5p(self):
-        """The 5' partner.
+        """Get the 5' partner.
 
         :rtype: CentralDogma
         """
@@ -923,7 +923,7 @@ class FusionBase(BaseEntity):
 
     @property
     def partner_3p(self):
-        """The 3' partner.
+        """Get the 3' partner.
 
         :rtype: CentralDogma
         """
@@ -931,7 +931,7 @@ class FusionBase(BaseEntity):
 
     @property
     def range_5p(self):
-        """The 5' partner's range.
+        """Get the 5' partner's range.
 
         :rtype: FusionRangeBase
         """
@@ -939,7 +939,7 @@ class FusionBase(BaseEntity):
 
     @property
     def range_3p(self):
-        """The 3' partner's range.
+        """Get the 3' partner's range.
 
         :rtype: FusionRangeBase
         """

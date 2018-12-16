@@ -37,15 +37,16 @@ def function_inclusion_filter_builder(func):
     raise TypeError('Invalid type for argument: {}'.format(func))
 
 
-def _single_function_inclusion_filter_builder(func):
-    """
+def _single_function_inclusion_filter_builder(func):  # noqa: D202
+    """Build a function inclusion filter for a single function.
+
     :param str func: A BEL function
     :type func: str
     :return: (pybel.BELGraph, BaseEntity) -> bool
     """
 
     def function_inclusion_filter(graph, node):
-        """Passes only for a node that has the enclosed function
+        """Pass only for a node that has the enclosed function.
 
         :param BELGraph graph: A BEL Graph
         :param BaseEntity node: A BEL node
@@ -58,7 +59,8 @@ def _single_function_inclusion_filter_builder(func):
 
 
 def _collection_function_inclusion_builder(funcs):
-    """
+    """Build a function inclusion filter for a collection of functions.
+
     :param funcs: A sequence of BEL functions
     :type funcs: iter[str]
     :return: (pybel.BELGraph, BaseEntity) -> bool
@@ -69,7 +71,7 @@ def _collection_function_inclusion_builder(funcs):
         raise ValueError('can not build function inclusion filter with empty list of functions')
 
     def functions_inclusion_filter(graph, node):
-        """Passes only for a node that is one of the enclosed functions
+        """Pass only for a node that is one of the enclosed functions.
 
         :param BELGraph graph: A BEL Graph
         :param BaseEntity node: A BEL node
@@ -81,7 +83,7 @@ def _collection_function_inclusion_builder(funcs):
     return functions_inclusion_filter
 
 
-def data_missing_key_builder(key):
+def data_missing_key_builder(key):  # noqa: D202
     """Build a filter that passes only on nodes that don't have the given key in their data dictionary.
 
     :param str key: A key for the node's data dictionary
@@ -102,9 +104,8 @@ def data_missing_key_builder(key):
     return data_does_not_contain_key
 
 
-def build_node_data_search(key, data_predicate):
-    """Pass for nodes who have the given key in their data dictionaries and whose associated values pass the given
-    filter function.
+def build_node_data_search(key, data_predicate):  # noqa: D202
+    """Build a filter for nodes whose associated data with the given key passes the given predicate.
 
     :param str key: The node data dictionary key to check
     :param data_predicate: The filter to apply to the node data dictionary
@@ -127,7 +128,7 @@ def build_node_data_search(key, data_predicate):
     return node_data_filter
 
 
-def build_node_graph_data_search(key, data_predicate):
+def build_node_graph_data_search(key, data_predicate):  # noqa: D202
     """Build a function for testing data associated with the node in the graph.
 
     :param str key: The node data dictionary key to check
@@ -152,8 +153,7 @@ def build_node_graph_data_search(key, data_predicate):
 
 
 def build_node_key_search(query, key):
-    """Build a node filter that only passes for nodes whose values for the given key are superstrings of the query
-    string(s).
+    """Build a node filter for nodes whose values for the given key are superstrings of the query string(s).
 
     :param query: The query string or strings to check if they're in the node name
     :type query: str or iter[str]
@@ -192,7 +192,7 @@ def namespace_inclusion_builder(namespace):
     """
     if isinstance(namespace, str):
         def namespace_filter(graph, node):
-            """Passes only for a node that has the enclosed namespace
+            """Pass only for a node that has the enclosed namespace.
 
             :param pybel.BELGraph graph: A BEL Graph
             :param BaseEntity node:: A BEL node

@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-"""
+"""Input and output functions for BEL graphs.
 
 PyBEL provides multiple lossless interchange options for BEL. Lossy output formats are also included for convenient
-export to other programs. Notably, a *de facto* interchange using Resource Description Framework (RDF) to match the 
+export to other programs. Notably, a *de facto* interchange using Resource Description Framework (RDF) to match the
 ability of other existing software is excluded due the immaturity of the BEL to RDF mapping.
-
 """
 
 from . import extras, gpickle, indra, jgif, lines, neo4j, nodelink, web

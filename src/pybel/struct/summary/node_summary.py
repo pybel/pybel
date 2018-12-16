@@ -2,9 +2,8 @@
 
 """Summary functions for nodes in BEL graphs."""
 
-from collections import Counter, defaultdict
-
 import itertools as itt
+from collections import Counter, defaultdict
 
 from ..filters.node_predicates import has_variant
 from ...constants import (

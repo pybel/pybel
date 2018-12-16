@@ -4,9 +4,8 @@
 
 from __future__ import print_function
 
-import logging
-
 import itertools as itt
+import logging
 
 from .constants import (
     ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_REFERENCE, CITATION_TYPE, COMPLEX, COMPOSITE,

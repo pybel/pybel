@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
+"""Utilities for node filters."""
+
 from ...constants import MODIFIER
 
 __all__ = ['part_has_modifier']
 
 
 def part_has_modifier(data, part, modifier):
-    """Returns true if the modifier is in the given subject/object part
+    """Return true if the modifier is in the given subject/object part.
 
     :param dict data: A PyBEL edge data dictionary
     :param str part: either :data:`pybel.constants.SUBJECT` or :data:`pybel.constants.OBJECT`

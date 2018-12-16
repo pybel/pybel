@@ -9,7 +9,7 @@ import logging
 
 import networkx as nx
 
-from ..constants import FUNCTION, NAME, NAMESPACE, RELATION
+from ..constants import NAME, NAMESPACE, RELATION
 from ..struct import BELGraph
 
 __all__ = [
@@ -98,7 +98,7 @@ def to_sif(graph, file=None, sep='\t'):
 def to_gsea(graph, file=None):
     """Write the genes/gene products to a GRP file for use with GSEA gene set enrichment analysis.
 
-    :param BELGraph graph: A BEL graph 
+    :param BELGraph graph: A BEL graph
     :param file file: A writeable file or file-like object. Defaults to stdout.
 
     .. seealso::

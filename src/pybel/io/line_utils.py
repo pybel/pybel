@@ -11,7 +11,7 @@ from pyparsing import ParseException
 from sqlalchemy.exc import OperationalError
 from tqdm import tqdm
 
-from ..constants import GRAPH_METADATA, INVERSE_DOCUMENT_KEYS, REQUIRED_METADATA
+from ..constants import INVERSE_DOCUMENT_KEYS, REQUIRED_METADATA
 from ..exceptions import PyBELWarning
 from ..manager import Manager
 from ..parser import BELParser, MetadataParser
@@ -25,7 +25,7 @@ from ..resources.exc import ResourceError
 log = logging.getLogger(__name__)
 parse_log = logging.getLogger('pybel.parser')
 
-METADATA_LINE_RE = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
+METADATA_LINE_RE = re.compile(r"(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
 
 
 def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearing=True, use_tqdm=False,

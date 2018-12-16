@@ -101,7 +101,7 @@ class Namespace(Base):
                      doc="Contains regex pattern for value identification.")
 
     miriam_id = Column(String(16), nullable=True,
-                       doc='MIRIAM resource identifier matching the regular expression ``^MIR:001\d{5}$``')
+                       doc=r'MIRIAM resource identifier matching the regular expression ``^MIR:001\d{5}$``')
     miriam_name = Column(String(255), nullable=True)
     miriam_namespace = Column(String(255), nullable=True)
     miriam_uri = Column(String(255), nullable=True)
@@ -154,7 +154,7 @@ class Namespace(Base):
         }
 
     def to_tree_list(self):
-        """Returns an edge set of the tree represented by this namespace's hierarchy
+        """Return an edge set of the tree represented by this namespace's hierarchy.
 
         :rtype: set[tuple[str,str]]
         """
@@ -165,7 +165,7 @@ class Namespace(Base):
         }
 
     def to_json(self, include_id=False):
-        """Returns the most useful entries as a dictionary
+        """Return the most useful entries as a dictionary.
 
         :param bool include_id: If true, includes the model identifier
         :rtype: dict[str,str]
@@ -544,6 +544,7 @@ class Node(Base):
         return parse_result_to_dsl(json.loads(self.data))
 
     def to_json(self):
+        """Serialize this node as a JSON object using as_bel()."""
         return self.as_bel()
 
 
@@ -595,7 +596,7 @@ class Author(Base):
 
     @classmethod
     def has_name_in(cls, names):
-        """Build a filter if the author has any of the given names"""
+        """Build a filter if the author has any of the given names."""
         return cls.sha512.in_({
             cls.hash_name(name)
             for name in names

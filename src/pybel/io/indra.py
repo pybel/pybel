@@ -33,6 +33,7 @@ After assembling a model with `INDRA <https://github.com/sorgerlab/indra>`_, a l
 """
 
 import warnings
+
 from six.moves.cPickle import load
 
 __all__ = [

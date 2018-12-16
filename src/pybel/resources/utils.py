@@ -1,17 +1,22 @@
 # -*- coding: utf-8 -*-
 
-import logging
+"""Utilities for reading and writing BEL script, namespace files, and annotation files."""
+
 import time
 
 import requests
 from requests.compat import urlparse
 from requests_file import FileAdapter
 
-log = logging.getLogger(__name__)
+__all__ = [
+    'get_iso_8601_date',
+    'is_url',
+    'download',
+]
 
 
 def get_iso_8601_date():
-    """Gets the current ISO 8601 date as a string
+    """Get the current date as a string in YYYYMMDD format.
 
     :rtype: str
     """
@@ -19,7 +24,7 @@ def get_iso_8601_date():
 
 
 def is_url(s):
-    """Checks if a string is a valid URL
+    """Check if a string is a valid URL.
 
     :param str s: An input string
     :return: Is the string a valid URL?
@@ -29,7 +34,7 @@ def is_url(s):
 
 
 def download(url):
-    """Uses requests to download an URL, maybe from a file
+    """Download an URL or file using :py:mod:`requests`.
 
     :param str url: The URL to download
     :rtype: requests.Response

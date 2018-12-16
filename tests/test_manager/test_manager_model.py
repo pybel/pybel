@@ -105,7 +105,7 @@ class TestModels(unittest.TestCase):
 
         model = Namespace(
             keyword='TEST',
-            pattern='\w+',
+            pattern=r'\w+',
             name='Test Namespace',
             domain=NAMESPACE_DOMAIN_OTHER,
             species='9606',
@@ -117,7 +117,7 @@ class TestModels(unittest.TestCase):
 
         expected = dict(
             keyword='TEST',
-            pattern='\w+',
+            pattern=r'\w+',
             name='Test Namespace',
             version='1.0.0',
         )

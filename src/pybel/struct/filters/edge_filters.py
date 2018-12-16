@@ -23,7 +23,7 @@ __all__ = [
 ]
 
 
-def invert_edge_predicate(edge_predicate):
+def invert_edge_predicate(edge_predicate):  # noqa: D202
     """Build an edge predicate that is the inverse of the given edge predicate.
 
     :param edge_predicate: An edge predicate
@@ -45,7 +45,6 @@ def and_edge_predicates(edge_predicates=None):
     :return: A combine filter
     :rtype: (pybel.BELGraph, BaseEntity, BaseEntity, str) -> bool
     """
-
     # If no filters are given, then return the trivially permissive filter
     if not edge_predicates:
         return keep_edge_permissive
@@ -87,7 +86,6 @@ def filter_edges(graph, edge_predicates=None):
     :return: An iterable of edges that pass all predicates
     :rtype: iter[BaseEntity, BaseEntity, str]
     """
-
     # If no predicates are given, return the standard edge iterator
     if not edge_predicates:
         for u, v, k in graph.edges(keys=True):

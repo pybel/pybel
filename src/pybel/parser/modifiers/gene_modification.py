@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
-Gene Modification
-~~~~~~~~~~~~~~~~~
+"""Gene Modifications.
 
 PyBEL introduces the gene modification tag, gmod(), to allow for the encoding of epigenetic modifications.
 Its syntax follows the same style s the pmod() tags for proteins, and can include the following values:
@@ -53,7 +51,7 @@ __all__ = [
 ]
 
 
-def _handle_gmod_default(line, position, tokens):
+def _handle_gmod_default(_, __, tokens):
     tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
     tokens[NAME] = language.gmod_namespace[tokens[0]]
     return tokens
@@ -64,7 +62,7 @@ gmod_default_ns = oneOf(list(language.gmod_namespace.keys())).setParseAction(_ha
 
 
 def get_gene_modification_language(identifier_qualified):
-    """
+    """Build a parser for gene modifications.
 
     :param pyparsing.ParseElement identifier_qualified:
     :rtype: pyparsing.ParseElement

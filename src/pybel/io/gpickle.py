@@ -16,7 +16,7 @@ __all__ = [
 
 
 def to_bytes(graph, protocol=HIGHEST_PROTOCOL):
-    """Converts a graph to bytes with pickle.
+    """Convert a graph to bytes with pickle.
 
     Note that the pickle module has some incompatibilities between Python 2 and 3. To export a universally importable
     pickle, choose 0, 1, or 2.

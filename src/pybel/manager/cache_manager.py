@@ -10,11 +10,11 @@ from __future__ import unicode_literals
 
 import json
 import logging
+import time
 from copy import deepcopy
+from itertools import chain
 
 import six
-import time
-from itertools import chain
 from six import string_types
 from sqlalchemy import and_, exists, func
 from sqlalchemy.orm import aliased
@@ -105,7 +105,8 @@ def _clean_bel_namespace_values(bel_resource):
 
 
 def _normalize_url(graph, keyword):  # FIXME move to utilities and unit test
-    """
+    """Normalize a URL for the BEL graph.
+
     :type graph: BELGraph
     :param str keyword: Namespace URL keyword
     :rtype: Optional[str]
@@ -438,12 +439,13 @@ class NetworkManager(NamespaceManager):
         :rtype: list[Network]
         """
         most_recent_times = (
-            self.session.query(
+            self.session
+            .query(
                 Network.name.label('network_name'),
                 func.max(Network.created).label('max_created')
             )
-                .group_by(Network.name)
-                .subquery('most_recent_times')
+            .group_by(Network.name)
+            .subquery('most_recent_times')
         )
 
         and_condition = and_(
@@ -520,14 +522,15 @@ class NetworkManager(NamespaceManager):
         ne1 = aliased(network_edge, name='ne1')
         ne2 = aliased(network_edge, name='ne2')
         singleton_edge_ids_for_network = (
-            self.session.query(ne1.c.edge_id)
-                .outerjoin(ne2, and_(
+            self.session
+            .query(ne1.c.edge_id)
+            .outerjoin(ne2, and_(
                 ne1.c.edge_id == ne2.c.edge_id,
                 ne1.c.network_id != ne2.c.network_id
             ))
-                .filter(and_(
+            .filter(and_(
                 ne1.c.network_id == network.id,
-                ne2.c.edge_id == None
+                ne2.c.edge_id == None  # noqa: E711
             ))
         )
         return singleton_edge_ids_for_network
@@ -582,8 +585,7 @@ class NetworkManager(NamespaceManager):
         :param str name: The name of the network
         :rtype: Optional[Network]
         """
-        network = self.session.query(Network).filter(Network.name == name).order_by(Network.created.desc()).first()
-        return network
+        return self.session.query(Network).filter(Network.name == name).order_by(Network.created.desc()).first()
 
     def get_graph_by_most_recent(self, name):
         """Get the most recently created network with the given name as a :class:`pybel.BELGraph`.
@@ -1057,7 +1059,7 @@ class InsertManager(NamespaceManager, LookupManager):
         log.info('dropped all nodes in %.2f seconds', time.time() - t)
 
     def drop_edges(self):
-        """Drop all edges in the database"""
+        """Drop all edges in the database."""
         t = time.time()
 
         self.session.query(Edge).delete()

@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
+"""Shared utilities for reading BEL namespace and annotation files."""
+
 import logging
 import os
+from configparser import ConfigParser
+
 import requests.exceptions
 import six
-from configparser import ConfigParser
 
 from ..exc import EmptyResourceError, InvalidResourceError, MissingResourceError
 from ..utils import download, is_url
@@ -19,7 +22,7 @@ log = logging.getLogger(__name__)
 
 
 def _get_bel_resource_kvp(line, delimiter):
-    """
+    """Get a BEL resource key/value pair.
 
     :param str line:
     :param str delimiter:
@@ -32,7 +35,7 @@ def _get_bel_resource_kvp(line, delimiter):
 
 
 def parse_bel_resource(lines):
-    """Parses a BEL config (BELNS, BELANNO, or BELEQ) file from the given line iterator over the file
+    """Parse a BEL config (BELNS, BELANNO, or BELEQ) file from the given line iterator over the file.
 
     :param iter[str] lines: An iterable over the lines in a BEL config file
     :return: A config-style dictionary representing the BEL config file
@@ -65,7 +68,7 @@ def parse_bel_resource(lines):
 
 
 def get_lines(location):
-    """Gets the lines from a location
+    """Get the lines from a location.
 
     :param str location: The URL location to download or a file path to open. File path expands user.
     :return: list[str]
@@ -80,7 +83,7 @@ def get_lines(location):
 
 
 def get_bel_resource(location):
-    """Loads/downloads and parses a config file from the given url or file path
+    """Load, download, and parse a config file from the given url or file path.
 
     :param str location: The URL or file path to a BELNS, BELANNO, or BELEQ file to download and parse
     :return: A config-style dictionary representing the BEL config file

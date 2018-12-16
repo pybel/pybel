@@ -3,7 +3,7 @@
 """Conversion functions for BEL graphs with JGIF JSON.
 
 The JSON Graph Interchange Format (JGIF) is `specified <http://jsongraphformat.info/>`_ similarly to the Node-Link
-JSON. Interchange with this format provides compatibilty with other software and repositories, such as the 
+JSON. Interchange with this format provides compatibilty with other software and repositories, such as the
 `Causal Biological Network Database <http://causalbionet.com/>`_.
 """
 
@@ -145,7 +145,7 @@ def from_cbn_jgif(graph_jgif_dict):
 
         Handling the annotations is not yet supported, since the CBN documents do not refer to the resources used
         to create them. This may be added in the future, but the annotations must be stripped from the graph
-        before uploading to the network store using :func:`pybel.struct.mutation.strip_annotations`
+        before uploading to the network store using :func:`pybel.struct.mutation.strip_annotations`.
     """
     graph_jgif_dict = map_cbn(graph_jgif_dict)
 
@@ -153,16 +153,16 @@ def from_cbn_jgif(graph_jgif_dict):
         METADATA_AUTHORS: 'Causal Biological Networks Database',
         METADATA_LICENSES: """
         Please cite:
-        
+
         - www.causalbionet.com
-        - https://bionet.sbvimprover.com 
+        - https://bionet.sbvimprover.com
 
         as well as any relevant publications.
-        
-        The sbv IMPROVER project, the website and the Symposia are part of a collaborative project 
-        designed to enable scientists to learn about and contribute to the development of a new crowd 
-        sourcing method for verification of scientific data and results. The current challenges, website 
-        and biological network models were developed and are maintained as part of a collaboration among 
+
+        The sbv IMPROVER project, the website and the Symposia are part of a collaborative project
+        designed to enable scientists to learn about and contribute to the development of a new crowd
+        sourcing method for verification of scientific data and results. The current challenges, website
+        and biological network models were developed and are maintained as part of a collaboration among
         Selventa, OrangeBus and ADS. The project is led and funded by Philip Morris International. For more
         information on the focus of Philip Morris International’s research, please visit www.pmi.com.
         """.replace('\n', '\t'),
