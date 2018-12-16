@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
-Node Filters
-------------
+"""Filter functions for nodes in BEL graphs.
 
 A node predicate is a function that takes two arguments: a :class:`BELGraph` and a node tuple. It returns a boolean
 representing whether the node passed the given test.
@@ -26,7 +24,7 @@ __all__ = [
 ]
 
 
-def invert_node_predicate(node_predicate):
+def invert_node_predicate(node_predicate):  # noqa: D202
     """Build a node predicate that is the inverse of the given node predicate.
 
     :param node_predicate: An edge predicate

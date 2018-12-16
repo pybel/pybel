@@ -40,9 +40,9 @@ class BaseParser(object):
             for line_number, line in enumerate(lines)
         ]
 
-    def parseString(self, line, line_number=0):
+    def parseString(self, line, line_number=0):  # noqa: N802
         """Parse a string with the language represented by this parser.
-        
+
         :param str line: A string representing an instance of this parser's language
         :param int line_number: The current line number of the parser
         """

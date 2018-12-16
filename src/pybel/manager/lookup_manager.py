@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""A manager for looking up nodes."""
+
 from .base_manager import BaseManager
 from .models import Author, Citation, Edge, Evidence, Node
 from ..constants import CITATION_TYPE_PUBMED

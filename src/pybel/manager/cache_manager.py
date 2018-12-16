@@ -10,11 +10,11 @@ from __future__ import unicode_literals
 
 import json
 import logging
+import time
 from copy import deepcopy
+from itertools import chain
 
 import six
-import time
-from itertools import chain
 from six import string_types
 from sqlalchemy import and_, exists, func
 from sqlalchemy.orm import aliased
@@ -105,7 +105,8 @@ def _clean_bel_namespace_values(bel_resource):
 
 
 def _normalize_url(graph, keyword):  # FIXME move to utilities and unit test
-    """
+    """Normalize a URL for the BEL graph.
+
     :type graph: BELGraph
     :param str keyword: Namespace URL keyword
     :rtype: Optional[str]
@@ -529,7 +530,7 @@ class NetworkManager(NamespaceManager):
             ))
             .filter(and_(
                 ne1.c.network_id == network.id,
-                ne2.c.edge_id == None
+                ne2.c.edge_id == None  # noqa: E711
             ))
         )
         return singleton_edge_ids_for_network
@@ -1058,7 +1059,7 @@ class InsertManager(NamespaceManager, LookupManager):
         log.info('dropped all nodes in %.2f seconds', time.time() - t)
 
     def drop_edges(self):
-        """Drop all edges in the database"""
+        """Drop all edges in the database."""
         t = time.time()
 
         self.session.query(Edge).delete()

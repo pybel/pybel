@@ -83,7 +83,7 @@ def write_namespace(values, namespace_name, namespace_keyword, namespace_domain=
 
 
 def write_namespace_body(values, delimiter='|', functions=None, file=None, value_prefix='', sort_key=None):
-    """Writes the [Values] section of a BEL namespace file
+    """Write the [Values] section of a BEL namespace file.
 
     :param values: An iterable of values (strings) or dictionary of {label:encodings}
     :type values: iter[str] or dict[str,str]

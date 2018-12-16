@@ -13,7 +13,7 @@ __all__ = [
 
 
 def make_annotation_header(keyword, description=None, usage=None, version=None, created=None):
-    """Makes the ``[AnnotationDefinition]`` section of a BELANNO file
+    """Make the ``[AnnotationDefinition]`` section of a BELANNO file.
 
     :param str keyword: Preferred BEL Keyword, maximum length of 8
     :param str description: A description of this annotation
@@ -23,7 +23,6 @@ def make_annotation_header(keyword, description=None, usage=None, version=None, 
     :return: A iterator over the lines for the ``[AnnotationDefinition]`` section
     :rtype: iter[str]
     """
-
     yield '[AnnotationDefinition]'
     yield 'Keyword={}'.format(keyword)
     yield 'TypeString={}'.format('list')
@@ -40,7 +39,7 @@ def make_annotation_header(keyword, description=None, usage=None, version=None, 
 def write_annotation(keyword, values, citation_name, description, usage=None, version=None, created=None,
                      author_name=None, author_copyright=None, author_contact=None, case_sensitive=True, delimiter='|',
                      cacheable=True, file=None, value_prefix=''):
-    """Writes a BEL annotation (BELANNO) to a file
+    """Write a BEL annotation (BELANNO) to a file.
 
     :param str keyword: The annotation keyword
     :param dict[str, str] values: A dictionary of {name: label}

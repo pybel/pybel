@@ -42,7 +42,6 @@ jobs:
 
 matrix:
   allow_failures:
-    - env: TOXENV=flake8
     - env: TOXENV=xenon
 
 install:

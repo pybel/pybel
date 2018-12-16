@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Functions for inducing graphs by nodes and by edge filters."""
+
 from ..utils import expand_by_edge_filter
 from ...operations import subgraph
 from ...pipeline import transformation

@@ -11,7 +11,6 @@ from .decorators import get_transformation, in_place_map, mapped, universe_map
 from .exc import MetaValueError, MissingPipelineFunctionError, MissingUniverseError
 from ..operations import node_intersection, union
 
-
 __all__ = [
     'Pipeline',
 ]
@@ -32,7 +31,7 @@ def _get_protocol_tuple(data):
 
 
 class Pipeline:
-    """Builds and runs analytical pipelines on BEL graphs.
+    """Build and runs analytical pipelines on BEL graphs.
 
     Example usage:
 
@@ -47,7 +46,8 @@ class Pipeline:
     """
 
     def __init__(self, protocol=None):
-        """
+        """Initialize the pipeline with an optional pre-defined protocol.
+
         :param iter[dict] protocol: An iterable of dictionaries describing how to transform a network
         """
         self.universe = None
@@ -234,12 +234,12 @@ class Pipeline:
         """
         return self.run(graph=graph, universe=universe)
 
-    def _wrap_universe(self, func):
+    def _wrap_universe(self, func):  # noqa: D202
         """Take a function that needs a universe graph as the first argument and returns a wrapped one."""
 
         @wraps(func)
         def wrapper(graph, *args, **kwargs):
-            """Applies the enclosed function with the universe given as the first argument"""
+            """Apply the enclosed function with the universe given as the first argument."""
             if self.universe is None:
                 raise MissingUniverseError(
                     'Can not run universe function [{}] - No universe is set'.format(func.__name__))
@@ -249,12 +249,12 @@ class Pipeline:
         return wrapper
 
     @staticmethod
-    def _wrap_in_place(func):
+    def _wrap_in_place(func):  # noqa: D202
         """Take a function that doesn't return the graph and returns the graph."""
 
         @wraps(func)
         def wrapper(graph, *args, **kwargs):
-            """Applies the enclosed function and returns the graph"""
+            """Apply the enclosed function and returns the graph."""
             func(graph, *args, **kwargs)
             return graph
 
@@ -308,7 +308,8 @@ class Pipeline:
 
     @staticmethod
     def _build_meta(meta, pipelines):
-        """
+        """Build a pipeline with a given meta-argument.
+
         :param str meta: either union or intersection
         :param iter[Pipeline] pipelines:
         :rtype: Pipeline

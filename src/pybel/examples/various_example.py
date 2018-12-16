@@ -2,7 +2,7 @@
 
 """Small graphs with grouped nodes"."""
 
-from ..dsl import abundance, composite_abundance, reaction, protein, complex_abundance
+from ..dsl import Abundance, ComplexAbundance, CompositeAbundance, Protein, Reaction
 from ..struct.graph import BELGraph
 
 __all__ = [
@@ -31,16 +31,16 @@ single_reaction_graph.namespace_url.update({
             'go-biological-process-20170725.belns'
 })
 
-hk1 = protein(name='HK1', namespace='HGNC', identifier='4922')
-atp = abundance(name='ATP', namespace='CHEBI', identifier='15422')
-adp = abundance(name='ADP', namespace='CHEBI', identifier='16761')
-phosphate = abundance(name='phosphoric acid', namespace='CHEBI', identifier='26078')
-glucose = abundance(name='glucose', namespace='CHEBI', identifier='17234')
-glucose_6_phosphate = abundance(name='D-glucopyranose 6-phosphate', namespace='CHEBI', identifier='4170')
-glycolisis_step_1 = reaction(reactants=[glucose, hk1, atp, phosphate], products=[glucose_6_phosphate, adp, hk1])
+hk1 = Protein(name='HK1', namespace='HGNC', identifier='4922')
+atp = Abundance(name='ATP', namespace='CHEBI', identifier='15422')
+adp = Abundance(name='ADP', namespace='CHEBI', identifier='16761')
+phosphate = Abundance(name='phosphoric acid', namespace='CHEBI', identifier='26078')
+glucose = Abundance(name='glucose', namespace='CHEBI', identifier='17234')
+glucose_6_phosphate = Abundance(name='D-glucopyranose 6-phosphate', namespace='CHEBI', identifier='4170')
+glycolisis_step_1 = Reaction(reactants=[glucose, hk1, atp, phosphate], products=[glucose_6_phosphate, adp, hk1])
 
-composite_example = composite_abundance(members=[glucose_6_phosphate, adp, hk1])
-complex_example = complex_abundance(members=[glucose_6_phosphate, adp, hk1])
+composite_example = CompositeAbundance(members=[glucose_6_phosphate, adp, hk1])
+complex_example = ComplexAbundance(members=[glucose_6_phosphate, adp, hk1])
 
 single_reaction_graph.add_node_from_data(glycolisis_step_1)
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Contains constants"""
+"""Constants for modifier parsers."""
 
 from pyparsing import Keyword, MatchFirst, oneOf
 
@@ -18,7 +18,7 @@ aa_placeholder = Keyword('X')
 
 
 def handle_aa_placeholder(line, position, tokens):
-    """Raises an exception when encountering a placeholder amino acid, ``X``"""
+    """Raise an exception when encountering a placeholder amino acid, ``X``."""
     raise PlaceholderAminoAcidWarning(-1, line, position, tokens[0])
 
 

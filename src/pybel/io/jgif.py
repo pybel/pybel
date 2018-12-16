@@ -3,7 +3,7 @@
 """Conversion functions for BEL graphs with JGIF JSON.
 
 The JSON Graph Interchange Format (JGIF) is `specified <http://jsongraphformat.info/>`_ similarly to the Node-Link
-JSON. Interchange with this format provides compatibilty with other software and repositories, such as the 
+JSON. Interchange with this format provides compatibilty with other software and repositories, such as the
 `Causal Biological Network Database <http://causalbionet.com/>`_.
 """
 

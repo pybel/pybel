@@ -8,7 +8,7 @@ DATETIME_FMT = '%Y-%m-%dT%H:%M:%S'
 
 
 def make_author_header(name=None, contact=None, copyright_str=None):
-    """Makes the ``[Author]`` section of a BELNS file
+    """Make the ``[Author]`` section of a BELNS file.
 
     :param str name: Namespace's authors
     :param str contact: Namespace author's contact info/email address
@@ -25,7 +25,7 @@ def make_author_header(name=None, contact=None, copyright_str=None):
 
 
 def make_citation_header(name, description=None, url=None, version=None, date=None):
-    """Makes the ``[Citation]`` section of a BEL config file.
+    """Make the ``[Citation]`` section of a BEL config file.
 
     :param str name: Citation name
     :param str description: Citation description
@@ -52,7 +52,7 @@ def make_citation_header(name, description=None, url=None, version=None, date=No
 
 
 def make_properties_header(case_sensitive=True, delimiter='|', cacheable=True):
-    """Makes the ``[Processing]`` section of a BEL config file.
+    """Make the ``[Processing]`` section of a BEL config file.
 
     :param bool case_sensitive: Should this config file be interpreted as case-sensitive?
     :param str delimiter: The delimiter between names and labels in this config file

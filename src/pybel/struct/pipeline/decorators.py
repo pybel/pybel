@@ -78,7 +78,7 @@ def _register_function(name, func, universe, in_place):
     return func
 
 
-def _build_register_function(universe, in_place):
+def _build_register_function(universe, in_place):  # noqa: D202
     """Build a decorator function to tag transformation functions.
 
     :param bool universe: Does the first positional argument of this function correspond to a universe graph?

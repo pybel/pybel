@@ -11,7 +11,7 @@ from pyparsing import ParseException
 from sqlalchemy.exc import OperationalError
 from tqdm import tqdm
 
-from ..constants import GRAPH_METADATA, INVERSE_DOCUMENT_KEYS, REQUIRED_METADATA
+from ..constants import INVERSE_DOCUMENT_KEYS, REQUIRED_METADATA
 from ..exceptions import PyBELWarning
 from ..manager import Manager
 from ..parser import BELParser, MetadataParser

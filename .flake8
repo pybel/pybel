@@ -6,9 +6,12 @@
 
 [flake8]
 ignore =
+    # max line length
     E501
     F401
+    # star imports
     F403
+    # docstring in magic method
     D105
     # Line break after operator
     W504
@@ -16,6 +19,8 @@ ignore =
     D107
     # Complaining about assert statements
     S101
+    # Complains about random number generators
+    S311
 exclude =
     .tox,
     .git,
@@ -29,7 +34,8 @@ exclude =
     *.egg-info,
     .cache,
     .eggs
-max-complexity = 15
+max-complexity = 25
+max-line-length = 120
 import-order-style = pycharm
 application-import-names =
     pybel

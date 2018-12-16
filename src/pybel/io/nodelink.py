@@ -4,9 +4,8 @@
 
 import json
 import os
-from operator import itemgetter, methodcaller
-
 from itertools import chain, count
+from operator import methodcaller
 
 from .utils import ensure_version
 from ..constants import GRAPH_ANNOTATION_LIST, GRAPH_UNCACHED_NAMESPACES
@@ -152,7 +151,7 @@ def node_link_data(graph):
 
 
 def _augment_node_with_sha512(node):
-    """
+    """Add the SHA-512 identifier to a node's dictionary.
 
     :type node: BaseEntity
     :rtype: dict

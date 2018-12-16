@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""General-use induction functions."""
+
 import networkx as nx
 
 from ..filters import filter_edges

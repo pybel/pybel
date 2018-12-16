@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains the base class for connection managers in SQLAlchemy"""
+"""This module contains the base class for connection managers in SQLAlchemy."""
 
 from __future__ import unicode_literals
 
@@ -110,13 +110,6 @@ class BaseManager(object):
         :rtype: int
         """
         return self.session.query(model_cls).count()
-
-    def list_citations(self, model_cls):
-        """List the models in the database.
-
-        :rtype: list
-        """
-        return self.session.query(model_cls).all()
 
     def __repr__(self):
         return '<{} connection={}>'.format(self.__class__.__name__, self.engine.url)

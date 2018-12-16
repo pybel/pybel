@@ -46,8 +46,7 @@ def _annotation_dict_all_filter(data, query):
 
 
 def build_annotation_dict_all_filter(annotations):
-    """Build an edge predicate that passes for edges whose data dictionaries's annotations entry are super-dictionaries
-    to the given dictionary.
+    """Build an edge predicate for edges whose annotations are super-dictionaries of the given dicionary.
 
     If no annotations are given, will always evaluate to true.
 
@@ -101,7 +100,7 @@ def build_annotation_dict_any_filter(annotations):
 
     @edge_predicate
     def annotation_dict_any_filter(data):
-        """Checks if the any of the annotations in the enclosed query match
+        """Check if the any of the annotations in the enclosed query match.
 
         :param dict data: A PyBEL edge data dictionary
         :rtype: bool

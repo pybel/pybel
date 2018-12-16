@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 
+"""A wrapper around selection methods."""
+
 import logging
 
-from .constants import *
+from .constants import (
+    SEED_TYPE_ANNOTATION, SEED_TYPE_AUTHOR, SEED_TYPE_DOUBLE_NEIGHBORS, SEED_TYPE_DOWNSTREAM,
+    SEED_TYPE_INDUCTION, SEED_TYPE_NEIGHBORS, SEED_TYPE_PATHS, SEED_TYPE_PUBMED, SEED_TYPE_SAMPLE, SEED_TYPE_UPSTREAM,
+)
 from ..mutation import (
     expand_nodes_neighborhoods, get_multi_causal_downstream, get_multi_causal_upstream,
     get_random_subgraph, get_subgraph_by_all_shortest_paths, get_subgraph_by_annotations, get_subgraph_by_authors,

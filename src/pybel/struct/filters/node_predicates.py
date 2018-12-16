@@ -39,7 +39,7 @@ __all__ = [
 ]
 
 
-def node_predicate(f):
+def node_predicate(f):  # noqa: D202
     """Tag a node predicate that takes a dictionary to also accept a pair of (BELGraph, tuple).
 
     Apply this as a decorator to a function that takes a single argument, a PyBEL node data dictionary, to make
@@ -298,7 +298,7 @@ def node_exclusion_predicate_builder(nodes):
 
     @node_predicate
     def node_exclusion_predicate(node):
-        """Returns true if the node is not in the given set of nodes
+        """Return true if the node is not in the given set of nodes.
 
         :param BaseEntity node: A PyBEL data dictionary
         :rtype: bool
@@ -319,7 +319,7 @@ def node_inclusion_predicate_builder(nodes):
 
     @node_predicate
     def node_inclusion_predicate(node):
-        """Returns true if the node is in the given set of nodes
+        """Return true if the node is in the given set of nodes.
 
         :param BaseEntity node: A PyBEL data dictionary
         :rtype: bool

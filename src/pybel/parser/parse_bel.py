@@ -5,9 +5,9 @@
 This module handles parsing BEL relations and validation of semantics.
 """
 
+import itertools as itt
 import logging
 
-import itertools as itt
 from pyparsing import And, Group, Keyword, MatchFirst, Optional, StringEnd, Suppress, delimitedList, oneOf, replaceWith
 
 from .baseparser import BaseParser
@@ -603,7 +603,7 @@ class BELParser(BaseParser):
 
     @property
     def namespace_dict(self):
-        """The dictionary of {namespace: {name: encoding}} stored in the internal identifier parser
+        """Get the dictionary of {namespace: {name: encoding}} stored in the internal identifier parser.
 
         :rtype: dict[str,dict[str,str]]
         """
@@ -709,11 +709,9 @@ class BELParser(BaseParser):
 
         return tokens
 
-    def handle_term(self, line, position, tokens):
+    def handle_term(self, _, __, tokens):
         """Handle BEL terms (the subject and object of BEL relations).
 
-        :param str line: The line being parsed
-        :param int position: The position in the line being parsed
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
         """
         self.ensure_node(tokens)
@@ -730,7 +728,7 @@ class BELParser(BaseParser):
         return tokens
 
     def handle_has_members(self, line, position, tokens):
-        """Handle list relations like ``p(X) hasMembers list(p(Y), p(Z), ...).``
+        """Handle list relations like ``p(X) hasMembers list(p(Y), p(Z), ...)``.
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
@@ -738,11 +736,9 @@ class BELParser(BaseParser):
         """
         return self._handle_list_helper(tokens, HAS_MEMBER)
 
-    def handle_has_components(self, line, position, tokens):
+    def handle_has_components(self, _, __, tokens):
         """Handle list relations like ``p(X) hasComponents list(p(Y), p(Z), ...)``.
 
-        :param str line: The line being parsed
-        :param int position: The position in the line being parsed
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
         """
         return self._handle_list_helper(tokens, HAS_COMPONENT)
@@ -783,7 +779,9 @@ class BELParser(BaseParser):
             )
 
     def _handle_relation(self, tokens):
-        """A policy in which all annotations are stored as sets, including single annotations.
+        """Handle a relation.
+
+        In this policy, all annotations are stored as sets, including single annotations.
 
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
         """
@@ -839,11 +837,9 @@ class BELParser(BaseParser):
 
         return tokens
 
-    def handle_unqualified_relation(self, line, position, tokens):
+    def handle_unqualified_relation(self, _, __, tokens):
         """Handle unqualified relations.
 
-        :param str line: The line being parsed
-        :param int position: The position in the line being parsed
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
         """
         subject_node_dsl = self.ensure_node(tokens[SUBJECT])
@@ -900,11 +896,9 @@ class BELParser(BaseParser):
 
 # HANDLERS
 
-def handle_molecular_activity_default(line, position, tokens):
+def handle_molecular_activity_default(_, __, tokens):
     """Handle a BEL 2.0 style molecular activity with BEL default names.
 
-    :param str line: The line being parsed
-    :param int position: The position in the line being parsed
     :param pyparsing.ParseResult tokens: The tokens from PyParsing
     """
     upgraded = language.activity_labels[tokens[0]]
@@ -913,11 +907,9 @@ def handle_molecular_activity_default(line, position, tokens):
     return tokens
 
 
-def handle_activity_legacy(line, position, tokens):
+def handle_activity_legacy(_, __, tokens):
     """Handle BEL 1.0 activities.
 
-    :param str line: The line being parsed
-    :param int position: The position in the line being parsed
     :param pyparsing.ParseResult tokens: The tokens from PyParsing
     """
     legacy_cls = language.activity_labels[tokens[MODIFIER]]
@@ -930,11 +922,10 @@ def handle_activity_legacy(line, position, tokens):
     return tokens
 
 
-def handle_legacy_tloc(line, position, tokens):
-    """Handles translocations that lack the ``fromLoc`` and ``toLoc`` entries
+def handle_legacy_tloc(line, _, tokens):
+    """Handle translocations that lack the ``fromLoc`` and ``toLoc`` entries.
 
     :param str line: The line being parsed
-    :param int position: The position in the line being parsed
     :param pyparsing.ParseResult tokens: The tokens from PyParsing
     """
     log.log(5, 'legacy translocation statement: %s', line)

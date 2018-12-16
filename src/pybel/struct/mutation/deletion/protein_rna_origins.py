@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Functions for deleting proteins and genes that are leaves."""
+
 from ...filters.node_selection import get_nodes_by_function
 from ...pipeline.decorators import in_place_transformation, register_deprecated
 from ....constants import GENE, RELATION, RNA, TRANSCRIBED_TO, TRANSLATED_TO

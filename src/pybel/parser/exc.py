@@ -2,7 +2,7 @@
 
 """Exceptions for the BEL parser.
 
-A message for "General Parser Failure" is displayed when a problem was caused due to an unforseen error. The line
+A message for "General Parser Failure" is displayed when a problem was caused due to an unforeseen error. The line
 number and original statement are printed for the user to debug.
 """
 
@@ -10,7 +10,7 @@ from ..exceptions import PyBELWarning
 
 
 class PyBelParserWarning(PyBELWarning):
-    """Base PyBEL parser exception, which holds the line and position where a parsing problem occurred"""
+    """The base PyBEL parser exception, which holds the line and position where a parsing problem occurred."""
 
     def __init__(self, line_number, line, position, *args):
         """Initialize the BEL parser warning.
@@ -87,7 +87,8 @@ class NamespaceIdentifierWarning(NameWarning):
     """The base class for warnings related to namespace:name identifiers."""
 
     def __init__(self, line_number, line, position, namespace, name):
-        """
+        """Initialize the namespace identifier warning.
+
         :param int line_number: The line number of the line that caused the exception
         :param str line: The line that caused the exception
         :param int position: The line's position of the exception
