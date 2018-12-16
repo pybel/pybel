@@ -518,7 +518,7 @@ class Fragment(Variant):
 
     @property
     def range(self):
-        """The range of this fragment."""
+        """Get the range of this fragment."""
         if FRAGMENT_MISSING in self:
             return '?'
 
