@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://pybel.github.io/schema/fusion.schema.json",
+  "title": "BEL node fusion schema",
+  "description": "Basic schema to validate JSON files describing a BEL fusion object",
+  "type": "object",
+  "definitions": {
+    "fusion_range": {
+      "type": "object",
+      "properties": {
+        "fusion_reference": {
+          "type": "string"
+        },
+        "fusion_start": {
+          "type": ["string", "integer"]
+        },
+        "fusion_stop": {
+          "type": ["string", "integer"]
+        }
+      },
+      "oneOf": [
+        { "required": ["fusion_reference", "fusion_start", "fusion_stop"]},
+        { "required": ["missing"]}
+      ]
+    }
+  },
+  "properties": {
+    "partner_5p": {
+      "description": "5' fusion partner",
+      "$ref": "nodes.schema.json"
+    },
+    "partner_3p": {
+      "description": "3' fusion partner",
+      "$ref": "nodes.schema.json"
+    },
+    "range_5p": {
+      "description": "sequence coordinates of the 5' partner",
+      "$ref": "#/definitions/fusion_range"
+    },
+    "range_3p": {
+      "description": "sequence coordinates of the 3' partner",
+      "$ref": "#/definitions/fusion_range"
+    }
+  },
+  "required": ["partner_5p", "partner_3p"]
+}

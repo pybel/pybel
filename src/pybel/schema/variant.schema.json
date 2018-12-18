@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://pybel.github.io/schema/variant.schema.json",
+  "title": "BEL node variation schema",
+  "description": "Basic schema to validate JSON files describing a BEL variant object",
+  "type": "object",
+  "properties": {
+    "kind": {
+      "description": "Kind of sequence variation",
+      "type": "string"
+    },
+    "identifier": {
+      "description": "Explanation on the sequence change"
+    },
+    "pmod_code": {
+      "description": "Amino acid code of the modification",
+      "type": "string"
+    },
+    "pmod_position": {
+      "description": "Position of the modification",
+      "type": "number"
+    },
+    "fragment_start": {
+      "description": "Start position of the sequence fragment",
+      "type": "number"
+    },
+    "fragment_end": {
+      "description": "End position of the sequence fragment",
+      "type": "number"
+    }
+  },
+  "required": ["kind"]
+}

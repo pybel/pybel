@@ -4,10 +4,10 @@
 
 import unittest
 
-from pybel.constants import FUNCTION, NAME, NAMESPACE, PROTEIN, VARIANTS
+from pybel.constants import FUNCTION, NAME, NAMESPACE, PROTEIN, VARIANTS, KIND, MEMBERS, FUSION, PARTNER_3P, PARTNER_5P, RANGE_3P, RANGE_5P
 from pybel.dsl import (
     Abundance, BiologicalProcess, ComplexAbundance, Gene, MicroRna, NamedComplexAbundance, Pathology, Protein,
-    ProteinModification, Reaction, Rna,
+    ProteinModification, Reaction, Rna, ProteinFusion
 )
 from pybel.schema import validate_node
 from pybel.testing.utils import n
@@ -32,7 +32,7 @@ enumerated_complex_1 = ComplexAbundance([
     protein_1,
     Protein(HGNC, n()),
 ])
-
+protein_fusion = ProteinFusion(protein_1, protein_2)
 
 class TestNodeSchema(unittest.TestCase):
     """Tests for the PyBEL node validator."""
@@ -54,14 +54,43 @@ class TestNodeSchema(unittest.TestCase):
         self.assertValidNode(pathology_1)
         self.assertValidNode(biological_process_1)
 
+    def test_protein_fusion(self):
+        """Test validating protein fusion"""
+        print(protein_fusion.function, protein_fusion.items())
+        self.assertValidNode(protein_fusion)
+
     def test_reaction(self):
         """Test a reaction."""
         self.assertValidNode(reaction_1)
 
     def test_enumerated_complex(self):
-        """Test a reaction."""
-        print('Log> ', type(enumerated_complex_1))
+        """Test a enumareted complex."""
+        print('Log> ', enumerated_complex_1.function)
         self.assertValidNode(enumerated_complex_1)
+
+    def test_enumerated_complex_fail(self):
+        """Test a complex with invalid properties"""
+        self.assertInvalidNode({
+            NAME: 'YFC',
+            FUNCTION: 'Complex',
+            MEMBERS: [],
+            VARIANTS: [
+                { KIND: 'pmod' }
+            ]
+        }, msg="Complex with invalid properties should fail")
+
+    def test_pathology_fail(self):
+        """Test a pathway with invalid properties, should fail"""
+        self.assertInvalidNode({
+            NAME: 'YFP',
+            FUNCTION: 'Pathology',
+            NAMESPACE: GO,
+            MEMBERS: [],
+            FUSION: {
+                PARTNER_5P: protein_1,
+                PARTNER_3P: protein_2,
+            }
+        }, msg="Should fail because two invalid properties")
 
     def test_simple_fail(self):
         """Test validating simple namespace/name nodes."""

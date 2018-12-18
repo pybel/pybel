@@ -21,110 +21,88 @@
       "description": "List of sequence variants of this node",
       "type": "array",
       "items": {
-        "type": "object",
-        "properties": {
-        "kind": {
-          "description": "Kind of sequence variation",
-          "type": "string"
-        },
-        "identifier": {
-          "description": "Explanation on the sequence change"
-        },
-        "pmod_code": {
-          "description": "Amino acid code of the modification",
-          "type": "string"
-        },
-        "pmod_position": {
-          "description": "Position of the modification",
-          "type": "number"
-        },
-        "fragment_start": {
-          "description": "Start position of the sequence fragment",
-          "type": "number"
-        },
-        "fragment_end": {
-          "description": "End position of the sequence fragment",
-          "type": "number"
-        }
-      },
-      "required": ["kind"]
+        "$ref": "variant.schema.json"
       }
     },
     "fusion": {
-      "properties": {
-        "partner_5p": {
-          "description": "5' fusion partner",
-          "type": "object",
-          "properties": {
-            "function": {"type": "string"},
-            "namespace": {"type": "string"},
-            "name": {"type": "string"}
-          }
-        },
-        "partner_3p": {
-          "description": "3' fusion partner",
-          "type": "object",
-          "properties": {
-            "function": {"type": "string"},
-            "namespace": {"type": "string"},
-            "name": {"type": "string"}
-          }
-        },
-        "range_5p": {
-          "description": "sequence coordinates of the 5' partner",
-          "type": "object",
-          "properties": {
-            "fusion_reference": {"type": "string"},
-            "fusion_start": {"type": ["string", "integer"]},
-            "fusion_stop": {"type": ["string", "integer"]}
-          }
-        },
-        "range_3p": {
-          "description": "sequence coordinates of the 3' partner",
-          "type": "object",
-          "properties": {
-            "fusion_reference": {"type": "string"},
-            "fusion_start": {"type": ["string", "integer"]},
-            "fusion_stop": {"type": ["string", "integer"]}
-          }
-        }
-      },
-      "$comment": "ToDo: Replace explicit description by reference e.g. '$ref': 'https://pybel.github.io/nodes.schema.json'",
-      "required": ["partner_5p", "partner_3p", "range_5p", "range_3p"]
+      "description": "Partners of a sequence fusion",
+      "$ref": "fusion.schema.json"
     },
     "members": {
       "description": "Member list of a complex/composite",
       "type": "array",
       "items": {
-        "type": "object",
-        "properties": {
-            "function": {"type": "string"},
-            "namespace": {"type": "string"},
-            "name": {"type": "string"}
-        },
-        "required": ["function", "namespace", "name"]
+        "$ref": "nodes.schema.json"
       }
     }
   },
-  "required": ["function"],
-  "anyOf": [
-    {
-      "properties": {
-        "function": { "enum": ["Protein", "Gene", "RNA", "miRNA"]}
-      },
-      "required": ["namespace", "name"]
+
+  "oneOf": [
+    { "allOf": [
+        {
+          "properties": {
+            "function": { "enum": ["Protein", "Gene", "RNA", "miRNA"] }
+          },
+          "required": ["function", "namespace", "name"]
+        },
+        {
+          "not": { "required": ["fusion"]}
+        },
+        {
+          "not": { "required": ["members"] }
+        }
+      ]
     },
-    {
-      "properties": {
-        "function": { "enum": ["Complex", "Composite"]}
-      },
-      "required": ["members"]
+    { "allOf": [
+        {
+          "properties": {
+            "function": { "enum": ["Protein", "Gene", "RNA", "miRNA"] }
+          },
+          "required": ["function"]
+        },
+        {
+          "required": ["fusion"]
+        },
+        {
+          "not": { "required": ["members"] }
+        },
+        {
+          "not": { "required": ["variants"]}
+        }
+      ]
     },
-    {
-      "properties": {
-        "function": { "enum": ["Pathology", "BiologicalProcess"]}
-      },
-      "required": ["function"]
+    { "allOf": [
+        {
+          "properties": {
+            "function": { "enum": ["Complex", "Composite"]}
+          },
+          "required": ["function", "members"]
+        },
+        {
+          "not": { "required": ["fusion"]}
+        },
+        {
+          "not": { "required": ["variants"]}
+        }
+      ]
+    },
+    { "allOf": [
+        {
+          "properties": {
+            "function": { "enum": ["Pathology", "BiologicalProcess"]}
+          },
+          "required": ["function", "name", "namespace"]
+        },
+        {
+          "not": { "required": ["fusion"]}
+        },
+        {
+          "not": { "required": ["variants"]}
+        },
+        {
+          "not": { "required": ["members"]}
+        }
+      ]
     }
   ]
 }

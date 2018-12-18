@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://pybel.github.io/schema/base_node.schema.json",
+  "title": "BEL node schema",
+  "description": "Basic schema to validate JSON files describing a BEL node",
+  "type": "object",
+  "properties": {
+    "function": {
+      "description": "Function of the node, e.g. protein or gene",
+      "enum": ["Protein", "Gene", "Complex", "Composite", "RNA", "miRNA", "Pathology", "BiologicalProcess"]
+    },
+    "namespace": {
+      "description": "Namespace of the node, e.g. ChemBL",
+      "type": "string"
+    },
+    "name": {
+      "description": "Name of the node, e.g. protein name",
+      "type": "string"
+    }
+  },
+  "required": ["function", "name", "namespace"]
+}
