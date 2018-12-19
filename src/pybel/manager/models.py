@@ -857,9 +857,14 @@ class Edge(Base):
                  and edge data information.
         :rtype: dict
         """
+        source_dict = self.source.to_json()
+        source_dict['sha512'] = source_dict.sha512
+        target_dict = self.target.to_json()
+        target_dict['sha512'] = target_dict.sha512
+
         result = {
-            'source': self.source.to_json(),
-            'target': self.target.to_json(),
+            'source': source_dict,
+            'target': target_dict,
             'key': self.sha512,
             'data': json.loads(self.data),
         }
