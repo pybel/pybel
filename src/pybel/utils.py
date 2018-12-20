@@ -5,7 +5,8 @@
 import hashlib
 import json
 import logging
-from collections import Iterable, MutableMapping, defaultdict
+from collections import defaultdict
+from collections.abc import Iterable, MutableMapping
 from datetime import datetime
 
 from six import string_types
