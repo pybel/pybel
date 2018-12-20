@@ -19,8 +19,13 @@ __all__ = [
 log = logging.getLogger(__name__)
 
 
-def from_lines(lines, manager=None, allow_nested=False, citation_clearing=True, use_tqdm=False,
-               disallow_unqualified_translocations=False, **kwargs):
+def from_lines(lines,
+               manager=None,
+               allow_nested=False,
+               citation_clearing=True,
+               use_tqdm=False,
+               disallow_unqualified_translocations=False,
+               **kwargs):
     """Load a BEL graph from an iterable over the lines of a BEL script.
 
     :param iter[str] lines: An iterable of strings (the lines in a BEL script)
@@ -48,8 +53,15 @@ def from_lines(lines, manager=None, allow_nested=False, citation_clearing=True, 
     return graph
 
 
-def from_path(path, manager=None, allow_nested=False, citation_clearing=True, encoding='utf-8', use_tqdm=False,
-              disallow_unqualified_translocations=False, **kwargs):
+def from_path(path,
+              manager=None,
+              allow_nested=False,
+              citation_clearing=True,
+              encoding='utf-8',
+              use_tqdm=False,
+              disallow_unqualified_translocations=False,
+              **kwargs
+              ):
     """Load a BEL graph from a file resource. This function is a thin wrapper around :func:`from_lines`.
 
     :param str path: A file path
@@ -80,7 +92,13 @@ def from_path(path, manager=None, allow_nested=False, citation_clearing=True, en
         )
 
 
-def from_url(url, manager=None, allow_nested=False, citation_clearing=True, use_tqdm=False, **kwargs):
+def from_url(url,
+             manager=None,
+             allow_nested=False,
+             citation_clearing=True,
+             use_tqdm=False,
+             **kwargs
+             ):
     """Load a BEL graph from a URL resource. This function is a thin wrapper around :func:`from_lines`.
 
     :param str url: A valid URL pointing to a BEL resource

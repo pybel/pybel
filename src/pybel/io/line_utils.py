@@ -22,14 +22,30 @@ from ..parser.exc import (
 from ..resources.document import split_file_to_annotations_and_definitions
 from ..resources.exc import ResourceError
 
+__all__ = [
+    'parse_lines',
+]
+
 log = logging.getLogger(__name__)
 parse_log = logging.getLogger('pybel.parser')
 
 METADATA_LINE_RE = re.compile(r"(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
 
 
-def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearing=True, use_tqdm=False,
-                no_identifier_validation=False, disallow_unqualified_translocations=False, **kwargs):
+def parse_lines(graph,
+                lines,
+                manager=None,
+                allow_nested=False,
+                citation_clearing=True,
+                use_tqdm=False,
+                tqdm_kwargs=None,
+                no_identifier_validation=False,
+                disallow_unqualified_translocations=False,
+                allow_redefinition=False,
+                allow_definition_failures=False,
+                allow_naked_names=False,
+                required_annotations=None,
+                ):
     """Parse an iterable of lines into this graph.
 
     Delegates to :func:`parse_document`, :func:`parse_definitions`, and :func:`parse_statements`.
@@ -41,6 +57,7 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
     :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                    Delegated to :class:`pybel.parser.ControlParser`
     :param bool use_tqdm: Use :mod:`tqdm` to show a progress bar?
+    :param Optional[dict] tqdm_kwargs: Keywords to pass to ``tqdm``
     :param bool no_identifier_validation: If true, turns off namespace validation
     :param bool disallow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
 
@@ -62,7 +79,7 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
 
     metadata_parser = MetadataParser(
         manager,
-        allow_redefinition=kwargs.get('allow_redefinition'),
+        allow_redefinition=allow_redefinition,
         skip_validation=no_identifier_validation,
     )
 
@@ -76,22 +93,25 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
         graph,
         definitions,
         metadata_parser,
-        allow_failures=kwargs.get('allow_definition_failures'),
+        allow_failures=allow_definition_failures,
         use_tqdm=use_tqdm,
+        tqdm_kwargs=tqdm_kwargs,
     )
 
     bel_parser = BELParser(
         graph=graph,
+        # terminologies
         namespace_dict=metadata_parser.namespace_dict,
         annotation_dict=metadata_parser.annotation_dict,
         namespace_regex=metadata_parser.namespace_regex,
         annotation_regex=metadata_parser.annotation_regex,
+        # language settings
         allow_nested=allow_nested,
         citation_clearing=citation_clearing,
         skip_validation=no_identifier_validation,
-        allow_naked_names=kwargs.get('allow_naked_names'),
+        allow_naked_names=allow_naked_names,
         disallow_unqualified_translocations=disallow_unqualified_translocations,
-        required_annotations=kwargs.get('required_annotations'),
+        required_annotations=required_annotations,
     )
 
     parse_statements(
@@ -99,6 +119,7 @@ def parse_lines(graph, lines, manager=None, allow_nested=False, citation_clearin
         statements,
         bel_parser,
         use_tqdm=use_tqdm,
+        tqdm_kwargs=tqdm_kwargs,
     )
 
     log.info('Network has %d nodes and %d edges', graph.number_of_nodes(), graph.number_of_edges())
@@ -137,7 +158,13 @@ def parse_document(graph, lines, metadata_parser):
     log.info('Finished parsing document section in %.02f seconds', time.time() - parse_document_start_time)
 
 
-def parse_definitions(graph, lines, metadata_parser, allow_failures=False, use_tqdm=False):
+def parse_definitions(graph,
+                      lines,
+                      metadata_parser,
+                      allow_failures=False,
+                      use_tqdm=False,
+                      tqdm_kwargs=None,
+                      ):
     """Parse the lines in the definitions section of a BEL script.
 
     :param pybel.BELGraph graph: A BEL graph
@@ -145,6 +172,7 @@ def parse_definitions(graph, lines, metadata_parser, allow_failures=False, use_t
     :param MetadataParser metadata_parser: A metadata parser
     :param bool allow_failures: If true, allows parser to continue past strange failures
     :param bool use_tqdm: Use :mod:`tqdm` to show a progress bar?
+    :param Optional[dict] tqdm_kwargs: Keywords to pass to ``tqdm``
     :raises: pybel.parser.parse_exceptions.InconsistentDefinitionError
     :raises: pybel.resources.exc.ResourceError
     :raises: sqlalchemy.exc.OperationalError
@@ -152,7 +180,7 @@ def parse_definitions(graph, lines, metadata_parser, allow_failures=False, use_t
     parse_definitions_start_time = time.time()
 
     if use_tqdm:
-        lines = tqdm(list(lines), desc='Definitions')
+        lines = tqdm(list(lines), desc='Definitions', **(tqdm_kwargs or {}))
 
     for line_number, line in lines:
         try:
@@ -186,18 +214,24 @@ def parse_definitions(graph, lines, metadata_parser, allow_failures=False, use_t
     log.info('Finished parsing definitions section in %.02f seconds', time.time() - parse_definitions_start_time)
 
 
-def parse_statements(graph, lines, bel_parser, use_tqdm=False):
+def parse_statements(graph,
+                     lines,
+                     bel_parser,
+                     use_tqdm=False,
+                     tqdm_kwargs=None,
+                     ):
     """Parse a list of statements from a BEL Script.
 
     :param BELGraph graph: A BEL graph
     :param iter[tuple[int,str]] lines: An enumerated iterable over the lines in the statements section of a BEL script
     :param BELParser bel_parser: A BEL parser
     :param bool use_tqdm: Use :mod:`tqdm` to show a progress bar? Requires reading whole file to memory.
+    :param Optional[dict] tqdm_kwargs: Keywords to pass to ``tqdm``
     """
     parse_statements_start_time = time.time()
 
     if use_tqdm:
-        lines = tqdm(list(lines), desc='Statements')
+        lines = tqdm(list(lines), desc='Statements', **(tqdm_kwargs or {}))
 
     for line_number, line in lines:
         try:
