@@ -21,6 +21,7 @@ import time
 import click
 from click_plugins import with_plugins
 from pkg_resources import iter_entry_points
+from tqdm import tqdm
 
 from .canonicalize import to_bel
 from .constants import get_cache_connection
@@ -29,7 +30,7 @@ from .io import from_path, from_pickle, to_csv, to_graphml, to_gsea, to_json_fil
 from .io.web import _get_host
 from .manager import Manager
 from .manager.database_io import to_database
-from .manager.models import Edge, Namespace
+from .manager.models import Edge, Namespace, Node
 from .struct import get_unused_annotations, get_unused_list_annotation_values, get_unused_namespaces
 from .utils import get_corresponding_pickle_path
 
@@ -76,12 +77,12 @@ graph_pickle_argument = click.argument(
 
 
 @with_plugins(iter_entry_points('pybel.cli_plugins'))
-@click.group(help="PyBEL Command Line Interface on {}".format(sys.executable))
+@click.group(help="PyBEL CLI on {}".format(sys.executable))
 @click.version_option()
 @connection_option
 @click.pass_context
 def main(ctx, connection):
-    """PyBEL Command Line."""
+    """Command line interface for PyBEL."""
     ctx.obj = Manager(connection=connection)
     ctx.obj.bind()  # add the engine to the metadata and query property to the session
 
@@ -307,7 +308,7 @@ def namespaces():
     """Manage namespaces."""
 
 
-@namespaces.command()
+@namespaces.command()  # noqa:F811
 @click.argument('url')
 @click.pass_obj
 def insert(manager, url):
@@ -338,7 +339,7 @@ def ls(manager, url, namespace_id):
         _ls(manager, Namespace, namespace_id)
 
 
-@namespaces.command()
+@namespaces.command()  # noqa:F811
 @click.argument('url')
 @click.pass_obj
 def drop(manager, url):
@@ -351,7 +352,7 @@ def networks():
     """Manage networks."""
 
 
-@networks.command()
+@networks.command()  # noqa:F811
 @click.pass_obj
 def ls(manager):
     """List network names, versions, and optionally, descriptions."""
@@ -359,7 +360,7 @@ def ls(manager):
         click.echo('{}\t{}\t{}'.format(n.id, n.name, n.version))
 
 
-@networks.command()
+@networks.command()  # noqa:F811
 @click.option('-n', '--network-id', type=int, help='Identifier of network to drop')
 @click.option('-y', '--yes', is_flag=True, help='Drop all networks without confirmation if no identifier is given')
 @click.pass_obj
@@ -377,7 +378,7 @@ def edges():
     """Manage edges."""
 
 
-@edges.command()
+@edges.command()  # noqa:F811
 @click.option('--offset', type=int)
 @click.option('--limit', type=int, default=10)
 @click.pass_obj
@@ -395,7 +396,25 @@ def ls(manager, offset, limit):
         click.echo(e.bel)
 
 
-@manage.command()
+@manage.group()
+def nodes():
+    """Manage nodes."""
+
+
+@nodes.command()
+@click.pass_obj
+def prune(manager):
+    """Prune nodes not belonging to any edges."""
+    nodes_to_delete = [
+        node
+        for node in tqdm(manager.session.query(Node), total=manager.count_nodes())
+        if not node.networks
+    ]
+    manager.session.delete(nodes_to_delete)
+    manager.session.commit()
+
+
+@manage.command()  # noqa:F811
 @click.pass_obj
 def summarize(manager):
     """Summarize the contents of the database."""

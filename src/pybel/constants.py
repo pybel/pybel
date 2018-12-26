@@ -52,6 +52,8 @@ DEFAULT_CACHE_LOCATION = path.join(PYBEL_DIR, DEFAULT_CACHE_NAME)
 #: The default cache connection string uses sqlite.
 DEFAULT_CACHE_CONNECTION = 'sqlite:///' + DEFAULT_CACHE_LOCATION
 
+_BASE_CONFIG_DIR = path.join(path.expanduser('~'), '.config')
+
 
 def get_config_dir():
     """Return the path to the directory where configuration is stored for PyBEL.
@@ -60,7 +62,9 @@ def get_config_dir():
 
     :rtype: str
     """
-    return environ.get('PYBEL_CONFIG_DIRECTORY', path.join(path.expanduser('~'), '.config', 'pybel'))
+    if VERSION.endswith('-dev'):
+        return environ.get('PYBEL_DEV_CONFIG_DIRECTORY', path.join(_BASE_CONFIG_DIR, 'pybel-dev'))
+    return environ.get('PYBEL_CONFIG_DIRECTORY', path.join(_BASE_CONFIG_DIR, 'pybel'))
 
 
 _config_dir = get_config_dir()
