@@ -104,6 +104,13 @@ class BaseManager(object):
         self.base.metadata.bind = self.engine
         self.base.query = self.session.query_property()
 
+    def _list_model(self, model_cls):
+        """List the models in this class.
+
+        :rtype: list
+        """
+        return self.session.query(model_cls).all()
+
     def _count_model(self, model_cls):
         """Count the number of models in the database.
 

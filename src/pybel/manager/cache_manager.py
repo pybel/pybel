@@ -128,21 +128,15 @@ class NamespaceManager(BaseManager):
 
         :rtype: list[Namespace]
         """
-        return self.session.query(Namespace).all()
+        return self._list_model(Namespace)
 
-    def count_namespaces(self):
-        """Count the number of namespaces in the database.
+    def count_namespaces(self) -> int:
+        """Count the number of namespaces in the database."""
+        return self._count_model(Namespace)
 
-        :rtype: int
-        """
-        return self.session.query(Namespace).count()
-
-    def count_namespace_entries(self):
-        """Count the number of namespace entries in the database.
-
-        :rtype: int
-        """
-        return self.session.query(NamespaceEntry).count()
+    def count_namespace_entries(self) -> int:
+        """Count the number of namespace entries in the database."""
+        return self._count_model(NamespaceEntry)
 
     def drop_namespaces(self):
         """Drop all namespaces."""
@@ -347,18 +341,12 @@ class NamespaceManager(BaseManager):
         """
         return self.session.query(Namespace).filter(Namespace.is_annotation).all()
 
-    def count_annotations(self):
-        """Count the number of annotations in the database.
-
-        :rtype: int
-        """
+    def count_annotations(self) -> int:
+        """Count the number of annotations in the database."""
         return self.session.query(Namespace).filter(Namespace.is_annotation).count()
 
-    def count_annotation_entries(self):
-        """Count the number of annotation entries in the database.
-
-        :rtype: int
-        """
+    def count_annotation_entries(self) -> int:
+        """Count the number of annotation entries in the database."""
         return self.session.query(NamespaceEntry).filter(NamespaceEntry.is_annotation).count()
 
     def get_or_create_annotation(self, url):
@@ -419,19 +407,16 @@ class NamespaceManager(BaseManager):
 class NetworkManager(NamespaceManager):
     """Groups functions for inserting and querying networks in the database's network store."""
 
-    def count_networks(self):
-        """Count the networks in the database.
-
-        :rtype: int
-        """
-        return self.session.query(func.count(Network.id)).scalar()
+    def count_networks(self) -> int:
+        """Count the networks in the database."""
+        return self._count_model(Network)
 
     def list_networks(self):
         """List all networks in the database.
 
         :rtype: list[Network]
         """
-        return self.session.query(Network).all()
+        return self._list_model(Network)
 
     def list_recent_networks(self):
         """List the most recently created version of each network (by name).
@@ -1468,7 +1453,7 @@ class InsertManager(NamespaceManager, LookupManager):
 class _Manager(QueryManager, InsertManager, NetworkManager):
     """A wrapper around PyBEL managers that can be directly instantiated with an engine and session."""
 
-    def count_citations(self):
+    def count_citations(self) -> int:
         return self._count_model(Citation)
 
     def list_citations(self):

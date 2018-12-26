@@ -37,12 +37,9 @@ def graph_from_edges(edges, **kwargs):
 class QueryManager(LookupManager):
     """An extension to the Manager to make queries over the database."""
 
-    def count_nodes(self):
-        """Count the number of nodes in the database.
-
-        :rtype: int
-        """
-        return self.session.query(func.count(Node.id)).scalar()
+    def count_nodes(self) -> int:
+        """Count the number of nodes in the database."""
+        return self._count_model(Node)
 
     def get_dsl_by_hash(self, node_hash):
         """Look up a node by the hash and returns the corresponding PyBEL node tuple.
@@ -85,12 +82,9 @@ class QueryManager(LookupManager):
 
         return q.all()
 
-    def count_edges(self):
-        """Count the number of edges in the database.
-
-        :rtype: int
-        """
-        return self.session.query(func.count(Edge.id)).scalar()
+    def count_edges(self) -> int:
+        """Count the number of edges in the database."""
+        return self._count_model(Edge)
 
     def get_edges_with_citation(self, citation):
         """Get the edges with the given citation.
