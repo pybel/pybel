@@ -33,6 +33,7 @@ jobs:
     - env: TOXENV=flake8
     - env: TOXENV=xenon
     - env: TOXENV=pyroma
+    - env: TOXENV=mypy
 
     # docs stage
     - stage: docs
@@ -42,6 +43,7 @@ jobs:
 
 matrix:
   allow_failures:
+    - env: TOXENV=mypy
     - env: TOXENV=xenon
 
 install:

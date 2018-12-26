@@ -7,13 +7,9 @@ A transformation function takes in a :class:`pybel.BELGraph` and either returns 
 """
 
 import logging
+from inspect import signature
 
 from .exc import DeprecationMappingError, MissingPipelineFunctionError, PipelineNameError
-
-try:
-    from inspect import signature
-except ImportError:
-    from funcsigs import signature
 
 __all__ = [
     'in_place_transformation',

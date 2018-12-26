@@ -140,12 +140,10 @@ class BELGraph(nx.MultiDiGraph):
         return self.graph[GRAPH_METADATA]
 
     @property
-    def name(self, *attrs):  # Needs *attrs since it's an override
+    def name(self, *attrs) -> str:  # Needs *attrs since it's an override
         """Get the graph's name.
 
         .. hint:: Can be set with the ``SET DOCUMENT Name = "..."`` entry in the source BEL script.
-
-        :rtype: str
         """
         return self.document.get(METADATA_NAME)
 
@@ -155,12 +153,10 @@ class BELGraph(nx.MultiDiGraph):
         self.document[METADATA_NAME] = attrs[0]
 
     @property
-    def version(self):
+    def version(self) -> str:
         """Get the graph's version.
 
         .. hint:: Can be set with the ``SET DOCUMENT Version = "..."`` entry in the source BEL script.
-
-        :rtype: str
         """
         return self.document.get(METADATA_VERSION)
 
