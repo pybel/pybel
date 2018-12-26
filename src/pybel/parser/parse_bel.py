@@ -12,8 +12,8 @@ from pyparsing import And, Group, Keyword, MatchFirst, Optional, StringEnd, Supp
 
 from .baseparser import BaseParser
 from .exc import (
-    InvalidFunctionSemantic, MalformedTranslocationWarning, MissingAnnotationWarning, MissingCitationException,
-    MissingSupportWarning, NestedRelationWarning, RelabelWarning,
+    InvalidEntity, InvalidFunctionSemantic, MalformedTranslocationWarning, MissingAnnotationWarning,
+    MissingCitationException, MissingSupportWarning, NestedRelationWarning, RelabelWarning,
 )
 from .modifiers import (
     get_fragment_language, get_fusion_language, get_gene_modification_language, get_gene_substitution_language,
@@ -699,9 +699,12 @@ class BELParser(BaseParser):
             return tokens
 
         valid_functions = set(itt.chain.from_iterable(
-            belns_encodings[k]
+            belns_encodings.get(k, set())
             for k in self.namespace_dict[namespace][name]
         ))
+
+        if not valid_functions:
+            raise InvalidEntity(self.line_number, line, position, namespace, name)
 
         if tokens[FUNCTION] not in valid_functions:
             raise InvalidFunctionSemantic(self.line_number, line, position, tokens[FUNCTION], namespace, name,
