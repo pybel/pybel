@@ -769,13 +769,13 @@ class InsertManager(NamespaceManager, LookupManager):
 
             node_model[node] = node_object
 
-        log.debug('built node models in %.2f seconds', time.time() - node_model_build_start)
+        node_models = list(node_model.values())
+        log.debug('built %d node models in %.2f seconds', len(node_models), time.time() - node_model_build_start)
 
         node_model_commit_start = time.time()
-        node_models = list(node_model.values())
         self.session.add_all(node_models)
         self.session.commit()
-        log.debug('stored node models in %.2f seconds', time.time() - node_model_commit_start)
+        log.debug('stored %d node models in %.2f seconds', len(node_models), time.time() - node_model_commit_start)
 
         log.debug('building edge models')
         edge_model_build_start = time.time()
@@ -786,12 +786,12 @@ class InsertManager(NamespaceManager, LookupManager):
 
         edge_models = list(self._get_edge_models(graph, node_model, edges))
 
-        log.debug('built edge models in %.2f seconds', time.time() - edge_model_build_start)
+        log.debug('built %d edge models in %.2f seconds', len(edge_models), time.time() - edge_model_build_start)
 
         edge_model_commit_start = time.time()
         self.session.add_all(edge_models)
         self.session.commit()
-        log.debug('stored edge models in %.2f seconds', time.time() - edge_model_commit_start)
+        log.debug('stored %d edge models in %.2f seconds', len(edge_models), time.time() - edge_model_commit_start)
 
         return node_models, edge_models
 
