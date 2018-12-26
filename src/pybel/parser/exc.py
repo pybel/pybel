@@ -377,6 +377,18 @@ class LexicographyWarning(PyBELWarning):
 
 # Semantic Warnings
 
+class InvalidEntity(PyBelParserWarning):
+    """Raised when using a non-entity name for a name."""
+
+    def __init__(self, line_number, line, position, namespace, name):
+        super().__init__(line_number, line, position, namespace, name)
+        self.namespace = namespace
+        self.name = name
+
+    def __str__(self):
+        return '{}:{} should not be coded as an entity'.format(self.namespace, self.name)
+
+
 class InvalidFunctionSemantic(PyBelParserWarning):
     """Raised when an invalid function is used for a given node.
 
