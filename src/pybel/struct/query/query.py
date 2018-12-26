@@ -75,7 +75,7 @@ class Query:
         """Add a seed by neighbors.
 
         :param nodes: A list of PyBEL node tuples
-        :type nodes: BaseEntity or iter[BaseEntity]
+        :type nodes: str or BaseEntity or iter[BaseEntity]
         """
         return self.seeding.append_neighbors(nodes)
 

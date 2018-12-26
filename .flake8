@@ -26,7 +26,6 @@ exclude =
     .git,
     __pycache__,
     docs/source/conf.py,
-    src/pybel/cli.py
     build,
     dist,
     tests/fixtures/*,

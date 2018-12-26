@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Setup.py for PyBEL."""
+"""Setup module."""
 
 import setuptools
 
