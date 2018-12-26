@@ -699,7 +699,7 @@ class BELParser(BaseParser):
             return tokens
 
         valid_functions = set(itt.chain.from_iterable(
-            belns_encodings[k]
+            belns_encodings.get(k, set())
             for k in self.namespace_dict[namespace][name]
         ))
 
