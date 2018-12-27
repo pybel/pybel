@@ -357,6 +357,10 @@ class BELGraph(nx.MultiDiGraph):
         """
         return self._warnings
 
+    def number_of_warnings(self) -> int:
+        """Return the number of warnings."""
+        return len(self.warnings)
+
     def __str__(self):
         return '{} v{}'.format(self.name, self.version)
 
