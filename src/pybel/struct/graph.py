@@ -22,6 +22,7 @@ from ..constants import (
     RELATION, SUBJECT, TRANSCRIBED_TO, TRANSLATED_TO, VARIANTS,
 )
 from ..dsl import BaseEntity, Gene, MicroRna, Protein, Rna, activity
+from ..parser.exc import PyBelParserWarning
 from ..typing import EdgeData
 from ..utils import get_version, hash_edge
 
@@ -324,13 +325,11 @@ class BELGraph(nx.MultiDiGraph):
         return self.graph[GRAPH_PYBEL_VERSION]
 
     @property
-    def warnings(self):
+    def warnings(self) -> List[Tuple[int, str, PyBelParserWarning, Mapping[str, str]]]:
         """Get the warnings stored in a list of 4-tuples that is a property of the graph object.
 
         This tuple respectively contains the line number, the line text, the exception instance, and the context
         dictionary from the parser at the time of error.
-
-        :rtype: list[tuple[int,str,Exception,dict[str,str]]]
         """
         return self._warnings
 

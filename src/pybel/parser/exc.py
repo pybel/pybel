@@ -187,13 +187,8 @@ class VersionFormatWarning(PyBelParserWarning):
         )
 
 
-class MetadataException(PyBELWarning):
+class MetadataException(PyBelParserWarning):
     """Base exception for issues with document metadata."""
-
-    def __init__(self, line_number, line, *args):
-        super(MetadataException, self).__init__(line_number, line, *args)
-        self.line = line
-        self.line_number = line_number
 
     def __str__(self):
         return '[line:{}] Invalid metadata - "{}"'.format(self.line_number, self.line)
@@ -217,7 +212,8 @@ class InvalidMetadataException(PyBelParserWarning):
         - ``Name``
         - ``Version``
 
-    .. seealso:: BEL specification on the `properties section <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_properties_section>`_
+    .. seealso:: BEL specification on the `properties section <http://openbel.org/language/web/version_1.0/
+                 bel_specification_version_1.0.html#_properties_section>`_
     """
 
     def __init__(self, line_number, line, position, key, value):
@@ -229,15 +225,23 @@ class InvalidMetadataException(PyBelParserWarning):
         return 'Invalid document metadata key: {}'.format(self.key)
 
 
-class MissingMetadataException(PyBELWarning):
+class MissingMetadataException(PyBelParserWarning):
     """Raised when a BEL Script is missing critical metadata."""
 
-    def __init__(self, key):
-        super(MissingMetadataException, self).__init__(key)
+    def __init__(self, line_number, line, position, key):
+        super(MissingMetadataException, self).__init__(line_number, line, position, key)
         self.key = key
 
     def __str__(self):
         return 'Missing required document metadata: {}'.format(self.key)
+
+    @staticmethod
+    def make(key: str):
+        """Build an instance of this class with auto-filled dummy values.
+
+        Unlike normal classes, polymorphism on __init__ can't be used for exceptions when pickling/unpickling.
+        """
+        return MissingMetadataException(0, '', 0, key)
 
 
 class InvalidCitationLengthException(PyBelParserWarning):
@@ -369,10 +373,6 @@ class NestedRelationWarning(PyBelParserWarning):
 
     def __str__(self):
         return 'Nesting is not supported. Split this statement: {}'.format(self.line)
-
-
-class LexicographyWarning(PyBELWarning):
-    """Raised when encountering improper capitalization of namespace/annotation names."""
 
 
 # Semantic Warnings

@@ -142,7 +142,7 @@ def parse_document(graph, lines, metadata_parser):
             graph.add_warning(line_number, line, e)
         except Exception as e:
             parse_log.exception('Line %07d - Critical Failure - %s', line_number, line)
-            six.raise_from(MalformedMetadataException(line_number, line), e)
+            six.raise_from(MalformedMetadataException(line_number, line, 0), e)
 
     for required in REQUIRED_METADATA:
         required_metadatum = metadata_parser.document_metadata.get(required)
@@ -150,7 +150,7 @@ def parse_document(graph, lines, metadata_parser):
             continue
 
         required_metadatum_key = INVERSE_DOCUMENT_KEYS[required]
-        graph.warnings.insert(0, (0, '', MissingMetadataException(required_metadatum_key), {}))
+        graph.warnings.insert(0, (0, '', MissingMetadataException.make(required_metadatum_key), {}))
         log.error('Missing required document metadata: %s', required_metadatum_key)
 
     graph.document.update(metadata_parser.document_metadata)
@@ -198,7 +198,7 @@ def parse_definitions(graph,
         except Exception as e:
             if not allow_failures:
                 parse_log.warning('Line %07d - Critical Failure - %s', line_number, line)
-                six.raise_from(MalformedMetadataException(line_number, line), e)
+                six.raise_from(MalformedMetadataException(line_number, line, 0), e)
 
     graph.namespace_url.update(metadata_parser.namespace_url_dict)
     graph.namespace_pattern.update(metadata_parser.namespace_regex)
