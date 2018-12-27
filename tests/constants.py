@@ -9,8 +9,8 @@ from json import dumps
 from pybel import BELGraph
 from pybel.constants import (
     ANNOTATIONS, ASSOCIATION, CITATION, CITATION_NAME, CITATION_REFERENCE, CITATION_TYPE, DECREASES, DIRECTLY_DECREASES,
-    EVIDENCE, INCREASES, METADATA_AUTHORS, METADATA_DESCRIPTION, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION,
-    OPENBEL_ANNOTATION_RESOURCES, OPENBEL_NAMESPACE_RESOURCES, RELATION,
+    EVIDENCE, INCREASES, METADATA_AUTHORS, METADATA_DESCRIPTION, METADATA_LICENSES, METADATA_NAME, GRAPH_PATH,
+    METADATA_VERSION, OPENBEL_ANNOTATION_RESOURCES, OPENBEL_NAMESPACE_RESOURCES, RELATION,
 )
 from pybel.dsl import BaseEntity, complex_abundance, pathology, protein
 from pybel.dsl.namespaces import hgnc
@@ -22,6 +22,8 @@ from pybel.parser.exc import (
     PlaceholderAminoAcidWarning, UndefinedAnnotationWarning, UndefinedNamespaceWarning, VersionFormatWarning,
 )
 from pybel.parser.parse_bel import BELParser
+from pybel.parser.parse_control import ControlParser
+from pybel.testing.constants import test_bel_simple, test_bel_thorough
 from pybel.utils import subdict_matches
 from tests.constant_helper import (
     BEL_THOROUGH_EDGES, BEL_THOROUGH_NODES, citation_1, evidence_1, expected_test_simple_metadata,
@@ -50,25 +52,14 @@ fadd = hgnc(name='FADD')
 casp8 = hgnc(name='CASP8')
 
 
-def update_provenance(control_parser):
-    """Put a default evidence and citation in a BEL parser.
-    
-    :param pybel.parser.parse_control.ControlParser control_parser:
-    """
+def update_provenance(control_parser: ControlParser) -> None:
+    """Put a default evidence and citation in a BEL parser."""
     control_parser.citation.update(test_citation_dict)
     control_parser.evidence = test_evidence_text
 
 
-def assert_has_node(self, node, graph, **kwargs):
-    """Check if a node with the given properties is contained within a graph.
-
-    :param self: A Test Case
-    :type self: unittest.TestCase
-    :param node: 
-    :param graph:
-    :type graph: BELGraph
-    :param kwargs:
-    """
+def assert_has_node(self: unittest.TestCase, node: BaseEntity, graph: BELGraph, **kwargs):
+    """Check if a node with the given properties is contained within a graph."""
     self.assertIsInstance(node, BaseEntity)
 
     self.assertIn(
@@ -116,16 +107,8 @@ def any_subdict_matches(dict_of_dicts, query_dict):
     )
 
 
-def assert_has_edge(self, u, v, graph, permissive=True, **kwargs):
-    """A helper function for checking if an edge with the given properties is contained within a graph
-
-    :param unittest.TestCase self: A TestCase
-    :param u: source node
-    :type u: BaseEntity or tuple
-    :param v: target node
-    :type v: BaseEntity or tuple
-    :param BELGraph graph: underlying graph
-    """
+def assert_has_edge(self: unittest.TestCase, u: BaseEntity, v: BaseEntity, graph: BELGraph, permissive=True, **kwargs):
+    """A helper function for checking if an edge with the given properties is contained within a graph."""
     self.assertIsInstance(u, BaseEntity)
     self.assertIsInstance(v, BaseEntity)
 
@@ -157,23 +140,12 @@ def assert_has_edge(self, u, v, graph, permissive=True, **kwargs):
 class TestGraphMixin(unittest.TestCase):
     """A test case with additional functions for testing graphs."""
 
-    def assert_has_node(self, g, n, **kwargs):
-        """Help assert node membership.
-        
-        :param g: Graph 
-        :param n: Node
-        :param kwargs: 
-        """
+    def assert_has_node(self, g: BELGraph, n: BaseEntity, **kwargs):
+        """Help assert node membership."""
         assert_has_node(self, n, g, **kwargs)
 
-    def assert_has_edge(self, g, u, v, **kwargs):
-        """Help assert edge membership.
-        
-        :param g: Graph
-        :param u: Source node
-        :param v: Target node
-        :param kwargs: 
-        """
+    def assert_has_edge(self, g: BELGraph, u: BaseEntity, v: BaseEntity, **kwargs):
+        """Help assert edge membership."""
         assert_has_edge(self, u, v, g, **kwargs)
 
 
@@ -194,21 +166,12 @@ class TestTokenParserBase(unittest.TestCase):
         """Clear the parser at the beginning of each test."""
         self.parser.clear()
 
-    def assert_has_node(self, member, **kwargs):
-        """Assert that this test case's graph has the given node.
-
-        :type member: tuple or BaseEntity
-        """
+    def assert_has_node(self, member: BaseEntity, **kwargs):
+        """Assert that this test case's graph has the given node."""
         assert_has_node(self, member, self.graph, **kwargs)
 
-    def assert_has_edge(self, u, v, **kwargs):
-        """Assert that this test case's graph has the given edge.
-
-        :param u: source node
-        :type u: BaseEntity or tuple
-        :param v: target node
-        :type v: BaseEntity or tuple
-        """
+    def assert_has_edge(self, u: BaseEntity, v: BaseEntity, **kwargs):
+        """Assert that this test case's graph has the given edge."""
         assert_has_edge(self, u, v, self.graph, **kwargs)
 
     def add_default_provenance(self):
@@ -216,13 +179,8 @@ class TestTokenParserBase(unittest.TestCase):
         update_provenance(self.parser.control_parser)
 
 
-def help_check_hgnc(test_case, namespace_dict):
-    """Assert that the namespace dictionary is correct.
-
-    :param unittest.TestCase test_case:
-    :param namespace_dict:
-    :return:
-    """
+def help_check_hgnc(test_case: unittest.TestCase, namespace_dict) -> None:
+    """Assert that the namespace dictionary is correct."""
     test_case.assertIn(HGNC_KEYWORD, namespace_dict)
 
     test_case.assertIn('MHS2', namespace_dict[HGNC_KEYWORD])
@@ -238,12 +196,8 @@ def help_check_hgnc(test_case, namespace_dict):
 class BelReconstitutionMixin(TestGraphMixin):
     """A test case that has checks for properly loading several BEL Scripts."""
 
-    def bel_simple_reconstituted(self, graph, check_metadata=True):
-        """Check that test_bel.bel was loaded properly.
-
-        :param BELGraph graph: A BEL grpah
-        :param bool check_metadata: Check the graph's document section is correct
-        """
+    def bel_simple_reconstituted(self, graph: BELGraph, check_metadata: bool = True):
+        """Check that test_bel.bel was loaded properly."""
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
 
@@ -333,16 +287,23 @@ class BelReconstitutionMixin(TestGraphMixin):
             EVIDENCE: evidence_3,
         })
 
-    def bel_thorough_reconstituted(self, graph, check_metadata=True, check_warnings=True, check_provenance=True,
-                                   check_citation_name=True):
+    def bel_thorough_reconstituted(self,
+                                   graph: BELGraph,
+                                   check_metadata: bool = True,
+                                   check_warnings: bool = True,
+                                   check_provenance: bool = True,
+                                   check_citation_name: bool = True,
+                                   check_path: bool = True,
+                                   ):
         """Check that thorough.bel was loaded properly.
 
-        :param BELGraph graph: A BEL graph
-        :param bool check_metadata: Check the graph's document section is correct
-        :param bool check_warnings: Check the graph produced the expected warnings
-        :param bool check_provenance: Check the graph's definition section is correct
-        :param bool check_citation_name: Check that the names in the citations get reconstituted. This isn't strictly
+        :param graph: A BEL graph
+        :param check_metadata: Check the graph's document section is correct
+        :param check_warnings: Check the graph produced the expected warnings
+        :param check_provenance: Check the graph's definition section is correct
+        :param check_citation_name: Check that the names in the citations get reconstituted. This isn't strictly
                                          necessary since this data can be looked up
+        :param check_path: Check the graph contains provenance for its original file
         """
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
@@ -356,6 +317,9 @@ class BelReconstitutionMixin(TestGraphMixin):
             self.assertEqual(expected_test_thorough_metadata[METADATA_NAME], graph.name)
             self.assertEqual(expected_test_thorough_metadata[METADATA_VERSION], graph.version)
             self.assertEqual(expected_test_thorough_metadata[METADATA_DESCRIPTION], graph.description)
+
+        if check_path:
+            self.assertEqual(test_bel_thorough, graph.path)
 
         if check_provenance:
             self.assertEqual({'CHEBI', 'HGNC', 'GOBP', 'GOCC', 'MESHD', 'TESTNS2'}, set(graph.namespace_url))
@@ -380,13 +344,8 @@ class BelReconstitutionMixin(TestGraphMixin):
 
             assert_has_edge(self, u, v, graph, permissive=True, **data)
 
-    def bel_slushy_reconstituted(self, graph, check_metadata=True, check_warnings=True):
-        """Check that slushy.bel was loaded properly.
-        
-        :param BELGraph graph: A BEL graph
-        :param bool check_metadata: Check the graph's document section is correct
-        :param bool check_warnings: Check the graph produced the expected warnings
-        """
+    def bel_slushy_reconstituted(self, graph: BELGraph, check_metadata: bool = True, check_warnings: bool = True):
+        """Check that slushy.bel was loaded properly."""
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
 
@@ -454,11 +413,8 @@ class BelReconstitutionMixin(TestGraphMixin):
             EVIDENCE: evidence_1,
         })
 
-    def bel_isolated_reconstituted(self, graph):
-        """Run the isolated node test.
-
-        :type graph: BELGraph
-        """
+    def bel_isolated_reconstituted(self, graph: BELGraph):
+        """Run the isolated node test."""
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
 

@@ -43,7 +43,7 @@ def from_path(path: str, encoding: str = 'utf-8', **kwargs) -> BELGraph:
     The remaining keyword arguments are passed to :func:`pybel.io.line_utils.parse_lines`.
     """
     log.info('Loading from path: %s', path)
-    graph = BELGraph()
+    graph = BELGraph(path=path)
     with codecs.open(os.path.expanduser(path), encoding=encoding) as lines:
         parse_lines(graph=graph, lines=lines, **kwargs)
     return graph
@@ -60,6 +60,6 @@ def from_url(url: str, **kwargs) -> BELGraph:
     res = download(url)
     lines = (line.decode('utf-8') for line in res.iter_lines())
 
-    graph = BELGraph()
+    graph = BELGraph(path=url)
     parse_lines(graph=graph, lines=lines, **kwargs)
     return graph

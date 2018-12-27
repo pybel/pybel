@@ -15,7 +15,7 @@ from ..canonicalize import edge_to_bel
 from ..constants import (
     ANNOTATIONS, ASSOCIATION, CITATION, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, DECREASES, DESCRIPTION,
     DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO, EVIDENCE, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN,
-    GRAPH_ANNOTATION_URL, GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, GRAPH_PYBEL_VERSION,
+    GRAPH_ANNOTATION_URL, GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION,
     GRAPH_UNCACHED_NAMESPACES, HAS_COMPONENT, HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A,
     MEMBERS, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER,
     METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAMESPACE, OBJECT, ORTHOLOGOUS, PART_OF, PRODUCTS, REACTANTS,
@@ -56,6 +56,7 @@ class BELGraph(nx.MultiDiGraph):
                  license: Optional[str] = None,
                  copyright: Optional[str] = None,
                  disclaimer: Optional[str] = None,
+                 path: Optional[str] = None,
                  data=None,
                  **kwargs
                  ) -> None:
@@ -106,6 +107,9 @@ class BELGraph(nx.MultiDiGraph):
         if disclaimer:
             self.disclaimer = disclaimer
 
+        if path:
+            self.path = path
+
         if GRAPH_PYBEL_VERSION not in self.graph:
             self.graph[GRAPH_PYBEL_VERSION] = get_version()
 
@@ -124,12 +128,22 @@ class BELGraph(nx.MultiDiGraph):
         return BELGraph()
 
     @property
+    def path(self) -> Optional[str]:
+        """Get the graph's path."""
+        return self.graph.get(GRAPH_PATH)
+
+    @path.setter
+    def path(self, path: str) -> None:
+        """Set the graph's path."""
+        self.graph[GRAPH_PATH] = path
+
+    @property
     def document(self):
         """Get the dictionary holding the metadata from the ``SET DOCUMENT`` statements in the source BEL script.
 
         All keys are normalized according to :data:`pybel.constants.DOCUMENT_KEYS`.
 
-        :rtype: dict[str,str]
+        :rtype: dict[str,Any]
         """
         return self.graph[GRAPH_METADATA]
 
