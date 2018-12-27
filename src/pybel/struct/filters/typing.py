@@ -2,7 +2,7 @@
 
 """Types for filters."""
 
-from typing import Callable, Iterable, Mapping, Tuple, Union
+from typing import Callable, Iterable, Tuple, Union
 
 from ..graph import BELGraph
 from ...dsl import BaseEntity
@@ -11,7 +11,6 @@ __all__ = [
     'NodePredicate',
     'NodePredicates',
     'EdgeTuple',
-    'EdgeData',
     'EdgeIterator',
     'EdgePredicate',
     'EdgePredicates',
@@ -22,7 +21,6 @@ NodePredicates = Union[NodePredicate, Iterable[NodePredicate]]
 
 EdgeTuple = Tuple[BaseEntity, BaseEntity, str]
 EdgeIterator = Iterable[EdgeTuple]
-EdgeData = Mapping
 
 EdgePredicate = Callable[[BELGraph, BaseEntity, BaseEntity, str], bool]
 EdgePredicates = Union[EdgePredicate, Iterable[EdgePredicate]]

@@ -7,11 +7,11 @@ from typing import Iterable, Mapping
 from six import string_types
 
 from .edge_predicates import edge_predicate, has_authors, has_pubmed, keep_edge_permissive
-from .typing import EdgeData, EdgePredicate
+from .typing import EdgePredicate
 from ..graph import BELGraph
 from ...constants import ANNOTATIONS, CAUSAL_RELATIONS, CITATION, CITATION_AUTHORS, CITATION_REFERENCE, RELATION
 from ...dsl import BaseEntity
-from ...typing import Strings
+from ...typing import EdgeData, Strings
 
 __all__ = [
     'build_annotation_dict_all_filter',

@@ -5,7 +5,7 @@
 from functools import wraps
 from typing import Any, Callable, Optional
 
-from .typing import EdgeData, EdgePredicate
+from .typing import EdgePredicate
 from .utils import part_has_modifier
 from ..graph import BELGraph
 from ...constants import (
@@ -14,6 +14,7 @@ from ...constants import (
     TRANSLOCATION,
 )
 from ...dsl import BaseEntity, BiologicalProcess, Pathology
+from ...typing import EdgeData
 
 __all__ = [
     'edge_predicate',

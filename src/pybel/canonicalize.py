@@ -2,10 +2,9 @@
 
 """This module contains output functions to BEL scripts."""
 
-from __future__ import print_function
-
 import itertools as itt
 import logging
+from typing import Optional
 
 from .constants import (
     ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_REFERENCE, CITATION_TYPE, COMPLEX, COMPOSITE,
@@ -15,6 +14,7 @@ from .constants import (
 )
 from .dsl import BaseEntity
 from .resources.document import make_knowledge_header
+from .typing import EdgeData
 from .utils import ensure_quotes
 
 __all__ = [
@@ -48,13 +48,12 @@ def postpend_location(bel_string, location_model):
     )
 
 
-def _decanonicalize_edge_node(node, edge_data, node_position):
+def _decanonicalize_edge_node(node, edge_data: EdgeData, node_position) -> str:
     """Canonicalize a node with its modifiers stored in the given edge to a BEL string.
 
     :param BaseEntity node: A PyBEL node data dictionary
-    :param dict edge_data: A PyBEL edge data dictionary
+    :param edge_data: A PyBEL edge data dictionary
     :param node_position: Either :data:`pybel.constants.SUBJECT` or :data:`pybel.constants.OBJECT`
-    :rtype: str
     """
     node_str = node.as_bel()
 
@@ -107,15 +106,14 @@ def _decanonicalize_edge_node(node, edge_data, node_position):
     raise ValueError('invalid modifier: {}'.format(modifier))
 
 
-def edge_to_bel(u, v, data, sep=None):
+def edge_to_bel(u, v, data: EdgeData, sep: Optional[str] = None) -> str:
     """Take two nodes and gives back a BEL string representing the statement.
 
     :param BaseEntity u: The edge's source's PyBEL node data dictionary
     :param BaseEntity v: The edge's target's PyBEL node data dictionary
-    :param dict data: The edge's data dictionary
-    :param str sep: The separator between the source, relation, and target. Defaults to ' '
+    :param data: The edge's data dictionary
+    :param sep: The separator between the source, relation, and target. Defaults to ' '
     :return: The canonical BEL for this edge
-    :rtype: str
     """
     sep = sep or ' '
     u_str = _decanonicalize_edge_node(u, data, node_position=SUBJECT)
@@ -147,30 +145,27 @@ def sort_qualified_edges(graph):
     return sorted(qualified_edges, key=_sort_qualified_edges_helper)
 
 
-def _citation_sort_key(t):
+def _citation_sort_key(t) -> str:
     """Make a confusing 4 tuple sortable by citation.
 
     :param tuple t: A 4-tuple of source node, target node, key, and data
-    :rtype: tuple[str,str]
     """
     return '"{}", "{}"'.format(t[3][CITATION][CITATION_TYPE], t[3][CITATION][CITATION_REFERENCE])
 
 
-def _evidence_sort_key(t):
+def _evidence_sort_key(t) -> str:
     """Make a confusing 4 tuple sortable by citation.
 
     :param tuple t: A 4-tuple of source node, target node, key, and data
-    :rtype: str
     """
     return t[3][EVIDENCE]
 
 
-def _set_annotation_to_str(annotation_data, key):
+def _set_annotation_to_str(annotation_data, key) -> str:
     """Return a set annotation string.
 
     :param dict[str,dict[str,bool] annotation_data:
     :param key:
-    :return:
     """
     value = annotation_data[key]
 
@@ -182,11 +177,8 @@ def _set_annotation_to_str(annotation_data, key):
     return 'SET {} = {{{}}}'.format(key, ', '.join(x))
 
 
-def _unset_annotation_to_str(keys):
-    """Return an unset annotation string.
-
-    :rtype: str
-    """
+def _unset_annotation_to_str(keys) -> str:
+    """Return an unset annotation string."""
     if len(keys) == 1:
         return 'UNSET {}'.format(list(keys)[0])
 

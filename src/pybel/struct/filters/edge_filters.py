@@ -11,7 +11,7 @@ A general use for an edge predicate is to use the built-in :func:`filter` in cod
 :code:`filter(your_edge_predicate, graph.edges(keys=True, data=True))`
 """
 
-from collections import Iterable
+from typing import Iterable
 
 from .typing import EdgeIterator, EdgePredicate, EdgePredicates
 from ..graph import BELGraph

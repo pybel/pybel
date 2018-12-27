@@ -2,8 +2,8 @@
 
 """Utilities for node filters."""
 
-from .typing import EdgeData
 from ...constants import MODIFIER
+from ...typing import EdgeData
 
 __all__ = [
     'part_has_modifier',
