@@ -3,9 +3,9 @@
 """The base parser class shared by several BEL parsers."""
 
 import logging
+import time
 from typing import Iterable, List
 
-import time
 from pyparsing import ParseResults
 
 log = logging.getLogger(__name__)

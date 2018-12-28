@@ -5,10 +5,10 @@
 This module handles parsing BEL relations and validation of semantics.
 """
 
+import itertools as itt
 import logging
 from typing import List, Mapping, Optional, Set
 
-import itertools as itt
 import pyparsing
 from pyparsing import (
     And, Group, Keyword, MatchFirst, ParseResults, StringEnd, Suppress, delimitedList,
