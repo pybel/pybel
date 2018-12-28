@@ -246,11 +246,7 @@ def hash_evidence(text: str, type: str, reference: str) -> str:
 
 
 def canonicalize_edge(edge_data: EdgeData) -> Tuple[str, Optional[Tuple], Optional[Tuple]]:
-    """Canonicalize the edge to a tuple based on the relation, subject modifications, and object modifications.
-
-    :param edge_data: A PyBEL edge data dictionary
-    :return: A 3-tuple that's specific for the edge (relation, subject, object)
-    """
+    """Canonicalize the edge to a tuple based on the relation, subject modifications, and object modifications."""
     return (
         edge_data[RELATION],
         _canonicalize_edge_modifications(edge_data.get(SUBJECT)),
@@ -259,10 +255,7 @@ def canonicalize_edge(edge_data: EdgeData) -> Tuple[str, Optional[Tuple], Option
 
 
 def _canonicalize_edge_modifications(edge_data: EdgeData) -> Optional[Tuple]:
-    """Return the SUBJECT or OBJECT entry of a PyBEL edge data dictionary as a canonical tuple.
-
-    :param edge_data: A PyBEL edge data dictionary
-    """
+    """Return the SUBJECT or OBJECT entry of a PyBEL edge data dictionary as a canonical tuple."""
     if edge_data is None:
         return
 
