@@ -2,10 +2,13 @@
 
 """Utilities for functions for collapsing nodes."""
 
+from typing import Mapping, Set
+
 from ...filters import filter_edges
 from ...filters.edge_predicate_builders import build_relation_predicate
 from ...pipeline import in_place_transformation
 from ....constants import HAS_VARIANT
+from ....dsl import BaseEntity
 
 __all__ = [
     'collapse_pair',
@@ -25,14 +28,14 @@ def _remove_self_edges(graph):
 
 
 @in_place_transformation
-def collapse_pair(graph, survivor, victim):
+def collapse_pair(graph, survivor: BaseEntity, victim: BaseEntity) -> None:
     """Rewire all edges from the synonymous node to the survivor node, then deletes the synonymous node.
 
     Does not keep edges between the two nodes.
 
     :param pybel.BELGraph graph: A BEL graph
-    :param tuple survivor: The BEL node to collapse all edges on the synonym to
-    :param tuple victim: The BEL node to collapse into the surviving node
+    :param survivor: The BEL node to collapse all edges on the synonym to
+    :param victim: The BEL node to collapse into the surviving node
     """
     graph.add_edges_from(
         (survivor, successor, key, data)
@@ -52,13 +55,12 @@ def collapse_pair(graph, survivor, victim):
 # TODO what happens when collapsing is not consistent? Need to build intermediate mappings and test their consistency.
 
 @in_place_transformation
-def collapse_nodes(graph, survivor_mapping):
+def collapse_nodes(graph, survivor_mapping: Mapping[BaseEntity, Set[BaseEntity]]) -> None:
     """Collapse all nodes in values to the key nodes, in place.
 
     :param pybel.BELGraph graph: A BEL graph
     :param survivor_mapping: A dictionary with survivors as their keys, and iterables of the corresponding victims as
      values.
-    :type survivor_mapping: dict[tuple,set[tuple]]
     """
     for survivor, victims in survivor_mapping.items():
         for victim in victims:
@@ -68,7 +70,7 @@ def collapse_nodes(graph, survivor_mapping):
 
 
 @in_place_transformation
-def collapse_all_variants(graph):
+def collapse_all_variants(graph) -> None:
     """Collapse all genes', RNAs', miRNAs', and proteins' variants to their parents.
 
     :param pybel.BELGraph graph: A BEL Graph
