@@ -178,7 +178,10 @@ def parse_definitions(graph,
     parse_definitions_start_time = time.time()
 
     if use_tqdm:
-        enumerated_lines = tqdm(list(enumerated_lines), desc='Definitions', leave=False, **(tqdm_kwargs or {}))
+        _tqdm_kwargs = dict(desc='Definitions', leave=False)
+        if tqdm_kwargs:
+            _tqdm_kwargs.update(tqdm_kwargs)
+        enumerated_lines = tqdm(list(enumerated_lines), **_tqdm_kwargs)
 
     for line_number, line in enumerated_lines:
         try:
@@ -227,7 +230,10 @@ def parse_statements(graph,
     parse_statements_start_time = time.time()
 
     if use_tqdm:
-        enumerated_lines = tqdm(list(enumerated_lines), desc='Statements', **(tqdm_kwargs or {}))
+        _tqdm_kwargs = dict(desc='Statements')
+        if tqdm_kwargs:
+            _tqdm_kwargs.update(tqdm_kwargs)
+        enumerated_lines = tqdm(list(enumerated_lines), **_tqdm_kwargs)
 
     for line_number, line in enumerated_lines:
         try:
