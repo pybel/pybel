@@ -73,7 +73,7 @@ class NakedNameWarning(NameWarning):
     """Raised when there is an identifier without a namespace. Enable lenient mode to suppress."""
 
     def __str__(self):
-        return '[pos:{}] "{}" should be qualified with a valid namespace'.format(self.position, self.name)
+        return '"{}" should be qualified with a valid namespace'.format(self.name)
 
 
 class MissingDefaultNameWarning(NameWarning):
@@ -191,7 +191,7 @@ class MetadataException(PyBelParserWarning):
     """Base exception for issues with document metadata."""
 
     def __str__(self):
-        return '[line:{}] Invalid metadata - "{}"'.format(self.line_number, self.line)
+        return 'Invalid metadata - "{}"'.format(self.line)
 
 
 class MalformedMetadataException(MetadataException):
@@ -252,14 +252,14 @@ class CitationTooShortException(InvalidCitationLengthException):
     """Raised when a citation does not have the minimum of {type, name, reference}."""
 
     def __str__(self):
-        return "[pos:{}] Citation is missing required fields: {}".format(self.position, self.line)
+        return "Citation is missing required fields: {}".format(self.line)
 
 
 class CitationTooLongException(InvalidCitationLengthException):
     """Raised when a citation has more than the allowed entries, {type, name, reference, date, authors, comments}."""
 
     def __str__(self):
-        return "[pos:{}] Citation contains too many entries: {}".format(self.position, self.line)
+        return "Citation contains too many entries: {}".format(self.line)
 
 
 class MissingCitationException(PyBelParserWarning):
@@ -323,7 +323,7 @@ class InvalidCitationType(PyBelParserWarning):
         self.citation_type = citation_type
 
     def __str__(self):
-        return '[pos:{}] "{}" is not a valid citation type'.format(self.position, self.citation_type)
+        return '"{}" is not a valid citation type'.format(self.citation_type)
 
 
 class InvalidPubMedIdentifierWarning(PyBelParserWarning):
@@ -334,7 +334,7 @@ class InvalidPubMedIdentifierWarning(PyBelParserWarning):
         self.reference = reference
 
     def __str__(self):
-        return '[pos:{}] "{}" is not a valid PubMed identifier'.format(self.position, self.reference)
+        return '"{}" is not a valid PubMed identifier'.format(self.reference)
 
 
 # BEL Syntax Warnings
@@ -347,7 +347,7 @@ class MalformedTranslocationWarning(PyBelParserWarning):
         self.tokens = tokens
 
     def __str__(self):
-        return '[pos:{}] Unqualified translocation: {} {}'.format(self.position, self.line, self.tokens)
+        return 'Unqualified translocation: {} {}'.format(self.line, self.tokens)
 
 
 class PlaceholderAminoAcidWarning(PyBelParserWarning):
@@ -362,7 +362,7 @@ class PlaceholderAminoAcidWarning(PyBelParserWarning):
         self.code = code
 
     def __str__(self):
-        return '[pos:{}] Placeholder amino acid found: {}'.format(self.position, self.code)
+        return 'Placeholder amino acid found: {}'.format(self.code)
 
 
 class NestedRelationWarning(PyBelParserWarning):
