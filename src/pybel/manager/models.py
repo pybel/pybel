@@ -6,6 +6,7 @@ import datetime
 import hashlib
 import json
 from collections import defaultdict
+from typing import Iterable, Set, Tuple
 
 from sqlalchemy import (
     Boolean, Column, Date, DateTime, ForeignKey, Integer, LargeBinary, String, Table, Text, UniqueConstraint,
@@ -15,7 +16,7 @@ from sqlalchemy.orm import backref, relationship
 
 from .utils import int_or_str
 from ..constants import (
-    BELNS_ENCODING_STR, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR,
+    CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR,
     CITATION_LAST_AUTHOR, CITATION_NAME, CITATION_PAGES, CITATION_REFERENCE, CITATION_TITLE, CITATION_TYPE,
     CITATION_TYPE_PUBMED, CITATION_VOLUME, EFFECT, EVIDENCE, FRAGMENT, FUSION, GMOD, HGVS, IDENTIFIER, LOCATION,
     METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER,
@@ -134,30 +135,8 @@ class Namespace(Base):
     def __str__(self):
         return self.keyword
 
-    def get_entry_names(self):
-        """Get all entry names.
-
-        :rtype: set[str]
-        """
-        return {entry.name for entry in self.entries}
-
-    def to_values(self):
-        """Return this namespace as a dictionary of names to their encodings.
-
-        Encodings are represented as a string, and lookup operations take constant time O(8).
-
-        :rtype: dict[str,str]
-        """
-        return {
-            entry.name: entry.encoding if entry.encoding else BELNS_ENCODING_STR
-            for entry in self.entries
-        }
-
-    def to_tree_list(self):
-        """Return an edge set of the tree represented by this namespace's hierarchy.
-
-        :rtype: set[tuple[str,str]]
-        """
+    def to_tree_list(self) -> Set[Tuple[str, str]]:
+        """Return an edge set of the tree represented by this namespace's hierarchy."""
         return {
             (parent.name, child.name)
             for parent in self.entries
@@ -191,7 +170,6 @@ class NamespaceEntry(Base):
     """Represents a name within a BEL namespace."""
 
     __tablename__ = NAME_TABLE_NAME
-
     id = Column(Integer, primary_key=True)
 
     name = Column(String(1023), index=True, nullable=False,
@@ -267,7 +245,6 @@ class Network(Base):
     """Represents a collection of edges, specified by a BEL Script."""
 
     __tablename__ = NETWORK_TABLE_NAME
-
     id = Column(Integer, primary_key=True)
 
     name = Column(String(255), nullable=False, index=True, doc='Name of the given Network (from the BEL file)')
@@ -290,10 +267,10 @@ class Network(Base):
         UniqueConstraint(name, version),
     )
 
-    def to_json(self, include_id=False):
+    def to_json(self, include_id: bool = False):
         """Return this network as JSON.
 
-        :param bool include_id: If true, includes the model identifier
+        :param include_id: If true, includes the model identifier
         :rtype: dict[str,str]
         """
         result = {
@@ -328,27 +305,18 @@ class Network(Base):
         return result
 
     @classmethod
-    def name_contains(cls, name_query):
-        """Build a filter for networks whose names contain the query.
-
-        :param str name_query:
-        """
+    def name_contains(cls, name_query: str):
+        """Build a filter for networks whose names contain the query."""
         return cls.name.contains(name_query)
 
     @classmethod
-    def description_contains(cls, description_query):
-        """Build a filter for networks whose descriptions contain the query.
-
-        :param str description_query:
-        """
+    def description_contains(cls, description_query: str):
+        """Build a filter for networks whose descriptions contain the query."""
         return cls.description.contains(description_query)
 
     @classmethod
-    def id_in(cls, network_ids):
-        """Build a filter for networks whose identifiers appear in the given sequence.
-
-        :param iter[int] network_ids:
-        """
+    def id_in(cls, network_ids: Iterable[int]):
+        """Build a filter for networks whose identifiers appear in the given sequence."""
         return cls.id.in_(network_ids)
 
     def __repr__(self):
@@ -383,7 +351,6 @@ class Modification(Base):
     """The modifications that are present in the network are stored in this table."""
 
     __tablename__ = MODIFICATION_TABLE_NAME
-
     id = Column(Integer, primary_key=True)
 
     type = Column(String(255), nullable=False, doc='Type of the stored modification e.g. Fusion, gmod, pmod, etc')
@@ -485,7 +452,6 @@ class Node(Base):
     """Represents a BEL Term."""
 
     __tablename__ = NODE_TABLE_NAME
-
     id = Column(Integer, primary_key=True)
 
     type = Column(String(255), nullable=False, doc='The type of the represented biological entity e.g. Protein or Gene')
