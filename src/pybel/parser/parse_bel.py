@@ -5,10 +5,15 @@
 This module handles parsing BEL relations and validation of semantics.
 """
 
-import itertools as itt
 import logging
+from typing import List, Mapping, Optional, Set
 
-from pyparsing import And, Group, Keyword, MatchFirst, Optional, StringEnd, Suppress, delimitedList, oneOf, replaceWith
+import itertools as itt
+import pyparsing
+from pyparsing import (
+    And, Group, Keyword, MatchFirst, ParseResults, StringEnd, Suppress, delimitedList,
+    oneOf, replaceWith,
+)
 
 from .baseparser import BaseParser
 from .exc import (
@@ -220,42 +225,38 @@ class BELParser(BaseParser):
 
     def __init__(self,
                  graph,
-                 namespace_dict=None,
-                 annotation_dict=None,
-                 namespace_regex=None,
-                 annotation_regex=None,
-                 allow_naked_names=False,
-                 allow_nested=False,
-                 disallow_unqualified_translocations=False,
-                 citation_clearing=True,
-                 skip_validation=False,
-                 autostreamline=True,
-                 required_annotations=None
-                 ):
+                 namespace_dict: Optional[Mapping[str, Mapping[str, str]]] = None,
+                 annotation_dict: Optional[Mapping[str, Set[str]]] = None,
+                 namespace_regex: Optional[Mapping[str, str]] = None,
+                 annotation_regex: Optional[Mapping[str, str]] = None,
+                 allow_naked_names: bool = False,
+                 allow_nested: bool = False,
+                 disallow_unqualified_translocations: bool = False,
+                 citation_clearing: bool = True,
+                 skip_validation: bool = False,
+                 autostreamline: bool = True,
+                 required_annotations: Optional[List[str]] = None,
+                 ) -> None:
         """Build a BEL parser.
 
         :param pybel.BELGraph graph: The BEL Graph to use to store the network
         :param namespace_dict: A dictionary of {namespace: {name: encoding}}. Delegated to
          :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :type namespace_dict: Optional[dict[str,dict[str,str]]]
         :param annotation_dict: A dictionary of {annotation: set of values}. Delegated to
          :class:`pybel.parser.ControlParser`
-        :rype annotation_dict: Optional[dict[str,set[str]]]
         :param namespace_regex: A dictionary of {namespace: regular expression strings}. Delegated to
          :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :type namespace_regex: Optional[dict[str,str]]
         :param annotation_regex: A dictionary of {annotation: regular expression strings}. Delegated to
          :class:`pybel.parser.ControlParser`
-        :type annotation_regex: Optional[dict[str,str]]
-        :param bool allow_naked_names: If true, turn off naked namespace failures. Delegated to
+        :param allow_naked_names: If true, turn off naked namespace failures. Delegated to
          :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :param bool allow_nested: If true, turn off nested statement failures. Delegated to
+        :param allow_nested: If true, turn off nested statement failures. Delegated to
          :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :param bool disallow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
-        :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
+        :param disallow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
+        :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
          Delegated to :class:`pybel.parser.ControlParser`
-        :param bool autostreamline: Should the parser be streamlined on instantiation?
-        :param Optional[list[str]] required_annotations: Optional list of required annotations
+        :param autostreamline: Should the parser be streamlined on instantiation?
+        :param required_annotations: Optional list of required annotations
         """
         self.graph = graph
 
@@ -285,6 +286,13 @@ class BELParser(BaseParser):
                 namespace_regex=namespace_regex,
             )
 
+        def _monkey_patch_get_line_number() -> int:
+            """Share the line number of this parser with the inner parsers."""
+            return self.get_line_number()
+
+        self.control_parser.get_line_number = _monkey_patch_get_line_number
+        self.identifier_parser.get_line_number = _monkey_patch_get_line_number
+
         identifier = Group(self.identifier_parser.language)(IDENTIFIER)
         ungrouped_identifier = self.identifier_parser.language
 
@@ -295,7 +303,7 @@ class BELParser(BaseParser):
 
         #: `2.2.4 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_cellular_location>`_
         self.location = get_location_language(self.identifier_parser.language)
-        opt_location = Optional(WCW + self.location)
+        opt_location = pyparsing.Optional(WCW + self.location)
 
         #: PyBEL BEL Specification variant
         self.gmod = get_gene_modification_language(self.identifier_parser.identifier_qualified)
@@ -310,7 +318,7 @@ class BELParser(BaseParser):
         #: `2.1.1 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XcomplexA>`_
         self.general_abundance = general_abundance_tags + nest(ungrouped_identifier + opt_location)
 
-        self.gene_modified = ungrouped_identifier + Optional(
+        self.gene_modified = ungrouped_identifier + pyparsing.Optional(
             WCW + delimitedList(Group(variant | gsub | self.gmod))(VARIANTS))
 
         self.gene_fusion = Group(self.fusion)(FUSION)
@@ -323,13 +331,13 @@ class BELParser(BaseParser):
             self.gene_modified
         ]) + opt_location)
 
-        self.mirna_modified = ungrouped_identifier + Optional(
+        self.mirna_modified = ungrouped_identifier + pyparsing.Optional(
             WCW + delimitedList(Group(variant))(VARIANTS)) + opt_location
 
         #: `2.1.5 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XmicroRNAA>`_
         self.mirna = mirna_tag + nest(self.mirna_modified)
 
-        self.protein_modified = ungrouped_identifier + Optional(
+        self.protein_modified = ungrouped_identifier + pyparsing.Optional(
             WCW + delimitedList(Group(MatchFirst([self.pmod, variant, fragment, psub, trunc])))(
                 VARIANTS))
 
@@ -343,7 +351,7 @@ class BELParser(BaseParser):
             self.protein_modified,
         ]) + opt_location)
 
-        self.rna_modified = ungrouped_identifier + Optional(WCW + delimitedList(Group(variant))(VARIANTS))
+        self.rna_modified = ungrouped_identifier + pyparsing.Optional(WCW + delimitedList(Group(variant))(VARIANTS))
 
         self.rna_fusion = Group(self.fusion)(FUSION)
         self.rna_fusion_legacy = Group(get_legacy_fusion_langauge(identifier, 'r'))(FUSION)
@@ -408,7 +416,7 @@ class BELParser(BaseParser):
 
         self.activity_standard = activity_tag + nest(
             Group(self.simple_abundance)(TARGET) +
-            Optional(WCW + Group(self.molecular_activity)(EFFECT))
+            pyparsing.Optional(WCW + Group(self.molecular_activity)(EFFECT))
         )
 
         activity_legacy_tags = oneOf(language.activities)(MODIFIER)
@@ -653,18 +661,15 @@ class BELParser(BaseParser):
         self.graph.clear()
         self.control_parser.clear()
 
-    def handle_nested_relation(self, line, position, tokens):
+    def handle_nested_relation(self, line: str, position: int, tokens: ParseResults):
         """Handle nested statements.
 
         If :code:`allow_nested` is False, raises a ``NestedRelationWarning``.
 
-        :param str line: The line being parsed
-        :param int position: The position in the line being parsed
-        :param pyparsing.ParseResult tokens: The tokens from PyParsing
         :raises: NestedRelationWarning
         """
         if not self.allow_nested:
-            raise NestedRelationWarning(self.line_number, line, position)
+            raise NestedRelationWarning(self.get_line_number(), line, position)
 
         self._handle_relation_harness(line, position, {
             SUBJECT: tokens[SUBJECT],
@@ -679,7 +684,7 @@ class BELParser(BaseParser):
         })
         return tokens
 
-    def check_function_semantics(self, line, position, tokens):
+    def check_function_semantics(self, line: str, position: int, tokens: ParseResults):
         """Raise an exception if the function used on the tokens is wrong.
 
         :param str line: The line being parsed
@@ -704,23 +709,20 @@ class BELParser(BaseParser):
         ))
 
         if not valid_functions:
-            raise InvalidEntity(self.line_number, line, position, namespace, name)
+            raise InvalidEntity(self.get_line_number(), line, position, namespace, name)
 
         if tokens[FUNCTION] not in valid_functions:
-            raise InvalidFunctionSemantic(self.line_number, line, position, tokens[FUNCTION], namespace, name,
+            raise InvalidFunctionSemantic(self.get_line_number(), line, position, tokens[FUNCTION], namespace, name,
                                           valid_functions)
 
         return tokens
 
-    def handle_term(self, _, __, tokens):
-        """Handle BEL terms (the subject and object of BEL relations).
-
-        :param pyparsing.ParseResult tokens: The tokens from PyParsing
-        """
+    def handle_term(self, _, __, tokens: ParseResults) -> ParseResults:
+        """Handle BEL terms (the subject and object of BEL relations)."""
         self.ensure_node(tokens)
         return tokens
 
-    def _handle_list_helper(self, tokens, relation):
+    def _handle_list_helper(self, tokens: ParseResults, relation: str) -> ParseResults:
         """Provide the functionality for :meth:`handle_has_members` and :meth:`handle_has_components`."""
         parent_node_dsl = self.ensure_node(tokens[0])
 
@@ -730,20 +732,12 @@ class BELParser(BaseParser):
 
         return tokens
 
-    def handle_has_members(self, line, position, tokens):
-        """Handle list relations like ``p(X) hasMembers list(p(Y), p(Z), ...)``.
-
-        :param str line: The line being parsed
-        :param int position: The position in the line being parsed
-        :param pyparsing.ParseResult tokens: The tokens from PyParsing
-        """
+    def handle_has_members(self, _, __, tokens: ParseResults) -> ParseResults:
+        """Handle list relations like ``p(X) hasMembers list(p(Y), p(Z), ...)``."""
         return self._handle_list_helper(tokens, HAS_MEMBER)
 
-    def handle_has_components(self, _, __, tokens):
-        """Handle list relations like ``p(X) hasComponents list(p(Y), p(Z), ...)``.
-
-        :param pyparsing.ParseResult tokens: The tokens from PyParsing
-        """
+    def handle_has_components(self, _, __, tokens: ParseResults) -> ParseResults:
+        """Handle list relations like ``p(X) hasComponents list(p(Y), p(Z), ...)``."""
         return self._handle_list_helper(tokens, HAS_COMPONENT)
 
     def _add_qualified_edge_helper(self, u, v, relation, annotations, subject_modifier, object_modifier):
@@ -757,7 +751,7 @@ class BELParser(BaseParser):
             annotations=annotations,
             subject_modifier=subject_modifier,
             object_modifier=object_modifier,
-            **{LINE: self.line_number}
+            **{LINE: self.get_line_number()}
         )
 
     def _add_qualified_edge(self, u, v, relation, annotations, subject_modifier, object_modifier):
@@ -817,7 +811,7 @@ class BELParser(BaseParser):
             object_modifier=object_modifier,
         )
 
-    def _handle_relation_harness(self, line, position, tokens):
+    def _handle_relation_harness(self, line: str, position: int, tokens):
         """Handle BEL relations based on the policy specified on instantiation.
 
         Note: this can't be changed after instantiation!
@@ -827,35 +821,30 @@ class BELParser(BaseParser):
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
         """
         if not self.control_parser.citation:
-            raise MissingCitationException(self.line_number, line, position)
+            raise MissingCitationException(self.get_line_number(), line, position)
 
         if not self.control_parser.evidence:
-            raise MissingSupportWarning(self.line_number, line, position)
+            raise MissingSupportWarning(self.get_line_number(), line, position)
 
         missing_required_annotations = self.control_parser.get_missing_required_annotations()
         if missing_required_annotations:
-            raise MissingAnnotationWarning(self.line_number, line, position, missing_required_annotations)
+            raise MissingAnnotationWarning(self.get_line_number(), line, position, missing_required_annotations)
 
         self._handle_relation(tokens)
 
         return tokens
 
-    def handle_unqualified_relation(self, _, __, tokens):
-        """Handle unqualified relations.
-
-        :param pyparsing.ParseResult tokens: The tokens from PyParsing
-        """
+    def handle_unqualified_relation(self, _, __, tokens: ParseResults) -> ParseResults:
+        """Handle unqualified relations."""
         subject_node_dsl = self.ensure_node(tokens[SUBJECT])
         object_node_dsl = self.ensure_node(tokens[OBJECT])
         rel = tokens[RELATION]
         self.graph.add_unqualified_edge(subject_node_dsl, object_node_dsl, rel)
+        return tokens
 
-    def handle_label_relation(self, line, position, tokens):
+    def handle_label_relation(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
         """Handle statements like ``p(X) label "Label for X"``.
 
-        :param str line: The line being parsed
-        :param int position: The position in the line being parsed
-        :param pyparsing.ParseResult tokens: The tokens from PyParsing
         :raises: RelabelWarning
         """
         subject_node_dsl = self.ensure_node(tokens[SUBJECT])
@@ -863,7 +852,7 @@ class BELParser(BaseParser):
 
         if self.graph.has_node_description(subject_node_dsl):
             raise RelabelWarning(
-                line_number=self.line_number,
+                line_number=self.get_line_number(),
                 line=line,
                 position=position,
                 node=self.graph.node,
@@ -872,6 +861,7 @@ class BELParser(BaseParser):
             )
 
         self.graph.set_node_description(subject_node_dsl, description)
+        return tokens
 
     def ensure_node(self, tokens):
         """Turn parsed tokens into canonical node name and makes sure its in the graph.
@@ -887,34 +877,28 @@ class BELParser(BaseParser):
         self.graph.add_node_from_data(node_dsl)
         return node_dsl
 
-    def handle_translocation_illegal(self, line, position, tokens):
+    def handle_translocation_illegal(self, line: str, position: int, tokens: ParseResults) -> None:
         """Handle a malformed translocation.
 
         :param str line: The line being parsed
         :param int position: The position in the line being parsed
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
         """
-        raise MalformedTranslocationWarning(self.line_number, line, position, tokens)
+        raise MalformedTranslocationWarning(self.get_line_number(), line, position, tokens)
 
 
 # HANDLERS
 
-def handle_molecular_activity_default(_, __, tokens):
-    """Handle a BEL 2.0 style molecular activity with BEL default names.
-
-    :param pyparsing.ParseResult tokens: The tokens from PyParsing
-    """
+def handle_molecular_activity_default(_: str, __: int, tokens: ParseResults) -> ParseResults:
+    """Handle a BEL 2.0 style molecular activity with BEL default names."""
     upgraded = language.activity_labels[tokens[0]]
     tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
     tokens[NAME] = upgraded
     return tokens
 
 
-def handle_activity_legacy(_, __, tokens):
-    """Handle BEL 1.0 activities.
-
-    :param pyparsing.ParseResult tokens: The tokens from PyParsing
-    """
+def handle_activity_legacy(_: str, __: int, tokens: ParseResults) -> ParseResults:
+    """Handle BEL 1.0 activities."""
     legacy_cls = language.activity_labels[tokens[MODIFIER]]
     tokens[MODIFIER] = ACTIVITY
     tokens[EFFECT] = {
@@ -925,13 +909,9 @@ def handle_activity_legacy(_, __, tokens):
     return tokens
 
 
-def handle_legacy_tloc(line, _, tokens):
-    """Handle translocations that lack the ``fromLoc`` and ``toLoc`` entries.
-
-    :param str line: The line being parsed
-    :param pyparsing.ParseResult tokens: The tokens from PyParsing
-    """
-    log.log(5, 'legacy translocation statement: %s', line)
+def handle_legacy_tloc(line: str, position: int, tokens: ParseResults) -> ParseResults:
+    """Handle translocations that lack the ``fromLoc`` and ``toLoc`` entries."""
+    log.log(5, 'legacy translocation statement: %s [%d]', line, position)
     return tokens
 
 

@@ -139,7 +139,7 @@ class MetadataParser(BaseParser):
         value = tokens['value']
 
         if key not in DOCUMENT_KEYS:
-            raise InvalidMetadataException(self.line_number, line, position, key, value)
+            raise InvalidMetadataException(self.get_line_number(), line, position, key, value)
 
         norm_key = DOCUMENT_KEYS[key]
 
@@ -163,7 +163,7 @@ class MetadataParser(BaseParser):
         :raises: RedefinedNamespaceError
         """
         if self.disallow_redefinition and self.has_namespace(namespace):
-            raise RedefinedNamespaceError(self.line_number, line, position, namespace)
+            raise RedefinedNamespaceError(self.get_line_number(), line, position, namespace)
 
     def handle_namespace_url(self, line: str, position: int, tokens: ParseResults):
         """Handle statements like ``DEFINE NAMESPACE X AS URL "Y"``.
@@ -217,7 +217,7 @@ class MetadataParser(BaseParser):
         :raises: RedefinedAnnotationError
         """
         if self.disallow_redefinition and self.has_annotation(annotation):
-            raise RedefinedAnnotationError(self.line_number, line, position, annotation)
+            raise RedefinedAnnotationError(self.get_line_number(), line, position, annotation)
 
     def handle_annotations_url(self, line: str, position: int, tokens: ParseResults):
         """Handle statements like ``DEFINE ANNOTATION X AS URL "Y"``.
@@ -309,4 +309,4 @@ class MetadataParser(BaseParser):
             return
 
         if not SEMANTIC_VERSION_STRING_RE.match(version):
-            raise VersionFormatWarning(self.line_number, line, position, version)
+            raise VersionFormatWarning(self.get_line_number(), line, position, version)

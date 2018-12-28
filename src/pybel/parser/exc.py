@@ -12,15 +12,14 @@ from ..exceptions import PyBELWarning
 class PyBelParserWarning(PyBELWarning):
     """The base PyBEL parser exception, which holds the line and position where a parsing problem occurred."""
 
-    def __init__(self, line_number, line, position, *args):
+    def __init__(self, line_number: int, line: str, position: int, *args):
         """Initialize the BEL parser warning.
 
-        :param int line_number: The line number on which this warning occurred
-        :param str line: The content of the line
-        :param int position: The position within the line where the warning occurred
-        :param args: Additional arguments to supply to the super class
+        :param line_number: The line number on which this warning occurred
+        :param line: The content of the line
+        :param position: The position within the line where the warning occurred
         """
-        super(PyBelParserWarning, self).__init__(line_number, line, position, *args)
+        super().__init__(line_number, line, position, *args)
         self.line_number = line_number
         self.line = line
         self.position = position
@@ -36,7 +35,7 @@ class BELSyntaxError(PyBelParserWarning, SyntaxError):
 class InconsistentDefinitionError(PyBelParserWarning):
     """Base PyBEL error for redefinition."""
 
-    def __init__(self, line_number, line, position, definition):
+    def __init__(self, line_number: int, line: str, position: int, definition: str):
         super(InconsistentDefinitionError, self).__init__(line_number, line, position, definition)
         self.definition = definition
 
@@ -57,15 +56,9 @@ class RedefinedAnnotationError(InconsistentDefinitionError):
 class NameWarning(PyBelParserWarning):
     """The base class for errors related to nomenclature."""
 
-    def __init__(self, line_number, line, position, name, *args):
-        """Build a NameWarning.
-
-        :param int line_number: The line number on which the warning occurred
-        :param str line: The line on which the warning occurred
-        :param int position: The position in the line that caused the warning
-        :param str name: The name that caused the warning
-        """
-        super(NameWarning, self).__init__(line_number, line, position, name, *args)
+    def __init__(self, line_number: int, line: str, position: int, name: str, *args):
+        """Build a warning wrapping a given name."""
+        super().__init__(line_number, line, position, name, *args)
         self.name = name
 
 
@@ -86,14 +79,14 @@ class MissingDefaultNameWarning(NameWarning):
 class NamespaceIdentifierWarning(NameWarning):
     """The base class for warnings related to namespace:name identifiers."""
 
-    def __init__(self, line_number, line, position, namespace, name):
+    def __init__(self, line_number: int, line: str, position: int, namespace: str, name: str):
         """Initialize the namespace identifier warning.
 
-        :param int line_number: The line number of the line that caused the exception
-        :param str line: The line that caused the exception
-        :param int position: The line's position of the exception
-        :param str namespace: The namespace of the identifier
-        :param str name: The name of the identifier
+        :param line_number: The line number of the line that caused the exception
+        :param line: The line that caused the exception
+        :param position: The line's position of the exception
+        :param namespace: The namespace of the identifier
+        :param name: The name of the identifier
         """
         super(NamespaceIdentifierWarning, self).__init__(line_number, line, position, name, namespace)
         self.namespace = namespace
