@@ -2,8 +2,6 @@
 
 """This module contains the base class for connection managers in SQLAlchemy."""
 
-from __future__ import unicode_literals
-
 import logging
 
 from sqlalchemy import create_engine

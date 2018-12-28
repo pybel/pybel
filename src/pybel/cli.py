@@ -128,7 +128,7 @@ def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified
     click.echo('')
     _print_summary(graph, ticks=skip_tqdm)
 
-    sys.exit(0 if 0 == len(graph.warnings) else 1)
+    sys.exit(0 if 0 == graph.number_of_warnings() else 1)
 
 
 @main.command()

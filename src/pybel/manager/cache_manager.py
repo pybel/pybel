@@ -6,8 +6,6 @@ Under the hood, PyBEL caches namespace and annotation files for quick recall on 
 enable this option, but can specify a database location if they choose.
 """
 
-from __future__ import unicode_literals
-
 import json
 import logging
 import time
