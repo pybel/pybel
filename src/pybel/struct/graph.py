@@ -438,12 +438,12 @@ class BELGraph(nx.MultiDiGraph):
                       annotations: Optional[AnnotationsHint] = None,
                       subject_modifier: Optional[Mapping] = None,
                       object_modifier: Optional[Mapping] = None,
-                      **attr,
+                      **attr
                       ) -> str:
         """Wrap :meth:`add_qualified_edge` for the :data:`pybel.constants.INCREASES` relation."""
         return self.add_qualified_edge(
             u=u, v=v, relation=INCREASES, evidence=evidence, citation=citation, annotations=annotations,
-            subject_modifier=subject_modifier, object_modifier=object_modifier, **attr,
+            subject_modifier=subject_modifier, object_modifier=object_modifier, **attr
         )
 
     def add_directly_increases(self, u, v, evidence, citation, annotations=None, subject_modifier=None,
