@@ -6,9 +6,9 @@ import logging
 import re
 import time
 from datetime import datetime
+from itertools import zip_longest
 
 import requests
-from six.moves import zip_longest
 
 from ..constants import CITATION, CITATION_REFERENCE, CITATION_TYPE_PUBMED
 from ..struct.filters import filter_edges

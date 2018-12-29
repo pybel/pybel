@@ -4,8 +4,6 @@
 
 from typing import Iterable, Mapping
 
-from six import string_types
-
 from .edge_predicates import edge_predicate, has_authors, has_pubmed, keep_edge_permissive
 from .typing import EdgePredicate
 from ..graph import BELGraph
@@ -149,7 +147,7 @@ def build_pmid_inclusion_filter(pmids: Strings) -> EdgePredicate:
 
     :param pmids: A PubMed identifier or list of PubMed identifiers to filter for
     """
-    if isinstance(pmids, string_types):
+    if isinstance(pmids, str):
         @edge_predicate
         def pmid_inclusion_filter(edge_data: EdgeData) -> bool:
             """Pass for edges with PubMed citations matching the contained PubMed identifier."""
@@ -171,7 +169,7 @@ def build_pmid_inclusion_filter(pmids: Strings) -> EdgePredicate:
 
 def build_author_inclusion_filter(authors: Strings) -> EdgePredicate:
     """Build an edge predicate that passes for edges with citations written by the given author(s)."""
-    if isinstance(authors, string_types):
+    if isinstance(authors, str):
         @edge_predicate
         def author_filter(edge_data: EdgeData) -> bool:
             """Pass for edges with citations with an author that matches the contained author."""

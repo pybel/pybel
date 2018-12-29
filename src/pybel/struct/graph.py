@@ -8,7 +8,6 @@ from typing import Any, Dict, Hashable, Iterable, List, Mapping, Optional, Set, 
 
 import networkx as nx
 from pkg_resources import iter_entry_points
-from six import string_types
 
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
 from ..canonicalize import edge_to_bel
@@ -603,7 +602,7 @@ class BELGraph(nx.MultiDiGraph):
             EVIDENCE: evidence,
         })
 
-        if isinstance(citation, string_types):
+        if isinstance(citation, str):
             attr[CITATION] = {
                 CITATION_TYPE: CITATION_TYPE_PUBMED,
                 CITATION_REFERENCE: citation
@@ -881,7 +880,7 @@ class BELGraph(nx.MultiDiGraph):
         """Serialize the graph to an object or file if given."""
         if file is None:
             return self._serialize_object(fmt=fmt)
-        elif isinstance(file, string_types):
+        elif isinstance(file, str):
             with open(file, 'w') as file_obj:
                 self._serialize_file(fmt=fmt, file=file_obj)
         else:

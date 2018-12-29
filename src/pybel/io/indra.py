@@ -32,9 +32,7 @@ After assembling a model with `INDRA <https://github.com/sorgerlab/indra>`_, a l
     not be for a while.
 """
 
-import warnings
-
-from six.moves.cPickle import load
+from pickle import load
 
 __all__ = [
     'from_indra_statements',

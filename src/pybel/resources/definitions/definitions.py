@@ -7,7 +7,6 @@ import os
 from configparser import ConfigParser
 
 import requests.exceptions
-import six
 
 from ..exc import EmptyResourceError, InvalidResourceError, MissingResourceError
 from ..utils import download, is_url
@@ -95,12 +94,12 @@ def get_bel_resource(location):
     try:
         lines = get_lines(location)
     except requests.exceptions.HTTPError as e:
-        six.raise_from(MissingResourceError(location), e)
+        raise MissingResourceError(location) from e
 
     try:
         result = parse_bel_resource(lines)
     except ValueError as e:
-        six.raise_from(InvalidResourceError(location), e)
+        raise InvalidResourceError(location) from e
 
     if not result['Values']:
         raise EmptyResourceError(location)

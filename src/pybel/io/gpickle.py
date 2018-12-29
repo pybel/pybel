@@ -2,8 +2,9 @@
 
 """Conversion functions for BEL graphs with bytes and Python pickles."""
 
+from pickle import HIGHEST_PROTOCOL, dumps, loads
+
 from networkx import read_gpickle, write_gpickle
-from six.moves.cPickle import HIGHEST_PROTOCOL, dumps, loads
 
 from .utils import raise_for_not_bel, raise_for_old_graph
 

@@ -8,10 +8,8 @@ import logging
 from collections import defaultdict
 from collections.abc import Iterable, MutableMapping
 from datetime import datetime
+from pickle import dumps
 from typing import Mapping, Optional, Tuple
-
-from six import string_types
-from six.moves.cPickle import dumps
 
 from .constants import (
     ACTIVITY, CITATION, CITATION_REFERENCE, CITATION_TYPE, DEGRADATION, EFFECT, EVIDENCE, FROM_LOC, IDENTIFIER,
@@ -197,9 +195,9 @@ def subdict_matches(target, query, partial_match: bool = True) -> bool:
     for k, v in query.items():
         if k not in target:
             return False
-        elif not isinstance(v, (int, string_types, dict, Iterable)):
+        elif not isinstance(v, (int, str, dict, Iterable)):
             raise ValueError('invalid value: {}'.format(v))
-        elif isinstance(v, (int, string_types)) and target[k] != v:
+        elif isinstance(v, (int, str)) and target[k] != v:
             return False
         elif isinstance(v, dict):
             if partial_match:

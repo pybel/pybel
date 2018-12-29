@@ -13,9 +13,7 @@ from copy import deepcopy
 from itertools import chain
 from typing import Iterable, List, Mapping, Optional, Set, Tuple
 
-import six
 import sqlalchemy
-from six import string_types
 from sqlalchemy import and_, exists, func
 from sqlalchemy.orm import aliased
 from tqdm import tqdm
@@ -743,7 +741,7 @@ class InsertManager(NamespaceManager, LookupManager):
                 except Exception as e:
                     self.session.rollback()
                     log.exception('error storing edge in database. edge data: %s', data)
-                    six.raise_from(EdgeAddError(e, u, v, key, data), e)
+                    raise EdgeAddError(e, u, v, key, data) from e
                 else:
                     yield edge
 
@@ -769,7 +767,7 @@ class InsertManager(NamespaceManager, LookupManager):
                 except Exception as e:
                     self.session.rollback()
                     log.exception('error storing edge in database. edge data: %s', data)
-                    six.raise_from(EdgeAddError(e, u, v, key, data), e)
+                    raise EdgeAddError(e, u, v, key, data) from e
                 else:
                     yield edge
 
@@ -1076,7 +1074,7 @@ class InsertManager(NamespaceManager, LookupManager):
             citation.last = self.get_or_create_author(last)
 
         if authors is not None:
-            for author in (authors.split('|') if isinstance(authors, string_types) else authors):
+            for author in (authors.split('|') if isinstance(authors, str) else authors):
                 author_model = self.get_or_create_author(author)
                 if author_model not in citation.authors:
                     citation.authors.append(author_model)

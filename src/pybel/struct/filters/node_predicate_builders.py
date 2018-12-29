@@ -4,8 +4,6 @@
 
 from typing import Any, Callable, Iterable
 
-from six import string_types
-
 from .typing import NodePredicate
 from ..graph import BELGraph
 from ...constants import NAME, NAMESPACE
@@ -28,7 +26,7 @@ def function_inclusion_filter_builder(func: Strings) -> NodePredicate:
 
     :param func: A BEL Function or list/set/tuple of BEL functions
     """
-    if isinstance(func, string_types):
+    if isinstance(func, str):
         return _single_function_inclusion_filter_builder(func)
 
     elif isinstance(func, Iterable):
@@ -111,7 +109,7 @@ def build_node_key_search(query, key) -> NodePredicate:
     :type query: str or iter[str]
     :param str key: The key for the node data dictionary. Should refer only to entries that have str values
     """
-    if isinstance(query, string_types):
+    if isinstance(query, str):
         return build_node_data_search(key, lambda s: query.lower() in s.lower())
 
     if isinstance(query, Iterable):
@@ -132,7 +130,7 @@ def build_node_name_search(query: Strings) -> NodePredicate:
 
 def namespace_inclusion_builder(namespace: Strings) -> NodePredicate:
     """Build a predicate for namespace inclusion."""
-    if isinstance(namespace, string_types):
+    if isinstance(namespace, str):
         def namespace_filter(_: BELGraph, node: BaseEntity) -> bool:
             """Pass only for a node that has the enclosed namespace."""
             return NAMESPACE in node and node[NAMESPACE] == namespace

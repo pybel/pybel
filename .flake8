@@ -21,6 +21,8 @@ ignore =
     S101
     # Complains about random number generators
     S311
+    # Complains about pickles
+    S301, S403
 exclude =
     .tox,
     .git,

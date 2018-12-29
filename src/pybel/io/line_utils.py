@@ -7,7 +7,6 @@ import re
 import time
 from typing import Any, Iterable, Mapping, Optional, Tuple
 
-import six
 from pyparsing import ParseException
 from sqlalchemy.exc import OperationalError
 from tqdm import tqdm
@@ -140,7 +139,7 @@ def parse_document(graph, enumerated_lines: Iterable[Tuple[int, str]], metadata_
         except Exception as e:
             exc = MalformedMetadataException(line_number, line, 0)
             _log_parse_exception(graph, exc)
-            six.raise_from(exc, e)
+            raise exc from e
 
     for required in REQUIRED_METADATA:
         required_metadatum = metadata_parser.document_metadata.get(required)
@@ -197,7 +196,7 @@ def parse_definitions(graph,
             if not allow_failures:
                 exc = MalformedMetadataException(line_number, line, 0)
                 _log_parse_exception(graph, exc)
-                six.raise_from(exc, e)
+                raise exc from e
 
     graph.namespace_url.update(metadata_parser.namespace_url_dict)
     graph.namespace_pattern.update(metadata_parser.namespace_regex)

@@ -2,7 +2,6 @@
 
 """Output functions for BEL graphs to Neo4j."""
 
-from six import string_types
 from tqdm import tqdm
 
 from ..constants import (
@@ -34,7 +33,7 @@ def to_neo4j(graph, neo_connection, use_tqdm=False):
     """
     import py2neo
 
-    if isinstance(neo_connection, string_types):
+    if isinstance(neo_connection, str):
         neo_connection = py2neo.Graph(neo_connection)
 
     tx = neo_connection.begin()
