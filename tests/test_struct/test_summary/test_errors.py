@@ -76,7 +76,7 @@ class TestErrors(unittest.TestCase):
             exception=exceptions[0],
         )
 
-        self.assertEqual(6, len(graph.warnings))
+        self.assertEqual(6, graph.number_of_warnings())
 
         naked_names = get_naked_names(graph)
         self.assertEqual(names, naked_names)

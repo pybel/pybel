@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import unittest
+from typing import Set, Tuple
 
 from pybel import BELGraph
 from pybel.constants import ANNOTATIONS
-from pybel.dsl import protein
+from pybel.dsl import BaseEntity, Protein
 from pybel.struct.filters import (
-    and_edge_predicates, concatenate_node_predicates, count_passed_edge_filter,
-    count_passed_node_filter, filter_edges, get_nodes, invert_edge_predicate,
+    and_edge_predicates, concatenate_node_predicates, count_passed_edge_filter, count_passed_node_filter, filter_edges,
+    get_nodes, invert_edge_predicate,
 )
 from pybel.struct.filters.edge_predicate_builders import (
     _annotation_dict_all_filter, _annotation_dict_any_filter, build_annotation_dict_all_filter,
@@ -15,10 +16,11 @@ from pybel.struct.filters.edge_predicate_builders import (
 )
 from pybel.struct.filters.edge_predicates import keep_edge_permissive
 from pybel.struct.filters.node_predicates import keep_node_permissive
+from pybel.struct.filters.typing import EdgeIterator
 from pybel.testing.utils import n
 
 
-def make_edge_iterator_set(it):
+def make_edge_iterator_set(it: EdgeIterator) -> Set[Tuple[BaseEntity, BaseEntity]]:
     return {(u, v) for u, v, _ in it}
 
 
@@ -41,7 +43,7 @@ class TestNodeFilters(unittest.TestCase):
         self.all_graph_nodes = {1, 2}
 
     def test_no_node_filter_argument(self):
-        nodes = get_nodes(self.universe)
+        nodes = get_nodes(self.universe, [])
         self.assertEqual(self.all_universe_nodes, nodes)
 
     def test_keep_node_permissive(self):
@@ -49,7 +51,7 @@ class TestNodeFilters(unittest.TestCase):
         self.assertEqual(self.all_universe_nodes, nodes)
 
     def test_missing_node_filter(self):
-        nodes = get_nodes(self.universe, concatenate_node_predicates())
+        nodes = get_nodes(self.universe, concatenate_node_predicates([]))
         self.assertEqual(self.all_universe_nodes, nodes)
 
     def test_concatenate_single_node_filter(self):
@@ -57,10 +59,10 @@ class TestNodeFilters(unittest.TestCase):
         self.assertEqual(self.all_universe_nodes, nodes)
 
     def test_concatenate_multiple_node_filters(self):
-        def even(graph, node):
+        def even(_, node) -> bool:
             return node % 2 == 0
 
-        def big(graph, node):
+        def big(_, node) -> bool:
             return node > 3
 
         nodes = get_nodes(self.universe, [even, big])
@@ -69,7 +71,7 @@ class TestNodeFilters(unittest.TestCase):
         self.assertEqual(3, count_passed_node_filter(self.universe, [even, big]))
 
     def test_no_edge_filter(self):
-        edges = make_edge_iterator_set(filter_edges(self.graph))
+        edges = make_edge_iterator_set(filter_edges(self.graph, []))
         self.assertEqual({(1, 2)}, edges)
 
     def test_keep_edge_permissive(self):
@@ -82,7 +84,7 @@ class TestNodeFilters(unittest.TestCase):
         self.assertEqual(set(), edges)
 
     def test_missing_edge_filter(self):
-        edges = make_edge_iterator_set(filter_edges(self.graph, and_edge_predicates()))
+        edges = make_edge_iterator_set(filter_edges(self.graph, and_edge_predicates([])))
         self.assertEqual(({(1, 2)}), edges)
 
     def test_concatenate_single_edge_filter(self):
@@ -141,22 +143,22 @@ class TestEdgeFilters(unittest.TestCase):
     def test_any_filter_no_query(self):
         """Test that the all filter returns true when there's no argument"""
         graph = BELGraph()
-        graph.add_increases(protein(n(), n()), protein(n(), n()), n(), n())
+        graph.add_increases(Protein(n(), n()), Protein(n(), n()), n(), n())
         self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_any_filter({})))
 
     def test_any_filter_no_annotations(self):
         graph = BELGraph()
-        graph.add_increases(protein(n(), n()), protein(n(), n()), n(), n())
+        graph.add_increases(Protein(n(), n()), Protein(n(), n()), n(), n())
         self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_any_filter({'A': {'1'}})))
 
     def test_any_filter_empty_annotations(self):
         graph = BELGraph()
-        graph.add_increases(protein(n(), n()), protein(n(), n()), n(), n(), annotations={})
+        graph.add_increases(Protein(n(), n()), Protein(n(), n()), n(), n(), annotations={})
         self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_any_filter({'A': {'1'}})))
 
     def test_any_filter(self):
         graph = BELGraph()
-        graph.add_increases(protein(n(), n()), protein(n(), n()), n(), n(), annotations={
+        graph.add_increases(Protein(n(), n()), Protein(n(), n()), n(), n(), annotations={
             'A': {'1', '2', '3'}
         })
 
@@ -208,22 +210,22 @@ class TestEdgeFilters(unittest.TestCase):
     def test_all_filter_no_query(self):
         """Test that the all filter returns true when there's no argument"""
         graph = BELGraph()
-        graph.add_increases(protein(n(), n()), protein(n(), n()), n(), n())
+        graph.add_increases(Protein(n(), n()), Protein(n(), n()), n(), n())
         self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter({})))
 
     def test_all_filter_no_annotations(self):
         graph = BELGraph()
-        graph.add_increases(protein(n(), n()), protein(n(), n()), n(), n())
+        graph.add_increases(Protein(n(), n()), Protein(n(), n()), n(), n())
         self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_all_filter({'A': {'1'}})))
 
     def test_all_filter_empty_annotations(self):
         graph = BELGraph()
-        graph.add_increases(protein(n(), n()), protein(n(), n()), n(), n(), annotations={})
+        graph.add_increases(Protein(n(), n()), Protein(n(), n()), n(), n(), annotations={})
         self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_all_filter({'A': {'1'}})))
 
     def test_all_filter(self):
         graph = BELGraph()
-        graph.add_increases(protein(n(), n()), protein(n(), n()), n(), n(), annotations={
+        graph.add_increases(Protein(n(), n()), Protein(n(), n()), n(), n(), annotations={
             'A': {'1', '2', '3'}
         })
 

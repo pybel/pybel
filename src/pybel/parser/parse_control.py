@@ -180,7 +180,7 @@ class ControlParser(BaseParser):
             return
 
         if not self.has_enumerated_annotation(annotation) and not self.has_regex_annotation(annotation):
-            raise UndefinedAnnotationWarning(self.line_number, line, position, annotation)
+            raise UndefinedAnnotationWarning(self.get_line_number(), line, position, annotation)
 
     def raise_for_invalid_annotation_value(self, line, position, key, value):
         """Raise an exception if the annotation is not defined.
@@ -195,10 +195,10 @@ class ControlParser(BaseParser):
             return
 
         if self.has_enumerated_annotation(key) and value not in self.annotation_dict[key]:
-            raise IllegalAnnotationValueWarning(self.line_number, line, position, key, value)
+            raise IllegalAnnotationValueWarning(self.get_line_number(), line, position, key, value)
 
         elif self.has_regex_annotation(key) and not self.annotation_regex_compiled[key].match(value):
-            raise MissingAnnotationRegexWarning(self.line_number, line, position, key, value)
+            raise MissingAnnotationRegexWarning(self.get_line_number(), line, position, key, value)
 
     def raise_for_missing_citation(self, line, position):
         """Raise an exception if there is no citation present in the parser.
@@ -208,7 +208,7 @@ class ControlParser(BaseParser):
         :raises: MissingCitationException
         """
         if self.citation_clearing and not self.citation:
-            raise MissingCitationException(self.line_number, line, position)
+            raise MissingCitationException(self.get_line_number(), line, position)
 
     def handle_annotation_key(self, line, position, tokens):
         """Handle an annotation key before parsing to validate that it's either enumerated or as a regex.
@@ -235,12 +235,12 @@ class ControlParser(BaseParser):
         values = tokens['values']
 
         if len(values) < 2:
-            raise CitationTooShortException(self.line_number, line, position)
+            raise CitationTooShortException(self.get_line_number(), line, position)
 
         citation_type = values[0]
 
         if citation_type not in CITATION_TYPES:
-            raise InvalidCitationType(self.line_number, line, position, citation_type)
+            raise InvalidCitationType(self.get_line_number(), line, position, citation_type)
 
         if 2 == len(values):
             return self.handle_set_citation_double(line, position, tokens)
@@ -248,7 +248,7 @@ class ControlParser(BaseParser):
         citation_reference = values[2]
 
         if citation_type == CITATION_TYPE_PUBMED and not is_int(citation_reference):
-            raise InvalidPubMedIdentifierWarning(self.line_number, line, position, citation_reference)
+            raise InvalidPubMedIdentifierWarning(self.get_line_number(), line, position, citation_reference)
 
         if 4 <= len(values) and not valid_date(values[3]):
             log.debug('Invalid date: %s. Truncating entry.', values[3])
@@ -258,7 +258,7 @@ class ControlParser(BaseParser):
         # TODO consider parsing up authors list
 
         if 6 < len(values):
-            raise CitationTooLongException(self.line_number, line, position)
+            raise CitationTooLongException(self.get_line_number(), line, position)
 
         self.citation = dict(zip(CITATION_ENTRIES, values))
 
@@ -269,7 +269,7 @@ class ControlParser(BaseParser):
         values = tokens['values']
 
         if values[0] == CITATION_TYPE_PUBMED and not is_int(values[1]):
-            raise InvalidPubMedIdentifierWarning(self.line_number, line, position, values[1])
+            raise InvalidPubMedIdentifierWarning(self.get_line_number(), line, position, values[1])
 
         self.citation = dict(zip((CITATION_TYPE, CITATION_REFERENCE), values))
 
@@ -310,7 +310,7 @@ class ControlParser(BaseParser):
         :raises: MissingAnnotationKeyWarning
         """
         if self.statement_group is None:
-            raise MissingAnnotationKeyWarning(self.line_number, line, position, BEL_KEYWORD_STATEMENT_GROUP)
+            raise MissingAnnotationKeyWarning(self.get_line_number(), line, position, BEL_KEYWORD_STATEMENT_GROUP)
         self.statement_group = None
         return tokens
 
@@ -323,7 +323,7 @@ class ControlParser(BaseParser):
         :raises: MissingAnnotationKeyWarning
         """
         if not self.citation:
-            raise MissingAnnotationKeyWarning(self.line_number, line, position, BEL_KEYWORD_CITATION)
+            raise MissingAnnotationKeyWarning(self.get_line_number(), line, position, BEL_KEYWORD_CITATION)
 
         self.clear_citation()
 
@@ -341,7 +341,7 @@ class ControlParser(BaseParser):
         :raises: MissingAnnotationKeyWarning
         """
         if self.evidence is None:
-            raise MissingAnnotationKeyWarning(self.line_number, line, position, tokens[EVIDENCE])
+            raise MissingAnnotationKeyWarning(self.get_line_number(), line, position, tokens[EVIDENCE])
         self.evidence = None
         return tokens
 
@@ -354,7 +354,7 @@ class ControlParser(BaseParser):
         :raises: MissingAnnotationKeyWarning
         """
         if key not in self.annotations:
-            raise MissingAnnotationKeyWarning(self.line_number, line, position, key)
+            raise MissingAnnotationKeyWarning(self.get_line_number(), line, position, key)
 
     def handle_unset_command(self, line, position, tokens):
         """Handle an ``UNSET X`` statement or raises an exception if it is not already set.

@@ -4,6 +4,9 @@
 
 import logging
 import time
+from typing import Iterable, List
+
+from pyparsing import ParseResults
 
 log = logging.getLogger(__name__)
 
@@ -25,29 +28,30 @@ class BaseParser(object):
         self.language = language
 
         #: The parser holds an internal state of the current line
-        self.line_number = 0
+        self._line_number = 0
 
         if streamline:
             self.streamline()
 
-    def parse_lines(self, lines):
-        """Parse multiple lines in succession.
-
-        :return: An list of the resulting parsed lines' tokens
-        """
+    def parse_lines(self, lines: Iterable[str]) -> List[ParseResults]:
+        """Parse multiple lines in succession."""
         return [
             self.parseString(line, line_number)
             for line_number, line in enumerate(lines)
         ]
 
-    def parseString(self, line, line_number=0):  # noqa: N802
+    def parseString(self, line: str, line_number: int = 0) -> ParseResults:  # noqa: N802
         """Parse a string with the language represented by this parser.
 
-        :param str line: A string representing an instance of this parser's language
-        :param int line_number: The current line number of the parser
+        :param line: A string representing an instance of this parser's language
+        :param line_number: The current line number of the parser
         """
-        self.line_number = line_number
+        self._line_number = line_number
         return self.language.parseString(line)
+
+    def get_line_number(self) -> int:
+        """Get the current line number."""
+        return self._line_number
 
     def streamline(self):
         """Streamline the language represented by this parser to make queries run faster."""

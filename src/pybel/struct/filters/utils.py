@@ -3,19 +3,21 @@
 """Utilities for node filters."""
 
 from ...constants import MODIFIER
+from ...typing import EdgeData
 
-__all__ = ['part_has_modifier']
+__all__ = [
+    'part_has_modifier',
+]
 
 
-def part_has_modifier(data, part, modifier):
+def part_has_modifier(edge_data: EdgeData, part: str, modifier: str) -> bool:
     """Return true if the modifier is in the given subject/object part.
 
-    :param dict data: A PyBEL edge data dictionary
-    :param str part: either :data:`pybel.constants.SUBJECT` or :data:`pybel.constants.OBJECT`
+    :param edge_data: PyBEL edge data dictionary
+    :param part: either :data:`pybel.constants.SUBJECT` or :data:`pybel.constants.OBJECT`
     :param modifier: The modifier to look for
-    :rtype: bool
     """
-    part_data = data.get(part)
+    part_data = edge_data.get(part)
 
     if part_data is None:
         return False

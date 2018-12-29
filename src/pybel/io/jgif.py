@@ -335,7 +335,7 @@ def to_jgif(graph):
         for data in graph[u][v].values():
 
             if (u, v, data[RELATION]) not in u_v_r_bel:
-                u_v_r_bel[u, v, data[RELATION]] = graph.edge_to_bel(u, v, data=data)
+                u_v_r_bel[u, v, data[RELATION]] = graph.edge_to_bel(u, v, edge_data=data)
 
             bel = u_v_r_bel[u, v, data[RELATION]]
 

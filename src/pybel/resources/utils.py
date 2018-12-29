@@ -3,9 +3,9 @@
 """Utilities for reading and writing BEL script, namespace files, and annotation files."""
 
 import time
+from urllib.parse import urlparse
 
 import requests
-from requests.compat import urlparse
 from requests_file import FileAdapter
 
 __all__ = [
@@ -15,29 +15,19 @@ __all__ = [
 ]
 
 
-def get_iso_8601_date():
-    """Get the current date as a string in YYYYMMDD format.
-
-    :rtype: str
-    """
+def get_iso_8601_date() -> str:
+    """Get the current date as a string in YYYYMMDD format."""
     return time.strftime('%Y%m%d')
 
 
-def is_url(s):
-    """Check if a string is a valid URL.
-
-    :param str s: An input string
-    :return: Is the string a valid URL?
-    :rtype: bool
-    """
+def is_url(s: str) -> bool:
+    """Check if a string is a valid URL."""
     return urlparse(s).scheme != ""
 
 
-def download(url):
+def download(url: str) -> requests.Response:
     """Download an URL or file using :py:mod:`requests`.
 
-    :param str url: The URL to download
-    :rtype: requests.Response
     :raises: requests.exceptions.HTTPError
     """
     session = requests.Session()
