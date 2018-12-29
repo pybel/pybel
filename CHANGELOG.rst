@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+
+`0.13.0 <https://github.com/pybel/pybel/compare/v0.12.2...0.13.0>`_ - UNRELEASED
+--------------------------------------------------------------------------------
+Added
+~~~~~
+- Add JSON to node and edge SQL models (https://github.com/pybel/pybel/pull/358)
+- Add more properties to the Fragment class
+- Node pruning command to CLI
+- Type hints (https://github.com/pybel/pybel/issues/369)
+
+Changed
+~~~~~~~
+- Use a declarative setup (https://github.com/pybel/pybel/issues/360)
+- Pass flake8 (https://github.com/pybel/pybel/issues/363)
+
+Fixed
+~~~~~
+- Add sha512 to JSON of edges' nodes when retrieving from the database
+- Add nested sha512 identifiers when outputting node-link (https://github.com/pybel/pybel/issues/370)
+- Fixed handling of invalid entities in the BEL parser (https://github.com/pybel/pybel/issues/368)
+
+Removed
+~~~~~~~
+- Dropped Python 2.7 support (https://github.com/pybel/pybel/issues/285)
+- Dropped Python 3.4 support (https://github.com/pybel/pybel/issues/286)
+
 `0.12.2 <https://github.com/pybel/pybel/compare/v0.12.1...0.12.2>`_ - 2018-11-19
 --------------------------------------------------------------------------------
 Added
