@@ -11,7 +11,7 @@ import logging
 import time
 from copy import deepcopy
 from itertools import chain
-from typing import Iterable, List, Mapping, Optional, Set, Tuple
+from typing import Dict, Iterable, List, Mapping, Optional, Set, Tuple, Union
 
 import sqlalchemy
 from sqlalchemy import and_, exists, func
@@ -105,13 +105,8 @@ def _clean_bel_namespace_values(bel_resource):
     }
 
 
-def _normalize_url(graph, keyword):  # FIXME move to utilities and unit test
-    """Normalize a URL for the BEL graph.
-
-    :type graph: BELGraph
-    :param str keyword: Namespace URL keyword
-    :rtype: Optional[str]
-    """
+def _normalize_url(graph: BELGraph, keyword: str) -> Optional[str]:  # FIXME move to utilities and unit test
+    """Normalize a URL for the BEL graph."""
     if keyword == BEL_DEFAULT_NAMESPACE and BEL_DEFAULT_NAMESPACE not in graph.namespace_url:
         return BEL_DEFAULT_NAMESPACE_URL
 
@@ -124,11 +119,8 @@ def _normalize_url(graph, keyword):  # FIXME move to utilities and unit test
 class NamespaceManager(BaseManager):
     """Manages BEL namespaces."""
 
-    def list_namespaces(self):
-        """List all namespaces.
-
-        :rtype: list[Namespace]
-        """
+    def list_namespaces(self) -> List[Namespace]:
+        """List all namespaces."""
         return self._list_model(Namespace)
 
     def count_namespaces(self) -> int:
@@ -149,41 +141,29 @@ class NamespaceManager(BaseManager):
         self.session.query(Namespace).delete()
         self.session.commit()
 
-    def drop_namespace_by_url(self, url):
+    def drop_namespace_by_url(self, url: str) -> None:
         """Drop the namespace at the given URL.
 
         Won't work if the edge store is in use.
 
-        :param str url: The URL of the namespace to drop
+        :param url: The URL of the namespace to drop
         """
         namespace = self.get_namespace_by_url(url)
         self.session.query(NamespaceEntry).filter(NamespaceEntry.namespace == namespace).delete()
         self.session.delete(namespace)
         self.session.commit()
 
-    def get_namespace_by_url(self, url):
-        """Look up a namespace by url.
-
-        :param str url: The URL of the namespace
-        :rtype: Optional[Namespace]
-        """
+    def get_namespace_by_url(self, url: str) -> Optional[Namespace]:
+        """Look up a namespace by url."""
         return self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
 
-    def get_namespace_by_keyword_version(self, keyword, version):
-        """Get a namespace with a given keyword and version.
-
-        :param str keyword: The keyword to search
-        :param str version: The version to search
-        :rtype: Optional[Namespace]
-        """
+    def get_namespace_by_keyword_version(self, keyword: str, version: str) -> Optional[Namespace]:
+        """Get a namespace with a given keyword and version."""
         filt = and_(Namespace.keyword == keyword, Namespace.version == version)
         return self.session.query(Namespace).filter(filt).one_or_none()
 
-    def ensure_default_namespace(self):
-        """Get or create the BEL default namespace.
-
-        :rtype: Namespace
-        """
+    def ensure_default_namespace(self) -> Namespace:
+        """Get or create the BEL default namespace."""
         namespace = self.get_namespace_by_keyword_version(BEL_DEFAULT_NAMESPACE, BEL_DEFAULT_NAMESPACE_VERSION)
 
         if namespace is None:
@@ -204,13 +184,11 @@ class NamespaceManager(BaseManager):
 
         return namespace
 
-    def get_or_create_namespace(self, url):
+    def get_or_create_namespace(self, url: str) -> Union[Namespace, Dict]:
         """Insert the namespace file at the given location to the cache.
 
         If not cachable, returns the dict of the values of this namespace.
 
-        :param str url: the location of the namespace file
-        :rtype: Namespace or dict
         :raises: pybel.resources.exc.ResourceError
         """
         result = self.get_namespace_by_url(url)
@@ -249,22 +227,16 @@ class NamespaceManager(BaseManager):
 
         return namespace
 
-    def get_namespace_by_keyword_pattern(self, keyword, pattern):
-        """Get a namespace with a given keyword and pattern.
-
-        :param str keyword: The keyword to search
-        :param str pattern: The pattern to search
-        :rtype: Optional[Namespace]
-        """
+    def get_namespace_by_keyword_pattern(self, keyword: str, pattern: str) -> Optional[Namespace]:
+        """Get a namespace with a given keyword and pattern."""
         filt = and_(Namespace.keyword == keyword, Namespace.pattern == pattern)
         return self.session.query(Namespace).filter(filt).one_or_none()
 
-    def ensure_regex_namespace(self, keyword, pattern):
+    def ensure_regex_namespace(self, keyword: str, pattern: str) -> Namespace:
         """Get or create a regular expression namespace.
 
-        :param str keyword: The keyword of a regular expression namespace
-        :param str pattern: The pattern for a regular expression namespace
-        :rtype: Namespace
+        :param keyword: The keyword of a regular expression namespace
+        :param pattern: The pattern for a regular expression namespace
         """
         if pattern is None:
             raise ValueError('cannot have null pattern')
@@ -282,12 +254,11 @@ class NamespaceManager(BaseManager):
 
         return namespace
 
-    def get_namespace_entry(self, url, name):
+    def get_namespace_entry(self, url: str, name: str) -> Optional[NamespaceEntry]:
         """Get a given NamespaceEntry object.
 
-        :param str url: The url of the namespace source
-        :param str name: The value of the namespace from the given url's document
-        :rtype: Optional[NamespaceEntry]
+        :param url: The url of the namespace source
+        :param name: The value of the namespace from the given url's document
         """
         entry_filter = and_(Namespace.url == url, NamespaceEntry.name == name)
         result = self.session.query(NamespaceEntry).join(Namespace).filter(entry_filter).all()
@@ -333,11 +304,8 @@ class NamespaceManager(BaseManager):
 
         return name_model
 
-    def list_annotations(self):
-        """Return a list of all annotations.
-
-        :rtype: list[Namespace]
-        """
+    def list_annotations(self) -> List[Namespace]:
+        """List all annotations."""
         return self.session.query(Namespace).filter(Namespace.is_annotation).all()
 
     def count_annotations(self) -> int:
@@ -348,11 +316,9 @@ class NamespaceManager(BaseManager):
         """Count the number of annotation entries in the database."""
         return self.session.query(NamespaceEntry).filter(NamespaceEntry.is_annotation).count()
 
-    def get_or_create_annotation(self, url):
+    def get_or_create_annotation(self, url: str) -> Namespace:
         """Insert the namespace file at the given location to the cache.
 
-        :param str url: the location of the namespace file
-        :rtype: Namespace
         :raises: pybel.resources.exc.ResourceError
         """
         result = self.get_namespace_by_url(url)
@@ -450,7 +416,7 @@ class NetworkManager(NamespaceManager):
         for network in self.session.query(Network).all():
             self.drop_network(network)
 
-    def drop_network_by_id(self, network_id: int):
+    def drop_network_by_id(self, network_id: int) -> None:
         """Drop a network by its database identifier."""
         network = self.session.query(Network).get(network_id)
         self.drop_network(network)
@@ -837,15 +803,8 @@ class InsertManager(NamespaceManager, LookupManager):
             annotations=annotations,
         )
 
-    def _add_unqualified_edge(self, source, target, key, bel, data):
-        """Add an unqualified edge to the network.
-
-        :type source: Node
-        :type target: Node
-        :type key: str
-        :type bel: str
-        :type data: dict
-        """
+    def _add_unqualified_edge(self, source: Node, target: Node, key: str, bel: str, data: EdgeData) -> Edge:
+        """Add an unqualified edge to the network."""
         return self.get_or_create_edge(
             source=source,
             target=target,
@@ -855,13 +814,8 @@ class InsertManager(NamespaceManager, LookupManager):
             data=data,
         )
 
-    def get_or_create_evidence(self, citation, text):
-        """Create an entry and object for given evidence if it does not exist.
-
-        :param Citation citation: Citation object obtained from :func:`get_or_create_citation`
-        :param str text: Evidence text
-        :rtype: Evidence
-        """
+    def get_or_create_evidence(self, citation: Citation, text: str) -> Evidence:
+        """Create an entry and object for given evidence if it does not exist."""
         sha512 = hash_evidence(text=text, type=str(citation.type), reference=str(citation.reference))
 
         if sha512 in self.object_cache_evidence:
@@ -885,13 +839,8 @@ class InsertManager(NamespaceManager, LookupManager):
         self.object_cache_evidence[sha512] = evidence
         return evidence
 
-    def get_or_create_node(self, graph, node_data):
-        """Create an entry and object for given node if it does not exist.
-
-        :type graph: BELGraph
-        :type node_data: pybel.dsl.BaseEntity
-        :rtype: Node
-        """
+    def get_or_create_node(self, graph: BELGraph, node_data: BaseEntity) -> Node:
+        """Create an entry and object for given node if it does not exist."""
         sha512 = node_data.as_sha512()
         if sha512 in self.object_cache_node:
             return self.object_cache_node[sha512]
@@ -948,7 +897,7 @@ class InsertManager(NamespaceManager, LookupManager):
         self.object_cache_node[sha512] = node
         return node
 
-    def drop_nodes(self):
+    def drop_nodes(self) -> None:
         """Drop all nodes in the database."""
         t = time.time()
 
@@ -957,7 +906,7 @@ class InsertManager(NamespaceManager, LookupManager):
 
         log.info('dropped all nodes in %.2f seconds', time.time() - t)
 
-    def drop_edges(self):
+    def drop_edges(self) -> None:
         """Drop all edges in the database."""
         t = time.time()
 
@@ -1020,23 +969,32 @@ class InsertManager(NamespaceManager, LookupManager):
         self.object_cache_edge[sha512] = edge
         return edge
 
-    def get_or_create_citation(self, reference, type=None, name=None, title=None, volume=None, issue=None, pages=None,
-                               date=None, first=None, last=None, authors=None):
+    def get_or_create_citation(self,
+                               reference: str,
+                               type: Optional[str] = None,
+                               name: Optional[str] = None,
+                               title: Optional[str] = None,
+                               volume: Optional[str] = None,
+                               issue: Optional[str] = None,
+                               pages: Optional[str] = None,
+                               date: Optional[str] = None,
+                               first: Optional[str] = None,
+                               last: Optional[str] = None,
+                               authors: Union[None, str, List[str]] = None,
+                               ) -> Citation:
         """Create a citation if it does not exist, or return it if it does.
 
-        :param str type: Citation type (e.g. PubMed)
-        :param str reference: Identifier of the given citation (e.g. PubMed id)
-        :param Optional[str] name: Name of the publication
-        :param Optional[str] title: Title of article
-        :param Optional[str] volume: Volume of publication
-        :param Optional[str] issue: Issue of publication
-        :param Optional[str] pages: Pages of issue
-        :param Optional[str] date: Date of publication in ISO 8601 (YYYY-MM-DD) format
-        :param Optional[str] first: Name of first author
-        :param Optional[str] last: Name of last author
+        :param type: Citation type (e.g. PubMed)
+        :param reference: Identifier of the given citation (e.g. PubMed id)
+        :param name: Name of the publication
+        :param title: Title of article
+        :param volume: Volume of publication
+        :param issue: Issue of publication
+        :param pages: Pages of issue
+        :param date: Date of publication in ISO 8601 (YYYY-MM-DD) format
+        :param first: Name of first author
+        :param last: Name of last author
         :param authors: Either a list of authors separated by |, or an actual list of authors
-        :type authors: None or str or list[str]
-        :rtype: Citation
         """
         if type is None:
             type = CITATION_TYPE_PUBMED
@@ -1083,12 +1041,8 @@ class InsertManager(NamespaceManager, LookupManager):
         self.object_cache_citation[sha512] = citation
         return citation
 
-    def get_or_create_author(self, name):
-        """Get an author by name, or creates one if it does not exist.
-
-        :param str name: An author's name
-        :rtype: Author
-        """
+    def get_or_create_author(self, name: str) -> Author:
+        """Get an author by name, or creates one if it does not exist."""
         author = self.object_cache_author.get(name)
 
         if author is not None:
@@ -1105,23 +1059,17 @@ class InsertManager(NamespaceManager, LookupManager):
         self.session.add(author)
         return author
 
-    def get_modification_by_hash(self, sha512):
-        """Get a modification by a SHA512 hash.
-
-        :param str sha512: A SHA512 hash of a modification
-        :rtype: Optional[Modification]
-        """
+    def get_modification_by_hash(self, sha512: str) -> Optional[Modification]:
+        """Get a modification by a SHA512 hash."""
         return self.session.query(Modification).filter(Modification.sha512 == sha512).one_or_none()
 
-    def get_or_create_modification(self, graph, node_data):
+    def get_or_create_modification(self, graph: BELGraph, node_data) -> Optional[List[Modification]]:
         """Create a list of node modification objects that belong to the node described by node_data.
 
         Return None if the list can not be constructed, and the node should also be skipped.
 
-        :param BELGraph graph: A BEL graph
         :param dict node_data: Describes the given node and contains is_variant information
         :return: A list of modification objects belonging to the given node
-        :rtype: Optional[list[Modification]]
         """
         modification_list = []
         if FUSION in node_data:
@@ -1237,19 +1185,14 @@ class InsertManager(NamespaceManager, LookupManager):
 
         return modifications
 
-    def get_property_by_hash(self, property_hash):
-        """Get a property by its hash if it exists.
-
-        :param str property_hash: The hash of the property to search
-        :rtype: Optional[Property]
-        """
+    def get_property_by_hash(self, property_hash: str) -> Optional[Property]:
+        """Get a property by its hash if it exists."""
         return self.session.query(Property).filter(Property.sha512 == property_hash).one_or_none()
 
-    def _make_property_from_dict(self, property_def):
+    def _make_property_from_dict(self, property_def: Dict) -> Property:
         """Build an edge property from a dictionary.
 
         :param property_def:
-        :rtype: Property
         """
         property_hash = hash_dump(property_def)
 
@@ -1265,15 +1208,13 @@ class InsertManager(NamespaceManager, LookupManager):
 
         return edge_property_model
 
-    def get_or_create_properties(self, graph, edge_data):  # TODO make for just single property then loop with other fn.
+    # TODO make for just single property then loop with other fn.
+    def get_or_create_properties(self, graph: BELGraph, edge_data: EdgeData) -> Optional[List[Property]]:
         """Create a list of edge subject/object property models.
 
         Return None if the property cannot be constructed due to missing cache entries.
 
-        :param BELGraph graph: A BEL graph
-        :param dict edge_data: Describes the context of the given edge.
         :return: A list of all subject and object properties of the edge
-        :rtype: Optional[list[Property]]
         """
         property_list = []
         for participant in (SUBJECT, OBJECT):
@@ -1378,7 +1319,7 @@ class _Manager(QueryManager, InsertManager, NetworkManager):
     def count_citations(self) -> int:
         return self._count_model(Citation)
 
-    def list_citations(self):
+    def list_citations(self) -> List[Citation]:
         return self._list_model(Citation)
 
 

@@ -3,28 +3,25 @@
 """The query manager for the database."""
 
 import datetime
-from collections import Iterable
+from typing import Iterable, List, Optional, Union
 
 from sqlalchemy import and_, or_
 
 from .lookup_manager import LookupManager
 from .models import Author, Citation, Edge, Evidence, Namespace, NamespaceEntry, Node
 from ..constants import CITATION_TYPE_PUBMED
+from ..dsl import BaseEntity
 from ..struct import BELGraph
 from ..utils import parse_datetime
 
 __all__ = [
     'QueryManager',
+    'graph_from_edges',
 ]
 
 
-def graph_from_edges(edges, **kwargs):
-    """Build a BEL graph from edges.
-
-    :param iter[Edge] edges: An iterable of edges from the database
-    :param kwargs: Arguments to pass to :class:`pybel.BELGraph`
-    :rtype: BELGraph
-    """
+def graph_from_edges(edges: Iterable[Edge], **kwargs) -> BELGraph:
+    """Build a BEL graph from edges."""
     graph = BELGraph(**kwargs)
 
     for edge in edges:
@@ -40,12 +37,8 @@ class QueryManager(LookupManager):
         """Count the number of nodes in the database."""
         return self._count_model(Node)
 
-    def get_dsl_by_hash(self, node_hash):
-        """Look up a node by the hash and returns the corresponding PyBEL node tuple.
-
-        :param str node_hash: The hash of a PyBEL node tuple from :func:`pybel.utils.hash_node`
-        :rtype: Optional[BaseEntity]
-        """
+    def get_dsl_by_hash(self, node_hash: str) -> Optional[BaseEntity]:
+        """Look up a node by the hash and returns the corresponding PyBEL node tuple."""
         node = self.get_node_by_hash(node_hash)
 
         if node is None:
@@ -53,14 +46,18 @@ class QueryManager(LookupManager):
 
         return node.to_json()
 
-    def query_nodes(self, bel=None, type=None, namespace=None, name=None):
+    def query_nodes(self,
+                    bel: Optional[str] = None,
+                    type: Optional[str] = None,
+                    namespace: Optional[str] = None,
+                    name: Optional[str] = None,
+                    ) -> List[Node]:
         """Query nodes in the database.
 
-        :param str bel: BEL term that describes the biological entity. e.g. ``p(HGNC:APP)``
-        :param str type: Type of the biological entity. e.g. Protein
-        :param str namespace: Namespace keyword that is used in BEL. e.g. HGNC
-        :param str name: Name of the biological entity. e.g. APP
-        :rtype: list[Node]
+        :param bel: BEL term that describes the biological entity. e.g. ``p(HGNC:APP)``
+        :param type: Type of the biological entity. e.g. Protein
+        :param namespace: Namespace keyword that is used in BEL. e.g. HGNC
+        :param name: Name of the biological entity. e.g. APP
         """
         q = self.session.query(Node)
 
@@ -85,45 +82,30 @@ class QueryManager(LookupManager):
         """Count the number of edges in the database."""
         return self._count_model(Edge)
 
-    def get_edges_with_citation(self, citation):
-        """Get the edges with the given citation.
-
-        :param Citation citation:
-        :rtype: iter[Edge]
-        """
+    def get_edges_with_citation(self, citation: Citation) -> List[Edge]:
+        """Get the edges with the given citation."""
         return self.session.query(Edge).join(Evidence).filter(Evidence.citation == citation)
 
-    def get_edges_with_citations(self, citations):
-        """Get edges with one of the given citations.
-
-        :param iter[Citation] citations:
-        :rtype: list[Edge]
-        """
+    def get_edges_with_citations(self, citations: Iterable[Citation]) -> List[Edge]:
+        """Get edges with one of the given citations."""
         return self.session.query(Edge).join(Evidence).filter(Evidence.citation.in_(citations)).all()
 
-    def search_edges_with_evidence(self, evidence):
+    def search_edges_with_evidence(self, evidence: str) -> List[Edge]:
         """Search edges with the given evidence.
 
-        :param str evidence: A string to search evidences. Can use wildcard percent symbol (%).
-        :rtype: list[Edge]
+        :param evidence: A string to search evidences. Can use wildcard percent symbol (%).
         """
         return self.session.query(Edge).join(Evidence).filter(Evidence.text.like(evidence)).all()
 
-    def search_edges_with_bel(self, bel):
+    def search_edges_with_bel(self, bel: str) -> List[Edge]:
         """Search edges with given BEL.
 
-        :param str bel: A BEL string to use as a search
-        :rtype: list[Edge]
+        :param bel: A BEL string to use as a search
         """
         return self.session.query(Edge).filter(Edge.bel.like(bel)).all()
 
-    def get_edges_with_annotation(self, annotation, value):
-        """Search edges with the given annotation/value pair.
-
-        :param str annotation:
-        :param str value:
-        :rtype: list[Edge]
-        """
+    def get_edges_with_annotation(self, annotation: str, value: str) -> List[Edge]:
+        """Search edges with the given annotation/value pair."""
         query = self.session.query(Edge).join(NamespaceEntry, Edge.annotations).join(Namespace)
         query = query.filter(Namespace.keyword == annotation).filter(NamespaceEntry.name == value)
         return query.all()
@@ -133,19 +115,22 @@ class QueryManager(LookupManager):
         """See usage in self.query_edges."""
         return query.join(Node, edge_node_id == Node.id).filter(Node.type == node_type)
 
-    def query_edges(self, bel=None, source_function=None, source=None, target_function=None, target=None,
-                    relation=None):
+    def query_edges(self,
+                    bel: Optional[str] = None,
+                    source_function: Optional[str] = None,
+                    source: Union[None, str, Node] = None,
+                    target_function: Optional[str] = None,
+                    target: Union[None, str, Node] = None,
+                    relation: Optional[str] = None,
+                    ) -> List[Edge]:
         """Query edges in the database.
 
-        :param str bel: BEL statement that represents the desired edge.
-        :param str source_function: Filter source nodes with the given BEL function
+        :param bel: BEL statement that represents the desired edge.
+        :param source_function: Filter source nodes with the given BEL function
         :param source: BEL term of source node e.g. ``p(HGNC:APP)`` or :class:`Node` object.
-        :type source: str or Node
-        :param str target_function: Filter target nodes with the given BEL function
+        :param target_function: Filter target nodes with the given BEL function
         :param target: BEL term of target node e.g. ``p(HGNC:APP)`` or :class:`Node` object.
-        :type target: str or Node
-        :param str relation: The relation that should be present between source and target node.
-        :rtype: list[Edge]
+        :param relation: The relation that should be present between source and target node.
         """
         if bel:
             return self.search_edges_with_bel(bel)
@@ -185,17 +170,22 @@ class QueryManager(LookupManager):
 
         return query.all()
 
-    def query_citations(self, type=None, reference=None, name=None, author=None, date=None, evidence_text=None):
+    def query_citations(self,
+                        type: Optional[str] = None,
+                        reference: Optional[str] = None,
+                        name: Optional[str] = None,
+                        author: Union[None, str, List[str]] = None,
+                        date: Union[None, str, datetime.date] = None,
+                        evidence_text: Optional[str] = None,
+                        ) -> List[Citation]:
         """Query citations in the database.
 
-        :param str type: Type of the citation. e.g. PubMed
-        :param str reference: The identifier used for the citation. e.g. PubMed_ID
-        :param str name: Title of the citation.
-        :param str or list[str] author: The name or a list of names of authors participated in the citation.
+        :param type: Type of the citation. e.g. PubMed
+        :param reference: The identifier used for the citation. e.g. PubMed_ID
+        :param name: Title of the citation.
+        :param author: The name or a list of names of authors participated in the citation.
         :param date: Publishing date of the citation.
-        :type date: str or datetime.date
-        :param str evidence_text:
-        :rtype: list[Citation]
+        :param evidence_text:
         """
         query = self.session.query(Citation)
 
@@ -229,21 +219,14 @@ class QueryManager(LookupManager):
 
         return query.all()
 
-    def query_edges_by_pubmed_identifiers(self, pubmed_identifiers):
-        """Get all edges annotated to the documents identified by the given PubMed identifiers.
-
-        :param list[str] pubmed_identifiers: A list of PubMed document identifiers
-        :rtype: list[Edge]
-        """
+    def query_edges_by_pubmed_identifiers(self, pubmed_identifiers: List[str]) -> List[Edge]:
+        """Get all edges annotated to the documents identified by the given PubMed identifiers."""
         fi = and_(Citation.type == CITATION_TYPE_PUBMED, Citation.reference.in_(pubmed_identifiers))
         return self.session.query(Edge).join(Evidence).join(Citation).filter(fi).all()
 
     @staticmethod
-    def _edge_both_nodes(nodes):
-        """Get edges where both the source and target are in the list of nodes.
-
-        :param list[Node] nodes: A list of node identifiers
-        """
+    def _edge_both_nodes(nodes: List[Node]):
+        """Get edges where both the source and target are in the list of nodes."""
         node_ids = [node.id for node in nodes]
 
         return and_(
@@ -251,22 +234,16 @@ class QueryManager(LookupManager):
             Edge.target_id.in_(node_ids),
         )
 
-    def query_induction(self, nodes):
-        """Get all edges between any of the given nodes.
-
-        :param list[Node] nodes: A list of nodes (length > 2)
-        :rtype: list[Edge]
-        """
+    def query_induction(self, nodes: List[Node]) -> List[Edge]:
+        """Get all edges between any of the given nodes (minimum length of 2)."""
         if len(nodes) < 2:
             raise ValueError('not enough nodes given to induce over')
 
         return self.session.query(Edge).filter(self._edge_both_nodes(nodes)).all()
 
     @staticmethod
-    def _edge_one_node(nodes):
+    def _edge_one_node(nodes: List[Node]):
         """Get edges where either the source or target are in the list of nodes.
-
-        :param list[Node] nodes: A list of node identifiers
 
         Note: doing this with the nodes directly is not yet supported by SQLAlchemy
 
@@ -284,10 +261,6 @@ class QueryManager(LookupManager):
             Edge.target_id.in_(node_ids),
         )
 
-    def query_neighbors(self, nodes):
-        """Get all edges incident to any of the given nodes.
-
-        :param list[Node] nodes: A list of nodes
-        :rtype: list[Edge]
-        """
+    def query_neighbors(self, nodes: List[Node]) -> List[Edge]:
+        """Get all edges incident to any of the given nodes."""
         return self.session.query(Edge).filter(self._edge_one_node(nodes)).all()

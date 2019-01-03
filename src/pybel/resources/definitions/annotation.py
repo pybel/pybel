@@ -3,25 +3,30 @@
 """Utilities for writing BEL annotation files."""
 
 import time
+from typing import Iterable, Mapping, Optional, TextIO
 
 from .write_utils import DATETIME_FMT, make_author_header, make_properties_header
 from ..utils import get_iso_8601_date
 
 __all__ = [
-    'write_annotation'
+    'write_annotation',
 ]
 
 
-def make_annotation_header(keyword, description=None, usage=None, version=None, created=None):
+def make_annotation_header(keyword: str,
+                           description: Optional[str] = None,
+                           usage: Optional[str] = None,
+                           version: Optional[str] = None,
+                           created: Optional[str] = None,
+                           ) -> Iterable[str]:
     """Make the ``[AnnotationDefinition]`` section of a BELANNO file.
 
-    :param str keyword: Preferred BEL Keyword, maximum length of 8
-    :param str description: A description of this annotation
-    :param str usage: How to use this annotation
-    :param str version: Namespace version. Defaults to date in ``YYYYMMDD`` format.
-    :param str created: Namespace public timestamp, ISO 8601 datetime
+    :param keyword: Preferred BEL Keyword, maximum length of 8
+    :param description: A description of this annotation
+    :param usage: How to use this annotation
+    :param version: Namespace version. Defaults to date in ``YYYYMMDD`` format.
+    :param created: Namespace public timestamp, ISO 8601 datetime
     :return: A iterator over the lines for the ``[AnnotationDefinition]`` section
-    :rtype: iter[str]
     """
     yield '[AnnotationDefinition]'
     yield 'Keyword={}'.format(keyword)
@@ -36,26 +41,39 @@ def make_annotation_header(keyword, description=None, usage=None, version=None, 
         yield 'UsageString={}'.format(usage.strip().replace('\n', ''))
 
 
-def write_annotation(keyword, values, citation_name, description, usage=None, version=None, created=None,
-                     author_name=None, author_copyright=None, author_contact=None, case_sensitive=True, delimiter='|',
-                     cacheable=True, file=None, value_prefix=''):
+def write_annotation(keyword: str,
+                     values: Mapping[str, str],
+                     citation_name: str,
+                     description: str,
+                     usage: Optional[str] = None,
+                     version: Optional[str] = None,
+                     created: Optional[str] = None,
+                     author_name: Optional[str] = None,
+                     author_copyright: Optional[str] = None,
+                     author_contact: Optional[str] = None,
+                     case_sensitive: bool = True,
+                     delimiter: str = '|',
+                     cacheable: bool = True,
+                     file: Optional[TextIO] = None,
+                     value_prefix: str = ''
+                     ) -> None:
     """Write a BEL annotation (BELANNO) to a file.
 
-    :param str keyword: The annotation keyword
-    :param dict[str, str] values: A dictionary of {name: label}
-    :param str citation_name: The citation name
-    :param str description: A description of this annotation
-    :param str usage: How to use this annotation
-    :param str version: The version of this annotation. Defaults to date in ``YYYYMMDD`` format.
-    :param str created: The annotation's public timestamp, ISO 8601 datetime
-    :param str author_name: The author's name
-    :param str author_copyright: The copyright information for this annotation. Defaults to ``Other/Proprietary``
-    :param str author_contact: The contact information for the author of this annotation.
-    :param bool case_sensitive: Should this config file be interpreted as case-sensitive?
-    :param str delimiter: The delimiter between names and labels in this config file
-    :param bool cacheable: Should this config file be cached?
-    :param file file: A writable file or file-like
-    :param str value_prefix: An optional prefix for all values
+    :param keyword: The annotation keyword
+    :param values: A dictionary of {name: label}
+    :param citation_name: The citation name
+    :param description: A description of this annotation
+    :param usage: How to use this annotation
+    :param version: The version of this annotation. Defaults to date in ``YYYYMMDD`` format.
+    :param created: The annotation's public timestamp, ISO 8601 datetime
+    :param author_name: The author's name
+    :param author_copyright: The copyright information for this annotation. Defaults to ``Other/Proprietary``
+    :param author_contact: The contact information for the author of this annotation.
+    :param case_sensitive: Should this config file be interpreted as case-sensitive?
+    :param delimiter: The delimiter between names and labels in this config file
+    :param cacheable: Should this config file be cached?
+    :param file: A writable file or file-like
+    :param value_prefix: An optional prefix for all values
     """
     for line in make_annotation_header(keyword, description=description, usage=usage, version=version, created=created):
         print(line, file=file)

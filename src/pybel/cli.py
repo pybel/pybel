@@ -17,6 +17,7 @@ import logging
 import os
 import sys
 import time
+from typing import Iterable, Mapping, Tuple
 
 import click
 from click_plugins import with_plugins
@@ -31,6 +32,7 @@ from .io.web import _get_host
 from .manager import Manager
 from .manager.database_io import to_database
 from .manager.models import Edge, Namespace, Node
+from .parser.exc import PyBelParserWarning
 from .struct import get_unused_annotations, get_unused_list_annotation_values, get_unused_namespaces
 from .utils import get_corresponding_pickle_path
 
@@ -427,11 +429,11 @@ def summarize(manager):
     click.echo('Annotation entries: {}'.format(manager.count_annotation_entries()))
 
 
-def echo_warnings_via_pager(warnings, sep='\t'):
+def echo_warnings_via_pager(warnings: Iterable[Tuple[int, str, PyBelParserWarning, Mapping]], sep: str = '\t') -> None:
     """Output the warnings from a BEL graph with Click and the system's pager.
 
-    :param warnings: A list of 4-tuples reprenting the warnings
-    :param str sep: The separator. Defaults to tab.
+    :param warnings: A list of 4-tuples representing the warnings
+    :param sep: The separator. Defaults to tab.
     """
     # Exit if no warnings
     if not warnings:
@@ -439,8 +441,8 @@ def echo_warnings_via_pager(warnings, sep='\t'):
         sys.exit(0)
 
     max_line_width = max(
-        len(str(line_number))
-        for line_number, _, _, _ in warnings
+        len(str(exc.line_number))
+        for _, _, exc, _ in warnings
     )
 
     max_warning_width = max(
