@@ -19,7 +19,7 @@ from pybel.parser.exc import (
     InvalidFunctionSemantic, InvalidPubMedIdentifierWarning, MalformedTranslocationWarning, MissingAnnotationKeyWarning,
     MissingAnnotationRegexWarning, MissingCitationException, MissingMetadataException, MissingNamespaceNameWarning,
     MissingNamespaceRegexWarning, MissingSupportWarning, NakedNameWarning, NestedRelationWarning,
-    PlaceholderAminoAcidWarning, UndefinedAnnotationWarning, UndefinedNamespaceWarning, VersionFormatWarning,
+    PlaceholderAminoAcidWarning, UndefinedAnnotationWarning, UndefinedNamespaceWarning, VersionFormatWarning, BELParserWarning
 )
 from pybel.parser.parse_bel import BELParser
 from pybel.parser.parse_control import ControlParser
@@ -394,9 +394,17 @@ class BelReconstitutionMixin(TestGraphMixin):
                 (98, BELSyntaxError),
             ]
 
-            for (el, ew), (l, _, w, _) in zip(expected_warnings, graph.warnings):
-                self.assertEqual(el, l, msg="Expected different error on line {}. Check line {}".format(el, l))
-                self.assertIsInstance(w, ew, msg='Line: {}'.format(el))
+            for warning_tuple in graph.warnings:
+                self.assertEqual(3, len(warning_tuple), msg='Warning tuple is wrong size: {}'.format(warning_tuple))
+
+            for (el, ew), (_, exc, _) in zip(expected_warnings, graph.warnings):
+                self.assertIsInstance(exc, BELParserWarning)
+                self.assertIsInstance(exc.line, str)
+                self.assertIsInstance(exc.line_number, int)
+                self.assertIsInstance(exc.position, int)
+                self.assertEqual(el, exc.line_number,
+                                 msg="Expected different error on line {}. Check line {}".format(el, exc.line_number))
+                self.assertIsInstance(exc, ew, msg='Line: {}'.format(el))
 
         for node in graph:
             self.assertIsInstance(node, BaseEntity)

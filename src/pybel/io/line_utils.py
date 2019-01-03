@@ -5,7 +5,7 @@
 import logging
 import re
 import time
-from typing import Any, Iterable, Mapping, Optional, Tuple
+from typing import Any, Iterable, List, Mapping, Optional, Tuple
 
 from pyparsing import ParseException
 from sqlalchemy.exc import OperationalError
@@ -15,11 +15,12 @@ from ..constants import INVERSE_DOCUMENT_KEYS, REQUIRED_METADATA
 from ..manager import Manager
 from ..parser import BELParser, MetadataParser
 from ..parser.exc import (
-    BELSyntaxError, InconsistentDefinitionError, MalformedMetadataException, MissingMetadataException,
-    PyBelParserWarning, VersionFormatWarning,
+    BELParserWarning, BELSyntaxError, InconsistentDefinitionError, MalformedMetadataException, MissingMetadataException,
+    PlaceholderAminoAcidWarning, VersionFormatWarning,
 )
 from ..resources.document import split_file_to_annotations_and_definitions
 from ..resources.exc import ResourceError
+from ..struct.graph import BELGraph
 
 __all__ = [
     'parse_lines',
@@ -33,45 +34,44 @@ LOG_FMT = '%d:%d %s %s'
 LOG_FMT_PATH = '%s:%d:%d %s %s'
 
 
-def parse_lines(graph,
+def parse_lines(graph: BELGraph,
                 lines: Iterable[str],
-                manager=None,
-                allow_nested=False,
-                citation_clearing=True,
-                use_tqdm=False,
-                tqdm_kwargs=None,
-                no_identifier_validation=False,
-                disallow_unqualified_translocations=False,
-                allow_redefinition=False,
-                allow_definition_failures=False,
-                allow_naked_names=False,
-                required_annotations=None,
+                manager: Optional[Manager] = None,
+                allow_nested: bool = False,
+                citation_clearing: bool = True,
+                use_tqdm: bool = False,
+                tqdm_kwargs: Optional[Mapping[str, Any]] = None,
+                no_identifier_validation: bool = False,
+                disallow_unqualified_translocations: bool = False,
+                allow_redefinition: bool = False,
+                allow_definition_failures: bool = False,
+                allow_naked_names: bool = False,
+                required_annotations: Optional[List[str]] = None,
                 ):
     """Parse an iterable of lines into this graph.
 
     Delegates to :func:`parse_document`, :func:`parse_definitions`, and :func:`parse_statements`.
 
-    :param BELGraph graph: A BEL graph
+    :param graph: A BEL graph
     :param lines: An iterable over lines of BEL script
-    :type manager: Optional[Manager]
-    :param bool allow_nested: If true, turns off nested statement failures
-    :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
+    :param manager: A PyBEL database manager
+    :param allow_nested: If true, turns off nested statement failures
+    :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                    Delegated to :class:`pybel.parser.ControlParser`
-    :param bool use_tqdm: Use :mod:`tqdm` to show a progress bar?
-    :param Optional[dict] tqdm_kwargs: Keywords to pass to ``tqdm``
-    :param bool no_identifier_validation: If true, turns off namespace validation
-    :param bool disallow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
+    :param use_tqdm: Use :mod:`tqdm` to show a progress bar?
+    :param tqdm_kwargs: Keywords to pass to ``tqdm``
+    :param disallow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
+    :param required_annotations: Annotations that are required for all statements
 
     .. warning::
 
         These options allow concessions for parsing BEL that is either **WRONG** or **UNSCIENTIFIC**. Use them at
         risk to reproducibility and validity of your results.
 
-    :param bool allow_naked_names: If true, turns off naked namespace failures
-    :param bool allow_redefinition: If true, doesn't fail on second definition of same name or annotation
-    :param bool allow_definition_failures: If true, allows parsing to continue if a terminology file download/parse
-     fails
-    :param Optional[list[str]] required_annotations: Annotations that are required for all statements
+    :param no_identifier_validation: If true, turns off namespace validation
+    :param allow_naked_names: If true, turns off naked namespace failures
+    :param allow_redefinition: If true, doesn't fail on second definition of same name or annotation
+    :param allow_definition_failures: If true, allows parsing to continue if a terminology file download/parse fails
     """
     docs, definitions, statements = split_file_to_annotations_and_definitions(lines)
 
@@ -126,16 +126,19 @@ def parse_lines(graph,
     log.info('Network has %d nodes and %d edges', graph.number_of_nodes(), graph.number_of_edges())
 
 
-def parse_document(graph, enumerated_lines: Iterable[Tuple[int, str]], metadata_parser):
+def parse_document(graph: BELGraph,
+                   enumerated_lines: Iterable[Tuple[int, str]],
+                   metadata_parser: MetadataParser,
+                   ) -> None:
     """Parse the lines in the document section of a BEL script."""
     parse_document_start_time = time.time()
 
     for line_number, line in enumerated_lines:
         try:
             metadata_parser.parseString(line, line_number=line_number)
-        except VersionFormatWarning as e:
-            _log_parse_exception(graph, e)
-            graph.add_warning(line_number, line, e)
+        except VersionFormatWarning as exc:
+            _log_parse_exception(graph, exc)
+            graph.add_warning(exc)
         except Exception as e:
             exc = MalformedMetadataException(line_number, line, 0)
             _log_parse_exception(graph, exc)
@@ -147,26 +150,28 @@ def parse_document(graph, enumerated_lines: Iterable[Tuple[int, str]], metadata_
             continue
 
         required_metadatum_key = INVERSE_DOCUMENT_KEYS[required]
-        graph.warnings.insert(0, (0, '', MissingMetadataException.make(required_metadatum_key), {}))
-        log.error('Missing required document metadata: %s', required_metadatum_key)
+        # This has to be insert since it needs to go on the front!
+        exc = MissingMetadataException.make(required_metadatum_key)
+        graph.warnings.insert(0, (None, exc, {}))
+        _log_parse_exception(graph, exc)
 
     graph.document.update(metadata_parser.document_metadata)
 
     log.info('Finished parsing document section in %.02f seconds', time.time() - parse_document_start_time)
 
 
-def parse_definitions(graph,
+def parse_definitions(graph: BELGraph,
                       enumerated_lines: Iterable[Tuple[int, str]],
-                      metadata_parser,
+                      metadata_parser: MetadataParser,
                       allow_failures: bool = False,
                       use_tqdm: bool = False,
                       tqdm_kwargs: Optional[Mapping[str, Any]] = None,
                       ) -> None:
     """Parse the lines in the definitions section of a BEL script.
 
-    :param pybel.BELGraph graph: A BEL graph
+    :param graph: A BEL graph
     :param enumerated_lines: An enumerated iterable over the lines in the definitions section of a BEL script
-    :param MetadataParser metadata_parser: A metadata parser
+    :param metadata_parser: A metadata parser
     :param allow_failures: If true, allows parser to continue past strange failures
     :param use_tqdm: Use :mod:`tqdm` to show a progress bar?
     :param tqdm_kwargs: Keywords to pass to ``tqdm``
@@ -212,17 +217,17 @@ def parse_definitions(graph,
     log.info('Finished parsing definitions section in %.02f seconds', time.time() - parse_definitions_start_time)
 
 
-def parse_statements(graph,
+def parse_statements(graph: BELGraph,
                      enumerated_lines: Iterable[Tuple[int, str]],
-                     bel_parser,
+                     bel_parser: BELParser,
                      use_tqdm: bool = False,
                      tqdm_kwargs: Optional[Mapping[str, Any]] = None,
-                     ):
+                     ) -> None:
     """Parse a list of statements from a BEL Script.
 
-    :param BELGraph graph: A BEL graph
+    :param graph: A BEL graph
     :param enumerated_lines: An enumerated iterable over the lines in the statements section of a BEL script
-    :param BELParser bel_parser: A BEL parser
+    :param bel_parser: A BEL parser
     :param use_tqdm: Use :mod:`tqdm` to show a progress bar? Requires reading whole file to memory.
     :param tqdm_kwargs: Keywords to pass to ``tqdm``
     """
@@ -240,19 +245,23 @@ def parse_statements(graph,
         except ParseException as e:
             exc = BELSyntaxError(line_number, line, e.loc)
             _log_parse_exception(graph, exc)
-            graph.add_warning(line_number, line, exc, bel_parser.get_annotations())
-        except PyBelParserWarning as e:
-            _log_parse_exception(graph, e)
-            graph.add_warning(line_number, line, e, bel_parser.get_annotations())
-        except Exception as e:
+            graph.add_warning(exc, bel_parser.get_annotations())
+        except PlaceholderAminoAcidWarning as exc:
+            exc.line_number = line_number
+            _log_parse_exception(graph, exc)
+            graph.add_warning(exc, bel_parser.get_annotations())
+        except BELParserWarning as exc:
+            _log_parse_exception(graph, exc)
+            graph.add_warning(exc, bel_parser.get_annotations())
+        except Exception:
             parse_log.exception(LOG_FMT, line_number, 0, 'General Failure', line)
-            raise e
+            raise
 
     log.info('Parsed statements section in %.02f seconds with %d warnings', time.time() - parse_statements_start_time,
              len(graph.warnings))
 
 
-def _log_parse_exception(graph, exc: PyBelParserWarning):
+def _log_parse_exception(graph: BELGraph, exc: BELParserWarning):
     if graph.path:
         parse_log.error(LOG_FMT_PATH, graph.path, exc.line_number, exc.position, exc.__class__.__name__, exc)
     else:

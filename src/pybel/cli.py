@@ -32,7 +32,7 @@ from .io.web import _get_host
 from .manager import Manager
 from .manager.database_io import to_database
 from .manager.models import Edge, Namespace, Node
-from .parser.exc import PyBelParserWarning
+from .parser.exc import BELParserWarning
 from .struct import get_unused_annotations, get_unused_list_annotation_values, get_unused_namespaces
 from .utils import get_corresponding_pickle_path
 
@@ -429,7 +429,7 @@ def summarize(manager):
     click.echo('Annotation entries: {}'.format(manager.count_annotation_entries()))
 
 
-def echo_warnings_via_pager(warnings: Iterable[Tuple[int, str, PyBelParserWarning, Mapping]], sep: str = '\t') -> None:
+def echo_warnings_via_pager(warnings: Iterable[Tuple[int, str, BELParserWarning, Mapping]], sep: str = '\t') -> None:
     """Output the warnings from a BEL graph with Click and the system's pager.
 
     :param warnings: A list of 4-tuples representing the warnings

@@ -21,7 +21,7 @@ from ..constants import (
     RELATION, SUBJECT, TRANSCRIBED_TO, TRANSLATED_TO, VARIANTS,
 )
 from ..dsl import BaseEntity, Gene, MicroRna, Protein, Rna, activity
-from ..parser.exc import PyBelParserWarning
+from ..parser.exc import BELParserWarning
 from ..typing import EdgeData
 from ..utils import get_version, hash_edge
 
@@ -42,6 +42,7 @@ RESOURCE_DICTIONARY_NAMES = (
 CitationDict = Mapping[str, str]
 AnnotationsDict = Mapping[str, Mapping[str, bool]]
 AnnotationsHint = Union[Mapping[str, str], Mapping[str, Set[str]], AnnotationsDict]
+WarningTuple = Tuple[Optional[str], BELParserWarning, EdgeData]
 
 
 class BELGraph(nx.MultiDiGraph):
@@ -128,8 +129,8 @@ class BELGraph(nx.MultiDiGraph):
         return BELGraph()
 
     @property
-    def path(self) -> Optional[str]:
-        """Get the graph's path."""
+    def path(self) -> Optional[str]:  # noqa: D401
+        """The graph's path, if it was derived from a BEL document."""
         return self.graph.get(GRAPH_PATH)
 
     @path.setter
@@ -138,18 +139,16 @@ class BELGraph(nx.MultiDiGraph):
         self.graph[GRAPH_PATH] = path
 
     @property
-    def document(self):
-        """Get the dictionary holding the metadata from the ``SET DOCUMENT`` statements in the source BEL script.
+    def document(self) -> Dict[str, Any]:   # noqa: D401
+        """The dictionary holding the metadata from the ``SET DOCUMENT`` statements in the source BEL script.
 
         All keys are normalized according to :data:`pybel.constants.DOCUMENT_KEYS`.
-
-        :rtype: dict[str,Any]
         """
         return self.graph[GRAPH_METADATA]
 
     @property
-    def name(self, *attrs) -> str:  # Needs *attrs since it's an override
-        """Get the graph's name.
+    def name(self, *attrs) -> str:  # noqa: D401 # Needs *attrs since it's an override
+        """The graph's name.
 
         .. hint:: Can be set with the ``SET DOCUMENT Name = "..."`` entry in the source BEL script.
         """
@@ -161,8 +160,8 @@ class BELGraph(nx.MultiDiGraph):
         self.document[METADATA_NAME] = attrs[0]
 
     @property
-    def version(self) -> str:
-        """Get the graph's version.
+    def version(self) -> str:  # noqa: D401
+        """The graph's version.
 
         .. hint:: Can be set with the ``SET DOCUMENT Version = "..."`` entry in the source BEL script.
         """
@@ -174,8 +173,8 @@ class BELGraph(nx.MultiDiGraph):
         self.document[METADATA_VERSION] = version
 
     @property
-    def description(self) -> str:
-        """Get the graph's description.
+    def description(self) -> str:  # noqa: D401
+        """The graph's description.
 
         .. hint:: Can be set with the ``SET DOCUMENT Description = "..."`` entry in the source BEL document.
         """
@@ -187,8 +186,8 @@ class BELGraph(nx.MultiDiGraph):
         self.document[METADATA_DESCRIPTION] = description
 
     @property
-    def authors(self) -> str:
-        """Get the graph's description.
+    def authors(self) -> str:  # noqa: D401
+        """The graph's authors.
 
         .. hint:: Can be set with the ``SET DOCUMENT Authors = "..."`` entry in the source BEL document.
         """
@@ -200,8 +199,8 @@ class BELGraph(nx.MultiDiGraph):
         self.document[METADATA_AUTHORS] = authors
 
     @property
-    def contact(self) -> str:
-        """Get the graph's contact information.
+    def contact(self) -> str:  # noqa: D401
+        """The graph's contact information.
 
         .. hint:: Can be set with the ``SET DOCUMENT ContactInfo = "..."`` entry in the source BEL document.
         """
@@ -213,8 +212,8 @@ class BELGraph(nx.MultiDiGraph):
         self.document[METADATA_CONTACT] = contact
 
     @property
-    def license(self) -> Optional[str]:
-        """Get the graph's license.
+    def license(self) -> Optional[str]:  # noqa: D401
+        """The graph's license.
 
         .. hint:: Can be set with the ``SET DOCUMENT Licenses = "..."`` entry in the source BEL document
         """
@@ -226,8 +225,8 @@ class BELGraph(nx.MultiDiGraph):
         self.document[METADATA_LICENSES] = license_str
 
     @property
-    def copyright(self) -> Optional[str]:
-        """Get the graph's copyright.
+    def copyright(self) -> Optional[str]:  # noqa: D401
+        """The graph's copyright.
 
         .. hint:: Can be set with the ``SET DOCUMENT Copyright = "..."`` entry in the source BEL document
         """
@@ -239,8 +238,8 @@ class BELGraph(nx.MultiDiGraph):
         self.document[METADATA_COPYRIGHT] = copyright_str
 
     @property
-    def disclaimer(self) -> Optional[str]:
-        """Get the graph's disclaimer.
+    def disclaimer(self) -> Optional[str]:  # noqa: D401
+        """The graph's disclaimer.
 
         .. hint:: Can be set with the ``SET DOCUMENT Disclaimer = "..."`` entry in the source BEL document.
         """
@@ -252,8 +251,8 @@ class BELGraph(nx.MultiDiGraph):
         self.document[METADATA_DISCLAIMER] = disclaimer
 
     @property
-    def namespace_url(self) -> Dict[str, str]:
-        """Get the mapping from the keywords used in this graph to their respective BEL namespace URLs.
+    def namespace_url(self) -> Dict[str, str]:  # noqa: D401
+        """The mapping from the keywords used in this graph to their respective BEL namespace URLs.
 
         .. hint:: Can be appended with the ``DEFINE NAMESPACE [key] AS URL "[value]"`` entries in the definitions
                   section of the source BEL document.
@@ -261,21 +260,21 @@ class BELGraph(nx.MultiDiGraph):
         return self.graph[GRAPH_NAMESPACE_URL]
 
     @property
-    def defined_namespace_keywords(self) -> Set[str]:
-        """Get the set of all keywords defined as namespaces in this graph."""
+    def defined_namespace_keywords(self) -> Set[str]:  # noqa: D401
+        """The set of all keywords defined as namespaces in this graph."""
         return set(self.namespace_pattern) | set(self.namespace_url)
 
     @property
-    def uncached_namespaces(self) -> Set[str]:
-        """Get the set of namespaces URLs that are present in the graph, but cannot be cached.
+    def uncached_namespaces(self) -> Set[str]:  # noqa: D401
+        """The set of namespaces URLs that are present in the graph, but cannot be cached.
 
         Namespaces are added to this set when their corresponding resources' cachable flags being set to "no."
         """
         return self.graph[GRAPH_UNCACHED_NAMESPACES]
 
     @property
-    def namespace_pattern(self) -> Dict[str, str]:
-        """Get the mapping from the namespace keywords used to create this graph to their regex patterns.
+    def namespace_pattern(self) -> Dict[str, str]:  # noqa: D401
+        """The mapping from the namespace keywords used to create this graph to their regex patterns.
 
         .. hint:: Can be appended with the ``DEFINE NAMESPACE [key] AS PATTERN "[value]"`` entries in the definitions
                   section of the source BEL document.
@@ -283,8 +282,8 @@ class BELGraph(nx.MultiDiGraph):
         return self.graph[GRAPH_NAMESPACE_PATTERN]
 
     @property
-    def annotation_url(self) -> Dict[str, str]:
-        """Get the mapping from the annotation keywords used to create this graph to the URLs of the BELANNO files.
+    def annotation_url(self) -> Dict[str, str]:  # noqa: D401
+        """The mapping from the annotation keywords used to create this graph to the URLs of the BELANNO files.
 
         .. hint:: Can be appended with the ``DEFINE ANNOTATION [key] AS URL "[value]"`` entries in the definitions
                   section of the source BEL document.
@@ -292,8 +291,8 @@ class BELGraph(nx.MultiDiGraph):
         return self.graph[GRAPH_ANNOTATION_URL]
 
     @property
-    def annotation_pattern(self) -> Dict[str, str]:
-        """Get the mapping from the annotation keywords used to create this graph to their regex patterns as strings.
+    def annotation_pattern(self) -> Dict[str, str]:  # noqa: D401
+        """The mapping from the annotation keywords used to create this graph to their regex patterns as strings.
 
         .. hint:: Can be appended with the ``DEFINE ANNOTATION [key] AS PATTERN "[value]"`` entries in the definitions
                   section of the source BEL document.
@@ -301,8 +300,8 @@ class BELGraph(nx.MultiDiGraph):
         return self.graph[GRAPH_ANNOTATION_PATTERN]
 
     @property
-    def annotation_list(self) -> Dict[str, Set[str]]:
-        """Get the mapping from the keywords of locally defined annotations to their respective sets of values.
+    def annotation_list(self) -> Dict[str, Set[str]]:  # noqa: D401
+        """The mapping from the keywords of locally defined annotations to their respective sets of values.
 
         .. hint:: Can be appended with the ``DEFINE ANNOTATION [key] AS LIST {"[value]", ...}`` entries in the
                   definitions section of the source BEL document.
@@ -319,17 +318,13 @@ class BELGraph(nx.MultiDiGraph):
         )
 
     @property
-    def pybel_version(self) -> str:
-        """Get the version of PyBEL with which this graph was produced as a string."""
+    def pybel_version(self) -> str:  # noqa: D401
+        """The version of PyBEL with which this graph was produced as a string."""
         return self.graph[GRAPH_PYBEL_VERSION]
 
     @property
-    def warnings(self) -> List[Tuple[int, str, PyBelParserWarning, Mapping[str, str]]]:
-        """Get the warnings stored in a list of 4-tuples that is a property of the graph object.
-
-        This tuple respectively contains the line number, the line text, the exception instance, and the context
-        dictionary from the parser at the time of error.
-        """
+    def warnings(self) -> List[WarningTuple]:  # noqa: D401
+        """A list of warnings associated with this graph."""
         return self._warnings
 
     def number_of_warnings(self) -> int:
@@ -348,19 +343,19 @@ class BELGraph(nx.MultiDiGraph):
         )
 
     def add_warning(self,
-                    line_number: int,
-                    line: str,
-                    exception: Exception,
+                    exception: BELParserWarning,
                     context: Optional[Mapping[str, Any]] = None,
                     ) -> None:
         """Add a warning to the internal warning log in the graph, with optional context information.
 
-        :param line_number: The line number on which the exception occurred
-        :param line: The line on which the exception occurred
         :param exception: The exception that occurred
         :param context: The context from the parser when the exception occurred
         """
-        self.warnings.append((line_number, line, exception, {} if context is None else context))
+        self.warnings.append((
+            self.path,
+            exception,
+            {} if context is None else context,
+        ))
 
     def _help_add_edge(self, u: BaseEntity, v: BaseEntity, attr: Mapping) -> str:
         """Help add a pre-built edge."""

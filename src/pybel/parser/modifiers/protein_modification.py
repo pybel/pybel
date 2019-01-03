@@ -75,7 +75,7 @@ twice to become active. This results in the following:
 
 import logging
 
-from pyparsing import Group, MatchFirst, Optional, oneOf, pyparsing_common as ppc
+from pyparsing import Group, MatchFirst, Optional, ParseResults, ParserElement, oneOf, pyparsing_common as ppc
 
 from .constants import amino_acid
 from ..utils import WCW, nest, one_of_tags
@@ -89,13 +89,13 @@ __all__ = [
 log = logging.getLogger(__name__)
 
 
-def _handle_pmod_default_ns(_, __, tokens):
+def _handle_pmod_default_ns(_, __, tokens: ParseResults) -> ParseResults:
     tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
     tokens['name'] = pmod_namespace[tokens[0]]
     return tokens
 
 
-def _handle_pmod_legacy_ns(line, _, tokens):
+def _handle_pmod_legacy_ns(line, _, tokens: ParseResults) -> ParseResults:
     upgraded = pmod_legacy_labels[tokens[0]]
     log.log(5, 'legacy pmod() value %s upgraded to %s', line, upgraded)
     tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
@@ -108,12 +108,8 @@ pmod_default_ns = oneOf(list(pmod_namespace)).setParseAction(_handle_pmod_defaul
 pmod_legacy_ns = oneOf(list(pmod_legacy_labels)).setParseAction(_handle_pmod_legacy_ns)
 
 
-def get_protein_modification_language(identifier_qualified):
-    """Build a protein modificaiton parser.
-
-    :param pyparsing.ParseElement identifier_qualified:
-    :rtype: pyparsing.ParseElement
-    """
+def get_protein_modification_language(identifier_qualified: ParserElement) -> ParserElement:
+    """Build a protein modificaiton parser."""
     pmod_identifier = MatchFirst([
         identifier_qualified,
         pmod_default_ns,

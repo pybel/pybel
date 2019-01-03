@@ -22,7 +22,7 @@ from pybel.dsl import BaseEntity, gene
 from pybel.examples import sialic_acid_graph
 from pybel.io.exc import ImportVersionWarning, import_version_message_fmt
 from pybel.parser import BELParser
-from pybel.parser.exc import InvalidFunctionSemantic, MissingCitationException, MissingNamespaceRegexWarning
+from pybel.parser.exc import InvalidFunctionSemantic, MissingCitationException, MissingNamespaceRegexWarning, BELSyntaxError
 from pybel.struct.summary import get_syntax_errors
 from pybel.testing.cases import TemporaryCacheClsMixin
 from pybel.testing.constants import (
@@ -185,8 +185,11 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
 
     def test_slushy_syntax_errors(self):
         syntax_errors = get_syntax_errors(self.slushy_graph)
+        for _, exc,_ in syntax_errors:
+            self.assertIsInstance(exc, BELSyntaxError)
         self.assertEqual(1, len(syntax_errors))
-        self.assertEqual(98, syntax_errors[0][0])
+        _, first_exc, _ = syntax_errors[0]
+        self.assertEqual(98, first_exc.line_number)
 
     def test_slushy_json(self):
         graph_json = to_json(self.slushy_graph)

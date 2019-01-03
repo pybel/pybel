@@ -9,7 +9,7 @@ number and original statement are printed for the user to debug.
 from ..exceptions import PyBELWarning
 
 
-class PyBelParserWarning(PyBELWarning):
+class BELParserWarning(PyBELWarning):
     """The base PyBEL parser exception, which holds the line and position where a parsing problem occurred."""
 
     def __init__(self, line_number: int, line: str, position: int, *args):
@@ -28,11 +28,11 @@ class PyBelParserWarning(PyBELWarning):
         return 'General Parser Failure on line {} at pos {}: {}'.format(self.line_number, self.position, self.line)
 
 
-class BELSyntaxError(PyBelParserWarning, SyntaxError):
+class BELSyntaxError(BELParserWarning, SyntaxError):
     """For general syntax errors."""
 
 
-class InconsistentDefinitionError(PyBelParserWarning):
+class InconsistentDefinitionError(BELParserWarning):
     """Base PyBEL error for redefinition."""
 
     def __init__(self, line_number: int, line: str, position: int, definition: str):
@@ -53,7 +53,7 @@ class RedefinedAnnotationError(InconsistentDefinitionError):
 
 # Naming Warnings
 
-class NameWarning(PyBelParserWarning):
+class NameWarning(BELParserWarning):
     """The base class for errors related to nomenclature."""
 
     def __init__(self, line_number: int, line: str, position: int, name: str, *args):
@@ -113,7 +113,7 @@ class MissingNamespaceRegexWarning(NamespaceIdentifierWarning):
         return '''"{}" doesn't match the regex for {} namespace'''.format(self.name, self.namespace)
 
 
-class AnnotationWarning(PyBelParserWarning):
+class AnnotationWarning(BELParserWarning):
     """Base exception for annotation warnings."""
 
     def __init__(self, line_number, line, position, annotation, *args):
@@ -166,7 +166,7 @@ class MissingAnnotationRegexWarning(AnnotationIdentifierWarning):
 
 # Provenance Warnings
 
-class VersionFormatWarning(PyBelParserWarning):
+class VersionFormatWarning(BELParserWarning):
     """Raised if the version string doesn't adhere to semantic versioning or ``YYYYMMDD`` format."""
 
     def __init__(self, line_number, line, position, version_string):
@@ -180,7 +180,7 @@ class VersionFormatWarning(PyBelParserWarning):
         )
 
 
-class MetadataException(PyBelParserWarning):
+class MetadataException(BELParserWarning):
     """Base exception for issues with document metadata."""
 
     def __str__(self):
@@ -191,7 +191,7 @@ class MalformedMetadataException(MetadataException):
     """Raised when an invalid metadata line is encountered."""
 
 
-class InvalidMetadataException(PyBelParserWarning):
+class InvalidMetadataException(BELParserWarning):
     """Raised when an incorrect document metadata key is used.
 
     .. hint:: Valid document metadata keys are:
@@ -218,7 +218,7 @@ class InvalidMetadataException(PyBelParserWarning):
         return 'Invalid document metadata key: {}'.format(self.key)
 
 
-class MissingMetadataException(PyBelParserWarning):
+class MissingMetadataException(BELParserWarning):
     """Raised when a BEL Script is missing critical metadata."""
 
     def __init__(self, line_number, line, position, key):
@@ -237,7 +237,7 @@ class MissingMetadataException(PyBelParserWarning):
         return MissingMetadataException(0, '', 0, key)
 
 
-class InvalidCitationLengthException(PyBelParserWarning):
+class InvalidCitationLengthException(BELParserWarning):
     """Base exception raised when the format for a citation is wrong."""
 
 
@@ -255,7 +255,7 @@ class CitationTooLongException(InvalidCitationLengthException):
         return "Citation contains too many entries: {}".format(self.line)
 
 
-class MissingCitationException(PyBelParserWarning):
+class MissingCitationException(BELParserWarning):
     """Raised when trying to parse a BEL statement, but no citation is currently set.
 
     This might be due to a previous error in the formatting of a citation.
@@ -270,7 +270,7 @@ class MissingCitationException(PyBelParserWarning):
         return "Missing citation; can't add: {}".format(self.line)
 
 
-class MissingSupportWarning(PyBelParserWarning):
+class MissingSupportWarning(BELParserWarning):
     """Raised when trying to parse a BEL statement, but no evidence is currently set.
 
     All BEL statements must be qualified with evidence.
@@ -284,7 +284,7 @@ class MissingSupportWarning(PyBelParserWarning):
         return "Missing evidence; can't add: {}".format(self.line)
 
 
-class MissingAnnotationWarning(PyBelParserWarning):
+class MissingAnnotationWarning(BELParserWarning):
     """Raised when trying to parse a BEL statement and a required annotation is not present."""
 
     def __init__(self, line_number, line, position, required_annotations):
@@ -295,7 +295,7 @@ class MissingAnnotationWarning(PyBelParserWarning):
         return 'Missing annotations: {}'.format(', '.join(sorted(self.required_annotations)))
 
 
-class InvalidCitationType(PyBelParserWarning):
+class InvalidCitationType(BELParserWarning):
     """Raised when a citation is set with an incorrect type.
 
     .. hint:: Valid citation types include:
@@ -319,7 +319,7 @@ class InvalidCitationType(PyBelParserWarning):
         return '"{}" is not a valid citation type'.format(self.citation_type)
 
 
-class InvalidPubMedIdentifierWarning(PyBelParserWarning):
+class InvalidPubMedIdentifierWarning(BELParserWarning):
     """Raised when a citation is set whose type is ``PubMed`` but whose database identifier is not a valid integer."""
 
     def __init__(self, line_number, line, position, reference):
@@ -332,7 +332,7 @@ class InvalidPubMedIdentifierWarning(PyBelParserWarning):
 
 # BEL Syntax Warnings
 
-class MalformedTranslocationWarning(PyBelParserWarning):
+class MalformedTranslocationWarning(BELParserWarning):
     """Raised when there is a translocation statement without location information."""
 
     def __init__(self, line_number, line, position, tokens):
@@ -343,7 +343,7 @@ class MalformedTranslocationWarning(PyBelParserWarning):
         return 'Unqualified translocation: {} {}'.format(self.line, self.tokens)
 
 
-class PlaceholderAminoAcidWarning(PyBelParserWarning):
+class PlaceholderAminoAcidWarning(BELParserWarning):
     """Raised when an invalid amino acid code is given.
 
     One example might be the usage of X, which is a colloquial signifier for a truncation in a given position. Text
@@ -358,7 +358,7 @@ class PlaceholderAminoAcidWarning(PyBelParserWarning):
         return 'Placeholder amino acid found: {}'.format(self.code)
 
 
-class NestedRelationWarning(PyBelParserWarning):
+class NestedRelationWarning(BELParserWarning):
     """Raised when encountering a nested statement.
 
     See our the docs for an explanation of why we explicitly do not support nested statements.
@@ -370,7 +370,7 @@ class NestedRelationWarning(PyBelParserWarning):
 
 # Semantic Warnings
 
-class InvalidEntity(PyBelParserWarning):
+class InvalidEntity(BELParserWarning):
     """Raised when using a non-entity name for a name."""
 
     def __init__(self, line_number, line, position, namespace, name):
@@ -382,7 +382,7 @@ class InvalidEntity(PyBelParserWarning):
         return '{}:{} should not be coded as an entity'.format(self.namespace, self.name)
 
 
-class InvalidFunctionSemantic(PyBelParserWarning):
+class InvalidFunctionSemantic(BELParserWarning):
     """Raised when an invalid function is used for a given node.
 
     For example, an HGNC symbol for a protein-coding gene YFG cannot be referenced as an miRNA with ``m(HGNC:YFG)``
@@ -405,7 +405,7 @@ class InvalidFunctionSemantic(PyBelParserWarning):
         )
 
 
-class RelabelWarning(PyBelParserWarning):
+class RelabelWarning(BELParserWarning):
     """Raised when a node is relabeled."""
 
     def __init__(self, line_number, line, position, node, old_label, new_label):
