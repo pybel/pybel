@@ -324,7 +324,9 @@ class BelReconstitutionMixin(TestGraphMixin):
         if check_provenance:
             self.assertEqual({'CHEBI', 'HGNC', 'GOBP', 'GOCC', 'MESHD', 'TESTNS2'}, set(graph.namespace_url))
             self.assertEqual({'dbSNP'}, set(graph.namespace_pattern))
-            self.assertEqual({'TESTAN1', 'TESTAN2'}, set(graph.annotation_list))
+            self.assertIn('TESTAN1', graph.annotation_list)
+            self.assertIn('TESTAN2', graph.annotation_list)
+            self.assertEqual(2, len(graph.annotation_list))
             self.assertEqual({'TestRegex'}, set(graph.annotation_pattern))
 
         for node in graph:
