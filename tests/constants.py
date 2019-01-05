@@ -9,21 +9,22 @@ from json import dumps
 from pybel import BELGraph
 from pybel.constants import (
     ANNOTATIONS, ASSOCIATION, CITATION, CITATION_NAME, CITATION_REFERENCE, CITATION_TYPE, DECREASES, DIRECTLY_DECREASES,
-    EVIDENCE, INCREASES, METADATA_AUTHORS, METADATA_DESCRIPTION, METADATA_LICENSES, METADATA_NAME, GRAPH_PATH,
-    METADATA_VERSION, OPENBEL_ANNOTATION_RESOURCES, OPENBEL_NAMESPACE_RESOURCES, RELATION,
+    EVIDENCE, INCREASES, METADATA_AUTHORS, METADATA_DESCRIPTION, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION,
+    OPENBEL_ANNOTATION_RESOURCES, OPENBEL_NAMESPACE_RESOURCES, RELATION,
 )
 from pybel.dsl import BaseEntity, complex_abundance, pathology, protein
 from pybel.dsl.namespaces import hgnc
 from pybel.parser.exc import (
-    BELSyntaxError, IllegalAnnotationValueWarning, InvalidCitationLengthException, InvalidCitationType,
-    InvalidFunctionSemantic, InvalidPubMedIdentifierWarning, MalformedTranslocationWarning, MissingAnnotationKeyWarning,
-    MissingAnnotationRegexWarning, MissingCitationException, MissingMetadataException, MissingNamespaceNameWarning,
-    MissingNamespaceRegexWarning, MissingSupportWarning, NakedNameWarning, NestedRelationWarning,
-    PlaceholderAminoAcidWarning, UndefinedAnnotationWarning, UndefinedNamespaceWarning, VersionFormatWarning, BELParserWarning
+    BELParserWarning, BELSyntaxError, IllegalAnnotationValueWarning, InvalidCitationLengthException,
+    InvalidCitationType, InvalidFunctionSemantic, InvalidPubMedIdentifierWarning, MalformedTranslocationWarning,
+    MissingAnnotationKeyWarning, MissingAnnotationRegexWarning, MissingCitationException, MissingMetadataException,
+    MissingNamespaceNameWarning, MissingNamespaceRegexWarning, MissingSupportWarning, NakedNameWarning,
+    NestedRelationWarning, PlaceholderAminoAcidWarning, UndefinedAnnotationWarning, UndefinedNamespaceWarning,
+    VersionFormatWarning,
 )
 from pybel.parser.parse_bel import BELParser
 from pybel.parser.parse_control import ControlParser
-from pybel.testing.constants import test_bel_simple, test_bel_thorough
+from pybel.testing.constants import test_bel_thorough
 from pybel.utils import subdict_matches
 from tests.constant_helper import (
     BEL_THOROUGH_EDGES, BEL_THOROUGH_NODES, citation_1, evidence_1, expected_test_simple_metadata,
@@ -326,7 +327,7 @@ class BelReconstitutionMixin(TestGraphMixin):
             self.assertEqual({'dbSNP'}, set(graph.namespace_pattern))
             self.assertIn('TESTAN1', graph.annotation_list)
             self.assertIn('TESTAN2', graph.annotation_list)
-            self.assertEqual(2, len(graph.annotation_list))
+            self.assertEqual(2, len(graph.annotation_list), msg='Wrong number of locally defined annotations')
             self.assertEqual({'TestRegex'}, set(graph.annotation_pattern))
 
         for node in graph:
@@ -404,18 +405,19 @@ class BelReconstitutionMixin(TestGraphMixin):
                 self.assertIsInstance(exc.line, str)
                 self.assertIsInstance(exc.line_number, int)
                 self.assertIsInstance(exc.position, int)
-                self.assertEqual(el, exc.line_number,
-                                 msg="Expected different error on line {}. Check line {}".format(el, exc.line_number))
+                self.assertEqual(el, exc.line_number, msg="Expected {} on line {} but got {} on line {}: {}".format(
+                    ew, el, exc.__class__, exc.line_number, exc
+                ))
                 self.assertIsInstance(exc, ew, msg='Line: {}'.format(el))
 
         for node in graph:
             self.assertIsInstance(node, BaseEntity)
 
-        self.assertIn(akt1, graph)
-        self.assertIn(egfr, graph)
+        self.assertIn(akt1, graph, msg='AKT1 not in graph')
+        self.assertIn(egfr, graph, msg='EGFR not in graph')
 
-        self.assertEqual(2, graph.number_of_nodes())
-        self.assertEqual(1, graph.number_of_edges())
+        self.assertEqual(2, graph.number_of_nodes(), msg='Wrong number of nodes retrieved from slushy.bel')
+        self.assertEqual(1, graph.number_of_edges(), msg='Wrong nunber of edges retrieved from slushy.bel')
 
         assert_has_edge(self, akt1, egfr, graph, **{
             RELATION: INCREASES,

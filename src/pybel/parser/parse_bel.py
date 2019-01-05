@@ -289,12 +289,8 @@ class BELParser(BaseParser):
                 namespace_to_pattern=namespace_to_pattern,
             )
 
-        def _monkey_patch_get_line_number() -> int:
-            """Share the line number of this parser with the inner parsers."""
-            return self.get_line_number()
-
-        self.control_parser.get_line_number = _monkey_patch_get_line_number
-        self.identifier_parser.get_line_number = _monkey_patch_get_line_number
+        self.control_parser.get_line_number = self.get_line_number
+        self.identifier_parser.get_line_number = self.get_line_number
 
         identifier = Group(self.identifier_parser.language)(IDENTIFIER)
         ungrouped_identifier = self.identifier_parser.language
