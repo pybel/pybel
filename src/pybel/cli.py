@@ -2,22 +2,22 @@
 
 """Command line interface for PyBEL.
 
-Why does this file exist, and why not put this in __main__?
-You might be tempted to import things from __main__ later, but that will cause
-problems--the code will get executed twice:
- - When you run ``python3 -m pybel`` python will execute
-   ``__main__.py`` as a script. That means there won't be any
-   ``pybel.__main__`` in ``sys.modules``.
- - When you import __main__ it will get executed again (as a module) because
-   there's no ``pybel.__main__`` in ``sys.modules``.
-Also see (1) from http://click.pocoo.org/5/setuptools/#setuptools-integration
+Why does this file exist, and why not put this in ``__main__``? You might be tempted to import things from ``__main__``
+later, but that will cause problems--the code will get executed twice:
+
+- When you run ``python3 -m pybel`` python will execute``__main__.py`` as a script. That means there won't be any
+  ``pybel.__main__`` in ``sys.modules``.
+- When you import __main__ it will get executed again (as a module) because
+  there's no ``pybel.__main__`` in ``sys.modules``.
+
+.. seealso:: http://click.pocoo.org/5/setuptools/#setuptools-integration
 """
 
 import logging
 import os
 import sys
 import time
-from typing import List
+from typing import List, Optional
 
 import click
 from click_plugins import with_plugins
@@ -34,7 +34,7 @@ from .manager.database_io import to_database
 from .manager.models import Edge, Namespace, Node
 from .parser.exc import BELParserWarning
 from .struct import get_unused_annotations, get_unused_list_annotation_values, get_unused_namespaces
-from .struct.graph import WarningTuple
+from .struct.graph import BELGraph, WarningTuple
 from .utils import get_corresponding_pickle_path
 
 log = logging.getLogger(__name__)
@@ -136,19 +136,23 @@ def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified
 
 @main.command()
 @graph_pickle_argument
-def summarize(graph):
+def summarize(graph: BELGraph):
     """Summarize a graph."""
     _print_summary(graph)
 
 
-def _print_summary(graph, ticks=False):
+def _print_summary(graph: BELGraph, ticks: bool = False):
     if not ticks:
         click.secho('Summary', fg='red', bold=True)
         graph.summarize()
 
     unused_namespaces = get_unused_namespaces(graph)
     if unused_namespaces:
-        click.secho('\nUnused Namespaces', fg='red', bold=True)
+        click.secho(
+            '\nUnused Namespaces ({}/{})'.format(len(unused_namespaces), len(graph.defined_namespace_keywords)),
+            fg='red',
+            bold=True
+        )
         if ticks:
             click.echo('```')
         for namespace in sorted(unused_namespaces):
@@ -158,7 +162,11 @@ def _print_summary(graph, ticks=False):
 
     unused_annotations = get_unused_annotations(graph)
     if unused_annotations:
-        click.secho('\nUnused Annotations', fg='red', bold=True)
+        click.secho(
+            '\nUnused Annotations ({}/{})'.format(len(unused_annotations), len(graph.defined_annotation_keywords)),
+            fg='red',
+            bold=True
+        )
         if ticks:
             click.echo('```')
         for annotation in sorted(unused_annotations):
@@ -181,7 +189,7 @@ def _print_summary(graph, ticks=False):
 
 @main.command()
 @graph_pickle_argument
-def warnings(graph):
+def warnings(graph: BELGraph):
     """List warnings from a graph."""
     echo_warnings_via_pager(graph.warnings)
 
@@ -189,7 +197,7 @@ def warnings(graph):
 @main.command()
 @graph_pickle_argument
 @click.pass_obj
-def insert(manager, graph):
+def insert(manager, graph: BELGraph):
     """Insert a graph to the database."""
     to_database(graph, manager=manager, use_tqdm=True)
 
@@ -197,7 +205,7 @@ def insert(manager, graph):
 @main.command()
 @graph_pickle_argument
 @host_option
-def post(graph, host):
+def post(graph: BELGraph, host: str):
     """Upload a graph to BEL Commons."""
     resp = to_web(graph, host=host)
     resp.raise_for_status()
@@ -211,7 +219,7 @@ def post(graph, host):
 @click.option('--graphml', help='Path to output a GraphML file. Use .graphml for Cytoscape.')
 @click.option('--json', type=click.File('w'), help='Path to output a node-link JSON file.')
 @click.option('--bel', type=click.File('w'), help='Output canonical BEL.')
-def serialize(graph, csv, sif, gsea, graphml, json, bel):
+def serialize(graph: BELGraph, csv, sif, gsea, graphml, json, bel):
     """Serialize a graph to various formats."""
     if csv:
         log.info('Outputting CSV to %s', csv)
@@ -242,7 +250,7 @@ def serialize(graph, csv, sif, gsea, graphml, json, bel):
 @graph_pickle_argument
 @click.option('--connection', default='http://localhost:7474/db/data/', help='Connection string for neo4j upload.')
 @click.password_option()
-def neo(graph, connection, password):
+def neo(graph: BELGraph, connection: str, password: str):
     """Upload to neo4j."""
     import py2neo
     neo_graph = py2neo.Graph(connection, password=password)
@@ -254,7 +262,7 @@ def neo(graph, connection, password):
 @click.argument('agents', nargs=-1)
 @click.option('--local', is_flag=True, help='Upload to local database.')
 @host_option
-def machine(manager, agents, local, host):
+def machine(manager: Manager, agents: List[str], local: bool, host: str):
     """Get content from the INDRA machine and upload to BEL Commons."""
     from indra.sources import indra_db_rest
     from pybel import from_indra_statements
@@ -286,17 +294,16 @@ def manage():
 
 
 @manage.command()
-@click.option('-y', '--yes', is_flag=True)
+@click.confirmation_option()
 @click.pass_obj
-def drop(manager, yes):
+def drop(manager: Manager):
     """Drop the database."""
-    if yes or click.confirm('Drop database?'):
-        manager.drop_all()
+    manager.drop_all()
 
 
 @manage.command()
 @click.pass_obj
-def examples(manager):
+def examples(manager: Manager):
     """Load examples to the database."""
     for graph in (sialic_acid_graph, statin_graph, homology_graph, braf_graph, egf_graph):
         if manager.has_name_version(graph.name, graph.version):
@@ -314,12 +321,12 @@ def namespaces():
 @namespaces.command()  # noqa:F811
 @click.argument('url')
 @click.pass_obj
-def insert(manager, url):
+def insert(manager: Manager, url: str):
     """Add a namespace by URL."""
     manager.get_or_create_namespace(url)
 
 
-def _ls(manager, model_cls, model_id):
+def _ls(manager: Manager, model_cls, model_id: int):
     if model_id:
         n = manager.session.query(model_cls).get(model_id)
         _page(n.entries)
@@ -330,22 +337,27 @@ def _ls(manager, model_cls, model_id):
 
 
 @namespaces.command()
-@click.option('--url', help='Specific resource URL to list')
-@click.option('-i', '--namespace-id', help='Specific resource URL to list')
+@click.option('-u', '--url', help='Specific resource URL to list')
+@click.option('-i', '--namespace-id', type=int, help='Specific resource URL to list')
 @click.pass_obj
-def ls(manager, url, namespace_id):
+def ls(manager: Manager, url: Optional[str], namespace_id: Optional[int]):
     """List cached namespaces."""
     if url:
         n = manager.get_or_create_namespace(url)
-        _page(n.entries)
-    else:
+        if isinstance(n, Namespace):
+            _page(n.entries)
+        else:
+            click.echo('uncachable namespace')
+    elif namespace_id is not None:
         _ls(manager, Namespace, namespace_id)
+    else:
+        click.echo('Missing argument -i or -u')
 
 
 @namespaces.command()  # noqa:F811
 @click.argument('url')
 @click.pass_obj
-def drop(manager, url):
+def drop(manager: Manager, url: str):
     """Drop a namespace by URL."""
     manager.drop_namespace_by_url(url)
 
@@ -357,7 +369,7 @@ def networks():
 
 @networks.command()  # noqa:F811
 @click.pass_obj
-def ls(manager):
+def ls(manager: Manager):
     """List network names, versions, and optionally, descriptions."""
     for n in manager.list_networks():
         click.echo('{}\t{}\t{}'.format(n.id, n.name, n.version))
@@ -367,7 +379,7 @@ def ls(manager):
 @click.option('-n', '--network-id', type=int, help='Identifier of network to drop')
 @click.option('-y', '--yes', is_flag=True, help='Drop all networks without confirmation if no identifier is given')
 @click.pass_obj
-def drop(manager, network_id, yes):
+def drop(manager: Manager, network_id: Optional[int], yes):
     """Drop a network by its identifier or drop all networks."""
     if network_id:
         manager.drop_network_by_id(network_id)
@@ -385,7 +397,7 @@ def edges():
 @click.option('--offset', type=int)
 @click.option('--limit', type=int, default=10)
 @click.pass_obj
-def ls(manager, offset, limit):
+def ls(manager: Manager, offset: Optional[int], limit: Optional[int]):
     """List edges."""
     q = manager.session.query(Edge)
 
@@ -406,7 +418,7 @@ def nodes():
 
 @nodes.command()
 @click.pass_obj
-def prune(manager):
+def prune(manager: Manager):
     """Prune nodes not belonging to any edges."""
     nodes_to_delete = [
         node
@@ -419,7 +431,7 @@ def prune(manager):
 
 @manage.command()  # noqa:F811
 @click.pass_obj
-def summarize(manager):
+def summarize(manager: Manager):
     """Summarize the contents of the database."""
     click.echo('Networks: {}'.format(manager.count_networks()))
     click.echo('Edges: {}'.format(manager.count_edges()))
