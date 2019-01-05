@@ -139,6 +139,13 @@ class ControlParser(BaseParser):
         """Check if the annotation is defined as a regular expression."""
         return annotation in self.annotation_to_pattern
 
+    def has_annotation(self, annotation: str) -> bool:
+        """Check if the annotation is defined."""
+        return (
+            self.has_enumerated_annotation(annotation) or
+            self.has_regex_annotation(annotation)
+        )
+
     def raise_for_undefined_annotation(self, line, position, annotation):
         """Raise an exception if the annotation is not defined.
 
@@ -150,7 +157,7 @@ class ControlParser(BaseParser):
         if self._in_debug_mode:
             return
 
-        if not self.has_enumerated_annotation(annotation) and not self.has_regex_annotation(annotation):
+        if not self.has_annotation(annotation):
             raise UndefinedAnnotationWarning(self.get_line_number(), line, position, annotation)
 
     def raise_for_invalid_annotation_value(self, line: str, position: int, key: str, value: str) -> None:
