@@ -17,7 +17,7 @@ import logging
 import os
 import sys
 import time
-from typing import Iterable, Mapping, Tuple
+from typing import List
 
 import click
 from click_plugins import with_plugins
@@ -34,6 +34,7 @@ from .manager.database_io import to_database
 from .manager.models import Edge, Namespace, Node
 from .parser.exc import BELParserWarning
 from .struct import get_unused_annotations, get_unused_list_annotation_values, get_unused_namespaces
+from .struct.graph import WarningTuple
 from .utils import get_corresponding_pickle_path
 
 log = logging.getLogger(__name__)
@@ -171,7 +172,7 @@ def _print_summary(graph, ticks=False):
         if ticks:
             click.echo('```')
         for annotation, values in sorted(unused_annotation_list_values.items()):
-            click.echo('{} ({})'.format(annotation, len(values)))
+            click.echo('{} ({}/{})'.format(annotation, len(values), len(graph.annotation_list[annotation])))
             for value in sorted(values):
                 click.echo('  {}'.format(value))
         if ticks:
@@ -429,12 +430,8 @@ def summarize(manager):
     click.echo('Annotation entries: {}'.format(manager.count_annotation_entries()))
 
 
-def echo_warnings_via_pager(warnings: Iterable[Tuple[int, str, BELParserWarning, Mapping]], sep: str = '\t') -> None:
-    """Output the warnings from a BEL graph with Click and the system's pager.
-
-    :param warnings: A list of 4-tuples representing the warnings
-    :param sep: The separator. Defaults to tab.
-    """
+def echo_warnings_via_pager(warnings: List[WarningTuple], sep: str = '\t') -> None:
+    """Output the warnings from a BEL graph with Click and the system's pager."""
     # Exit if no warnings
     if not warnings:
         click.echo('Congratulations! No warnings.')
@@ -442,32 +439,28 @@ def echo_warnings_via_pager(warnings: Iterable[Tuple[int, str, BELParserWarning,
 
     max_line_width = max(
         len(str(exc.line_number))
-        for _, _, exc, _ in warnings
+        for _, exc, _ in warnings
     )
 
     max_warning_width = max(
         len(exc.__class__.__name__)
-        for _, _, exc, _ in warnings
+        for _, exc, _ in warnings
     )
 
     s1 = '{:>' + str(max_line_width) + '}' + sep
     s2 = '{:>' + str(max_warning_width) + '}' + sep
 
-    def _make_line(line_number, line, exc):
-        s = click.style(s1.format(line_number), fg='blue', bold=True)
-
-        if exc.__class__.__name__.endswith('Error'):
-            s += click.style(s2.format(exc.__class__.__name__), fg='red')
-        else:
-            s += click.style(s2.format(exc.__class__.__name__), fg='yellow')
-
-        s += click.style(line, bold=True) + sep
+    def _make_line(exc: BELParserWarning):
+        s = click.style(s1.format(exc.line_number), fg='blue', bold=True)
+        s += click.style(s2.format(exc.__class__.__name__),
+                         fg=('red' if exc.__class__.__name__.endswith('Error') else 'yellow'))
+        s += click.style(exc.line, bold=True) + sep
         s += click.style(str(exc))
         return s
 
     click.echo_via_pager('\n'.join(
-        _make_line(line_number, line, exc)
-        for line_number, line, exc, _ in warnings
+        _make_line(exc)
+        for _, exc, _ in warnings
     ))
 
 
