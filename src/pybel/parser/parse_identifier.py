@@ -39,9 +39,9 @@ class IdentifierParser(BaseParser):
         :param default_namespace: A set of strings that can be used without a namespace
         :param allow_naked_names: If true, turn off naked namespace failures
         """
-        self.namespace_to_terms: Mapping[str, Mapping[str, str]] = namespace_to_term or {}
-        self.namespace_to_pattern: Mapping[str, Pattern] = namespace_to_pattern or {}
-        self.default_namespace: Set[str] = set(default_namespace) if default_namespace is not None else None
+        self.namespace_to_terms = namespace_to_term or {}
+        self.namespace_to_pattern = namespace_to_pattern or {}
+        self.default_namespace = set(default_namespace) if default_namespace is not None else None
         self.allow_naked_names = allow_naked_names
 
         self.identifier_qualified = word(NAMESPACE) + Suppress(':') + (word | quote)(NAME)
