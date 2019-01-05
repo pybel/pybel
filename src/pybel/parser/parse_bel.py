@@ -7,12 +7,11 @@ This module handles parsing BEL relations and validation of semantics.
 
 import itertools as itt
 import logging
-from typing import List, Mapping, Optional, Set
+from typing import List, Mapping, Optional, Pattern, Set
 
 import pyparsing
 from pyparsing import (
-    And, Group, Keyword, MatchFirst, ParseResults, StringEnd, Suppress, delimitedList,
-    oneOf, replaceWith,
+    And, Group, Keyword, MatchFirst, ParseResults, StringEnd, Suppress, delimitedList, oneOf, replaceWith,
 )
 
 from .baseparser import BaseParser
@@ -225,10 +224,10 @@ class BELParser(BaseParser):
 
     def __init__(self,
                  graph,
-                 namespace_dict: Optional[Mapping[str, Mapping[str, str]]] = None,
-                 annotation_dict: Optional[Mapping[str, Set[str]]] = None,
-                 namespace_regex: Optional[Mapping[str, str]] = None,
-                 annotation_regex: Optional[Mapping[str, str]] = None,
+                 namespace_to_term: Optional[Mapping[str, Mapping[str, str]]] = None,
+                 annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
+                 namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
+                 annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
                  allow_naked_names: bool = False,
                  allow_nested: bool = False,
                  disallow_unqualified_translocations: bool = False,
@@ -240,13 +239,13 @@ class BELParser(BaseParser):
         """Build a BEL parser.
 
         :param pybel.BELGraph graph: The BEL Graph to use to store the network
-        :param namespace_dict: A dictionary of {namespace: {name: encoding}}. Delegated to
+        :param namespace_to_term: A dictionary of {namespace: {name: encoding}}. Delegated to
          :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :param annotation_dict: A dictionary of {annotation: set of values}. Delegated to
+        :param annotation_to_term: A dictionary of {annotation: set of values}. Delegated to
          :class:`pybel.parser.ControlParser`
-        :param namespace_regex: A dictionary of {namespace: regular expression strings}. Delegated to
+        :param namespace_to_pattern: A dictionary of {namespace: regular expression strings}. Delegated to
          :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :param annotation_regex: A dictionary of {annotation: regular expression strings}. Delegated to
+        :param annotation_to_pattern: A dictionary of {annotation: regular expression strings}. Delegated to
          :class:`pybel.parser.ControlParser`
         :param allow_naked_names: If true, turn off naked namespace failures. Delegated to
          :class:`pybel.parser.parse_identifier.IdentifierParser`
@@ -274,16 +273,16 @@ class BELParser(BaseParser):
             )
         else:
             self.control_parser = ControlParser(
-                annotation_dict=annotation_dict,
-                annotation_regex=annotation_regex,
+                annotation_to_term=annotation_to_term,
+                annotation_to_pattern=annotation_to_pattern,
                 citation_clearing=citation_clearing,
                 required_annotations=required_annotations,
             )
 
             self.identifier_parser = IdentifierParser(
                 allow_naked_names=allow_naked_names,
-                namespace_dict=namespace_dict,
-                namespace_regex=namespace_regex,
+                namespace_to_term=namespace_to_term,
+                namespace_to_pattern=namespace_to_pattern,
             )
 
         def _monkey_patch_get_line_number() -> int:
@@ -610,20 +609,14 @@ class BELParser(BaseParser):
         super(BELParser, self).__init__(self.language, streamline=autostreamline)
 
     @property
-    def namespace_dict(self):
-        """Get the dictionary of {namespace: {name: encoding}} stored in the internal identifier parser.
-
-        :rtype: dict[str,dict[str,str]]
-        """
-        return self.identifier_parser.namespace_dict
+    def namespace_dict(self) -> Mapping[str, Mapping[str, str]]:
+        """Get the dictionary of {namespace: {name: encoding}} stored in the internal identifier parser."""
+        return self.identifier_parser.namespace_to_terms
 
     @property
-    def namespace_regex(self):
-        """Return the dictionary of {namespace keyword: compiled regular expression} in the internal identifier parser.
-
-        :rtype: dict[str,re]
-        """
-        return self.identifier_parser.namespace_regex_compiled
+    def namespace_regex(self) -> Mapping[str, Pattern]:
+        """Return the dictionary of {namespace keyword: regular expression} in the internal identifier parser."""
+        return self.identifier_parser.namespace_to_pattern
 
     @property
     def annotation_dict(self):
@@ -631,7 +624,7 @@ class BELParser(BaseParser):
 
         :rtype: dict[str,set[str]]
         """
-        return self.control_parser.annotation_dict
+        return self.control_parser.annotation_to_term
 
     @property
     def annotation_regex(self):
@@ -639,7 +632,7 @@ class BELParser(BaseParser):
 
         :rtype: dict[str,str]
         """
-        return self.control_parser.annotation_regex
+        return self.control_parser.annotation_to_pattern
 
     @property
     def allow_naked_names(self):
@@ -684,7 +677,7 @@ class BELParser(BaseParser):
         })
         return tokens
 
-    def check_function_semantics(self, line: str, position: int, tokens: ParseResults):
+    def check_function_semantics(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
         """Raise an exception if the function used on the tokens is wrong.
 
         :param str line: The line being parsed
@@ -692,7 +685,7 @@ class BELParser(BaseParser):
         :param pyparsing.ParseResult tokens: The tokens from PyParsing
         :raises: InvalidFunctionSemantic
         """
-        if self.namespace_dict is None or NAMESPACE not in tokens:
+        if not self.namespace_dict or NAMESPACE not in tokens:
             return tokens
 
         namespace, name = tokens[NAMESPACE], tokens[NAME]

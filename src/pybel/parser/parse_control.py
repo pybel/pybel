@@ -10,7 +10,7 @@ This module handles parsing control statement, which add annotations and namespa
 """
 
 import logging
-import re
+from typing import List, Mapping, Optional, Pattern, Set
 
 from pyparsing import And, MatchFirst, Suppress, oneOf, pyparsing_common as ppc
 
@@ -52,24 +52,23 @@ class ControlParser(BaseParser):
         <http://openbel.org/language/version_1.0/bel_specification_version_1.0.html#_control_records>`_
     """
 
-    def __init__(self, annotation_dict=None, annotation_regex=None, citation_clearing=True, required_annotations=None):
+    def __init__(self,
+                 annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
+                 annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
+                 citation_clearing: bool = True,
+                 required_annotations: Optional[List[str]] = None
+                 ) -> None:
         """Initialize the control statement parser.
 
-        :param annotation_dict: A dictionary of {annotation: set of valid values} for parsing
-        :type annotation_dict: Optional[dict[str,set[str]]]
-        :param annotation_regex: A dictionary of {annotation: regular expression string}
-        :type annotation_regex: Optional[dict[str,str]]
-        :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
-        :param Optional[list[str]] required_annotations: Annotations that are required
+        :param annotation_to_term: A dictionary of {annotation: set of valid values} for parsing
+        :param annotation_to_pattern: A dictionary of {annotation: regular expression string}
+        :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
+        :param required_annotations: Annotations that are required
         """
         self.citation_clearing = citation_clearing
 
-        self._annotation_dict = {} if annotation_dict is None else annotation_dict
-        self._annotation_regex = {} if annotation_regex is None else annotation_regex
-        self._annotation_regex_compiled = {
-            keyword: re.compile(value)
-            for keyword, value in self.annotation_regex.items()
-        }
+        self.annotation_to_term = annotation_to_term or {}
+        self.annotation_to_pattern = annotation_to_pattern or {}
 
         self.statement_group = None
         self.citation = {}
@@ -129,44 +128,16 @@ class ControlParser(BaseParser):
         super(ControlParser, self).__init__(self.language)
 
     @property
-    def annotation_dict(self):
-        """Get the dictionary of annotaions to their set of values.
-
-        :rtype: dict[str,set[str]]
-        """
-        return self._annotation_dict
-
-    @property
-    def annotation_regex(self):
-        """Get the dictionary of annotations defined by regular expressions.
-
-        Contains: {annotation keyword: string regular expression}
-
-        :return: dict[str,str]
-        """
-        return self._annotation_regex
-
-    @property
-    def annotation_regex_compiled(self):
-        """Get the dictionary of annotations defined by regular expressions.
-
-        Contains: {annotation keyword: compiled regular expression}
-
-        :rtype: dict[str,re]
-        """
-        return self._annotation_regex_compiled
-
-    @property
     def _in_debug_mode(self):
-        return not self.annotation_dict and not self.annotation_regex
+        return not self.annotation_to_term and not self.annotation_to_pattern
 
     def has_enumerated_annotation(self, annotation):
         """Check if the annotation is defined as an enumeration."""
-        return annotation in self.annotation_dict
+        return annotation in self.annotation_to_term
 
     def has_regex_annotation(self, annotation):
         """Check if the annotation is defined as a regular expression."""
-        return annotation in self.annotation_regex
+        return annotation in self.annotation_to_pattern
 
     def raise_for_undefined_annotation(self, line, position, annotation):
         """Raise an exception if the annotation is not defined.
@@ -182,29 +153,23 @@ class ControlParser(BaseParser):
         if not self.has_enumerated_annotation(annotation) and not self.has_regex_annotation(annotation):
             raise UndefinedAnnotationWarning(self.get_line_number(), line, position, annotation)
 
-    def raise_for_invalid_annotation_value(self, line, position, key, value):
+    def raise_for_invalid_annotation_value(self, line: str, position: int, key: str, value: str) -> None:
         """Raise an exception if the annotation is not defined.
 
-        :param str line: The line being parsed
-        :param int position: The position in the line being parsed
-        :param str key: The annotation to check
-        :param str value: The entry in the annotation to check
         :raises: IllegalAnnotationValueWarning or MissingAnnotationRegexWarning
         """
         if self._in_debug_mode:
             return
 
-        if self.has_enumerated_annotation(key) and value not in self.annotation_dict[key]:
+        if self.has_enumerated_annotation(key) and value not in self.annotation_to_term[key]:
             raise IllegalAnnotationValueWarning(self.get_line_number(), line, position, key, value)
 
-        elif self.has_regex_annotation(key) and not self.annotation_regex_compiled[key].match(value):
+        elif self.has_regex_annotation(key) and not self.annotation_to_pattern[key].match(value):
             raise MissingAnnotationRegexWarning(self.get_line_number(), line, position, key, value)
 
-    def raise_for_missing_citation(self, line, position):
+    def raise_for_missing_citation(self, line: str, position: int) -> None:
         """Raise an exception if there is no citation present in the parser.
 
-        :param str line: The line being parsed
-        :param int position: The position in the line being parsed
         :raises: MissingCitationException
         """
         if self.citation_clearing and not self.citation:

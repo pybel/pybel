@@ -942,7 +942,7 @@ class TestCustom(unittest.TestCase):
     def setUp(self):
         graph = BELGraph()
 
-        namespace_dict = {
+        namespace_to_term = {
             'HGNC': {
                 'AKT1': 'GRP',
                 'YFG': 'GRP'
@@ -952,7 +952,7 @@ class TestCustom(unittest.TestCase):
             }
         }
 
-        self.parser = BELParser(graph, namespace_dict=namespace_dict, autostreamline=False)
+        self.parser = BELParser(graph, namespace_to_term=namespace_to_term, autostreamline=False)
 
     def test_tloc_undefined_namespace(self):
         s = 'tloc(p(HGNC:AKT1), fromLoc(MESHCS:nucleus), toLoc(MISSING:"undefined"))'
