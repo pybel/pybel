@@ -2,9 +2,12 @@
 
 """Operations for BEL graphs."""
 
+from typing import Set
+
 import networkx as nx
 
 from .utils import update_metadata, update_node_helper
+from ..dsl import BaseEntity
 
 __all__ = [
     'subgraph',
@@ -16,11 +19,11 @@ __all__ = [
 ]
 
 
-def subgraph(graph, nodes):
+def subgraph(graph, nodes: Set[BaseEntity]):
     """Induce a sub-graph over the given nodes.
 
     :param BELGraph graph:
-    :param set[BaseEntity] nodes:
+    :param nodes:
     :rtype: BELGraph
     """
     sg = graph.subgraph(nodes)
@@ -40,7 +43,7 @@ def subgraph(graph, nodes):
     return result
 
 
-def left_full_join(g, h):
+def left_full_join(g, h) -> None:
     """Add all nodes and edges from ``h`` to ``g``, in-place for ``g``.
 
     :param pybel.BELGraph g: A BEL graph
@@ -64,7 +67,7 @@ def left_full_join(g, h):
     g.warnings.extend(h.warnings)
 
 
-def left_outer_join(g, h):
+def left_outer_join(g, h) -> None:
     """Only add components from the ``h`` that are touching ``g``.
 
     Algorithm:
