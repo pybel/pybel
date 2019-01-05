@@ -228,6 +228,7 @@ class BELParser(BaseParser):
                  namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
                  annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
                  annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
+                 annotation_to_local: Optional[Mapping[str, Set[str]]] = None,
                  allow_naked_names: bool = False,
                  allow_nested: bool = False,
                  disallow_unqualified_translocations: bool = False,
@@ -246,6 +247,8 @@ class BELParser(BaseParser):
         :param annotation_to_term: A dictionary of {annotation: set of values}. Delegated to
          :class:`pybel.parser.ControlParser`
         :param annotation_to_pattern: A dictionary of {annotation: regular expression strings}. Delegated to
+         :class:`pybel.parser.ControlParser`
+        :param annotation_to_local: A dictionary of {annotation: set of values}. Delegated to
          :class:`pybel.parser.ControlParser`
         :param allow_naked_names: If true, turn off naked namespace failures. Delegated to
          :class:`pybel.parser.parse_identifier.IdentifierParser`
@@ -275,6 +278,7 @@ class BELParser(BaseParser):
             self.control_parser = ControlParser(
                 annotation_to_term=annotation_to_term,
                 annotation_to_pattern=annotation_to_pattern,
+                annotation_to_local=annotation_to_local,
                 citation_clearing=citation_clearing,
                 required_annotations=required_annotations,
             )

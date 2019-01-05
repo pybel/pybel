@@ -50,6 +50,7 @@ class MetadataParser(BaseParser):
                  namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
                  annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
                  annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
+                 annotation_to_local: Optional[Mapping[str, Set[str]]] = None,
                  default_namespace: Optional[Set[str]] = None,
                  allow_redefinition: bool = False,
                  skip_validation: bool = False,
@@ -82,6 +83,8 @@ class MetadataParser(BaseParser):
         self.annotation_to_term = annotation_to_term or {}
         #: A dictionary of {annotation keyword: regular expression string}
         self.annotation_to_pattern = annotation_to_pattern or {}
+        #: A dictionary of cached {annotation keyword: set of values}
+        self.annotation_to_local = annotation_to_local or {}
 
         #: A dictionary containing the document metadata
         self.document_metadata = {}
@@ -90,8 +93,6 @@ class MetadataParser(BaseParser):
         self.namespace_url_dict = {}
         #: A dictionary from {annotation keyword: BEL annotation URL}
         self.annotation_url_dict = {}
-        #: A set of annotation keywords that are defined ad-hoc in the BEL script
-        self.annotation_lists = set()
 
         self.document = And([
             set_tag,
@@ -245,12 +246,7 @@ class MetadataParser(BaseParser):
         """
         annotation = tokens['name']
         self.raise_for_redefined_annotation(line, position, annotation)
-
-        values = set(tokens['values'])
-
-        self.annotation_to_term[annotation] = values
-        self.annotation_lists.add(annotation)
-
+        self.annotation_to_local[annotation] = set(tokens['values'])
         return tokens
 
     def handle_annotation_pattern(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
@@ -271,9 +267,17 @@ class MetadataParser(BaseParser):
         """Check if this annotation is defined by a regular expression."""
         return annotation in self.annotation_to_pattern
 
+    def has_local_annotation(self, annotation: str) -> bool:
+        """Check if this annotation is defined by an locally."""
+        return annotation in self.annotation_to_local
+
     def has_annotation(self, annotation: str) -> bool:
         """Check if this annotation is defined."""
-        return self.has_enumerated_annotation(annotation) or self.has_regex_annotation(annotation)
+        return (
+            self.has_enumerated_annotation(annotation) or
+            self.has_regex_annotation(annotation) or
+            self.has_local_annotation(annotation)
+        )
 
     def has_enumerated_namespace(self, namespace: str) -> bool:
         """Check if this namespace is defined by an enumeration."""

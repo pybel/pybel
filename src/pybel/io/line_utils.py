@@ -106,6 +106,7 @@ def parse_lines(graph: BELGraph,
         namespace_to_pattern=metadata_parser.namespace_to_pattern,
         annotation_to_term=metadata_parser.annotation_to_term,
         annotation_to_pattern=metadata_parser.annotation_to_pattern,
+        annotation_to_local=metadata_parser.annotation_to_local,
         # language settings
         allow_nested=allow_nested,
         citation_clearing=citation_clearing,
@@ -214,10 +215,7 @@ def parse_definitions(graph: BELGraph,
         keyword: pattern.pattern
         for keyword, pattern in metadata_parser.annotation_to_pattern.items()
     })
-    graph.annotation_list.update({
-        keyword: metadata_parser.annotation_to_term[keyword]
-        for keyword in metadata_parser.annotation_lists
-    })
+    graph.annotation_list.update(metadata_parser.annotation_to_local)
     graph.uncached_namespaces.update(metadata_parser.uncachable_namespaces)
 
     log.info('Finished parsing definitions section in %.02f seconds', time.time() - parse_definitions_start_time)

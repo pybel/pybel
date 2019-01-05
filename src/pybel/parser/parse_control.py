@@ -55,6 +55,7 @@ class ControlParser(BaseParser):
     def __init__(self,
                  annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
                  annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
+                 annotation_to_local: Optional[Mapping[str, Set[str]]] = None,
                  citation_clearing: bool = True,
                  required_annotations: Optional[List[str]] = None
                  ) -> None:
@@ -62,6 +63,7 @@ class ControlParser(BaseParser):
 
         :param annotation_to_term: A dictionary of {annotation: set of valid values} defined with URL for parsing
         :param annotation_to_pattern: A dictionary of {annotation: regular expression string}
+        :param annotation_to_local: A dictionary of {annotation: set of valid values} for parsing defined with LIST
         :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
         :param required_annotations: Annotations that are required
         """
@@ -69,6 +71,7 @@ class ControlParser(BaseParser):
 
         self.annotation_to_term = annotation_to_term or {}
         self.annotation_to_pattern = annotation_to_pattern or {}
+        self.annotation_to_local = annotation_to_local or {}
 
         self.statement_group = None
         self.citation = {}
@@ -139,11 +142,16 @@ class ControlParser(BaseParser):
         """Check if the annotation is defined as a regular expression."""
         return annotation in self.annotation_to_pattern
 
+    def has_local_annotation(self, annotation: str) -> bool:
+        """Check if the annotation is defined locally."""
+        return annotation in self.annotation_to_local
+
     def has_annotation(self, annotation: str) -> bool:
         """Check if the annotation is defined."""
         return (
             self.has_enumerated_annotation(annotation) or
-            self.has_regex_annotation(annotation)
+            self.has_regex_annotation(annotation) or
+            self.has_local_annotation(annotation)
         )
 
     def raise_for_undefined_annotation(self, line, position, annotation):
@@ -173,6 +181,9 @@ class ControlParser(BaseParser):
 
         elif self.has_regex_annotation(key) and not self.annotation_to_pattern[key].match(value):
             raise MissingAnnotationRegexWarning(self.get_line_number(), line, position, key, value)
+
+        elif self.has_local_annotation(key) and value not in self.annotation_to_local[key]:  # TODO condense
+            raise IllegalAnnotationValueWarning(self.get_line_number(), line, position, key, value)
 
     def raise_for_missing_citation(self, line: str, position: int) -> None:
         """Raise an exception if there is no citation present in the parser.

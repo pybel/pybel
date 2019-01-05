@@ -38,6 +38,16 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
         super(TestParseMetadata, self).setUp()
         self.parser = MetadataParser(manager=self.manager)
 
+    def help_test_local_annotation(self, annotation: str) -> None:
+        """Check that the annotation is defined locally."""
+        self.assertTrue(self.parser.has_annotation(annotation))
+        self.assertNotIn(annotation, self.parser.annotation_to_term)
+        self.assertFalse(self.parser.has_enumerated_annotation(annotation))
+        self.assertNotIn(annotation, self.parser.annotation_pattern)
+        self.assertFalse(self.parser.has_regex_annotation(annotation))
+        self.assertIn(annotation, self.parser.annotation_to_local)
+        self.assertTrue(self.parser.has_local_annotation(annotation))
+
     def test_namespace_nocache(self):
         """Checks namespace is loaded into parser but not cached"""
         s = 'DEFINE NAMESPACE TESTNS3 AS URL "{}"'.format(test_ns_nocache_path)
@@ -78,23 +88,24 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
         """Tests that an annotation defined by a list can't be overwritten by a definition by URL"""
         s = 'DEFINE ANNOTATION TextLocation AS LIST {"Abstract","Results","Legend","Review"}'
         self.parser.parseString(s)
-        self.assertIn('TextLocation', self.parser.annotation_to_term)
+        self.help_test_local_annotation('TextLocation')
 
         s = 'DEFINE ANNOTATION TextLocation AS URL "{}"'.format(MESH_DISEASES_URL)
         with self.assertRaises(RedefinedAnnotationError):
             self.parser.parseString(s)
 
-        self.assertIn('TextLocation', self.parser.annotation_to_term)
-        self.assertIn('Abstract', self.parser.annotation_to_term['TextLocation'])
+        self.help_test_local_annotation('TextLocation')
+        self.assertIn('Abstract', self.parser.annotation_to_local['TextLocation'])
 
     def test_underscore(self):
         """Tests that an underscore is a valid character in an annotation name"""
         s = 'DEFINE ANNOTATION Text_Location AS LIST {"Abstract","Results","Legend","Review"}'
         self.parser.parseString(s)
-        self.assertIn('Text_Location', self.parser.annotation_to_term)
+        self.help_test_local_annotation('Text_Location')
 
     @mock_bel_resources
     def test_control_compound(self, mock_get):
+        text_location = 'TextLocation'
         lines = [
             'DEFINE ANNOTATION {} AS URL "{}"'.format(MESH_DISEASES_KEYWORD, MESH_DISEASES_URL),
             'DEFINE NAMESPACE {} AS URL "{}"'.format(HGNC_KEYWORD, HGNC_URL),
@@ -104,7 +115,7 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
 
         self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotation_to_term)
         self.assertIn(HGNC_KEYWORD, self.parser.namespace_to_term)
-        self.assertIn('TextLocation', self.parser.annotation_to_term)
+        self.help_test_local_annotation(text_location)
 
     @unittest.skipUnless('PYBEL_BASE' in os.environ, "Need local files to test local files")
     def test_squiggly_filepath(self):
