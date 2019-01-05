@@ -61,6 +61,7 @@ def left_full_join(g, h):
 
     update_metadata(h, g)
     update_node_helper(h, g)
+    g.warnings.extend(h.warnings)
 
 
 def left_outer_join(g, h):
