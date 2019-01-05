@@ -4,7 +4,7 @@
 
 import logging
 import re
-from typing import Mapping, Optional, Set
+from typing import Mapping, Optional, Pattern, Set
 
 from pyparsing import And, MatchFirst, ParseResults, Suppress, Word, pyparsing_common as ppc
 
@@ -46,10 +46,11 @@ class MetadataParser(BaseParser):
 
     def __init__(self,
                  manager,
-                 namespace_dict: Optional[Mapping[str, Mapping[str, str]]] = None,
-                 annotation_dict: Optional[Mapping[str, Set[str]]] = None,
-                 namespace_regex: Optional[Mapping[str, str]] = None,
-                 annotation_regex: Optional[Mapping[str, str]] = None,
+                 namespace_to_term: Optional[Mapping[str, Mapping[str, str]]] = None,
+                 namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
+                 annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
+                 annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
+                 annotation_to_local: Optional[Mapping[str, Set[str]]] = None,
                  default_namespace: Optional[Set[str]] = None,
                  allow_redefinition: bool = False,
                  skip_validation: bool = False,
@@ -57,10 +58,10 @@ class MetadataParser(BaseParser):
         """Build a metadata parser.
 
         :param manager: A cache manager
-        :param namespace_dict: Enumerated namespace mapping from {namespace keyword: {name: encoding}}
-        :param annotation_dict: Enumerated annotation mapping from {annotation keyword: set of valid values}
-        :param namespace_regex: Regular expression namespace mapping from {namespace keyword: regex string}
-        :param annotation_regex: Regular expression annotation mapping from {annotation keyword: regex string}
+        :param namespace_to_term: Enumerated namespace mapping from {namespace keyword: {name: encoding}}
+        :param namespace_to_pattern: Regular expression namespace mapping from {namespace keyword: regex string}
+        :param annotation_to_term: Enumerated annotation mapping from {annotation keyword: set of valid values}
+        :param annotation_to_pattern: Regular expression annotation mapping from {annotation keyword: regex string}
         :param default_namespace: A set of strings that can be used without a namespace
         :param skip_validation: If true, don't download and cache namespaces/annotations
         """
@@ -70,18 +71,20 @@ class MetadataParser(BaseParser):
         self.skip_validation = skip_validation
 
         #: A dictionary of cached {namespace keyword: {name: encoding}}
-        self.namespace_dict = {} if namespace_dict is None else namespace_dict
-        #: A dictionary of cached {annotation keyword: set of values}
-        self.annotation_dict = {} if annotation_dict is None else annotation_dict
-        #: A dictionary of {namespace keyword: regular expression string}
-        self.namespace_regex = {} if namespace_regex is None else namespace_regex
-        #: A set of names that can be used without a namespace
-        self.default_namespace = set(default_namespace) if default_namespace is not None else None
-        #: A dictionary of {annotation keyword: regular expression string}
-        self.annotation_regex = {} if annotation_regex is None else annotation_regex
-
+        self.namespace_to_term = namespace_to_term or {}
         #: A set of namespaces's URLs that can't be cached
         self.uncachable_namespaces = set()
+        #: A dictionary of {namespace keyword: regular expression string}
+        self.namespace_to_pattern = namespace_to_pattern or {}
+        #: A set of names that can be used without a namespace
+        self.default_namespace = set(default_namespace) if default_namespace is not None else None
+
+        #: A dictionary of cached {annotation keyword: set of values}
+        self.annotation_to_term = annotation_to_term or {}
+        #: A dictionary of {annotation keyword: regular expression string}
+        self.annotation_to_pattern = annotation_to_pattern or {}
+        #: A dictionary of cached {annotation keyword: set of values}
+        self.annotation_to_local = annotation_to_local or {}
 
         #: A dictionary containing the document metadata
         self.document_metadata = {}
@@ -90,8 +93,6 @@ class MetadataParser(BaseParser):
         self.namespace_url_dict = {}
         #: A dictionary from {annotation keyword: BEL annotation URL}
         self.annotation_url_dict = {}
-        #: A set of annotation keywords that are defined ad-hoc in the BEL script
-        self.annotation_lists = set()
 
         self.document = And([
             set_tag,
@@ -186,26 +187,21 @@ class MetadataParser(BaseParser):
         namespace_result = self.manager.get_or_create_namespace(url)
 
         if isinstance(namespace_result, dict):
-            self.namespace_dict[namespace] = namespace_result
+            self.namespace_to_term[namespace] = namespace_result
             self.uncachable_namespaces.add(url)
         else:
-            self.namespace_dict[namespace] = self.manager.get_namespace_encoding(url)
+            self.namespace_to_term[namespace] = self.manager.get_namespace_encoding(url)
 
         return tokens
 
-    def handle_namespace_pattern(self, line: str, position: int, tokens: ParseResults):
+    def handle_namespace_pattern(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
         """Handle statements like ``DEFINE NAMESPACE X AS PATTERN "Y"``.
 
-        :param line: The line being parsed
-        :param position: The position in the line being parsed
-        :param tokens: The tokens from PyParsing
         :raises: RedefinedNamespaceError
         """
         namespace = tokens['name']
         self.raise_for_redefined_namespace(line, position, namespace)
-
-        self.namespace_regex[namespace] = tokens['value']
-
+        self.namespace_to_pattern[namespace] = re.compile(tokens['value'])
         return tokens
 
     def raise_for_redefined_annotation(self, line: str, position: int, annotation: str) -> None:
@@ -236,7 +232,7 @@ class MetadataParser(BaseParser):
         if self.skip_validation:
             return tokens
 
-        self.annotation_dict[keyword] = self.manager.get_annotation_entry_names(url)
+        self.annotation_to_term[keyword] = self.manager.get_annotation_entry_names(url)
 
         return tokens
 
@@ -250,46 +246,46 @@ class MetadataParser(BaseParser):
         """
         annotation = tokens['name']
         self.raise_for_redefined_annotation(line, position, annotation)
-
-        values = set(tokens['values'])
-
-        self.annotation_dict[annotation] = values
-        self.annotation_lists.add(annotation)
-
+        self.annotation_to_local[annotation] = set(tokens['values'])
         return tokens
 
-    def handle_annotation_pattern(self, line: str, position: int, tokens: ParseResults):
+    def handle_annotation_pattern(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
         """Handle statements like ``DEFINE ANNOTATION X AS PATTERN "Y"``.
 
-        :param line: The line being parsed
-        :param position: The position in the line being parsed
-        :param tokens: The tokens from PyParsing
         :raises: RedefinedAnnotationError
         """
         annotation = tokens['name']
         self.raise_for_redefined_annotation(line, position, annotation)
-        self.annotation_regex[annotation] = tokens['value']
+        self.annotation_to_pattern[annotation] = re.compile(tokens['value'])
         return tokens
 
     def has_enumerated_annotation(self, annotation: str) -> bool:
         """Check if this annotation is defined by an enumeration."""
-        return annotation in self.annotation_dict
+        return annotation in self.annotation_to_term
 
     def has_regex_annotation(self, annotation: str) -> bool:
         """Check if this annotation is defined by a regular expression."""
-        return annotation in self.annotation_regex
+        return annotation in self.annotation_to_pattern
+
+    def has_local_annotation(self, annotation: str) -> bool:
+        """Check if this annotation is defined by an locally."""
+        return annotation in self.annotation_to_local
 
     def has_annotation(self, annotation: str) -> bool:
         """Check if this annotation is defined."""
-        return self.has_enumerated_annotation(annotation) or self.has_regex_annotation(annotation)
+        return (
+            self.has_enumerated_annotation(annotation) or
+            self.has_regex_annotation(annotation) or
+            self.has_local_annotation(annotation)
+        )
 
     def has_enumerated_namespace(self, namespace: str) -> bool:
         """Check if this namespace is defined by an enumeration."""
-        return namespace in self.namespace_dict
+        return namespace in self.namespace_to_term
 
     def has_regex_namespace(self, namespace: str) -> bool:
         """Check if this namespace is defined by a regular expression."""
-        return namespace in self.namespace_regex
+        return namespace in self.namespace_to_pattern
 
     def has_namespace(self, namespace: str) -> bool:
         """Check if this namespace is defined."""

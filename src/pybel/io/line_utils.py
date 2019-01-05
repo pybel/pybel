@@ -102,10 +102,11 @@ def parse_lines(graph: BELGraph,
     bel_parser = BELParser(
         graph=graph,
         # terminologies
-        namespace_dict=metadata_parser.namespace_dict,
-        annotation_dict=metadata_parser.annotation_dict,
-        namespace_regex=metadata_parser.namespace_regex,
-        annotation_regex=metadata_parser.annotation_regex,
+        namespace_to_term=metadata_parser.namespace_to_term,
+        namespace_to_pattern=metadata_parser.namespace_to_pattern,
+        annotation_to_term=metadata_parser.annotation_to_term,
+        annotation_to_pattern=metadata_parser.annotation_to_pattern,
+        annotation_to_local=metadata_parser.annotation_to_local,
         # language settings
         allow_nested=allow_nested,
         citation_clearing=citation_clearing,
@@ -204,14 +205,17 @@ def parse_definitions(graph: BELGraph,
                 raise exc from e
 
     graph.namespace_url.update(metadata_parser.namespace_url_dict)
-    graph.namespace_pattern.update(metadata_parser.namespace_regex)
+    graph.namespace_pattern.update({
+        keyword: pattern.pattern
+        for keyword, pattern in metadata_parser.namespace_to_pattern.items()
+    })
 
     graph.annotation_url.update(metadata_parser.annotation_url_dict)
-    graph.annotation_pattern.update(metadata_parser.annotation_regex)
-    graph.annotation_list.update({
-        keyword: metadata_parser.annotation_dict[keyword]
-        for keyword in metadata_parser.annotation_lists
+    graph.annotation_pattern.update({
+        keyword: pattern.pattern
+        for keyword, pattern in metadata_parser.annotation_to_pattern.items()
     })
+    graph.annotation_list.update(metadata_parser.annotation_to_local)
     graph.uncached_namespaces.update(metadata_parser.uncachable_namespaces)
 
     log.info('Finished parsing definitions section in %.02f seconds', time.time() - parse_definitions_start_time)

@@ -3,8 +3,7 @@
 """A module holding the :class:`IdentifierParser`."""
 
 import logging
-import re
-from typing import Mapping, Optional, Set
+from typing import Mapping, Optional, Pattern, Set
 
 from pyparsing import ParseResults, Suppress
 
@@ -28,30 +27,26 @@ class IdentifierParser(BaseParser):
     """
 
     def __init__(self,
-                 namespace_dict: Optional[Mapping[str, Mapping[str, str]]] = None,
-                 namespace_regex: Optional[Mapping[str, str]] = None,
+                 namespace_to_term: Optional[Mapping[str, Mapping[str, str]]] = None,
+                 namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
                  default_namespace: Optional[Set[str]] = None,
                  allow_naked_names: bool = False,
                  ) -> None:
         """Initialize the identifier parser.
 
-        :param namespace_dict: A dictionary of {namespace: {name: encoding}}
-        :param namespace_regex: A dictionary of {namespace: regular expression string} to compile
+        :param namespace_to_term: A dictionary of {namespace: {name: encoding}}
+        :param namespace_to_pattern: A dictionary of {namespace: regular expression string} to compile
         :param default_namespace: A set of strings that can be used without a namespace
         :param allow_naked_names: If true, turn off naked namespace failures
         """
-        self._namespace_dict = namespace_dict
-        self._namespace_regex = {} if namespace_regex is None else namespace_regex
-        self._namespace_regex_compiled = {
-            keyword: re.compile(pattern)
-            for keyword, pattern in self.namespace_regex.items()
-        }
+        self.namespace_to_terms = namespace_to_term or {}
+        self.namespace_to_pattern = namespace_to_pattern or {}
         self.default_namespace = set(default_namespace) if default_namespace is not None else None
         self.allow_naked_names = allow_naked_names
 
         self.identifier_qualified = word(NAMESPACE) + Suppress(':') + (word | quote)(NAME)
 
-        if self.namespace_dict is not None:
+        if self.namespace_to_terms:
             self.identifier_qualified.setParseAction(self.handle_identifier_qualified)
 
         self.identifier_bare = (word | quote)(NAME)
@@ -64,28 +59,13 @@ class IdentifierParser(BaseParser):
 
         super(IdentifierParser, self).__init__(self.identifier_qualified | self.identifier_bare)
 
-    @property
-    def namespace_dict(self) -> Mapping[str, Mapping[str, str]]:
-        """Get the dictionary of {namespace: {name: encodings}}."""
-        return self._namespace_dict
-
-    @property
-    def namespace_regex(self) -> Mapping[str, str]:
-        """Get the dictionary of {namespace keyword: regular expression string}."""
-        return self._namespace_regex
-
-    @property
-    def namespace_regex_compiled(self):
-        """Get the dictionary of {namespace keyword: compiled regular expression}."""
-        return self._namespace_regex_compiled
-
     def has_enumerated_namespace(self, namespace: str) -> bool:
         """Check that the namespace has been defined by an enumeration."""
-        return namespace in self.namespace_dict
+        return namespace in self.namespace_to_terms
 
     def has_regex_namespace(self, namespace: str) -> bool:
         """Check that the namespace has been defined by a regular expression."""
-        return namespace in self.namespace_regex
+        return namespace in self.namespace_to_pattern
 
     def has_namespace(self, namespace: str) -> bool:
         """Check that the namespace has either been defined by an enumeration or a regular expression."""
@@ -93,11 +73,11 @@ class IdentifierParser(BaseParser):
 
     def has_enumerated_namespace_name(self, namespace: str, name: str) -> bool:
         """Check that the namespace is defined by an enumeration and that the name is a member."""
-        return self.has_enumerated_namespace(namespace) and name in self.namespace_dict[namespace]
+        return self.has_enumerated_namespace(namespace) and name in self.namespace_to_terms[namespace]
 
     def has_regex_namespace_name(self, namespace: str, name: str) -> bool:
         """Check that the namespace is defined as a regular expression and the name matches it."""
-        return self.has_regex_namespace(namespace) and self.namespace_regex_compiled[namespace].match(name)
+        return self.has_regex_namespace(namespace) and self.namespace_to_pattern[namespace].match(name)
 
     def has_namespace_name(self, line: str, position: int, namespace: str, name: str) -> bool:
         """Check that the namespace is defined and has the given name."""

@@ -96,14 +96,14 @@ def node_link_data(graph: BELGraph) -> Mapping[str, Any]:
     return {
         'directed': True,
         'multigraph': True,
-        'graph': graph.graph,
+        'graph': graph.graph.copy(),
         'nodes': [
             _augment_node_with_sha512(node)
             for node in nodes
         ],
         'links': [
             dict(chain(
-                data.items(),
+                data.copy().items(),
                 [('source', mapping[u]), ('target', mapping[v]), ('key', key)]
             ))
             for u, v, key, data in graph.edges(keys=True, data=True)
@@ -127,6 +127,10 @@ def node_link_graph(data: Mapping[str, Any]) -> BELGraph:
     """
     graph = BELGraph()
     graph.graph = data.get('graph', {})
+    graph.graph[GRAPH_ANNOTATION_LIST] = {
+        keyword: set(values)
+        for keyword, values in graph.graph[GRAPH_ANNOTATION_LIST].items()
+    }
 
     mapping = []
 

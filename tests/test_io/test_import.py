@@ -4,6 +4,7 @@
 
 import logging
 import os
+import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -255,14 +256,14 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
         self.assert_has_edge(self.misordered_graph, egfr, casp8, **e3)
 
 
-namespaces = {
+namespace_to_term = {
     'TESTNS': {
         "1": "GRP",
         "2": "GRP"
     }
 }
 
-annotations = {
+annotation_to_term = {
     'TestAnnotation1': {'A', 'B', 'C'},
     'TestAnnotation2': {'X', 'Y', 'Z'},
     'TestAnnotation3': {'D', 'E', 'F'}
@@ -275,9 +276,9 @@ class TestFull(TestTokenParserBase):
         cls.graph = BELGraph()
         cls.parser = BELParser(
             cls.graph,
-            namespace_dict=namespaces,
-            annotation_dict=annotations,
-            namespace_regex={'dbSNP': 'rs[0-9]*'}
+            namespace_to_term=namespace_to_term,
+            annotation_to_term=annotation_to_term,
+            namespace_to_pattern={'dbSNP': re.compile('rs[0-9]*')}
         )
 
     def test_regex_match(self):

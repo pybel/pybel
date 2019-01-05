@@ -142,7 +142,6 @@ class TestSummary(unittest.TestCase):
         graph.add_association(a, c, n(), n())
 
         top_hubs = get_top_hubs(graph, count=1)
-        print(top_hubs[0])
         self.assertEqual(1, len(top_hubs))
         node, degree = top_hubs[0]
         self.assertEqual(a, node)

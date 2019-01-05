@@ -3,6 +3,7 @@
 """Contains the main data structure for PyBEL."""
 
 import logging
+from collections import defaultdict
 from copy import deepcopy
 from typing import Any, Dict, Hashable, Iterable, List, Mapping, Optional, Set, TextIO, Tuple, Union
 
@@ -31,14 +32,6 @@ __all__ = [
 
 log = logging.getLogger(__name__)
 
-RESOURCE_DICTIONARY_NAMES = (
-    GRAPH_NAMESPACE_URL,
-    GRAPH_NAMESPACE_PATTERN,
-    GRAPH_ANNOTATION_URL,
-    GRAPH_ANNOTATION_PATTERN,
-    GRAPH_ANNOTATION_LIST,
-)
-
 CitationDict = Mapping[str, str]
 AnnotationsDict = Mapping[str, Mapping[str, bool]]
 AnnotationsHint = Union[Mapping[str, str], Mapping[str, Set[str]], AnnotationsDict]
@@ -58,8 +51,6 @@ class BELGraph(nx.MultiDiGraph):
                  copyright: Optional[str] = None,
                  disclaimer: Optional[str] = None,
                  path: Optional[str] = None,
-                 data=None,
-                 **kwargs
                  ) -> None:
         """Initialize a BEL graph with its associated metadata.
 
@@ -72,17 +63,23 @@ class BELGraph(nx.MultiDiGraph):
         :param license: The license for this graph
         :param copyright: The copyright for this graph
         :param disclaimer: The disclaimer for this graph
-        :param data: initial graph data to pass to :class:`networkx.MultiDiGraph`
-        :param kwargs: keyword arguments to pass to :class:`networkx.MultiDiGraph`
 
         For IO, see the :mod:`pybel.io` module.
         """
-        super().__init__(data=data, **kwargs)
+        super().__init__()
 
         self._warnings = []
 
-        if GRAPH_METADATA not in self.graph:
-            self.graph[GRAPH_METADATA] = {}
+        self.graph[GRAPH_PYBEL_VERSION] = get_version()
+        self.graph[GRAPH_METADATA] = {}
+
+        self.graph[GRAPH_NAMESPACE_URL] = {}
+        self.graph[GRAPH_NAMESPACE_PATTERN] = {}
+        self.graph[GRAPH_UNCACHED_NAMESPACES] = set()
+
+        self.graph[GRAPH_ANNOTATION_URL] = {}
+        self.graph[GRAPH_ANNOTATION_PATTERN] = {}
+        self.graph[GRAPH_ANNOTATION_LIST] = defaultdict(set)
 
         if name:
             self.name = name
@@ -111,16 +108,6 @@ class BELGraph(nx.MultiDiGraph):
         if path:
             self.path = path
 
-        if GRAPH_PYBEL_VERSION not in self.graph:
-            self.graph[GRAPH_PYBEL_VERSION] = get_version()
-
-        for resource_dict in RESOURCE_DICTIONARY_NAMES:
-            if resource_dict not in self.graph:
-                self.graph[resource_dict] = {}
-
-        if GRAPH_UNCACHED_NAMESPACES not in self.graph:
-            self.graph[GRAPH_UNCACHED_NAMESPACES] = set()
-
     def fresh_copy(self) -> 'BELGraph':
         """Create an unfilled :class:`BELGraph` as a hook for other :mod:`networkx` functions.
 
@@ -139,7 +126,7 @@ class BELGraph(nx.MultiDiGraph):
         self.graph[GRAPH_PATH] = path
 
     @property
-    def document(self) -> Dict[str, Any]:   # noqa: D401
+    def document(self) -> Dict[str, Any]:  # noqa: D401
         """The dictionary holding the metadata from the ``SET DOCUMENT`` statements in the source BEL script.
 
         All keys are normalized according to :data:`pybel.constants.DOCUMENT_KEYS`.

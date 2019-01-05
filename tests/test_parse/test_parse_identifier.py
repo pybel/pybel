@@ -9,11 +9,11 @@ from pybel.parser.parse_identifier import IdentifierParser
 
 class TestIdentifierParser(unittest.TestCase):
     def setUp(self):
-        self.namespace_dicts = {
-            'A': {'1', '2', '3'},
-            'B': {'4', '5', '6'}
+        self.namespace_to_term = {
+            'A': dict(zip('123','PPP')),
+            'B': dict(zip('456','PPP')),
         }
-        self.parser = IdentifierParser(namespace_dict=self.namespace_dicts)
+        self.parser = IdentifierParser(namespace_to_term=self.namespace_to_term)
 
     def test_valid_1(self):
         s = 'A:3'
@@ -56,14 +56,13 @@ class TestIdentifierParser(unittest.TestCase):
 
 class TestNamespaceParserDefault(unittest.TestCase):
     def setUp(self):
-        nsd = {
-            'A': {'1', '2', '3'},
-            'B': {'4', '5', '6'}
+        namespace_to_term = {
+            'A': dict(zip('123', 'PPP')),
+            'B': dict(zip('456', 'PPP')),
         }
 
-        dns = {'X', 'Y', 'W Z'}
-
-        self.parser = IdentifierParser(namespace_dict=nsd, default_namespace=dns)
+        default_namespace = {'X', 'Y', 'W Z'}
+        self.parser = IdentifierParser(namespace_to_term=namespace_to_term, default_namespace=default_namespace)
 
     def test_valid_1(self):
         s = 'A:3'
@@ -96,12 +95,12 @@ class TestNamespaceParserDefault(unittest.TestCase):
 
 class TestNamespaceParserLenient(unittest.TestCase):
     def setUp(self):
-        nsd = {
-            'A': {'1', '2', '3'},
-            'B': {'4', '5', '6'}
+        namespace_to_term = {
+            'A': dict(zip('123', 'PPP')),
+            'B': dict(zip('456', 'PPP')),
         }
 
-        self.parser = IdentifierParser(namespace_dict=nsd, allow_naked_names=True)
+        self.parser = IdentifierParser(namespace_to_term=namespace_to_term, allow_naked_names=True)
 
     def test_valid_1(self):
         s = 'A:3'

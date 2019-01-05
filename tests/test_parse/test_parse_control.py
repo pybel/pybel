@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import re
 import unittest
 
 from pybel.constants import (
@@ -22,18 +23,18 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 
 class TestParseControl(unittest.TestCase):
     def setUp(self):
-        self.custom_annotation_dicts = {
+        self.annotation_to_term = {
             'Custom1': {'Custom1_A', 'Custom1_B'},
             'Custom2': {'Custom2_A', 'Custom2_B'}
         }
 
-        self.custom_annotation_expressions = {
-            'CustomRegex': '[0-9]+'
+        self.annotation_to_pattern = {
+            'CustomRegex': re.compile('[0-9]+')
         }
 
         self.parser = ControlParser(
-            annotation_dict=self.custom_annotation_dicts,
-            annotation_regex=self.custom_annotation_expressions
+            annotation_to_term=self.annotation_to_term,
+            annotation_to_pattern=self.annotation_to_pattern,
         )
 
 
