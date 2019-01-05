@@ -103,8 +103,8 @@ def parse_lines(graph: BELGraph,
         graph=graph,
         # terminologies
         namespace_to_term=metadata_parser.namespace_to_term,
-        annotation_to_term=metadata_parser.annotation_to_term,
         namespace_to_pattern=metadata_parser.namespace_to_pattern,
+        annotation_to_term=metadata_parser.annotation_to_term,
         annotation_to_pattern=metadata_parser.annotation_to_pattern,
         # language settings
         allow_nested=allow_nested,

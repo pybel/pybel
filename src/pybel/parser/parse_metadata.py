@@ -47,8 +47,8 @@ class MetadataParser(BaseParser):
     def __init__(self,
                  manager,
                  namespace_to_term: Optional[Mapping[str, Mapping[str, str]]] = None,
-                 annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
                  namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
+                 annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
                  annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
                  default_namespace: Optional[Set[str]] = None,
                  allow_redefinition: bool = False,
@@ -58,8 +58,8 @@ class MetadataParser(BaseParser):
 
         :param manager: A cache manager
         :param namespace_to_term: Enumerated namespace mapping from {namespace keyword: {name: encoding}}
-        :param annotation_to_term: Enumerated annotation mapping from {annotation keyword: set of valid values}
         :param namespace_to_pattern: Regular expression namespace mapping from {namespace keyword: regex string}
+        :param annotation_to_term: Enumerated annotation mapping from {annotation keyword: set of valid values}
         :param annotation_to_pattern: Regular expression annotation mapping from {annotation keyword: regex string}
         :param default_namespace: A set of strings that can be used without a namespace
         :param skip_validation: If true, don't download and cache namespaces/annotations

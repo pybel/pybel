@@ -225,8 +225,8 @@ class BELParser(BaseParser):
     def __init__(self,
                  graph,
                  namespace_to_term: Optional[Mapping[str, Mapping[str, str]]] = None,
-                 annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
                  namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
+                 annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
                  annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
                  allow_naked_names: bool = False,
                  allow_nested: bool = False,
@@ -241,10 +241,10 @@ class BELParser(BaseParser):
         :param pybel.BELGraph graph: The BEL Graph to use to store the network
         :param namespace_to_term: A dictionary of {namespace: {name: encoding}}. Delegated to
          :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :param annotation_to_term: A dictionary of {annotation: set of values}. Delegated to
-         :class:`pybel.parser.ControlParser`
         :param namespace_to_pattern: A dictionary of {namespace: regular expression strings}. Delegated to
          :class:`pybel.parser.parse_identifier.IdentifierParser`
+        :param annotation_to_term: A dictionary of {annotation: set of values}. Delegated to
+         :class:`pybel.parser.ControlParser`
         :param annotation_to_pattern: A dictionary of {annotation: regular expression strings}. Delegated to
          :class:`pybel.parser.ControlParser`
         :param allow_naked_names: If true, turn off naked namespace failures. Delegated to

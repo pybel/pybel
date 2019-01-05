@@ -60,7 +60,7 @@ class ControlParser(BaseParser):
                  ) -> None:
         """Initialize the control statement parser.
 
-        :param annotation_to_term: A dictionary of {annotation: set of valid values} for parsing
+        :param annotation_to_term: A dictionary of {annotation: set of valid values} defined with URL for parsing
         :param annotation_to_pattern: A dictionary of {annotation: regular expression string}
         :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
         :param required_annotations: Annotations that are required
