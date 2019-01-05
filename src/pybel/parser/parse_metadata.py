@@ -129,12 +129,11 @@ class MetadataParser(BaseParser):
 
         super(MetadataParser, self).__init__(self.language)
 
-    def handle_document(self, line: str, position: int, tokens: ParseResults):
+    def handle_document(self, line: str, position: int, tokens: ParseResults)-> ParseResults:
         """Handle statements like ``SET DOCUMENT X = "Y"``.
 
-        :param line: The line being parsed
-        :param position: The position in the line being parsed
-        :param tokens: The tokens from PyParsing
+        :raises: InvalidMetadataException
+        :raises: VersionFormatWarning
         """
         key = tokens['key']
         value = tokens['value']
@@ -158,20 +157,14 @@ class MetadataParser(BaseParser):
     def raise_for_redefined_namespace(self, line: str, position: int, namespace: str) -> None:
         """Raise an exception if a namespace is already defined.
 
-        :param line: The line being parsed
-        :param position: The position in the line being parsed
-        :param namespace: The namespace being parsed
         :raises: RedefinedNamespaceError
         """
         if self.disallow_redefinition and self.has_namespace(namespace):
             raise RedefinedNamespaceError(self.get_line_number(), line, position, namespace)
 
-    def handle_namespace_url(self, line: str, position: int, tokens: ParseResults):
+    def handle_namespace_url(self, line: str, position: int, tokens: ParseResults)-> ParseResults:
         """Handle statements like ``DEFINE NAMESPACE X AS URL "Y"``.
 
-        :param line: The line being parsed
-        :param position: The position in the line being parsed
-        :param tokens: The tokens from PyParsing
         :raises: RedefinedNamespaceError
         :raises: pybel.resources.exc.ResourceError
         """
@@ -207,20 +200,14 @@ class MetadataParser(BaseParser):
     def raise_for_redefined_annotation(self, line: str, position: int, annotation: str) -> None:
         """Raise an exception if the given annotation is already defined.
 
-        :param line: The line being parsed
-        :param position: The position in the line being parsed
-        :param annotation: The annotation being parsed
         :raises: RedefinedAnnotationError
         """
         if self.disallow_redefinition and self.has_annotation(annotation):
             raise RedefinedAnnotationError(self.get_line_number(), line, position, annotation)
 
-    def handle_annotations_url(self, line: str, position: int, tokens: ParseResults):
+    def handle_annotations_url(self, line: str, position: int, tokens: ParseResults)-> ParseResults:
         """Handle statements like ``DEFINE ANNOTATION X AS URL "Y"``.
 
-        :param line: The line being parsed
-        :param position: The position in the line being parsed
-        :param tokens: The tokens from PyParsing
         :raises: RedefinedAnnotationError
         """
         keyword = tokens['name']
@@ -236,12 +223,9 @@ class MetadataParser(BaseParser):
 
         return tokens
 
-    def handle_annotation_list(self, line: str, position: int, tokens: ParseResults):
+    def handle_annotation_list(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
         """Handle statements like ``DEFINE ANNOTATION X AS LIST {"Y","Z", ...}``.
 
-        :param line: The line being parsed
-        :param position: The position in the line being parsed
-        :param tokens: The tokens from PyParsing
         :raises: RedefinedAnnotationError
         """
         annotation = tokens['name']

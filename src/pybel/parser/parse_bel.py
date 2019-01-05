@@ -7,7 +7,7 @@ This module handles parsing BEL relations and validation of semantics.
 
 import itertools as itt
 import logging
-from typing import List, Mapping, Optional, Pattern, Set
+from typing import Dict, List, Mapping, Optional, Pattern, Set, Union
 
 import pyparsing
 from pyparsing import (
@@ -36,7 +36,7 @@ from ..constants import (
     POSITIVE_CORRELATION, PRODUCTS, PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, TARGET, TO_LOC,
     TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, TWO_WAY_RELATIONS, VARIANTS, belns_encodings,
 )
-from ..dsl import cell_surface_expression, secretion
+from ..dsl import BaseEntity, cell_surface_expression, secretion
 from ..tokens import parse_result_to_dsl
 
 __all__ = [
@@ -609,44 +609,17 @@ class BELParser(BaseParser):
         super(BELParser, self).__init__(self.language, streamline=autostreamline)
 
     @property
-    def namespace_dict(self) -> Mapping[str, Mapping[str, str]]:
+    def _namespace_dict(self) -> Mapping[str, Mapping[str, str]]:
         """Get the dictionary of {namespace: {name: encoding}} stored in the internal identifier parser."""
         return self.identifier_parser.namespace_to_terms
 
     @property
-    def namespace_regex(self) -> Mapping[str, Pattern]:
-        """Return the dictionary of {namespace keyword: regular expression} in the internal identifier parser."""
-        return self.identifier_parser.namespace_to_pattern
-
-    @property
-    def annotation_dict(self):
-        """Return the dictionary of annotations to their set of values.
-
-        :rtype: dict[str,set[str]]
-        """
-        return self.control_parser.annotation_to_term
-
-    @property
-    def annotation_regex(self):
-        """Return the dictionary of annotations defined by regular expressions.
-
-        :rtype: dict[str,str]
-        """
-        return self.control_parser.annotation_to_pattern
-
-    @property
-    def allow_naked_names(self):
-        """Return if naked names should be parsed (``True``), or if errors should be thrown (``False``).
-
-        :rtype: bool
-        """
+    def _allow_naked_names(self) -> bool:
+        """Return if naked names should be parsed (``True``), or if errors should be thrown (``False``)."""
         return self.identifier_parser.allow_naked_names
 
-    def get_annotations(self):
-        """Get the current annotations in this parser.
-
-        :rtype: dict
-        """
+    def get_annotations(self) -> Dict:
+        """Get the current annotations in this parser."""
         return self.control_parser.get_annotations()
 
     def clear(self):
@@ -667,38 +640,35 @@ class BELParser(BaseParser):
         self._handle_relation_harness(line, position, {
             SUBJECT: tokens[SUBJECT],
             RELATION: tokens[RELATION],
-            OBJECT: tokens[OBJECT][SUBJECT]
+            OBJECT: tokens[OBJECT][SUBJECT],
         })
 
         self._handle_relation_harness(line, position, {
             SUBJECT: tokens[OBJECT][SUBJECT],
             RELATION: tokens[OBJECT][RELATION],
-            OBJECT: tokens[OBJECT][OBJECT]
+            OBJECT: tokens[OBJECT][OBJECT],
         })
         return tokens
 
     def check_function_semantics(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
         """Raise an exception if the function used on the tokens is wrong.
 
-        :param str line: The line being parsed
-        :param int position: The position in the line being parsed
-        :param pyparsing.ParseResult tokens: The tokens from PyParsing
         :raises: InvalidFunctionSemantic
         """
-        if not self.namespace_dict or NAMESPACE not in tokens:
+        if not self._namespace_dict or NAMESPACE not in tokens:
             return tokens
 
         namespace, name = tokens[NAMESPACE], tokens[NAME]
 
-        if namespace in self.namespace_regex:
+        if namespace in self.identifier_parser.namespace_to_pattern:
             return tokens
 
-        if self.allow_naked_names and tokens[NAMESPACE] == DIRTY:  # Don't check dirty names in lenient mode
+        if self._allow_naked_names and tokens[NAMESPACE] == DIRTY:  # Don't check dirty names in lenient mode
             return tokens
 
         valid_functions = set(itt.chain.from_iterable(
             belns_encodings.get(k, set())
-            for k in self.namespace_dict[namespace][name]
+            for k in self._namespace_dict[namespace][name]
         ))
 
         if not valid_functions:
@@ -733,9 +703,9 @@ class BELParser(BaseParser):
         """Handle list relations like ``p(X) hasComponents list(p(Y), p(Z), ...)``."""
         return self._handle_list_helper(tokens, HAS_COMPONENT)
 
-    def _add_qualified_edge_helper(self, u, v, relation, annotations, subject_modifier, object_modifier):
+    def _add_qualified_edge_helper(self, u, v, relation, annotations, subject_modifier, object_modifier) -> str:
         """Add a qualified edge from the internal aspects of the parser."""
-        self.graph.add_qualified_edge(
+        return self.graph.add_qualified_edge(
             u,
             v,
             relation=relation,
@@ -747,9 +717,9 @@ class BELParser(BaseParser):
             **{LINE: self.get_line_number()}
         )
 
-    def _add_qualified_edge(self, u, v, relation, annotations, subject_modifier, object_modifier):
+    def _add_qualified_edge(self, u, v, relation, annotations, subject_modifier, object_modifier) -> str:
         """Add an edge, then adds the opposite direction edge if it should."""
-        self._add_qualified_edge_helper(
+        sha512 = self._add_qualified_edge_helper(
             u,
             v,
             relation=relation,
@@ -768,13 +738,10 @@ class BELParser(BaseParser):
                 subject_modifier=object_modifier,
             )
 
-    def _handle_relation(self, tokens):
-        """Handle a relation.
+        return sha512
 
-        In this policy, all annotations are stored as sets, including single annotations.
-
-        :param pyparsing.ParseResult tokens: The tokens from PyParsing
-        """
+    def _handle_relation(self, tokens: ParseResults) -> str:
+        """Handle a relation."""
         subject_node_dsl = self.ensure_node(tokens[SUBJECT])
         object_node_dsl = self.ensure_node(tokens[OBJECT])
 
@@ -795,7 +762,7 @@ class BELParser(BaseParser):
             for annotation_name, annotation_entry in self.control_parser.annotations.items()
         }
 
-        self._add_qualified_edge(
+        return self._add_qualified_edge(
             subject_node_dsl,
             object_node_dsl,
             relation=tokens[RELATION],
@@ -804,14 +771,10 @@ class BELParser(BaseParser):
             object_modifier=object_modifier,
         )
 
-    def _handle_relation_harness(self, line: str, position: int, tokens):
+    def _handle_relation_harness(self, line: str, position: int, tokens: Union[ParseResults, Dict]) -> ParseResults:
         """Handle BEL relations based on the policy specified on instantiation.
 
         Note: this can't be changed after instantiation!
-
-        :param str line: The line being parsed
-        :param int position: The position in the line being parsed
-        :param pyparsing.ParseResult tokens: The tokens from PyParsing
         """
         if not self.control_parser.citation:
             raise MissingCitationException(self.get_line_number(), line, position)
@@ -824,7 +787,6 @@ class BELParser(BaseParser):
             raise MissingAnnotationWarning(self.get_line_number(), line, position, missing_required_annotations)
 
         self._handle_relation(tokens)
-
         return tokens
 
     def handle_unqualified_relation(self, _, __, tokens: ParseResults) -> ParseResults:
@@ -856,27 +818,17 @@ class BELParser(BaseParser):
         self.graph.set_node_description(subject_node_dsl, description)
         return tokens
 
-    def ensure_node(self, tokens):
-        """Turn parsed tokens into canonical node name and makes sure its in the graph.
-
-        :param pyparsing.ParseResult tokens: Tokens from PyParsing
-        :return: A pair of the PyBEL node tuple and the PyBEL node data dictionary
-        :rtype: BaseEntity
-        """
+    def ensure_node(self, tokens: ParseResults) -> BaseEntity:
+        """Turn parsed tokens into canonical node name and makes sure its in the graph."""
         if MODIFIER in tokens:
             return self.ensure_node(tokens[TARGET])
 
-        node_dsl = parse_result_to_dsl(tokens)
-        self.graph.add_node_from_data(node_dsl)
-        return node_dsl
+        node = parse_result_to_dsl(tokens)
+        self.graph.add_node_from_data(node)
+        return node
 
     def handle_translocation_illegal(self, line: str, position: int, tokens: ParseResults) -> None:
-        """Handle a malformed translocation.
-
-        :param str line: The line being parsed
-        :param int position: The position in the line being parsed
-        :param pyparsing.ParseResult tokens: The tokens from PyParsing
-        """
+        """Handle a malformed translocation."""
         raise MalformedTranslocationWarning(self.get_line_number(), line, position, tokens)
 
 
