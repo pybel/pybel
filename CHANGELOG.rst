@@ -19,12 +19,14 @@ Changed
 ~~~~~~~
 - Use a declarative setup (https://github.com/pybel/pybel/issues/360)
 - Pass flake8 (https://github.com/pybel/pybel/issues/363)
+- Change handling of locally defined namespaces in parser
 
 Fixed
 ~~~~~
 - Add sha512 to JSON of edges' nodes when retrieving from the database
 - Add nested sha512 identifiers when outputting node-link (https://github.com/pybel/pybel/issues/370)
 - Fixed handling of invalid entities in the BEL parser (https://github.com/pybel/pybel/issues/368)
+- Fixed merging of locally defined annotations when using `pybel.union` (https://github.com/pybel/pybel/issues/372)
 
 Removed
 ~~~~~~~

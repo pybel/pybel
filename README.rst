@@ -28,8 +28,7 @@ If you use PyBEL in your work, please cite:
 Getting Started
 ---------------
 This example illustrates how the `Selventa Small Corpus <https://wiki.openbel.org/display/home/Summary+of+Large+and+Small+BEL+Corpuses>`_
-can be loaded and visualized in a Jupyter Notebook. Note that this requires an extension, the ``pybel-jupyter``
-repository. This is not included by default because installing the Jupyter and iPython stack has a large footprint.
+can be loaded and visualized in a Jupyter Notebook.
 
 .. code-block:: python
 
@@ -37,17 +36,17 @@ repository. This is not included by default because installing the Jupyter and i
    >>> graph = pybel.from_url('http://resources.openbel.org/belframework/20150611/knowledge/small_corpus.bel')
    >>> graph.number_of_nodes()  # Will be smaller than expected because we have the most strict settings enabled
    1207
-   >>> pybel_jupyter.to_jupyter(graph)  # Need to pip install pybel-jupyter first
 
 More examples can be found in the `documentation <http://pybel.readthedocs.io>`_ and in the
 `PyBEL Notebooks <https://github.com/pybel/pybel-notebooks>`_ repository.
 
 PyBEL also installs a command line interface with the command :code:`pybel` for simple utilities such as data
-conversion. In this example, a BEL Script is exported to GraphML for viewing in Cytoscape.
+conversion. In this example, a BEL document is compiled then exported to GraphML for viewing in Cytoscape.
 
 .. code-block:: sh
 
-    $ pybel convert --path ~/Desktop/example.bel --graphml ~/Desktop/example.graphml
+    $ pybel compile ~/Desktop/example.bel
+    $ pybel serialize ~/Desktop/example.bel --graphml ~/Desktop/example.graphml
 
 In Cytoscape, open with :code:`Import > Network > From File`.
 
