@@ -21,13 +21,8 @@ def update_metadata(source, target) -> None:
 
     target.annotation_url.update(source.annotation_url)
     target.annotation_pattern.update(source.annotation_pattern)
-
     for keyword, values in source.annotation_list.items():
-        if keyword not in target.annotation_list:
-            target.annotation_list[keyword] = values
-        else:
-            for value in values:
-                target.annotation_list[keyword].add(value)
+        target.annotation_list[keyword].update(values)
 
 
 def update_node_helper(source: nx.Graph, target: nx.Graph) -> None:
