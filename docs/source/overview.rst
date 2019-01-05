@@ -1,21 +1,17 @@
 Overview
 ========
-
-Background on Systems Biology Modelling
----------------------------------------
-
+Background on Systems Biology Modeling
+--------------------------------------
 Biological Expression Language (BEL)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Biological Expression Language (BEL) is a domain specific language that enables the expression of complex molecular
 relationships and their context in a machine-readable form. Its simple grammar and expressive power have led to its
-successful use to describe
-complex disease networks with several thousands of relationships. For a detailed explanation, see the
-BEL `1.0 <http://openbel.org/language/version_1.0/bel_specification_version_1.0.html>`_ and
+successful use to describe complex disease networks with several thousands of relationships. For a detailed
+explanation, see the BEL `1.0 <http://openbel.org/language/version_1.0/bel_specification_version_1.0.html>`_ and
 `2.0 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_ specifications.
 
 OpenBEL Links
 ~~~~~~~~~~~~~
-
 - OpenBEL on `Google Groups <https://groups.google.com/forum/#!forum/openbel-discuss>`_
 - OpenBEL `Wiki <https://wiki.openbel.org/>`_
 - OpenBEL on `GitHub <https://github.com/OpenBEL>`_
@@ -38,7 +34,6 @@ This code has not been maintained to reflect the changes in the underlying resou
 forked and updated at https://github.com/pybel/resource-generator to reflect the most recent versions of the underlying
 namespaces. The files are now distributed using the Fraunhofer SCAI
 `Artifactory server <https://arty.scai.fraunhofer.de/artifactory/bel/>`_.
-
 
 Generating New Namespaces
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -95,6 +90,11 @@ References:
 - https://www.ncbi.nlm.nih.gov/pubmed/17948130
 - https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4655260/
 
+.. note::
+
+   This syntax is currently under consideration as `BEP-0006 <https://github.com/belbio/bep/blob/bep-0006/docs/drafts/BEP-0006.md>`_.
+
+
 Definition of Namespaces as Regular Expressions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 BEL imposes the constraint that each identifier must be qualified with an enumerated namespace to enable semantic
@@ -105,6 +105,11 @@ against the underlying database. The dbSNP namespace can be defined with a synta
 definitions with regular expressions as follows:
 
 ``DEFINE NAMESPACE dbSNP AS PATTERN "rs[0-9]+"``
+
+.. note::
+
+   This syntax was proposed with `BEP-0005 <https://github.com/belbio/bep/blob/master/docs/published/BEP-0005.md>`_
+   and has been officially accepted as part of the BEL 2.1 specification.
 
 Definition of Resources using OWL
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -146,21 +151,8 @@ curator, so they are excluded.
 
 Multiple Annotations
 ~~~~~~~~~~~~~~~~~~~~
-When an annotation has a list, it means that the following BEL relations are true for each of the listed values.
-The lines below show a BEL relation that corresponds to two edges, each with the same citation but different values
-for :code:`ExampleAnnotation`. This should be considered carefully for analyses dealing with the number of edges
-between two entities.
-
-.. code::
-
-    SET Citation = {"PubMed","Example Article","12345"}
-    SET ExampleAnnotation = {"Example Value 1", "Example Value 2"}
-    p(HGNC:YFG1) -> p(HGNC:YFG2)
-
-Furthermore, if there are multiple annotations with lists, the following BEL relations are true for all of the
-different combinations of them. The following statements will produce four edges, as the cartesian product of the values
-used for both :code:`ExampleAnnotation1` and :code:`ExampleAnnotation2`. This might not be the knowledge that the
-annotator wants to express, and is prone to mistakes, so use of annotation lists are not recommended.
+All single annotations are considered as single element sets. When multiple annotations are present, all are unioned
+and attached to a given edge.
 
 .. code::
 
@@ -254,7 +246,7 @@ Why Not RDF?
 Current bel2rdf serialization tools build URLs with the OpenBEL Framework domain as a namespace, rather than respect
 the original namespaces of original entities. This does not follow the best
 practices of the semantic web, where URL’s representing an object point to a real page with additional information.
-For example, UniProt Knowledge Base does an exemplary job of this. Ultimately, using non-standard URL’s makes
+For example, UniProt does an exemplary job of this. Ultimately, using non-standard URLs makes
 harmonizing and data integration difficult.
 
 Additionally, the RDF format does not easily allow for the annotation of edges. A simple statement in BEL that one
