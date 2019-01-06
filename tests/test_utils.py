@@ -2,15 +2,13 @@
 
 """Tests for PyBEL utilities."""
 
-import unittest
-
 import time
-from six import string_types
+import unittest
 
 from pybel.parser.exc import PlaceholderAminoAcidWarning
 from pybel.parser.modifiers.constants import amino_acid
 from pybel.parser.utils import nest
-from pybel.resources.definitions import get_bel_resource
+from pybel.resources import get_bel_resource
 from pybel.resources.exc import EmptyResourceError
 from pybel.resources.utils import get_iso_8601_date
 from pybel.testing.constants import test_an_1, test_ns_empty
@@ -51,7 +49,7 @@ class TestRandom(unittest.TestCase):
 
     def test_get_date(self):
         d = get_iso_8601_date()
-        self.assertIsInstance(d, string_types)
+        self.assertIsInstance(d, str)
         self.assertEqual(d[:4], time.strftime('%Y'))
         self.assertEqual(d[4:6], time.strftime('%m'))
         self.assertEqual(d[6:8], time.strftime('%d'))

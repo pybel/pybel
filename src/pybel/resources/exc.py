@@ -6,13 +6,17 @@
 class ResourceError(ValueError):
     """A base class for resource errors."""
 
-    def __init__(self, location):  # noqa: D107
+    def __init__(self, location: str):  # noqa: D107
         """Initialize the ResourceError.
 
-        :param str location: The URL location of the BEL resource
+        :param location: The URL location of the BEL resource
         """
-        super(ValueError, self).__init__(location)
-        self.location = location
+        super().__init__(location)
+
+    @property
+    def location(self):  # noqa: D401
+        """The URL location of the BEL resource."""
+        return self.args[0]
 
 
 class MissingResourceError(ResourceError):

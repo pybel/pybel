@@ -12,7 +12,7 @@ from pybel.parser import MetadataParser
 from pybel.parser.exc import (
     InvalidMetadataException, RedefinedAnnotationError, RedefinedNamespaceError, VersionFormatWarning,
 )
-from pybel.resources.document import split_file_to_annotations_and_definitions
+from pybel.resources import split_file_to_annotations_and_definitions
 from pybel.testing.cases import FleetingTemporaryCacheMixin
 from pybel.testing.constants import test_an_1, test_bel_simple, test_ns_1, test_ns_nocache_path
 from pybel.testing.mocks import mock_bel_resources

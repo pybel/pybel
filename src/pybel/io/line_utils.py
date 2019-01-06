@@ -18,8 +18,7 @@ from ..parser.exc import (
     BELParserWarning, BELSyntaxError, InconsistentDefinitionError, MalformedMetadataException, MissingMetadataException,
     PlaceholderAminoAcidWarning, VersionFormatWarning,
 )
-from ..resources.document import split_file_to_annotations_and_definitions
-from ..resources.exc import ResourceError
+from ..resources import ResourceError, split_file_to_annotations_and_definitions
 from ..struct.graph import BELGraph
 
 __all__ = [

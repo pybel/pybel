@@ -40,7 +40,7 @@ from ..dsl import BaseEntity
 from ..language import (
     BEL_DEFAULT_NAMESPACE_URL, BEL_DEFAULT_NAMESPACE_VERSION, activity_mapping, gmod_mappings, pmod_mappings,
 )
-from ..resources.definitions import get_bel_resource
+from ..resources import get_bel_resource
 from ..struct.graph import AnnotationsDict, BELGraph
 from ..struct.operations import union
 from ..struct.summary.node_summary import get_names

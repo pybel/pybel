@@ -15,7 +15,7 @@ from pybel.parser.exc import (
     UndefinedAnnotationWarning,
 )
 from pybel.parser.parse_control import set_citation_stub
-from pybel.resources.document import sanitize_file_lines
+from pybel.resources.read_document import sanitize_file_lines
 from tests.constants import SET_CITATION_TEST, test_citation_dict
 
 logging.getLogger("requests").setLevel(logging.WARNING)
