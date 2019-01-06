@@ -20,6 +20,7 @@ Changed
 - Use a declarative setup (https://github.com/pybel/pybel/issues/360)
 - Pass flake8 (https://github.com/pybel/pybel/issues/363)
 - Change handling of locally defined namespaces in parser
+- Excise `pybel.resources` module to new package [`bel_resources`](https://github.com/cthoyt/bel-resources)
 
 Fixed
 ~~~~~
