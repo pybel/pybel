@@ -3,4 +3,4 @@ python:
   version: 3
   pip_install: true
   extra_requirements:
-  - docs
+    - docs
