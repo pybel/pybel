@@ -6,6 +6,7 @@ import itertools as itt
 import logging
 from typing import Iterable, List, Mapping, Optional, TextIO, Tuple
 
+from bel_resources import make_knowledge_header
 from .constants import (
     ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_REFERENCE, CITATION_TYPE, COMPLEX, COMPOSITE,
     DEGRADATION, EFFECT, EVIDENCE, FROM_LOC, FUNCTION, FUSION, GOCC_KEYWORD, GOCC_LATEST, IDENTIFIER, LOCATION,
@@ -13,7 +14,6 @@ from .constants import (
     UNQUALIFIED_EDGES, VARIANTS,
 )
 from .dsl import BaseEntity
-from .resources import make_knowledge_header
 from .typing import EdgeData
 from .utils import ensure_quotes
 

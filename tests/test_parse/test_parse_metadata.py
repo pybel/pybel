@@ -12,25 +12,14 @@ from pybel.parser import MetadataParser
 from pybel.parser.exc import (
     InvalidMetadataException, RedefinedAnnotationError, RedefinedNamespaceError, VersionFormatWarning,
 )
-from pybel.resources import split_file_to_annotations_and_definitions
 from pybel.testing.cases import FleetingTemporaryCacheMixin
-from pybel.testing.constants import test_an_1, test_bel_simple, test_ns_1, test_ns_nocache_path
+from pybel.testing.constants import test_an_1, test_ns_1, test_ns_nocache_path
 from pybel.testing.mocks import mock_bel_resources
 from tests.constants import (
     HGNC_KEYWORD, HGNC_URL, MESH_DISEASES_KEYWORD, MESH_DISEASES_URL, help_check_hgnc,
 )
 
 logging.getLogger("requests").setLevel(logging.WARNING)
-
-
-class TestSplitLines(unittest.TestCase):
-    def test_parts(self):
-        with open(test_bel_simple) as lines:
-            docs, definitions, statements = split_file_to_annotations_and_definitions(lines)
-
-            self.assertEqual(8, len(list(docs)))
-            self.assertEqual(4, len(list(definitions)))
-            self.assertEqual(14, len(list(statements)))
 
 
 class TestParseMetadata(FleetingTemporaryCacheMixin):

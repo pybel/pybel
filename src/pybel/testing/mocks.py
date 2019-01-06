@@ -72,4 +72,4 @@ class MockSession:
         """Mock closing a connection by not doing anything."""
 
 
-mock_bel_resources = mock.patch('pybel.resources.utils.requests.Session', side_effect=MockSession)
+mock_bel_resources = mock.patch('bel_resources.utils.requests.Session', side_effect=MockSession)

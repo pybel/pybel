@@ -2,17 +2,11 @@
 
 """Tests for PyBEL utilities."""
 
-import time
 import unittest
 
 from pybel.parser.exc import PlaceholderAminoAcidWarning
 from pybel.parser.modifiers.constants import amino_acid
 from pybel.parser.utils import nest
-from pybel.resources import get_bel_resource
-from pybel.resources.exc import EmptyResourceError
-from pybel.resources.utils import get_iso_8601_date
-from pybel.testing.constants import test_an_1, test_ns_empty
-from pybel.testing.mocks import mock_bel_resources
 from pybel.utils import expand_dict, flatten_dict, tokenize_version
 
 
@@ -47,35 +41,8 @@ class TestRandom(unittest.TestCase):
         with self.assertRaises(PlaceholderAminoAcidWarning):
             amino_acid.parseString('X')
 
-    def test_get_date(self):
-        d = get_iso_8601_date()
-        self.assertIsInstance(d, str)
-        self.assertEqual(d[:4], time.strftime('%Y'))
-        self.assertEqual(d[4:6], time.strftime('%m'))
-        self.assertEqual(d[6:8], time.strftime('%d'))
-
 
 class TestUtils(unittest.TestCase):
-    def test_download_url(self):
-        """Test downloading a resource by URL."""
-        with mock_bel_resources:
-            res = get_bel_resource(test_an_1)
-
-        expected_values = {
-            'TestAnnot1': 'O',
-            'TestAnnot2': 'O',
-            'TestAnnot3': 'O',
-            'TestAnnot4': 'O',
-            'TestAnnot5': 'O'
-        }
-
-        self.assertEqual(expected_values, res['Values'])
-
-    def test_download_raises_on_empty(self):
-        """Test that an error is thrown if an empty resource is downloaded."""
-        with mock_bel_resources, self.assertRaises(EmptyResourceError):
-            get_bel_resource(test_ns_empty)
-
     def test_expand_dict(self):
         flat_dict = {
             'k1': 'v1',

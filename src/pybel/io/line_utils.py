@@ -11,6 +11,7 @@ from pyparsing import ParseException
 from sqlalchemy.exc import OperationalError
 from tqdm import tqdm
 
+from bel_resources import ResourceError, split_file_to_annotations_and_definitions
 from ..constants import INVERSE_DOCUMENT_KEYS, REQUIRED_METADATA
 from ..manager import Manager
 from ..parser import BELParser, MetadataParser
@@ -18,7 +19,6 @@ from ..parser.exc import (
     BELParserWarning, BELSyntaxError, InconsistentDefinitionError, MalformedMetadataException, MissingMetadataException,
     PlaceholderAminoAcidWarning, VersionFormatWarning,
 )
-from ..resources import ResourceError, split_file_to_annotations_and_definitions
 from ..struct.graph import BELGraph
 
 __all__ = [

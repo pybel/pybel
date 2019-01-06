@@ -7,8 +7,8 @@ import logging
 import os
 from typing import Iterable
 
+from bel_resources.utils import download
 from .line_utils import parse_lines
-from ..resources.utils import download
 from ..struct import BELGraph
 
 __all__ = [

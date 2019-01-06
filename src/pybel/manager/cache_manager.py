@@ -18,6 +18,7 @@ from sqlalchemy import and_, exists, func
 from sqlalchemy.orm import aliased
 from tqdm import tqdm
 
+from bel_resources import get_bel_resource
 from .base_manager import BaseManager, build_engine_session
 from .exc import EdgeAddError
 from .lookup_manager import LookupManager
@@ -40,7 +41,6 @@ from ..dsl import BaseEntity
 from ..language import (
     BEL_DEFAULT_NAMESPACE_URL, BEL_DEFAULT_NAMESPACE_VERSION, activity_mapping, gmod_mappings, pmod_mappings,
 )
-from ..resources import get_bel_resource
 from ..struct.graph import AnnotationsDict, BELGraph
 from ..struct.operations import union
 from ..struct.summary.node_summary import get_names
