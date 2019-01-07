@@ -4,14 +4,16 @@
 
 import itertools as itt
 import logging
+import time
 from typing import Iterable, List, Mapping, Optional, TextIO, Tuple
 
+import bel_resources.constants
 from bel_resources import make_knowledge_header
 from .constants import (
     ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_REFERENCE, CITATION_TYPE, COMPLEX, COMPOSITE,
     DEGRADATION, EFFECT, EVIDENCE, FROM_LOC, FUNCTION, FUSION, GOCC_KEYWORD, GOCC_LATEST, IDENTIFIER, LOCATION,
     MODIFIER, NAME, NAMESPACE, OBJECT, PYBEL_AUTOEVIDENCE, REACTION, RELATION, SUBJECT, TO_LOC, TRANSLOCATION,
-    UNQUALIFIED_EDGES, VARIANTS,
+    UNQUALIFIED_EDGES, VARIANTS, VERSION,
 )
 from .dsl import BaseEntity
 from .typing import EdgeData
@@ -182,7 +184,10 @@ def _to_bel_lines_header(graph) -> Iterable[str]:
     if GOCC_KEYWORD not in graph.namespace_url:
         graph.namespace_url[GOCC_KEYWORD] = GOCC_LATEST
 
-    return make_knowledge_header(
+    yield '# This document was created by PyBEL v{} and bel-resources v{} on {}\n'.format(
+        VERSION, bel_resources.constants.VERSION, time.asctime()
+    )
+    yield from make_knowledge_header(
         namespace_url=graph.namespace_url,
         namespace_patterns=graph.namespace_pattern,
         annotation_url=graph.annotation_url,
@@ -210,8 +215,7 @@ def _to_bel_lines_body(graph) -> Iterable[str]:
     qualified_edges = sort_qualified_edges(graph)
 
     for citation, citation_edges in group_citation_edges(qualified_edges):
-        yield '#' * 80
-        yield 'SET Citation = {{{}}}'.format(citation)
+        yield 'SET Citation = {{{}}}\n'.format(citation)
 
         for evidence, evidence_edges in group_evidence_edges(citation_edges):
             yield 'SET SupportingText = "{}"'.format(evidence)
@@ -230,6 +234,7 @@ def _to_bel_lines_body(graph) -> Iterable[str]:
 
             yield 'UNSET SupportingText'
         yield 'UNSET Citation'
+        yield '\n' + '#' * 80
 
 
 def _to_bel_lines_footer(graph) -> Iterable[str]:
@@ -272,7 +277,7 @@ def to_bel_lines(graph) -> Iterable[str]:
     return itt.chain(
         _to_bel_lines_header(graph),
         _to_bel_lines_body(graph),
-        _to_bel_lines_footer(graph)
+        _to_bel_lines_footer(graph),
     )
 
 
