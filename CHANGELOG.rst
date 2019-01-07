@@ -6,7 +6,7 @@ The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
 
-`0.13.0 <https://github.com/pybel/pybel/compare/v0.12.2...0.13.0>`_ - UNRELEASED
+`0.13.0 <https://github.com/pybel/pybel/compare/v0.12.2...0.13.0>`_ - 2019-01-07
 --------------------------------------------------------------------------------
 Added
 ~~~~~
