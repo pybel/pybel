@@ -20,7 +20,7 @@ Development |develop_build| |develop_windows_build| |develop_coverage| |develop_
 
 Citation
 --------
-If you use PyBEL in your work, please cite:
+If you find PyBEL useful for your work, please cite:
 
 .. [1] Hoyt, C. T., *et al.* (2017). `PyBEL: a Computational Framework for Biological Expression Language
        <https://doi.org/10.1093/bioinformatics/btx660>`_. Bioinformatics, 34(December), 1–2.
@@ -28,11 +28,11 @@ If you use PyBEL in your work, please cite:
 Getting Started
 ---------------
 This example illustrates how the `Selventa Small Corpus <https://wiki.openbel.org/display/home/Summary+of+Large+and+Small+BEL+Corpuses>`_
-can be loaded and visualized in a Jupyter Notebook.
+can be loaded.
 
 .. code-block:: python
 
-   >>> import pybel, pybel_jupyter
+   >>> import pybel
    >>> graph = pybel.from_url('http://resources.openbel.org/belframework/20150611/knowledge/small_corpus.bel')
    >>> graph.number_of_nodes()  # Will be smaller than expected because we have the most strict settings enabled
    1207
@@ -41,7 +41,8 @@ More examples can be found in the `documentation <http://pybel.readthedocs.io>`_
 `PyBEL Notebooks <https://github.com/pybel/pybel-notebooks>`_ repository.
 
 PyBEL also installs a command line interface with the command :code:`pybel` for simple utilities such as data
-conversion. In this example, a BEL document is compiled then exported to GraphML for viewing in Cytoscape.
+conversion. In this example, a BEL document is compiled then exported to `GraphML <http://graphml.graphdrawing.org/>`_
+for viewing in Cytoscape.
 
 .. code-block:: sh
 
@@ -57,21 +58,22 @@ your favorite terminal:
 
 .. code-block:: sh
 
-    $ python3 -m pip install pybel
+    $ pip install pybel
 
 or from the latest code on `GitHub <https://github.com/pybel/pybel>`_ with:
 
 .. code-block:: sh
 
-    $ python3 -m pip install git+https://github.com/pybel/pybel.git@develop
+    $ pip install git+https://github.com/pybel/pybel.git
 
 See the `installation documentation <http://pybel.readthedocs.io/en/latest/installation.html>`_ for more advanced
-instructions. Also, check the change log at :code:`CHANGELOG.rst`.
+instructions. Also, check the change log at `CHANGELOG.rst <https://github.com/pybel/pybel/blob/develop/CHANGELOG.rst>`_.
 
 Contributing
 ------------
 Contributions, whether filing an issue, making a pull request, or forking, are appreciated. See
-:code:`CONTRIBUTING.rst` for more information on getting involved. Please add your name to :code:`AUTHORS.rst`!
+`CONTRIBUTING.rst <https://github.com/pybel/pybel/blob/develop/CONTRIBUTING.rst>`_ for more information on getting
+involved. Please add your name to `AUTHORS.rst <https://github.com/pybel/pybel/blob/develop/AUTHORS.rst>`_!
 
 Acknowledgements
 ----------------
