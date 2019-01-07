@@ -20,7 +20,7 @@ Development |develop_build| |develop_windows_build| |develop_coverage| |develop_
 
 Citation
 --------
-If you find PyBEL useful for your work, please cite:
+If you find PyBEL useful for your work, please consider citing:
 
 .. [1] Hoyt, C. T., *et al.* (2017). `PyBEL: a Computational Framework for Biological Expression Language
        <https://doi.org/10.1093/bioinformatics/btx660>`_. Bioinformatics, 34(December), 1–2.
