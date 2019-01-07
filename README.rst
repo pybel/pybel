@@ -1,5 +1,5 @@
-PyBEL |zenodo|
-==============
+PyBEL |zenodo| |build| |windows_build| |coverage| |documentation|
+=================================================================
 `PyBEL <http://pybel.readthedocs.io>`_ is a pure Python package for parsing and handling biological networks encoded in
 the `Biological Expression Language <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_
 (BEL). It also facilitates data interchange between common formats and databases such as
@@ -12,11 +12,6 @@ suite of functions and pipelines for analyzing the resulting biological networks
 
 We realize there we have a name conflict with the python wrapper for the cheminformatics package, OpenBabel. If you're
 looking for their python wrapper, see `here <https://github.com/openbabel/openbabel/tree/master/scripts/python>`_.
-
-=========== =============== ======================= ================== =======================
-Stable      |stable_build|  |stable_windows_build|  |stable_coverage|  |stable_documentation|
-Development |develop_build| |develop_windows_build| |develop_coverage| |develop_documentation|
-=========== =============== ======================= ================== =======================
 
 Citation
 --------
@@ -94,35 +89,19 @@ Links
 - Distributed by `PyPI <https://pypi.python.org/pypi/pybel>`_
 - Chat on `Gitter <https://gitter.im/pybel/Lobby>`_
 
-.. |stable_build| image:: https://travis-ci.org/pybel/pybel.svg?branch=master
-    :target: https://travis-ci.org/pybel/pybel
-    :alt: Stable Build Status
-
-.. |stable_windows_build| image:: https://ci.appveyor.com/api/projects/status/v22l3ymg3bdq525d/branch/master?svg=true
-    :target: https://ci.appveyor.com/project/cthoyt/pybel
-    :alt: Stable Windows Build Status
-
-.. |stable_coverage| image:: https://codecov.io/gh/pybel/pybel/coverage.svg?branch=master
-    :target: https://codecov.io/gh/pybel/pybel/branch/master
-    :alt: Stable Coverage Status
-
-.. |stable_documentation| image:: https://readthedocs.org/projects/pybel/badge/?version=stable
-    :target: http://pybel.readthedocs.io/en/stable/
-    :alt: Stable Documentation Status
-
-.. |develop_build| image:: https://travis-ci.org/pybel/pybel.svg?branch=develop
+.. |build| image:: https://travis-ci.org/pybel/pybel.svg?branch=develop
     :target: https://travis-ci.org/pybel/pybel
     :alt: Development Build Status
 
-.. |develop_windows_build| image:: https://ci.appveyor.com/api/projects/status/v22l3ymg3bdq525d/branch/develop?svg=true
+.. |windows_build| image:: https://ci.appveyor.com/api/projects/status/v22l3ymg3bdq525d/branch/develop?svg=true
     :target: https://ci.appveyor.com/project/cthoyt/pybel
     :alt: Development Windows Build Status
 
-.. |develop_coverage| image:: https://codecov.io/gh/pybel/pybel/coverage.svg?branch=develop
+.. |coverage| image:: https://codecov.io/gh/pybel/pybel/coverage.svg?branch=develop
     :target: https://codecov.io/gh/pybel/pybel/branch/develop
     :alt: Development Coverage Status
 
-.. |develop_documentation| image:: https://readthedocs.org/projects/pybel/badge/?version=latest
+.. |documentation| image:: https://readthedocs.org/projects/pybel/badge/?version=latest
     :target: http://pybel.readthedocs.io/en/latest/
     :alt: Development Documentation Status
 
