@@ -256,12 +256,12 @@ class TestSerializeBEL(unittest.TestCase):
         self.assertEqual(1, self.graph.number_of_edges())
 
         expected_lines = [
-            '#' * 80,
-            'SET Citation = {{"PubMed", "{}"}}'.format(self.citation),
+            'SET Citation = {{"PubMed", "{}"}}\n'.format(self.citation),
             'SET SupportingText = "{}"'.format(self.evidence),
             'p(HGNC:YFG1) increases p(HGNC:YFG)',
             'UNSET SupportingText',
-            'UNSET Citation'
+            'UNSET Citation\n',
+            '#' * 80,
         ]
 
         self.help_check_lines(expected_lines)
@@ -284,14 +284,14 @@ class TestSerializeBEL(unittest.TestCase):
         self.assertEqual(1, self.graph.number_of_edges())
 
         expected_lines = [
-            '#' * 80,
-            'SET Citation = {{"PubMed", "{}"}}'.format(self.citation),
+            'SET Citation = {{"PubMed", "{}"}}\n'.format(self.citation),
             'SET SupportingText = "{}"'.format(self.evidence),
             'SET {} = "{}"'.format(a1, v1),
             'p(HGNC:YFG1) increases p(HGNC:YFG)',
             'UNSET {}'.format(a1),
             'UNSET SupportingText',
-            'UNSET Citation'
+            'UNSET Citation\n',
+            '#' * 80,
         ]
 
         self.help_check_lines(expected_lines)
@@ -314,14 +314,14 @@ class TestSerializeBEL(unittest.TestCase):
         self.assertEqual(1, self.graph.number_of_edges())
 
         expected_lines = [
-            '#' * 80,
-            'SET Citation = {{"PubMed", "{}"}}'.format(self.citation),
+            'SET Citation = {{"PubMed", "{}"}}\n'.format(self.citation),
             'SET SupportingText = "{}"'.format(self.evidence),
             'SET {} = {{"{}", "{}"}}'.format(a1, v1, v2),
             'p(HGNC:YFG1) increases p(HGNC:YFG)',
             'UNSET {}'.format(a1),
             'UNSET SupportingText',
-            'UNSET Citation',
+            'UNSET Citation\n',
+            ('#' * 80),
         ]
 
         self.help_check_lines(expected_lines)

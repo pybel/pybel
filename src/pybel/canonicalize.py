@@ -233,8 +233,8 @@ def _to_bel_lines_body(graph) -> Iterable[str]:
                     yield _unset_annotation_to_str(keys)
 
             yield 'UNSET SupportingText'
-        yield 'UNSET Citation'
-        yield '\n' + '#' * 80
+        yield 'UNSET Citation\n'
+        yield '#' * 80
 
 
 def _to_bel_lines_footer(graph) -> Iterable[str]:
