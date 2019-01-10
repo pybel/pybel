@@ -103,7 +103,8 @@ def _simple_po_to_dict(tokens):
 
     return dsl(
         namespace=tokens[NAMESPACE],
-        name=tokens[NAME],
+        name=tokens.get(NAME),
+        identifier=tokens.get(IDENTIFIER),
     )
 
 
