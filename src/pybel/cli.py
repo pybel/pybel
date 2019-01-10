@@ -462,8 +462,9 @@ def echo_warnings_via_pager(warnings: List[WarningTuple], sep: str = '\t') -> No
     s1 = '{:>' + str(max_line_width) + '}' + sep
     s2 = '{:>' + str(max_warning_width) + '}' + sep
 
-    def _make_line(exc: BELParserWarning):
-        s = click.style(s1.format(exc.line_number), fg='blue', bold=True)
+    def _make_line(path: str, exc: BELParserWarning):
+        s = click.style(path, fg='cyan') + sep
+        s += click.style(s1.format(exc.line_number), fg='blue', bold=True)
         s += click.style(s2.format(exc.__class__.__name__),
                          fg=('red' if exc.__class__.__name__.endswith('Error') else 'yellow'))
         s += click.style(exc.line, bold=True) + sep
@@ -471,8 +472,8 @@ def echo_warnings_via_pager(warnings: List[WarningTuple], sep: str = '\t') -> No
         return s
 
     click.echo_via_pager('\n'.join(
-        _make_line(exc)
-        for _, exc, _ in warnings
+        _make_line(path, exc)
+        for path, exc, _ in warnings
     ))
 
 
