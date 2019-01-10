@@ -56,6 +56,11 @@ def left_full_join(g, h) -> None:
     >>> h = pybel.from_path('...')
     >>> left_full_join(g, h)
     """
+    g.add_nodes_from(
+        (node, data)
+        for node, data in h.nodes(data=True)
+        if node not in g
+    )
     g.add_edges_from(
         (u, v, key, data)
         for u, v, key, data in h.edges(keys=True, data=True)

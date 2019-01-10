@@ -10,6 +10,7 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_
 Fixed
 ~~~~~
 - Fix handling of node JSON with identifier but not name (https://github.com/pybel/pybel/issues/375)
+- Fix handling of isolated nodes in `pybel.union` (https://github.com/pybel/pybel/issues/373)
 
 `0.13.0 <https://github.com/pybel/pybel/compare/v0.12.2...0.13.0>`_ - 2019-01-07
 --------------------------------------------------------------------------------

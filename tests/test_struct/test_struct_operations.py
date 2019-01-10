@@ -39,26 +39,20 @@ class TestLeftFullJoin(unittest.TestCase):
         self.help_check_initial_g(self.g)
         self.help_check_initial_h(self.h)
 
-    def help_check_initial_g(self, graph):
-        """Test the initial G graph.
-
-        :type graph: pybel.BELGraph
-        """
+    def help_check_initial_g(self, graph: BELGraph):
+        """Test the initial G graph."""
         self.assertEqual(2, graph.number_of_nodes(), msg='initial graph G had wrong number of nodes')
         self.assertEqual(1, graph.number_of_edges(), msg='initial graph G had wrong number of edges')
 
-    def help_check_initial_h(self, graph):
-        """Test the initial H graph.
-
-        :type graph: pybel.BELGraph
-        """
+    def help_check_initial_h(self, graph: BELGraph):
+        """Test the initial H graph."""
         self.assertEqual(3, graph.number_of_nodes(), msg='initial graph H had wrong number of nodes')
         self.assertEqual(3, graph.number_of_edges(), msg='initial graph H had wrong number of edges')
 
-    def help_check_result(self, j):
+    def help_check_result(self, j: BELGraph):
         """Help check the result of left joining H into G.
 
-        :param pybel.BELGraph j: The resulting graph from G += H
+        :param j: The resulting graph from G += H
         """
         self.assertIn(self.tag, j.nodes[p1])
         self.assertNotIn(self.tag, j.nodes[p2])
@@ -74,6 +68,18 @@ class TestLeftFullJoin(unittest.TestCase):
         left_full_join(self.g, self.h)
         self.help_check_result(self.g)
         self.help_check_initial_h(self.h)
+
+    def test_full_join_with_isolated_nodes(self):
+        """Test what happens when there are isolated nodes."""
+        a = BELGraph()
+        a.add_increases(p1, p2, n(), n())
+        a.add_node_from_data(p4)
+        b = BELGraph()
+        b.add_increases(p2, p3, n(), n())
+        b.add_node_from_data(p5)
+        left_full_join(a, b)
+        for node in p1, p2, p3, p4, p5:
+            self.assertIn(node, a)
 
     def test_in_place_operator_failure(self):
         """Test that using the wrong type with the in-place addition operator raises an error."""
