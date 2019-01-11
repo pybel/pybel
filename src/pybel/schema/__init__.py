@@ -1,9 +1,10 @@
- # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 """Validation for PyBEL data."""
 
 import json
 import os
+
 import jsonschema
 
 __all__ = [
@@ -19,7 +20,7 @@ resolver = jsonschema.RefResolver('file://' + HERE + '/schema', NODES_SCHEMA)
 validator = jsonschema.Draft4Validator(NODES_SCHEMA, resolver=resolver)
 
 
-def validate_node(node):
+def validate_node(node) -> bool:
     """Validate against the JSON Schema for PyBEL nodes."""
     try:
         validator.validate(node)
