@@ -27,6 +27,7 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.viewcode',
+    'sphinx_autodoc_typehints',
     'sphinx_click.ext',
 ]
 
@@ -57,7 +58,7 @@ author = 'Charles Tapley Hoyt'
 #
 
 # The full version, including alpha/beta/rc tags.
-release = '0.13.0-dev'
+release = '0.13.1-dev'
 
 # The short X.Y version.
 parsed_version = re.match(
@@ -349,7 +350,7 @@ texinfo_documents = [
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
     'networkx': ('https://networkx.github.io/', None),
-    'py2neo': ('http://py2neo.org/v3/', None),
+    'py2neo': ('https://py2neo.org/v3/', None),
     'sqlalchemy': ('https://docs.sqlalchemy.org/en/latest', None),
     'indra': ('https://indra.readthedocs.io/en/latest/', None),
     'requests': ('http://docs.python-requests.org/en/master/', None),

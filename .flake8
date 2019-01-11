@@ -6,18 +6,28 @@
 
 [flake8]
 ignore =
+    # max line length
     E501
     F401
+    # star imports
     F403
+    # docstring in magic method
     D105
     # Line break after operator
     W504
+    # Docstring in __init__
+    D107
+    # Complaining about assert statements
+    S101
+    # Complains about random number generators
+    S311
+    # Complains about pickles
+    S301, S403
 exclude =
     .tox,
     .git,
     __pycache__,
     docs/source/conf.py,
-    src/pybel/cli.py
     build,
     dist,
     tests/fixtures/*,
@@ -25,9 +35,11 @@ exclude =
     *.egg-info,
     .cache,
     .eggs
-max-complexity = 10
+max-complexity = 25
+max-line-length = 120
 import-order-style = pycharm
 application-import-names =
     pybel
+    bel_resources
     tests
 format = ${cyan}%(path)s${reset}:${yellow_bold}%(row)d${reset}:${green_bold}%(col)d${reset}: ${red_bold}%(code)s${reset} %(text)s

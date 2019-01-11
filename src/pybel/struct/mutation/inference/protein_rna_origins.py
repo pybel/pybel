@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Functions for enriching the origins of Proteins, RNAs, and miRNAs."""
+
 from pybel.dsl import Protein
 from ...pipeline import in_place_transformation
 from ...pipeline.decorators import register_deprecated

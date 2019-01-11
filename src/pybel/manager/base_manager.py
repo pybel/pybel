@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""This module contains the base class for connection managers in SQLAlchemy"""
-
-from __future__ import unicode_literals
+"""This module contains the base class for connection managers in SQLAlchemy."""
 
 import logging
 
@@ -104,19 +102,19 @@ class BaseManager(object):
         self.base.metadata.bind = self.engine
         self.base.query = self.session.query_property()
 
+    def _list_model(self, model_cls):
+        """List the models in this class.
+
+        :rtype: list
+        """
+        return self.session.query(model_cls).all()
+
     def _count_model(self, model_cls):
         """Count the number of models in the database.
 
         :rtype: int
         """
         return self.session.query(model_cls).count()
-
-    def list_citations(self, model_cls):
-        """List the models in the database.
-
-        :rtype: list
-        """
-        return self.session.query(model_cls).all()
 
     def __repr__(self):
         return '<{} connection={}>'.format(self.__class__.__name__, self.engine.url)

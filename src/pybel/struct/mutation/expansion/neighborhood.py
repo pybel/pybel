@@ -17,8 +17,7 @@ __all__ = [
 
 @uni_in_place_transformation
 def expand_node_predecessors(universe, graph, node):
-    """Expands around the predecessors of the given node in the result graph by looking at the universe graph,
-    in place.
+    """Expand around the predecessors of the given node in the result graph.
 
     :param pybel.BELGraph universe: The graph containing the stuff to add
     :param pybel.BELGraph graph: The graph to add stuff to
@@ -44,8 +43,7 @@ def expand_node_predecessors(universe, graph, node):
 
 @uni_in_place_transformation
 def expand_node_successors(universe, graph, node):
-    """Expands around the successors of the given node in the result graph by looking at the universe graph,
-    in place.
+    """Expand around the successors of the given node in the result graph.
 
     :param pybel.BELGraph universe: The graph containing the stuff to add
     :param pybel.BELGraph graph: The graph to add stuff to
@@ -71,8 +69,7 @@ def expand_node_successors(universe, graph, node):
 
 @uni_in_place_transformation
 def expand_node_neighborhood(universe, graph, node):
-    """Expands around the neighborhoods of the given node in the result graph by looking at the universe graph,
-    in place.
+    """Expand around the neighborhoods of the given node in the result graph.
 
     :param pybel.BELGraph universe: The graph containing the stuff to add
     :param pybel.BELGraph graph: The graph to add stuff to
@@ -84,8 +81,7 @@ def expand_node_neighborhood(universe, graph, node):
 
 @uni_in_place_transformation
 def expand_nodes_neighborhoods(universe, graph, nodes):
-    """Expands around the neighborhoods of the given node in the result graph by looking at the universe graph,
-    in place.
+    """Expand around the neighborhoods of the given node in the result graph.
 
     :param pybel.BELGraph universe: The graph containing the stuff to add
     :param pybel.BELGraph graph: The graph to add stuff to
@@ -97,7 +93,7 @@ def expand_nodes_neighborhoods(universe, graph, nodes):
 
 @uni_in_place_transformation
 def expand_all_node_neighborhoods(universe, graph, filter_pathologies=False):
-    """Expands the neighborhoods of all nodes in the given graph based on the universe graph.
+    """Expand the neighborhoods of all nodes in the given graph.
 
     :param pybel.BELGraph universe: The graph containing the stuff to add
     :param pybel.BELGraph  graph: The graph to add stuff to

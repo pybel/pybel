@@ -3,8 +3,7 @@
 """Tests for data structures in PyBEL."""
 
 import unittest
-
-from six import StringIO, string_types
+from io import StringIO
 
 from pybel import BELGraph
 from pybel.constants import CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED
@@ -153,7 +152,7 @@ class TestGetGraphProperties(unittest.TestCase):
         evidence = self.graph.get_edge_evidence(test_source, test_target, test_key)
 
         self.assertIsNotNone(evidence)
-        self.assertIsInstance(evidence, string_types)
+        self.assertIsInstance(evidence, str)
         self.assertEqual(test_evidence, evidence)
 
         annotations = self.graph.get_edge_annotations(test_source, test_target, test_key)

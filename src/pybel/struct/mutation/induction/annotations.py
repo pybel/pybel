@@ -4,8 +4,6 @@
 
 import logging
 
-from six import string_types
-
 from .utils import get_subgraph_by_edge_filter
 from ...filters import build_annotation_dict_all_filter, build_annotation_dict_any_filter
 from ...pipeline import transformation
@@ -49,7 +47,7 @@ def get_subgraph_by_annotation_value(graph, annotation, values):
     :return: A subgraph of the original BEL graph
     :rtype: pybel.BELGraph
     """
-    if isinstance(values, string_types):
+    if isinstance(values, str):
         values = {values}
 
     return get_subgraph_by_annotations(graph, {annotation: values})

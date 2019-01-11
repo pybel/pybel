@@ -79,9 +79,9 @@ _CITATION_KEEP_KEYS = {CITATION_REFERENCE, CITATION_TYPE}
 
 @in_place_transformation
 def remove_citation_metadata(graph):
-    """"Remove the metadata associated with a citation.
+    """Remove the metadata associated with a citation.
 
-    Best practice is to add this information programatically.
+    Best practice is to add this information programmatically.
     """
     for u, v, k in graph.edges(keys=True):
         if CITATION not in graph[u][v][k]:

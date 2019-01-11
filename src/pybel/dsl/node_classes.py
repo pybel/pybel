@@ -2,11 +2,9 @@
 
 """Classes for DSL nodes."""
 
-import abc
 import hashlib
+from abc import ABCMeta, abstractmethod
 from operator import methodcaller
-
-import six
 
 from .exc import InferCentralDogmaException, PyBELDSLException
 from .utils import entity
@@ -68,8 +66,7 @@ __all__ = [
 _as_bel = methodcaller('as_bel')
 
 
-@six.add_metaclass(abc.ABCMeta)
-class BaseEntity(dict):
+class BaseEntity(dict, metaclass=ABCMeta):
     """This class represents all BEL nodes. It can be converted to a tuple and hashed."""
 
     def __init__(self, func):
@@ -91,7 +88,7 @@ class BaseEntity(dict):
     def _func(self):
         return rev_abundance_labels[self.function]
 
-    @abc.abstractmethod
+    @abstractmethod
     def as_bel(self):
         """Return this entity as a BEL string.
 
@@ -107,7 +104,7 @@ class BaseEntity(dict):
 
     @property
     def sha512(self):
-        """The SHA512 hash of this node.
+        """Get the SHA512 hash of this node.
 
         :rtype: str
         """
@@ -318,8 +315,7 @@ class CentralDogma(BaseAbundance):
         )
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Variant(dict):
+class Variant(dict, metaclass=ABCMeta):
     """The superclass for variant dictionaries."""
 
     def __init__(self, kind):
@@ -329,7 +325,7 @@ class Variant(dict):
         """
         super(Variant, self).__init__({KIND: kind})
 
-    @abc.abstractmethod
+    @abstractmethod
     def as_bel(self):
         """Return this variant as a BEL string.
 
@@ -518,7 +514,7 @@ class Fragment(Variant):
 
     @property
     def range(self):
-        """The range of this fragment."""
+        """Get the range of this fragment."""
         if FRAGMENT_MISSING in self:
             return '?'
 
@@ -828,11 +824,10 @@ class CompositeAbundance(ListAbundance):
         super(CompositeAbundance, self).__init__(func=COMPOSITE, members=members)
 
 
-@six.add_metaclass(abc.ABCMeta)
-class FusionRangeBase(dict):
+class FusionRangeBase(dict, metaclass=ABCMeta):
     """The superclass for fusion range data dictionaries."""
 
-    @abc.abstractmethod
+    @abstractmethod
     def as_bel(self):
         """Return this fusion range as BEL.
 
@@ -915,7 +910,7 @@ class FusionBase(BaseEntity):
 
     @property
     def partner_5p(self):
-        """The 5' partner.
+        """Get the 5' partner.
 
         :rtype: CentralDogma
         """
@@ -923,7 +918,7 @@ class FusionBase(BaseEntity):
 
     @property
     def partner_3p(self):
-        """The 3' partner.
+        """Get the 3' partner.
 
         :rtype: CentralDogma
         """
@@ -931,7 +926,7 @@ class FusionBase(BaseEntity):
 
     @property
     def range_5p(self):
-        """The 5' partner's range.
+        """Get the 5' partner's range.
 
         :rtype: FusionRangeBase
         """
@@ -939,7 +934,7 @@ class FusionBase(BaseEntity):
 
     @property
     def range_3p(self):
-        """The 3' partner's range.
+        """Get the 3' partner's range.
 
         :rtype: FusionRangeBase
         """

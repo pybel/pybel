@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
-Protein Substitution
-~~~~~~~~~~~~~~~~~~~~
+"""Protein Substitutions.
 
 Protein substitutions are legacy statements defined in BEL 1.0. BEL 2.0 recommends using HGVS strings. Luckily,
 the information contained in a BEL 1.0 encoding, such as :code:`p(HGNC:APP,sub(R,275,H))` can be
@@ -26,7 +24,8 @@ The previous statements both produce the underlying data:
 
 .. seealso::
 
-    - BEL 2.0 specification on `protein substitutions <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_variants_2>`_
+    - BEL 2.0 specification on `protein substitutions
+      <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_variants_2>`_
     - PyBEL module :py:class:`pybel.parser.modifiers.get_protein_substitution_language`
 """
 
@@ -49,17 +48,11 @@ log = logging.getLogger(__name__)
 psub_tag = one_of_tags(tags=['sub', 'substitution'], canonical_tag=HGVS, name=KIND)
 
 
-def _handle_psub(line, position, tokens):
-    upgraded = 'p.{}{}{}'.format(tokens[PSUB_REFERENCE], tokens[PSUB_POSITION], tokens[PSUB_VARIANT])
-    log.log(5, 'sub() in p() is deprecated: %s. Upgraded to %s', line, upgraded)
-    tokens[IDENTIFIER] = upgraded
-    del tokens[PSUB_REFERENCE]
-    del tokens[PSUB_POSITION]
-    del tokens[PSUB_VARIANT]
-    return tokens
-
-
 def get_protein_substitution_language():
+    """Build a protein substitution parser.
+
+    :rtype: pyparsing.ParseElement
+    """
     language = psub_tag + nest(
         amino_acid(PSUB_REFERENCE),
         ppc.integer(PSUB_POSITION),
@@ -67,3 +60,13 @@ def get_protein_substitution_language():
     )
     language.setParseAction(_handle_psub)
     return language
+
+
+def _handle_psub(line, _, tokens):
+    upgraded = 'p.{}{}{}'.format(tokens[PSUB_REFERENCE], tokens[PSUB_POSITION], tokens[PSUB_VARIANT])
+    log.log(5, 'sub() in p() is deprecated: %s. Upgraded to %s', line, upgraded)
+    tokens[IDENTIFIER] = upgraded
+    del tokens[PSUB_REFERENCE]
+    del tokens[PSUB_POSITION]
+    del tokens[PSUB_VARIANT]
+    return tokens

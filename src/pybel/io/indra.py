@@ -32,8 +32,7 @@ After assembling a model with `INDRA <https://github.com/sorgerlab/indra>`_, a l
     not be for a while.
 """
 
-import warnings
-from six.moves.cPickle import load
+from pickle import load
 
 __all__ = [
     'from_indra_statements',
@@ -98,14 +97,10 @@ def from_indra_pickle(path, name=None, version=None, description=None):
 
 
 def to_indra_statements(graph):
-    """Export this graph as a list of INDRA statements using `indra.sources.pybel.PybelProcessor`.
+    """Export this graph as a list of INDRA statements using the :py:class:`indra.sources.pybel.PybelProcessor`.
 
-    :param pybel.BELGraph graph: A BEL graph
     :rtype: list[indra.statements.Statement]
-
-
     """
-    warnings.warn('export to INDRA is not yet complete')
     from indra.sources.bel import process_pybel_graph
 
     pbp = process_pybel_graph(graph)

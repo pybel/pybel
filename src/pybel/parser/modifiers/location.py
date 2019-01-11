@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
+"""Locations.
 
 Location data also is added into the information in the edge for the node (subject or object) for which it was
 annotated. :code:`p(HGNC:GSK3B, pmod(P, S, 9), loc(GOCC:lysozome)) pos act(p(HGNC:GSK3B), ma(kin))` becomes:
@@ -55,6 +55,10 @@ location_tag = Suppress(oneOf(['loc', 'location']))
 
 
 def get_location_language(identifier):
+    """Build a location parser.
+
+    :rtype: pyparsing.ParseElement
+    """
     return Group(
         location_tag +
         nest(identifier)

@@ -2,14 +2,16 @@
 
 """Utilities for the PyBEL database manager."""
 
+from typing import Optional, Union
+
 from ..utils import parse_datetime
 
 
-def extract_shared_required(config, definition_header='Namespace'):
+def extract_shared_required(config, definition_header: str = 'Namespace'):
     """Get the required annotations shared by BEL namespace and annotation resource documents.
 
     :param dict config: The configuration dictionary representing a BEL resource
-    :param str definition_header: ``Namespace`` or ``AnnotationDefinition``
+    :param definition_header: ``Namespace`` or ``AnnotationDefinition``
     :rtype: dict
     """
     return {
@@ -18,11 +20,11 @@ def extract_shared_required(config, definition_header='Namespace'):
     }
 
 
-def extract_shared_optional(bel_resource, definition_header='Namespace'):
+def extract_shared_optional(bel_resource, definition_header: str = 'Namespace'):
     """Get the optional annotations shared by BEL namespace and annotation resource documents.
 
     :param dict bel_resource: A configuration dictionary representing a BEL resource
-    :param str definition_header: ``Namespace`` or ``AnnotationDefinition``
+    :param definition_header: ``Namespace`` or ``AnnotationDefinition``
     :rtype: dict
     """
     shared_mapping = {
@@ -59,12 +61,8 @@ def update_insert_values(bel_resource, mapping, values):
             values[database_column] = bel_resource[section][key]
 
 
-def int_or_str(v):
-    """Safe converts an string represent an integer to an integer or passes through none.
-
-    :type v: Optional[str]
-    :rtype: None or str or int
-    """
+def int_or_str(v: Optional[str]) -> Union[None, int, str]:
+    """Safe converts an string represent an integer to an integer or passes through ``None``."""
     if v is None:
         return
     try:

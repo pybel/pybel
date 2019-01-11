@@ -6,9 +6,10 @@ import logging
 import re
 import time
 from datetime import datetime
+from itertools import zip_longest
+from typing import Iterable, List
 
 import requests
-from six.moves import zip_longest
 
 from ..constants import CITATION, CITATION_REFERENCE, CITATION_TYPE_PUBMED
 from ..struct.filters import filter_edges
@@ -24,23 +25,19 @@ log = logging.getLogger(__name__)
 
 EUTILS_URL_FMT = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&retmode=json&id={}"
 
-re1 = re.compile('^[12][0-9]{3} [a-zA-Z]{3} \d{1,2}$')
-re2 = re.compile('^[12][0-9]{3} [a-zA-Z]{3}$')
-re3 = re.compile('^[12][0-9]{3}$')
-re4 = re.compile('^[12][0-9]{3} [a-zA-Z]{3}-[a-zA-Z]{3}$')
-re5 = re.compile('^([12][0-9]{3}) (Spring|Fall|Winter|Summer)$')
-re6 = re.compile('^[12][0-9]{3} [a-zA-Z]{3} \d{1,2}-(\d{1,2})$')
-re7 = re.compile('^[12][0-9]{3} [a-zA-Z]{3} \d{1,2}-([a-zA-Z]{3} \d{1,2})$')
+re1 = re.compile(r'^[12][0-9]{3} [a-zA-Z]{3} \d{1,2}$')
+re2 = re.compile(r'^[12][0-9]{3} [a-zA-Z]{3}$')
+re3 = re.compile(r'^[12][0-9]{3}$')
+re4 = re.compile(r'^[12][0-9]{3} [a-zA-Z]{3}-[a-zA-Z]{3}$')
+re5 = re.compile(r'^([12][0-9]{3}) (Spring|Fall|Winter|Summer)$')
+re6 = re.compile(r'^[12][0-9]{3} [a-zA-Z]{3} \d{1,2}-(\d{1,2})$')
+re7 = re.compile(r'^[12][0-9]{3} [a-zA-Z]{3} \d{1,2}-([a-zA-Z]{3} \d{1,2})$')
 
 season_map = {'Spring': '03', 'Summer': '06', 'Fall': '09', 'Winter': '12'}
 
 
-def sanitize_date(publication_date):
-    """Sanitize lots of different date strings into ISO-8601.
-
-    :param str publication_date:
-    :rtype: str
-    """
+def sanitize_date(publication_date: str) -> str:
+    """Sanitize lots of different date strings into ISO-8601."""
     if re1.search(publication_date):
         return datetime.strptime(publication_date, '%Y %b %d').strftime('%Y-%m-%d')
 
@@ -79,12 +76,8 @@ def grouper(n, iterable, fillvalue=None):
     return zip_longest(*args, fillvalue=fillvalue)
 
 
-def clean_pubmed_identifiers(pmids):
-    """Clean a list of PubMed identifiers with string strips, deduplicates, and sorting.
-
-    :param iter[str] pmids: An iterable of PubMed identifiers
-    :return:
-    """
+def clean_pubmed_identifiers(pmids: Iterable[str]) -> List[str]:
+    """Clean a list of PubMed identifiers with string strips, deduplicates, and sorting."""
     return sorted({str(pmid).strip() for pmid in pmids})
 
 
@@ -104,13 +97,12 @@ def get_pubmed_citation_response(pubmed_identifiers):
     return response.json()
 
 
-def enrich_citation_model(manager, citation, p):
+def enrich_citation_model(manager, citation, p) -> bool:
     """Enrich a citation model with the information from PubMed.
 
     :param pybel.manager.Manager manager:
     :param Citation citation: A citation model
     :param dict p: The dictionary from PubMed E-Utils corresponding to d["result"][pmid]
-    :rtype: bool
     """
     if 'error' in p:
         log.warning('Error downloading PubMed')

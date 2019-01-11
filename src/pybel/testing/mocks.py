@@ -4,14 +4,10 @@
 
 import itertools as itt
 import os
+from unittest import mock
 
 from .constants import bel_dir_path, belanno_dir_path, belns_dir_path
 from .utils import get_uri_name
-
-try:
-    from unittest import mock
-except ImportError:
-    import mock
 
 __all__ = [
     'MockResponse',
@@ -32,20 +28,17 @@ _responses = [
 class MockResponse:
     """See http://stackoverflow.com/questions/15753390/python-mock-requests-and-the-response."""
 
-    def __init__(self, mock_url):
-        """Build a mock for the requests Response object.
-
-        :param str mock_url: The real URL to mock.
-        """
+    def __init__(self, url_to_mock: str):
+        """Build a mock for the requests Response object."""
         _r = [
-            ('.belns', os.path.join(belns_dir_path, get_uri_name(mock_url))),
-            ('.belanno', os.path.join(belanno_dir_path, get_uri_name(mock_url))),
-            ('.bel', os.path.join(bel_dir_path, get_uri_name(mock_url))),
+            ('.belns', os.path.join(belns_dir_path, get_uri_name(url_to_mock))),
+            ('.belanno', os.path.join(belanno_dir_path, get_uri_name(url_to_mock))),
+            ('.bel', os.path.join(bel_dir_path, get_uri_name(url_to_mock))),
         ]
 
         self.path = None
         for suffix, path in itt.chain(_responses, _r):
-            if mock_url.endswith(suffix):
+            if url_to_mock.endswith(suffix):
                 self.path = path
                 break
 
@@ -58,10 +51,7 @@ class MockResponse:
     def iter_lines(self):
         """Iterate the lines of the mock file."""
         with open(self.path, 'rb') as file:
-            lines = list(file)
-
-        for line in lines:
-            yield line
+            yield from file
 
     def raise_for_status(self):
         """Mock raising an error, by not doing anything at all."""
@@ -74,15 +64,12 @@ class MockSession:
         """Mock mounting an adapter by not doing anything."""
 
     @staticmethod
-    def get(url):
-        """Mock getting a URL by returning a mock response.
-
-        :param str url: The URL to mock get
-        """
+    def get(url: str):
+        """Mock getting a URL by returning a mock response."""
         return MockResponse(url)
 
     def close(self):
         """Mock closing a connection by not doing anything."""
 
 
-mock_bel_resources = mock.patch('pybel.resources.utils.requests.Session', side_effect=MockSession)
+mock_bel_resources = mock.patch('bel_resources.utils.requests.Session', side_effect=MockSession)

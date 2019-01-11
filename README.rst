@@ -1,5 +1,5 @@
-PyBEL |zenodo|
-==============
+PyBEL |zenodo| |build| |windows_build| |coverage| |documentation|
+=================================================================
 `PyBEL <http://pybel.readthedocs.io>`_ is a pure Python package for parsing and handling biological networks encoded in
 the `Biological Expression Language <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_
 (BEL). It also facilitates data interchange between common formats and databases such as
@@ -13,40 +13,36 @@ suite of functions and pipelines for analyzing the resulting biological networks
 We realize there we have a name conflict with the python wrapper for the cheminformatics package, OpenBabel. If you're
 looking for their python wrapper, see `here <https://github.com/openbabel/openbabel/tree/master/scripts/python>`_.
 
-=========== =============== ======================= ================== =======================
-Stable      |stable_build|  |stable_windows_build|  |stable_coverage|  |stable_documentation|
-Development |develop_build| |develop_windows_build| |develop_coverage| |develop_documentation|
-=========== =============== ======================= ================== =======================
-
 Citation
 --------
-If you use PyBEL in your work, please cite:
+If you find PyBEL useful for your work, please consider citing:
 
-.. [1] Hoyt, C. T., *et al.* (2017). `PyBEL: a Computational Framework for Biological Expression Language <https://doi.org/10.1093/bioinformatics/btx660>`_. Bioinformatics, 34(December), 1–2.
+.. [1] Hoyt, C. T., *et al.* (2017). `PyBEL: a Computational Framework for Biological Expression Language
+       <https://doi.org/10.1093/bioinformatics/btx660>`_. Bioinformatics, 34(December), 1–2.
 
 Getting Started
 ---------------
 This example illustrates how the `Selventa Small Corpus <https://wiki.openbel.org/display/home/Summary+of+Large+and+Small+BEL+Corpuses>`_
-can be loaded and visualized in a Jupyter Notebook. Note that this requires an extension, the ``pybel-jupyter``
-repository. This is not included by default because installing the Jupyter and iPython stack has a large footprint.
+can be loaded.
 
 .. code-block:: python
 
-   >>> import pybel, pybel_jupyter
+   >>> import pybel
    >>> graph = pybel.from_url('http://resources.openbel.org/belframework/20150611/knowledge/small_corpus.bel')
    >>> graph.number_of_nodes()  # Will be smaller than expected because we have the most strict settings enabled
    1207
-   >>> pybel_jupyter.to_jupyter(graph)  # Need to pip install pybel-jupyter first
 
 More examples can be found in the `documentation <http://pybel.readthedocs.io>`_ and in the
 `PyBEL Notebooks <https://github.com/pybel/pybel-notebooks>`_ repository.
 
 PyBEL also installs a command line interface with the command :code:`pybel` for simple utilities such as data
-conversion. In this example, a BEL Script is exported to GraphML for viewing in Cytoscape.
+conversion. In this example, a BEL document is compiled then exported to `GraphML <http://graphml.graphdrawing.org/>`_
+for viewing in Cytoscape.
 
 .. code-block:: sh
 
-    $ pybel convert --path ~/Desktop/example.bel --graphml ~/Desktop/example.graphml
+    $ pybel compile ~/Desktop/example.bel
+    $ pybel serialize ~/Desktop/example.bel --graphml ~/Desktop/example.graphml
 
 In Cytoscape, open with :code:`Import > Network > From File`.
 
@@ -57,21 +53,22 @@ your favorite terminal:
 
 .. code-block:: sh
 
-    $ python3 -m pip install pybel
+    $ pip install pybel
 
 or from the latest code on `GitHub <https://github.com/pybel/pybel>`_ with:
 
 .. code-block:: sh
 
-    $ python3 -m pip install git+https://github.com/pybel/pybel.git@develop
+    $ pip install git+https://github.com/pybel/pybel.git
 
 See the `installation documentation <http://pybel.readthedocs.io/en/latest/installation.html>`_ for more advanced
-instructions. Also, check the change log at :code:`CHANGELOG.rst`.
+instructions. Also, check the change log at `CHANGELOG.rst <https://github.com/pybel/pybel/blob/develop/CHANGELOG.rst>`_.
 
 Contributing
 ------------
 Contributions, whether filing an issue, making a pull request, or forking, are appreciated. See
-:code:`CONTRIBUTING.rst` for more information on getting involved. Please add your name to :code:`AUTHORS.rst`!
+`CONTRIBUTING.rst <https://github.com/pybel/pybel/blob/develop/CONTRIBUTING.rst>`_ for more information on getting
+involved. Please add your name to `AUTHORS.rst <https://github.com/pybel/pybel/blob/develop/AUTHORS.rst>`_!
 
 Acknowledgements
 ----------------
@@ -92,35 +89,19 @@ Links
 - Distributed by `PyPI <https://pypi.python.org/pypi/pybel>`_
 - Chat on `Gitter <https://gitter.im/pybel/Lobby>`_
 
-.. |stable_build| image:: https://travis-ci.org/pybel/pybel.svg?branch=master
-    :target: https://travis-ci.org/pybel/pybel
-    :alt: Stable Build Status
-
-.. |stable_windows_build| image:: https://ci.appveyor.com/api/projects/status/v22l3ymg3bdq525d/branch/master?svg=true
-    :target: https://ci.appveyor.com/project/cthoyt/pybel
-    :alt: Stable Windows Build Status
-
-.. |stable_coverage| image:: https://codecov.io/gh/pybel/pybel/coverage.svg?branch=master
-    :target: https://codecov.io/gh/pybel/pybel/branch/master
-    :alt: Stable Coverage Status
-
-.. |stable_documentation| image:: https://readthedocs.org/projects/pybel/badge/?version=stable
-    :target: http://pybel.readthedocs.io/en/stable/
-    :alt: Stable Documentation Status
-
-.. |develop_build| image:: https://travis-ci.org/pybel/pybel.svg?branch=develop
+.. |build| image:: https://travis-ci.org/pybel/pybel.svg?branch=develop
     :target: https://travis-ci.org/pybel/pybel
     :alt: Development Build Status
 
-.. |develop_windows_build| image:: https://ci.appveyor.com/api/projects/status/v22l3ymg3bdq525d/branch/develop?svg=true
+.. |windows_build| image:: https://ci.appveyor.com/api/projects/status/v22l3ymg3bdq525d/branch/develop?svg=true
     :target: https://ci.appveyor.com/project/cthoyt/pybel
     :alt: Development Windows Build Status
 
-.. |develop_coverage| image:: https://codecov.io/gh/pybel/pybel/coverage.svg?branch=develop
+.. |coverage| image:: https://codecov.io/gh/pybel/pybel/coverage.svg?branch=develop
     :target: https://codecov.io/gh/pybel/pybel/branch/develop
     :alt: Development Coverage Status
 
-.. |develop_documentation| image:: https://readthedocs.org/projects/pybel/badge/?version=latest
+.. |documentation| image:: https://readthedocs.org/projects/pybel/badge/?version=latest
     :target: http://pybel.readthedocs.io/en/latest/
     :alt: Development Documentation Status
 

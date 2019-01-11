@@ -101,18 +101,31 @@ identify whether it is a post-translational modification (PTM), gene modificatio
     directly modifying the BELGraph's structure, use :meth:`pybel.BELGraph.add_node_from_data`, which takes care of
     automatically canonicalizing this dictionary.
 
+
 .. automodule:: pybel.parser.modifiers.variant
 
+Gene Substitutions
+~~~~~~~~~~~~~~~~~~
 .. automodule:: pybel.parser.modifiers.gene_substitution
 
+Gene Modifications
+~~~~~~~~~~~~~~~~~~
 .. automodule:: pybel.parser.modifiers.gene_modification
 
+Protein Substitutions
+~~~~~~~~~~~~~~~~~~~~~
 .. automodule:: pybel.parser.modifiers.protein_substitution
 
+Protein Modifications
+~~~~~~~~~~~~~~~~~~~~~
 .. automodule:: pybel.parser.modifiers.protein_modification
 
+Protein Truncations
+~~~~~~~~~~~~~~~~~~~
 .. automodule:: pybel.parser.modifiers.truncation
 
+Protein Fragments
+~~~~~~~~~~~~~~~~~
 .. automodule:: pybel.parser.modifiers.fragment
 
 Fusions
@@ -126,7 +139,7 @@ Unqualified edges are automatically inferred by PyBEL and do not contain citatio
 Variant and Modifications' Parent Relations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 All variants, modifications, fragments, and truncations are connected to their parent entity with an edge having
-the relationship :code:`hasParent`
+the relationship :code:`hasParent`.
 
 For :code:`p(HGNC:GSK3B, var(p.Gly123Arg))`, the following edge is inferred:
 
@@ -382,7 +395,6 @@ schema, :code:`p(HGNC:GSK3B, pmod(P, S, 9)) pos act(p(HGNC:GSK3B))` becomes:
 Locations
 ~~~~~~~~~
 .. automodule:: pybel.parser.modifiers.location
-
 
 Translocations
 ~~~~~~~~~~~~~~

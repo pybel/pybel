@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Utilities for the parsers."""
+
 import itertools as itt
 import logging
 import re
@@ -13,11 +15,11 @@ from ..constants import OBJECT, RELATION, SUBJECT
 
 log = logging.getLogger('pybel')
 
-re_match_bel_header = re.compile("(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
+re_match_bel_header = re.compile(r"(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
 
 
 def is_int(s):
-    """Determines if an object can be cast to an int
+    """Determine if an object can be cast to an int.
 
     :param s: any object
     :return: true if argument can be cast to an int:
@@ -46,15 +48,16 @@ delimited_unquoted_list = And([Suppress('{'), delimitedList(identifier), Suppres
 
 
 def nest(*content):
-    """Defines a delimited list by enumerating each element of the list"""
+    """Define a delimited list by enumerating each element of the list."""
     if len(content) == 0:
         raise ValueError('no arguments supplied')
     return And([LPF, content[0]] + list(itt.chain.from_iterable(zip(itt.repeat(C), content[1:]))) + [RPF])
 
 
 def one_of_tags(tags, canonical_tag, name=None):
-    """This is a convenience method for defining the tags usable in the :class:`BelParser`. For example,
-    statements like g(HGNC:SNCA) can be expressed also as geneAbundance(HGNC:SNCA). The language
+    """Define the tags usable in the :class:`BelParser`.
+
+    For example, statements like ``g(HGNC:SNCA)`` can be expressed also as ``geneAbundance(HGNC:SNCA)``. The language
     must define multiple different tags that get normalized to the same thing.
 
     :param list[str] tags: a list of strings that are the tags for a function. For example, ['g', 'geneAbundance'] for the
@@ -73,5 +76,5 @@ def one_of_tags(tags, canonical_tag, name=None):
 
 
 def triple(subject, relation, obj):
-    """Builds a simple triple in PyParsing that has a ``subject relation object`` format"""
+    """Build a simple triple in PyParsing that has a ``subject relation object`` format."""
     return And([Group(subject)(SUBJECT), relation(RELATION), Group(obj)(OBJECT)])

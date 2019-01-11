@@ -2,8 +2,7 @@
 
 import logging
 import unittest
-
-from six.moves import StringIO
+from io import StringIO
 
 from pybel import BELGraph
 from pybel.examples.egf_example import egf_graph

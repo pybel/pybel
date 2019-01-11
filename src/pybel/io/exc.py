@@ -2,6 +2,8 @@
 
 """Exceptions for input/output."""
 
+from typing import Tuple
+
 from ..exceptions import PyBELWarning
 
 import_version_message_fmt = 'Tried importing from PyBEL v{}. Need at least v{}'
@@ -10,13 +12,9 @@ import_version_message_fmt = 'Tried importing from PyBEL v{}. Need at least v{}'
 class ImportVersionWarning(PyBELWarning, ValueError):
     """Raised when trying to import data from an old version of PyBEL."""
 
-    def __init__(self, actual_version_tuple, minimum_version_tuple):
-        """Build an import version warning.
-
-        :type actual_version_tuple: str
-        :type minimum_version_tuple: str
-        """
-        super(ImportVersionWarning, self).__init__(actual_version_tuple, minimum_version_tuple)
+    def __init__(self, actual_version_tuple: Tuple[int, int, int], minimum_version_tuple: Tuple[int, int, int]) -> None:
+        """Build an import version warning."""
+        super().__init__(actual_version_tuple, minimum_version_tuple)
         self.actual_tuple = actual_version_tuple
         self.minimum_tuple = minimum_version_tuple
 

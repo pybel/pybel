@@ -5,9 +5,10 @@
 import codecs
 import logging
 import os
+from typing import Iterable
 
+from bel_resources.utils import download
 from .line_utils import parse_lines
-from ..resources.utils import download
 from ..struct import BELGraph
 
 __all__ = [
@@ -19,90 +20,46 @@ __all__ = [
 log = logging.getLogger(__name__)
 
 
-def from_lines(lines, manager=None, allow_nested=False, citation_clearing=True, use_tqdm=False,
-               disallow_unqualified_translocations=False, **kwargs):
+def from_lines(lines: Iterable[str], **kwargs) -> BELGraph:
     """Load a BEL graph from an iterable over the lines of a BEL script.
 
-    :param iter[str] lines: An iterable of strings (the lines in a BEL script)
-    :type manager: Optional[pybel.manager.Manager]
-    :param bool allow_nested: if true, turn off nested statement failures
-    :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
-                                Delegated to :class:`pybel.parser.ControlParser`
-    :param bool use_tqdm: If true, use tqdm for logging
-    :param bool disallow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
-    :rtype: BELGraph
+    :param lines: An iterable of strings (the lines in a BEL script)
 
-    The remaining keyword arguments to :func:`pybel.io.line_utils.parse_lines`.
+    The remaining keyword arguments are passed to :func:`pybel.io.line_utils.parse_lines`.
     """
     graph = BELGraph()
-    parse_lines(
-        graph=graph,
-        lines=lines,
-        manager=manager,
-        allow_nested=allow_nested,
-        citation_clearing=citation_clearing,
-        use_tqdm=use_tqdm,
-        disallow_unqualified_translocations=disallow_unqualified_translocations,
-        **kwargs
-    )
+    parse_lines(graph=graph, lines=lines, **kwargs)
     return graph
 
 
-def from_path(path, manager=None, allow_nested=False, citation_clearing=True, encoding='utf-8', use_tqdm=False,
-              disallow_unqualified_translocations=False, **kwargs):
+def from_path(path: str, encoding: str = 'utf-8', **kwargs) -> BELGraph:
     """Load a BEL graph from a file resource. This function is a thin wrapper around :func:`from_lines`.
 
-    :param str path: A file path
-    :type manager: Optional[pybel.manager.Manager]
-    :param bool allow_nested: if true, turn off nested statement failures
-    :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
-                                Delegated to :class:`pybel.parser.ControlParser`
-    :param str encoding: the encoding to use when reading this file. Is passed to :code:`codecs.open`.
-                     See the python `docs <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ for a
-                     list of standard encodings. For example, files starting with a UTF-8 BOM should use
-                     :code:`utf_8_sig`
-    :param bool use_tqdm: If true, use tqdm for logging
-    :param bool disallow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
-    :rtype: pybel.BELGraph
+    :param path: A file path
+    :param encoding: the encoding to use when reading this file. Is passed to :code:`codecs.open`. See the python
+     `docs <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ for a list of standard encodings. For
+     example, files starting with a UTF-8 BOM should use :code:`utf_8_sig`.
 
-    The remaining keyword arguments to :func:`pybel.io.line_utils.parse_lines`.
+    The remaining keyword arguments are passed to :func:`pybel.io.line_utils.parse_lines`.
     """
     log.info('Loading from path: %s', path)
-    with codecs.open(os.path.expanduser(path), encoding=encoding) as file:
-        return from_lines(
-            lines=file,
-            manager=manager,
-            allow_nested=allow_nested,
-            citation_clearing=citation_clearing,
-            use_tqdm=use_tqdm,
-            disallow_unqualified_translocations=disallow_unqualified_translocations,
-            **kwargs
-        )
+    graph = BELGraph(path=path)
+    with codecs.open(os.path.expanduser(path), encoding=encoding) as lines:
+        parse_lines(graph=graph, lines=lines, **kwargs)
+    return graph
 
 
-def from_url(url, manager=None, allow_nested=False, citation_clearing=True, use_tqdm=False, **kwargs):
-    """Load a BEL graph from a URL resource. This function is a thin wrapper around :func:`from_lines`.
+def from_url(url: str, **kwargs) -> BELGraph:
+    """Load a BEL graph from a URL resource.
 
-    :param str url: A valid URL pointing to a BEL resource
-    :param manager: database connection string to cache, pre-built :class:`Manager`, or None to use default cache
-    :type manager: None or str or pybel.manager.Manager
-    :param bool allow_nested: if true, turn off nested statement failures
-    :param bool citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
-                                Delegated to :class:`pybel.parser.ControlParser`
-    :param bool use_tqdm: If true, use tqdm for logging
-    :param dict kwargs: keyword arguments to :func:`pybel.io.line_utils.parse_lines`
-    :rtype: BELGraph
+    :param url: A valid URL pointing to a BEL document
+
+    The remaining keyword arguments are passed to :func:`pybel.io.line_utils.parse_lines`.
     """
     log.info('Loading from url: %s', url)
-
     res = download(url)
     lines = (line.decode('utf-8') for line in res.iter_lines())
 
-    return from_lines(
-        lines=lines,
-        manager=manager,
-        allow_nested=allow_nested,
-        citation_clearing=citation_clearing,
-        use_tqdm=use_tqdm,
-        **kwargs
-    )
+    graph = BELGraph(path=url)
+    parse_lines(graph=graph, lines=lines, **kwargs)
+    return graph

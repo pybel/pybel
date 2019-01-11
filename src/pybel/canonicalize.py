@@ -2,20 +2,21 @@
 
 """This module contains output functions to BEL scripts."""
 
-from __future__ import print_function
-
-import logging
-
 import itertools as itt
+import logging
+import time
+from typing import Iterable, List, Mapping, Optional, TextIO, Tuple
 
+import bel_resources.constants
+from bel_resources import make_knowledge_header
 from .constants import (
     ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_REFERENCE, CITATION_TYPE, COMPLEX, COMPOSITE,
     DEGRADATION, EFFECT, EVIDENCE, FROM_LOC, FUNCTION, FUSION, GOCC_KEYWORD, GOCC_LATEST, IDENTIFIER, LOCATION,
     MODIFIER, NAME, NAMESPACE, OBJECT, PYBEL_AUTOEVIDENCE, REACTION, RELATION, SUBJECT, TO_LOC, TRANSLOCATION,
-    UNQUALIFIED_EDGES, VARIANTS,
+    UNQUALIFIED_EDGES, VARIANTS, VERSION,
 )
 from .dsl import BaseEntity
-from .resources.document import make_knowledge_header
+from .typing import EdgeData
 from .utils import ensure_quotes
 
 __all__ = [
@@ -27,17 +28,18 @@ __all__ = [
 
 log = logging.getLogger(__name__)
 
+EdgeTuple = Tuple[BaseEntity, BaseEntity, str, EdgeData]
 
-def postpend_location(bel_string, location_model):
+
+def postpend_location(bel_string: str, location_model) -> str:
     """Rip off the closing parentheses and adds canonicalized modification.
 
     I did this because writing a whole new parsing model for the data would be sad and difficult
 
-    :param str bel_string: BEL string representing node
+    :param bel_string: BEL string representing node
     :param dict location_model: A dictionary containing keys :code:`pybel.constants.TO_LOC` and
                                 :code:`pybel.constants.FROM_LOC`
     :return: A part of a BEL string representing the location
-    :rtype: str
     """
     if not all(k in location_model for k in {NAMESPACE, NAME}):
         raise ValueError('Location model missing namespace and/or name keys: {}'.format(location_model))
@@ -49,13 +51,12 @@ def postpend_location(bel_string, location_model):
     )
 
 
-def _decanonicalize_edge_node(node, edge_data, node_position):
+def _decanonicalize_edge_node(node: BaseEntity, edge_data: EdgeData, node_position: str) -> str:
     """Canonicalize a node with its modifiers stored in the given edge to a BEL string.
 
-    :param BaseEntity node: A PyBEL node data dictionary
-    :param dict edge_data: A PyBEL edge data dictionary
+    :param node: A PyBEL node data dictionary
+    :param edge_data: A PyBEL edge data dictionary
     :param node_position: Either :data:`pybel.constants.SUBJECT` or :data:`pybel.constants.OBJECT`
-    :rtype: str
     """
     node_str = node.as_bel()
 
@@ -108,15 +109,13 @@ def _decanonicalize_edge_node(node, edge_data, node_position):
     raise ValueError('invalid modifier: {}'.format(modifier))
 
 
-def edge_to_bel(u, v, data, sep=None):
+def edge_to_bel(u: BaseEntity, v: BaseEntity, data: EdgeData, sep: Optional[str] = None) -> str:
     """Take two nodes and gives back a BEL string representing the statement.
 
-    :param BaseEntity u: The edge's source's PyBEL node data dictionary
-    :param BaseEntity v: The edge's target's PyBEL node data dictionary
-    :param dict data: The edge's data dictionary
-    :param str sep: The separator between the source, relation, and target. Defaults to ' '
-    :return: The canonical BEL for this edge
-    :rtype: str
+    :param u: The edge's source's PyBEL node data dictionary
+    :param v: The edge's target's PyBEL node data dictionary
+    :param data: The edge's data dictionary
+    :param sep: The separator between the source, relation, and target. Defaults to ' '
     """
     sep = sep or ' '
     u_str = _decanonicalize_edge_node(u, data, node_position=SUBJECT)
@@ -134,11 +133,10 @@ def _sort_qualified_edges_helper(edge_tuple):
     )
 
 
-def sort_qualified_edges(graph):
+def sort_qualified_edges(graph) -> Iterable[EdgeTuple]:
     """Return the qualified edges, sorted first by citation, then by evidence, then by annotations.
 
     :param BELGraph graph: A BEL graph
-    :rtype: tuple[tuple,tuple,int,dict]
     """
     qualified_edges = (
         (u, v, k, d)
@@ -148,31 +146,18 @@ def sort_qualified_edges(graph):
     return sorted(qualified_edges, key=_sort_qualified_edges_helper)
 
 
-def _citation_sort_key(t):
-    """Make a confusing 4 tuple sortable by citation.
-
-    :param tuple t: A 4-tuple of source node, target node, key, and data
-    :rtype: tuple[str,str]
-    """
+def _citation_sort_key(t: EdgeTuple) -> str:
+    """Make a confusing 4 tuple sortable by citation."""
     return '"{}", "{}"'.format(t[3][CITATION][CITATION_TYPE], t[3][CITATION][CITATION_REFERENCE])
 
 
-def _evidence_sort_key(t):
-    """Make a confusing 4 tuple sortable by citation.
-
-    :param tuple t: A 4-tuple of source node, target node, key, and data
-    :rtype: str
-    """
+def _evidence_sort_key(t: EdgeTuple) -> str:
+    """Make a confusing 4 tuple sortable by citation."""
     return t[3][EVIDENCE]
 
 
-def _set_annotation_to_str(annotation_data, key):
-    """Return a set annotation string.
-
-    :param dict[str,dict[str,bool] annotation_data:
-    :param key:
-    :return:
-    """
+def _set_annotation_to_str(annotation_data: Mapping[str, Mapping[str, bool]], key: str) -> str:
+    """Return a set annotation string."""
     value = annotation_data[key]
 
     if len(value) == 1:
@@ -183,27 +168,26 @@ def _set_annotation_to_str(annotation_data, key):
     return 'SET {} = {{{}}}'.format(key, ', '.join(x))
 
 
-def _unset_annotation_to_str(keys):
-    """Return an unset annotation string.
-
-    :rtype: str
-    """
+def _unset_annotation_to_str(keys: List[str]) -> str:
+    """Return an unset annotation string."""
     if len(keys) == 1:
         return 'UNSET {}'.format(list(keys)[0])
 
     return 'UNSET {{{}}}'.format(', '.join('{}'.format(key) for key in keys))
 
 
-def _to_bel_lines_header(graph):
+def _to_bel_lines_header(graph) -> Iterable[str]:
     """Iterate the lines of a BEL graph's corresponding BEL script's header.
 
     :param pybel.BELGraph graph: A BEL graph
-    :rtype: iter[str]
     """
     if GOCC_KEYWORD not in graph.namespace_url:
         graph.namespace_url[GOCC_KEYWORD] = GOCC_LATEST
 
-    return make_knowledge_header(
+    yield '# This document was created by PyBEL v{} and bel-resources v{} on {}\n'.format(
+        VERSION, bel_resources.constants.VERSION, time.asctime()
+    )
+    yield from make_knowledge_header(
         namespace_url=graph.namespace_url,
         namespace_patterns=graph.namespace_pattern,
         annotation_url=graph.annotation_url,
@@ -213,35 +197,25 @@ def _to_bel_lines_header(graph):
     )
 
 
-def group_citation_edges(edges):
-    """Return an iterator over pairs of citation values and their corresponding edge iterators.
-
-    :param iter[tuple,tuple,int,dict] edges: An iterator over the 4-tuples of edges
-    :rtype: tuple[str,tuple[tuple,tuple,int,dict]]
-    """
+def group_citation_edges(edges: Iterable[EdgeTuple]) -> Iterable[Tuple[str, Iterable[EdgeTuple]]]:
+    """Return an iterator over pairs of citation values and their corresponding edge iterators."""
     return itt.groupby(edges, key=_citation_sort_key)
 
 
-def group_evidence_edges(edges):
-    """Return an iterator over pairs of evidence values and their corresponding edge iterators.
-
-    :param iter[tuple,tuple,int,dict] edges: An iterator over the 4-tuples of edges
-    :rtype: tuple[str,tuple[tuple,tuple,int,dict]]
-    """
+def group_evidence_edges(edges: Iterable[EdgeTuple]) -> Iterable[Tuple[str, Iterable[EdgeTuple]]]:
+    """Return an iterator over pairs of evidence values and their corresponding edge iterators."""
     return itt.groupby(edges, key=_evidence_sort_key)
 
 
-def _to_bel_lines_body(graph):
+def _to_bel_lines_body(graph) -> Iterable[str]:
     """Iterate the lines of a BEL graph's corresponding BEL script's body.
 
     :param pybel.BELGraph graph: A BEL graph
-    :rtype: iter[str]
     """
     qualified_edges = sort_qualified_edges(graph)
 
     for citation, citation_edges in group_citation_edges(qualified_edges):
-        yield '#' * 80
-        yield 'SET Citation = {{{}}}'.format(citation)
+        yield 'SET Citation = {{{}}}\n'.format(citation)
 
         for evidence, evidence_edges in group_evidence_edges(citation_edges):
             yield 'SET SupportingText = "{}"'.format(evidence)
@@ -259,14 +233,14 @@ def _to_bel_lines_body(graph):
                     yield _unset_annotation_to_str(keys)
 
             yield 'UNSET SupportingText'
-        yield 'UNSET Citation'
+        yield 'UNSET Citation\n'
+        yield '#' * 80
 
 
-def _to_bel_lines_footer(graph):
+def _to_bel_lines_footer(graph) -> Iterable[str]:
     """Iterate the lines of a BEL graph's corresponding BEL script's footer.
 
     :param pybel.BELGraph graph: A BEL graph
-    :rtype: iter[str]
     """
     unqualified_edges_to_serialize = [
         (u, v, d)
@@ -295,49 +269,43 @@ def _to_bel_lines_footer(graph):
         yield 'UNSET Citation'
 
 
-def to_bel_lines(graph):
-    """Return an iterable over the lines of the BEL graph as a canonical BEL Script (.bel).
+def to_bel_lines(graph) -> Iterable[str]:
+    """Iterate over the lines of the BEL graph as a canonical BEL Script (.bel).
 
     :param pybel.BELGraph graph: the BEL Graph to output as a BEL Script
-    :return: An iterable over the lines of the representative BEL script
-    :rtype: iter[str]
     """
     return itt.chain(
         _to_bel_lines_header(graph),
         _to_bel_lines_body(graph),
-        _to_bel_lines_footer(graph)
+        _to_bel_lines_footer(graph),
     )
 
 
-def to_bel(graph, file=None):
+def to_bel(graph, file: Optional[TextIO] = None) -> None:
     """Output the BEL graph as canonical BEL to the given file/file-like/stream.
 
     :param BELGraph graph: the BEL Graph to output as a BEL Script
-    :param file file: A writable file-like object. If None, defaults to standard out.
+    :param file: A writable file-like object. If None, defaults to standard out.
     """
     for line in to_bel_lines(graph):
         print(line, file=file)
 
 
-def to_bel_path(graph, path, mode='w', **kwargs):
+def to_bel_path(graph, path: str, mode: str = 'w', **kwargs) -> None:
     """Write the BEL graph as a canonical BEL Script to the given path.
 
     :param BELGraph graph: the BEL Graph to output as a BEL Script
-    :param str path: A file path
-    :param str mode: The file opening mode. Defaults to 'w'
+    :param path: A file path
+    :param mode: The file opening mode. Defaults to 'w'
     """
     with open(path, mode=mode, **kwargs) as bel_file:
         to_bel(graph, bel_file)
 
 
-def calculate_canonical_name(data):
+def calculate_canonical_name(data: BaseEntity) -> str:
     """Calculate the canonical name for a given node.
 
     If it is a simple node, uses the already given name. Otherwise, it uses the BEL string.
-
-    :type data: BaseEntity
-    :return: Canonical node name
-    :rtype: str
     """
     if data[FUNCTION] == COMPLEX and NAMESPACE in data:
         return data[NAME]

@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 
+"""Operations for BEL graphs."""
+
+from typing import Set
+
 import networkx as nx
 
 from .utils import update_metadata, update_node_helper
+from ..dsl import BaseEntity
 
 __all__ = [
     'subgraph',
@@ -14,11 +19,11 @@ __all__ = [
 ]
 
 
-def subgraph(graph, nodes):
+def subgraph(graph, nodes: Set[BaseEntity]):
     """Induce a sub-graph over the given nodes.
 
     :param BELGraph graph:
-    :param set[BaseEntity] nodes:
+    :param nodes:
     :rtype: BELGraph
     """
     sg = graph.subgraph(nodes)
@@ -38,11 +43,11 @@ def subgraph(graph, nodes):
     return result
 
 
-def left_full_join(g, h):
-    """Add all nodes and edges from ``h`` to ``g``, in-place for ``g``
+def left_full_join(g, h) -> None:
+    """Add all nodes and edges from ``h`` to ``g``, in-place for ``g``.
 
-    :param pybel.BELGraph g: A BEL network
-    :param pybel.BELGraph h: A BEL network
+    :param pybel.BELGraph g: A BEL graph
+    :param pybel.BELGraph h: A BEL graph
 
     Example usage:
 
@@ -51,6 +56,11 @@ def left_full_join(g, h):
     >>> h = pybel.from_path('...')
     >>> left_full_join(g, h)
     """
+    g.add_nodes_from(
+        (node, data)
+        for node, data in h.nodes(data=True)
+        if node not in g
+    )
     g.add_edges_from(
         (u, v, key, data)
         for u, v, key, data in h.edges(keys=True, data=True)
@@ -59,9 +69,10 @@ def left_full_join(g, h):
 
     update_metadata(h, g)
     update_node_helper(h, g)
+    g.warnings.extend(h.warnings)
 
 
-def left_outer_join(g, h):
+def left_outer_join(g, h) -> None:
     """Only add components from the ``h`` that are touching ``g``.
 
     Algorithm:
@@ -69,8 +80,8 @@ def left_outer_join(g, h):
     1. Identify all weakly connected components in ``h``
     2. Add those that have an intersection with the ``g``
 
-    :param BELGraph g: A BEL network
-    :param BELGraph h: A BEL network
+    :param BELGraph g: A BEL graph
+    :param BELGraph h: A BEL graph
 
     Example usage:
 
@@ -86,26 +97,27 @@ def left_outer_join(g, h):
             left_full_join(g, h_subgraph)
 
 
-def _left_outer_join_networks(target, networks):
-    """Outer join a list of networks to a target network.
+def _left_outer_join_graphs(target, graphs):
+    """Outer join a list of graphs to a target graph.
 
-    Note: the order of networks will have significant results!
+    Note: the order of graphs will have significant results!
 
-    :param BELGraph target: A BEL network
-    :param iter[BELGraph] networks: An iterator of BEL networks
+    :param BELGraph target: A BEL graph
+    :param iter[BELGraph] graphs: An iterator of BEL graphs
     :rtype: BELGraph
     """
-    for network in networks:
-        left_outer_join(target, network)
+    for graph in graphs:
+        left_outer_join(target, graph)
     return target
 
 
-def union(networks):
-    """Take the union over a collection of networks into a new network. Assumes iterator is longer than 2, but not
-    infinite.
+def union(graphs):
+    """Take the union over a collection of graphs into a new graph.
 
-    :param iter[BELGraph] networks: An iterator over BEL networks. Can't be infinite.
-    :return: A merged network
+    Assumes iterator is longer than 2, but not infinite.
+
+    :param iter[BELGraph] graphs: An iterator over BEL graphs. Can't be infinite.
+    :return: A merged graph
     :rtype: BELGraph
 
     Example usage:
@@ -116,30 +128,31 @@ def union(networks):
     >>> k = pybel.from_path('...')
     >>> merged = union([g, h, k])
     """
-    networks = tuple(networks)
+    graphs = tuple(graphs)
 
-    n_networks = len(networks)
+    n_graphs = len(graphs)
 
-    if n_networks == 0:
-        raise ValueError('no networks given')
+    if n_graphs == 0:
+        raise ValueError('no graphs given')
 
-    if n_networks == 1:
-        return networks[0]
+    if n_graphs == 1:
+        return graphs[0]
 
-    target = networks[0].copy()
+    target = graphs[0].copy()
 
-    for network in networks[1:]:
-        left_full_join(target, network)
+    for graph in graphs[1:]:
+        left_full_join(target, graph)
 
     return target
 
 
 def left_node_intersection_join(g, h):
-    """Take the intersection over two networks. This intersection of two graphs is defined by the
-     union of the subgraphs induced over the intersection of their nodes
+    """Take the intersection over two graphs.
 
-    :param BELGraph g: A BEL network
-    :param BELGraph h: A BEL network
+    This intersection of two graphs is defined by the union of the sub-graphs induced over the intersection of their nodes
+
+    :param BELGraph g: A BEL graph
+    :param BELGraph h: A BEL graph
     :rtype: BELGraph
 
     Example usage:
@@ -159,12 +172,13 @@ def left_node_intersection_join(g, h):
     return g_inter
 
 
-def node_intersection(networks):
-    """Take the node intersection over a collection of networks into a new network. This intersection is defined
-    the same way as by :func:`left_node_intersection_join`
+def node_intersection(graphs):
+    """Take the node intersection over a collection of graphs into a new graph.
 
-    :param iter[BELGraph] networks: An iterable of networks. Since it's iterated over twice, it gets converted to a
-                                    tuple first, so this isn't a safe operation for infinite lists.
+    This intersection is defined the same way as by :func:`left_node_intersection_join`
+
+    :param iter[BELGraph] graphs: An iterable of graphs. Since it's iterated over twice, it gets converted to a
+     tuple first, so this isn't a safe operation for infinite lists.
     :rtype: BELGraph
 
     Example usage:
@@ -175,22 +189,22 @@ def node_intersection(networks):
     >>> k = pybel.from_path('...')
     >>> merged = node_intersection([g, h, k])
     """
-    networks = tuple(networks)
+    graphs = tuple(graphs)
 
-    n_networks = len(networks)
+    n_graphs = len(graphs)
 
-    if n_networks == 0:
-        raise ValueError('no networks given')
+    if n_graphs == 0:
+        raise ValueError('no graphs given')
 
-    if n_networks == 1:
-        return networks[0]
+    if n_graphs == 1:
+        return graphs[0]
 
-    nodes = set(networks[0].nodes())
+    nodes = set(graphs[0].nodes())
 
-    for network in networks[1:]:
-        nodes.intersection_update(network)
+    for graph in graphs[1:]:
+        nodes.intersection_update(graph)
 
     return union(
-        subgraph(network, nodes)
-        for network in networks
+        subgraph(graph, nodes)
+        for graph in graphs
     )

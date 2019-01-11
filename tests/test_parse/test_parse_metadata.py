@@ -4,6 +4,7 @@
 
 import logging
 import os
+import re
 import unittest
 from pathlib import Path
 
@@ -11,9 +12,8 @@ from pybel.parser import MetadataParser
 from pybel.parser.exc import (
     InvalidMetadataException, RedefinedAnnotationError, RedefinedNamespaceError, VersionFormatWarning,
 )
-from pybel.resources.document import split_file_to_annotations_and_definitions
 from pybel.testing.cases import FleetingTemporaryCacheMixin
-from pybel.testing.constants import test_an_1, test_bel_simple, test_ns_1, test_ns_nocache_path
+from pybel.testing.constants import test_an_1, test_ns_1, test_ns_nocache_path
 from pybel.testing.mocks import mock_bel_resources
 from tests.constants import (
     HGNC_KEYWORD, HGNC_URL, MESH_DISEASES_KEYWORD, MESH_DISEASES_URL, help_check_hgnc,
@@ -22,26 +22,26 @@ from tests.constants import (
 logging.getLogger("requests").setLevel(logging.WARNING)
 
 
-class TestSplitLines(unittest.TestCase):
-    def test_parts(self):
-        with open(test_bel_simple) as lines:
-            docs, definitions, statements = split_file_to_annotations_and_definitions(lines)
-
-            self.assertEqual(8, len(list(docs)))
-            self.assertEqual(4, len(list(definitions)))
-            self.assertEqual(14, len(list(statements)))
-
-
 class TestParseMetadata(FleetingTemporaryCacheMixin):
     def setUp(self):
         super(TestParseMetadata, self).setUp()
         self.parser = MetadataParser(manager=self.manager)
 
+    def help_test_local_annotation(self, annotation: str) -> None:
+        """Check that the annotation is defined locally."""
+        self.assertTrue(self.parser.has_annotation(annotation))
+        self.assertNotIn(annotation, self.parser.annotation_to_term)
+        self.assertFalse(self.parser.has_enumerated_annotation(annotation))
+        self.assertNotIn(annotation, self.parser.annotation_pattern)
+        self.assertFalse(self.parser.has_regex_annotation(annotation))
+        self.assertIn(annotation, self.parser.annotation_to_local)
+        self.assertTrue(self.parser.has_local_annotation(annotation))
+
     def test_namespace_nocache(self):
         """Checks namespace is loaded into parser but not cached"""
         s = 'DEFINE NAMESPACE TESTNS3 AS URL "{}"'.format(test_ns_nocache_path)
         self.parser.parseString(s)
-        self.assertIn('TESTNS3', self.parser.namespace_dict)
+        self.assertIn('TESTNS3', self.parser.namespace_to_term)
         self.assertEqual(0, len(self.manager.list_namespaces()))
 
     @mock_bel_resources
@@ -49,13 +49,13 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
         """Tests that a namespace defined by a URL can't be overwritten by a definition by another URL"""
         s = 'DEFINE NAMESPACE {} AS URL "{}"'.format(HGNC_KEYWORD, HGNC_URL)
         self.parser.parseString(s)
-        help_check_hgnc(self, self.parser.namespace_dict)
+        help_check_hgnc(self, self.parser.namespace_to_term)
 
         s = 'DEFINE NAMESPACE {} AS URL "{}"'.format(HGNC_KEYWORD, 'XXXXX')
         with self.assertRaises(RedefinedNamespaceError):
             self.parser.parseString(s)
 
-        help_check_hgnc(self, self.parser.namespace_dict)
+        help_check_hgnc(self, self.parser.namespace_to_term)
 
     @mock_bel_resources
     def test_annotation_name_persistience_1(self, mock_get):
@@ -63,37 +63,38 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
 
         s = 'DEFINE ANNOTATION {} AS URL "{}"'.format(MESH_DISEASES_KEYWORD, MESH_DISEASES_URL)
         self.parser.parseString(s)
-        self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotation_dict)
+        self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotation_to_term)
 
         s = 'DEFINE ANNOTATION {} AS LIST {{"A","B","C"}}'.format(MESH_DISEASES_KEYWORD)
         with self.assertRaises(RedefinedAnnotationError):
             self.parser.parseString(s)
 
-        self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotation_dict)
-        self.assertNotIn('A', self.parser.annotation_dict[MESH_DISEASES_KEYWORD])
-        self.assertIn('46, XX Disorders of Sex Development', self.parser.annotation_dict[MESH_DISEASES_KEYWORD])
+        self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotation_to_term)
+        self.assertNotIn('A', self.parser.annotation_to_term[MESH_DISEASES_KEYWORD])
+        self.assertIn('46, XX Disorders of Sex Development', self.parser.annotation_to_term[MESH_DISEASES_KEYWORD])
 
     def test_annotation_name_persistience_2(self):
         """Tests that an annotation defined by a list can't be overwritten by a definition by URL"""
         s = 'DEFINE ANNOTATION TextLocation AS LIST {"Abstract","Results","Legend","Review"}'
         self.parser.parseString(s)
-        self.assertIn('TextLocation', self.parser.annotation_dict)
+        self.help_test_local_annotation('TextLocation')
 
         s = 'DEFINE ANNOTATION TextLocation AS URL "{}"'.format(MESH_DISEASES_URL)
         with self.assertRaises(RedefinedAnnotationError):
             self.parser.parseString(s)
 
-        self.assertIn('TextLocation', self.parser.annotation_dict)
-        self.assertIn('Abstract', self.parser.annotation_dict['TextLocation'])
+        self.help_test_local_annotation('TextLocation')
+        self.assertIn('Abstract', self.parser.annotation_to_local['TextLocation'])
 
     def test_underscore(self):
         """Tests that an underscore is a valid character in an annotation name"""
         s = 'DEFINE ANNOTATION Text_Location AS LIST {"Abstract","Results","Legend","Review"}'
         self.parser.parseString(s)
-        self.assertIn('Text_Location', self.parser.annotation_dict)
+        self.help_test_local_annotation('Text_Location')
 
     @mock_bel_resources
     def test_control_compound(self, mock_get):
+        text_location = 'TextLocation'
         lines = [
             'DEFINE ANNOTATION {} AS URL "{}"'.format(MESH_DISEASES_KEYWORD, MESH_DISEASES_URL),
             'DEFINE NAMESPACE {} AS URL "{}"'.format(HGNC_KEYWORD, HGNC_URL),
@@ -101,15 +102,16 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
         ]
         self.parser.parse_lines(lines)
 
-        self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotation_dict)
-        self.assertIn(HGNC_KEYWORD, self.parser.namespace_dict)
-        self.assertIn('TextLocation', self.parser.annotation_dict)
+        self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotation_to_term)
+        self.assertIn(HGNC_KEYWORD, self.parser.namespace_to_term)
+        self.help_test_local_annotation(text_location)
 
     @unittest.skipUnless('PYBEL_BASE' in os.environ, "Need local files to test local files")
     def test_squiggly_filepath(self):
-        line = 'DEFINE NAMESPACE {} AS URL "~/dev/pybel/src/pybel/testing/resources/belns/hgnc-human-genes.belns"'.format(HGNC_KEYWORD)
+        line = 'DEFINE NAMESPACE {} AS URL "~/dev/pybel/src/pybel/testing/resources/belns/hgnc-human-genes.belns"'.format(
+            HGNC_KEYWORD)
         self.parser.parseString(line)
-        help_check_hgnc(self, self.parser.namespace_dict)
+        help_check_hgnc(self, self.parser.namespace_to_term)
 
     def test_document_metadata_exception(self):
         s = 'SET DOCUMENT InvalidKey = "nope"'
@@ -142,11 +144,11 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
             'TestValue5': {'O'}
         }
 
-        self.assertIn('TESTNS1', self.parser.namespace_dict)
+        self.assertIn('TESTNS1', self.parser.namespace_to_term)
 
         for k, values in expected_values.items():
-            self.assertIn(k, self.parser.namespace_dict['TESTNS1'])
-            self.assertEqual(set(values), set(self.parser.namespace_dict['TESTNS1'][k]))
+            self.assertIn(k, self.parser.namespace_to_term['TESTNS1'])
+            self.assertEqual(set(values), set(self.parser.namespace_to_term['TESTNS1'][k]))
 
     def test_parse_annotation_url_file(self):
         """Tests parsing an annotation by file URL"""
@@ -168,35 +170,21 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
 
         self.assertEqual(set(expected_values), self.parser.manager.get_annotation_entry_names(url))
 
-    # FIXME
-    '''
-    def test_lexicography_namespace(self):
-        s = 'DEFINE NAMESPACE hugo AS URL "{}"'.format(HGNC_URL)
-        with self.assertRaises(LexicographyWarning):
-            self.parser.parseString(s)
-
-    def test_lexicography_annotation(self):
-        s = 'DEFINE ANNOTATION mesh AS URL "{}"'.format(MESH_DISEASES_URL)
-        with self.assertRaises(LexicographyWarning):
-            self.parser.parseString(s)
-
-    '''
-
     def test_parse_annotation_pattern(self):
-        s = 'DEFINE ANNOTATION Test AS PATTERN "\w+"'
+        s = r'DEFINE ANNOTATION Test AS PATTERN "\w+"'
         self.parser.parseString(s)
 
-        self.assertNotIn('Test', self.parser.annotation_dict)
-        self.assertIn('Test', self.parser.annotation_regex)
-        self.assertEqual('\w+', self.parser.annotation_regex['Test'])
+        self.assertNotIn('Test', self.parser.annotation_to_term)
+        self.assertIn('Test', self.parser.annotation_to_pattern)
+        self.assertEqual(re.compile(r'\w+'), self.parser.annotation_to_pattern['Test'])
 
     def test_define_namespace_regex(self):
         s = 'DEFINE NAMESPACE dbSNP AS PATTERN "rs[0-9]*"'
         self.parser.parseString(s)
 
-        self.assertNotIn('dbSNP', self.parser.namespace_dict)
-        self.assertIn('dbSNP', self.parser.namespace_regex)
-        self.assertEqual('rs[0-9]*', self.parser.namespace_regex['dbSNP'])
+        self.assertNotIn('dbSNP', self.parser.namespace_to_term)
+        self.assertIn('dbSNP', self.parser.namespace_to_pattern)
+        self.assertEqual(re.compile('rs[0-9]*'), self.parser.namespace_to_pattern['dbSNP'])
 
     def test_not_semantic_version(self):
         s = 'SET DOCUMENT Version = "1.0"'

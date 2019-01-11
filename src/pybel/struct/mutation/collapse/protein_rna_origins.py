@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Functions for collapsing proteins, RNAs, microRNAs, and variants to their correspongind genes."""
+
 from collections import defaultdict
 
 from .collapse import collapse_nodes
@@ -13,7 +15,8 @@ __all__ = [
 
 
 def _build_collapse_to_gene_dict(graph):
-    """
+    """Build a collapse dictionary.
+
     :param pybel.BELGraph graph: A BEL graph
     :return: A dictionary of {node: set of PyBEL node tuples}
     :rtype: dict[tuple,set[tuple]]

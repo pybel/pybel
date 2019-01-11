@@ -5,16 +5,17 @@
 import hashlib
 import json
 import logging
-from collections import Iterable, MutableMapping, defaultdict
+from collections import defaultdict
+from collections.abc import Iterable, MutableMapping
 from datetime import datetime
-
-from six import string_types
-from six.moves.cPickle import dumps
+from pickle import dumps
+from typing import Mapping, Optional, Tuple
 
 from .constants import (
     ACTIVITY, CITATION, CITATION_REFERENCE, CITATION_TYPE, DEGRADATION, EFFECT, EVIDENCE, FROM_LOC, IDENTIFIER,
     LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT, RELATION, SUBJECT, TO_LOC, TRANSLOCATION, VERSION,
 )
+from .typing import EdgeData
 
 log = logging.getLogger(__name__)
 
@@ -69,39 +70,29 @@ def flatten_dict(data, parent_key='', sep='_'):
     return items
 
 
-def get_version():
-    """Get the current PyBEL version.
-
-    :return: The current PyBEL version
-    :rtype: str
-    """
+def get_version() -> str:
+    """Get the current PyBEL version."""
     return VERSION
 
 
-def tokenize_version(version_string):
+def tokenize_version(version_string: str) -> Tuple[int, int, int]:
     """Tokenize a version string to a tuple.
 
     Truncates qualifiers like ``-dev``.
 
-    :param str version_string: A version string
+    :param version_string: A version string
     :return: A tuple representing the version string
-    :rtype: tuple
 
     >>> tokenize_version('0.1.2-dev')
     (0, 1, 2)
-
     """
     before_dash = version_string.split('-')[0]
-    version_tuple = before_dash.split('.')[:3]  # take only the first 3 in case there's an extension like -dev.0
-    return tuple(map(int, version_tuple))
+    major, minor, patch = before_dash.split('.')[:3]  # take only the first 3 in case there's an extension like -dev.0
+    return int(major), int(minor), int(patch)
 
 
-def ensure_quotes(s):
-    """Quote a string that isn't solely alphanumeric.
-
-    :type s: str
-    :rtype: str
-    """
+def ensure_quotes(s: str) -> str:
+    """Quote a string that isn't solely alphanumeric."""
     return '"{}"'.format(s) if not s.isalnum() else s
 
 
@@ -111,39 +102,26 @@ PUBLISHED_DATE_FMT_2 = '%d:%m:%Y %H:%M'
 DATE_VERSION_FMT = '%Y%m%d'
 
 
-def valid_date(s):
-    """Check that a string represents a valid date in ISO 8601 format YYYY-MM-DD.
-    
-    :type s: str
-    :rtype: bool
-    """
+def valid_date(s: str) -> bool:
+    """Check that a string represents a valid date in ISO 8601 format YYYY-MM-DD."""
+    return _validate_date_fmt(s, PUBLISHED_DATE_FMT)
+
+
+def valid_date_version(s: str) -> bool:
+    """Check that the string is a valid date versions string."""
+    return _validate_date_fmt(s, DATE_VERSION_FMT)
+
+
+def _validate_date_fmt(s: str, fmt: str) -> bool:
     try:
-        datetime.strptime(s, PUBLISHED_DATE_FMT)
+        datetime.strptime(s, fmt)
         return True
     except ValueError:
         return False
 
 
-def valid_date_version(s):
-    """Check that the string is a valid date versions string.
-
-    :type s: str
-    :rtype: bool
-    """
-    try:
-        datetime.strptime(s, DATE_VERSION_FMT)
-        return True
-    except ValueError:
-        return False
-
-
-def parse_datetime(s):
-    """Try to parse a datetime object from a standard datetime format or date format.
-
-    :param str s: A string representing a date or datetime
-    :return: A parsed date object
-    :rtype: datetime.date
-    """
+def parse_datetime(s: str) -> datetime.date:
+    """Try to parse a datetime object from a standard datetime format or date format."""
     for fmt in (CREATION_DATE_FMT, PUBLISHED_DATE_FMT, PUBLISHED_DATE_FMT_2):
         try:
             dt = datetime.strptime(s, fmt)
@@ -159,47 +137,49 @@ def _hash_tuple(t):
     return hashlib.sha512(dumps(t)).hexdigest()
 
 
-def _get_citation_tuple(data):
+def _get_citation_str(data: Mapping) -> Optional[str]:
     citation = data.get(CITATION)
 
     if citation is None:
-        return None, None
+        return
 
     return '{type}:{reference}'.format(type=citation[CITATION_TYPE], reference=citation[CITATION_REFERENCE])
 
 
-def _get_edge_tuple(u, v, data):
+def _get_edge_tuple(source,
+                    target,
+                    edge_data: EdgeData,
+                    ) -> Tuple[str, str, str, Optional[str], Tuple[str, Optional[Tuple], Optional[Tuple]]]:
     """Convert an edge to a consistent tuple.
 
-    :param BaseEntity u: The source BEL node
-    :param BaseEntity v: The target BEL node
-    :param dict data: The edge's data dictionary
+    :param BaseEntity source: The source BEL node
+    :param BaseEntity target: The target BEL node
+    :param edge_data: The edge's data dictionary
     :return: A tuple that can be hashed representing this edge. Makes no promises to its structure.
     """
     return (
-        u.as_bel(),
-        v.as_bel(),
-        _get_citation_tuple(data),
-        data.get(EVIDENCE),
-        canonicalize_edge(data),
+        source.as_bel(),
+        target.as_bel(),
+        _get_citation_str(edge_data),
+        edge_data.get(EVIDENCE),
+        canonicalize_edge(edge_data),
     )
 
 
-def hash_edge(u, v, data):
-    """Convert an edge tuple to a SHA512 hash.
+def hash_edge(source, target, edge_data: EdgeData) -> str:
+    """Convert an edge tuple to a SHA-512 hash.
 
-    :param BaseEntity u: The source BEL node
-    :param BaseEntity v: The target BEL node
-    :param dict data: The edge's data dictionary
+    :param BaseEntity source: The source BEL node
+    :param BaseEntity target: The target BEL node
+    :param edge_data: The edge's data dictionary
     :return: A hashed version of the edge tuple using md5 hash of the binary pickle dump of u, v, and the json dump of d
-    :rtype: str
     """
-    edge_tuple = _get_edge_tuple(u, v, data)
+    edge_tuple = _get_edge_tuple(source, target, edge_data)
     return _hash_tuple(edge_tuple)
 
 
-def subdict_matches(target, query, partial_match=True):
-    """Checks if all the keys in the query dict are in the target dict, and that their values match
+def subdict_matches(target, query, partial_match: bool = True) -> bool:
+    """Check if all the keys in the query dict are in the target dict, and that their values match.
 
     1. Checks that all keys in the query dict are in the target dict
     2. Matches the values of the keys in the query dict
@@ -209,16 +189,15 @@ def subdict_matches(target, query, partial_match=True):
 
     :param dict target: The dictionary to search
     :param dict query: A query dict with keys to match
-    :param bool partial_match: Should the query values be used as partial or exact matches? Defaults to :code:`True`.
+    :param partial_match: Should the query values be used as partial or exact matches? Defaults to :code:`True`.
     :return: if all keys in b are in target_dict and their values match
-    :rtype: bool
     """
     for k, v in query.items():
         if k not in target:
             return False
-        elif not isinstance(v, (int, string_types, dict, Iterable)):
+        elif not isinstance(v, (int, str, dict, Iterable)):
             raise ValueError('invalid value: {}'.format(v))
-        elif isinstance(v, (int, string_types)) and target[k] != v:
+        elif isinstance(v, (int, str)) and target[k] != v:
             return False
         elif isinstance(v, dict):
             if partial_match:
@@ -234,65 +213,53 @@ def subdict_matches(target, query, partial_match=True):
     return True
 
 
-def hash_dump(data):
+def hash_dump(data) -> str:
     """Hash an arbitrary JSON dictionary by dumping it in sorted order, encoding it in UTF-8, then hashing the bytes.
 
     :param data: An arbitrary JSON-serializable object
     :type data: dict or list or tuple
-    :rtype: str
     """
     return hashlib.sha512(json.dumps(data, sort_keys=True).encode('utf-8')).hexdigest()
 
 
-def hash_citation(type, reference):
+def hash_citation(type: str, reference: str) -> str:
     """Create a hash for a type/reference pair of a citation.
 
-    :param str type: The corresponding citation type
-    :param str reference: The citation reference
-    :rtype: str
+    :param type: The corresponding citation type
+    :param reference: The citation reference
     """
     s = u'{type}:{reference}'.format(type=type, reference=reference)
     return hashlib.sha512(s.encode('utf8')).hexdigest()
 
 
-def hash_evidence(text, type, reference):
+def hash_evidence(text: str, type: str, reference: str) -> str:
     """Create a hash for an evidence and its citation.
 
-    :param str text: The evidence text
-    :param str type: The corresponding citation type
-    :param str reference: The citation reference
-    :rtype: str
+    :param text: The evidence text
+    :param type: The corresponding citation type
+    :param reference: The citation reference
     """
     s = u'{type}:{reference}:{text}'.format(type=type, reference=reference, text=text)
     return hashlib.sha512(s.encode('utf8')).hexdigest()
 
 
-def canonicalize_edge(data):
-    """Canonicalize the edge to a tuple based on the relation, subject modifications, and object modifications.
-
-    :param dict data: A PyBEL edge data dictionary
-    :return: A 3-tuple that's specific for the edge (relation, subject, object)
-    :rtype: tuple
-    """
+def canonicalize_edge(edge_data: EdgeData) -> Tuple[str, Optional[Tuple], Optional[Tuple]]:
+    """Canonicalize the edge to a tuple based on the relation, subject modifications, and object modifications."""
     return (
-        data[RELATION],
-        _canonicalize_edge_modifications(data.get(SUBJECT)),
-        _canonicalize_edge_modifications(data.get(OBJECT)),
+        edge_data[RELATION],
+        _canonicalize_edge_modifications(edge_data.get(SUBJECT)),
+        _canonicalize_edge_modifications(edge_data.get(OBJECT)),
     )
 
 
-def _canonicalize_edge_modifications(data):
-    """Return the SUBJECT or OBJECT entry of a PyBEL edge data dictionary as a canonical tuple.
-
-    :param dict data: A PyBEL edge data dictionary
-    :rtype: tuple
-    """
-    if data is None:
+def _canonicalize_edge_modifications(edge_data: EdgeData) -> Optional[Tuple]:
+    """Return the SUBJECT or OBJECT entry of a PyBEL edge data dictionary as a canonical tuple."""
+    if edge_data is None:
         return
 
-    modifier = data.get(MODIFIER)
-    location = data.get(LOCATION)
-    effect = data.get(EFFECT)
+    modifier = edge_data.get(MODIFIER)
+    location = edge_data.get(LOCATION)
+    effect = edge_data.get(EFFECT)
 
     if modifier is None and location is None:
         return
@@ -328,9 +295,9 @@ def _canonicalize_edge_modifications(data):
 
             t = (
                 TRANSLOCATION,
-                data[EFFECT][FROM_LOC][NAMESPACE],
+                edge_data[EFFECT][FROM_LOC][NAMESPACE],
                 from_loc_name or from_loc_identifier,
-                data[EFFECT][TO_LOC][NAMESPACE],
+                edge_data[EFFECT][TO_LOC][NAMESPACE],
                 to_loc_name or to_loc_identifier,
             )
         else:
@@ -349,15 +316,14 @@ def _canonicalize_edge_modifications(data):
         result.append(t)
 
     if not result:
-        raise ValueError('Invalid data: {}'.format(data))
+        raise ValueError('Invalid data: {}'.format(edge_data))
 
     return tuple(result)
 
 
-def get_corresponding_pickle_path(path):
+def get_corresponding_pickle_path(path: str) -> str:
     """Get the same path with a pickle extension.
 
-    :param str path: A path to a BEL file.
-    :rtype: str
+    :param path: A path to a BEL file.
     """
     return '{path}.pickle'.format(path=path)

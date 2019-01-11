@@ -22,18 +22,14 @@ class TestErrors(unittest.TestCase):
         line = n()
         annotation = n()
 
-        exception = UndefinedAnnotationWarning(
+        exc = UndefinedAnnotationWarning(
             line_number=line_number,
             line=line,
             position=position,
             annotation=annotation,
         )
 
-        graph.add_warning(
-            line_number=line_number,
-            line=line,
-            exception=exception,
-        )
+        graph.add_warning(exc)
 
         error_types = count_error_types(graph)
 
@@ -64,19 +60,11 @@ class TestErrors(unittest.TestCase):
         ]
 
         for exception in exceptions:
-            graph.add_warning(
-                line_number=line_number,
-                line=line,
-                exception=exception,
-            )
+            graph.add_warning(exception=exception)
 
-        graph.add_warning(
-            line_number=line_number,
-            line=line,
-            exception=exceptions[0],
-        )
+        graph.add_warning(exception=exceptions[0])
 
-        self.assertEqual(6, len(graph.warnings))
+        self.assertEqual(6, graph.number_of_warnings())
 
         naked_names = get_naked_names(graph)
         self.assertEqual(names, naked_names)

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
-Truncations
-~~~~~~~~~~~
+"""Truncations.
 
 Truncations in the legacy BEL 1.0 specification are automatically translated to BEL 2.0 with HGVS nomenclature.
 :code:`p(HGNC:AKT1, trunc(40))` becomes :code:`p(HGNC:AKT1, var(p.40*))` and is represented with the following
@@ -21,7 +19,6 @@ dictionary:
             }
         ]
     }
-
 
 Unfortunately, the HGVS nomenclature requires the encoding of the terminal amino acid which is exchanged
 for a stop codon, and this information is not required by BEL 1.0. For this example, the proper encoding
@@ -56,6 +53,10 @@ AMINO_ACID = 'aminoacid'
 
 
 def get_truncation_language():
+    """Build a parser for protein truncations.
+
+    :rtype: pyparsing.ParseElement
+    """
     l1 = truncation_tag + nest(amino_acid(AMINO_ACID) + ppc.integer(TRUNCATION_POSITION))
     l1.setParseAction(_handle_trunc)
     l2 = truncation_tag + nest(ppc.integer(TRUNCATION_POSITION))
@@ -63,7 +64,7 @@ def get_truncation_language():
     return l1 | l2
 
 
-def _handle_trunc_legacy(line, position, tokens):
+def _handle_trunc_legacy(line, _, tokens):
     # FIXME this isn't correct HGVS nomenclature, but truncation isn't forward compatible without more information
     upgraded = 'p.{}*'.format(tokens[TRUNCATION_POSITION])
     log.warning('trunc() is deprecated. Re-encode with reference terminal amino acid in HGVS: %s', line)
@@ -72,7 +73,7 @@ def _handle_trunc_legacy(line, position, tokens):
     return tokens
 
 
-def _handle_trunc(line, position, tokens):
+def _handle_trunc(_, __, tokens):
     aa, position = tokens[AMINO_ACID], tokens[TRUNCATION_POSITION]
     tokens[IDENTIFIER] = 'p.{aa}{position}*'.format(aa=aa, position=position)
     del tokens[AMINO_ACID]

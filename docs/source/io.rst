@@ -34,6 +34,7 @@ Reference
 .. autofunction:: pybel.from_lines
 .. autofunction:: pybel.from_path
 .. autofunction:: pybel.from_url
+.. autofunction:: pybel.io.line_utils.parse_lines
 
 Canonicalization
 ----------------

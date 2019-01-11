@@ -2,9 +2,9 @@
 
 """Modules supporting deletion and degradation of graphs."""
 
-from . import protein_rna_origins, deletion
-from .protein_rna_origins import *
+from . import deletion, protein_rna_origins
 from .deletion import *
+from .protein_rna_origins import *
 
 __all__ = (
     protein_rna_origins.__all__ +

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import re
 import unittest
 
 from pybel.constants import (
@@ -14,7 +15,6 @@ from pybel.parser.exc import (
     UndefinedAnnotationWarning,
 )
 from pybel.parser.parse_control import set_citation_stub
-from pybel.resources.document import sanitize_file_lines
 from tests.constants import SET_CITATION_TEST, test_citation_dict
 
 logging.getLogger("requests").setLevel(logging.WARNING)
@@ -22,18 +22,18 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 
 class TestParseControl(unittest.TestCase):
     def setUp(self):
-        self.custom_annotation_dicts = {
+        self.annotation_to_term = {
             'Custom1': {'Custom1_A', 'Custom1_B'},
             'Custom2': {'Custom2_A', 'Custom2_B'}
         }
 
-        self.custom_annotation_expressions = {
-            'CustomRegex': '[0-9]+'
+        self.annotation_to_pattern = {
+            'CustomRegex': re.compile('[0-9]+')
         }
 
         self.parser = ControlParser(
-            annotation_dict=self.custom_annotation_dicts,
-            annotation_regex=self.custom_annotation_expressions
+            annotation_to_term=self.annotation_to_term,
+            annotation_to_pattern=self.annotation_to_pattern,
         )
 
 
@@ -378,60 +378,3 @@ class TestParseControl2(TestParseControl):
         self.parser.parse_lines(s)
 
         self.assertEqual('1234', self.parser.annotations['CustomRegex'])
-
-
-class TestParseEvidence(unittest.TestCase):
-    def test_111(self):
-        statement = '''SET Evidence = "1.1.1 Easy case"'''
-        expect = '''SET Evidence = "1.1.1 Easy case'''
-        lines = list(sanitize_file_lines(statement.split('\n')))
-        self.assertEqual(1, len(lines))
-        line = lines[0]
-        self.assertTrue(expect, line)
-
-    def test_131(self):
-        statement = '''SET Evidence = "3.1 Backward slash break test \\
-second line"'''
-        expect = '''SET Evidence = "3.1 Backward slash break test second line"'''
-        lines = [line for i, line in sanitize_file_lines(statement.split('\n'))]
-        self.assertEqual(1, len(lines))
-        line = lines[0]
-        self.assertEqual(expect, line)
-
-    def test_132(self):
-        statement = '''SET Evidence = "3.2 Backward slash break test with whitespace \\
-second line"'''
-        expect = '''SET Evidence = "3.2 Backward slash break test with whitespace second line"'''
-        lines = [line for i, line in sanitize_file_lines(statement.split('\n'))]
-        self.assertEqual(1, len(lines))
-        line = lines[0]
-        self.assertEqual(expect, line)
-
-    def test_133(self):
-        statement = '''SET Evidence = "3.3 Backward slash break test \\
-second line \\
-third line"'''
-        expect = '''SET Evidence = "3.3 Backward slash break test second line third line"'''
-        lines = [line for i, line in sanitize_file_lines(statement.split('\n'))]
-        self.assertEqual(1, len(lines))
-        line = lines[0]
-        self.assertEqual(expect, line)
-
-    def test_141(self):
-        statement = '''SET Evidence = "4.1 Malformed line breakcase
-second line"'''
-        expect = '''SET Evidence = "4.1 Malformed line breakcase second line"'''
-        lines = [line for i, line in sanitize_file_lines(statement.split('\n'))]
-        self.assertEqual(1, len(lines))
-        line = lines[0]
-        self.assertEqual(expect, line)
-
-    def test_142(self):
-        statement = '''SET Evidence = "4.2 Malformed line breakcase
-second line
-third line"'''
-        expect = '''SET Evidence = "4.2 Malformed line breakcase second line third line"'''
-        lines = [line for i, line in sanitize_file_lines(statement.split('\n'))]
-        self.assertEqual(1, len(lines))
-        line = lines[0]
-        self.assertEqual(expect, line)

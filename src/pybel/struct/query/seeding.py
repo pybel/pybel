@@ -5,12 +5,9 @@
 import json
 import logging
 import random
+from collections import UserList
 
-from six.moves import UserList
-
-from .constants import (
-    SEED_TYPE_ANNOTATION, SEED_TYPE_INDUCTION, SEED_TYPE_NEIGHBORS, SEED_TYPE_SAMPLE,
-)
+from .constants import SEED_TYPE_ANNOTATION, SEED_TYPE_INDUCTION, SEED_TYPE_NEIGHBORS, SEED_TYPE_SAMPLE
 from .selection import get_subgraph
 from ...dsl import BaseEntity
 from ...manager.models import Node

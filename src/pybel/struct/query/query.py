@@ -75,7 +75,7 @@ class Query:
         """Add a seed by neighbors.
 
         :param nodes: A list of PyBEL node tuples
-        :type nodes: BaseEntity or iter[BaseEntity]
+        :type nodes: str or BaseEntity or iter[BaseEntity]
         """
         return self.seeding.append_neighbors(nodes)
 
@@ -155,7 +155,7 @@ class Query:
         json.dump(self.to_json(), file, **kwargs)
 
     def dumps(self, **kwargs):
-        """Dump this query to a string as JSON
+        """Dump this query to a string as JSON.
 
         :rtype: str
         """
@@ -205,7 +205,7 @@ class Query:
 
     @staticmethod
     def loads(s):
-        """Load a query from a JSON string
+        """Load a query from a JSON string.
 
         :param str s: A stringified JSON query
         :rtype: Query

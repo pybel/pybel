@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
+"""General-use induction functions."""
+
 import networkx as nx
 
 from ..filters import filter_edges
+from ..filters.typing import EdgePredicates
 from ..pipeline import in_place_transformation, transformation, uni_in_place_transformation
 from ..utils import update_metadata, update_node_helper
 
@@ -37,13 +40,12 @@ def remove_isolated_nodes_op(graph):
 
 
 @uni_in_place_transformation
-def expand_by_edge_filter(source, target, edge_predicates=None):
+def expand_by_edge_filter(source, target, edge_predicates: EdgePredicates):
     """Expand a target graph by edges in the source matching the given predicates.
 
     :param pybel.BELGraph source: A BEL graph
     :param pybel.BELGraph target: A BEL graph
     :param edge_predicates: An edge predicate or list of edge predicates
-    :type edge_predicates: None or (pybel.BELGraph, tuple, tuple, int) -> bool or list[(pybel.BELGraph, tuple, tuple, int) -> bool]
     :return: A BEL sub-graph induced over the edges passing the given filters
     :rtype: pybel.BELGraph
     """

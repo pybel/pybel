@@ -1,11 +1,10 @@
 codecov:
-    branch: master
+  branch: master
 
 coverage:
   precision: 2
   round: down
   range: "60...100"
-
   ignore:
     - "tests/*"
     - "src/pybel/cli.py"

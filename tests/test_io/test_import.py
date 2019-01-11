@@ -4,25 +4,28 @@
 
 import logging
 import os
+import re
 import tempfile
 import unittest
+from io import BytesIO, StringIO
 from pathlib import Path
-
-from six import BytesIO, StringIO
 
 from pybel import (
     BELGraph, from_bytes, from_json, from_json_file, from_jsons, from_lines, from_path, from_pickle, from_url,
     to_bel_lines, to_bytes, to_csv, to_graphml, to_gsea, to_json, to_json_file, to_jsons, to_pickle, to_sif,
 )
 from pybel.constants import (
-    ANNOTATIONS, CITATION, DECREASES, DIRECTLY_DECREASES, EVIDENCE, GENE, GRAPH_PYBEL_VERSION, INCREASES,
+    ANNOTATIONS, CITATION, DECREASES, DIRECTLY_DECREASES, EVIDENCE, GRAPH_PYBEL_VERSION, INCREASES,
     PYBEL_MINIMUM_IMPORT_VERSION, RELATION,
 )
 from pybel.dsl import BaseEntity, gene
 from pybel.examples import sialic_acid_graph
 from pybel.io.exc import ImportVersionWarning, import_version_message_fmt
 from pybel.parser import BELParser
-from pybel.parser.exc import InvalidFunctionSemantic, MissingCitationException, MissingNamespaceRegexWarning
+from pybel.parser.exc import (
+    BELSyntaxError, InvalidFunctionSemantic, MissingCitationException,
+    MissingNamespaceRegexWarning,
+)
 from pybel.struct.summary import get_syntax_errors
 from pybel.testing.cases import TemporaryCacheClsMixin
 from pybel.testing.constants import (
@@ -173,7 +176,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
     def test_thorough_upgrade(self):
         lines = to_bel_lines(self.thorough_graph)
         reconstituted = from_lines(lines, manager=self.manager)
-        self.bel_thorough_reconstituted(reconstituted, check_citation_name=False)
+        self.bel_thorough_reconstituted(reconstituted, check_citation_name=False, check_path=False)
 
     def test_slushy(self):
         self.bel_slushy_reconstituted(self.slushy_graph)
@@ -185,8 +188,11 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
 
     def test_slushy_syntax_errors(self):
         syntax_errors = get_syntax_errors(self.slushy_graph)
+        for _, exc, _ in syntax_errors:
+            self.assertIsInstance(exc, BELSyntaxError)
         self.assertEqual(1, len(syntax_errors))
-        self.assertEqual(98, syntax_errors[0][0])
+        _, first_exc, _ = syntax_errors[0]
+        self.assertEqual(98, first_exc.line_number)
 
     def test_slushy_json(self):
         graph_json = to_json(self.slushy_graph)
@@ -252,14 +258,14 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
         self.assert_has_edge(self.misordered_graph, egfr, casp8, **e3)
 
 
-namespaces = {
+namespace_to_term = {
     'TESTNS': {
         "1": "GRP",
         "2": "GRP"
     }
 }
 
-annotations = {
+annotation_to_term = {
     'TestAnnotation1': {'A', 'B', 'C'},
     'TestAnnotation2': {'X', 'Y', 'Z'},
     'TestAnnotation3': {'D', 'E', 'F'}
@@ -272,9 +278,9 @@ class TestFull(TestTokenParserBase):
         cls.graph = BELGraph()
         cls.parser = BELParser(
             cls.graph,
-            namespace_dict=namespaces,
-            annotation_dict=annotations,
-            namespace_regex={'dbSNP': 'rs[0-9]*'}
+            namespace_to_term=namespace_to_term,
+            annotation_to_term=annotation_to_term,
+            namespace_to_pattern={'dbSNP': re.compile('rs[0-9]*')}
         )
 
     def test_regex_match(self):

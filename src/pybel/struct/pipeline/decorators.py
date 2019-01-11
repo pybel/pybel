@@ -7,13 +7,9 @@ A transformation function takes in a :class:`pybel.BELGraph` and either returns 
 """
 
 import logging
+from inspect import signature
 
 from .exc import DeprecationMappingError, MissingPipelineFunctionError, PipelineNameError
-
-try:
-    from inspect import signature
-except ImportError:
-    from funcsigs import signature
 
 __all__ = [
     'in_place_transformation',
@@ -78,7 +74,7 @@ def _register_function(name, func, universe, in_place):
     return func
 
 
-def _build_register_function(universe, in_place):
+def _build_register_function(universe, in_place):  # noqa: D202
     """Build a decorator function to tag transformation functions.
 
     :param bool universe: Does the first positional argument of this function correspond to a universe graph?
