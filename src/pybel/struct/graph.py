@@ -134,7 +134,7 @@ class BELGraph(nx.MultiDiGraph):
         return self.graph[GRAPH_METADATA]
 
     @property
-    def name(self, *attrs) -> str:  # noqa: D401 # Needs *attrs since it's an override
+    def name(self, *attrs) -> Optional[str]:  # noqa: D401 # Needs *attrs since it's an override
         """The graph's name.
 
         .. hint:: Can be set with the ``SET DOCUMENT Name = "..."`` entry in the source BEL script.
@@ -147,7 +147,7 @@ class BELGraph(nx.MultiDiGraph):
         self.document[METADATA_NAME] = attrs[0]
 
     @property
-    def version(self) -> str:  # noqa: D401
+    def version(self) -> Optional[str]:  # noqa: D401
         """The graph's version.
 
         .. hint:: Can be set with the ``SET DOCUMENT Version = "..."`` entry in the source BEL script.
@@ -160,7 +160,7 @@ class BELGraph(nx.MultiDiGraph):
         self.document[METADATA_VERSION] = version
 
     @property
-    def description(self) -> str:  # noqa: D401
+    def description(self) -> Optional[str]:  # noqa: D401
         """The graph's description.
 
         .. hint:: Can be set with the ``SET DOCUMENT Description = "..."`` entry in the source BEL document.
@@ -173,12 +173,12 @@ class BELGraph(nx.MultiDiGraph):
         self.document[METADATA_DESCRIPTION] = description
 
     @property
-    def authors(self) -> str:  # noqa: D401
+    def authors(self) -> Optional[str]:  # noqa: D401
         """The graph's authors.
 
         .. hint:: Can be set with the ``SET DOCUMENT Authors = "..."`` entry in the source BEL document.
         """
-        return self.document[METADATA_AUTHORS]
+        return self.document.get(METADATA_AUTHORS)
 
     @authors.setter
     def authors(self, authors: str) -> None:
@@ -186,7 +186,7 @@ class BELGraph(nx.MultiDiGraph):
         self.document[METADATA_AUTHORS] = authors
 
     @property
-    def contact(self) -> str:  # noqa: D401
+    def contact(self) -> Optional[str]:  # noqa: D401
         """The graph's contact information.
 
         .. hint:: Can be set with the ``SET DOCUMENT ContactInfo = "..."`` entry in the source BEL document.
