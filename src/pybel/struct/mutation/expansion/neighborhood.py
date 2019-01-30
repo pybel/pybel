@@ -2,9 +2,12 @@
 
 """Functions for expanding the neighborhoods of nodes."""
 
+from typing import Iterable
+
 from ...filters.node_predicates import is_pathology
 from ...pipeline import uni_in_place_transformation
 from ...utils import update_metadata, update_node_helper
+from ....dsl import BaseEntity
 
 __all__ = [
     'expand_node_predecessors',
@@ -16,12 +19,12 @@ __all__ = [
 
 
 @uni_in_place_transformation
-def expand_node_predecessors(universe, graph, node):
+def expand_node_predecessors(universe, graph, node: BaseEntity) -> None:
     """Expand around the predecessors of the given node in the result graph.
 
     :param pybel.BELGraph universe: The graph containing the stuff to add
     :param pybel.BELGraph graph: The graph to add stuff to
-    :param tuple node: A BEL node
+    :param node: A BEL node
     """
     skip_successors = set()
     for successor in universe.successors(node):
@@ -29,7 +32,7 @@ def expand_node_predecessors(universe, graph, node):
             skip_successors.add(successor)
             continue
 
-        graph.add_node(successor, **universe.node[successor])
+        graph.add_node(successor, **universe.nodes[successor])
 
     graph.add_edges_from(
         (source, successor, key, data)
@@ -42,12 +45,12 @@ def expand_node_predecessors(universe, graph, node):
 
 
 @uni_in_place_transformation
-def expand_node_successors(universe, graph, node):
+def expand_node_successors(universe, graph, node: BaseEntity) -> None:
     """Expand around the successors of the given node in the result graph.
 
     :param pybel.BELGraph universe: The graph containing the stuff to add
     :param pybel.BELGraph graph: The graph to add stuff to
-    :param tuple node: A BEL node
+    :param node: A BEL node
     """
     skip_predecessors = set()
     for predecessor in universe.predecessors(node):
@@ -55,7 +58,7 @@ def expand_node_successors(universe, graph, node):
             skip_predecessors.add(predecessor)
             continue
 
-        graph.add_node(predecessor, **universe.node[predecessor])
+        graph.add_node(predecessor, **universe.nodes[predecessor])
 
     graph.add_edges_from(
         (predecessor, target, key, data)
@@ -68,36 +71,36 @@ def expand_node_successors(universe, graph, node):
 
 
 @uni_in_place_transformation
-def expand_node_neighborhood(universe, graph, node):
+def expand_node_neighborhood(universe, graph, node: BaseEntity) -> None:
     """Expand around the neighborhoods of the given node in the result graph.
 
     :param pybel.BELGraph universe: The graph containing the stuff to add
     :param pybel.BELGraph graph: The graph to add stuff to
-    :param tuple node: A BEL node
+    :param node: A BEL node
     """
     expand_node_predecessors(universe, graph, node)
     expand_node_successors(universe, graph, node)
 
 
 @uni_in_place_transformation
-def expand_nodes_neighborhoods(universe, graph, nodes):
+def expand_nodes_neighborhoods(universe, graph, nodes: Iterable[BaseEntity]) -> None:
     """Expand around the neighborhoods of the given node in the result graph.
 
     :param pybel.BELGraph universe: The graph containing the stuff to add
     :param pybel.BELGraph graph: The graph to add stuff to
-    :param list[tuple] nodes: A node tuples from the query graph
+    :param nodes: A node tuples from the query graph
     """
     for node in nodes:
         expand_node_neighborhood(universe, graph, node)
 
 
 @uni_in_place_transformation
-def expand_all_node_neighborhoods(universe, graph, filter_pathologies=False):
+def expand_all_node_neighborhoods(universe, graph, filter_pathologies: bool = False) -> None:
     """Expand the neighborhoods of all nodes in the given graph.
 
     :param pybel.BELGraph universe: The graph containing the stuff to add
     :param pybel.BELGraph  graph: The graph to add stuff to
-    :param bool filter_pathologies: Should expansion take place around pathologies?
+    :param filter_pathologies: Should expansion take place around pathologies?
     """
     for node in list(graph):
         if filter_pathologies and is_pathology(node):
