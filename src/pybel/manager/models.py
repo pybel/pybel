@@ -6,7 +6,7 @@ import datetime
 import hashlib
 import json
 from collections import defaultdict
-from typing import Iterable, Set, Tuple
+from typing import Iterable, Mapping
 
 from sqlalchemy import (
     Boolean, Column, Date, DateTime, ForeignKey, Integer, LargeBinary, String, Table, Text, UniqueConstraint,
@@ -124,19 +124,10 @@ class Namespace(Base):
     def __str__(self):
         return self.keyword
 
-    def to_tree_list(self) -> Set[Tuple[str, str]]:
-        """Return an edge set of the tree represented by this namespace's hierarchy."""
-        return {
-            (parent.name, child.name)
-            for parent in self.entries
-            for child in parent.children
-        }
-
-    def to_json(self, include_id=False):
+    def to_json(self, include_id: bool = False) -> Mapping[str, str]:
         """Return the most useful entries as a dictionary.
 
-        :param bool include_id: If true, includes the model identifier
-        :rtype: dict[str,str]
+        :param include_id: If true, includes the model identifier
         """
         result = {
             'keyword': self.keyword,
@@ -172,11 +163,10 @@ class NamespaceEntry(Base):
     is_name = Column(Boolean)
     is_annotation = Column(Boolean)
 
-    def to_json(self, include_id=False):
+    def to_json(self, include_id: bool = False) -> Mapping[str, str]:
         """Describe the namespaceEntry as dictionary of Namespace-Keyword and Name.
 
-        :param bool include_id: If true, includes the model identifier
-        :rtype: dict[str,str]
+        :param include_id: If true, includes the model identifier
         """
         result = {
             NAMESPACE: self.namespace.keyword,
@@ -194,11 +184,8 @@ class NamespaceEntry(Base):
         return result
 
     @classmethod
-    def name_contains(cls, name_query):
-        """Make a filter if the name contains a certain substring.
-
-        :param str name_query:
-        """
+    def name_contains(cls, name_query: str):
+        """Make a filter if the name contains a certain substring."""
         return cls.name.contains(name_query)
 
     def __str__(self):
