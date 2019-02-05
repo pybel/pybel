@@ -16,16 +16,13 @@ from sqlalchemy.orm import backref, relationship
 
 from .utils import int_or_str
 from ..constants import (
-    CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR,
-    CITATION_LAST_AUTHOR, CITATION_NAME, CITATION_PAGES, CITATION_REFERENCE, CITATION_TITLE, CITATION_TYPE,
-    CITATION_TYPE_PUBMED, CITATION_VOLUME, EFFECT, EVIDENCE, FRAGMENT, FUSION, GMOD, HGVS, IDENTIFIER, LOCATION,
-    METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER,
-    METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PMOD,
-    RANGE_3P, RANGE_5P, SUBJECT,
+    CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR, CITATION_LAST_AUTHOR, CITATION_NAME,
+    CITATION_PAGES, CITATION_REFERENCE, CITATION_TITLE, CITATION_TYPE, CITATION_TYPE_PUBMED, CITATION_VOLUME, EFFECT,
+    EVIDENCE, FRAGMENT, FUSION, GMOD, HGVS, IDENTIFIER, LOCATION, METADATA_AUTHORS, METADATA_CONTACT,
+    METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION,
+    MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PMOD, RANGE_3P, RANGE_5P, SUBJECT,
 )
-from ..dsl import (
-    fragment, fusion_range, gmod, hgvs, missing_fusion_range, pmod,
-)
+from ..dsl import fragment, fusion_range, gmod, hgvs, missing_fusion_range, pmod
 from ..io.gpickle import from_bytes, to_bytes
 from ..tokens import parse_result_to_dsl
 
@@ -49,7 +46,6 @@ __all__ = [
 
 NAME_TABLE_NAME = 'pybel_name'
 NAMESPACE_TABLE_NAME = 'pybel_namespace'
-NAME_HIERARCHY_TABLE_NAME = 'pybel_name_hierarchy'
 
 NODE_TABLE_NAME = 'pybel_node'
 MODIFICATION_TABLE_NAME = 'pybel_modification'
@@ -76,13 +72,6 @@ NETWORK_ANNOTATION_TABLE_NAME = 'pybel_network_annotation'
 LONGBLOB = 4294967295
 
 Base = declarative_base()
-
-name_hierarchy = Table(
-    NAME_HIERARCHY_TABLE_NAME,
-    Base.metadata,
-    Column('left_id', Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), primary_key=True),
-    Column('right_id', Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), primary_key=True)
-)
 
 
 class Namespace(Base):
@@ -182,13 +171,6 @@ class NamespaceEntry(Base):
 
     is_name = Column(Boolean)
     is_annotation = Column(Boolean)
-
-    children = relationship(
-        'NamespaceEntry',
-        secondary=name_hierarchy,
-        primaryjoin=(id == name_hierarchy.c.left_id),
-        secondaryjoin=(id == name_hierarchy.c.right_id),
-    )
 
     def to_json(self, include_id=False):
         """Describe the namespaceEntry as dictionary of Namespace-Keyword and Name.
