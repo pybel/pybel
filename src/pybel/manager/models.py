@@ -87,7 +87,7 @@ class Namespace(Base):
                      doc='Keyword that is used in a BEL file to identify a specific namespace')
 
     # A namespace either needs a URL or a pattern
-    pattern = Column(String(255), nullable=True, unique=True, index=True,
+    pattern = Column(String(255), nullable=True, index=True,
                      doc="Contains regex pattern for value identification.")
 
     miriam_id = Column(String(16), nullable=True,
