@@ -4,6 +4,7 @@
 
 import logging
 import os
+from typing import Optional
 
 import requests
 
@@ -46,19 +47,23 @@ def _get_password():
     return _get_config_or_env(PYBEL_REMOTE_PASSWORD)
 
 
-def to_web(graph, host=None, user=None, password=None):
+def to_web(graph,
+           host: Optional[str] = None,
+           user: Optional[str] = None,
+           password: Optional[str] = None,
+           public: bool = False,
+           ) -> requests.Response:
     """Send a graph to the receiver service and returns the :mod:`requests` response object.
 
     :param pybel.BELGraph graph: A BEL network
-    :param Optional[str] host: The location of the BEL Commons server. Alternatively, looks up in PyBEL config with
+    :param host: The location of the BEL Commons server. Alternatively, looks up in PyBEL config with
      ``PYBEL_REMOTE_HOST`` or the environment as ``PYBEL_REMOTE_HOST`` Defaults to
      :data:`pybel.constants.DEFAULT_SERVICE_URL`
-    :param Optional[str] user: Username for BEL Commons. Alternatively, looks up in PyBEL config with
+    :param user: Username for BEL Commons. Alternatively, looks up in PyBEL config with
      ``PYBEL_REMOTE_USER`` or the environment as ``PYBEL_REMOTE_USER``
-    :param Optional[str] password: Password for BEL Commons. Alternatively, looks up in PyBEL config with
+    :param password: Password for BEL Commons. Alternatively, looks up in PyBEL config with
      ``PYBEL_REMOTE_PASSWORD`` or the environment as ``PYBEL_REMOTE_PASSWORD``
     :return: The response object from :mod:`requests`
-    :rtype: requests.Response
     """
     if host is None:
         host = _get_host()
@@ -84,8 +89,9 @@ def to_web(graph, host=None, user=None, password=None):
         headers={
             'content-type': 'application/json',
             'User-Agent': 'PyBEL v{}'.format(get_version()),
+            'bel-commons-public': public,
         },
-        auth=(user, password)
+        auth=(user, password),
     )
     log.debug('received response: %s', response)
 
