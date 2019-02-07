@@ -129,7 +129,7 @@ class MetadataParser(BaseParser):
 
         super(MetadataParser, self).__init__(self.language)
 
-    def handle_document(self, line: str, position: int, tokens: ParseResults)-> ParseResults:
+    def handle_document(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
         """Handle statements like ``SET DOCUMENT X = "Y"``.
 
         :raises: InvalidMetadataException
@@ -162,7 +162,7 @@ class MetadataParser(BaseParser):
         if self.disallow_redefinition and self.has_namespace(namespace):
             raise RedefinedNamespaceError(self.get_line_number(), line, position, namespace)
 
-    def handle_namespace_url(self, line: str, position: int, tokens: ParseResults)-> ParseResults:
+    def handle_namespace_url(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
         """Handle statements like ``DEFINE NAMESPACE X AS URL "Y"``.
 
         :raises: RedefinedNamespaceError
@@ -205,7 +205,7 @@ class MetadataParser(BaseParser):
         if self.disallow_redefinition and self.has_annotation(annotation):
             raise RedefinedAnnotationError(self.get_line_number(), line, position, annotation)
 
-    def handle_annotations_url(self, line: str, position: int, tokens: ParseResults)-> ParseResults:
+    def handle_annotations_url(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
         """Handle statements like ``DEFINE ANNOTATION X AS URL "Y"``.
 
         :raises: RedefinedAnnotationError
