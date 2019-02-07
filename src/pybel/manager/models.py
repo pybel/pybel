@@ -324,7 +324,7 @@ class Modification(Base):
 
     type = Column(String(255), nullable=False, doc='Type of the stored modification e.g. Fusion, gmod, pmod, etc')
 
-    variantString = Column(String(255), nullable=True, doc='HGVS string if sequence modification') # noqa: N815
+    variantString = Column(String(255), nullable=True, doc='HGVS string if sequence modification')  # noqa: N815
 
     p3_partner_id = Column(Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), nullable=True)
     p3_partner = relationship(NamespaceEntry, foreign_keys=[p3_partner_id])
