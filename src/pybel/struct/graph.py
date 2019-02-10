@@ -858,23 +858,23 @@ class BELGraph(nx.MultiDiGraph):
         """Print a summary of the graph."""
         print(self.summary_str(), file=file)
 
-    def serialize(self, fmt: str = 'nodelink', file: Union[str, TextIO] = None):
+    def serialize(self, *, fmt: str = 'nodelink', file: Union[None, str, TextIO] = None, **kwargs):
         """Serialize the graph to an object or file if given."""
         if file is None:
-            return self._serialize_object(fmt=fmt)
+            return self._serialize_object(fmt=fmt, **kwargs)
         elif isinstance(file, str):
             with open(file, 'w') as file_obj:
-                self._serialize_file(fmt=fmt, file=file_obj)
+                self._serialize_file(fmt=fmt, file=file_obj, **kwargs)
         else:
-            self._serialize_file(fmt=fmt, file=file)
+            self._serialize_file(fmt=fmt, file=file, **kwargs)
 
-    def _serialize_object(self, fmt: str):
+    def _serialize_object(self, *, fmt: str, **kwargs):
         object_exporter = self._get_serialize_entry_point('pybel.object_exporter', fmt)
-        return object_exporter(self)
+        return object_exporter(self, **kwargs)
 
-    def _serialize_file(self, fmt: str, file: TextIO):
+    def _serialize_file(self, *, fmt: str, file: TextIO, **kwargs):
         file_exporter = self._get_serialize_entry_point('pybel.file_exporter', fmt)
-        return file_exporter(self, file)
+        return file_exporter(self, file, **kwargs)
 
     @staticmethod
     def _get_serialize_entry_point(group: str, name: str):
