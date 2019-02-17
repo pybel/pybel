@@ -1,5 +1,6 @@
-sudo: false
+sudo: true
 cache: pip
+dist: xenial
 
 services:
   - mysql
@@ -8,7 +9,7 @@ services:
 language: python
 
 python:
-  - 3.6
+  - 3.7
   - 3.5
 
 stages:
