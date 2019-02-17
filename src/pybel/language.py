@@ -476,5 +476,5 @@ gmod_mappings = {
     }
 }
 
-BEL_DEFAULT_NAMESPACE_VERSION = '2.1.0'
-BEL_DEFAULT_NAMESPACE_URL = 'http://openbel.org/2.1.0.belns'  # just needs something unique... will change later
+BEL_DEFAULT_NAMESPACE_VERSION = '2.1.1'
+BEL_DEFAULT_NAMESPACE_URL = 'http://openbel.org/2.1.1.belns'  # just needs something unique... will change later

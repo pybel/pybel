@@ -581,10 +581,8 @@ class InsertManager(NamespaceManager, LookupManager):
             namespace_urls = tqdm(namespace_urls, desc='namespaces')
 
         for namespace_url in namespace_urls:
-            if namespace_url in graph.uncached_namespaces:
-                continue
-
-            self.get_or_create_namespace(namespace_url)
+            if namespace_url not in graph.uncached_namespaces:
+                self.get_or_create_namespace(namespace_url)
 
         for keyword, pattern in graph.namespace_pattern.items():
             self.ensure_regex_namespace(keyword, pattern)

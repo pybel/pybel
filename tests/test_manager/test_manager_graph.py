@@ -18,7 +18,7 @@ from pybel.constants import (
     INCREASES, LOCATION, METADATA_NAME, METADATA_VERSION, PATHOLOGY, PROTEIN, RELATION,
 )
 from pybel.dsl import (
-    BaseEntity, activity, complex_abundance, composite_abundance, degradation, Entity, fragment, fusion_range, gene,
+    BaseEntity, Entity, activity, complex_abundance, composite_abundance, degradation, fragment, fusion_range, gene,
     gene_fusion, gmod, hgvs, location, named_complex_abundance, pmod, protein, protein_fusion, reaction, secretion,
     translocation,
 )
@@ -820,11 +820,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
     def setUp(self):
         """Creates a unit test with a manager and graph"""
-        super(TestReconstituteEdges, self).setUp()
-        self.graph = BELGraph(
-            name=n(),
-            version=n()
-        )
+        super().setUp()
+        self.graph = BELGraph(name=n(), version=n())
 
     @mock_bel_resources
     def test_translocation_default(self, mock):
@@ -885,17 +882,17 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         make_dummy_namespaces(self.manager, self.graph)
 
         network = self.manager.insert_graph(self.graph, store_parts=True)
-        self.assertEqual(2, network.nodes.count())
-        self.assertEqual(1, network.edges.count())
+        self.assertEqual(2, network.nodes.count(), msg='number of nodes')
+        self.assertEqual(1, network.edges.count(), msg='number of edges')
 
         kin_list = self.manager.session.query(NamespaceEntry).filter(NamespaceEntry.name == 'kin').all()
-        self.assertEqual(1, len(kin_list))
+        self.assertEqual(1, len(kin_list), msg='number of kinase NamespaceEntrys')
 
         kin = list(kin_list)[0]
         self.assertEqual('kin', kin.name)
 
         effects = self.manager.session.query(Property).join(NamespaceEntry).filter(Property.effect == kin)
-        self.assertEqual(1, effects.count())
+        self.assertEqual(1, effects.count(), msg='number of effects')
 
     @mock_bel_resources
     def test_subject_activity_custom(self, mock):
