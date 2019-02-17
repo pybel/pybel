@@ -93,6 +93,8 @@ class TestStruct(unittest.TestCase):
         test_str = """Test v0.0.0
 Number of Nodes: 1
 Number of Edges: 0
+Number of Citations: 0
+Number of Authors: 0
 Network Density: 0.00E+00
 Number of Components: 1
 Number of Warnings: 0"""

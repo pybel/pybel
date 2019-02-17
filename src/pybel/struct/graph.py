@@ -5,6 +5,7 @@
 import logging
 from collections import defaultdict
 from copy import deepcopy
+from itertools import chain
 from typing import Any, Dict, Hashable, Iterable, List, Mapping, Optional, Set, TextIO, Tuple, Union
 
 import networkx as nx
@@ -13,13 +14,13 @@ from pkg_resources import iter_entry_points
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
 from ..canonicalize import edge_to_bel
 from ..constants import (
-    ANNOTATIONS, ASSOCIATION, CITATION, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, DECREASES, DESCRIPTION,
-    DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO, EVIDENCE, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN,
-    GRAPH_ANNOTATION_URL, GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION,
-    GRAPH_UNCACHED_NAMESPACES, HAS_COMPONENT, HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A,
-    MEMBERS, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER,
-    METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAMESPACE, OBJECT, ORTHOLOGOUS, PART_OF, PRODUCTS, REACTANTS,
-    RELATION, SUBJECT, TRANSCRIBED_TO, TRANSLATED_TO, VARIANTS,
+    ANNOTATIONS, ASSOCIATION, CITATION, CITATION_AUTHORS, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED,
+    DECREASES, DESCRIPTION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO, EVIDENCE, GRAPH_ANNOTATION_LIST,
+    GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL,
+    GRAPH_PATH, GRAPH_PYBEL_VERSION, GRAPH_UNCACHED_NAMESPACES, HAS_COMPONENT, HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT,
+    HAS_VARIANT, INCREASES, IS_A, MEMBERS, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION,
+    METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAMESPACE, OBJECT, ORTHOLOGOUS, PART_OF,
+    PRODUCTS, REACTANTS, RELATION, SUBJECT, TRANSCRIBED_TO, TRANSLATED_TO, VARIANTS,
 )
 from ..dsl import BaseEntity, Gene, MicroRna, Protein, Rna, activity
 from ..parser.exc import BELParserWarning
@@ -317,6 +318,22 @@ class BELGraph(nx.MultiDiGraph):
     def number_of_warnings(self) -> int:
         """Return the number of warnings."""
         return len(self.warnings)
+
+    def number_of_citations(self) -> int:
+        """Return the number of citations contained within the graph."""
+        return len({
+            (data[CITATION][CITATION_TYPE], data[CITATION][CITATION_REFERENCE])
+            for _, _, data in self.edges(data=True)
+            if CITATION in data
+        })
+
+    def number_of_authors(self) -> int:
+        """Return the number of citations contained within the graph."""
+        return len(set(chain.from_iterable(
+            data[CITATION][CITATION_AUTHORS]
+            for _, _, data in self.edges(data=True)
+            if CITATION in data and CITATION_AUTHORS in data[CITATION]
+        )))
 
     def __str__(self):
         return '{} v{}'.format(self.name, self.version)
@@ -838,6 +855,8 @@ class BELGraph(nx.MultiDiGraph):
         return [
             ('Number of Nodes', number_nodes),
             ('Number of Edges', self.number_of_edges()),
+            ('Number of Citations', self.number_of_citations()),
+            ('Number of Authors', self.number_of_authors()),
             ('Network Density', '{:.2E}'.format(nx.density(self))),
             ('Number of Components', nx.number_weakly_connected_components(self)),
             ('Number of Warnings', self.number_of_warnings()),
