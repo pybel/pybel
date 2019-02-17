@@ -26,7 +26,7 @@
     SET Evidence = "Although found predominantly in the cytoplasm and, less abundantly, in the nucleus, VCP can be translocated from the nucleus after stimulation with epidermal growth factor."
     SET Species = 9606
 
-    p(HGNC:EGF) increases tloc(p(HGNC:VCP),GOCCID:0005634,GOCCID:0005737)
+    p(HGNC:EGF) increases tloc(p(HGNC:VCP), GO:nucleus, GO:cytoplasm)
 
     UNSET ALL
 
@@ -40,7 +40,8 @@
     UNSET ALL
 """
 
-from ..dsl import activity, bioprocess, complex_abundance, entity, protein, translocation
+from ..dsl import activity, bioprocess, complex_abundance, protein, translocation
+from ..language import cytoplasm, nucleus
 from ..struct.graph import BELGraph
 
 __all__ = [
@@ -58,7 +59,7 @@ egf_graph = BELGraph(
 egf_graph.namespace_url.update({
     'HGNC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/hgnc-human-genes/hgnc-human-genes-20170725.belns',
     'CHEBI': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/chebi/chebi-20170725.belns',
-    'GOBP': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process/go-biological-process-20170725.belns'
+    'GO': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process/go-biological-process-20170725.belns'
 })
 
 egf_graph.annotation_url.update({
@@ -80,7 +81,7 @@ relb = protein(name='RELB', namespace='HGNC')
 
 nfkb_complex = complex_abundance([nfkb1, nfkb2, rel, rela, relb])
 
-apoptosis = bioprocess(namespace='GOBP', name='apoptotic process', identifier='0006915')
+apoptosis = bioprocess(namespace='GO', name='apoptotic process', identifier='GO:0006915')
 
 egf_graph.add_increases(
     ar,
@@ -118,8 +119,8 @@ egf_graph.add_increases(
              'translocated from the nucleus after stimulation with epidermal growth factor.',
     annotations={'Species': '9606'},
     object_modifier=translocation(
-        from_loc=entity(namespace='GOCC', name='nucleus', identifier='0005634'),
-        to_loc=entity(namespace='GOCC', name='cytoplasm', identifier='0005737'),
+        from_loc=nucleus,
+        to_loc=cytoplasm,
     )
 )
 

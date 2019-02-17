@@ -2,6 +2,8 @@
 
 """This module helps handle node data dictionaries."""
 
+from typing import List
+
 from .constants import (
     FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_START, FRAGMENT_STOP, FUNCTION,
     FUSION, FUSION_MISSING, FUSION_REFERENCE,
@@ -10,8 +12,8 @@ from .constants import (
     REACTION, TARGET, VARIANTS,
 )
 from .dsl import (
-    BaseAbundance, BaseEntity, CentralDogma, FUNC_TO_DSL, FUNC_TO_FUSION_DSL, FUNC_TO_LIST_DSL, FusionBase, Reaction,
-    Variant, fragment, fusion_range, gmod, hgvs, missing_fusion_range, pmod,
+    BaseAbundance, BaseEntity, CentralDogma, FUNC_TO_DSL, FUNC_TO_FUSION_DSL, FUNC_TO_LIST_DSL, FusionBase,
+    FusionRangeBase, ListAbundance, Reaction, Variant, fragment, fusion_range, gmod, hgvs, missing_fusion_range, pmod,
 )
 
 __all__ = [
@@ -43,12 +45,11 @@ def parse_result_to_dsl(tokens):
     return _simple_po_to_dict(tokens)
 
 
-def _fusion_to_dsl(tokens):
+def _fusion_to_dsl(tokens) -> FusionBase:
     """Convert a PyParsing data dictionary to a PyBEL fusion data dictionary.
 
     :param tokens: A PyParsing data dictionary representing a fusion
     :type tokens: ParseResult
-    :rtype: FusionBase
     """
     func = tokens[FUNCTION]
     fusion_dsl = FUNC_TO_FUSION_DSL[func]
@@ -75,11 +76,10 @@ def _fusion_to_dsl(tokens):
     )
 
 
-def _fusion_range_to_dsl(tokens):
+def _fusion_range_to_dsl(tokens) -> FusionRangeBase:
     """Convert a PyParsing data dictionary into a PyBEL.
 
     :type tokens: ParseResult
-    :rtype: pybel.dsl.FusionRangeBase
     """
     if FUSION_MISSING in tokens:
         return missing_fusion_range()
@@ -91,11 +91,10 @@ def _fusion_range_to_dsl(tokens):
     )
 
 
-def _simple_po_to_dict(tokens):
+def _simple_po_to_dict(tokens) -> BaseAbundance:
     """Convert a simple named entity to a DSL object.
 
     :type tokens: ParseResult
-    :rtype: BaseAbundance
     """
     dsl = FUNC_TO_DSL.get(tokens[FUNCTION])
     if dsl is None:
@@ -108,11 +107,10 @@ def _simple_po_to_dict(tokens):
     )
 
 
-def _variant_po_to_dict(tokens):
+def _variant_po_to_dict(tokens) -> CentralDogma:
     """Convert a PyParsing data dictionary to a central dogma abundance (i.e., Protein, RNA, miRNA, Gene).
 
     :type tokens: ParseResult
-    :rtype: CentralDogma
     """
     dsl = FUNC_TO_DSL.get(tokens[FUNCTION])
     if dsl is None:
@@ -128,11 +126,10 @@ def _variant_po_to_dict(tokens):
     )
 
 
-def _variant_to_dsl_helper(tokens):
+def _variant_to_dsl_helper(tokens) -> Variant:
     """Convert variant tokens to DSL objects.
 
     :type tokens: ParseResult
-    :rtype: Variant
     """
     kind = tokens[KIND]
 
@@ -164,11 +161,10 @@ def _variant_to_dsl_helper(tokens):
     raise ValueError('invalid fragment kind: {}'.format(kind))
 
 
-def _reaction_po_to_dict(tokens):
+def _reaction_po_to_dict(tokens) -> Reaction:
     """Convert a reaction parse object to a DSL.
 
     :type tokens: ParseResult
-    :rtype: Reaction
     """
     return Reaction(
         reactants=_reaction_part_po_to_dict(tokens[REACTANTS]),
@@ -176,20 +172,18 @@ def _reaction_po_to_dict(tokens):
     )
 
 
-def _reaction_part_po_to_dict(tokens):
+def _reaction_part_po_to_dict(tokens) -> List[BaseEntity]:
     """Convert a PyParsing result to a reaction.
 
     :type tokens: ParseResult
-    :rtype: list[BaseAbundance]
     """
     return [parse_result_to_dsl(token) for token in tokens]
 
 
-def _list_po_to_dict(tokens):
+def _list_po_to_dict(tokens) -> ListAbundance:
     """Convert a list parse object to a node.
 
-    :param tokens: PyParsing ParseObject
-    :rtype: ListAbundance
+    :type tokens: ParseResult
     """
     func = tokens[FUNCTION]
     dsl = FUNC_TO_LIST_DSL[func]

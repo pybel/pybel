@@ -10,9 +10,9 @@ from typing import Iterable, List, Mapping, Optional, TextIO, Tuple
 import bel_resources.constants
 from bel_resources import make_knowledge_header
 from .constants import (
-    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_REFERENCE, CITATION_TYPE, COMPLEX, COMPOSITE,
-    DEGRADATION, EFFECT, EVIDENCE, FROM_LOC, FUNCTION, FUSION, GOCC_KEYWORD, GOCC_LATEST, IDENTIFIER, LOCATION,
-    MODIFIER, NAME, NAMESPACE, OBJECT, PYBEL_AUTOEVIDENCE, REACTION, RELATION, SUBJECT, TO_LOC, TRANSLOCATION,
+    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CELL_SURFACE, CITATION, CITATION_REFERENCE, CITATION_TYPE, COMPLEX,
+    COMPOSITE, DEGRADATION, EFFECT, EVIDENCE, EXTRACELLULAR, FROM_LOC, FUNCTION, FUSION, IDENTIFIER, INTRACELLULAR,
+    LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT, PYBEL_AUTOEVIDENCE, REACTION, RELATION, SUBJECT, TO_LOC, TRANSLOCATION,
     UNQUALIFIED_EDGES, VARIANTS, VERSION,
 )
 from .dsl import BaseEntity
@@ -94,19 +94,26 @@ def _decanonicalize_edge_node(node: BaseEntity, edge_data: EdgeData, node_positi
         to_loc_data = effect[TO_LOC]
         from_loc_data = effect[FROM_LOC]
 
-        from_loc = "fromLoc({}:{})".format(
-            from_loc_data[NAMESPACE],
-            ensure_quotes(from_loc_data[NAME])
-        )
+        if from_loc_data[NAMESPACE] == BEL_DEFAULT_NAMESPACE and from_loc_data[NAME] == INTRACELLULAR:
+            if to_loc_data[NAMESPACE] == BEL_DEFAULT_NAMESPACE and to_loc_data[NAME] == EXTRACELLULAR:
+                return 'sec({})'.format(node_str)
+            if to_loc_data[NAMESPACE] == BEL_DEFAULT_NAMESPACE and to_loc_data[NAME] == CELL_SURFACE:
+                return 'surf({})'.format(node_str)
 
-        to_loc = "toLoc({}:{})".format(
-            to_loc_data[NAMESPACE],
-            ensure_quotes(to_loc_data[NAME])
-        )
+        from_loc = _get_tloc_terminal('fromLoc', from_loc_data)
+        to_loc = _get_tloc_terminal('toLoc', to_loc_data)
 
         return "tloc({}, {}, {})".format(node_str, from_loc, to_loc)
 
     raise ValueError('invalid modifier: {}'.format(modifier))
+
+
+def _get_tloc_terminal(side, data):
+    return "{}({}:{})".format(
+        side,
+        data[NAMESPACE],
+        ensure_quotes(data[NAME])
+    )
 
 
 def edge_to_bel(u: BaseEntity, v: BaseEntity, data: EdgeData, sep: Optional[str] = None) -> str:
@@ -124,12 +131,11 @@ def edge_to_bel(u: BaseEntity, v: BaseEntity, data: EdgeData, sep: Optional[str]
     return sep.join((u_str, data[RELATION], v_str))
 
 
-def _sort_qualified_edges_helper(edge_tuple):
-    u, v, k, d = edge_tuple
+def _sort_qualified_edges_helper(t: EdgeTuple) -> Tuple[str, str, str]:
     return (
-        d[CITATION][CITATION_TYPE],
-        d[CITATION][CITATION_REFERENCE],
-        d[EVIDENCE],
+        t[3][CITATION][CITATION_TYPE],
+        t[3][CITATION][CITATION_REFERENCE],
+        t[3][EVIDENCE],
     )
 
 
@@ -181,9 +187,6 @@ def _to_bel_lines_header(graph) -> Iterable[str]:
 
     :param pybel.BELGraph graph: A BEL graph
     """
-    if GOCC_KEYWORD not in graph.namespace_url:
-        graph.namespace_url[GOCC_KEYWORD] = GOCC_LATEST
-
     yield '# This document was created by PyBEL v{} and bel-resources v{} on {}\n'.format(
         VERSION, bel_resources.constants.VERSION, time.asctime()
     )

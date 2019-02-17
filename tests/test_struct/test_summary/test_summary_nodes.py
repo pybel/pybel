@@ -55,7 +55,7 @@ class TestSummary(unittest.TestCase):
         """Test getting and counting namespaces' contents on the EGF graph."""
         result = {
             'HGNC': 10,
-            'GOBP': 1,
+            'GO': 1,
         }
 
         self.assertEqual(set(result), get_namespaces(egf_graph))
@@ -141,7 +141,7 @@ class TestSummary(unittest.TestCase):
         graph.add_association(a, b, n(), n())
         graph.add_association(a, c, n(), n())
 
-        top_hubs = get_top_hubs(graph, count=1)
+        top_hubs = get_top_hubs(graph, n=1)
         self.assertEqual(1, len(top_hubs))
         node, degree = top_hubs[0]
         self.assertEqual(a, node)

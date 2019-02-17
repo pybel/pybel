@@ -12,7 +12,8 @@
     p(SFAM:"RAS Family",pmod(F)) directlyIncreases tloc(p(SFAM:"RAS Family"),MESHCS:"Intracellular Space",MESHCS:"Cell Membrane")
 """
 
-from ..dsl import activity, complex_abundance, entity, pmod, protein, translocation
+from ..dsl import activity, complex_abundance, pmod, protein, translocation
+from ..language import Entity
 from ..struct.graph import BELGraph
 
 __all__ = ['ras_tloc_graph']
@@ -52,7 +53,7 @@ ras_tloc_graph.add_directly_increases(
     evidence=evidence,
     citation=pmid,
     object_modifier=translocation(
-        from_loc=entity(namespace='GO', name='intracellular', identifier='GO:0005622'),
-        to_loc=entity(namespace='GO', name='plasma membrane', identifier='GO:0005886'),
+        from_loc=Entity(namespace='GO', name='intracellular', identifier='GO:0005622'),
+        to_loc=Entity(namespace='GO', name='plasma membrane', identifier='GO:0005886'),
     )
 )

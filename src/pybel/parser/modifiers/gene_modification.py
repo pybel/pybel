@@ -40,11 +40,11 @@ in the OpenBEL community.
     - PyBEL module :py:func:`pybel.parser.modifiers.get_gene_modification_language`
 """
 
-from pyparsing import Group, MatchFirst, oneOf
+from pyparsing import Group, MatchFirst, ParserElement, oneOf
 
 from ..utils import nest, one_of_tags
-from ... import language
 from ...constants import BEL_DEFAULT_NAMESPACE, GMOD, IDENTIFIER, KIND, NAME, NAMESPACE
+from ...language import gmod_namespace
 
 __all__ = [
     'get_gene_modification_language',
@@ -53,25 +53,21 @@ __all__ = [
 
 def _handle_gmod_default(_, __, tokens):
     tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
-    tokens[NAME] = language.gmod_namespace[tokens[0]]
+    tokens[NAME] = gmod_namespace[tokens[0]]
     return tokens
 
 
 gmod_tag = one_of_tags(tags=['gmod', 'geneModification'], canonical_tag=GMOD, name=KIND)
-gmod_default_ns = oneOf(list(language.gmod_namespace.keys())).setParseAction(_handle_gmod_default)
+gmod_default_ns = oneOf(list(gmod_namespace)).setParseAction(_handle_gmod_default)
 
 
-def get_gene_modification_language(identifier_qualified):
-    """Build a parser for gene modifications.
-
-    :param pyparsing.ParseElement identifier_qualified:
-    :rtype: pyparsing.ParseElement
-    """
+def get_gene_modification_language(identifier_qualified: ParserElement) -> ParserElement:
+    """Build a gene modification parser."""
     gmod_identifier = MatchFirst([
-        Group(identifier_qualified),
-        Group(gmod_default_ns),
+        identifier_qualified,
+        gmod_default_ns,
     ])
 
     return gmod_tag + nest(
-        gmod_identifier(IDENTIFIER)
+        Group(gmod_identifier)(IDENTIFIER)
     )

@@ -7,9 +7,10 @@ import unittest
 from pybel import BELGraph
 from pybel.constants import NAME
 from pybel.dsl import (
-    abundance, complex_abundance, composite_abundance, entity, fragment, fusion_range, gene, gene_fusion,
-    missing_fusion_range, protein,
+    abundance, complex_abundance, composite_abundance, fragment, fusion_range, gene, gene_fusion, missing_fusion_range,
+    protein,
 )
+from pybel.language import Entity
 from pybel.testing.utils import n
 from pybel.utils import ensure_quotes
 
@@ -48,7 +49,7 @@ class TestDSL(unittest.TestCase):
     def test_missing_information(self):
         """Test that entity and abundance functions raise on missing name/identifier."""
         with self.assertRaises(ValueError):
-            entity(namespace='test')
+            Entity(namespace='test')
 
         with self.assertRaises(ValueError):
             protein(namespace='test')

@@ -213,7 +213,7 @@ def count_variants(graph):
     )
 
 
-def get_top_hubs(graph, n: Optional[int] = 15) -> List[Tuple[BaseEntity, int]]:
+def get_top_hubs(graph, *, n: Optional[int] = 15) -> List[Tuple[BaseEntity, int]]:
     """Get the top hubs in the graph by BEL.
 
     :param pybel.BELGraph graph: A BEL graph

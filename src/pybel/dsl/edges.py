@@ -2,29 +2,23 @@
 
 """Internal DSL functions for edges."""
 
-from .utils import entity
 from ..constants import (
-    ACTIVITY, BEL_DEFAULT_NAMESPACE, DEGRADATION, EFFECT, FROM_LOC, LOCATION, MODIFIER, TO_LOC,
-    TRANSLOCATION,
+    ACTIVITY, BEL_DEFAULT_NAMESPACE, CELL_SURFACE, DEGRADATION, EFFECT, EXTRACELLULAR, FROM_LOC, INTRACELLULAR,
+    LOCATION, MODIFIER, TO_LOC, TRANSLOCATION,
 )
+from ..language import Entity
 
 __all__ = [
     'activity',
     'degradation',
     'translocation',
-    'extracellular',
-    'intracellular',
     'secretion',
     'cell_surface_expression',
     'location',
 ]
 
-intracellular = entity(name='intracellular', namespace='GOCC')
-extracellular = entity(name='extracellular space', namespace='GOCC')
-surface = entity(name='cell surface', namespace='GOCC')
 
-
-def _activity_helper(modifier, location=None):
+def _activity_helper(modifier: str, location=None):
     """Make an activity dictionary.
 
     :param str modifier:
@@ -51,10 +45,10 @@ def activity(name=None, namespace=None, identifier=None, location=None):
     rv = _activity_helper(ACTIVITY, location=location)
 
     if name or (namespace and identifier):
-        rv[EFFECT] = entity(
+        rv[EFFECT] = Entity(
             namespace=(namespace or BEL_DEFAULT_NAMESPACE),
             name=name,
-            identifier=identifier
+            identifier=identifier,
         )
 
     return rv
@@ -78,8 +72,8 @@ def translocation(from_loc, to_loc):
     """
     rv = _activity_helper(TRANSLOCATION)
     rv[EFFECT] = {
-        FROM_LOC: from_loc,
-        TO_LOC: to_loc
+        FROM_LOC: Entity(namespace=BEL_DEFAULT_NAMESPACE, name=from_loc) if isinstance(from_loc, str) else from_loc,
+        TO_LOC: Entity(namespace=BEL_DEFAULT_NAMESPACE, name=to_loc) if isinstance(to_loc, str) else to_loc,
     }
     return rv
 
@@ -92,10 +86,7 @@ def secretion():
 
     :rtype: dict
     """
-    return translocation(
-        from_loc=intracellular,
-        to_loc=extracellular
-    )
+    return translocation(INTRACELLULAR, EXTRACELLULAR)
 
 
 def cell_surface_expression():
@@ -106,16 +97,13 @@ def cell_surface_expression():
 
     :rtype: dict
     """
-    return translocation(
-        from_loc=intracellular,
-        to_loc=surface,
-    )
+    return translocation(INTRACELLULAR, CELL_SURFACE)
 
 
 def location(identifier):
     """Make a location object modifier dictionary.
 
-    :param entity identifier: A namespace/name/identifier pair
+    :param Entity identifier: A namespace/name/identifier pair
 
     Usage:
 

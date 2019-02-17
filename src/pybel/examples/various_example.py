@@ -27,8 +27,8 @@ single_reaction_graph.namespace_url.update({
     'HGNC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/hgnc-human-genes/'
             'hgnc-human-genes-20170725.belns',
     'CHEBI': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/chebi/chebi-20170725.belns',
-    'GOBP': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process/'
-            'go-biological-process-20170725.belns'
+    'GO': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process/'
+          'go-biological-process-20170725.belns'
 })
 
 hk1 = Protein(name='HK1', namespace='HGNC', identifier='4922')
@@ -56,8 +56,8 @@ single_complex_graph.namespace_url.update({
     'HGNC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/hgnc-human-genes/'
             'hgnc-human-genes-20170725.belns',
     'CHEBI': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/chebi/chebi-20170725.belns',
-    'GOBP': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process/'
-            'go-biological-process-20170725.belns'
+    'GO': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process/'
+          'go-biological-process-20170725.belns'
 })
 
 single_complex_graph.add_node_from_data(complex_example)
@@ -74,8 +74,8 @@ single_composite_graph.namespace_url.update({
     'HGNC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/hgnc-human-genes/'
             'hgnc-human-genes-20170725.belns',
     'CHEBI': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/chebi/chebi-20170725.belns',
-    'GOBP': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process/'
-            'go-biological-process-20170725.belns'
+    'GO': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process/'
+          'go-biological-process-20170725.belns'
 })
 
 single_composite_graph.add_node_from_data(composite_example)

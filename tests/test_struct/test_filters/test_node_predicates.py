@@ -6,15 +6,15 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import (
-    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS,
-    CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_ONLINE, CITATION_TYPE_PUBMED, DECREASES, DEGRADATION,
-    DIRECTLY_DECREASES, DIRECTLY_INCREASES, EVIDENCE, GMOD, INCREASES, LOCATION, MODIFIER, OBJECT, POLAR_RELATIONS,
-    POSITIVE_CORRELATION, RELATION, SUBJECT, TRANSLOCATION,
+    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_REFERENCE, CITATION_TYPE,
+    CITATION_TYPE_ONLINE, CITATION_TYPE_PUBMED, DECREASES, DEGRADATION, DIRECTLY_DECREASES, DIRECTLY_INCREASES,
+    EVIDENCE, GMOD, INCREASES, LOCATION, MODIFIER, OBJECT, POLAR_RELATIONS, POSITIVE_CORRELATION, RELATION, SUBJECT,
+    TRANSLOCATION,
 )
 from pybel.dsl import (
-    abundance, activity, degradation, entity, fragment, gene, gmod, hgvs, pmod, protein, secretion,
-    translocation,
+    abundance, activity, degradation, fragment, gene, gmod, hgvs, pmod, protein, secretion, translocation,
 )
+from pybel.language import Entity
 from pybel.struct.filters.edge_predicate_builders import build_relation_predicate
 from pybel.struct.filters.edge_predicates import (
     edge_has_activity, edge_has_annotation, edge_has_degradation,
@@ -171,24 +171,22 @@ class TestNodePredicates(unittest.TestCase):
         self.assertFalse(has_activity(g, v))
 
     def test_object_has_translocation(self):
-        """p(HGNC: EGF) increases tloc(p(HGNC: VCP), GOCCID: 0005634, GOCCID: 0005737)"""
+        """p(HGNC: EGF) increases tloc(p(HGNC: VCP), GO:0005634, GO:0005737)"""
         g = BELGraph()
-        u_node = protein(name='EFG', namespace='HGNC')
-        v_node = protein(name='VCP', namespace='HGNC')
-        u = g.add_node_from_data(u_node)
-        v = g.add_node_from_data(v_node)
+        u = protein(name='EFG', namespace='HGNC')
+        v = protein(name='VCP', namespace='HGNC')
 
         g.add_qualified_edge(
-            u_node,
-            v_node,
+            u,
+            v,
             relation=INCREASES,
             citation='10855792',
             evidence="Although found predominantly in the cytoplasm and, less abundantly, in the nucleus, VCP can be "
                      "translocated from the nucleus after stimulation with epidermal growth factor.",
             annotations={'Species': '9606'},
             object_modifier=translocation(
-                from_loc=entity(namespace='GO', identifier='0005634'),
-                to_loc=entity(namespace='GO', identifier='0005737')
+                from_loc=Entity(namespace='GO', identifier='0005634'),
+                to_loc=Entity(namespace='GO', identifier='0005737'),
             )
         )
 
@@ -207,14 +205,12 @@ class TestNodePredicates(unittest.TestCase):
     def test_object_has_secretion(self):
         """p(MGI:Il4) increases sec(p(MGI:Cxcl1))"""
         g = BELGraph()
-        u_node = protein(name='Il4', namespace='MGI')
-        v_node = protein(name='Cxcl1', namespace='MGI')
-        u = g.add_node_from_data(u_node)
-        v = g.add_node_from_data(v_node)
+        u = protein(name='Il4', namespace='MGI')
+        v = protein(name='Cxcl1', namespace='MGI')
 
         g.add_increases(
-            u_node,
-            v_node,
+            u,
+            v,
             citation='10072486',
             evidence='Compared with controls treated with culture medium alone, IL-4 and IL-5 induced significantly '
                      'higher levels of MIP-2 and KC production; IL-4 also increased the production of MCP-1 '
@@ -240,14 +236,12 @@ class TestNodePredicates(unittest.TestCase):
     def test_subject_has_secretion(self):
         """sec(p(MGI:S100b)) increases a(CHEBI:"nitric oxide")"""
         g = BELGraph()
-        u_node = protein(name='S100b', namespace='MGI')
-        v_node = abundance(name='nitric oxide', namespace='CHEBI')
-        u = g.add_node_from_data(u_node)
-        v = g.add_node_from_data(v_node)
+        u = protein(name='S100b', namespace='MGI')
+        v = abundance(name='nitric oxide', namespace='CHEBI')
 
         g.add_increases(
-            u_node,
-            v_node,
+            u,
+            v,
             citation='11180510',
             evidence='S100B protein is also secreted by astrocytes and acts on these cells to stimulate nitric oxide '
                      'secretion in an autocrine manner.',

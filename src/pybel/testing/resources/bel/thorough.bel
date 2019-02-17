@@ -12,18 +12,17 @@ SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"
 ##################################################################################
 # Definitions Section
 
-DEFINE NAMESPACE CHEBI AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=chebi.belns"
-DEFINE NAMESPACE HGNC AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=hgnc-human-genes.belns"
-DEFINE NAMESPACE GOBP AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=go-biological-process.belns"
-DEFINE NAMESPACE GOCC AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=go-cellular-component.belns"
-DEFINE NAMESPACE MESHD AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=mesh-diseases.belns"
+DEFINE NAMESPACE CHEBI   AS URL "https://raw.githubusercontent.com/pharmacome/terminology/73688d6dc24e309fca59a1340dc9ee971e9f3baa/external/chebi-names.belns"
+DEFINE NAMESPACE HGNC    AS URL "https://raw.githubusercontent.com/pharmacome/terminology/73688d6dc24e309fca59a1340dc9ee971e9f3baa/external/hgnc-names.belns"
+DEFINE NAMESPACE GO      AS URL "https://raw.githubusercontent.com/pharmacome/terminology/73688d6dc24e309fca59a1340dc9ee971e9f3baa/external/go-names.belns"
+DEFINE NAMESPACE MESHD   AS URL "https://raw.githubusercontent.com/pharmacome/terminology/73688d6dc24e309fca59a1340dc9ee971e9f3baa/external/mesh-names.belns"
 
-DEFINE NAMESPACE dbSNP AS PATTERN "rs[0-9]*"
+DEFINE NAMESPACE dbSNP   AS PATTERN "rs[0-9]*"
 
 DEFINE NAMESPACE TESTNS2 AS URL "https://raw.githubusercontent.com/pybel/pybel/develop/tests/belns/test_ns_2.belns"
 
-DEFINE ANNOTATION TESTAN1 AS LIST {"1","2","3"}
-DEFINE ANNOTATION TESTAN2 AS LIST {"1","2","3"}
+DEFINE ANNOTATION TESTAN1   AS LIST {"1","2","3"}
+DEFINE ANNOTATION TESTAN2   AS LIST {"1","2","3"}
 
 DEFINE ANNOTATION TestRegex AS PATTERN "[0-9]+"
 
@@ -39,10 +38,10 @@ SET TestRegex = "9000"
 a(CHEBI:"oxygen atom") -> geneAbundance(HGNC:AKT1,gmod(M))
 UNSET {TESTAN1, TestRegex}
 
-g(HGNC:AKT1, loc(GOCC:intracellular)) -| abundance(CHEBI:"oxygen atom", loc(GOCC:intracellular))
+g(HGNC:AKT1, loc(GO:intracellular)) -| abundance(CHEBI:"oxygen atom", loc(GO:intracellular))
 g(HGNC:AKT1, var(p.Phe508del)) =| p(HGNC:AKT1)
 g(HGNC:AKT1,sub(G,308,A)) cnc g(fus(HGNC:TMPRSS2, c.1_79, HGNC:ERG, c.312_5034))
-g(HGNC:AKT1,sub(G,308,A),loc(GOCC:intracellular)) -> g(HGNC:AKT1, var(p.Phe508del), sub(G,308,A), var(c.1521_1523delCTT))
+g(HGNC:AKT1,sub(G,308,A),loc(GO:intracellular)) -> g(HGNC:AKT1, var(p.Phe508del), sub(G,308,A), var(c.1521_1523delCTT))
 
 m(HGNC:MIR21) => g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))
 
@@ -50,12 +49,12 @@ g(HGNC:CFTR, var(c.1521_1523delCTT)) -> deg(p(HGNC:AKT1))
 g(HGNC:CFTR, var(g.117199646_117199648delCTT)) -> g(HGNC:CFTR, var(c.1521_1523delCTT))
 
 microRNAAbundance(HGNC:MIR21) -| p(HGNC:AKT1, pmod(TESTNS2:PhosRes, Ser, 473))
-m(HGNC:MIR21,loc(GOCC:intracellular)) -| p(HGNC:AKT1, pmod(Ph, Ser, 473))
+m(HGNC:MIR21,loc(GO:intracellular)) -| p(HGNC:AKT1, pmod(Ph, Ser, 473))
 m(HGNC:MIR21,var(p.Phe508del)) -| p(HGNC:AKT1, pmod(Ph, S, 473))
 
-m(HGNC:MIR21,var(p.Phe508del),loc(GOCC:intracellular)) -> p(HGNC:AKT1, var(p.C40*))
+m(HGNC:MIR21,var(p.Phe508del),loc(GO:intracellular)) -> p(HGNC:AKT1, var(p.C40*))
 
-p(HGNC:AKT1, loc(GOCC:intracellular)) =| p(HGNC:AKT1,sub(A,127,Y),pmod(Ph, Ser),loc(GOCC:intracellular))
+p(HGNC:AKT1, loc(GO:intracellular)) =| p(HGNC:AKT1,sub(A,127,Y),pmod(Ph, Ser),loc(GO:intracellular))
 g(HGNC:CHCHD4, fusion(HGNC:AIFM1)) -> p(fus(HGNC:TMPRSS2, p.1_79, HGNC:ERG, p.312_5034))
 p(HGNC:AKT1, var(p.Arg1851*)) -> p(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))
 p(HGNC:AKT1, trunc(40)) -> p(HGNC:CHCHD4, fusion(HGNC:AIFM1))
@@ -64,9 +63,9 @@ p(HGNC:CFTR, var(=)) -> surf(p(HGNC:EGFR)) -> p(HGNC:MIA, frag(?_*))
 p(HGNC:CFTR, var(?)) -> pathology(MESHD:Adenocarcinoma)
 
 
-p(HGNC:MIA, frag(5_20)) -> sec(complex(GOCC:"interleukin-23 complex"))
+p(HGNC:MIA, frag(5_20)) -> sec(complex(GO:"interleukin-23 complex"))
 
-p(HGNC:MIA, frag(1_?)) -> tloc(p(HGNC:EGFR), GOCC:"cell surface", GOCC:endosome)
+p(HGNC:MIA, frag(1_?)) -> tloc(p(HGNC:EGFR), GO:"cell surface", GO:endosome)
 
 deg(p(HGNC:AKT1)) -> p(HGNC:MIA, frag(?))
 
@@ -74,7 +73,7 @@ p(HGNC:CFTR, var(p.Phe508del)) -- p(HGNC:MIA, frag(?, "55kD"))
 
 p(HGNC:AKT1) -> p(HGNC:CFTR, var(p.Gly576Ala))
 
-r(HGNC:AKT1) -> tloc(p(HGNC:EGFR), fromLoc(GOCC:"cell surface"), toLoc(GOCC:endosome))
+r(HGNC:AKT1) -> tloc(p(HGNC:EGFR), fromLoc(GO:"cell surface"), toLoc(GO:endosome))
 
 r(HGNC:AKT1, var(p.Phe508del), var(c.1521_1523delCTT)) => r(fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.312_5034))
 
@@ -90,7 +89,7 @@ act(p(HGNC:AKT1)) -> r(HGNC:CFTR, var(r.1653_1655delcuu))
 
 complex(TESTNS2:"AP-1 Complex") -> p(HGNC:HRAS, pmod(Palm))
 
-composite(p(HGNC:IL6), complex(GOCC:"interleukin-23 complex")) -| bp(GOBP:"cell cycle arrest")
+composite(p(HGNC:IL6), complex(GO:"interleukin-23 complex")) -| bp(GO:"cell cycle arrest")
 
 act(p(HGNC:AKT1), ma(catalyticActivity)) -> deg(p(HGNC:EGFR))
 
@@ -101,23 +100,23 @@ kin(p(HGNC:AKT1)) -> sec(p(HGNC:EGFR))
 SET Citation = {"PubMed","That one article from last week #2","123456"}
 SET Evidence = "These were all explicitly stated in the BEL 2.0 Specification"
 
-composite(p(HGNC:CASP8),p(HGNC:FADD),a(TESTNS2:"Abeta_42")) -> bp(GOBP:"neuron apoptotic process")
+composite(p(HGNC:CASP8),p(HGNC:FADD),a(TESTNS2:"Abeta_42")) -> bp(GO:"neuron apoptotic process")
 
-pep(p(TESTNS2:"CAPN Family", location(GOCC:intracellular))) -| reaction(reactants(p(HGNC:CDK5R1)),products(p(HGNC:CDK5)))
+pep(p(TESTNS2:"CAPN Family", location(GO:intracellular))) -| reaction(reactants(p(HGNC:CDK5R1)),products(p(HGNC:CDK5)))
 
-proteinAbundance(HGNC:CAT, location(GOCC:intracellular)) directlyDecreases abundance(CHEBI:"hydrogen peroxide")
+proteinAbundance(HGNC:CAT, location(GO:intracellular)) directlyDecreases abundance(CHEBI:"hydrogen peroxide")
 
-g(HGNC:CAT, location(GOCC:intracellular)) directlyDecreases abundance(CHEBI:"hydrogen peroxide")
+g(HGNC:CAT, location(GO:intracellular)) directlyDecreases abundance(CHEBI:"hydrogen peroxide")
 
-act(p(HGNC:HMGCR), ma(cat)) rateLimitingStepOf bp(GOBP:"cholesterol biosynthetic process")
+act(p(HGNC:HMGCR), ma(cat)) rateLimitingStepOf bp(GO:"cholesterol biosynthetic process")
 
 g(HGNC:APP,sub(G,275341,C)) cnc path(MESHD:"Alzheimer Disease")
 
 pep(complex(p(HGNC:F3),p(HGNC:F7))) regulates pep(p(HGNC:F9))
 
-p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GOBP:"apoptotic process"))
+p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process"))
 
-p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GOBP:"apoptotic process"))
+p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process"))
 
 kin(p(TESTNS2:"GSK3 Family")) neg p(HGNC:MAPT,pmod(P))
 
@@ -133,7 +132,7 @@ p(TESTNS2:PRKC) hasMembers list(p(HGNC:PRKCA), p(HGNC:PRKCB), p(HGNC:PRKCD), p(H
 
 pathology(MESHD:Psoriasis) isA pathology(MESHD:"Skin Diseases")
 
-rxn(reactants(a(CHEBI:"(3S)-3-hydroxy-3-methylglutaryl-CoA"),a(CHEBI:NADPH), a(CHEBI:hydron)),products(a(CHEBI:mevalonate), a(CHEBI:"NADP(+)"))) subProcessOf bp(GOBP:"cholesterol biosynthetic process")
+rxn(reactants(a(CHEBI:"(3S)-3-hydroxy-3-methylglutaryl-CoA"),a(CHEBI:NADPH), a(CHEBI:hydron)),products(a(CHEBI:mevalonate), a(CHEBI:"NADP(+)"))) subProcessOf bp(GO:"cholesterol biosynthetic process")
 
 a(CHEBI:"nitric oxide") increases surf(complex(p(HGNC:ITGAV),p(HGNC:ITGB3)))
 

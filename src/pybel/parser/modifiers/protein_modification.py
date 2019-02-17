@@ -91,7 +91,7 @@ log = logging.getLogger(__name__)
 
 def _handle_pmod_default_ns(_, __, tokens: ParseResults) -> ParseResults:
     tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
-    tokens['name'] = pmod_namespace[tokens[0]]
+    tokens[NAME] = pmod_namespace[tokens[0]]
     return tokens
 
 
@@ -109,7 +109,7 @@ pmod_legacy_ns = oneOf(list(pmod_legacy_labels)).setParseAction(_handle_pmod_leg
 
 
 def get_protein_modification_language(identifier_qualified: ParserElement) -> ParserElement:
-    """Build a protein modificaiton parser."""
+    """Build a protein modification parser."""
     pmod_identifier = MatchFirst([
         identifier_qualified,
         pmod_default_ns,

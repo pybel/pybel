@@ -32,14 +32,15 @@ from ..constants import (
     ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR,
     CITATION_ISSUE, CITATION_LAST_AUTHOR, CITATION_NAME, CITATION_PAGES, CITATION_REFERENCE, CITATION_TITLE,
     CITATION_TYPE, CITATION_TYPE_PUBMED, CITATION_VOLUME, DEGRADATION, EFFECT, EVIDENCE, FRAGMENT, FRAGMENT_MISSING,
-    FRAGMENT_START, FRAGMENT_STOP, FUSION, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, GOCC_KEYWORD, GOCC_LATEST,
-    HGVS, IDENTIFIER, KIND, LINE, LOCATION, METADATA_INSERT_KEYS, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P,
-    PARTNER_5P, PMOD, PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P, RELATION, SUBJECT, TRANSLOCATION, UNQUALIFIED_EDGES,
-    VARIANTS, belns_encodings, get_cache_connection,
+    FRAGMENT_START, FRAGMENT_STOP, FUSION, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, HGVS, IDENTIFIER, KIND,
+    LINE, LOCATION, METADATA_INSERT_KEYS, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PMOD, PMOD_CODE,
+    PMOD_POSITION, RANGE_3P, RANGE_5P, RELATION, SUBJECT, TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS, belns_encodings,
+    get_cache_connection,
 )
 from ..dsl import BaseEntity
 from ..language import (
-    BEL_DEFAULT_NAMESPACE_URL, BEL_DEFAULT_NAMESPACE_VERSION, activity_mapping, gmod_mappings, pmod_mappings,
+    BEL_DEFAULT_NAMESPACE_URL, BEL_DEFAULT_NAMESPACE_VERSION, activity_mapping, compartment_mapping, gmod_mappings,
+    pmod_mappings,
 )
 from ..struct.graph import AnnotationsDict, BELGraph
 from ..struct.operations import union
@@ -110,9 +111,6 @@ def _normalize_url(graph: BELGraph, keyword: str) -> Optional[str]:  # FIXME mov
     if keyword == BEL_DEFAULT_NAMESPACE and BEL_DEFAULT_NAMESPACE not in graph.namespace_url:
         return BEL_DEFAULT_NAMESPACE_URL
 
-    if keyword == GOCC_KEYWORD and GOCC_KEYWORD not in graph.namespace_url:
-        return GOCC_LATEST
-
     return graph.namespace_url.get(keyword)
 
 
@@ -171,7 +169,7 @@ class NamespaceManager(BaseManager):
                 url=BEL_DEFAULT_NAMESPACE_URL,
             )
 
-            for name in set(chain(pmod_mappings, gmod_mappings, activity_mapping)):
+            for name in set(chain(pmod_mappings, gmod_mappings, activity_mapping, compartment_mapping)):
                 entry = NamespaceEntry(name=name, namespace=namespace)
                 self.session.add(entry)
 
@@ -583,10 +581,8 @@ class InsertManager(NamespaceManager, LookupManager):
             namespace_urls = tqdm(namespace_urls, desc='namespaces')
 
         for namespace_url in namespace_urls:
-            if namespace_url in graph.uncached_namespaces:
-                continue
-
-            self.get_or_create_namespace(namespace_url)
+            if namespace_url not in graph.uncached_namespaces:
+                self.get_or_create_namespace(namespace_url)
 
         for keyword, pattern in graph.namespace_pattern.items():
             self.ensure_regex_namespace(keyword, pattern)
@@ -622,10 +618,6 @@ class InsertManager(NamespaceManager, LookupManager):
         :raises: pybel.resources.exc.ResourceError
         :raises: EdgeAddError
         """
-        names = get_names(graph)
-        if 'GOCC' in names and 'GOCC' not in graph.namespace_url:  # means it got thrown in there!
-            self.get_or_create_namespace(GOCC_LATEST)
-
         log.debug('inserting %s into edge store', graph)
         log.debug('building node models')
         node_model_build_start = time.time()
@@ -1227,15 +1219,12 @@ class InsertManager(NamespaceManager, LookupManager):
 
                 location_namespace = location[NAMESPACE]
 
-                if location_namespace == GOCC_KEYWORD and GOCC_KEYWORD not in graph.namespace_url:
-                    namespace_url = GOCC_LATEST
-                else:
-                    namespace_url = graph.namespace_url[location_namespace]
+                namespace_url = graph.namespace_url[location_namespace]
 
-                    if namespace_url in graph.uncached_namespaces:
-                        log.warning('uncached namespace %s in loc() on line %s', location_namespace,
-                                    edge_data.get(LINE))
-                        return
+                if namespace_url in graph.uncached_namespaces:
+                    log.warning('uncached namespace %s in loc() on line %s', location_namespace,
+                                edge_data.get(LINE))
+                    return
 
                 participant_name = location[NAME]
                 location_property_dict['effect'] = self.get_namespace_entry(namespace_url, participant_name)
@@ -1262,10 +1251,10 @@ class InsertManager(NamespaceManager, LookupManager):
                         else:
                             effect_namespace = effect_value[NAMESPACE]
 
-                            if effect_namespace == GOCC_KEYWORD and GOCC_KEYWORD not in graph.namespace_url:
-                                namespace_url = GOCC_LATEST
-                            elif effect_namespace in graph.namespace_url:
+                            if effect_namespace in graph.namespace_url:
                                 namespace_url = graph.namespace_url[effect_namespace]
+                            elif effect_namespace == BEL_DEFAULT_NAMESPACE:
+                                namespace_url = BEL_DEFAULT_NAMESPACE_URL
                             else:
                                 log.warning('namespace not enumerated in modifier %s', effect_namespace)
                                 return

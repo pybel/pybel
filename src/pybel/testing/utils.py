@@ -12,15 +12,8 @@ from ..struct.summary import get_annotation_values_by_annotation
 from ..struct.summary.node_summary import get_names
 
 
-def get_uri_name(url):
-    """Get the file name from the end of the URL.
-
-    Only useful for PyBEL's testing though since it looks specifically if the file is from the weird owncloud
-    resources distributed by Fraunhofer.
-
-    :type url: str
-    :rtype: str
-    """
+def get_uri_name(url: str) -> str:
+    """Get the file name from the end of the URL."""
     url_parsed = urlparse(url)
 
     if url.startswith(FRAUNHOFER_RESOURCES):
@@ -30,11 +23,8 @@ def get_uri_name(url):
         return url_parts[-1]
 
 
-def n():
-    """Return a UUID string for testing.
-
-    :rtype: str
-    """
+def n() -> str:
+    """Return a UUID string for testing."""
     return str(uuid4())[:15]
 
 

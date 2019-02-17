@@ -46,11 +46,8 @@ testan1 = '1'
 class TestExampleInterchange(unittest.TestCase):
     """Test round-trip interchange of the sialic acid graph example."""
 
-    def help_test_equal(self, graph):
-        """Check that a graph is equal to the sialic acid graph example.
-
-        :type graph: pybel.BELGraph
-        """
+    def help_test_equal(self, graph: BELGraph):
+        """Check that a graph is equal to the sialic acid graph example."""
         for node in graph:
             self.assertIsInstance(node, BaseEntity)
 

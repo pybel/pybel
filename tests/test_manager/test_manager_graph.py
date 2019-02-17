@@ -4,11 +4,11 @@
 
 from __future__ import unicode_literals
 
+import time
 import unittest
 from collections import Counter
 
 import sqlalchemy.exc
-import time
 from sqlalchemy import not_
 
 from pybel import BELGraph, from_database, from_path, to_database
@@ -18,12 +18,13 @@ from pybel.constants import (
     INCREASES, LOCATION, METADATA_NAME, METADATA_VERSION, PATHOLOGY, PROTEIN, RELATION,
 )
 from pybel.dsl import (
-    BaseEntity, activity, complex_abundance, composite_abundance, degradation, entity, fragment, fusion_range, gene,
+    BaseEntity, activity, complex_abundance, composite_abundance, degradation, fragment, fusion_range, gene,
     gene_fusion, gmod, hgvs, location, named_complex_abundance, pmod, protein, protein_fusion, reaction, secretion,
     translocation,
 )
 from pybel.dsl.namespaces import chebi, hgnc
 from pybel.examples import ras_tloc_graph, sialic_acid_graph
+from pybel.language import Entity
 from pybel.manager import models
 from pybel.manager.models import Author, Citation, Edge, Evidence, NamespaceEntry, Node, Property
 from pybel.testing.cases import FleetingTemporaryCacheMixin, TemporaryCacheClsMixin, TemporaryCacheMixin
@@ -547,7 +548,7 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertEqual(0, self.graph.number_of_edges())
 
     def test_composite(self):
-        il23 = named_complex_abundance('GOCC', 'interleukin-23 complex')
+        il23 = named_complex_abundance('GO', 'interleukin-23 complex')
         il6 = protein('HGNC', 'IL6')
         node_data = composite_abundance([il23, il6])
 
@@ -796,7 +797,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_composite(self, mock):
-        interleukin_23_complex = named_complex_abundance('GOCC', 'interleukin-23 complex')
+        interleukin_23_complex = named_complex_abundance('GO', 'interleukin-23 complex')
         il6 = hgnc('IL6')
         interleukin_23_and_il6 = composite_abundance([interleukin_23_complex, il6])
 
@@ -820,11 +821,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
     def setUp(self):
         """Creates a unit test with a manager and graph"""
-        super(TestReconstituteEdges, self).setUp()
-        self.graph = BELGraph(
-            name=n(),
-            version=n()
-        )
+        super().setUp()
+        self.graph = BELGraph(name=n(), version=n())
 
     @mock_bel_resources
     def test_translocation_default(self, mock):
@@ -832,7 +830,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         self.graph.add_increases(
             protein(name='F2', namespace='HGNC'),
             protein(name='EDN1', namespace='HGNC'),
-            evidence='In endothelial cells, ET-1 secretion is detectable under basal conditions, whereas thrombin induces its secretion.',
+            evidence='In endothelial cells, ET-1 secretion is detectable under basal conditions, whereas thrombin '
+                     'induces its secretion.',
             citation='10473669',
             subject_modifier=secretion()
         )
@@ -840,8 +839,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         make_dummy_namespaces(self.manager, self.graph)
 
         network = self.manager.insert_graph(self.graph, store_parts=True)
-        self.assertEqual(2, network.nodes.count())
-        self.assertEqual(1, network.edges.count())
+        self.assertEqual(2, network.nodes.count(), msg='Missing one or both of the nodes.')
+        self.assertEqual(1, network.edges.count(), msg='Missing the edge')
 
         edge = network.edges.first()
         self.assertEqual(2, edge.properties.count())
@@ -854,8 +853,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             evidence='In endothelial cells, ET-1 secretion is detectable under basal conditions, whereas thrombin induces its secretion.',
             citation='10473669',
             subject_modifier=translocation(
-                from_loc=entity(namespace='TEST', name='A'),
-                to_loc=entity(namespace='GOCC', name='extracellular space'),
+                from_loc=Entity(namespace='TEST', name='A'),
+                to_loc=Entity(namespace='GO', name='extracellular space'),
             )
         )
 
@@ -884,17 +883,17 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         make_dummy_namespaces(self.manager, self.graph)
 
         network = self.manager.insert_graph(self.graph, store_parts=True)
-        self.assertEqual(2, network.nodes.count())
-        self.assertEqual(1, network.edges.count())
+        self.assertEqual(2, network.nodes.count(), msg='number of nodes')
+        self.assertEqual(1, network.edges.count(), msg='number of edges')
 
         kin_list = self.manager.session.query(NamespaceEntry).filter(NamespaceEntry.name == 'kin').all()
-        self.assertEqual(1, len(kin_list))
+        self.assertEqual(1, len(kin_list), msg='number of kinase NamespaceEntrys')
 
         kin = list(kin_list)[0]
         self.assertEqual('kin', kin.name)
 
         effects = self.manager.session.query(Property).join(NamespaceEntry).filter(Property.effect == kin)
-        self.assertEqual(1, effects.count())
+        self.assertEqual(1, effects.count(), msg='number of effects')
 
     @mock_bel_resources
     def test_subject_activity_custom(self, mock):
@@ -1026,7 +1025,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             protein(name='YFG2', namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            subject_modifier=location(entity(namespace='GO', name='nucleus', identifier='GO:0005634'))
+            subject_modifier=location(Entity(namespace='GO', name='nucleus', identifier='GO:0005634'))
         )
         make_dummy_namespaces(self.manager, self.graph)
 
@@ -1088,8 +1087,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         MEF2A results in the repression of MEF2A transcriptional activation, a function that requires the
         deacetylase domain of HDAC4.""",
             annotations={'Species': '9606'},
-            subject_modifier=activity('cat', location=entity(namespace='GOCC', name='nucleus')),
-            object_modifier=activity('tscript', location=entity(namespace='GOCC', name='nucleus'))
+            subject_modifier=activity('cat', location=Entity(namespace='GO', name='nucleus')),
+            object_modifier=activity('tscript', location=Entity(namespace='GO', name='nucleus'))
         )
 
         make_dummy_namespaces(self.manager, self.graph)
@@ -1227,8 +1226,8 @@ class TestNoAddNode(TemporaryCacheMixin):
             evidence=n(),
             citation=n(),
             subject_modifier=translocation(
-                from_loc=entity(namespace=dummy_namespace_name, name='intracellular'),
-                to_loc=entity(namespace='GOCC', name='extracellular space')
+                from_loc=Entity(namespace=dummy_namespace_name, name='intracellular'),
+                to_loc=Entity(namespace='GO', name='extracellular space')
             ),
         )
 
@@ -1254,7 +1253,7 @@ class TestNoAddNode(TemporaryCacheMixin):
             evidence=n(),
             citation=n(),
             subject_modifier={
-                LOCATION: entity(namespace=dummy_namespace_name, name='lysozome')
+                LOCATION: Entity(namespace=dummy_namespace_name, name='lysozome')
             },
         )
 
