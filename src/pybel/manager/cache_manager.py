@@ -1254,6 +1254,8 @@ class InsertManager(NamespaceManager, LookupManager):
 
                             if effect_namespace in graph.namespace_url:
                                 namespace_url = graph.namespace_url[effect_namespace]
+                            elif effect_namespace == BEL_DEFAULT_NAMESPACE:
+                                namespace_url = BEL_DEFAULT_NAMESPACE_URL
                             else:
                                 log.warning('namespace not enumerated in modifier %s', effect_namespace)
                                 return
