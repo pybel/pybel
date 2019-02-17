@@ -127,7 +127,7 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(1, pathology_counter[c])
         self.assertEqual(2, pathology_counter[d])
 
-        top_pathology_counter = get_top_pathologies(graph, count=1)
+        top_pathology_counter = get_top_pathologies(graph, n=1)
         self.assertEqual(1, len(top_pathology_counter))
         node, count = top_pathology_counter[0]
         self.assertEqual(d, node)

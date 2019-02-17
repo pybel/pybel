@@ -4,13 +4,14 @@
 
 import itertools as itt
 from collections import Counter, defaultdict
+from typing import List, Optional, Tuple
 
 from ..filters.node_predicates import has_variant
 from ...constants import (
     ACTIVITY, EFFECT, FROM_LOC, FUSION, IDENTIFIER, KIND, LOCATION, MEMBERS, MODIFIER, NAME, NAMESPACE,
     OBJECT, PARTNER_3P, PARTNER_5P, SUBJECT, TO_LOC, TRANSLOCATION, VARIANTS,
 )
-from ...dsl import Pathology
+from ...dsl import BaseEntity, Pathology
 
 __all__ = [
     'get_functions',
@@ -212,14 +213,13 @@ def count_variants(graph):
     )
 
 
-def get_top_hubs(graph, count=15):
+def get_top_hubs(graph, n: Optional[int] = 15) -> List[Tuple[BaseEntity, int]]:
     """Get the top hubs in the graph by BEL.
 
     :param pybel.BELGraph graph: A BEL graph
-    :param Optional[int] count: The number of top hubs to return. If None, returns all nodes
-    :rtype: dict[tuple,int]
+    :param n: The number of top hubs to return. If None, returns all nodes
     """
-    return Counter(dict(graph.degree())).most_common(count)
+    return Counter(dict(graph.degree())).most_common(n=n)
 
 
 def _pathology_iterator(graph):
@@ -242,11 +242,10 @@ def count_pathologies(graph):
     return Counter(_pathology_iterator(graph))
 
 
-def get_top_pathologies(graph, count=15):
+def get_top_pathologies(graph, n: Optional[int] = 15) -> List[Tuple[BaseEntity, int]]:
     """Get the top highest relationship-having edges in the graph by BEL.
 
     :param pybel.BELGraph graph: A BEL graph
-    :param Optional[int] count:
-    :rtype: dict[tuple,int]
+    :param n: The number of top connected pathologies to return. If None, returns all nodes
     """
-    return count_pathologies(graph).most_common(count)
+    return count_pathologies(graph).most_common(n)
