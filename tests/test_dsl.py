@@ -7,9 +7,10 @@ import unittest
 from pybel import BELGraph
 from pybel.constants import NAME
 from pybel.dsl import (
-    abundance, complex_abundance, composite_abundance, Entity, fragment, fusion_range, gene, gene_fusion,
-    missing_fusion_range, protein,
+    abundance, complex_abundance, composite_abundance, fragment, fusion_range, gene, gene_fusion, missing_fusion_range,
+    protein,
 )
+from pybel.language import Entity
 from pybel.testing.utils import n
 from pybel.utils import ensure_quotes
 

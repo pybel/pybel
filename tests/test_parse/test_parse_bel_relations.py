@@ -9,20 +9,18 @@ from pybel import BELGraph
 from pybel.canonicalize import edge_to_bel
 from pybel.constants import (
     ABUNDANCE, ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CITATION, COMPLEX, COMPOSITE, DECREASES,
-    DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE, FROM_LOC, FUNCTION, GENE, GMOD,
-    HAS_COMPONENT, HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, IDENTIFIER, INCREASES, IS_A, KIND,
-    LOCATION, MEMBERS, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, PATHOLOGY,
-    PRODUCTS, PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, SUBPROCESS_OF, TARGET, TO_LOC,
-    TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, VARIANTS,
+    DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE, FROM_LOC, FUNCTION, GENE, HAS_COMPONENT,
+    HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, IDENTIFIER, INCREASES, IS_A, KIND, LOCATION, MEMBERS,
+    MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, PATHOLOGY, PRODUCTS, PROTEIN,
+    REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, SUBPROCESS_OF, TARGET, TO_LOC, TRANSCRIBED_TO,
+    TRANSLATED_TO, TRANSLOCATION, VARIANTS,
 )
-
 from pybel.dsl import (
-    abundance, activity, bioprocess, complex_abundance, composite_abundance, Entity, gene, hgvs, pmod, protein,
-    reaction, rna, Pathology,
-    named_complex_abundance,
-    gmod,
+    Pathology, abundance, activity, bioprocess, complex_abundance, composite_abundance, gene, gmod, hgvs,
+    named_complex_abundance, pmod, protein, reaction, rna,
 )
 from pybel.dsl.namespaces import hgnc
+from pybel.language import Entity
 from pybel.parser import BELParser
 from pybel.parser.exc import (
     MissingNamespaceNameWarning, NestedRelationWarning, RelabelWarning, UndefinedNamespaceWarning,
@@ -35,11 +33,11 @@ log = logging.getLogger(__name__)
 class TestRelations(TestTokenParserBase):
     @classmethod
     def setUpClass(cls):
-        super(TestRelations, cls).setUpClass()
+        super().setUpClass()
         cls.parser.relation.streamline()
 
     def setUp(self):
-        super(TestRelations, self).setUp()
+        super().setUp()
         self.add_default_provenance()
 
     def test_ensure_no_dup_nodes(self):

@@ -14,12 +14,12 @@ from pybel.constants import (
     RELATION, RNA, SUBJECT, TARGET, TO_LOC, TRANSLOCATION, VARIANTS,
 )
 from pybel.dsl import (
-    abundance, bioprocess, cell_surface_expression, complex_abundance, composite_abundance, Entity,
-    fragment, fusion_range, gene, gene_fusion, gmod, hgvs, mirna, named_complex_abundance, pathology, pmod, protein,
+    Fragment, abundance, bioprocess, cell_surface_expression, complex_abundance, composite_abundance, fragment,
+    fusion_range, gene, gene_fusion, gmod, hgvs, mirna, named_complex_abundance, pathology, pmod, protein,
     protein_fusion, reaction, rna, rna_fusion, secretion, translocation,
-    Fragment,
 )
 from pybel.dsl.namespaces import hgnc
+from pybel.language import Entity
 from pybel.parser import BELParser
 from pybel.parser.exc import MalformedTranslocationWarning
 from pybel.parser.parse_bel import modifier_po_to_dict

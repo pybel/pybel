@@ -2,11 +2,11 @@
 
 """Internal DSL functions for edges."""
 
-from .utils import Entity
 from ..constants import (
     ACTIVITY, BEL_DEFAULT_NAMESPACE, CELL_SURFACE, DEGRADATION, EFFECT, EXTRACELLULAR, FROM_LOC, INTRACELLULAR,
     LOCATION, MODIFIER, TO_LOC, TRANSLOCATION,
 )
+from ..language import Entity
 
 __all__ = [
     'activity',

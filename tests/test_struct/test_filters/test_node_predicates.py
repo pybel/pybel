@@ -6,15 +6,15 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import (
-    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS,
-    CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_ONLINE, CITATION_TYPE_PUBMED, DECREASES, DEGRADATION,
-    DIRECTLY_DECREASES, DIRECTLY_INCREASES, EVIDENCE, GMOD, INCREASES, LOCATION, MODIFIER, OBJECT, POLAR_RELATIONS,
-    POSITIVE_CORRELATION, RELATION, SUBJECT, TRANSLOCATION,
+    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_REFERENCE, CITATION_TYPE,
+    CITATION_TYPE_ONLINE, CITATION_TYPE_PUBMED, DECREASES, DEGRADATION, DIRECTLY_DECREASES, DIRECTLY_INCREASES,
+    EVIDENCE, GMOD, INCREASES, LOCATION, MODIFIER, OBJECT, POLAR_RELATIONS, POSITIVE_CORRELATION, RELATION, SUBJECT,
+    TRANSLOCATION,
 )
 from pybel.dsl import (
-    abundance, activity, degradation, Entity, fragment, gene, gmod, hgvs, pmod, protein, secretion,
-    translocation,
+    abundance, activity, degradation, fragment, gene, gmod, hgvs, pmod, protein, secretion, translocation,
 )
+from pybel.language import Entity
 from pybel.struct.filters.edge_predicate_builders import build_relation_predicate
 from pybel.struct.filters.edge_predicates import (
     edge_has_activity, edge_has_annotation, edge_has_degradation,

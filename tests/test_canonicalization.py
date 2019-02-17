@@ -8,10 +8,11 @@ from pybel import BELGraph
 from pybel.canonicalize import _to_bel_lines_body, postpend_location
 from pybel.constants import BEL_DEFAULT_NAMESPACE, EXTRACELLULAR, INTRACELLULAR, MODIFIER
 from pybel.dsl import (
-    abundance, activity, bioprocess, complex_abundance, composite_abundance, degradation, Entity, fragment,
-    fusion_range, gene, gene_fusion, gmod, hgvs, mirna, named_complex_abundance, pathology, pmod, protein,
-    protein_substitution, reaction, rna, rna_fusion, secretion, translocation,
+    abundance, activity, bioprocess, complex_abundance, composite_abundance, degradation, fragment, fusion_range, gene,
+    gene_fusion, gmod, hgvs, mirna, named_complex_abundance, pathology, pmod, protein, protein_substitution, reaction,
+    rna, rna_fusion, secretion, translocation,
 )
+from pybel.language import Entity
 from pybel.testing.utils import n
 from pybel.utils import canonicalize_edge
 

@@ -8,7 +8,6 @@ from operator import methodcaller
 from typing import Optional
 
 from .exc import InferCentralDogmaException, PyBELDSLException
-from .utils import Entity
 from ..constants import (
     ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING,
     FRAGMENT_START, FRAGMENT_STOP, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GENE,
@@ -16,6 +15,7 @@ from ..constants import (
     PMOD_ORDER, PMOD_POSITION, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P, REACTANTS, REACTION, RNA, VARIANTS,
     rev_abundance_labels,
 )
+from ..language import Entity
 from ..utils import ensure_quotes
 
 __all__ = [

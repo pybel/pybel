@@ -12,7 +12,8 @@
     p(SFAM:"RAS Family",pmod(F)) directlyIncreases tloc(p(SFAM:"RAS Family"),MESHCS:"Intracellular Space",MESHCS:"Cell Membrane")
 """
 
-from ..dsl import Entity, activity, complex_abundance, pmod, protein, translocation
+from ..dsl import activity, complex_abundance, pmod, protein, translocation
+from ..language import Entity
 from ..struct.graph import BELGraph
 
 __all__ = ['ras_tloc_graph']

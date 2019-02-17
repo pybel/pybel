@@ -4,11 +4,11 @@
 
 from __future__ import unicode_literals
 
+import time
 import unittest
 from collections import Counter
 
 import sqlalchemy.exc
-import time
 from sqlalchemy import not_
 
 from pybel import BELGraph, from_database, from_path, to_database
@@ -18,12 +18,13 @@ from pybel.constants import (
     INCREASES, LOCATION, METADATA_NAME, METADATA_VERSION, PATHOLOGY, PROTEIN, RELATION,
 )
 from pybel.dsl import (
-    BaseEntity, Entity, activity, complex_abundance, composite_abundance, degradation, fragment, fusion_range, gene,
+    BaseEntity, activity, complex_abundance, composite_abundance, degradation, fragment, fusion_range, gene,
     gene_fusion, gmod, hgvs, location, named_complex_abundance, pmod, protein, protein_fusion, reaction, secretion,
     translocation,
 )
 from pybel.dsl.namespaces import chebi, hgnc
 from pybel.examples import ras_tloc_graph, sialic_acid_graph
+from pybel.language import Entity
 from pybel.manager import models
 from pybel.manager.models import Author, Citation, Edge, Evidence, NamespaceEntry, Node, Property
 from pybel.testing.cases import FleetingTemporaryCacheMixin, TemporaryCacheClsMixin, TemporaryCacheMixin
