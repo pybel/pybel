@@ -133,10 +133,6 @@ class NamespaceManager(BaseManager):
 
     def drop_namespaces(self):
         """Drop all namespaces."""
-        for namespace in self.session.query(NamespaceEntry).all():
-            namespace.children[:] = []
-            self.session.commit()
-
         self.session.query(NamespaceEntry).delete()
         self.session.query(Namespace).delete()
         self.session.commit()
