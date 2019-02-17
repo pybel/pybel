@@ -232,7 +232,8 @@ class ControlParser(BaseParser):
             self.citation = dict(zip(CITATION_ENTRIES, values[:3]))
             return tokens
 
-        # TODO consider parsing up authors list
+        if 5 <= len(values):
+            values[4] = [value.strip() for value in values[4].split('|')]
 
         if 6 < len(values):
             raise CitationTooLongException(self.get_line_number(), line, position)

@@ -220,7 +220,7 @@ class TestParseControl2(TestParseControl):
             CITATION_NAME: 'Test Name',
             CITATION_REFERENCE: '12928037',
             CITATION_DATE: '1999-01-01',
-            CITATION_AUTHORS: 'de Nigris|Lerman A|Ignarro LJ',
+            CITATION_AUTHORS: ['de Nigris', 'Lerman A', 'Ignarro LJ'],
             CITATION_COMMENTS: ''
         }
 

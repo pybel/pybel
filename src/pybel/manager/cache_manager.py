@@ -976,7 +976,7 @@ class InsertManager(NamespaceManager, LookupManager):
                                date: Optional[str] = None,
                                first: Optional[str] = None,
                                last: Optional[str] = None,
-                               authors: Union[None, str, List[str]] = None,
+                               authors: Union[None, List[str]] = None,
                                ) -> Citation:
         """Create a citation if it does not exist, or return it if it does.
 
@@ -1028,7 +1028,7 @@ class InsertManager(NamespaceManager, LookupManager):
             citation.last = self.get_or_create_author(last)
 
         if authors is not None:
-            for author in (authors.split('|') if isinstance(authors, str) else authors):
+            for author in authors:
                 author_model = self.get_or_create_author(author)
                 if author_model not in citation.authors:
                     citation.authors.append(author_model)
