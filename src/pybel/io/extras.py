@@ -3,7 +3,7 @@
 """This module contains IO functions for outputting BEL graphs to lossy formats, such as GraphML and CSV."""
 
 import json
-from typing import Optional, TextIO, Union
+from typing import BinaryIO, Optional, TextIO, Union
 
 import networkx as nx
 
@@ -18,7 +18,7 @@ __all__ = [
 ]
 
 
-def to_graphml(graph: BELGraph, path: Union[str, TextIO]) -> None:
+def to_graphml(graph: BELGraph, path: Union[str, BinaryIO]) -> None:
     """Write this graph to GraphML XML file using :func:`networkx.write_graphml`.
 
     The .graphml file extension is suggested so Cytoscape can recognize it.

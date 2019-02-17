@@ -10,6 +10,7 @@ import requests
 
 from .nodelink import from_json, to_json
 from ..constants import DEFAULT_SERVICE_URL, PYBEL_REMOTE_HOST, PYBEL_REMOTE_PASSWORD, PYBEL_REMOTE_USER, config
+from ..struct.graph import BELGraph
 from ..utils import get_version
 
 __all__ = [
@@ -23,11 +24,11 @@ RECIEVE_ENDPOINT = '/api/receive/'
 GET_ENDPOINT = '/api/network/{}/export/nodelink'
 
 
-def _get_config_or_env(name):
+def _get_config_or_env(name: str) -> Optional[str]:
     return config.get(name) or os.environ.get(name)
 
 
-def _get_host():
+def _get_host() -> str:
     """Find the host.
 
     Has three possibilities:
@@ -39,15 +40,15 @@ def _get_host():
     return _get_config_or_env(PYBEL_REMOTE_HOST) or DEFAULT_SERVICE_URL
 
 
-def _get_user():
+def _get_user() -> Optional[str]:
     return _get_config_or_env(PYBEL_REMOTE_USER)
 
 
-def _get_password():
+def _get_password() -> Optional[str]:
     return _get_config_or_env(PYBEL_REMOTE_PASSWORD)
 
 
-def to_web(graph,
+def to_web(graph: BELGraph,
            host: Optional[str] = None,
            user: Optional[str] = None,
            password: Optional[str] = None,
@@ -55,7 +56,7 @@ def to_web(graph,
            ) -> requests.Response:
     """Send a graph to the receiver service and returns the :mod:`requests` response object.
 
-    :param pybel.BELGraph graph: A BEL network
+    :param graph: A BEL graph
     :param host: The location of the BEL Commons server. Alternatively, looks up in PyBEL config with
      ``PYBEL_REMOTE_HOST`` or the environment as ``PYBEL_REMOTE_HOST`` Defaults to
      :data:`pybel.constants.DEFAULT_SERVICE_URL`
@@ -98,7 +99,7 @@ def to_web(graph,
     return response
 
 
-def from_web(network_id, host=None):
+def from_web(network_id: int, host: Optional[str] = None) -> BELGraph:
     """Retrieve a public network from BEL Commons.
 
     In the future, this function may be extended to support authentication.
