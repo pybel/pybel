@@ -321,19 +321,23 @@ class BELGraph(nx.MultiDiGraph):
 
     def number_of_citations(self) -> int:
         """Return the number of citations contained within the graph."""
-        return len({
-            (data[CITATION][CITATION_TYPE], data[CITATION][CITATION_REFERENCE])
-            for _, _, data in self.edges(data=True)
-            if CITATION in data
-        })
+        return len(set(self._iterate_citations()))
+
+    def _iterate_citations(self) -> Iterable[Tuple[str, str]]:
+        for _, _, data in self.edges(data=True):
+            if CITATION in data:
+                yield data[CITATION][CITATION_TYPE], data[CITATION][CITATION_REFERENCE]
 
     def number_of_authors(self) -> int:
         """Return the number of citations contained within the graph."""
-        return len(set(chain.from_iterable(
+        return len(set(self._iterate_authors()))
+
+    def _iterate_authors(self) -> Iterable[str]:
+        return chain.from_iterable(
             data[CITATION][CITATION_AUTHORS]
             for _, _, data in self.edges(data=True)
             if CITATION in data and CITATION_AUTHORS in data[CITATION]
-        )))
+        )
 
     def __str__(self):
         return '{} v{}'.format(self.name, self.version)
