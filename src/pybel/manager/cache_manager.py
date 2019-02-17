@@ -618,7 +618,6 @@ class InsertManager(NamespaceManager, LookupManager):
         :raises: pybel.resources.exc.ResourceError
         :raises: EdgeAddError
         """
-        names = get_names(graph)
         log.debug('inserting %s into edge store', graph)
         log.debug('building node models')
         node_model_build_start = time.time()

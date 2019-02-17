@@ -40,12 +40,12 @@ in the OpenBEL community.
     - PyBEL module :py:func:`pybel.parser.modifiers.get_gene_modification_language`
 """
 
-from pyparsing import Group, MatchFirst, oneOf
+from pyparsing import Group, MatchFirst, ParserElement, oneOf
 
 from ..utils import nest, one_of_tags
 from ...constants import BEL_DEFAULT_NAMESPACE, GMOD, IDENTIFIER, KIND, NAME, NAMESPACE
 from ...language import gmod_namespace
-from pyparsing import ParserElement
+
 __all__ = [
     'get_gene_modification_language',
 ]

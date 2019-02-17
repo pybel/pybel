@@ -29,9 +29,9 @@
     UNSET ALL
 """
 
+from ..constants import hbp_namespace
 from ..dsl import abundance, activity, bioprocess, complex_abundance, pmod, protein
 from ..struct.graph import BELGraph
-from ..constants import hbp_namespace
 
 __all__ = [
     'sialic_acid_graph'
