@@ -1,11 +1,11 @@
 [Namespace]
-NameString=GO Cellular Components (Names)
-Keyword=GOCC
-DomainString=Cell Components and Complexes
+NameString=Gene Ontology
+Keyword=GO
+DomainString=Biological Process
 SpeciesString=all
-DescriptionString=Gene Ontology (GO) cellular component names. These terms may be used to represent cellular components as well as complex abundances. 
+DescriptionString=The Gene Ontology (GO) names for biological process. These names may be used to represent biological processes. 
 VersionString=20150611
-CreatedDateTime=2015-06-11T19:51:15
+CreatedDateTime=2015-06-11T19:51:23
 QueryValueURL=http://amigo.geneontology.org/cgi-bin/amigo/search.cgi?search_query=[VALUE]&search_constraint=term&exact_match=1&action=new-search
 
 [Author]
@@ -18,7 +18,7 @@ NameString=The Gene Ontology Consortium
 DescriptionString=The Gene Ontology project is a major bioinformatics initiative with the aim of standardizing the representation of gene and gene product attributes across species and databases.
 PublishedVersionString=2015-05-30
 PublishedDate=2015-05-29
-ReferenceURL=http://www.geneontology.org
+ReferenceURL=http://www.geneontology.org/
 
 [Processing]
 CaseSensitiveFlag=yes
@@ -26,6 +26,11 @@ DelimiterString=|
 CacheableFlag=yes
 
 [Values]
+cholesterol biosynthetic process|B
+cell cycle arrest|B
+neuron apoptotic process|B
+apoptotic process|B
+response to oxidative stress|B
 interleukin-23 complex|C
 intracellular|A
 endosome|A

@@ -14,7 +14,7 @@ from pybel.constants import (
     RELATION, RNA, SUBJECT, TARGET, TO_LOC, TRANSLOCATION, VARIANTS,
 )
 from pybel.dsl import (
-    abundance, bioprocess, cell_surface_expression, complex_abundance, composite_abundance, entity,
+    abundance, bioprocess, cell_surface_expression, complex_abundance, composite_abundance, Entity,
     fragment, fusion_range, gene, gene_fusion, gmod, hgvs, mirna, named_complex_abundance, pathology, pmod, protein,
     protein_fusion, reaction, rna, rna_fusion, secretion, translocation,
     Fragment,
@@ -63,7 +63,7 @@ class TestAbundance(TestTokenParserBase):
             NAMESPACE: 'CHEBI',
             NAME: 'oxygen atom',
             LOCATION: {
-                NAMESPACE: 'GOCC',
+                NAMESPACE: 'GO',
                 NAME: 'intracellular'
             }
         }
@@ -75,16 +75,16 @@ class TestAbundance(TestTokenParserBase):
 
         modifier = modifier_po_to_dict(result)
         expected_modifier = {
-            LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
+            LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}
         }
         self.assertEqual(expected_modifier, modifier)
 
     def test_abundance_with_location(self):
         """Test short/long abundance name and short/long location name."""
-        self._test_abundance_with_location_helper('a(CHEBI:"oxygen atom", loc(GOCC:intracellular))')
-        self._test_abundance_with_location_helper('abundance(CHEBI:"oxygen atom", loc(GOCC:intracellular))')
-        self._test_abundance_with_location_helper('a(CHEBI:"oxygen atom", location(GOCC:intracellular))')
-        self._test_abundance_with_location_helper('abundance(CHEBI:"oxygen atom", location(GOCC:intracellular))')
+        self._test_abundance_with_location_helper('a(CHEBI:"oxygen atom", loc(GO:intracellular))')
+        self._test_abundance_with_location_helper('abundance(CHEBI:"oxygen atom", loc(GO:intracellular))')
+        self._test_abundance_with_location_helper('a(CHEBI:"oxygen atom", location(GO:intracellular))')
+        self._test_abundance_with_location_helper('abundance(CHEBI:"oxygen atom", location(GO:intracellular))')
 
 
 class TestGene(TestTokenParserBase):
@@ -114,7 +114,7 @@ class TestGene(TestTokenParserBase):
         self.assertEqual(1, len(self.graph))
 
     def test_214b(self):
-        statement = 'g(HGNC:AKT1, loc(GOCC:intracellular))'
+        statement = 'g(HGNC:AKT1, loc(GO:intracellular))'
 
         result = self.parser.gene.parseString(statement)
 
@@ -123,7 +123,7 @@ class TestGene(TestTokenParserBase):
             NAMESPACE: 'HGNC',
             NAME: 'AKT1',
             LOCATION: {
-                NAMESPACE: 'GOCC',
+                NAMESPACE: 'GO',
                 NAME: 'intracellular'
             }
         }
@@ -198,7 +198,7 @@ class TestGene(TestTokenParserBase):
 
     def test_variant_location(self):
         """Test BEL 1.0 gene substitution with location tag"""
-        statement = 'g(HGNC:AKT1,sub(G,308,A),loc(GOCC:intracellular))'
+        statement = 'g(HGNC:AKT1,sub(G,308,A),loc(GO:intracellular))'
         result = self.parser.gene.parseString(statement)
 
         expected_result = {
@@ -212,7 +212,7 @@ class TestGene(TestTokenParserBase):
                 }
             ],
             LOCATION: {
-                NAMESPACE: 'GOCC',
+                NAMESPACE: 'GO',
                 NAME: 'intracellular'
             }
         }
@@ -502,7 +502,7 @@ class TestMiRNA(TestTokenParserBase):
         self._test_no_variant_helper('microRNAAbundance(HGNC:MIR21)')
 
     def test_mirna_location(self):
-        statement = 'm(HGNC:MIR21,loc(GOCC:intracellular))'
+        statement = 'm(HGNC:MIR21,loc(GO:intracellular))'
         result = self.parser.mirna.parseString(statement)
 
         expected_dict = {
@@ -510,7 +510,7 @@ class TestMiRNA(TestTokenParserBase):
             NAMESPACE: 'HGNC',
             NAME: 'MIR21',
             LOCATION: {
-                NAMESPACE: 'GOCC',
+                NAMESPACE: 'GO',
                 NAME: 'intracellular'
             }
         }
@@ -547,7 +547,7 @@ class TestMiRNA(TestTokenParserBase):
         self.assert_has_edge(expected_parent, node, relation=HAS_VARIANT)
 
     def test_mirna_variant_location(self):
-        statement = 'm(HGNC:MIR21,var(p.Phe508del),loc(GOCC:intracellular))'
+        statement = 'm(HGNC:MIR21,var(p.Phe508del),loc(GO:intracellular))'
         result = self.parser.mirna.parseString(statement)
 
         expected_dict = {
@@ -561,7 +561,7 @@ class TestMiRNA(TestTokenParserBase):
                 },
             ],
             LOCATION: {
-                NAMESPACE: 'GOCC',
+                NAMESPACE: 'GO',
                 NAME: 'intracellular'
             }
         }
@@ -606,7 +606,7 @@ class TestProtein(TestTokenParserBase):
         self._test_reference_helper('proteinAbundance(HGNC:AKT1)')
 
     def test_protein_with_location(self):
-        statement = 'p(HGNC:AKT1, loc(GOCC:intracellular))'
+        statement = 'p(HGNC:AKT1, loc(GO:intracellular))'
 
         result = self.parser.protein.parseString(statement)
 
@@ -615,7 +615,7 @@ class TestProtein(TestTokenParserBase):
             NAMESPACE: 'HGNC',
             NAME: 'AKT1',
             LOCATION: {
-                NAMESPACE: 'GOCC',
+                NAMESPACE: 'GO',
                 NAME: 'intracellular'
             }
         }
@@ -626,7 +626,7 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual('p(HGNC:AKT1)', self.graph.node_to_bel(node))
 
     def test_multiple_variants(self):
-        statement = 'p(HGNC:AKT1,sub(A,127,Y),pmod(Ph, Ser),loc(GOCC:intracellular))'
+        statement = 'p(HGNC:AKT1,sub(A,127,Y),pmod(Ph, Ser),loc(GO:intracellular))'
 
         result = self.parser.protein.parseString(statement)
 
@@ -635,7 +635,7 @@ class TestProtein(TestTokenParserBase):
             NAMESPACE: 'HGNC',
             NAME: 'AKT1',
             LOCATION: {
-                NAMESPACE: 'GOCC',
+                NAMESPACE: 'GO',
                 NAME: 'intracellular'
             },
             VARIANTS: [
@@ -1295,10 +1295,10 @@ class TestComposite(TestTokenParserBase):
 
     def test_213a(self):
         """Evidence: ``IL-6 and IL-23 synergistically induce Th17 differentiation"""
-        statement = 'composite(p(HGNC:IL6), complex(GOCC:"interleukin-23 complex"))'
+        statement = 'composite(p(HGNC:IL6), complex(GO:"interleukin-23 complex"))'
         result = self.parser.composite_abundance.parseString(statement)
 
-        expected_result = [COMPOSITE, [PROTEIN, 'HGNC', 'IL6'], [COMPLEX, 'GOCC', 'interleukin-23 complex']]
+        expected_result = [COMPOSITE, [PROTEIN, 'HGNC', 'IL6'], [COMPLEX, 'GO', 'interleukin-23 complex']]
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
@@ -1310,14 +1310,14 @@ class TestComposite(TestTokenParserBase):
                     NAME: 'IL6'
                 }, {
                     FUNCTION: COMPLEX,
-                    NAMESPACE: 'GOCC',
+                    NAMESPACE: 'GO',
                     NAME: 'interleukin-23 complex'
                 }
             ]
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        il23 = named_complex_abundance('GOCC', 'interleukin-23 complex')
+        il23 = named_complex_abundance('GO', 'interleukin-23 complex')
         il6 = protein('HGNC', 'IL6')
         expected_node = composite_abundance([il23, il6])
         self.assert_has_node(expected_node)
@@ -1326,7 +1326,7 @@ class TestComposite(TestTokenParserBase):
         self.assertEqual(il23, expected_node[MEMBERS][0])
         self.assertEqual(il6, expected_node[MEMBERS][1])
 
-        self.assertEqual('composite(complex(GOCC:"interleukin-23 complex"), p(HGNC:IL6))',
+        self.assertEqual('composite(complex(GO:"interleukin-23 complex"), p(HGNC:IL6))',
                          self.graph.node_to_bel(expected_node))
 
         self.assertEqual(3, self.parser.graph.number_of_nodes())
@@ -1343,20 +1343,20 @@ class TestBiologicalProcess(TestTokenParserBase):
 
     def test_231a(self):
         """"""
-        statement = 'bp(GOBP:"cell cycle arrest")'
+        statement = 'bp(GO:"cell cycle arrest")'
         result = self.parser.biological_process.parseString(statement)
 
-        expected_result = [BIOPROCESS, 'GOBP', 'cell cycle arrest']
+        expected_result = [BIOPROCESS, 'GO', 'cell cycle arrest']
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
             FUNCTION: BIOPROCESS,
-            NAMESPACE: 'GOBP',
+            NAMESPACE: 'GO',
             NAME: 'cell cycle arrest'
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = bioprocess('GOBP', 'cell cycle arrest')
+        expected_node = bioprocess('GO', 'cell cycle arrest')
         self.assert_has_node(expected_node)
 
 
@@ -1682,7 +1682,7 @@ class TestTransformation(TestTokenParserBase):
 
     def test_translocation_standard(self):
         """translocation example"""
-        statement = 'tloc(p(HGNC:EGFR), fromLoc(GOCC:"cell surface"), toLoc(GOCC:endosome))'
+        statement = 'tloc(p(HGNC:EGFR), fromLoc(GO:"cell surface"), toLoc(GO:endosome))'
         result = self.parser.transformation.parseString(statement)
 
         expected_dict = {
@@ -1693,8 +1693,8 @@ class TestTransformation(TestTokenParserBase):
                 NAME: 'EGFR'
             },
             EFFECT: {
-                FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'},
-                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'endosome'}
+                FROM_LOC: {NAMESPACE: 'GO', NAME: 'cell surface'},
+                TO_LOC: {NAMESPACE: 'GO', NAME: 'endosome'}
             }
         }
 
@@ -1702,8 +1702,8 @@ class TestTransformation(TestTokenParserBase):
 
         mod = modifier_po_to_dict(result)
         expected_mod = translocation(
-            from_loc=entity(namespace='GOCC', name='cell surface'),
-            to_loc=entity(namespace='GOCC', name='endosome'),
+            from_loc=Entity(namespace='GO', name='cell surface'),
+            to_loc=Entity(namespace='GO', name='endosome'),
         )
 
         self.assertEqual(expected_mod, mod)
@@ -1713,7 +1713,7 @@ class TestTransformation(TestTokenParserBase):
 
     def test_translocation_bare(self):
         """translocation example"""
-        statement = 'tloc(p(HGNC:EGFR), GOCC:"cell surface", GOCC:endosome)'
+        statement = 'tloc(p(HGNC:EGFR), GO:"cell surface", GO:endosome)'
         result = self.parser.transformation.parseString(statement)
 
         expected_dict = {
@@ -1724,8 +1724,8 @@ class TestTransformation(TestTokenParserBase):
                 NAME: 'EGFR'
             },
             EFFECT: {
-                FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'},
-                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'endosome'}
+                FROM_LOC: {NAMESPACE: 'GO', NAME: 'cell surface'},
+                TO_LOC: {NAMESPACE: 'GO', NAME: 'endosome'}
             }
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1734,8 +1734,8 @@ class TestTransformation(TestTokenParserBase):
         expected_mod = {
             MODIFIER: TRANSLOCATION,
             EFFECT: {
-                FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'},
-                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'endosome'}
+                FROM_LOC: {NAMESPACE: 'GO', NAME: 'cell surface'},
+                TO_LOC: {NAMESPACE: 'GO', NAME: 'endosome'}
             }
         }
         self.assertEqual(expected_mod, mod)

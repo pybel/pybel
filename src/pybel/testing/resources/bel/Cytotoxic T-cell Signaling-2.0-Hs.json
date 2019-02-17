@@ -50,8 +50,8 @@
         }
       },
       {
-        "id": "bp(GOBP:\"lymphocyte chemotaxis\")",
-        "label": "bp(GOBP:\"lymphocyte chemotaxis\")",
+        "id": "bp(GO:\"lymphocyte chemotaxis\")",
+        "label": "bp(GO:\"lymphocyte chemotaxis\")",
         "metadata": {
           "coordinate": [
             0.5333907798362775,
@@ -193,8 +193,8 @@
         }
       },
       {
-        "id": "bp(GOBP:\"T cell activation\")",
-        "label": "bp(GOBP:\"T cell activation\")",
+        "id": "bp(GO:\"T cell activation\")",
+        "label": "bp(GO:\"T cell activation\")",
         "metadata": {
           "coordinate": [
             0.4294485135717363,
@@ -596,8 +596,8 @@
         }
       },
       {
-        "id": "bp(GOBP:\"CD8-positive, alpha-beta T cell proliferation\")",
-        "label": "bp(GOBP:\"CD8-positive, alpha-beta T cell proliferation\")",
+        "id": "bp(GO:\"CD8-positive, alpha-beta T cell proliferation\")",
+        "label": "bp(GO:\"CD8-positive, alpha-beta T cell proliferation\")",
         "metadata": {
           "coordinate": [
             0.191419861368565,
@@ -862,16 +862,16 @@
       {
         "source": "cat(p(EGID:21577))",
         "relation": "increases",
-        "target": "bp(GOBP:\"T cell activation\")",
+        "target": "bp(GO:\"T cell activation\")",
         "directed": false,
-        "label": "cat(p(EGID:21577)) increases bp(GOBP:\"T cell activation\")",
+        "label": "cat(p(EGID:21577)) increases bp(GO:\"T cell activation\")",
         "metadata": {
           "casual": true,
           "createdBy": "selventa",
           "edgeId": "524b3517d3fbfd4c34051473",
           "evidences": [
             {
-              "bel_statement": "cat(p(EGID:21577)) increases bp(GOBP:\"T cell activation\")",
+              "bel_statement": "cat(p(EGID:21577)) increases bp(GO:\"T cell activation\")",
               "summary_text": "This Network edge has no supporting evidence.  Please add real evidence to this edge prior to deleting.",
               "citation": {
                 "type": "PubMed",
@@ -910,16 +910,16 @@
       {
         "source": "cat(p(HGNC:IL2RB))",
         "relation": "decreases",
-        "target": "bp(GOBP:\"T cell activation\")",
+        "target": "bp(GO:\"T cell activation\")",
         "directed": false,
-        "label": "cat(p(HGNC:IL2RB)) decreases bp(GOBP:\"T cell activation\")",
+        "label": "cat(p(HGNC:IL2RB)) decreases bp(GO:\"T cell activation\")",
         "metadata": {
           "casual": true,
           "createdBy": "selventa",
           "edgeId": "524b3517d3fbfd4c34051485",
           "evidences": [
             {
-              "bel_statement": "cat(p(HGNC:IL2RB)) decreases bp(GOBP:\"T cell activation\")",
+              "bel_statement": "cat(p(HGNC:IL2RB)) decreases bp(GO:\"T cell activation\")",
               "summary_text": "This Network edge has no supporting evidence.  Please add real evidence to this edge prior to deleting.",
               "citation": {
                 "type": "PubMed",
@@ -1057,9 +1057,9 @@
       {
         "source": "path(SDIS:\"Cytotoxic T-cell activation\")",
         "relation": " isA",
-        "target": "bp(GOBP:\"T cell activation\")",
+        "target": "bp(GO:\"T cell activation\")",
         "directed": false,
-        "label": "path(SDIS:\"Cytotoxic T-cell activation\")  isA bp(GOBP:\"T cell activation\")",
+        "label": "path(SDIS:\"Cytotoxic T-cell activation\")  isA bp(GO:\"T cell activation\")",
         "metadata": {
           "casual": false,
           "createdBy": "selventa",
@@ -1666,16 +1666,16 @@
       {
         "source": "phos(complex(SCOMP:\"Calcineurin Complex\"))",
         "relation": "increases",
-        "target": "bp(GOBP:\"T cell activation\")",
+        "target": "bp(GO:\"T cell activation\")",
         "directed": false,
-        "label": "phos(complex(SCOMP:\"Calcineurin Complex\")) increases bp(GOBP:\"T cell activation\")",
+        "label": "phos(complex(SCOMP:\"Calcineurin Complex\")) increases bp(GO:\"T cell activation\")",
         "metadata": {
           "casual": true,
           "createdBy": "selventa",
           "edgeId": "524b3517d3fbfd4c34051474",
           "evidences": [
             {
-              "bel_statement": "phos(complex(SCOMP:\"Calcineurin Complex\")) increases bp(GOBP:\"T cell activation\")",
+              "bel_statement": "phos(complex(SCOMP:\"Calcineurin Complex\")) increases bp(GO:\"T cell activation\")",
               "summary_text": "This Network edge has no supporting evidence.  Please add real evidence to this edge prior to deleting.",
               "citation": {
                 "type": "PubMed",
@@ -1841,16 +1841,16 @@
       {
         "source": "cat(p(HGNC:CXCR3))",
         "relation": "increases",
-        "target": "bp(GOBP:\"lymphocyte chemotaxis\")",
+        "target": "bp(GO:\"lymphocyte chemotaxis\")",
         "directed": false,
-        "label": "cat(p(HGNC:CXCR3)) increases bp(GOBP:\"lymphocyte chemotaxis\")",
+        "label": "cat(p(HGNC:CXCR3)) increases bp(GO:\"lymphocyte chemotaxis\")",
         "metadata": {
           "casual": true,
           "createdBy": "selventa",
           "edgeId": "524b3517d3fbfd4c3405148e",
           "evidences": [
             {
-              "bel_statement": "cat(p(HGNC:CXCR3)) increases bp(GOBP:\"lymphocyte chemotaxis\")",
+              "bel_statement": "cat(p(HGNC:CXCR3)) increases bp(GO:\"lymphocyte chemotaxis\")",
               "summary_text": "neutralization of CXCR3 reduced MIG/CXCL9-induced T lymphocyte proliferation and the number of IFN-gamma-positive spots",
               "citation": {
                 "type": "PubMed",
@@ -1869,7 +1869,7 @@
               }
             },
             {
-              "bel_statement": "cat(p(HGNC:CXCR3)) increases bp(GOBP:\"lymphocyte chemotaxis\")",
+              "bel_statement": "cat(p(HGNC:CXCR3)) increases bp(GO:\"lymphocyte chemotaxis\")",
               "summary_text": "supernatants harvested from stimulated PMN induced migration and rapid integrin-dependent adhesion of CXCR3-expressing lymphocytes; these activities were significantly reduced by neutralizing anti-MIG and anti-IP-10 Abs,",
               "citation": {
                 "type": "PubMed",
@@ -4579,16 +4579,16 @@
       {
         "source": "p(HGNC:IDO1)",
         "relation": "increases",
-        "target": "bp(GOBP:\"T cell activation\")",
+        "target": "bp(GO:\"T cell activation\")",
         "directed": false,
-        "label": "p(HGNC:IDO1) increases bp(GOBP:\"T cell activation\")",
+        "label": "p(HGNC:IDO1) increases bp(GO:\"T cell activation\")",
         "metadata": {
           "casual": true,
           "createdBy": "selventa",
           "edgeId": "524b3517d3fbfd4c3405149c",
           "evidences": [
             {
-              "bel_statement": "p(HGNC:IDO1) increases bp(GOBP:\"T cell activation\")",
+              "bel_statement": "p(HGNC:IDO1) increases bp(GO:\"T cell activation\")",
               "summary_text": "This Network edge has no supporting evidence.  Please add real evidence to this edge prior to deleting.",
               "citation": {
                 "type": "PubMed",
@@ -8701,16 +8701,16 @@
       {
         "source": "p(HGNC:FOXO3)",
         "relation": "decreases",
-        "target": "bp(GOBP:\"CD8-positive, alpha-beta T cell proliferation\")",
+        "target": "bp(GO:\"CD8-positive, alpha-beta T cell proliferation\")",
         "directed": false,
-        "label": "p(HGNC:FOXO3) decreases bp(GOBP:\"CD8-positive, alpha-beta T cell proliferation\")",
+        "label": "p(HGNC:FOXO3) decreases bp(GO:\"CD8-positive, alpha-beta T cell proliferation\")",
         "metadata": {
           "casual": false,
           "createdBy": "edwardsanders",
           "edgeId": "52d177f3bf21ca0758e0b198",
           "evidences": [
             {
-              "bel_statement": "p(HGNC:FOXO3) decreases bp(GOBP:\"CD8-positive, alpha-beta T cell proliferation\")",
+              "bel_statement": "p(HGNC:FOXO3) decreases bp(GO:\"CD8-positive, alpha-beta T cell proliferation\")",
               "summary_text": "\"These data suggested that FOXO3 downregulates the accumulation of CD8 T cells in tissue specific fashion during an acute LCMV [lymphocytic choriomeningitis virus] infection.\" (p. 3)",
               "citation": {
                 "type": "Other",
@@ -9450,16 +9450,16 @@
       {
         "source": "a(CHEBI:acrolein)",
         "relation": "increases",
-        "target": "bp(GOBP:\"CD8-positive, alpha-beta T cell proliferation\")",
+        "target": "bp(GO:\"CD8-positive, alpha-beta T cell proliferation\")",
         "directed": false,
-        "label": "a(CHEBI:acrolein) increases bp(GOBP:\"CD8-positive, alpha-beta T cell proliferation\")",
+        "label": "a(CHEBI:acrolein) increases bp(GO:\"CD8-positive, alpha-beta T cell proliferation\")",
         "metadata": {
           "casual": false,
           "createdBy": "edwardsanders",
           "edgeId": "52e8181cbf21ca0b1807399f",
           "evidences": [
             {
-              "bel_statement": "a(CHEBI:acrolein) increases bp(GOBP:\"CD8-positive, alpha-beta T cell proliferation\")",
+              "bel_statement": "a(CHEBI:acrolein) increases bp(GO:\"CD8-positive, alpha-beta T cell proliferation\")",
               "summary_text": "\"Acrolein exposure induces a time-dependent increase in the number of CD8+ cells in the lungs of wild-type mice.\"",
               "citation": {
                 "type": "Other",
@@ -9483,16 +9483,16 @@
       {
         "source": "p(HGNC:IL2RG)",
         "relation": "increases",
-        "target": "bp(GOBP:\"T cell activation\")",
+        "target": "bp(GO:\"T cell activation\")",
         "directed": false,
-        "label": "p(HGNC:IL2RG) increases bp(GOBP:\"T cell activation\")",
+        "label": "p(HGNC:IL2RG) increases bp(GO:\"T cell activation\")",
         "metadata": {
           "casual": false,
           "createdBy": "mberra",
           "edgeId": "5477834189e36203806fca55",
           "evidences": [
             {
-              "bel_statement": "p(HGNC:IL2RG) increases bp(GOBP:\"T cell activation\")",
+              "bel_statement": "p(HGNC:IL2RG) increases bp(GO:\"T cell activation\")",
               "summary_text": "Thus, sγc expression is a naturally occurring immunomodulator that regulates γc cytokine signaling and controls T cell activation and differentiation.",
               "citation": {
                 "type": "Other",

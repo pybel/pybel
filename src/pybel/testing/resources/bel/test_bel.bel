@@ -13,9 +13,10 @@ SET DOCUMENT Project = "PyBEL Testing"
 ##################################################################################
 # Definitions Section
 
-DEFINE NAMESPACE CHEBI AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=chebi.belns"
-DEFINE NAMESPACE HGNC AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=hgnc-human-genes.belns"
-DEFINE ANNOTATION Species AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=species-taxonomy-id.belanno"
+DEFINE NAMESPACE CHEBI AS URL "https://raw.githubusercontent.com/pharmacome/terminology/73688d6dc24e309fca59a1340dc9ee971e9f3baa/external/chebi-names.belns"
+DEFINE NAMESPACE HGNC  AS URL "https://raw.githubusercontent.com/pharmacome/terminology/73688d6dc24e309fca59a1340dc9ee971e9f3baa/external/hgnc-names.belns"
+
+DEFINE ANNOTATION Species  AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=species-taxonomy-id.belanno"
 DEFINE ANNOTATION CellLine AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=cell-line.belanno"
 
 ##################################################################################

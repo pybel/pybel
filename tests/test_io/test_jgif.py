@@ -23,7 +23,7 @@ logging.getLogger('pybel.parser').setLevel(20)
 calcium = Abundance('SCHEM', 'Calcium')
 calcineurin_complex = NamedComplexAbundance('SCOMP', 'Calcineurin Complex')
 foxo3 = Protein('HGNC', 'FOXO3')
-tcell_proliferation = BiologicalProcess('GOBP', 'CD8-positive, alpha-beta T cell proliferation')
+tcell_proliferation = BiologicalProcess('GO', 'CD8-positive, alpha-beta T cell proliferation')
 il15 = Protein('HGNC', 'IL15')
 il2rg = Protein('MGI', 'Il2rg')
 jgif_expected_nodes = {
@@ -35,11 +35,11 @@ jgif_expected_nodes = {
     il2rg,
     Protein('HGNC', 'CXCR6'),
     Protein('HGNC', 'IL15RA'),
-    BiologicalProcess('GOBP', 'lymphocyte chemotaxis'),
+    BiologicalProcess('GO', 'lymphocyte chemotaxis'),
     Protein('HGNC', 'IL2RG'),
     Protein('HGNC', 'ZAP70'),
     NamedComplexAbundance('SCOMP', 'T Cell Receptor Complex'),
-    BiologicalProcess('GOBP', 'T cell activation'),
+    BiologicalProcess('GO', 'T cell activation'),
     Protein('HGNC', 'CCL3'),
     Protein('HGNC', 'PLCG1'),
     Protein('HGNC', 'FASLG'),

@@ -31,6 +31,7 @@
 
 from ..dsl import abundance, activity, bioprocess, complex_abundance, pmod, protein
 from ..struct.graph import BELGraph
+from ..constants import hbp_namespace
 
 __all__ = [
     'sialic_acid_graph'
@@ -57,11 +58,9 @@ sialic_acid_graph = BELGraph(
 )
 
 sialic_acid_graph.namespace_url.update({
-    'HGNC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/hgnc-human-genes/'
-            'hgnc-human-genes-20170725.belns',
-    'CHEBI': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/chebi/chebi-20170725.belns',
-    'GOBP': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process/'
-            'go-biological-process-20170725.belns'
+    'HGNC': hbp_namespace('hgnc'),
+    'CHEBI': hbp_namespace('chebi'),
+    'GO': hbp_namespace('go'),
 })
 
 sialic_acid_graph.annotation_url.update({
@@ -79,7 +78,7 @@ syk = protein(namespace='HGNC', name='SYK', identifier='11491')
 dap12 = protein(namespace='HGNC', name='TYROBP', identifier='12449')
 trem2 = protein(namespace='HGNC', name='TREM2', identifier='17761')
 cd33_phosphorylated = protein(name='CD33', namespace='HGNC', identifier='1659', variants=[pmod('Ph')])
-immune_response = bioprocess(name='immune response', namespace='GOBP', identifier='0006955')
+immune_response = bioprocess(name='immune response', namespace='GO', identifier='0006955')
 
 sialic_acid_graph.add_increases(
     sialic_acid_cd33_complex,

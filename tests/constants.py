@@ -10,7 +10,7 @@ from pybel import BELGraph
 from pybel.constants import (
     ANNOTATIONS, ASSOCIATION, CITATION, CITATION_NAME, CITATION_REFERENCE, CITATION_TYPE, DECREASES, DIRECTLY_DECREASES,
     EVIDENCE, INCREASES, METADATA_AUTHORS, METADATA_DESCRIPTION, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION,
-    OPENBEL_ANNOTATION_RESOURCES, OPENBEL_NAMESPACE_RESOURCES, RELATION,
+    OPENBEL_ANNOTATION_RESOURCES, RELATION, hbp_namespace,
 )
 from pybel.dsl import BaseEntity, complex_abundance, pathology, protein
 from pybel.dsl.namespaces import hgnc
@@ -43,7 +43,7 @@ test_evidence_text = 'I read it on Twitter'
 test_set_evidence = 'SET Evidence = "{}"'.format(test_evidence_text)
 
 HGNC_KEYWORD = 'HGNC'
-HGNC_URL = OPENBEL_NAMESPACE_RESOURCES + 'hgnc-human-genes.belns'
+HGNC_URL = hbp_namespace('hgnc')
 MESH_DISEASES_KEYWORD = 'MeSHDisease'
 MESH_DISEASES_URL = OPENBEL_ANNOTATION_RESOURCES + "mesh-diseases.belanno"
 
@@ -323,7 +323,7 @@ class BelReconstitutionMixin(TestGraphMixin):
             self.assertEqual(test_bel_thorough, graph.path)
 
         if check_provenance:
-            self.assertEqual({'CHEBI', 'HGNC', 'GOBP', 'GOCC', 'MESHD', 'TESTNS2'}, set(graph.namespace_url))
+            self.assertEqual({'CHEBI', 'HGNC', 'GO', 'MESHD', 'TESTNS2'}, set(graph.namespace_url))
             self.assertEqual({'dbSNP'}, set(graph.namespace_pattern))
             self.assertIn('TESTAN1', graph.annotation_list)
             self.assertIn('TESTAN2', graph.annotation_list)

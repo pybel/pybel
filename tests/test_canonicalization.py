@@ -6,11 +6,11 @@ import unittest
 
 from pybel import BELGraph
 from pybel.canonicalize import _to_bel_lines_body, postpend_location
-from pybel.constants import BEL_DEFAULT_NAMESPACE, MODIFIER
+from pybel.constants import BEL_DEFAULT_NAMESPACE, EXTRACELLULAR, INTRACELLULAR, MODIFIER
 from pybel.dsl import (
-    abundance, activity, bioprocess, complex_abundance, composite_abundance, degradation, entity, extracellular,
-    fragment, fusion_range, gene, gene_fusion, gmod, hgvs, intracellular, mirna, named_complex_abundance, pathology,
-    pmod, protein, protein_substitution, reaction, rna, rna_fusion, secretion, translocation,
+    abundance, activity, bioprocess, complex_abundance, composite_abundance, degradation, Entity, fragment,
+    fusion_range, gene, gene_fusion, gmod, hgvs, mirna, named_complex_abundance, pathology, pmod, protein,
+    protein_substitution, reaction, rna, rna_fusion, secretion, translocation,
 )
 from pybel.testing.utils import n
 from pybel.utils import canonicalize_edge
@@ -200,10 +200,10 @@ class TestCanonicalizeEdge(unittest.TestCase):
 
         self.assertEqual(
             self.add_edge(
-                subject_modifier=degradation(location=entity(name='somewhere', namespace='GOCC'))
+                subject_modifier=degradation(location=Entity(name='somewhere', namespace='GO'))
             ),
             self.add_edge(
-                subject_modifier=degradation(location=entity(name='somewhere', namespace='GOCC'))
+                subject_modifier=degradation(location=Entity(name='somewhere', namespace='GO'))
             )
         )
 
@@ -212,7 +212,7 @@ class TestCanonicalizeEdge(unittest.TestCase):
                 subject_modifier=degradation()
             ),
             self.add_edge(
-                subject_modifier=degradation(location=entity(name='somewhere', namespace='GOCC'))
+                subject_modifier=degradation(location=Entity(name='somewhere', namespace='GO'))
             )
         )
 
@@ -224,7 +224,7 @@ class TestCanonicalizeEdge(unittest.TestCase):
 
         self.assertEqual(
             self.add_edge(subject_modifier=secretion()),
-            self.add_edge(subject_modifier=translocation(from_loc=intracellular, to_loc=extracellular)),
+            self.add_edge(subject_modifier=translocation(INTRACELLULAR, EXTRACELLULAR)),
         )
 
 

@@ -10,7 +10,7 @@ from pybel.constants import (
     FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, IDENTIFIER, KIND, LOCATION, NAME, NAMESPACE,
     PARTNER_3P, PARTNER_5P, PMOD, PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P,
 )
-from pybel.dsl import entity, gmod, hgvs, pmod
+from pybel.dsl import Entity, gmod, hgvs, pmod
 from pybel.parser.modifiers import (
     get_fragment_language, get_fusion_language, get_gene_modification_language, get_gene_substitution_language,
     get_hgvs_language, get_location_language, get_protein_modification_language, get_protein_substitution_language,
@@ -181,7 +181,7 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            IDENTIFIER: entity('MOD', 'PhosRes'),
+            IDENTIFIER: Entity('MOD', 'PhosRes'),
             PMOD_CODE: 'Ser',
             PMOD_POSITION: 473
         }
@@ -495,9 +495,9 @@ class TestLocation(unittest.TestCase):
         self.parser = get_location_language(identifier_qualified)
 
     def test_a(self):
-        statement = 'loc(GOCC:intracellular)'
+        statement = 'loc(GO:intracellular)'
         result = self.parser.parseString(statement)
         expected = {
-            LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
+            LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}
         }
         self.assertEqual(expected, result.asDict())

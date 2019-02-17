@@ -13,6 +13,7 @@ By default, PyBEL loads its configuration from ``~/.config/pybel/config.json``. 
 from json import load
 from logging import getLogger
 from os import environ, makedirs, mkdir, path
+from typing import Optional
 
 log = getLogger(__name__)
 
@@ -23,6 +24,14 @@ PYBEL_MINIMUM_IMPORT_VERSION = 0, 13, 0
 
 BELFRAMEWORK_DOMAIN = 'http://resource.belframework.org'
 OPENBEL_DOMAIN = 'http://resources.openbel.org'
+HBP_NAMESPACE_URL = 'https://raw.githubusercontent.com/pharmacome/terminology/{hash}/external/{keyword}-names.belns'
+LAST_HASH = '73688d6dc24e309fca59a1340dc9ee971e9f3baa'
+
+
+def hbp_namespace(name: str, hash: Optional[str] = None) -> str:
+    """Format a namespace URL."""
+    return HBP_NAMESPACE_URL.format(hash=hash or LAST_HASH, keyword=name)
+
 
 SMALL_CORPUS_URL = OPENBEL_DOMAIN + '/belframework/20150611/knowledge/small_corpus.bel'
 LARGE_CORPUS_URL = OPENBEL_DOMAIN + '/belframework/20150611/knowledge/large_corpus.bel'
@@ -30,10 +39,6 @@ LARGE_CORPUS_URL = OPENBEL_DOMAIN + '/belframework/20150611/knowledge/large_corp
 FRAUNHOFER_RESOURCES = 'https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path='
 OPENBEL_NAMESPACE_RESOURCES = OPENBEL_DOMAIN + '/belframework/20150611/namespace/'
 OPENBEL_ANNOTATION_RESOURCES = OPENBEL_DOMAIN + '/belframework/20150611/annotation/'
-
-#: GOCC is the only namespace that needs to be stored because translocations use some of its values by default
-GOCC_LATEST = 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-cellular-component/go-cellular-component-20170511.belns'
-GOCC_KEYWORD = 'GOCC'
 
 #: The environment variable that contains the default SQL connection information for the PyBEL cache
 PYBEL_CONNECTION = 'PYBEL_CONNECTION'
@@ -205,6 +210,10 @@ DEGRADATION = 'Degradation'
 TRANSLOCATION = 'Translocation'
 CELL_SECRETION = 'CellSecretion'
 CELL_SURFACE_EXPRESSION = 'CellSurfaceExpression'
+
+INTRACELLULAR = 'intracellular'
+EXTRACELLULAR = 'extracellular space'
+CELL_SURFACE = 'cell surface'
 
 # Internal node data format keys
 #: The node data key specifying the node's function (e.g. :data:`GENE`, :data:`MIRNA`, :data:`BIOPROCESS`, etc.)

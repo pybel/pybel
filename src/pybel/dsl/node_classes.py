@@ -5,9 +5,10 @@
 import hashlib
 from abc import ABCMeta, abstractmethod
 from operator import methodcaller
+from typing import Optional
 
 from .exc import InferCentralDogmaException, PyBELDSLException
-from .utils import entity
+from .utils import Entity
 from ..constants import (
     ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING,
     FRAGMENT_START, FRAGMENT_STOP, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GENE,
@@ -69,45 +70,33 @@ _as_bel = methodcaller('as_bel')
 class BaseEntity(dict, metaclass=ABCMeta):
     """This class represents all BEL nodes. It can be converted to a tuple and hashed."""
 
-    def __init__(self, func):
+    def __init__(self, func: str) -> None:
         """Build a PyBEL node data dictionary.
 
-        :param str func: The PyBEL function
+        :param func: The PyBEL function
         """
-        super(BaseEntity, self).__init__(**{FUNCTION: func})
+        super().__init__(**{FUNCTION: func})
 
     @property
-    def function(self):
-        """Return the function of this entity.
-
-        :rtype: str
-        """
+    def function(self) -> str:
+        """Return the function of this entity."""
         return self[FUNCTION]
 
     @property
-    def _func(self):
+    def _func(self) -> str:
         return rev_abundance_labels[self.function]
 
     @abstractmethod
-    def as_bel(self):
-        """Return this entity as a BEL string.
+    def as_bel(self) -> str:
+        """Return this entity as a BEL string."""
 
-        :rtype: str
-        """
-
-    def as_sha512(self):
-        """Return this entity as a SHA512 hash encoded in UTF-8.
-
-        :rtype: str
-        """
+    def as_sha512(self) -> str:
+        """Return this entity as a SHA512 hash encoded in UTF-8."""
         return hashlib.sha512(self.as_bel().encode('utf8')).hexdigest()
 
     @property
-    def sha512(self):
-        """Get the SHA512 hash of this node.
-
-        :rtype: str
-        """
+    def sha512(self) -> str:
+        """Get the SHA512 hash of this node."""
         return self.as_sha512()
 
     def __hash__(self):  # noqa: D105
@@ -126,19 +115,19 @@ class BaseEntity(dict, metaclass=ABCMeta):
 class BaseAbundance(BaseEntity):
     """The superclass for building node data dictionaries."""
 
-    def __init__(self, func, namespace, name=None, identifier=None):
+    def __init__(self, func: str, namespace: str, name: Optional[str] = None, identifier: Optional[str] = None) -> None:
         """Build an abundance from a function, namespace, and a name and/or identifier.
 
-        :param str func: The PyBEL function
-        :param str namespace: The name of the namespace
-        :param Optional[str] name: The name of this abundance
-        :param Optional[str] identifier: The database identifier for this abundance
+        :param func: The PyBEL function
+        :param namespace: The name of the namespace
+        :param name: The name of this abundance
+        :param identifier: The database identifier for this abundance
         """
         if name is None and identifier is None:
             raise PyBELDSLException('Either name or identifier must be specified')
 
         super(BaseAbundance, self).__init__(func=func)
-        self.update(entity(namespace=namespace, name=name, identifier=identifier))
+        self.update(Entity(namespace=namespace, name=name, identifier=identifier))
 
     @property
     def namespace(self):
@@ -366,7 +355,7 @@ class ProteinModification(Variant):
         """
         super(ProteinModification, self).__init__(PMOD)
 
-        self[IDENTIFIER] = entity(
+        self[IDENTIFIER] = Entity(
             namespace=(namespace or BEL_DEFAULT_NAMESPACE),
             name=name,
             identifier=identifier
@@ -412,7 +401,7 @@ class GeneModification(Variant):
         """
         super(GeneModification, self).__init__(GMOD)
 
-        self[IDENTIFIER] = entity(
+        self[IDENTIFIER] = Entity(
             namespace=(namespace or BEL_DEFAULT_NAMESPACE),
             name=name,
             identifier=identifier
@@ -788,7 +777,7 @@ class ComplexAbundance(ListAbundance):
         super(ComplexAbundance, self).__init__(func=COMPLEX, members=members)
 
         if namespace:
-            self.update(entity(namespace=namespace, name=name, identifier=identifier))
+            self.update(Entity(namespace=namespace, name=name, identifier=identifier))
 
 
 class NamedComplexAbundance(BaseAbundance):

@@ -3,14 +3,14 @@
 """Locations.
 
 Location data also is added into the information in the edge for the node (subject or object) for which it was
-annotated. :code:`p(HGNC:GSK3B, pmod(P, S, 9), loc(GOCC:lysozome)) pos act(p(HGNC:GSK3B), ma(kin))` becomes:
+annotated. :code:`p(HGNC:GSK3B, pmod(P, S, 9), loc(GO:lysozome)) pos act(p(HGNC:GSK3B), ma(kin))` becomes:
 
 .. code::
 
     {
         SUBJECT: {
             LOCATION: {
-                NAMESPACE: 'GOCC',
+                NAMESPACE: 'GO',
                 NAME: 'lysozome'
             }
         },
@@ -33,8 +33,8 @@ hypothetical :code:`HGNC:A` in a specific location having different effects. In 
 but this introduced unnecessary complexity to the network and made querying more difficult.
 This calls for thoughtful consideration of the following two statements:
 
-- :code:`tloc(p(HGNC:A), fromLoc(GOCC:intracellular), toLoc(GOCC:"cell membrane")) -> p(HGNC:B)`
-- :code:`p(HGNC:A, location(GOCC:"cell membrane")) -> p(HGNC:B)`
+- :code:`tloc(p(HGNC:A), fromLoc(GO:intracellular), toLoc(GO:"cell membrane")) -> p(HGNC:B)`
+- :code:`p(HGNC:A, location(GO:"cell membrane")) -> p(HGNC:B)`
 
 .. seealso::
 

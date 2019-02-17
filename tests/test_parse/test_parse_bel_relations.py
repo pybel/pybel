@@ -17,7 +17,7 @@ from pybel.constants import (
 )
 
 from pybel.dsl import (
-    abundance, activity, bioprocess, complex_abundance, composite_abundance, entity, gene, hgvs, pmod, protein,
+    abundance, activity, bioprocess, complex_abundance, composite_abundance, Entity, gene, hgvs, pmod, protein,
     reaction, rna, Pathology,
     named_complex_abundance,
     gmod,
@@ -93,7 +93,7 @@ class TestRelations(TestTokenParserBase):
 
     def test_predicate_failure(self):
         """Checks that if there's a problem with the relation/object, that an error gets thrown"""
-        statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(ADO:"Abeta_42")) -> nope(GOBP:"neuron apoptotic process")'
+        statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(ADO:"Abeta_42")) -> nope(GO:"neuron apoptotic process")'
 
         with self.assertRaises(ParseException):
             self.parser.relation.parseString(statement)
@@ -102,14 +102,14 @@ class TestRelations(TestTokenParserBase):
         """Test composite in subject. See BEL 2.0 specification
         `3.1.1 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xincreases>`_
         """
-        statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(ADO:"Abeta_42")) -> bp(GOBP:"neuron apoptotic process")'
+        statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(ADO:"Abeta_42")) -> bp(GO:"neuron apoptotic process")'
         result = self.parser.relation.parseString(statement)
 
         expected = [
             [COMPOSITE, [PROTEIN, 'HGNC', 'CASP8'], [PROTEIN, 'HGNC', 'FADD'],
              [ABUNDANCE, 'ADO', 'Abeta_42']],
             INCREASES,
-            [BIOPROCESS, 'GOBP', 'neuron apoptotic process']
+            [BIOPROCESS, 'GO', 'neuron apoptotic process']
         ]
         self.assertEqual(expected, result.asList())
 
@@ -129,7 +129,7 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_edge(sub, sub_member_2, relation=HAS_COMPONENT)
         self.assert_has_edge(sub, sub_member_3, relation=HAS_COMPONENT)
 
-        obj = bioprocess('GOBP', 'neuron apoptotic process')
+        obj = bioprocess('GO', 'neuron apoptotic process')
         self.assert_has_node(obj)
 
         self.assert_has_edge(sub, obj, relation=INCREASES)
@@ -188,7 +188,7 @@ class TestRelations(TestTokenParserBase):
 
         3.1.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xdecreases
         """
-        statement = 'pep(p(SFAM:"CAPN Family", location(GOCC:intracellular))) -| reaction(reactants(p(HGNC:CDK5R1)),products(p(HGNC:CDK5)))'
+        statement = 'pep(p(SFAM:"CAPN Family", location(GO:intracellular))) -| reaction(reactants(p(HGNC:CDK5R1)),products(p(HGNC:CDK5)))'
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
@@ -198,7 +198,7 @@ class TestRelations(TestTokenParserBase):
                     FUNCTION: PROTEIN,
                     NAMESPACE: 'SFAM',
                     NAME: 'CAPN Family',
-                    LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
+                    LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}
                 },
                 EFFECT: {
                     NAME: 'pep',
@@ -243,14 +243,14 @@ class TestRelations(TestTokenParserBase):
                     NAMESPACE: BEL_DEFAULT_NAMESPACE,
                 },
                 LOCATION: {
-                    NAMESPACE: 'GOCC',
+                    NAMESPACE: 'GO',
                     NAME: 'intracellular',
                 }
             }
         }
 
         self.assertEqual(expected_edge_attributes[SUBJECT],
-                         activity(name='pep', location=entity(name='intracellular', namespace='GOCC')))
+                         activity(name='pep', location=Entity(name='intracellular', namespace='GO')))
 
         self.assert_has_edge(sub, obj, **expected_edge_attributes)
 
@@ -258,7 +258,7 @@ class TestRelations(TestTokenParserBase):
         """
         3.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdDecreases
         Tests simple triple"""
-        statement = 'proteinAbundance(HGNC:CAT, location(GOCC:intracellular)) directlyDecreases abundance(CHEBI:"hydrogen peroxide")'
+        statement = 'proteinAbundance(HGNC:CAT, location(GO:intracellular)) directlyDecreases abundance(CHEBI:"hydrogen peroxide")'
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
@@ -266,7 +266,7 @@ class TestRelations(TestTokenParserBase):
                 FUNCTION: PROTEIN,
                 NAMESPACE: 'HGNC',
                 NAME: 'CAT',
-                LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
+                LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}
             },
             RELATION: 'directlyDecreases',
             OBJECT: {
@@ -285,7 +285,7 @@ class TestRelations(TestTokenParserBase):
 
         expected_attrs = {
             SUBJECT: {
-                LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}
+                LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}
             },
             RELATION: 'directlyDecreases',
         }
@@ -295,7 +295,7 @@ class TestRelations(TestTokenParserBase):
         """
         3.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdDecreases
         Tests simple triple"""
-        statement = 'g(HGNC:CAT, location(GOCC:intracellular)) directlyDecreases abundance(CHEBI:"hydrogen peroxide")'
+        statement = 'g(HGNC:CAT, location(GO:intracellular)) directlyDecreases abundance(CHEBI:"hydrogen peroxide")'
 
         annotations = {
             'ListAnnotation': {'a', 'b'},
@@ -312,7 +312,7 @@ class TestRelations(TestTokenParserBase):
                 NAMESPACE: 'HGNC',
                 NAME: 'CAT',
                 LOCATION: {
-                    NAMESPACE: 'GOCC',
+                    NAMESPACE: 'GO',
                     NAME: 'intracellular'
                 }
             },
@@ -334,7 +334,7 @@ class TestRelations(TestTokenParserBase):
         expected_attrs = {
             SUBJECT: {
                 LOCATION: {
-                    NAMESPACE: 'GOCC',
+                    NAMESPACE: 'GO',
                     NAME: 'intracellular'
                 }
             },
@@ -350,7 +350,7 @@ class TestRelations(TestTokenParserBase):
 
     def test_rateLimitingStepOf_subjectActivity(self):
         """3.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_ratelimitingstepof"""
-        statement = 'act(p(HGNC:HMGCR), ma(cat)) rateLimitingStepOf bp(GOBP:"cholesterol biosynthetic process")'
+        statement = 'act(p(HGNC:HMGCR), ma(cat)) rateLimitingStepOf bp(GO:"cholesterol biosynthetic process")'
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
@@ -369,7 +369,7 @@ class TestRelations(TestTokenParserBase):
             RELATION: 'rateLimitingStepOf',
             OBJECT: {
                 FUNCTION: BIOPROCESS,
-                NAMESPACE: 'GOBP',
+                NAMESPACE: 'GO',
                 NAME: 'cholesterol biosynthetic process'
             }
         }
@@ -378,7 +378,7 @@ class TestRelations(TestTokenParserBase):
         sub = protein('HGNC', 'HMGCR')
         self.assert_has_node(sub)
 
-        obj = bioprocess('GOBP', 'cholesterol biosynthetic process')
+        obj = bioprocess('GO', 'cholesterol biosynthetic process')
         self.assert_has_node(obj)
 
         self.assert_has_edge(sub, obj, relation=expected_dict[RELATION])
@@ -618,7 +618,7 @@ class TestRelations(TestTokenParserBase):
         """
         3.3.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_translatedto
         """
-        statement = 'r(HGNC:AKT1,loc(GOCC:intracellular)) >> p(HGNC:AKT1)'
+        statement = 'r(HGNC:AKT1,loc(GO:intracellular)) >> p(HGNC:AKT1)'
         result = self.parser.relation.parseString(statement)
 
         # [[RNA, ['HGNC', 'AKT1']], TRANSLATED_TO, [PROTEIN, ['HGNC', 'AKT1']]]
@@ -628,7 +628,7 @@ class TestRelations(TestTokenParserBase):
                 NAMESPACE: 'HGNC',
                 NAME: 'AKT1',
                 LOCATION: {
-                    NAMESPACE: 'GOCC',
+                    NAMESPACE: 'GO',
                     NAME: 'intracellular'
                 }
             },
@@ -662,7 +662,7 @@ class TestRelations(TestTokenParserBase):
         self.assertEqual(TRANSLATED_TO, data[RELATION])
 
         calculated_edge_bel = edge_to_bel(source, target, data=data)
-        self.assertEqual('r(HGNC:AKT1, loc(GOCC:intracellular)) translatedTo p(HGNC:AKT1)', calculated_edge_bel)
+        self.assertEqual('r(HGNC:AKT1, loc(GO:intracellular)) translatedTo p(HGNC:AKT1)', calculated_edge_bel)
 
     def test_component_list(self):
         s = 'complex(SCOMP:"C1 Complex") hasComponents list(p(HGNC:C1QB), p(HGNC:C1S))'
@@ -837,7 +837,7 @@ class TestRelations(TestTokenParserBase):
         """
         statement = 'rxn(reactants(a(CHEBI:"(S)-3-hydroxy-3-methylglutaryl-CoA"),a(CHEBI:NADPH), \
             a(CHEBI:hydron)),products(a(CHEBI:mevalonate), a(CHEBI:"CoA-SH"), a(CHEBI:"NADP(+)"))) \
-            subProcessOf bp(GOBP:"cholesterol biosynthetic process")'
+            subProcessOf bp(GO:"cholesterol biosynthetic process")'
         result = self.parser.relation.parseString(statement)
         expected_result = [
             [
@@ -854,7 +854,7 @@ class TestRelations(TestTokenParserBase):
                 ]
             ],
             SUBPROCESS_OF,
-            [BIOPROCESS, 'GOBP', 'cholesterol biosynthetic process']]
+            [BIOPROCESS, 'GO', 'cholesterol biosynthetic process']]
         self.assertEqual(expected_result, result.asList())
 
         sub_reactant_1 = abundance('CHEBI', '(S)-3-hydroxy-3-methylglutaryl-CoA')
@@ -880,7 +880,7 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_edge(sub, sub_product_2, relation=HAS_PRODUCT)
         self.assert_has_edge(sub, sub_product_3, relation=HAS_PRODUCT)
 
-        obj = bioprocess('GOBP', 'cholesterol biosynthetic process')
+        obj = bioprocess('GO', 'cholesterol biosynthetic process')
         self.assert_has_node(obj)
 
         self.assert_has_edge(sub, obj, **{RELATION: 'subProcessOf'})

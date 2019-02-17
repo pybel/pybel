@@ -69,7 +69,7 @@ cftr_protein_unspecified_variant = cftr.with_variants(hgvs_unspecified())
 cftr_protein_phe_508_del = cftr.with_variants(hgvs('p.Phe508del'))
 
 adenocarcinoma = pathology('MESHD', 'Adenocarcinoma')
-interleukin_23_complex = named_complex_abundance('GOCC', 'interleukin-23 complex')
+interleukin_23_complex = named_complex_abundance('GO', 'interleukin-23 complex')
 
 oxygen_atom = abundance(namespace='CHEBI', name='oxygen atom')
 hydrogen_peroxide = abundance('CHEBI', 'hydrogen peroxide')
@@ -198,12 +198,12 @@ BEL_THOROUGH_NODES = {
         il6
     ]),
     il6,
-    bioprocess('GOBP', 'cell cycle arrest'),
+    bioprocess('GO', 'cell cycle arrest'),
     hydrogen_peroxide,
     protein('HGNC', 'CAT'),
     gene('HGNC', 'CAT'),
     protein('HGNC', 'HMGCR'),
-    bioprocess('GOBP', 'cholesterol biosynthetic process'),
+    bioprocess('GO', 'cholesterol biosynthetic process'),
     gene('HGNC', 'APP', variants=hgvs('c.275341G>C')),
     gene('HGNC', 'APP'),
     pathology('MESHD', 'Alzheimer Disease'),
@@ -246,7 +246,7 @@ BEL_THOROUGH_NODES = {
     protein('HGNC', 'CASP8'),
     protein('HGNC', 'AKT1', variants=pmod(namespace='TESTNS2', name='PhosRes', code='Ser', position=473)),
     protein('HGNC', 'HRAS', variants=pmod('Palm')),
-    bioprocess('GOBP', 'apoptotic process'),
+    bioprocess('GO', 'apoptotic process'),
     composite_abundance([
         abundance('TESTNS2', 'Abeta_42'),
         protein('HGNC', 'CASP8'),
@@ -265,7 +265,7 @@ BEL_THOROUGH_NODES = {
     protein('HGNC', 'HRAS'),
     protein('HGNC', 'CDK5R1'),
     protein('TESTNS2', 'PRKC'),
-    bioprocess('GOBP', 'neuron apoptotic process'),
+    bioprocess('GO', 'neuron apoptotic process'),
     protein('HGNC', 'MAPT', variants=pmod('Ph')),
     protein('HGNC', 'MAPT'),
     gene('HGNC', 'ARRDC2'),
@@ -294,8 +294,8 @@ BEL_THOROUGH_EDGES = [
          EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: DIRECTLY_DECREASES,
-         SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
-         OBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
+         SUBJECT: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
+         OBJECT: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
      }),
     (akt1, protein('HGNC', 'AKT1', variants=hgvs('p.Arg1851*')), {
         RELATION: HAS_VARIANT,
@@ -348,8 +348,8 @@ BEL_THOROUGH_EDGES = [
             EFFECT: {NAME: 'kin', NAMESPACE: BEL_DEFAULT_NAMESPACE}
         },
         OBJECT: translocation(
-            {NAMESPACE: 'GOCC', NAME: 'intracellular'},
-            {NAMESPACE: 'GOCC', NAME: 'extracellular space'}
+            {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'intracellular'},
+            {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'extracellular space'}
         ),
     }),
     (gene('HGNC', 'AKT1', variants=hgvs('c.308G>A')), tmprss2_erg_gene_fusion, {
@@ -362,7 +362,7 @@ BEL_THOROUGH_EDGES = [
          EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: INCREASES,
-         SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
+         SUBJECT: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
      }),
     (mirna('HGNC', 'MIR21'), bcr_jak2_gene_fusion,
      {
@@ -375,7 +375,7 @@ BEL_THOROUGH_EDGES = [
          EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: DECREASES,
-         SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
+         SUBJECT: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
      }),
     (mirna('HGNC', 'MIR21'), mirna('HGNC', 'MIR21', variants=hgvs('p.Phe508del')), {
         RELATION: HAS_VARIANT,
@@ -407,7 +407,7 @@ BEL_THOROUGH_EDGES = [
          EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: INCREASES,
-         SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
+         SUBJECT: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
      }),
     (chchd4_aifm1_gene_fusion, tmprss2_erg_protein_fusion, {
         EVIDENCE: dummy_evidence,
@@ -429,13 +429,7 @@ BEL_THOROUGH_EDGES = [
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
-        OBJECT: {
-            MODIFIER: TRANSLOCATION,
-            EFFECT: {
-                FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'intracellular'},
-                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'}
-            }
-        },
+        OBJECT: translocation(INTRACELLULAR, CELL_SURFACE),
     }),
     (cftr, protein('HGNC', 'CFTR', variants=hgvs('=')), {
         RELATION: HAS_VARIANT,
@@ -525,17 +519,11 @@ BEL_THOROUGH_EDGES = [
          CITATION: citation_1,
          RELATION: INCREASES,
      }),
-    (protein('HGNC', 'MIA', variants=fragment(5, 20)), named_complex_abundance('GOCC', 'interleukin-23 complex'), {
+    (protein('HGNC', 'MIA', variants=fragment(5, 20)), named_complex_abundance('GO', 'interleukin-23 complex'), {
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
-        OBJECT: {
-            MODIFIER: TRANSLOCATION,
-            EFFECT: {
-                FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'intracellular'},
-                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'extracellular space'}
-            }
-        },
+        OBJECT: secretion(),
     }),
     (protein('HGNC', 'MIA', variants=fragment(1, '?')), egfr, {
         EVIDENCE: dummy_evidence,
@@ -544,8 +532,8 @@ BEL_THOROUGH_EDGES = [
         OBJECT: {
             MODIFIER: TRANSLOCATION,
             EFFECT: {
-                FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'},
-                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'endosome'}
+                FROM_LOC: {NAMESPACE: 'GO', NAME: 'cell surface'},
+                TO_LOC: {NAMESPACE: 'GO', NAME: 'endosome'}
             }
         },
     }),
@@ -555,8 +543,8 @@ BEL_THOROUGH_EDGES = [
         RELATION: INCREASES,
         OBJECT: {
             MODIFIER: TRANSLOCATION, EFFECT: {
-                FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'},
-                TO_LOC: {NAMESPACE: 'GOCC', NAME: 'endosome'}
+                FROM_LOC: {NAMESPACE: 'GO', NAME: 'cell surface'},
+                TO_LOC: {NAMESPACE: 'GO', NAME: 'endosome'}
             }
         },
     }),
@@ -568,7 +556,7 @@ BEL_THOROUGH_EDGES = [
          RELATION: INCREASES,
      }),
     (composite_abundance([interleukin_23_complex, il6]),
-     bioprocess('GOBP', 'cell cycle arrest'), {
+     bioprocess('GO', 'cell cycle arrest'), {
          EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: DECREASES,
@@ -577,15 +565,15 @@ BEL_THOROUGH_EDGES = [
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: DIRECTLY_DECREASES,
-        SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
+        SUBJECT: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
     }),
     (gene('HGNC', 'CAT'), hydrogen_peroxide, {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: DIRECTLY_DECREASES,
-        SUBJECT: {LOCATION: {NAMESPACE: 'GOCC', NAME: 'intracellular'}},
+        SUBJECT: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
     }),
-    (protein('HGNC', 'HMGCR'), bioprocess('GOBP', 'cholesterol biosynthetic process'), {
+    (protein('HGNC', 'HMGCR'), bioprocess('GO', 'cholesterol biosynthetic process'), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: RATE_LIMITING_STEP_OF,
@@ -700,7 +688,7 @@ BEL_THOROUGH_EDGES = [
             abundance('CHEBI', 'mevalonate')
         )
     ),
-     bioprocess('GOBP', 'cholesterol biosynthetic process'),
+     bioprocess('GO', 'cholesterol biosynthetic process'),
      {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
@@ -714,8 +702,8 @@ BEL_THOROUGH_EDGES = [
          OBJECT: {
              MODIFIER: TRANSLOCATION,
              EFFECT: {
-                 FROM_LOC: {NAMESPACE: 'GOCC', NAME: 'intracellular'},
-                 TO_LOC: {NAMESPACE: 'GOCC', NAME: 'cell surface'}
+                 FROM_LOC: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'intracellular'},
+                 TO_LOC: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'cell surface'}
              }
          },
      }),

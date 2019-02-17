@@ -12,7 +12,7 @@ SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"
 ##################################################################################
 # Definitions Section
 
-DEFINE NAMESPACE HGNC AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=hgnc-human-genes.belns"
+DEFINE NAMESPACE HGNC AS URL "https://raw.githubusercontent.com/pharmacome/terminology/73688d6dc24e309fca59a1340dc9ee971e9f3baa/external/hgnc-names.belns"
 DEFINE ANNOTATION TESTAN1 AS LIST {"1","2","3"}
 
 ##################################################################################
