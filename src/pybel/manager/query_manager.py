@@ -76,7 +76,7 @@ class QueryManager(LookupManager):
             if name:
                 q = q.filter(NamespaceEntry.name.like(name))
 
-        return q.all()
+        return q
 
     def count_edges(self) -> int:
         """Count the number of edges in the database."""
