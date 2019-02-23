@@ -651,15 +651,15 @@ class Evidence(Base):
     def __str__(self):
         return '{}:{}'.format(self.citation, self.sha512[:8])
 
-    def to_json(self, include_id=False):
+    def to_json(self, include_id: bool = False):
         """Create a dictionary that is used to recreate the edge data dictionary for a :class:`BELGraph`.
 
-        :param bool include_id: If true, includes the model identifier
+        :param include_id: If true, includes the model identifier
         :return: Dictionary containing citation and evidence for a :class:`BELGraph` edge.
         :rtype: dict
         """
         result = {
-            CITATION: self.citation.to_json(),
+            CITATION: self.citation.to_json(include_id=include_id),
             EVIDENCE: self.text
         }
 
