@@ -90,7 +90,7 @@ def to_web(graph: BELGraph,
         headers={
             'content-type': 'application/json',
             'User-Agent': 'PyBEL v{}'.format(get_version()),
-            'bel-commons-public': public,
+            'bel-commons-public': 'true' if public else 'false',
         },
         auth=(user, password),
     )
