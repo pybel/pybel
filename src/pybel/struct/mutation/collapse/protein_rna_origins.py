@@ -3,23 +3,24 @@
 """Functions for collapsing proteins, RNAs, microRNAs, and variants to their correspongind genes."""
 
 from collections import defaultdict
+from typing import Dict, Set
 
 from .collapse import collapse_nodes
 from ..inference import enrich_protein_and_rna_origins
 from ...pipeline.decorators import in_place_transformation, register_deprecated
 from ....constants import RELATION, TRANSCRIBED_TO, TRANSLATED_TO
+from ....dsl import BaseEntity
 
 __all__ = [
     'collapse_to_genes',
 ]
 
 
-def _build_collapse_to_gene_dict(graph):
+def _build_collapse_to_gene_dict(graph) -> Dict[BaseEntity, Set[BaseEntity]]:
     """Build a collapse dictionary.
 
     :param pybel.BELGraph graph: A BEL graph
     :return: A dictionary of {node: set of PyBEL node tuples}
-    :rtype: dict[tuple,set[tuple]]
     """
     collapse_dict = defaultdict(set)
     r2g = {}

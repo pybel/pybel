@@ -42,10 +42,10 @@ __all__ = [
 
 
 def node_predicate(f: Callable[[BaseEntity], bool]) -> NodePredicate:  # noqa: D202
-    """Tag a node predicate that takes a dictionary to also accept a pair of (BELGraph, tuple).
+    """Tag a node predicate that takes a dictionary to also accept a pair of (BELGraph, node).
 
-    Apply this as a decorator to a function that takes a single argument, a PyBEL node data dictionary, to make
-    sure that it can also accept a pair of arguments, a BELGraph and a PyBEL node tuple as well.
+    Apply this as a decorator to a function that takes a single argument, a PyBEL node, to make
+    sure that it can also accept a pair of arguments, a BELGraph and a PyBEL node as well.
     """
 
     @wraps(f)

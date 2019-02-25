@@ -15,11 +15,11 @@ class LookupManager(BaseManager):
     """Groups functions for looking up entries by hashes."""
 
     def get_node_by_hash(self, node_hash: str) -> Optional[Node]:
-        """Look up a node by the hash of a PyBEL node tuple."""
+        """Look up a node by its hash."""
         return self.session.query(Node).filter(Node.sha512 == node_hash).one_or_none()
 
     def get_nodes_by_hashes(self, node_hashes: List[str]) -> List[Node]:
-        """Look up several nodes by hashes of their PyBEL node tuples."""
+        """Look up several nodes by their hashes."""
         return self.session.query(Node).filter(Node.sha512.in_(node_hashes)).all()
 
     def get_node_by_dsl(self, node_dict: BaseEntity) -> Optional[Node]:

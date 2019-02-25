@@ -119,7 +119,7 @@ class TestRandom(unittest.TestCase):
             result,
             graph,
             number_edges_remaining=5,
-            no_grow={1, 2, 3},
+            node_blacklist={1, 2, 3},
         )
 
         self.assertNotIn(3, result)

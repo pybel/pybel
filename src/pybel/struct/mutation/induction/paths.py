@@ -5,12 +5,14 @@
 import itertools as itt
 import logging
 import random
+from typing import Iterable, List, Optional, Tuple
 
 import networkx as nx
 
 from .utils import get_subgraph_by_induction
 from ...pipeline import transformation
 from ....constants import FUNCTION, PATHOLOGY
+from ....dsl import BaseEntity
 
 __all__ = [
     'get_nodes_in_all_shortest_paths',
@@ -30,13 +32,13 @@ def _remove_pathologies_oop(graph):
     return rv
 
 
-def _iterate_nodes_in_shortest_paths(graph, nodes, weight=None):
+def _iterate_nodes_in_shortest_paths(graph,
+                                     nodes: Iterable[BaseEntity],
+                                     weight: Optional[str] = None,
+                                     ) -> Iterable[BaseEntity]:
     """Iterate over nodes in the shortest paths between all pairs of nodes in the given list.
 
     :type graph: pybel.BELGraph
-    :type nodes: list[tuple]
-    :param weight: Optional[str]
-    :rtype: iter[tuple]
     """
     for source, target in itt.product(nodes, repeat=2):
         try:
@@ -48,17 +50,20 @@ def _iterate_nodes_in_shortest_paths(graph, nodes, weight=None):
             continue
 
 
-def get_nodes_in_all_shortest_paths(graph, nodes, weight=None, remove_pathologies=False):
+def get_nodes_in_all_shortest_paths(graph,
+                                    nodes: Iterable[BaseEntity],
+                                    weight: Optional[str] = None,
+                                    remove_pathologies: bool = False,
+                                    ):
     """Get a set of nodes in all shortest paths between the given nodes.
 
     Thinly wraps :func:`networkx.all_shortest_paths`.
 
     :param pybel.BELGraph graph: A BEL graph
-    :param iter[tuple] nodes: The list of nodes to use to use to find all shortest paths
-    :param Optional[str] weight: Edge data key corresponding to the edge weight. If none, uses unweighted search.
-    :param bool remove_pathologies: Should pathology nodes be removed first?
+    :param nodes: The list of nodes to use to use to find all shortest paths
+    :param weight: Edge data key corresponding to the edge weight. If none, uses unweighted search.
+    :param remove_pathologies: Should pathology nodes be removed first?
     :return: A set of nodes appearing in the shortest paths between nodes in the BEL graph
-    :rtype: set[tuple]
 
     .. note:: This can be trivially parallelized using :func:`networkx.single_source_shortest_path`
     """
@@ -69,13 +74,17 @@ def get_nodes_in_all_shortest_paths(graph, nodes, weight=None, remove_pathologie
 
 
 @transformation
-def get_subgraph_by_all_shortest_paths(graph, nodes, weight=None, remove_pathologies=False):
+def get_subgraph_by_all_shortest_paths(graph,
+                                       nodes: Iterable[BaseEntity],
+                                       weight: Optional[str] = None,
+                                       remove_pathologies: bool = False,
+                                       ):
     """Induce a subgraph over the nodes in the pairwise shortest paths between all of the nodes in the given list.
 
     :param pybel.BELGraph graph: A BEL graph
-    :param iter[tuple] nodes: A set of nodes over which to calculate shortest paths
-    :param str weight: Edge data key corresponding to the edge weight. If None, performs unweighted search
-    :param bool remove_pathologies: Should the pathology nodes be deleted before getting shortest paths?
+    :param nodes: A set of nodes over which to calculate shortest paths
+    :param weight: Edge data key corresponding to the edge weight. If None, performs unweighted search
+    :param remove_pathologies: Should the pathology nodes be deleted before getting shortest paths?
     :return: A BEL graph induced over the nodes appearing in the shortest paths between the given nodes
     :rtype: Optional[pybel.BELGraph]
     """
@@ -99,21 +108,17 @@ def get_subgraph_by_all_shortest_paths(graph, nodes, weight=None, remove_patholo
     return get_subgraph_by_induction(graph, induced_nodes)
 
 
-def get_random_path(graph):
+def get_random_path(graph) -> List[BaseEntity]:
     """Get a random path from the graph as a list of nodes.
 
     :param pybel.BELGraph graph: A BEL graph
-    :rtype: list[BaseEntity]
     """
     wg = graph.to_undirected()
 
     nodes = wg.nodes()
 
-    def pick_random_pair():
-        """Get a pair of random nodes.
-
-        :rtype: tuple
-        """
+    def pick_random_pair() -> Tuple[BaseEntity, BaseEntity]:
+        """Get a pair of random nodes."""
         return random.sample(nodes, k=2)
 
     source, target = pick_random_pair()

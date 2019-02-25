@@ -88,7 +88,7 @@ def expand_nodes_neighborhoods(universe, graph, nodes: Iterable[BaseEntity]) -> 
 
     :param pybel.BELGraph universe: The graph containing the stuff to add
     :param pybel.BELGraph graph: The graph to add stuff to
-    :param nodes: A node tuples from the query graph
+    :param nodes: Nodes from the query graph
     """
     for node in nodes:
         expand_node_neighborhood(universe, graph, node)

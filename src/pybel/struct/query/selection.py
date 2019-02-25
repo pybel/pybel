@@ -3,6 +3,7 @@
 """A wrapper around selection methods."""
 
 import logging
+from typing import Any, List, Optional
 
 from .constants import (
     SEED_TYPE_ANNOTATION, SEED_TYPE_AUTHOR, SEED_TYPE_DOUBLE_NEIGHBORS, SEED_TYPE_DOWNSTREAM,
@@ -13,6 +14,7 @@ from ..mutation import (
     get_random_subgraph, get_subgraph_by_all_shortest_paths, get_subgraph_by_annotations, get_subgraph_by_authors,
     get_subgraph_by_induction, get_subgraph_by_neighborhood, get_subgraph_by_pubmed, get_subgraph_by_second_neighbors,
 )
+from ...dsl import BaseEntity
 
 log = logging.getLogger(__name__)
 
@@ -21,7 +23,12 @@ __all__ = [
 ]
 
 
-def get_subgraph(graph, seed_method=None, seed_data=None, expand_nodes=None, remove_nodes=None):
+def get_subgraph(graph,
+                 seed_method: Optional[str] = None,
+                 seed_data: Optional[Any] = None,
+                 expand_nodes: Optional[List[BaseEntity]] = None,
+                 remove_nodes: Optional[List[BaseEntity]] = None,
+                 ):
     """Run a pipeline query on graph with multiple sub-graph filters and expanders.
 
     Order of Operations:
@@ -31,10 +38,10 @@ def get_subgraph(graph, seed_method=None, seed_data=None, expand_nodes=None, rem
     3. Remove nodes
 
     :param pybel.BELGraph graph: A BEL graph
-    :param str seed_method: The name of the get_subgraph_by_* function to use
+    :param seed_method: The name of the get_subgraph_by_* function to use
     :param seed_data: The argument to pass to the get_subgraph function
-    :param list[tuple] expand_nodes: Add the neighborhoods around all of these nodes
-    :param list[tuple] remove_nodes: Remove these nodes and all of their in/out edges
+    :param expand_nodes: Add the neighborhoods around all of these nodes
+    :param remove_nodes: Remove these nodes and all of their in/out edges
     :rtype: Optional[pybel.BELGraph]
     """
     # Seed by the given function

@@ -6,10 +6,12 @@ import bisect
 import logging
 import random
 from operator import itemgetter
+from typing import Any, Iterable, Mapping, Optional, Set, Tuple
 
 from ..utils import remove_isolated_nodes
 from ...pipeline import transformation
 from ...utils import update_metadata, update_node_helper
+from ....dsl import BaseEntity
 
 __all__ = [
     'get_graph_with_random_edges',
@@ -20,12 +22,11 @@ __all__ = [
 log = logging.getLogger(__name__)
 
 
-def _random_edge_iterator(graph, n_edges):
+def _random_edge_iterator(graph, n_edges: int) -> Iterable[Tuple[BaseEntity, BaseEntity, int, Mapping]]:
     """Get a random set of edges from the graph and randomly samples a key from each.
 
     :type graph: pybel.BELGraph
-    :param int n_edges: Number of edges to randomly select from the given graph
-    :rtype: iter[tuple[tuple,tuple,int,dict]]
+    :param n_edges: Number of edges to randomly select from the given graph
     """
     edges = list(graph.edges())
     edge_sample = random.sample(edges, n_edges)
@@ -36,11 +37,11 @@ def _random_edge_iterator(graph, n_edges):
 
 
 @transformation
-def get_graph_with_random_edges(graph, n_edges):
+def get_graph_with_random_edges(graph, n_edges: int):
     """Build a new graph from a seeding of edges.
 
     :type graph: pybel.BELGraph
-    :param int n_edges: Number of edges to randomly select from the given graph
+    :param n_edges: Number of edges to randomly select from the given graph
     :rtype: pybel.BELGraph
     """
     result = graph.fresh_copy()
@@ -82,28 +83,24 @@ class WeightedRandomGenerator(object):
         """Get the total weight stored."""
         return self.totals[-1]
 
-    def next_index(self):
-        """Get a random index.
-
-        :rtype: int
-        """
+    def next_index(self) -> int:
+        """Get a random index."""
         return bisect.bisect_right(self.totals, random.random() * self.total)
 
-    def next(self):
-        """Get a random value.
-
-        :rtype: Any
-        """
+    def next(self) -> Any:
+        """Get a random value."""
         return self.values[self.next_index()]
 
 
-def get_random_node(graph, node_blacklist, invert_degrees=None):
+def get_random_node(graph,
+                    node_blacklist: Set[BaseEntity],
+                    invert_degrees: Optional[bool] = None,
+                    ) -> Optional[BaseEntity]:
     """Choose a node from the graph with probabilities based on their degrees.
 
     :type graph: networkx.Graph
-    :param set[tuple] node_blacklist: Nodes to filter out
-    :param Optional[bool] invert_degrees: Should the degrees be inverted? Defaults to true.
-    :rtype: Optional[tuple]
+    :param node_blacklist: Nodes to filter out
+    :param invert_degrees: Should the degrees be inverted? Defaults to true.
     """
     try:
         nodes, degrees = zip(*(
@@ -122,14 +119,16 @@ def get_random_node(graph, node_blacklist, invert_degrees=None):
     return wrg.next()
 
 
-def _helper(result, graph, number_edges_remaining, no_grow, invert_degrees=None):
+def _helper(result,
+            graph,
+            number_edges_remaining: int,
+            node_blacklist: Set[BaseEntity],
+            invert_degrees: Optional[bool] = None,
+            ):
     """Help build a random graph.
 
     :type result: networkx.Graph
     :type graph: networkx.Graph
-    :type number_edges_remaining: int
-    :type no_grow: set
-    :type invert_degrees: Optional[bool]
     """
     original_node_count = graph.number_of_nodes()
 
@@ -138,13 +137,13 @@ def _helper(result, graph, number_edges_remaining, no_grow, invert_degrees=None)
 
         source, possible_step_nodes, c = None, set(), 0
         while not source or not possible_step_nodes:
-            source = get_random_node(result, no_grow, invert_degrees=invert_degrees)
+            source = get_random_node(result, node_blacklist, invert_degrees=invert_degrees)
 
             c += 1
             if c >= original_node_count:
                 log.warning('infinite loop happening')
                 log.warning('source: %s', source)
-                log.warning('no grow: %s', no_grow)
+                log.warning('no grow: %s', node_blacklist)
                 return  # Happens when after exhausting the connected components. Try increasing the number seed edges
 
             if source is None:
@@ -154,7 +153,8 @@ def _helper(result, graph, number_edges_remaining, no_grow, invert_degrees=None)
             possible_step_nodes = set(graph[source]) - set(result[source])
 
             if not possible_step_nodes:
-                no_grow.add(source)  # there aren't any possible nodes to step to, so try growing from somewhere else
+                node_blacklist.add(
+                    source)  # there aren't any possible nodes to step to, so try growing from somewhere else
 
         step_node = random.choice(list(possible_step_nodes))
 
@@ -202,7 +202,7 @@ def get_random_subgraph(graph, number_edges=None, number_seed_edges=None, seed=N
         result,
         graph,
         number_edges_remaining,
-        no_grow=set(),  # This is the set of nodes that should no longer be chosen to grow from
+        node_blacklist=set(),  # This is the set of nodes that should no longer be chosen to grow from
         invert_degrees=invert_degrees,
     )
 

@@ -2,7 +2,7 @@
 
 """Filter functions for nodes in BEL graphs.
 
-A node predicate is a function that takes two arguments: a :class:`BELGraph` and a node tuple. It returns a boolean
+A node predicate is a function that takes two arguments: a :class:`BELGraph` and a node. It returns a boolean
 representing whether the node passed the given test.
 
 This module contains a set of default functions for filtering lists of nodes and building node predicates.

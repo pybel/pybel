@@ -2,8 +2,8 @@
 
 """Filter functions for edges in BEL graphs.
 
-A edge predicate is a function that takes five arguments: a :class:`BELGraph`, a source node tuple, a target node
-tuple, a key, and a data dictionary. It returns a boolean representing whether the edge passed the given test.
+A edge predicate is a function that takes five arguments: a :class:`BELGraph`, a source node, a target node, a key,
+and a data dictionary. It returns a boolean representing whether the edge passed the given test.
 
 This module contains a set of default functions for filtering lists of edges and building edge predicate functions.
 

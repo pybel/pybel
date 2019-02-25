@@ -6,6 +6,7 @@ import json
 import logging
 import types
 from functools import wraps
+from typing import Any, Dict, Iterable, List, Optional, TextIO, Tuple, Union
 
 from .decorators import get_transformation, in_place_map, mapped, universe_map
 from .exc import MetaValueError, MissingPipelineFunctionError, MissingUniverseError
@@ -21,12 +22,8 @@ META_UNION = 'union'
 META_INTERSECTION = 'intersection'
 
 
-def _get_protocol_tuple(data):
-    """Convert a dictionary to a tuple.
-
-    :param dict data:
-    :rtype: tuple[str,list,dict]
-    """
+def _get_protocol_tuple(data: Dict[str, Any]) -> Tuple[str, List, Dict]:
+    """Convert a dictionary to a tuple."""
     return data['function'], data.get('args', []), data.get('kwargs', {})
 
 
@@ -45,10 +42,10 @@ class Pipeline:
     >>> result = example.run(graph)
     """
 
-    def __init__(self, protocol=None):
+    def __init__(self, protocol: Optional[Iterable[Dict]] = None):
         """Initialize the pipeline with an optional pre-defined protocol.
 
-        :param iter[dict] protocol: An iterable of dictionaries describing how to transform a network
+        :param protocol: An iterable of dictionaries describing how to transform a network
         """
         self.universe = None
         self.protocol = protocol or []
@@ -60,12 +57,11 @@ class Pipeline:
         return iter(self.protocol)
 
     @staticmethod
-    def from_functions(functions):
+    def from_functions(functions) -> 'Pipeline':
         """Build a pipeline from a list of functions.
 
         :param functions: A list of functions or names of functions
         :type functions: iter[((pybel.BELGraph) -> pybel.BELGraph) or ((pybel.BELGraph) -> None) or str]
-        :rtype: Pipeline
 
         Example with function:
 
@@ -93,10 +89,10 @@ class Pipeline:
 
         return result
 
-    def _get_function(self, name):
+    def _get_function(self, name: str):
         """Wrap a function with the universe and in-place.
 
-        :param str name: The name of the function
+        :param name: The name of the function
         :rtype: types.FunctionType
         :raises MissingPipelineFunctionError: If the functions is not registered
         """
@@ -116,7 +112,7 @@ class Pipeline:
 
         return f
 
-    def append(self, name, *args, **kwargs):
+    def append(self, name, *args, **kwargs) -> 'Pipeline':
         """Add a function (either as a reference, or by name) and arguments to the pipeline.
 
         :param name: The name of the function
@@ -124,7 +120,6 @@ class Pipeline:
         :param args: The positional arguments to call in the function
         :param kwargs: The keyword arguments to call in the function
         :return: This pipeline for fluid query building
-        :rtype: Pipeline
         :raises MissingPipelineFunctionError: If the function is not registered
         """
         if isinstance(name, types.FunctionType):
@@ -147,13 +142,11 @@ class Pipeline:
         self.protocol.append(av)
         return self
 
-    def extend(self, protocol):
+    def extend(self, protocol: Union[Iterable[Dict], 'Pipeline']) -> 'Pipeline':
         """Add another pipeline to the end of the current pipeline.
 
         :param protocol: An iterable of dictionaries (or another Pipeline)
-        :type protocol: iter[dict] or Pipeline
         :return: This pipeline for fluid query building
-        :rtype: Pipeline
 
         Example:
 
@@ -167,11 +160,11 @@ class Pipeline:
 
         return self
 
-    def _run_helper(self, graph, protocol):
+    def _run_helper(self, graph, protocol: Iterable[Dict]):
         """Help run the protocol.
 
         :param pybel.BELGraph graph: A BEL graph
-        :param list[dict] protocol: The protocol to run, as JSON
+        :param protocol: The protocol to run, as JSON
         :rtype: pybel.BELGraph
         """
         result = graph
@@ -206,7 +199,6 @@ class Pipeline:
         :param pybel.BELGraph graph: The seed BEL graph
         :param pybel.BELGraph universe: Allows just-in-time setting of the universe in case it wasn't set before.
                                         Defaults to the given network.
-        :param bool in_place: Should the graph be copied before applying the algorithm?
         :return: The new graph is returned if not applied in-place
         :rtype: pybel.BELGraph
         """
@@ -260,45 +252,33 @@ class Pipeline:
 
         return wrapper
 
-    def to_json(self):
-        """Return this pipeline as a JSON list.
-
-        :rtype: list
-        """
+    def to_json(self) -> List:
+        """Return this pipeline as a JSON list."""
         return self.protocol
 
-    def dumps(self, **kwargs):
-        """Dump this pipeline as a JSON string.
-
-        :rtype: str
-        """
+    def dumps(self, **kwargs) -> str:
+        """Dump this pipeline as a JSON string."""
         return json.dumps(self.to_json(), **kwargs)
 
-    def dump(self, file, **kwargs):
-        """Dump this protocol to a file in JSON.
-
-        :param file: A file or file-like to pass to :func:`json.dump`
-        """
+    def dump(self, file: TextIO, **kwargs) -> None:
+        """Dump this protocol to a file in JSON."""
         return json.dump(self.to_json(), file, **kwargs)
 
     @staticmethod
-    def load(file):
+    def load(file: TextIO) -> 'Pipeline':
         """Load a protocol from JSON contained in file.
 
-        :param file: A file or file-like
         :return: The pipeline represented by the JSON in the file
-        :rtype: Pipeline
         :raises MissingPipelineFunctionError: If any functions are not registered
         """
         return Pipeline(json.load(file))
 
     @staticmethod
-    def loads(s):
+    def loads(s: str) -> 'Pipeline':
         """Load a protocol from a JSON string.
 
-        :param str s: A JSON string
+        :param s: A JSON string
         :return: The pipeline represented by the JSON in the file
-        :rtype: Pipeline
         :raises MissingPipelineFunctionError: If any functions are not registered
         """
         return Pipeline(json.loads(s))
@@ -307,12 +287,11 @@ class Pipeline:
         return json.dumps(self.protocol, indent=2)
 
     @staticmethod
-    def _build_meta(meta, pipelines):
+    def _build_meta(meta: str, pipelines: Iterable['Pipeline']) -> 'Pipeline':
         """Build a pipeline with a given meta-argument.
 
-        :param str meta: either union or intersection
-        :param iter[Pipeline] pipelines:
-        :rtype: Pipeline
+        :param meta: either union or intersection
+        :param pipelines:
         """
         return Pipeline(protocol=[
             {
@@ -325,21 +304,19 @@ class Pipeline:
         ])
 
     @staticmethod
-    def union(pipelines):
+    def union(pipelines: Iterable['Pipeline']) -> 'Pipeline':
         """Take the union of multiple pipelines.
 
-        :param iter[Pipeline] pipelines: A list of pipelines
+        :param pipelines: A list of pipelines
         :return: The union of the results from multiple pipelines
-        :rtype: Pipeline
         """
         return Pipeline._build_meta(META_UNION, pipelines)
 
     @staticmethod
-    def intersection(pipelines):
+    def intersection(pipelines: Iterable['Pipeline']) -> 'Pipeline':
         """Take the intersection of the results from multiple pipelines.
 
-        :param iter[Pipeline] pipelines: A list of pipelines
+        :param pipelines: A list of pipelines
         :return: The intersection of results from multiple pipelines
-        :rtype: Pipeline
         """
         return Pipeline._build_meta(META_INTERSECTION, pipelines)

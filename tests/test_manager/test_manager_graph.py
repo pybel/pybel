@@ -214,41 +214,41 @@ class TestQuery(TemporaryCacheMixin):
             self.manager.insert_graph(graph, store_parts=True)
 
     def test_query_node_bel_1(self):
-        rv = self.manager.query_nodes(bel='p(HGNC:FOS)')
+        rv = self.manager.query_nodes(bel='p(HGNC:FOS)').all()
         self.assertEqual(1, len(rv))
         self.assertEqual(fos, rv[0].to_json())
 
     def test_query_node_bel_2(self):
-        rv = self.manager.query_nodes(bel='p(HGNC:JUN)')
+        rv = self.manager.query_nodes(bel='p(HGNC:JUN)').all()
         self.assertEqual(1, len(rv))
         self.assertEqual(jun, rv[0].to_json())
 
     def test_query_node_namespace_wildcard(self):
-        rv = self.manager.query_nodes(namespace='HG%')
+        rv = self.manager.query_nodes(namespace='HG%').all()
         self.assertEqual(2, len(rv))
         self.assertTrue(any(x.to_json() == fos for x in rv))
         self.assertTrue(any(x.to_json() == jun for x in rv))
 
     def test_query_node_name_wildcard(self):
-        rv = self.manager.query_nodes(name='%J%')
+        rv = self.manager.query_nodes(name='%J%').all()
         self.assertEqual(1, len(rv), 1)
         self.assertEqual(jun, rv[0].to_json())
 
     def test_query_node_type(self):
-        rv = self.manager.query_nodes(type=PROTEIN)
+        rv = self.manager.query_nodes(type=PROTEIN).all()
         self.assertEqual(2, len(rv))
 
     def test_query_node_type_missing(self):
-        rv = self.manager.query_nodes(type=ABUNDANCE)
+        rv = self.manager.query_nodes(type=ABUNDANCE).all()
         self.assertEqual(0, len(rv))
 
     def test_query_edge_by_bel(self):
-        rv = self.manager.query_edges(bel="p(HGNC:FOS) increases p(HGNC:JUN)")
+        rv = self.manager.query_edges(bel="p(HGNC:FOS) increases p(HGNC:JUN)").all()
         self.assertEqual(1, len(rv))
 
     def test_query_edge_by_relation_wildcard(self):
         # relation like, data
-        increased_list = self.manager.query_edges(relation='increase%')
+        increased_list = self.manager.query_edges(relation='increase%').all()
         self.assertEqual(1, len(increased_list))
         # self.assertIn(..., increased_list)
 
@@ -262,26 +262,26 @@ class TestQuery(TemporaryCacheMixin):
 
     def test_query_edge_by_mixed_no_result(self):
         # no result
-        empty_list = self.manager.query_edges(source='p(HGNC:FADD)', relation=DECREASES)
+        empty_list = self.manager.query_edges(source='p(HGNC:FADD)', relation=DECREASES).all()
         self.assertEqual(len(empty_list), 0)
 
     def test_query_edge_by_mixed(self):
         # source, relation, data
-        source_list = self.manager.query_edges(source='p(HGNC:FOS)', relation=INCREASES)
+        source_list = self.manager.query_edges(source='p(HGNC:FOS)', relation=INCREASES).all()
         self.assertEqual(len(source_list), 1)
 
     def test_query_edge_by_source_function(self):
-        edges = self.manager.query_edges(source_function=PROTEIN)
+        edges = self.manager.query_edges(source_function=PROTEIN).all()
         self.assertEqual(1, len(edges), msg='Wrong number of edges: {}'.format(edges))
 
-        edges = self.manager.query_edges(source_function=BIOPROCESS)
+        edges = self.manager.query_edges(source_function=BIOPROCESS).all()
         self.assertEqual(0, len(edges), msg='Wrong number of edges: {}'.format(edges))
 
     def test_query_edge_by_target_function(self):
-        edges = self.manager.query_edges(target_function=PROTEIN)
+        edges = self.manager.query_edges(target_function=PROTEIN).all()
         self.assertEqual(1, len(edges), msg='Wrong number of edges: {}'.format(edges))
 
-        edges = self.manager.query_edges(target_function=PATHOLOGY)
+        edges = self.manager.query_edges(target_function=PATHOLOGY).all()
         self.assertEqual(0, len(edges), msg='Wrong number of edges: {}'.format(edges))
 
     def test_query_citation_by_type(self):

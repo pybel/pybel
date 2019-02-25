@@ -41,13 +41,13 @@ def _has_arguments(func, universe):
     )
 
 
-def _register_function(name, func, universe, in_place):
+def _register_function(name: str, func, universe: bool, in_place: bool):
     """Register a transformation function under the given name.
 
-    :param str name: Name to register the function under
+    :param name: Name to register the function under
     :param func: A function
-    :param bool universe:
-    param bool in_place:
+    :param universe:
+    :param in_place:
     :return: The same function, with additional properties added
     """
     if name in mapped:
@@ -74,11 +74,11 @@ def _register_function(name, func, universe, in_place):
     return func
 
 
-def _build_register_function(universe, in_place):  # noqa: D202
+def _build_register_function(universe: bool, in_place: bool):  # noqa: D202
     """Build a decorator function to tag transformation functions.
 
-    :param bool universe: Does the first positional argument of this function correspond to a universe graph?
-    :param bool in_place: Does this function return a new graph, or just modify it in-place?
+    :param universe: Does the first positional argument of this function correspond to a universe graph?
+    :param in_place: Does this function return a new graph, or just modify it in-place?
     """
 
     def register(func):
@@ -102,10 +102,10 @@ uni_transformation = _build_register_function(universe=True, in_place=False)
 transformation = _build_register_function(universe=False, in_place=False)
 
 
-def register_deprecated(deprecated_name):
+def register_deprecated(deprecated_name: str):
     """Register a function as deprecated.
 
-    :param str deprecated_name: The old name of the function
+    :param deprecated_name: The old name of the function
     :return: A decorator
 
     Usage:
@@ -139,10 +139,10 @@ def register_deprecated(deprecated_name):
     return register_deprecated_f
 
 
-def get_transformation(name):
+def get_transformation(name: str):
     """Get a transformation function and error if its name is not registered.
 
-    :param str name: The name of a function to look up
+    :param name: The name of a function to look up
     :return: A transformation function
     :raises MissingPipelineFunctionError: If the given function name is not registered
     """

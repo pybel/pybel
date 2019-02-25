@@ -6,11 +6,11 @@ import json
 import logging
 import random
 from collections import UserList
+from typing import Any, Dict, List, Set, TextIO, Union
 
 from .constants import SEED_TYPE_ANNOTATION, SEED_TYPE_INDUCTION, SEED_TYPE_NEIGHBORS, SEED_TYPE_SAMPLE
 from .selection import get_subgraph
 from ...dsl import BaseEntity
-from ...manager.models import Node
 from ...struct import union
 from ...tokens import parse_result_to_dsl
 
@@ -19,49 +19,47 @@ log = logging.getLogger(__name__)
 SEED_METHOD = 'type'
 SEED_DATA = 'data'
 
+MaybeNodeList = Union[BaseEntity, List[BaseEntity], List[Dict]]
+
 
 class Seeding(UserList):
     """Represents a container of seeding methods to apply to a network."""
 
-    def append_induction(self, nodes):
+    def append_induction(self, nodes: MaybeNodeList) -> 'Seeding':
         """Add a seed induction method.
 
-        :param list[tuple or Node or BaseEntity] nodes: A list of PyBEL node tuples
+        :param nodes: A node or list of nodes
         :returns: self for fluid API
-        :rtype: Seeding
         """
-        return self._append_seed(SEED_TYPE_INDUCTION, _handle_nodes(nodes))
+        return self._append_seed_handle_nodes(SEED_TYPE_INDUCTION, nodes)
 
-    def append_neighbors(self, nodes):
+    def append_neighbors(self, nodes: MaybeNodeList) -> 'Seeding':
         """Add a seed by neighbors.
 
-        :param nodes: A list of PyBEL node tuples
-        :type nodes: BaseEntity or iter[BaseEntity]
+        :param nodes: A node or list of nodes
         :returns: self for fluid API
-        :rtype: Seeding
         """
-        return self._append_seed(SEED_TYPE_NEIGHBORS, _handle_nodes(nodes))
+        return self._append_seed_handle_nodes(SEED_TYPE_NEIGHBORS, nodes)
 
-    def append_annotation(self, annotation, values):
+    def append_annotation(self, annotation: str, values: Set[str]) -> 'Seeding':
         """Add a seed induction method for single annotation's values.
 
-        :param str annotation: The annotation to filter by
-        :param set[str] values: The values of the annotation to keep
+        :param annotation: The annotation to filter by
+        :param values: The values of the annotation to keep
         :returns: self for fluid API
-        :rtype: Seeding
         """
         return self._append_seed(SEED_TYPE_ANNOTATION, {
             'annotations': {
-                annotation: values
+                annotation: values,
             }
         })
 
-    def append_sample(self, **kwargs):
+    def append_sample(self, **kwargs) -> 'Seeding':
         """Add seed induction methods.
 
         Kwargs can have ``number_edges`` or ``number_seed_nodes``.
+
         :returns: self for fluid API
-        :rtype: Seeding
         """
         data = {
             'seed': random.randint(0, 1000000)
@@ -70,19 +68,25 @@ class Seeding(UserList):
 
         return self._append_seed(SEED_TYPE_SAMPLE, data)
 
-    def _append_seed(self, seed_type, data):
-        """Add a seeding method.
+    def _append_seed(self, seed_type: str, data: Any) -> 'Seeding':
+        """Add a seeding method and returns self.
 
-        :param str seed_type:
-        :param data:
         :returns: self for fluid API
-        :rtype: Seeding
         """
         self.append({
             SEED_METHOD: seed_type,
             SEED_DATA: data,
         })
         return self
+
+    def _append_seed_handle_nodes(self, seed_type: str, nodes: MaybeNodeList) -> 'Seeding':
+        """Add a seeding method and returns self.
+
+        :param seed_type: The seed type
+        :param nodes: A node or list of nodes
+        :returns: self for fluid API
+        """
+        return self._append_seed(seed_type, _handle_nodes(nodes))
 
     def run(self, graph):
         """Seed the graph or return none if not possible.
@@ -114,63 +118,43 @@ class Seeding(UserList):
 
         return union(subgraphs)
 
-    def to_json(self):
-        """Serialize this seeding container to a JSON object.
-
-        :rtype: list
-        """
+    def to_json(self) -> List[Dict]:
+        """Serialize this seeding container to a JSON object."""
         return list(self)
 
-    def dump(self, file, sort_keys=True, **kwargs):
+    def dump(self, file, sort_keys: bool = True, **kwargs) -> None:
         """Dump this seeding container to a file as JSON."""
         json.dump(self.to_json(), file, sort_keys=sort_keys, **kwargs)
 
-    def dumps(self, sort_keys=True, **kwargs):
-        """Dump this query to a string as JSON.
-
-        :rtype: str
-        """
+    def dumps(self, sort_keys: bool = True, **kwargs) -> str:
+        """Dump this query to a string as JSON."""
         return json.dumps(self.to_json(), sort_keys=sort_keys, **kwargs)
 
     @staticmethod
-    def from_json(data):
-        """Build a seeding container from a JSON list.
-
-        :param dict data:
-        :rtype: Seeding
-        """
+    def from_json(data) -> 'Seeding':
+        """Build a seeding container from a JSON list."""
         return Seeding(data)
 
     @staticmethod
-    def load(file):
-        """Load a seeding container from a JSON file.
-
-        :rtype: Seeding
-        """
+    def load(file: TextIO) -> 'Seeding':
+        """Load a seeding container from a JSON file."""
         return Seeding.from_json(json.load(file))
 
     @staticmethod
-    def loads(s):
-        """Load a seeding container from a JSON string.
-
-        :rtype: Seeding
-        """
+    def loads(s: str) -> 'Seeding':
+        """Load a seeding container from a JSON string."""
         return Seeding.from_json(json.loads(s))
 
 
-def _handle_nodes(nodes):
-    """Handle nodes that might be dictionaries.
-
-    :type nodes: BaseEntity or list[dict] or list[BaseEntity]
-    :rtype: list[BaseEntity]
-    """
+def _handle_nodes(nodes: MaybeNodeList) -> List[BaseEntity]:
+    """Handle node(s) that might be dictionaries."""
     if isinstance(nodes, BaseEntity):
         return [nodes]
 
     return [
         (
             parse_result_to_dsl(node)
-            if isinstance(node, dict) else
+            if not isinstance(node, BaseEntity) else
             node
         )
         for node in nodes

@@ -2,7 +2,7 @@
 
 """Utilities for the PyBEL database manager."""
 
-from typing import Optional, Union
+from typing import Dict, Mapping, Optional, Tuple, Union
 
 from ..utils import parse_datetime
 
@@ -49,13 +49,8 @@ def extract_shared_optional(bel_resource, definition_header: str = 'Namespace'):
     return result
 
 
-def update_insert_values(bel_resource, mapping, values):
-    """Update the value dictionary with a BEL resource dictionary.
-
-    :param dict bel_resource:
-    :param dict[str,tuple[str,str]] mapping:
-    :param dict[str,str] values:
-    """
+def update_insert_values(bel_resource: Mapping, mapping: Mapping[str, Tuple[str, str]], values: Dict[str, str]) -> None:
+    """Update the value dictionary with a BEL resource dictionary."""
     for database_column, (section, key) in mapping.items():
         if section in bel_resource and key in bel_resource[section]:
             values[database_column] = bel_resource[section][key]

@@ -7,7 +7,7 @@ import re
 import time
 from datetime import datetime
 from itertools import zip_longest
-from typing import Iterable, List
+from typing import Dict, Iterable, List, Optional, Set, Tuple, Union
 
 import requests
 
@@ -81,10 +81,10 @@ def clean_pubmed_identifiers(pmids: Iterable[str]) -> List[str]:
     return sorted({str(pmid).strip() for pmid in pmids})
 
 
-def get_pubmed_citation_response(pubmed_identifiers):
+def get_pubmed_citation_response(pubmed_identifiers: Iterable[str]):
     """Get the response from PubMed E-Utils for a given list of PubMed identifiers.
 
-    :param list[str] pubmed_identifiers:
+    :param pubmed_identifiers:
     :rtype: dict
     """
     pubmed_identifiers = list(pubmed_identifiers)
@@ -133,17 +133,19 @@ def enrich_citation_model(manager, citation, p) -> bool:
     return True
 
 
-def get_citations_by_pmids(manager, pmids, group_size=None, sleep_time=None):
+def get_citations_by_pmids(manager,
+                           pmids: Iterable[Union[str, int]],
+                           group_size: Optional[int] = None,
+                           sleep_time: Optional[int] = None,
+                           ) -> Tuple[Dict[str, Dict], Set[str]]:
     """Get citation information for the given list of PubMed identifiers using the NCBI's eUtils service.
 
     :type manager: pybel.Manager
     :param pmids: an iterable of PubMed identifiers
-    :type pmids: iter[str] or iter[int]
-    :param int group_size: The number of PubMed identifiers to query at a time. Defaults to 200 identifiers.
-    :param int sleep_time: Number of seconds to sleep between queries. Defaults to 1 second.
+    :param group_size: The number of PubMed identifiers to query at a time. Defaults to 200 identifiers.
+    :param sleep_time: Number of seconds to sleep between queries. Defaults to 1 second.
     :return: A dictionary of {pmid: pmid data dictionary} or a pair of this dictionary and a set ot erroneous
             pmids if return_errors is :data:`True`
-    :rtype: tuple[dict[str,dict],set[str]]
     """
     group_size = group_size if group_size is not None else 200
     sleep_time = sleep_time if sleep_time is not None else 1
@@ -207,7 +209,11 @@ def get_citations_by_pmids(manager, pmids, group_size=None, sleep_time=None):
     return result, errors
 
 
-def enrich_pubmed_citations(manager, graph, group_size=None, sleep_time=None):
+def enrich_pubmed_citations(manager,
+                            graph,
+                            group_size: Optional[int] = None,
+                            sleep_time: Optional[int] = None,
+                            ) -> Set[str]:
     """Overwrite all PubMed citations with values from NCBI's eUtils lookup service.
 
     Sets authors as list, so probably a good idea to run :func:`pybel_tools.mutation.serialize_authors` before
@@ -215,10 +221,9 @@ def enrich_pubmed_citations(manager, graph, group_size=None, sleep_time=None):
 
     :type manager: pybel.manager.Manager
     :type graph: pybel.BELGraph
-    :param Optional[int] group_size: The number of PubMed identifiers to query at a time. Defaults to 200 identifiers.
-    :param Optional[int] sleep_time: Number of seconds to sleep between queries. Defaults to 1 second.
+    :param group_size: The number of PubMed identifiers to query at a time. Defaults to 200 identifiers.
+    :param sleep_time: Number of seconds to sleep between queries. Defaults to 1 second.
     :return: A set of PMIDs for which the eUtils service crashed
-    :rtype: set[str]
     """
     pmids = get_pubmed_identifiers(graph)
     pmid_data, errors = get_citations_by_pmids(manager, pmids=pmids, group_size=group_size, sleep_time=sleep_time)

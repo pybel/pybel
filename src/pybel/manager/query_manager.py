@@ -122,8 +122,10 @@ class QueryManager(LookupManager):
                     target_function: Optional[str] = None,
                     target: Union[None, str, Node] = None,
                     relation: Optional[str] = None,
-                    ) -> List[Edge]:
-        """Query edges in the database.
+                    ):
+        """Return a query over the edges in the database.
+
+        Usually this means that you should call ``list()`` or ``.all()`` on this result.
 
         :param bel: BEL statement that represents the desired edge.
         :param source_function: Filter source nodes with the given BEL function
@@ -149,9 +151,9 @@ class QueryManager(LookupManager):
         if source:
             if isinstance(source, str):
                 source = self.query_nodes(bel=source)
-                if len(source) == 0:
+                if source.count() == 0:
                     return []
-                source = source[0]  # FIXME what if this matches multiple?
+                source = source.first()  # FIXME what if this matches multiple?
                 query = query.filter(Edge.source == source)
             elif isinstance(source, Node):
                 query = query.filter(Edge.source == source)
@@ -160,7 +162,7 @@ class QueryManager(LookupManager):
 
         if target:
             if isinstance(target, str):
-                targets = self.query_nodes(bel=target)
+                targets = self.query_nodes(bel=target).all()
                 target = targets[0]  # FIXME what if this matches multiple?
                 query = query.filter(Edge.target == target)
             elif isinstance(target, Node):
@@ -168,7 +170,7 @@ class QueryManager(LookupManager):
             else:
                 raise TypeError('Invalid type of {}: {}'.format(target, target.__class__.__name__))
 
-        return query.all()
+        return query
 
     def query_citations(self,
                         type: Optional[str] = None,

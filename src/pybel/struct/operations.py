@@ -2,7 +2,7 @@
 
 """Operations for BEL graphs."""
 
-from typing import Set
+from typing import Iterable
 
 import networkx as nx
 
@@ -19,11 +19,9 @@ __all__ = [
 ]
 
 
-def subgraph(graph, nodes: Set[BaseEntity]):
+def subgraph(graph, nodes: Iterable[BaseEntity]):
     """Induce a sub-graph over the given nodes.
 
-    :param BELGraph graph:
-    :param nodes:
     :rtype: BELGraph
     """
     sg = graph.subgraph(nodes)

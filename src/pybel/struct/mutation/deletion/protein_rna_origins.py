@@ -2,20 +2,22 @@
 
 """Functions for deleting proteins and genes that are leaves."""
 
+from typing import Iterable
+
 from ...filters.node_selection import get_nodes_by_function
 from ...pipeline.decorators import in_place_transformation, register_deprecated
 from ....constants import GENE, RELATION, RNA, TRANSCRIBED_TO, TRANSLATED_TO
+from ....dsl import BaseEntity
 
 __all__ = [
     'prune_protein_rna_origins',
 ]
 
 
-def get_gene_leaves(graph):
+def get_gene_leaves(graph) -> Iterable[BaseEntity]:
     """Iterate over all genes who have only one connection, that's a transcription to its RNA.
 
     :param pybel.BELGraph graph: A BEL graph
-    :rtype: iter[tuple]
     """
     for node in get_nodes_by_function(graph, GENE):
         if graph.in_degree(node) != 0:
@@ -30,11 +32,10 @@ def get_gene_leaves(graph):
             yield node
 
 
-def get_rna_leaves(graph):
+def get_rna_leaves(graph) -> Iterable[BaseEntity]:
     """Iterate over all RNAs who have only one connection, that's a translation to its protein.
 
     :param pybel.BELGraph graph: A BEL graph
-    :rtype: iter[tuple]
     """
     for node in get_nodes_by_function(graph, RNA):
         if graph.in_degree(node) != 0:
