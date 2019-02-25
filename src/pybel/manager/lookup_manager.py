@@ -14,6 +14,12 @@ from ..utils import hash_citation
 class LookupManager(BaseManager):
     """Groups functions for looking up entries by hashes."""
 
+    def get_dsl_by_hash(self, node_hash: str) -> Optional[BaseEntity]:
+        """Look up a node by the hash and returns the corresponding PyBEL node tuple."""
+        node = self.get_node_by_hash(node_hash)
+        if node is not None:
+            return node.as_bel()
+
     def get_node_by_hash(self, node_hash: str) -> Optional[Node]:
         """Look up a node by its hash."""
         return self.session.query(Node).filter(Node.sha512 == node_hash).one_or_none()

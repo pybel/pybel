@@ -4,12 +4,12 @@
 
 import json
 import logging
-from collections import Iterable
+from typing import Dict, Iterable, List, Mapping, Optional, Set, TextIO, Union
 
 from .exc import QueryMissingNetworksError
 from .seeding import Seeding
-from ...manager.models import Node
-from ...struct.pipeline import Pipeline
+from ..pipeline import Pipeline
+from ...dsl import BaseEntity
 
 __all__ = [
     'Query',
@@ -21,13 +21,14 @@ log = logging.getLogger(__name__)
 class Query:
     """Represents a query over a network store."""
 
-    def __init__(self, network_ids=None, seeding=None, pipeline=None):
+    def __init__(self,
+                 network_ids: Union[None, int, Iterable[int]] = None,
+                 seeding: Optional[Seeding] = None,
+                 pipeline: Optional[Pipeline] = None,
+                 ) -> None:
         """Build a query.
 
-        :param iter[int] network_ids: Database network identifiers identifiers
-        :type network_ids: None or int or iter[int]
-        :type seeding: Optional[Seeding]
-        :type pipeline: Optional[Pipeline]
+        :param network_ids: Database network identifiers identifiers
         """
         if not network_ids:
             self.network_ids = []
@@ -52,55 +53,50 @@ class Query:
             raise TypeError('Not a pipeline: {}'.format(pipeline))
         self.pipeline = pipeline or Pipeline()
 
-    def append_network(self, network_id):
+    def append_network(self, network_id: int) -> 'Query':
         """Add a network to this query.
 
-        :param int network_id: The database identifier of the network
+        :param network_id: The database identifier of the network
         :returns: self for fluid API
-        :rtype: Query
         """
         self.network_ids.append(network_id)
         return self
 
-    def append_seeding_induction(self, nodes):
+    def append_seeding_induction(self, nodes: Union[BaseEntity, List[BaseEntity], List[Dict]]) -> Seeding:
         """Add a seed induction method.
 
-        :param list[tuple or Node or BaseEntity] nodes: A list of PyBEL node tuples
         :returns: seeding container for fluid API
-        :rtype: Seeding
         """
         return self.seeding.append_induction(nodes)
 
-    def append_seeding_neighbors(self, nodes):
+    def append_seeding_neighbors(self, nodes: Union[BaseEntity, List[BaseEntity], List[Dict]]) -> Seeding:
         """Add a seed by neighbors.
 
-        :param nodes: A list of PyBEL node tuples
-        :type nodes: str or BaseEntity or iter[BaseEntity]
+        :returns: seeding container for fluid API
         """
         return self.seeding.append_neighbors(nodes)
 
-    def append_seeding_annotation(self, annotation, values):
+    def append_seeding_annotation(self, annotation: str, values: Set[str]) -> Seeding:
         """Add a seed induction method for single annotation's values.
 
-        :param str annotation: The annotation to filter by
-        :param set[str] values: The values of the annotation to keep
+        :param annotation: The annotation to filter by
+        :param values: The values of the annotation to keep
         """
         return self.seeding.append_annotation(annotation, values)
 
-    def append_seeding_sample(self, **kwargs):
+    def append_seeding_sample(self, **kwargs) -> Seeding:
         """Add seed induction methods.
 
         Kwargs can have ``number_edges`` or ``number_seed_nodes``.
         """
         return self.seeding.append_sample(**kwargs)
 
-    def append_pipeline(self, name, *args, **kwargs):
+    def append_pipeline(self, name, *args, **kwargs) -> Pipeline:
         """Add an entry to the pipeline. Defers to :meth:`pybel_tools.pipeline.Pipeline.append`.
 
         :param name: The name of the function
         :type name: str or types.FunctionType
         :return: This pipeline for fluid query building
-        :rtype: Pipeline
         """
         return self.pipeline.append(name, *args, **kwargs)
 
@@ -133,11 +129,8 @@ class Query:
 
         return universe
 
-    def to_json(self):
-        """Return this query as a JSON object.
-
-        :rtype: dict
-        """
+    def to_json(self) -> Dict:
+        """Return this query as a JSON object."""
         rv = {
             'network_ids': self.network_ids,
         }
@@ -150,23 +143,19 @@ class Query:
 
         return rv
 
-    def dump(self, file, **kwargs):
+    def dump(self, file: TextIO, **kwargs) -> None:
         """Dump this query to a file as JSON."""
         json.dump(self.to_json(), file, **kwargs)
 
-    def dumps(self, **kwargs):
-        """Dump this query to a string as JSON.
-
-        :rtype: str
-        """
+    def dumps(self, **kwargs) -> str:
+        """Dump this query to a string as JSON."""
         return json.dumps(self.to_json(), **kwargs)
 
     @staticmethod
-    def from_json(data):
+    def from_json(data: Mapping) -> 'Query':
         """Load a query from a JSON dictionary.
 
-        :param dict data: A JSON dictionary
-        :rtype: Query
+        :param data: A JSON dictionary
         :raises: QueryMissingNetworksError
         """
         network_ids = data.get('network_ids')
@@ -175,14 +164,14 @@ class Query:
 
         seeding_data = data.get('seeding')
         seeding = (
-            Seeding(seeding_data)
+            Seeding.from_json(seeding_data)
             if seeding_data is not None else
             None
         )
 
         pipeline_data = data.get('pipeline')
         pipeline = (
-            Pipeline(pipeline_data)
+            Pipeline.from_json(pipeline_data)
             if pipeline_data is not None else
             None
         )
@@ -194,21 +183,21 @@ class Query:
         )
 
     @staticmethod
-    def load(file):
+    def load(file: TextIO) -> 'Query':
         """Load a query from a JSON file.
 
-        :param file: A file or file-like
-        :rtype: Query
         :raises: QueryMissingNetworksError
         """
         return Query.from_json(json.load(file))
 
     @staticmethod
-    def loads(s):
+    def loads(s: str) -> 'Query':
         """Load a query from a JSON string.
 
-        :param str s: A stringified JSON query
-        :rtype: Query
+        :param s: A stringified JSON query
         :raises: QueryMissingNetworksError
         """
         return Query.from_json(json.loads(s))
+
+    def __str__(self):
+        return 'Query(networks={}, seeding={}, pipeline={})'.format(self.network_ids, self.seeding, self.pipeline)

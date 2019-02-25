@@ -34,7 +34,7 @@ SEED_TYPES = {
     SEED_TYPE_PUBMED,
     SEED_TYPE_AUTHOR,
     SEED_TYPE_ANNOTATION,
-    SEED_TYPE_SAMPLE
+    SEED_TYPE_SAMPLE,
 }
 
 #: Seed types that don't take node lists as their arguments
@@ -44,3 +44,5 @@ NONNODE_SEED_TYPES = {
     SEED_TYPE_PUBMED,
     SEED_TYPE_SAMPLE,
 }
+
+NODE_SEED_TYPES = SEED_TYPES - NONNODE_SEED_TYPES

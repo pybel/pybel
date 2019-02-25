@@ -265,13 +265,18 @@ class Pipeline:
         return json.dump(self.to_json(), file, **kwargs)
 
     @staticmethod
+    def from_json(data: List) -> 'Pipeline':
+        """Build a pipeline from a JSON list."""
+        return Pipeline(data)
+
+    @staticmethod
     def load(file: TextIO) -> 'Pipeline':
         """Load a protocol from JSON contained in file.
 
         :return: The pipeline represented by the JSON in the file
         :raises MissingPipelineFunctionError: If any functions are not registered
         """
-        return Pipeline(json.load(file))
+        return Pipeline.from_json(json.load(file))
 
     @staticmethod
     def loads(s: str) -> 'Pipeline':
@@ -281,7 +286,7 @@ class Pipeline:
         :return: The pipeline represented by the JSON in the file
         :raises MissingPipelineFunctionError: If any functions are not registered
         """
-        return Pipeline(json.loads(s))
+        return Pipeline.from_json(json.loads(s))
 
     def __str__(self):
         return json.dumps(self.protocol, indent=2)

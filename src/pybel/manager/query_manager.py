@@ -10,7 +10,6 @@ from sqlalchemy import and_, or_
 from .lookup_manager import LookupManager
 from .models import Author, Citation, Edge, Evidence, Namespace, NamespaceEntry, Node
 from ..constants import CITATION_TYPE_PUBMED
-from ..dsl import BaseEntity
 from ..struct import BELGraph
 from ..utils import parse_datetime
 
@@ -37,15 +36,6 @@ class QueryManager(LookupManager):
         """Count the number of nodes in the database."""
         return self._count_model(Node)
 
-    def get_dsl_by_hash(self, node_hash: str) -> Optional[BaseEntity]:
-        """Look up a node by the hash and returns the corresponding PyBEL node tuple."""
-        node = self.get_node_by_hash(node_hash)
-
-        if node is None:
-            return
-
-        return node.to_json()
-
     def query_nodes(self,
                     bel: Optional[str] = None,
                     type: Optional[str] = None,
@@ -62,19 +52,19 @@ class QueryManager(LookupManager):
         q = self.session.query(Node)
 
         if bel:
-            q = q.filter(Node.bel.like(bel))
+            q = q.filter(Node.bel.contains(bel))
 
         if type:
-            q = q.filter(Node.type.like(type))
+            q = q.filter(Node.type == type)
 
         if namespace or name:
             q = q.join(NamespaceEntry)
 
             if namespace:
-                q = q.join(Namespace).filter(Namespace.keyword.like(namespace))
+                q = q.join(Namespace).filter(Namespace.keyword.contains(namespace))
 
             if name:
-                q = q.filter(NamespaceEntry.name.like(name))
+                q = q.filter(NamespaceEntry.name.contains(name))
 
         return q
 
@@ -102,7 +92,7 @@ class QueryManager(LookupManager):
 
         :param bel: A BEL string to use as a search
         """
-        return self.session.query(Edge).filter(Edge.bel.like(bel)).all()
+        return self.session.query(Edge).filter(Edge.bel.like(bel))
 
     def get_edges_with_annotation(self, annotation: str, value: str) -> List[Edge]:
         """Search edges with the given annotation/value pair."""
