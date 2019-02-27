@@ -100,7 +100,7 @@ else:
     log.info('can not find config file at %s', _config_path)
 
 
-def get_cache_connection():
+def get_cache_connection() -> str:
     """Get the preferred RFC-1738 database connection string.
 
     1. Check the environment variable ``PYBEL_CONNECTION``
@@ -108,8 +108,6 @@ def get_cache_connection():
        file might be in a different place if the environment variable ``PYBEL_CONFIG_DIRECTORY`` has been set.
     3. Return a default connection string using a SQLite database in the ``~/.pybel``. Optionally, this directory
        might be in a different place if the environment variable ``PYBEL_RESOURCE_DIRECTORY`` has been set.
-
-    :rtype: str
     """
     connection = environ.get(PYBEL_CONNECTION)
     if connection is not None:
