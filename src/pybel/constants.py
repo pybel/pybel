@@ -96,6 +96,8 @@ if path.exists(_config_path):
     log.info('using config file at %s', _config_path)
     with open(_config_path) as f:
         config.update(load(f))
+else:
+    log.info('can not find config file at %s', _config_path)
 
 
 def get_cache_connection():
