@@ -60,12 +60,10 @@ DEFAULT_CACHE_CONNECTION = 'sqlite:///' + DEFAULT_CACHE_LOCATION
 _BASE_CONFIG_DIR = path.join(path.expanduser('~'), '.config')
 
 
-def get_config_dir():
+def get_config_dir() -> str:
     """Return the path to the directory where configuration is stored for PyBEL.
 
      Can be overridden by setting the environment variable ``PYBEL_CONFIG_DIRECTORY``.
-
-    :rtype: str
     """
     if VERSION.endswith('-dev'):
         return environ.get('PYBEL_DEV_CONFIG_DIRECTORY', path.join(_BASE_CONFIG_DIR, 'pybel-dev'))
@@ -85,18 +83,17 @@ config = {
 }
 
 
-def get_config_path():
+def get_config_path() -> str:
     """Return the path of the configuration file.
 
     By default, should just be a file called ``config.json`` inside the directory returned by :func:`get_config_dir`.
-
-    :rtype: str
     """
     return path.join(_config_dir, 'config.json')
 
 
 _config_path = get_config_path()
 if path.exists(_config_path):
+    log.info('using config file at %s', _config_path)
     with open(_config_path) as f:
         config.update(load(f))
 
