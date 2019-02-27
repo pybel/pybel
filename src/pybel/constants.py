@@ -118,7 +118,7 @@ def get_cache_connection():
 
     connection = config.get(PYBEL_CONNECTION)
     if connection is not None:
-        log.info('getting configured connection %s', connection)
+        log.info('getting configured connection from %s: %s', _config_path, connection)
         return connection
 
     log.debug('using default connection %s', DEFAULT_CACHE_CONNECTION)
