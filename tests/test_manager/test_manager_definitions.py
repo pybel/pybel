@@ -76,7 +76,7 @@ class TestDefinitionManagers(TemporaryCacheClsMixin):
         self.assertIsNotNone(annotation)
         self.assertEqual(CELL_LINE_URL, annotation.url)
 
-        entry = self.manager.get_annotation_entry_by_name(CELL_LINE_URL, '1321N1 cell')
+        entry = self.manager.get_namespace_entry(CELL_LINE_URL, '1321N1 cell')
         self.assertEqual('1321N1 cell', entry.name)
         self.assertEqual('CLO_0001072', entry.identifier)
 

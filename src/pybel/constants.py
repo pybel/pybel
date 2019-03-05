@@ -10,27 +10,19 @@ By default, PyBEL loads its configuration from ``~/.config/pybel/config.json``. 
 :data:`pybel.constants.config`.
 """
 
-from json import load
-from logging import getLogger
-from os import environ, makedirs, mkdir, path
 from typing import Optional
 
-log = getLogger(__name__)
-
-VERSION = '0.13.2-dev'
-
-#: The last PyBEL version where the graph data definition changed
-PYBEL_MINIMUM_IMPORT_VERSION = 0, 13, 0
+from .config import connection
 
 BELFRAMEWORK_DOMAIN = 'http://resource.belframework.org'
 OPENBEL_DOMAIN = 'http://resources.openbel.org'
-HBP_NAMESPACE_URL = 'https://raw.githubusercontent.com/pharmacome/terminology/{hash}/external/{keyword}-names.belns'
+HBP_NAMESPACE_URL = 'https://raw.githubusercontent.com/pharmacome/terminology/{sha}/external/{keyword}-names.belns'
 LAST_HASH = '73688d6dc24e309fca59a1340dc9ee971e9f3baa'
 
 
-def hbp_namespace(name: str, hash: Optional[str] = None) -> str:
+def hbp_namespace(name: str, sha: Optional[str] = None) -> str:
     """Format a namespace URL."""
-    return HBP_NAMESPACE_URL.format(hash=hash or LAST_HASH, keyword=name)
+    return HBP_NAMESPACE_URL.format(sha=sha or LAST_HASH, keyword=name)
 
 
 SMALL_CORPUS_URL = OPENBEL_DOMAIN + '/belframework/20150611/knowledge/small_corpus.bel'
@@ -39,65 +31,6 @@ LARGE_CORPUS_URL = OPENBEL_DOMAIN + '/belframework/20150611/knowledge/large_corp
 FRAUNHOFER_RESOURCES = 'https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path='
 OPENBEL_NAMESPACE_RESOURCES = OPENBEL_DOMAIN + '/belframework/20150611/namespace/'
 OPENBEL_ANNOTATION_RESOURCES = OPENBEL_DOMAIN + '/belframework/20150611/annotation/'
-
-#: The environment variable that contains the default SQL connection information for the PyBEL cache
-PYBEL_CONNECTION = 'PYBEL_CONNECTION'
-
-#: The default directory where PyBEL files, including logs and the  default cache, are stored. Created if not exists.
-PYBEL_DIR = environ.get('PYBEL_RESOURCE_DIRECTORY', path.join(path.expanduser('~'), '.pybel'))
-if not path.exists(PYBEL_DIR):
-    try:
-        mkdir(PYBEL_DIR)
-    except FileExistsError:
-        log.debug('pybel data directory was created already: %s', PYBEL_DIR)
-
-DEFAULT_CACHE_NAME = 'pybel_{}.{}.{}_cache.db'.format(*PYBEL_MINIMUM_IMPORT_VERSION)
-#: The default cache location is ``~/.pybel/data/pybel_cache.db``
-DEFAULT_CACHE_LOCATION = path.join(PYBEL_DIR, DEFAULT_CACHE_NAME)
-#: The default cache connection string uses sqlite.
-DEFAULT_CACHE_CONNECTION = 'sqlite:///' + DEFAULT_CACHE_LOCATION
-
-_BASE_CONFIG_DIR = path.join(path.expanduser('~'), '.config')
-
-
-def get_config_dir() -> str:
-    """Return the path to the directory where configuration is stored for PyBEL.
-
-     Can be overridden by setting the environment variable ``PYBEL_CONFIG_DIRECTORY``.
-    """
-    if VERSION.endswith('-dev'):
-        return environ.get('PYBEL_DEV_CONFIG_DIRECTORY', path.join(_BASE_CONFIG_DIR, 'pybel-dev'))
-    return environ.get('PYBEL_CONFIG_DIRECTORY', path.join(_BASE_CONFIG_DIR, 'pybel'))
-
-
-_config_dir = get_config_dir()
-if not path.exists(_config_dir):
-    try:
-        makedirs(_config_dir)
-    except FileExistsError:
-        log.debug('config folder was already created: %s', _config_dir)
-
-#: The global configuration for PyBEL is stored here. By default, it loads from ``~/.config/pybel/config.json``
-config = {
-    PYBEL_CONNECTION: DEFAULT_CACHE_CONNECTION
-}
-
-
-def get_config_path() -> str:
-    """Return the path of the configuration file.
-
-    By default, should just be a file called ``config.json`` inside the directory returned by :func:`get_config_dir`.
-    """
-    return path.join(_config_dir, 'config.json')
-
-
-_config_path = get_config_path()
-if path.exists(_config_path):
-    log.info('using config file at %s', _config_path)
-    with open(_config_path) as f:
-        config.update(load(f))
-else:
-    log.info('can not find config file at %s', _config_path)
 
 
 def get_cache_connection() -> str:
@@ -109,18 +42,7 @@ def get_cache_connection() -> str:
     3. Return a default connection string using a SQLite database in the ``~/.pybel``. Optionally, this directory
        might be in a different place if the environment variable ``PYBEL_RESOURCE_DIRECTORY`` has been set.
     """
-    connection = environ.get(PYBEL_CONNECTION)
-    if connection is not None:
-        log.info('getting environment-defined connection: %s', connection)
-        return connection
-
-    connection = config.get(PYBEL_CONNECTION)
-    if connection is not None:
-        log.info('getting configured connection from %s: %s', _config_path, connection)
-        return connection
-
-    log.debug('using default connection %s', DEFAULT_CACHE_CONNECTION)
-    return DEFAULT_CACHE_CONNECTION
+    return connection
 
 
 PYBEL_CONTEXT_TAG = 'pybel_context'

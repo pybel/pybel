@@ -9,7 +9,8 @@ from typing import Optional
 import requests
 
 from .nodelink import from_json, to_json
-from ..constants import DEFAULT_SERVICE_URL, PYBEL_REMOTE_HOST, PYBEL_REMOTE_PASSWORD, PYBEL_REMOTE_USER, config
+from ..config import config
+from ..constants import DEFAULT_SERVICE_URL, PYBEL_REMOTE_HOST, PYBEL_REMOTE_PASSWORD, PYBEL_REMOTE_USER
 from ..struct.graph import BELGraph
 from ..utils import get_version
 

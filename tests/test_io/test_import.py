@@ -14,9 +14,9 @@ from pybel import (
     BELGraph, from_bytes, from_json, from_json_file, from_jsons, from_lines, from_path, from_pickle, from_url,
     to_bel_lines, to_bytes, to_csv, to_graphml, to_gsea, to_json, to_json_file, to_jsons, to_pickle, to_sif,
 )
+from pybel.config import PYBEL_MINIMUM_IMPORT_VERSION
 from pybel.constants import (
-    ANNOTATIONS, CITATION, DECREASES, DIRECTLY_DECREASES, EVIDENCE, GRAPH_PYBEL_VERSION, INCREASES,
-    PYBEL_MINIMUM_IMPORT_VERSION, RELATION,
+    ANNOTATIONS, CITATION, DECREASES, DIRECTLY_DECREASES, EVIDENCE, GRAPH_PYBEL_VERSION, INCREASES, RELATION,
 )
 from pybel.dsl import BaseEntity, gene
 from pybel.examples import sialic_acid_graph

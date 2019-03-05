@@ -3,12 +3,13 @@
 """This module contains the base class for connection managers in SQLAlchemy."""
 
 import logging
+from typing import List, Optional, Tuple, Type, TypeVar
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from .models import Base
-from ..constants import config
+from ..config import config
 
 __all__ = [
     'BaseManager',
@@ -17,16 +18,22 @@ __all__ = [
 
 log = logging.getLogger(__name__)
 
+X = TypeVar('X')
 
-def build_engine_session(connection, echo=False, autoflush=None, autocommit=None, expire_on_commit=None,
-                         scopefunc=None):
+
+def build_engine_session(connection: str,
+                         echo: bool = False,
+                         autoflush: Optional[bool] = None,
+                         autocommit: Optional[bool] = None,
+                         expire_on_commit: Optional[bool] = None,
+                         scopefunc=None) -> Tuple:
     """Build an engine and a session.
 
-    :param str connection: An RFC-1738 database connection string
-    :param bool echo: Turn on echoing SQL
-    :param Optional[bool] autoflush: Defaults to True if not specified in kwargs or configuration.
-    :param Optional[bool] autocommit: Defaults to False if not specified in kwargs or configuration.
-    :param Optional[bool] expire_on_commit: Defaults to False if not specified in kwargs or configuration.
+    :param connection: An RFC-1738 database connection string
+    :param echo: Turn on echoing SQL
+    :param autoflush: Defaults to True if not specified in kwargs or configuration.
+    :param autocommit: Defaults to False if not specified in kwargs or configuration.
+    :param expire_on_commit: Defaults to False if not specified in kwargs or configuration.
     :param scopefunc: Scoped function to pass to :func:`sqlalchemy.orm.scoped_session`
     :rtype: tuple[Engine,Session]
 
@@ -65,7 +72,7 @@ def build_engine_session(connection, echo=False, autoflush=None, autocommit=None
     #: A SQLAlchemy session object
     session = scoped_session(
         session_maker,
-        scopefunc=scopefunc
+        scopefunc=scopefunc,
     )
 
     return engine, session
@@ -77,43 +84,37 @@ class BaseManager(object):
     #: The declarative base for this manager
     base = Base
 
-    def __init__(self, engine, session):
+    def __init__(self, engine, session) -> None:
         """Instantiate a manager from an engine and session."""
         self.engine = engine
         self.session = session
 
-    def create_all(self, checkfirst=True):
+    def create_all(self, checkfirst: bool = True) -> None:
         """Create the PyBEL cache's database and tables.
 
-        :param bool checkfirst: Check if the database exists before trying to re-make it
+        :param checkfirst: Check if the database exists before trying to re-make it
         """
         self.base.metadata.create_all(bind=self.engine, checkfirst=checkfirst)
 
-    def drop_all(self, checkfirst=True):
+    def drop_all(self, checkfirst: bool = True) -> None:
         """Drop all data, tables, and databases for the PyBEL cache.
 
-        :param bool checkfirst: Check if the database exists before trying to drop it
+        :param checkfirst: Check if the database exists before trying to drop it
         """
         self.session.close()
         self.base.metadata.drop_all(bind=self.engine, checkfirst=checkfirst)
 
-    def bind(self):
+    def bind(self) -> None:
         """Bind the metadata to the engine and session."""
         self.base.metadata.bind = self.engine
         self.base.query = self.session.query_property()
 
-    def _list_model(self, model_cls):
-        """List the models in this class.
-
-        :rtype: list
-        """
+    def _list_model(self, model_cls: Type[X]) -> List[X]:
+        """List the models in this class."""
         return self.session.query(model_cls).all()
 
-    def _count_model(self, model_cls):
-        """Count the number of models in the database.
-
-        :rtype: int
-        """
+    def _count_model(self, model_cls) -> int:
+        """Count the number of models in the database."""
         return self.session.query(model_cls).count()
 
     def __repr__(self):

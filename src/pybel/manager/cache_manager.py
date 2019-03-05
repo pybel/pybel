@@ -44,7 +44,6 @@ from ..language import (
 )
 from ..struct.graph import AnnotationsDict, BELGraph
 from ..struct.operations import union
-from ..struct.summary.node_summary import get_names
 from ..typing import EdgeData
 from ..utils import hash_citation, hash_dump, hash_evidence, parse_datetime
 
@@ -265,14 +264,10 @@ class NamespaceManager(BaseManager):
 
         return result[0]
 
-    def get_annotation_entry_by_name(self, url: str, name: str) -> NamespaceEntry:
-        """Get an annotation entry by URL and name.
-
-        :param url: The url of the annotation source
-        :param name: The name of the annotation entry from the given url's document
-        """
-        annotation_filter = and_(Namespace.url == url, NamespaceEntry.name == name)
-        return self.session.query(NamespaceEntry).join(Namespace).filter(annotation_filter).one()
+    def get_entity_by_identifier(self, url: str, identifier: str) -> Optional[NamespaceEntry]:
+        """Get a given entity by its url/identifier combination."""
+        entry_filter = and_(Namespace.url == url, NamespaceEntry.identifier == identifier)
+        return self.session.query(NamespaceEntry).join(Namespace).filter(entry_filter).one_or_none()
 
     def get_or_create_regex_namespace_entry(self, namespace: str, pattern: str, name: str) -> NamespaceEntry:
         """Get a namespace entry from a regular expression.
@@ -820,34 +815,34 @@ class InsertManager(NamespaceManager, LookupManager):
         evidence = Evidence(
             text=text,
             citation=citation,
-            sha512=sha512
+            sha512=sha512,
         )
 
         self.session.add(evidence)
         self.object_cache_evidence[sha512] = evidence
         return evidence
 
-    def get_or_create_node(self, graph: BELGraph, node_data: BaseEntity) -> Node:
+    def get_or_create_node(self, graph: BELGraph, node: BaseEntity) -> Optional[Node]:
         """Create an entry and object for given node if it does not exist."""
-        sha512 = node_data.as_sha512()
+        sha512 = node.as_sha512()
         if sha512 in self.object_cache_node:
             return self.object_cache_node[sha512]
 
-        node = self.get_node_by_hash(sha512)
+        node_model = self.get_node_by_hash(sha512)
 
-        if node is not None:
-            self.object_cache_node[sha512] = node
-            return node
+        if node_model is not None:
+            self.object_cache_node[sha512] = node_model
+            return node_model
 
-        node = Node._start_from_base_entity(node_data)
+        node_model = Node._start_from_base_entity(node)
 
-        namespace = node_data.get(NAMESPACE)
+        namespace = node.get(NAMESPACE)
         if namespace is None:
             pass
 
         elif namespace in graph.namespace_url:
             url = graph.namespace_url[namespace]
-            name = node_data[NAME]
+            name = node[NAME]
             entry = self.get_namespace_entry(url, name)
 
             if entry is None:
@@ -855,35 +850,35 @@ class InsertManager(NamespaceManager, LookupManager):
                 return
 
             self.session.add(entry)
-            node.namespace_entry = entry
+            node_model.namespace_entry = entry
 
         elif namespace in graph.namespace_pattern:
-            name = node_data[NAME]
+            name = node[NAME]
             pattern = graph.namespace_pattern[namespace]
             entry = self.get_or_create_regex_namespace_entry(namespace, pattern, name)
 
             self.session.add(entry)
-            node.namespace_entry = entry
+            node_model.namespace_entry = entry
 
         else:
-            log.warning("No reference in BELGraph for namespace: {}".format(node_data[NAMESPACE]))
+            log.warning("No reference in BELGraph for namespace: {}".format(node[NAMESPACE]))
             return
 
-        if VARIANTS in node_data or FUSION in node_data:
-            node.is_variant = True
-            node.has_fusion = FUSION in node_data
+        if VARIANTS in node or FUSION in node:
+            node_model.is_variant = True
+            node_model.has_fusion = FUSION in node
 
-            modifications = self.get_or_create_modification(graph, node_data)
+            modifications = self.get_or_create_modification(graph, node)
 
             if modifications is None:
-                log.warning('could not create %s because had an uncachable modification', node_data.as_bel())
+                log.warning('could not create %s because had an uncachable modification', node.as_bel())
                 return
 
-            node.modifications = modifications
+            node_model.modifications = modifications
 
-        self.session.add(node)
-        self.object_cache_node[sha512] = node
-        return node
+        self.session.add(node_model)
+        self.object_cache_node[sha512] = node_model
+        return node_model
 
     def drop_nodes(self) -> None:
         """Drop all nodes in the database."""
@@ -1051,38 +1046,38 @@ class InsertManager(NamespaceManager, LookupManager):
         """Get a modification by a SHA512 hash."""
         return self.session.query(Modification).filter(Modification.sha512 == sha512).one_or_none()
 
-    def get_or_create_modification(self, graph: BELGraph, node_data) -> Optional[List[Modification]]:
+    def get_or_create_modification(self, graph: BELGraph, node: BaseEntity) -> Optional[List[Modification]]:
         """Create a list of node modification objects that belong to the node described by node_data.
 
-        Return None if the list can not be constructed, and the node should also be skipped.
+        Return ``None`` if the list can not be constructed, and the node should also be skipped.
 
-        :param dict node_data: Describes the given node and contains is_variant information
+        :param dict node: Describes the given node and contains is_variant information
         :return: A list of modification objects belonging to the given node
         """
         modification_list = []
-        if FUSION in node_data:
+        if FUSION in node:
             mod_type = FUSION
-            node_data = node_data[FUSION]
-            p3_namespace_url = graph.namespace_url[node_data[PARTNER_3P][NAMESPACE]]
+            node = node[FUSION]
+            p3_namespace_url = graph.namespace_url[node[PARTNER_3P][NAMESPACE]]
 
             if p3_namespace_url in graph.uncached_namespaces:
                 log.warning('uncached namespace %s in fusion()', p3_namespace_url)
                 return
 
-            p3_name = node_data[PARTNER_3P][NAME]
+            p3_name = node[PARTNER_3P][NAME]
             p3_namespace_entry = self.get_namespace_entry(p3_namespace_url, p3_name)
 
             if p3_namespace_entry is None:
                 log.warning('Could not find namespace entry %s %s', p3_namespace_url, p3_name)
                 return  # FIXME raise?
 
-            p5_namespace_url = graph.namespace_url[node_data[PARTNER_5P][NAMESPACE]]
+            p5_namespace_url = graph.namespace_url[node[PARTNER_5P][NAMESPACE]]
 
             if p5_namespace_url in graph.uncached_namespaces:
                 log.warning('uncached namespace %s in fusion()', p5_namespace_url)
                 return
 
-            p5_name = node_data[PARTNER_5P][NAME]
+            p5_name = node[PARTNER_5P][NAME]
             p5_namespace_entry = self.get_namespace_entry(p5_namespace_url, p5_name)
 
             if p5_namespace_entry is None:
@@ -1095,7 +1090,7 @@ class InsertManager(NamespaceManager, LookupManager):
                 'p5_partner': p5_namespace_entry,
             }
 
-            node_range_3p = node_data.get(RANGE_3P)
+            node_range_3p = node.get(RANGE_3P)
             if node_range_3p and FUSION_REFERENCE in node_range_3p:
                 fusion_dict.update({
                     'p3_reference': node_range_3p[FUSION_REFERENCE],
@@ -1103,7 +1098,7 @@ class InsertManager(NamespaceManager, LookupManager):
                     'p3_stop': node_range_3p[FUSION_STOP],
                 })
 
-            node_range_5p = node_data.get(RANGE_5P)
+            node_range_5p = node.get(RANGE_5P)
             if node_range_5p and FUSION_REFERENCE in node_range_5p:
                 fusion_dict.update({
                     'p5_reference': node_range_5p[FUSION_REFERENCE],
@@ -1114,7 +1109,7 @@ class InsertManager(NamespaceManager, LookupManager):
             modification_list.append(fusion_dict)
 
         else:
-            for variant in node_data[VARIANTS]:
+            for variant in node[VARIANTS]:
                 mod_type = variant[KIND].strip()
                 if mod_type == HGVS:
                     modification_list.append({
@@ -1178,10 +1173,7 @@ class InsertManager(NamespaceManager, LookupManager):
         return self.session.query(Property).filter(Property.sha512 == property_hash).one_or_none()
 
     def _make_property_from_dict(self, property_def: Dict) -> Property:
-        """Build an edge property from a dictionary.
-
-        :param property_def:
-        """
+        """Build an edge property from a dictionary."""
         property_hash = hash_dump(property_def)
 
         edge_property_model = self.object_cache_property.get(property_hash)
@@ -1302,16 +1294,18 @@ class _Manager(QueryManager, InsertManager, NetworkManager):
     """A wrapper around PyBEL managers that can be directly instantiated with an engine and session."""
 
     def count_citations(self) -> int:
+        """Count the number of citations stored in the database."""
         return self._count_model(Citation)
 
     def list_citations(self) -> List[Citation]:
+        """List the citations in the database."""
         return self._list_model(Citation)
 
 
 class Manager(_Manager):
     """A manager for the PyBEL database."""
 
-    def __init__(self, connection=None, engine=None, session=None, **kwargs):
+    def __init__(self, connection=None, engine=None, session=None, **kwargs) -> None:
         """Create a connection to database and a persistent session using SQLAlchemy.
 
         A custom default can be set as an environment variable with the name :data:`pybel.constants.PYBEL_CONNECTION`,
@@ -1388,5 +1382,5 @@ class Manager(_Manager):
         elif kwargs:
             raise ValueError('keyword arguments should not be used with engine/session')
 
-        super(Manager, self).__init__(engine=engine, session=session)
+        super().__init__(engine=engine, session=session)
         self.create_all()
