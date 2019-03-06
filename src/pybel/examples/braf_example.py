@@ -2,7 +2,7 @@
 
 """An example describing a single evidence about BRAF.
 
-.. code-block::
+.. code-block:: none
 
     SET Citation = {"PubMed", "11283246"}
     SET Evidence = "Expression of both dominant negative forms, RasN17 and Rap1N17, in UT7-Mpl cells decreased
