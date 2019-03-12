@@ -1,13 +1,6 @@
 Data Model
 ==========
-Molecular biology is a directed graph; not a table. BEL expresses how biological entities interact within many
-different contexts, with descriptive annotations. PyBEL represents data as a directional multigraph using an extension
-of :class:`networkx.MultiDiGraph`. Each node and edge has an associated data dictionary for storing relevant/contextual
-information.
-
-This allows for much easier programmatic access to answer more complicated questions, which can be written with python
-code. Because the data structure is the same in Neo4J, the data can be directly exported with :func:`pybel.to_neo4j`.
-Neo4J supports the Cypher querying language so that the same queries can be written in an elegant and simple way.
+.. automodule:: pybel.struct
 
 Constants
 ---------
@@ -16,7 +9,7 @@ These documents refer to many aspects of the data model using constants, which c
 
 .. code-block:: python
 
-    >>> from pybel.constants import *
+    >>> import pybel.constants as pc
 
 Terms describing abundances, annotations, and other internal data are designated in :mod:`pybel.constants`
 with full-caps, such as :data:`pybel.constants.FUNCTION` and :data:`pybel.constants.PROTEIN`.
@@ -29,33 +22,32 @@ Function Nomenclature
 The following table shows PyBEL's internal mapping from BEL functions to its own constants. This can be accessed
 programatically via :data:`pybel.parser.language.abundance_labels`
 
-+-------------------------------------------+----------------------------------------+
-| BEL Function                              | PyBEL Constant                         |
-+===========================================+========================================+
-| ``a()``, ``abundance()``                  | :data:`pybel.constants.ABUNDANCE`      |
-+-------------------------------------------+----------------------------------------+
-| ``g()``, ``geneAbundance()``              | :data:`pybel.constants.GENE`           |
-+-------------------------------------------+----------------------------------------+
-| ``r()``, ``rnaAbunance()``                | :data:`pybel.constants.RNA`            |
-+-------------------------------------------+----------------------------------------+
-| ``m()``, ``microRNAAbundance()``          | :data:`pybel.constants.MIRNA`          |
-+-------------------------------------------+----------------------------------------+
-| ``p()``, ``proteinAbundance()``           | :data:`pybel.constants.PROTEIN`        |
-+-------------------------------------------+----------------------------------------+
-| ``bp()``, ``biologicalProcess()``         | :data:`pybel.constants.BIOPROCESS`     |
-+-------------------------------------------+----------------------------------------+
-| ``path()``, ``pathology()``               | :data:`pybel.constants.PATHOLOGY`      |
-+-------------------------------------------+----------------------------------------+
-| ``complex()``, ``complexAbundance()``     | :data:`pybel.constants.COMPLEX`        |
-+-------------------------------------------+----------------------------------------+
-| ``composite()``, ``compositeAbundance()`` | :data:`pybel.constants.COMPOSITE`      |
-+-------------------------------------------+----------------------------------------+
-| ``rxn()``, ``reaction()``                 | :data:`pybel.constants.REACTION`       |
-+-------------------------------------------+----------------------------------------+
++-------------------------------------------+-------------------------------------+---------------------------------------+
+| BEL Function                              | PyBEL Constant                      | PyBEL DSL                             |
++===========================================+=====================================+=======================================+
+| ``a()``, ``abundance()``                  | :data:`pybel.constants.ABUNDANCE`   | :class:`pybel.dsl.Abundance`          |
++-------------------------------------------+-------------------------------------+---------------------------------------+
+| ``g()``, ``geneAbundance()``              | :data:`pybel.constants.GENE`        | :class:`pybel.dsl.Gene`               |
++-------------------------------------------+-------------------------------------+---------------------------------------+
+| ``r()``, ``rnaAbunance()``                | :data:`pybel.constants.RNA`         | :class:`pybel.dsl.Rna`                |
++-------------------------------------------+-------------------------------------+---------------------------------------+
+| ``m()``, ``microRNAAbundance()``          | :data:`pybel.constants.MIRNA`       | :class:`pybel.dsl.Mirna`              |
++-------------------------------------------+-------------------------------------+---------------------------------------+
+| ``p()``, ``proteinAbundance()``           | :data:`pybel.constants.PROTEIN`     | :class:`pybel.dsl.Protein`            |
++-------------------------------------------+-------------------------------------+---------------------------------------+
+| ``bp()``, ``biologicalProcess()``         | :data:`pybel.constants.BIOPROCESS`  | :class:`pybel.dsl.BiologicalProcess`  |
++-------------------------------------------+-------------------------------------+---------------------------------------+
+| ``path()``, ``pathology()``               | :data:`pybel.constants.PATHOLOGY`   | :class:`pybel.dsl.Pathology`          |
++-------------------------------------------+-------------------------------------+---------------------------------------+
+| ``complex()``, ``complexAbundance()``     | :data:`pybel.constants.COMPLEX`     | :class:`pybel.dsl.ComplexAbundance`   |
++-------------------------------------------+-------------------------------------+---------------------------------------+
+| ``composite()``, ``compositeAbundance()`` | :data:`pybel.constants.COMPOSITE`   | :class:`pybel.dsl.Composite`          |
++-------------------------------------------+-------------------------------------+---------------------------------------+
+| ``rxn()``, ``reaction()``                 | :data:`pybel.constants.REACTION`    | :class:`pybel.dsl.Reaction`           |
++-------------------------------------------+-------------------------------------+---------------------------------------+
 
 Graph
 -----
-.. automodule:: pybel.struct
 
 .. autoclass:: pybel.BELGraph
     :exclude-members: nodes_iter, edges_iter, add_warning
@@ -72,21 +64,32 @@ Graph
 
 Nodes
 -----
-Nodes are used to represent physical entities' abundances. The relevant data about a node is stored in its associated
-data dictionary in :mod:`networkx` that can be accessed with ``my_bel_graph.node[node]``. After parsing,
-:code:`p(HGNC:GSK3B)` becomes:
+Nodes (or *entities*) in a :class:`pybel.BELGraph` represent physical entities' abundances. Most contain information
+about the identifier for the entity using a namespace/name pair. The PyBEL parser converts BEL terms to an internal
+representation using an internal domain specific language (DSL) that allows for writing BEL directly in Python.
 
-.. code::
+For example, after the BEL term :code:`p(HGNC:GSK3B)` is parsed, it is instantiated as a Python object using the
+DSL function corresponding to the ``p()`` function in BEL, :class:`pybel.dsl.Protein`, like:
+
+.. code:: python
+
+    from pybel.dsl import Protein
+    gsk3b_protein = Protein(namespace='HGNC', name='GSK3B')
+
+:class:`pybel.dsl.Protein`, like the others mentioned before, inherit from :class:`pybel.dsl.BaseEntity`, which itself
+inherits from :class:`dict`. Therefore, the resulting object can be used like a dict that looks like:
+
+.. code:: python
+
+    import pybel.constants as pc
 
     {
-        FUNCTION: PROTEIN,
-        NAMESPACE: 'HGNC',
-        NAME: 'GSK3B'
+        pc.FUNCTION: pc.PROTEIN,
+        pc.NAMESPACE: 'HGNC',
+        pc.NAME: 'GSK3B',
     }
 
-This section describes the structure of the data dictionaries created for each type of node available in BEL.
-Programatically, these dictionaries can be converted to tuples, which are used as the keys for the network with the
-:func:`pybel.parser.canonicalize.node_to_tuple` function.
+Alternatively, it can be used in more exciting ways, outlined later in the documentation for :mod:`pybel.dsl`.
 
 Variants
 ~~~~~~~~

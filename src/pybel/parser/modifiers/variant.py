@@ -2,22 +2,38 @@
 
 """HGVS Variants.
 
-For example, the node :code:`p(HGNC:GSK3B, var(p.Gly123Arg))` is represented with the following:
+For example, the BEL term :code:`p(HGNC:GSK3B, var(p.Gly123Arg))` is translated to the following internal DSL:
 
-.. code::
+.. code-block:: python
 
-   {
-        FUNCTION: PROTEIN,
-        NAMESPACE: 'HGNC',
-        NAME: 'GSK3B',
-        VARIANTS:  [
+   from pybel.dsl import Protein, Hgvs
+   gsk3b_variant = Protien(namespace='HGNC', name='GSK3B', variants=Hgvs(p.Gly123Arg))
+
+Further, the shorthand for protein substitutions, :class:`pybel.dsl.ProteinSubstitution`, can be used to produce the
+same result, as it inherits from :class:`pybel.dsl.Hgvs`:
+
+.. code-block:: python
+
+   from pybel.dsl import Protein, ProteinSubstitution
+   gsk3b_variant = Protien(namespace='HGNC', name='GSK3B', variants=ProteinSubstitution('Gly', 123, 'Arg'))
+
+Either way, the resulting object can be used like a dict that looks like:
+
+.. code-block:: python
+
+    import pybel.constants as pc
+
+    {
+        pc.FUNCTION: pc.PROTEIN,
+        pc.NAMESPACE: 'HGNC',
+        pc.NAME: 'GSK3B',
+        pc.VARIANTS: [
             {
-               KIND: HGVS,
-               IDENTIFIER: 'p.Gly123Arg'
-            }
-       ]
-   }
-
+                pc.KIND: pc.HGVS,
+                pc.IDENTIFIER: 'p.Gly123Arg',
+            },
+        ],
+    }
 
 .. seealso::
 
@@ -26,7 +42,7 @@ For example, the node :code:`p(HGNC:GSK3B, var(p.Gly123Arg))` is represented wit
     - PyBEL module :py:class:`pybel.parser.modifiers.get_hgvs_language`
 """
 
-from pyparsing import Word, alphanums
+from pyparsing import ParserElement, Word, alphanums
 
 from ..utils import nest, one_of_tags, quote
 from ...constants import HGVS, IDENTIFIER, KIND
@@ -39,11 +55,8 @@ variant_tags = one_of_tags(tags=['var', 'variant'], canonical_tag=HGVS, name=KIN
 variant_characters = Word(alphanums + '._*=?>')
 
 
-def get_hgvs_language():
-    """Build a HGVS :class:`pyparsing.ParseElement`.
-
-    :rtype: pyparsing.ParseElement
-    """
+def get_hgvs_language() -> ParserElement:
+    """Build a HGVS :class:`pyparsing.ParseElement`."""
     hgvs = (variant_characters | quote)(IDENTIFIER)
     language = variant_tags + nest(hgvs)
     return language
