@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Tests for parsing full BEL relations."""
+
 import logging
 import unittest
 
@@ -8,12 +10,12 @@ from pyparsing import ParseException
 from pybel import BELGraph
 from pybel.canonicalize import edge_to_bel
 from pybel.constants import (
-    ABUNDANCE, ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CITATION, COMPLEX, COMPOSITE, DECREASES,
-    DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE, FROM_LOC, FUNCTION, GENE, HAS_COMPONENT,
-    HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, IDENTIFIER, INCREASES, IS_A, KIND, LOCATION, MEMBERS,
-    MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, PATHOLOGY, PRODUCTS, PROTEIN,
-    REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, SUBPROCESS_OF, TARGET, TO_LOC, TRANSCRIBED_TO,
-    TRANSLATED_TO, TRANSLOCATION, VARIANTS,
+    ABUNDANCE, ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE, CITATION, COMPLEX, COMPOSITE,
+    DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE, FROM_LOC, FUNCTION, GENE, GMOD,
+    HAS_COMPONENT, HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, IDENTIFIER, INCREASES, IS_A, KIND,
+    LOCATION, MEMBERS, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, PATHOLOGY,
+    POSITIVE_CORRELATION, PRODUCTS, PROTEIN, RATE_LIMITING_STEP_OF, REACTANTS, REACTION, REGULATES, RELATION, RNA,
+    SUBJECT, SUBPROCESS_OF, TARGET, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, VARIANTS,
 )
 from pybel.dsl import (
     Pathology, abundance, activity, bioprocess, complex_abundance, composite_abundance, gene, gmod, hgvs,
@@ -132,6 +134,39 @@ class TestRelations(TestTokenParserBase):
 
         self.assert_has_edge(sub, obj, relation=INCREASES)
 
+    def test_increases_methylation(self):
+        """Test a causal statement with a gene modification."""
+        statement = 'a(CHEBI:"lead atom") -> g(HGNC:APP, gmod(Me))'
+        result = self.parser.relation.parseString(statement)
+        expected_dict = {
+            OBJECT: {
+                FUNCTION: GENE,
+                NAMESPACE: 'HGNC',
+                NAME: 'APP',
+                VARIANTS: [
+                    {
+                        KIND: GMOD,
+                        IDENTIFIER: {
+                            NAMESPACE: BEL_DEFAULT_NAMESPACE,
+                            NAME: 'Me',
+                        },
+                    },
+                ],
+            },
+            RELATION: INCREASES,
+            SUBJECT: {
+                FUNCTION: ABUNDANCE,
+                NAMESPACE: 'CHEBI',
+                NAME: 'lead atom',
+            },
+        }
+        self.assertEqual(expected_dict, result.asDict())
+
+        sub = abundance('CHEBI', 'lead atom')
+        obj = gene('HGNC', 'APP', variants=gmod('Me'))
+
+        self.assert_has_edge(sub, obj, relation=INCREASES)
+
     def test_directlyIncreases_withTlocObject(self):
         """Test translocation in object. See BEL 2.0 specification
         `3.1.2 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdIncreases>`_
@@ -203,7 +238,7 @@ class TestRelations(TestTokenParserBase):
                     NAMESPACE: BEL_DEFAULT_NAMESPACE
                 },
             },
-            RELATION: 'decreases',
+            RELATION: DECREASES,
             OBJECT: {
                 FUNCTION: REACTION,
                 REACTANTS: [
@@ -266,7 +301,7 @@ class TestRelations(TestTokenParserBase):
                 NAME: 'CAT',
                 LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}
             },
-            RELATION: 'directlyDecreases',
+            RELATION: DIRECTLY_DECREASES,
             OBJECT: {
                 FUNCTION: ABUNDANCE,
                 NAMESPACE: 'CHEBI',
@@ -285,7 +320,7 @@ class TestRelations(TestTokenParserBase):
             SUBJECT: {
                 LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}
             },
-            RELATION: 'directlyDecreases',
+            RELATION: DIRECTLY_DECREASES,
         }
         self.assert_has_edge(sub, obj, **expected_attrs)
 
@@ -364,7 +399,7 @@ class TestRelations(TestTokenParserBase):
                     NAMESPACE: BEL_DEFAULT_NAMESPACE
                 },
             },
-            RELATION: 'rateLimitingStepOf',
+            RELATION: RATE_LIMITING_STEP_OF,
             OBJECT: {
                 FUNCTION: BIOPROCESS,
                 NAMESPACE: 'GO',
@@ -401,7 +436,7 @@ class TestRelations(TestTokenParserBase):
                     }
                 ]
             },
-            RELATION: 'causesNoChange',
+            RELATION: CAUSES_NO_CHANGE,
             OBJECT: {
                 FUNCTION: PATHOLOGY,
                 NAMESPACE: 'MESHD',
@@ -551,7 +586,7 @@ class TestRelations(TestTokenParserBase):
                 NAME: 'GSK3B',
                 VARIANTS: [pmod('Ph', position=9, code='Ser')]
             },
-            RELATION: 'positiveCorrelation',
+            RELATION: POSITIVE_CORRELATION,
             OBJECT: {
                 MODIFIER: ACTIVITY,
                 TARGET: {
@@ -881,7 +916,7 @@ class TestRelations(TestTokenParserBase):
         obj = bioprocess('GO', 'cholesterol biosynthetic process')
         self.assert_has_node(obj)
 
-        self.assert_has_edge(sub, obj, **{RELATION: 'subProcessOf'})
+        self.assert_has_edge(sub, obj, **{RELATION: SUBPROCESS_OF})
 
     def test_extra_1(self):
         statement = 'abundance(CHEBI:"nitric oxide") increases cellSurfaceExpression(complexAbundance(proteinAbundance(HGNC:ITGAV),proteinAbundance(HGNC:ITGB3)))'
