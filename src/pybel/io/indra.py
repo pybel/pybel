@@ -33,6 +33,7 @@ After assembling a model with `INDRA <https://github.com/sorgerlab/indra>`_, a l
 """
 
 from pickle import load
+from typing import Optional
 
 __all__ = [
     'from_indra_statements',
@@ -42,20 +43,28 @@ __all__ = [
 ]
 
 
-def from_indra_statements(stmts, name=None, version=None, description=None, authors=None, contact=None, license=None,
-                          copyright=None, disclaimer=None):
+def from_indra_statements(stmts,
+                          name: Optional[str] = None,
+                          version: Optional[str] = None,
+                          description: Optional[str] = None,
+                          authors: Optional[str] = None,
+                          contact: Optional[str] = None,
+                          license: Optional[str] = None,
+                          copyright: Optional[str] = None,
+                          disclaimer: Optional[str] = None,
+                          ):
     """Import a model from :mod:`indra`.
 
-    :param list[indra.statements.Statement] stmts: A list of statements
-    :param str name: The graph's name
-    :param str version: The graph's version. Recommended to use `semantic versioning <http://semver.org/>`_ or
+    :param List[indra.statements.Statement] stmts: A list of statements
+    :param name: The graph's name
+    :param version: The graph's version. Recommended to use `semantic versioning <http://semver.org/>`_ or
                         ``YYYYMMDD`` format.
-    :param str description: A description of the graph
-    :param str authors: The authors of this graph
-    :param str contact: The contact email for this graph
-    :param str license: The license for this graph
-    :param str copyright: The copyright for this graph
-    :param str disclaimer: The disclaimer for this graph
+    :param description: The description of the graph
+    :param authors: The authors of this graph
+    :param contact: The contact email for this graph
+    :param license: The license for this graph
+    :param copyright: The copyright for this graph
+    :param disclaimer: The disclaimer for this graph
     :rtype: pybel.BELGraph
     """
     from indra.assemblers.pybel import PybelAssembler
@@ -76,13 +85,27 @@ def from_indra_statements(stmts, name=None, version=None, description=None, auth
     return graph
 
 
-def from_indra_pickle(path, name=None, version=None, description=None):
+def from_indra_pickle(path: str,
+                      name: Optional[str] = None,
+                      version: Optional[str] = None,
+                      description: Optional[str] = None,
+                      authors: Optional[str] = None,
+                      contact: Optional[str] = None,
+                      license: Optional[str] = None,
+                      copyright: Optional[str] = None,
+                      disclaimer: Optional[str] = None,
+                      ):
     """Import a model from :mod:`indra`.
 
-    :param str path: Path to pickled list of :class:`indra.statements.Statement`
-    :param str name: The name for the BEL graph
-    :param str version: The version of the BEL graph
-    :param str description: The description of the BEL graph
+    :param path: Path to pickled list of :class:`indra.statements.Statement`
+    :param name: The name for the BEL graph
+    :param version: The version of the BEL graph
+    :param description: The description of the graph
+    :param authors: The authors of this graph
+    :param contact: The contact email for this graph
+    :param license: The license for this graph
+    :param copyright: The copyright for this graph
+    :param disclaimer: The disclaimer for this graph
     :rtype: pybel.BELGraph
     """
     with open(path, 'rb') as f:
@@ -92,13 +115,19 @@ def from_indra_pickle(path, name=None, version=None, description=None):
         stmts=statements,
         name=name,
         version=version,
-        description=description
+        description=description,
+        authors=authors,
+        contact=contact,
+        license=license,
+        copyright=copyright,
+        disclaimer=disclaimer,
     )
 
 
 def to_indra_statements(graph):
     """Export this graph as a list of INDRA statements using the :py:class:`indra.sources.pybel.PybelProcessor`.
 
+    :param pybel.BELGraph graph: A BEL graph
     :rtype: list[indra.statements.Statement]
     """
     from indra.sources.bel import process_pybel_graph
@@ -107,13 +136,27 @@ def to_indra_statements(graph):
     return pbp.statements
 
 
-def from_biopax(path, name=None, version=None, description=None):
+def from_biopax(path: str,
+                name: Optional[str] = None,
+                version: Optional[str] = None,
+                description: Optional[str] = None,
+                authors: Optional[str] = None,
+                contact: Optional[str] = None,
+                license: Optional[str] = None,
+                copyright: Optional[str] = None,
+                disclaimer: Optional[str] = None,
+                ):
     """Import a model encoded in Pathway Commons `BioPAX <http://www.biopax.org/>`_ via :mod:`indra`.
 
-    :param str path: Path to a BioPAX OWL file
-    :param str name: The name for the BEL graph
-    :param str version: The version of the BEL graph
-    :param str description: The description of the BEL graph
+    :param path: Path to a BioPAX OWL file
+    :param name: The name for the BEL graph
+    :param version: The version of the BEL graph
+    :param description: The description of the graph
+    :param authors: The authors of this graph
+    :param contact: The contact email for this graph
+    :param license: The license for this graph
+    :param copyright: The copyright for this graph
+    :param disclaimer: The disclaimer for this graph
     :rtype: pybel.BELGraph
 
     .. warning:: Not compatible with all BioPAX! See INDRA documentation.
@@ -126,5 +169,10 @@ def from_biopax(path, name=None, version=None, description=None):
         stmts=model.statements,
         name=name,
         version=version,
-        description=description
+        description=description,
+        authors=authors,
+        contact=contact,
+        license=license,
+        copyright=copyright,
+        disclaimer=disclaimer,
     )
