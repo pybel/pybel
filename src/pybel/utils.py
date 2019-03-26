@@ -179,7 +179,7 @@ def hash_edge(source, target, edge_data: EdgeData) -> str:
     return _hash_tuple(edge_tuple)
 
 
-def subdict_matches(target, query, partial_match: bool = True) -> bool:
+def subdict_matches(target: Mapping, query: Mapping, partial_match: bool = True) -> bool:
     """Check if all the keys in the query dict are in the target dict, and that their values match.
 
     1. Checks that all keys in the query dict are in the target dict
@@ -188,8 +188,8 @@ def subdict_matches(target, query, partial_match: bool = True) -> bool:
         b. If the value is a set/list/tuple, then will match any of them
         c. If the value is a dict, then recursively check if that subdict matches
 
-    :param dict target: The dictionary to search
-    :param dict query: A query dict with keys to match
+    :param target: The dictionary to search
+    :param query: A query dict with keys to match
     :param partial_match: Should the query values be used as partial or exact matches? Defaults to :code:`True`.
     :return: if all keys in b are in target_dict and their values match
     """
