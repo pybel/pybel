@@ -262,7 +262,8 @@ class TestQuery(TemporaryCacheMixin):
 
     def test_query_edge_by_mixed_no_result(self):
         # no result
-        empty_list = self.manager.query_edges(source='p(HGNC:FADD)', relation=DECREASES).all()
+        # FIXME what should this return
+        empty_list = self.manager.query_edges(source='p(HGNC:FADD)', relation=DECREASES)
         self.assertEqual(len(empty_list), 0)
 
     def test_query_edge_by_mixed(self):
