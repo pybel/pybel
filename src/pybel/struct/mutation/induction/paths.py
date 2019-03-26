@@ -26,9 +26,12 @@ log = logging.getLogger(__name__)
 def _remove_pathologies_oop(graph):
     """Remove pathology nodes from the graph."""
     rv = graph.copy()
-    for node, data in rv.nodes(data=True):
-        if data[FUNCTION] == PATHOLOGY:
-            rv.remove_node(node)
+    victims = [
+        node
+        for node in rv
+        if node[FUNCTION] == PATHOLOGY
+    ]
+    rv.remove_nodes_from(victims)
     return rv
 
 
