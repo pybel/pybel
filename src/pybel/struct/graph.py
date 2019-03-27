@@ -557,7 +557,7 @@ class BELGraph(nx.MultiDiGraph):
             evidence: str,
             citation: Union[str, Mapping[str, str]],
             annotations: Optional[AnnotationsHint] = None,
-            object_modifier: Optional[Mapping] = None,
+            object_modifier: Optional[Mapping] = None
     ) -> str:
         """Add an "inhibits" relationship.
 
