@@ -7,7 +7,9 @@ import unittest
 from pybel import BELGraph
 from pybel.constants import DIRECTLY_INCREASES
 from pybel.dsl import gene, mirna, pathology, pmod, protein, rna
-from pybel.struct.mutation.collapse import collapse_all_variants, collapse_nodes, collapse_to_genes
+from pybel.struct.mutation.collapse import (
+    collapse_all_variants, collapse_nodes, collapse_to_genes, surviors_are_inconsistent,
+)
 from pybel.testing.utils import n
 
 HGNC = 'HGNC'
@@ -35,6 +37,25 @@ p5 = pathology(GO, '5')
 
 class TestCollapse(unittest.TestCase):
     """Tests for collapse functions."""
+
+    def test_check_survivors_consistent(self):
+        """Test the survivor mapping is consistent."""
+        inconsistencies = surviors_are_inconsistent({
+            1: {2},
+            3: {4},
+        })
+        self.assertEqual(0, len(inconsistencies))
+        self.assertFalse(inconsistencies)
+
+        inconsistencies = surviors_are_inconsistent({
+            1: {2},
+            2: {3},
+            3: {4},
+            5: {4},
+        })
+        self.assertEqual(2, len(inconsistencies))
+        self.assertIn(2, inconsistencies)
+        self.assertIn(3, inconsistencies)
 
     def test_collapse_by_dict(self):
         """Test collapsing nodes by a dictionary."""

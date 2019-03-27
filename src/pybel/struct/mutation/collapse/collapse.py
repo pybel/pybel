@@ -2,6 +2,7 @@
 
 """Utilities for functions for collapsing nodes."""
 
+import itertools as itt
 from typing import Mapping, Set
 
 from ...filters import filter_edges
@@ -14,6 +15,7 @@ __all__ = [
     'collapse_pair',
     'collapse_nodes',
     'collapse_all_variants',
+    'surviors_are_inconsistent',
 ]
 
 
@@ -62,11 +64,24 @@ def collapse_nodes(graph, survivor_mapping: Mapping[BaseEntity, Set[BaseEntity]]
     :param survivor_mapping: A dictionary with survivors as their keys, and iterables of the corresponding victims as
      values.
     """
+    inconsistencies = surviors_are_inconsistent(survivor_mapping)
+    if inconsistencies:
+        raise ValueError('survivor mapping is inconsistent: {}'.format(inconsistencies))
+
     for survivor, victims in survivor_mapping.items():
         for victim in victims:
             collapse_pair(graph, survivor=survivor, victim=victim)
 
     _remove_self_edges(graph)
+
+
+def surviors_are_inconsistent(survivor_mapping: Mapping[BaseEntity, Set[BaseEntity]]) -> Set[BaseEntity]:
+    """Check that there's no transitive shit going on."""
+    victim_mapping = set()
+    for victim in itt.chain.from_iterable(survivor_mapping.values()):
+        if victim in survivor_mapping:
+            victim_mapping.add(victim)
+    return victim_mapping
 
 
 @in_place_transformation
