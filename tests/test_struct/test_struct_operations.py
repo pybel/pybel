@@ -72,10 +72,10 @@ class TestLeftFullJoin(unittest.TestCase):
     def test_full_join_with_isolated_nodes(self):
         """Test what happens when there are isolated nodes."""
         a = BELGraph()
-        a.add_increases(p1, p2, n(), n())
+        a.add_increases(p1, p2, citation=n(), evidence=n())
         a.add_node_from_data(p4)
         b = BELGraph()
-        b.add_increases(p2, p3, n(), n())
+        b.add_increases(p2, p3, citation=n(), evidence=n())
         b.add_node_from_data(p5)
         left_full_join(a, b)
         for node in p1, p2, p3, p4, p5:

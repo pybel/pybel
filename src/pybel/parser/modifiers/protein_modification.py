@@ -12,25 +12,26 @@ optionally include the position ('pos') and/or amino acid code ('code').
 
 For example, the node :code:`p(HGNC:GSK3B, pmod(P, S, 9))` is represented with the following:
 
-.. code::
+.. code-block:: python
 
-   {
-       FUNCTION: PROTEIN,
-       NAMESPACE: 'HGNC',
-       NAME: 'GSK3B',
-       VARIANTS: [
-           {
-               KIND: PMOD,
-               IDENTIFIER: {
-                   NAMESPACE: BEL_DEFAULT_NAMESPACE
-                   NAME: 'Ph',
+    from pybel.constants import *
 
-               },
-               PMOD_CODE: 'Ser',
-               PMOD_POSITION: 9
-           }
-       ]
-   }
+    {
+        FUNCTION: PROTEIN,
+        NAMESPACE: 'HGNC',
+        NAME: 'GSK3B',
+        VARIANTS: [
+            {
+                KIND: PMOD,
+                IDENTIFIER: {
+                    NAMESPACE: BEL_DEFAULT_NAMESPACE
+                    NAME: 'Ph',
+                },
+                PMOD_CODE: 'Ser',
+                PMOD_POSITION: 9,
+            },
+        ],
+    }
 
 
 As an additional example, in :code:`p(HGNC:MAPK1, pmod(Ph, Thr, 202), pmod(Ph, Tyr, 204))`, MAPK is phosphorylated

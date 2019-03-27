@@ -6,7 +6,9 @@ Truncations in the legacy BEL 1.0 specification are automatically translated to 
 :code:`p(HGNC:AKT1, trunc(40))` becomes :code:`p(HGNC:AKT1, var(p.40*))` and is represented with the following
 dictionary:
 
-.. code::
+.. code-block:: python
+
+    from pybel.constants import *
 
     {
         FUNCTION: PROTEIN,
@@ -15,9 +17,9 @@ dictionary:
         VARIANTS: [
             {
                 KIND: HGVS,
-                IDENTIFIER: 'p.40*'
-            }
-        ]
+                IDENTIFIER: 'p.40*',
+            },
+        ],
     }
 
 Unfortunately, the HGVS nomenclature requires the encoding of the terminal amino acid which is exchanged

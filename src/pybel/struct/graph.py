@@ -5,6 +5,7 @@
 import logging
 from collections import defaultdict
 from copy import deepcopy
+from functools import partialmethod
 from itertools import chain
 from typing import Any, Dict, Hashable, Iterable, List, Mapping, Optional, Set, TextIO, Tuple, Union
 
@@ -14,13 +15,14 @@ from pkg_resources import iter_entry_points
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
 from ..canonicalize import edge_to_bel
 from ..constants import (
-    ANNOTATIONS, ASSOCIATION, CITATION, CITATION_AUTHORS, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED,
-    DECREASES, DESCRIPTION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO, EVIDENCE, GRAPH_ANNOTATION_LIST,
-    GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL,
-    GRAPH_PATH, GRAPH_PYBEL_VERSION, GRAPH_UNCACHED_NAMESPACES, HAS_COMPONENT, HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT,
-    HAS_VARIANT, INCREASES, IS_A, MEMBERS, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION,
-    METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAMESPACE, OBJECT, ORTHOLOGOUS, PART_OF,
-    PRODUCTS, REACTANTS, RELATION, SUBJECT, TRANSCRIBED_TO, TRANSLATED_TO, VARIANTS,
+    ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_REFERENCE, CITATION_TYPE,
+    CITATION_TYPE_PUBMED, DECREASES, DESCRIPTION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO, EVIDENCE,
+    GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN,
+    GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION, GRAPH_UNCACHED_NAMESPACES, HAS_COMPONENT, HAS_MEMBER,
+    HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A, MEMBERS, METADATA_AUTHORS, METADATA_CONTACT,
+    METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION,
+    NAMESPACE, NEGATIVE_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, PRODUCTS, REACTANTS, REGULATES,
+    RELATION, SUBJECT, TRANSCRIBED_TO, TRANSLATED_TO, VARIANTS,
 )
 from ..dsl import BaseEntity, Gene, MicroRna, Protein, Rna, activity
 from ..parser.exc import BELParserWarning
@@ -64,8 +66,6 @@ class BELGraph(nx.MultiDiGraph):
         :param license: The license for this graph
         :param copyright: The copyright for this graph
         :param disclaimer: The disclaimer for this graph
-
-        For IO, see the :mod:`pybel.io` module.
         """
         super().__init__()
 
@@ -343,7 +343,10 @@ class BELGraph(nx.MultiDiGraph):
         return '{} v{}'.format(self.name, self.version)
 
     def skip_storing_namespace(self, namespace: Optional[str]) -> bool:
-        """Check if the namespace should be skipped."""
+        """Check if the namespace should be skipped.
+
+        :param namespace: The keyword of the namespace to check.
+        """
         return (
             namespace is not None and
             namespace in self.namespace_url and
@@ -391,13 +394,21 @@ class BELGraph(nx.MultiDiGraph):
         attr = {RELATION: relation}
         return self._help_add_edge(u, v, attr)
 
-    def add_transcription(self, u: Gene, v: Union[Rna, MicroRna]) -> str:
-        """Add a transcription relation from a gene to an RNA or miRNA node."""
-        return self.add_unqualified_edge(u, v, TRANSCRIBED_TO)
+    def add_transcription(self, gene: Gene, rna: Union[Rna, MicroRna]) -> str:
+        """Add a transcription relation from a gene to an RNA or miRNA node.
 
-    def add_translation(self, u: Rna, v: Protein) -> str:
-        """Add a translation relation from a RNA to a protein."""
-        return self.add_unqualified_edge(u, v, TRANSLATED_TO)
+        :param gene: A gene node
+        :param rna: An RNA or microRNA node
+        """
+        return self.add_unqualified_edge(gene, rna, TRANSCRIBED_TO)
+
+    def add_translation(self, rna: Rna, protein: Protein) -> str:
+        """Add a translation relation from a RNA to a protein.
+
+        :param rna: An RNA node
+        :param protein: A protein node
+        """
+        return self.add_unqualified_edge(rna, protein, TRANSLATED_TO)
 
     def _add_two_way_unqualified_edge(self, u: BaseEntity, v: BaseEntity, relation: str) -> str:
         """Add an unqualified edge both ways."""
@@ -428,159 +439,28 @@ class BELGraph(nx.MultiDiGraph):
         """Add an ``hasComponent`` relationship such that u hasComponent v."""
         return self.add_unqualified_edge(u, v, HAS_COMPONENT)
 
-    def add_has_variant(self, u: BaseEntity, v: BaseEntity) -> str:
-        """Add an ``hasVariant`` relationship such that ``u hasVariant v``."""
-        return self.add_unqualified_edge(u, v, HAS_VARIANT)
+    add_has_variant = partialmethod(add_unqualified_edge, relation=HAS_VARIANT)
+    """Add a ``hasVariant`` relationship such that ``u hasVariant v``."""
 
-    def add_increases(self,
-                      u: BaseEntity,
-                      v: BaseEntity,
-                      evidence: str,
-                      citation: Union[str, CitationDict],
-                      annotations: Optional[AnnotationsHint] = None,
-                      subject_modifier: Optional[Mapping] = None,
-                      object_modifier: Optional[Mapping] = None,
-                      **attr
-                      ) -> str:
-        """Wrap :meth:`add_qualified_edge` for the :data:`pybel.constants.INCREASES` relation."""
-        return self.add_qualified_edge(
-            u=u, v=v, relation=INCREASES, evidence=evidence, citation=citation, annotations=annotations,
-            subject_modifier=subject_modifier, object_modifier=object_modifier, **attr
-        )
+    add_has_reactant = partialmethod(add_unqualified_edge, relation=HAS_REACTANT)
+    """Add a ``hasReactant`` relationship such that ``u hasReactant v``."""
 
-    def add_directly_increases(self, u, v, evidence, citation, annotations=None, subject_modifier=None,
-                               object_modifier=None, **attr):
-        """Add a :data:`pybel.constants.DIRECTLY_INCREASES` with :meth:`add_qualified_edge`.
+    add_has_product = partialmethod(add_unqualified_edge, relation=HAS_PRODUCT)
+    """Add a ``hasProduct`` relationship such that ``u hasProduct v``."""
 
-        :param BaseEntity u: The source node
-        :param BaseEntity v: The target node
-        :param str evidence: The evidence string from an article
-        :param dict[str,str] or str citation: The citation data dictionary for this evidence. If a string is given,
-                                                assumes it's a PubMed identifier and auto-fills the citation type.
-        :param annotations: The annotations data dictionary
-        :type annotations: Optional[dict[str,str] or dict[str,set] or dict[str,dict[str,bool]]]
-        :param Optional[dict] subject_modifier: The modifiers (like activity) on the subject node. See data model
-         documentation.
-        :param Optional[dict] object_modifier: The modifiers (like activity) on the object node. See data model
-         documentation.
-
-        :return: The hash of the edge
-        :rtype: str
-        """
-        return self.add_qualified_edge(u=u, v=v, relation=DIRECTLY_INCREASES, evidence=evidence, citation=citation,
-                                       annotations=annotations, subject_modifier=subject_modifier,
-                                       object_modifier=object_modifier, **attr)
-
-    def add_decreases(self, u, v, evidence, citation, annotations=None, subject_modifier=None, object_modifier=None,
-                      **attr):
-        """Add a :data:`pybel.constants.DECREASES` relationship with :meth:`add_qualified_edge`.
-
-        :param BaseEntity u: The source node
-        :param BaseEntity v: The target node
-        :param str evidence: The evidence string from an article
-        :param dict[str,str] or str citation: The citation data dictionary for this evidence. If a string is given,
-                                                assumes it's a PubMed identifier and auto-fills the citation type.
-        :param annotations: The annotations data dictionary
-        :type annotations: Optional[dict[str,str] or dict[str,set] or dict[str,dict[str,bool]]]
-        :param Optional[dict] subject_modifier: The modifiers (like activity) on the subject node. See data model
-         documentation.
-        :param Optional[dict] object_modifier: The modifiers (like activity) on the object node. See data model
-         documentation.
-
-        :return: The hash of the edge
-        :rtype: str
-        """
-        return self.add_qualified_edge(u=u, v=v, relation=DECREASES, evidence=evidence, citation=citation,
-                                       annotations=annotations, subject_modifier=subject_modifier,
-                                       object_modifier=object_modifier, **attr)
-
-    def add_directly_decreases(self, u, v, evidence, citation, annotations=None, subject_modifier=None,
-                               object_modifier=None, **attr):
-        """Add a :data:`pybel.constants.DIRECTLY_DECREASES` relationship with :meth:`add_qualified_edge`.
-
-        :param BaseEntity u: The source node
-        :param BaseEntity v: The target node
-        :param str evidence: The evidence string from an article
-        :param dict[str,str] or str citation: The citation data dictionary for this evidence. If a string is given,
-                                                assumes it's a PubMed identifier and auto-fills the citation type.
-        :param annotations: The annotations data dictionary
-        :type annotations: Optional[dict[str,str] or dict[str,set] or dict[str,dict[str,bool]]]
-        :param Optional[dict] subject_modifier: The modifiers (like activity) on the subject node. See data model
-         documentation.
-        :param Optional[dict] object_modifier: The modifiers (like activity) on the object node. See data model
-         documentation.
-
-        :return: The hash of the edge
-        :rtype: str
-        """
-        return self.add_qualified_edge(u=u, v=v, relation=DIRECTLY_DECREASES, evidence=evidence, citation=citation,
-                                       annotations=annotations, subject_modifier=subject_modifier,
-                                       object_modifier=object_modifier, **attr)
-
-    def add_association(self, u, v, evidence, citation, annotations=None, subject_modifier=None, object_modifier=None,
-                        **attr):
-        """Add an association relation to the network.
-
-        Wraps :meth:`add_qualified_edge` for :data:`pybel.constants.ASSOCIATION`.
-
-        :param BaseEntity u: The source node
-        :param BaseEntity v: The target node
-        :param str evidence: The evidence string from an article
-        :param dict[str,str] or str citation: The citation data dictionary for this evidence. If a string is given,
-                                                assumes it's a PubMed identifier and auto-fills the citation type.
-        :param annotations: The annotations data dictionary
-        :type annotations: Optional[dict[str,str] or dict[str,set] or dict[str,dict[str,bool]]]
-        :param Optional[dict] subject_modifier: The modifiers (like activity) on the subject node. See data model
-         documentation.
-        :param Optional[dict] object_modifier: The modifiers (like activity) on the object node. See data model
-         documentation.
-
-        :return: The hash of the edge
-        :rtype: str
-        """
-        return self.add_qualified_edge(u=u, v=v, relation=ASSOCIATION, evidence=evidence, citation=citation,
-                                       annotations=annotations, subject_modifier=subject_modifier,
-                                       object_modifier=object_modifier, **attr)
-
-    def add_node_from_data(self, node):
-        """Convert a PyBEL node data dictionary to a canonical PyBEL node and ensures it is in the graph.
-
-        :param BaseEntity node: A PyBEL node
-        :rtype: BaseEntity
-        """
-        assert isinstance(node, BaseEntity)
-
-        if node in self:
-            return node
-
-        self.add_node(node)
-
-        if VARIANTS in node:
-            self.add_has_variant(node.get_parent(), node)
-
-        elif MEMBERS in node:
-            for member in node[MEMBERS]:
-                self.add_has_component(node, member)
-
-        elif PRODUCTS in node and REACTANTS in node:
-            for reactant_tokens in node[REACTANTS]:
-                self.add_unqualified_edge(node, reactant_tokens, HAS_REACTANT)
-
-            for product_tokens in node[PRODUCTS]:
-                self.add_unqualified_edge(node, product_tokens, HAS_PRODUCT)
-
-        return node
-
-    def add_qualified_edge(self,
-                           u,
-                           v,
-                           relation: str,
-                           evidence: str,
-                           citation: Union[str, Mapping[str, str]],
-                           annotations: Optional[AnnotationsHint] = None,
-                           subject_modifier=None,
-                           object_modifier=None,
-                           **attr) -> str:
+    def add_qualified_edge(
+            self,
+            u,
+            v,
+            *,
+            relation: str,
+            evidence: str,
+            citation: Union[str, Mapping[str, str]],
+            annotations: Optional[AnnotationsHint] = None,
+            subject_modifier: Optional[Mapping] = None,
+            object_modifier: Optional[Mapping] = None,
+            **attr
+    ) -> str:
         """Add a qualified edge.
 
         Qualified edges have a relation, evidence, citation, and optional annotations, subject modifications,
@@ -591,12 +471,10 @@ class BELGraph(nx.MultiDiGraph):
         :param relation: The type of relation this edge represents
         :param evidence: The evidence string from an article
         :param citation: The citation data dictionary for this evidence. If a string is given,
-                                                assumes it's a PubMed identifier and auto-fills the citation type.
+         assumes it's a PubMed identifier and auto-fills the citation type.
         :param annotations: The annotations data dictionary
-        :param Optional[dict] subject_modifier: The modifiers (like activity) on the subject node. See data model
-         documentation.
-        :param Optional[dict] object_modifier: The modifiers (like activity) on the object node. See data model
-         documentation.
+        :param subject_modifier: The modifiers (like activity) on the subject node. See data model documentation.
+        :param object_modifier: The modifiers (like activity) on the object node. See data model documentation.
 
         :return: The hash of the edge
         """
@@ -608,7 +486,7 @@ class BELGraph(nx.MultiDiGraph):
         if isinstance(citation, str):
             attr[CITATION] = {
                 CITATION_TYPE: CITATION_TYPE_PUBMED,
-                CITATION_REFERENCE: citation
+                CITATION_REFERENCE: citation,
             }
         elif isinstance(citation, dict):
             attr[CITATION] = citation
@@ -626,28 +504,79 @@ class BELGraph(nx.MultiDiGraph):
 
         return self._help_add_edge(u, v, attr)
 
-    def add_inhibits(self, u, v, evidence, citation, annotations=None, object_modifier=None):
+    add_increases = partialmethod(add_qualified_edge, relation=INCREASES)
+    """Wrap :meth:`add_qualified_edge` for the :data:`pybel.constants.INCREASES` relation."""
+
+    add_directly_increases = partialmethod(add_qualified_edge, relation=DIRECTLY_INCREASES)
+    """Add a :data:`pybel.constants.DIRECTLY_INCREASES` with :meth:`add_qualified_edge`."""
+
+    add_decreases = partialmethod(add_qualified_edge, relation=DECREASES)
+    """Add a :data:`pybel.constants.DECREASES` relationship with :meth:`add_qualified_edge`."""
+
+    add_directly_decreases = partialmethod(add_qualified_edge, relation=DIRECTLY_DECREASES)
+    """Add a :data:`pybel.constants.DIRECTLY_DECREASES` relationship with :meth:`add_qualified_edge`."""
+
+    add_association = partialmethod(add_qualified_edge, relation=ASSOCIATION)
+    add_regulates = partialmethod(add_qualified_edge, relation=REGULATES)
+    add_positive_correlation = partialmethod(add_qualified_edge, relation=POSITIVE_CORRELATION)
+    add_negative_correlation = partialmethod(add_qualified_edge, relation=NEGATIVE_CORRELATION)
+    add_causes_no_change = partialmethod(add_qualified_edge, relation=CAUSES_NO_CHANGE)
+
+    def add_node_from_data(self, node: BaseEntity) -> BaseEntity:
+        """Convert a PyBEL node data dictionary to a canonical PyBEL node and ensures it is in the graph.
+
+        :param node: A PyBEL node
+        """
+        assert isinstance(node, BaseEntity)
+
+        if node in self:
+            return node
+
+        self.add_node(node)
+
+        if VARIANTS in node:
+            self.add_has_variant(node.get_parent(), node)
+
+        elif MEMBERS in node:
+            for member in node[MEMBERS]:
+                self.add_has_component(node, member)
+
+        elif PRODUCTS in node and REACTANTS in node:
+            for reactant_tokens in node[REACTANTS]:
+                self.add_has_reactant(node, reactant_tokens)
+            for product_tokens in node[PRODUCTS]:
+                self.add_has_product(node, product_tokens)
+
+        return node
+
+    def add_inhibits(
+            self,
+            u: BaseEntity,
+            v: BaseEntity,
+            *,
+            evidence: str,
+            citation: Union[str, Mapping[str, str]],
+            annotations: Optional[AnnotationsHint] = None,
+            object_modifier: Optional[Mapping] = None,
+    ) -> str:
         """Add an "inhibits" relationship.
 
-        A more specific version of add_qualified edge that automatically populates the relation and object
-        modifier
+        A more specific version of :meth:`add_decreases` that automatically populates the object modifier with an
+        activity.
 
-        :param BaseEntity u: The source node
-        :param BaseEntity v: The target node
-        :param str evidence: The evidence string from an article
-        :param dict[str,str] or str citation: The citation data dictionary for this evidence. If a string is given,
-                                                assumes it's a PubMed identifier and autofills the citation type.
+        :param u: The source node
+        :param v: The target node
+        :param evidence: The evidence string from an article
+        :param citation: The citation data dictionary for this evidence. If a string is given,
+         assumes it's a PubMed identifier and auto-fills the citation type.
         :param annotations: The annotations data dictionary
-        :type annotations: Optional[dict[str,str] or dict[str,set] or dict[str,dict[str,bool]]]
-        :param Optional[dict] object_modifier: A non-default activity.
+        :param object_modifier: A non-default activity.
 
         :return: The hash of the edge
-        :rtype: str
         """
-        return self.add_qualified_edge(
+        return self.add_decreases(
             u,
             v,
-            relation=DECREASES,
             evidence=evidence,
             citation=citation,
             annotations=annotations,
@@ -709,6 +638,9 @@ class BELGraph(nx.MultiDiGraph):
     def __add__(self, other: 'BELGraph') -> 'BELGraph':
         """Copy this graph and join it with another graph with it using :func:`pybel.struct.left_full_join`.
 
+        :param BELGraph other: Another BEL graph
+        :rtype: BELGraph
+
         Example usage:
 
         >>> import pybel
@@ -725,6 +657,9 @@ class BELGraph(nx.MultiDiGraph):
 
     def __iadd__(self, other: 'BELGraph') -> 'BELGraph':
         """Join another graph into this one, in-place, using :func:`pybel.struct.left_full_join`.
+
+        :param BELGraph other: Another BEL graph
+        :rtype: BELGraph
 
         Example usage:
 
@@ -764,6 +699,9 @@ class BELGraph(nx.MultiDiGraph):
     def __iand__(self, other: 'BELGraph') -> 'BELGraph':
         """Join another graph into this one, in-place, using :func:`pybel.struct.left_outer_join`.
 
+        :param BELGraph other: Another BEL graph
+        :rtype: BELGraph
+
         Example usage:
 
         >>> import pybel
@@ -781,6 +719,7 @@ class BELGraph(nx.MultiDiGraph):
         """Join this graph with another using :func:`pybel.struct.left_node_intersection_join`.
 
         :param BELGraph other: Another BEL graph
+        :rtype: BELGraph
 
         Example usage:
 
@@ -882,7 +821,10 @@ class BELGraph(nx.MultiDiGraph):
         print(self.summary_str(), file=file)
 
     def serialize(self, *, fmt: str = 'nodelink', file: Union[None, str, TextIO] = None, **kwargs):
-        """Serialize the graph to an object or file if given."""
+        """Serialize the graph to an object or file if given.
+
+        For additional I/O, see the :mod:`pybel.io` module.
+        """
         if file is None:
             return self._serialize_object(fmt=fmt, **kwargs)
         elif isinstance(file, str):

@@ -5,7 +5,7 @@
 import unittest
 
 from pybel import BELGraph
-from pybel.constants import FUNCTION, POSITIVE_CORRELATION, PROTEIN, RELATION
+from pybel.constants import POSITIVE_CORRELATION, RELATION
 from pybel.dsl import gene, hgvs, pathology, protein, protein_fusion, rna, rna_fusion
 from pybel.struct.mutation import (
     enrich_protein_and_rna_origins, prune_protein_rna_origins, remove_associations, remove_pathologies,
@@ -28,13 +28,13 @@ class TestDeletions(unittest.TestCase):
         p1, p2, p3 = (protein(namespace='HGNC', name=n()) for _ in range(3))
         d1, d2 = (pathology(namespace='MESH', name=n()) for _ in range(2))
 
-        g.add_increases(p1, p2, n(), n())
-        g.add_increases(p2, p3, n(), n())
-        g.add_qualified_edge(p1, d1, POSITIVE_CORRELATION, n(), n())
-        g.add_qualified_edge(p2, d1, POSITIVE_CORRELATION, n(), n())
-        g.add_association(p2, d1, n(), n())
-        g.add_qualified_edge(d1, d2, POSITIVE_CORRELATION, n(), n())
-        g.add_qualified_edge(d1, d2, POSITIVE_CORRELATION, n(), n())
+        g.add_increases(p1, p2, citation=n(), evidence=n())
+        g.add_increases(p2, p3, citation=n(), evidence=n())
+        g.add_positive_correlation(p1, d1, citation=n(), evidence=n())
+        g.add_positive_correlation(p2, d1, citation=n(), evidence=n())
+        g.add_association(p2, d1, citation=n(), evidence=n())
+        g.add_positive_correlation(d1, d2, citation=n(), evidence=n())
+        g.add_positive_correlation(d1, d2, citation=n(), evidence=n())
 
         self.assertEqual(5, g.number_of_nodes())
         self.assertEqual(7, g.number_of_edges())

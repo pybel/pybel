@@ -14,7 +14,9 @@ Its syntax follows the same style s the pmod() tags for proteins, and can includ
 
 For example, the node :code:`g(HGNC:GSK3B, gmod(M))` is represented with the following:
 
-.. code::
+.. code-block:: python
+
+    from pybel.constants import *
 
     {
         FUNCTION: GENE,
@@ -25,10 +27,10 @@ For example, the node :code:`g(HGNC:GSK3B, gmod(M))` is represented with the fol
                 KIND: GMOD,
                 IDENTIFIER: {
                     NAMESPACE: BEL_DEFAULT_NAMESPACE,
-                    NAME: 'Me'
-                }
-            }
-        ]
+                    NAME: 'Me',
+                },
+            },
+        ],
     }
 
 The addition of this function does not preclude the use of all other standard functions in BEL; however, other

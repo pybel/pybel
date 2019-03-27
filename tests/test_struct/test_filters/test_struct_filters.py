@@ -143,22 +143,22 @@ class TestEdgeFilters(unittest.TestCase):
     def test_any_filter_no_query(self):
         """Test that the all filter returns true when there's no argument"""
         graph = BELGraph()
-        graph.add_increases(Protein(n(), n()), Protein(n(), n()), n(), n())
+        graph.add_increases(Protein(n(), n()), Protein(n(), n()), citation=n(), evidence=n())
         self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_any_filter({})))
 
     def test_any_filter_no_annotations(self):
         graph = BELGraph()
-        graph.add_increases(Protein(n(), n()), Protein(n(), n()), n(), n())
+        graph.add_increases(Protein(n(), n()), Protein(n(), n()), citation=n(), evidence=n())
         self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_any_filter({'A': {'1'}})))
 
     def test_any_filter_empty_annotations(self):
         graph = BELGraph()
-        graph.add_increases(Protein(n(), n()), Protein(n(), n()), n(), n(), annotations={})
+        graph.add_increases(Protein(n(), n()), Protein(n(), n()), citation=n(), evidence=n(), annotations={})
         self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_any_filter({'A': {'1'}})))
 
     def test_any_filter(self):
         graph = BELGraph()
-        graph.add_increases(Protein(n(), n()), Protein(n(), n()), n(), n(), annotations={
+        graph.add_increases(Protein(n(), n()), Protein(n(), n()), citation=n(), evidence=n(), annotations={
             'A': {'1', '2', '3'}
         })
 
@@ -210,22 +210,22 @@ class TestEdgeFilters(unittest.TestCase):
     def test_all_filter_no_query(self):
         """Test that the all filter returns true when there's no argument"""
         graph = BELGraph()
-        graph.add_increases(Protein(n(), n()), Protein(n(), n()), n(), n())
+        graph.add_increases(Protein(n(), n()), Protein(n(), n()), citation=n(), evidence=n())
         self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter({})))
 
     def test_all_filter_no_annotations(self):
         graph = BELGraph()
-        graph.add_increases(Protein(n(), n()), Protein(n(), n()), n(), n())
+        graph.add_increases(Protein(n(), n()), Protein(n(), n()), citation=n(), evidence=n())
         self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_all_filter({'A': {'1'}})))
 
     def test_all_filter_empty_annotations(self):
         graph = BELGraph()
-        graph.add_increases(Protein(n(), n()), Protein(n(), n()), n(), n(), annotations={})
+        graph.add_increases(Protein(n(), n()), Protein(n(), n()), citation=n(), evidence=n(), annotations={})
         self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_all_filter({'A': {'1'}})))
 
     def test_all_filter(self):
         graph = BELGraph()
-        graph.add_increases(Protein(n(), n()), Protein(n(), n()), n(), n(), annotations={
+        graph.add_increases(Protein(n(), n()), Protein(n(), n()), citation=n(), evidence=n(), annotations={
             'A': {'1', '2', '3'}
         })
 

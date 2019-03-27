@@ -371,8 +371,8 @@ class TestNodePredicates(unittest.TestCase):
         g = BELGraph()
         a, b, c = (protein(n(), n()) for _ in range(3))
 
-        g.add_increases(a, b, n(), n())
-        g.add_increases(b, c, n(), n())
+        g.add_increases(a, b, citation=n(), evidence=n())
+        g.add_increases(b, c, citation=n(), evidence=n())
 
         self.assertTrue(is_causal_source(g, a))
         self.assertFalse(is_causal_central(g, a))
@@ -397,10 +397,10 @@ class TestEdgePredicate(unittest.TestCase):
     def test_has_polarity(self):
         g = BELGraph()
         a, b, c = (protein(n(), n()) for _ in range(3))
-        key1 = g.add_increases(a, b, n(), n())
+        key1 = g.add_increases(a, b, citation=n(), evidence=n())
         self.assertTrue(has_polarity(g, a, b, key1))
 
-        key2 = g.add_association(b, c, n(), n())
+        key2 = g.add_association(b, c, citation=n(), evidence=n())
         self.assertFalse(has_polarity(g, b, c, key2))
 
     def test_has_provenance(self):

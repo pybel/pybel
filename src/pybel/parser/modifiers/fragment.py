@@ -13,7 +13,9 @@ the position ('pos') and/or amino acid code ('code').
 
 For example, the node :code:`p(HGNC:GSK3B, frag(45_129))` is represented with the following:
 
-.. code::
+.. code-block:: python
+
+    from pybel.constants import *
 
     {
         FUNCTION: PROTEIN,
@@ -23,9 +25,9 @@ For example, the node :code:`p(HGNC:GSK3B, frag(45_129))` is represented with th
             {
                 KIND: FRAGMENT,
                 FRAGMENT_START: 45,
-                FRAGMENT_STOP: 129
-            }
-        ]
+                FRAGMENT_STOP: 129,
+            },
+        ],
     }
 
 Additionally, nodes can have an asterick (*) or question mark (?) representing unbound
@@ -35,7 +37,9 @@ A fragment may also be unknown, such as in the node :code:`p(HGNC:GSK3B, frag(?)
 is represented with the key :data:`pybel.constants.FRAGMENT_MISSING` and the value of '?' like:
 
 
-.. code::
+.. code-block:: python
+
+    from pybel.constants import *
 
     {
         FUNCTION: PROTEIN,
@@ -45,8 +49,8 @@ is represented with the key :data:`pybel.constants.FRAGMENT_MISSING` and the val
             {
                 KIND: FRAGMENT,
                 FRAGMENT_MISSING: '?',
-            }
-        ]
+            },
+        ],
     }
 
 .. seealso::

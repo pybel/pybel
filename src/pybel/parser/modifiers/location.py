@@ -5,13 +5,15 @@
 Location data also is added into the information in the edge for the node (subject or object) for which it was
 annotated. :code:`p(HGNC:GSK3B, pmod(P, S, 9), loc(GO:lysozome)) pos act(p(HGNC:GSK3B), ma(kin))` becomes:
 
-.. code::
+.. code-block:: python
+
+    from pybel.constants import *
 
     {
         SUBJECT: {
             LOCATION: {
                 NAMESPACE: 'GO',
-                NAME: 'lysozome'
+                NAME: 'lysozome',
             }
         },
         RELATION: POSITIVE_CORRELATION,
@@ -22,8 +24,8 @@ annotated. :code:`p(HGNC:GSK3B, pmod(P, S, 9), loc(GO:lysozome)) pos act(p(HGNC:
                 NAME: 'kin',
             }
         },
-        EVIDENCE: '...',
-        CITATION: { ... }
+        EVIDENCE: ...,
+        CITATION: { ... },
     }
 
 

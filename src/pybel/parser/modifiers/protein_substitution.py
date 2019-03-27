@@ -8,7 +8,9 @@ automatically translated to the appropriate HGVS :code:`p(HGNC:APP, var(p.Arg275
 substitutions are using the reference protein sequence for numbering and not the genomic reference.
 The previous statements both produce the underlying data:
 
-.. code::
+.. code-block:: python
+
+    from pybel.constants import *
 
     {
         FUNCTION: GENE,
@@ -17,9 +19,9 @@ The previous statements both produce the underlying data:
         VARIANTS: [
             {
                 KIND: HGVS,
-                IDENTIFIER: 'p.Arg275His'
-            }
-        ]
+                IDENTIFIER: 'p.Arg275His',
+            },
+        ],
     }
 
 .. seealso::

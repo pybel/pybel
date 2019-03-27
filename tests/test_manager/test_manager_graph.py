@@ -1336,18 +1336,10 @@ class TestEquivalentNodes(unittest.TestCase):
     def test_direct_has_namespace(self):
         graph = BELGraph()
 
-        n1_data = protein(namespace='HGNC', name='CD33', identifier='1659')
-        n2_data = protein(namespace='NOPE', name='NOPE', identifier='NOPE')
+        n1 = protein(namespace='HGNC', name='CD33', identifier='1659')
+        n2 = protein(namespace='NOPE', name='NOPE', identifier='NOPE')
 
-        n1 = graph.add_node_from_data(n1_data)
-        n2 = graph.add_node_from_data(n2_data)
-
-        graph.add_increases(
-            n1_data,
-            n2_data,
-            n(),
-            n()
-        )
+        graph.add_increases(n1, n2, citation=n(), evidence=n())
 
         self.assertEqual({n1}, graph.get_equivalent_nodes(n1))
 
@@ -1357,16 +1349,13 @@ class TestEquivalentNodes(unittest.TestCase):
     def test_indirect_has_namespace(self):
         graph = BELGraph()
 
-        a_node = protein(namespace='HGNC', name='CD33')
-        b_node = protein(namespace='HGNCID', identifier='1659')
+        a = protein(namespace='HGNC', name='CD33')
+        b = protein(namespace='HGNCID', identifier='1659')
 
-        graph.add_equivalence(a_node, b_node)
+        graph.add_equivalence(a, b)
 
-        a = a_node
-        b = b_node
-
-        self.assertEqual({a, b}, graph.get_equivalent_nodes(a_node))
-        self.assertEqual({a, b}, graph.get_equivalent_nodes(b_node))
+        self.assertEqual({a, b}, graph.get_equivalent_nodes(a))
+        self.assertEqual({a, b}, graph.get_equivalent_nodes(b))
 
         self.assertTrue(graph.node_has_namespace(a, 'HGNC'))
         self.assertTrue(graph.node_has_namespace(b, 'HGNC'))
@@ -1374,31 +1363,22 @@ class TestEquivalentNodes(unittest.TestCase):
     def test_triangle_has_namespace(self):
         graph = BELGraph()
 
-        a_node = protein(namespace='A', name='CD33')
-        b_node = protein(namespace='B', identifier='1659')
-        c_node = protein(namespace='C', identifier='1659')
-        d_node = protein(namespace='HGNC', identifier='1659')
+        a = protein(namespace='A', name='CD33')
+        b = protein(namespace='B', identifier='1659')
+        c = protein(namespace='C', identifier='1659')
+        d = protein(namespace='HGNC', identifier='1659')
 
-        a = graph.add_node_from_data(a_node)
-        b = graph.add_node_from_data(b_node)
-        c = graph.add_node_from_data(c_node)
-        d = graph.add_node_from_data(d_node)
+        graph.add_equivalence(a, b)
+        graph.add_equivalence(b, c)
+        graph.add_equivalence(c, a)
+        graph.add_equivalence(c, d)
 
-        graph.add_equivalence(a_node, b_node)
-        graph.add_equivalence(b_node, c_node)
-        graph.add_equivalence(c_node, a_node)
-        graph.add_equivalence(c_node, d_node)
-
-        self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(a_node))
-        self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(b_node))
-        self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(c_node))
-        self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(d_node))
+        self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(a))
+        self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(b))
+        self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(c))
+        self.assertEqual({a, b, c, d}, graph.get_equivalent_nodes(d))
 
         self.assertTrue(graph.node_has_namespace(a, 'HGNC'))
         self.assertTrue(graph.node_has_namespace(b, 'HGNC'))
         self.assertTrue(graph.node_has_namespace(c, 'HGNC'))
         self.assertTrue(graph.node_has_namespace(d, 'HGNC'))
-
-
-if __name__ == '__main__':
-    unittest.main()

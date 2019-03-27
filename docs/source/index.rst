@@ -45,6 +45,7 @@ Links
    datamodel
    examples
    summary
+   operators
    filters
    transformations
    grouping

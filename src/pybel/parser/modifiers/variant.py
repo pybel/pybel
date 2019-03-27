@@ -7,7 +7,7 @@ For example, the BEL term :code:`p(HGNC:GSK3B, var(p.Gly123Arg))` is translated 
 .. code-block:: python
 
    from pybel.dsl import Protein, Hgvs
-   gsk3b_variant = Protien(namespace='HGNC', name='GSK3B', variants=Hgvs(p.Gly123Arg))
+   gsk3b_variant = Protien(namespace='HGNC', name='GSK3B', variants=Hgvs('p.Gly123Arg'))
 
 Further, the shorthand for protein substitutions, :class:`pybel.dsl.ProteinSubstitution`, can be used to produce the
 same result, as it inherits from :class:`pybel.dsl.Hgvs`:
@@ -21,16 +21,16 @@ Either way, the resulting object can be used like a dict that looks like:
 
 .. code-block:: python
 
-    import pybel.constants as pc
+    from pybel.constants import *
 
     {
-        pc.FUNCTION: pc.PROTEIN,
-        pc.NAMESPACE: 'HGNC',
-        pc.NAME: 'GSK3B',
-        pc.VARIANTS: [
+        FUNCTION: PROTEIN,
+        NAMESPACE: 'HGNC',
+        NAME: 'GSK3B',
+        VARIANTS: [
             {
-                pc.KIND: pc.HGVS,
-                pc.IDENTIFIER: 'p.Gly123Arg',
+                KIND: HGVS,
+                IDENTIFIER: 'p.Gly123Arg',
             },
         ],
     }

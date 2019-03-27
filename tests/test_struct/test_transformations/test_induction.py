@@ -7,7 +7,7 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import (
-    ASSOCIATION, CITATION_AUTHORS, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED, DECREASES, INCREASES,
+    CITATION_AUTHORS, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED,
 )
 from pybel.dsl import BaseEntity, gene, protein, rna
 from pybel.struct.mutation.expansion import expand_upstream_causal
@@ -51,10 +51,10 @@ class TestInduction(TestGraphMixin):
         keyword, url = n(), n()
         graph.namespace_url[keyword] = url
         a, b, c, d = [protein(namespace='test', name=str(i)) for i in range(4)]
-        graph.add_directly_increases(a, b, n(), n())
-        graph.add_directly_increases(b, c, n(), n())
-        graph.add_directly_increases(c, d, n(), n())
-        graph.add_increases(a, d, n(), n())
+        graph.add_directly_increases(a, b, citation=n(), evidence=n())
+        graph.add_directly_increases(b, c, citation=n(), evidence=n())
+        graph.add_directly_increases(c, d, citation=n(), evidence=n())
+        graph.add_increases(a, d, citation=n(), evidence=n())
 
         nodes = [b, c]
         subgraph = get_subgraph_by_induction(graph, nodes)
@@ -76,13 +76,13 @@ class TestInduction(TestGraphMixin):
         keyword, url = n(), n()
         graph.namespace_url[keyword] = url
         a, b, c, d, e, f = [protein(namespace='test', name=n()) for _ in range(6)]
-        graph.add_increases(a, b, n(), n())
-        graph.add_increases(a, c, n(), n())
-        graph.add_increases(b, d, n(), n())
-        graph.add_increases(c, d, n(), n())
-        graph.add_increases(a, e, n(), n())
-        graph.add_increases(e, f, n(), n())
-        graph.add_increases(f, d, n(), n())
+        graph.add_increases(a, b, citation=n(), evidence=n())
+        graph.add_increases(a, c, citation=n(), evidence=n())
+        graph.add_increases(b, d, citation=n(), evidence=n())
+        graph.add_increases(c, d, citation=n(), evidence=n())
+        graph.add_increases(a, e, citation=n(), evidence=n())
+        graph.add_increases(e, f, citation=n(), evidence=n())
+        graph.add_increases(f, d, citation=n(), evidence=n())
 
         query_nodes = [a, d]
         shortest_paths_nodes = get_nodes_in_all_shortest_paths(graph, query_nodes)
@@ -108,15 +108,14 @@ class TestInduction(TestGraphMixin):
     def test_get_upstream_causal_subgraph(self):
         """Test get_upstream_causal_subgraph."""
         a, b, c, d, e, f = [protein(namespace='test', name=n()) for _ in range(6)]
-        citation, evidence = '', ''
 
         universe = BELGraph()
         universe.namespace_pattern['test'] = 'test-url'
-        universe.add_qualified_edge(a, b, INCREASES, citation, evidence)
-        universe.add_qualified_edge(b, c, INCREASES, citation, evidence)
-        universe.add_qualified_edge(d, a, ASSOCIATION, citation, evidence)
-        universe.add_qualified_edge(e, a, INCREASES, citation, evidence)
-        universe.add_qualified_edge(f, b, DECREASES, citation, evidence)
+        universe.add_increases(a, b, citation=n(), evidence=n())
+        universe.add_increases(b, c, citation=n(), evidence=n())
+        universe.add_association(d, a, citation=n(), evidence=n())
+        universe.add_increases(e, a, citation=n(), evidence=n())
+        universe.add_decreases(f, b, citation=n(), evidence=n())
 
         subgraph = get_upstream_causal_subgraph(universe, [a, b])
 
@@ -144,14 +143,14 @@ class TestInduction(TestGraphMixin):
         a, b, c, d, e, f = [protein(namespace='test', name=i) for i in string.ascii_lowercase[:6]]
 
         universe = BELGraph()
-        universe.add_qualified_edge(a, b, INCREASES, n(), n())
-        universe.add_qualified_edge(b, c, INCREASES, n(), n())
-        universe.add_qualified_edge(d, a, ASSOCIATION, n(), n())
-        universe.add_qualified_edge(e, a, INCREASES, n(), n())
-        universe.add_qualified_edge(f, b, DECREASES, n(), n())
+        universe.add_increases(a, b, citation=n(), evidence=n())
+        universe.add_increases(b, c, citation=n(), evidence=n())
+        universe.add_association(d, a, citation=n(), evidence=n())
+        universe.add_increases(e, a, citation=n(), evidence=n())
+        universe.add_decreases(f, b, citation=n(), evidence=n())
 
         subgraph = BELGraph()
-        subgraph.add_qualified_edge(a, b, INCREASES, n(), n())
+        subgraph.add_increases(a, b, citation=n(), evidence=n())
 
         expand_upstream_causal(universe, subgraph)
 
@@ -184,11 +183,11 @@ class TestEdgePredicateBuilders(TestGraphMixin):
         graph = BELGraph()
         keyword, url = n(), n()
         graph.namespace_url[keyword] = url
-        graph.add_increases(a, b, n(), citation=p1)
-        graph.add_increases(a, b, n(), citation=p2)
-        graph.add_increases(b, c, n(), citation=p1)
-        graph.add_increases(b, c, n(), citation=p3)
-        graph.add_increases(c, d, n(), citation=p3)
+        graph.add_increases(a, b, evidence=n(), citation=p1)
+        graph.add_increases(a, b, evidence=n(), citation=p2)
+        graph.add_increases(b, c, evidence=n(), citation=p1)
+        graph.add_increases(b, c, evidence=n(), citation=p3)
+        graph.add_increases(c, d, evidence=n(), citation=p3)
 
         subgraph = get_subgraph_by_pubmed(graph, p1)
 
@@ -216,12 +215,12 @@ class TestEdgePredicateBuilders(TestGraphMixin):
         graph = BELGraph()
         keyword, url = n(), n()
         graph.namespace_url[keyword] = url
-        graph.add_increases(a, b, n(), citation=p1)
-        graph.add_increases(a, b, n(), citation=p2)
-        graph.add_increases(b, c, n(), citation=p1)
-        graph.add_increases(b, c, n(), citation=p3)
-        graph.add_increases(c, d, n(), citation=p3)
-        graph.add_increases(e, f, n(), citation=p4)
+        graph.add_increases(a, b, evidence=n(), citation=p1)
+        graph.add_increases(a, b, evidence=n(), citation=p2)
+        graph.add_increases(b, c, evidence=n(), citation=p1)
+        graph.add_increases(b, c, evidence=n(), citation=p3)
+        graph.add_increases(c, d, evidence=n(), citation=p3)
+        graph.add_increases(e, f, evidence=n(), citation=p4)
 
         subgraph = get_subgraph_by_pubmed(graph, [p1, p4])
 
@@ -262,10 +261,10 @@ class TestEdgePredicateBuilders(TestGraphMixin):
         graph = BELGraph()
         keyword, url = n(), n()
         graph.namespace_url[keyword] = url
-        graph.add_increases(a, b, n(), citation=c1)
-        graph.add_increases(a, b, n(), citation=c2)
-        graph.add_increases(b, c, n(), citation=c1)
-        graph.add_increases(c, d, n(), citation=c2)
+        graph.add_increases(a, b, evidence=n(), citation=c1)
+        graph.add_increases(a, b, evidence=n(), citation=c2)
+        graph.add_increases(b, c, evidence=n(), citation=c1)
+        graph.add_increases(c, d, evidence=n(), citation=c2)
 
         subgraph1 = get_subgraph_by_authors(graph, a1)
 
@@ -321,10 +320,10 @@ class TestEdgePredicateBuilders(TestGraphMixin):
         graph = BELGraph()
         keyword, url = n(), n()
         graph.namespace_url[keyword] = url
-        graph.add_increases(a, b, n(), citation=c1)
-        graph.add_increases(a, b, n(), citation=c2)
-        graph.add_increases(b, c, n(), citation=c1)
-        graph.add_increases(c, d, n(), citation=c2)
+        graph.add_increases(a, b, evidence=n(), citation=c1)
+        graph.add_increases(a, b, evidence=n(), citation=c2)
+        graph.add_increases(b, c, evidence=n(), citation=c1)
+        graph.add_increases(c, d, evidence=n(), citation=c2)
 
         subgraph1 = get_subgraph_by_authors(graph, [a1, a2])
 

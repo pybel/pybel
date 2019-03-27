@@ -109,9 +109,9 @@ class QueryTestEgf(unittest.TestCase):
         graph = BELGraph()
         a, b, c, d = (Protein(namespace=n(), name=str(i)) for i in range(4))
 
-        graph.add_increases(a, b, n(), n())
-        graph.add_increases(b, c, n(), n())
-        graph.add_increases(c, d, n(), n())
+        graph.add_increases(a, b, citation=n(), evidence=n())
+        graph.add_increases(b, c, citation=n(), evidence=n())
+        graph.add_increases(c, d, citation=n(), evidence=n())
 
         self.add_query(graph).append_seeding_neighbors(b)
         result = self.run_query()
@@ -130,10 +130,10 @@ class QueryTestEgf(unittest.TestCase):
         graph = BELGraph()
         a, b, c, d, e = (Protein(namespace=n(), name=str(i)) for i in range(5))
 
-        graph.add_increases(a, b, n(), n())
-        graph.add_increases(b, c, n(), n())
-        graph.add_increases(c, d, n(), n())
-        graph.add_increases(d, e, n(), n())
+        graph.add_increases(a, b, citation=n(), evidence=n())
+        graph.add_increases(b, c, citation=n(), evidence=n())
+        graph.add_increases(c, d, citation=n(), evidence=n())
+        graph.add_increases(d, e, citation=n(), evidence=n())
 
         self.add_query(graph).append_seeding_neighbors([b, c])
 

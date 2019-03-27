@@ -19,14 +19,14 @@ class TestEdgePredicates(unittest.TestCase):
 
         a, b, c = protein(n(), n()), pathology(n(), n()), pathology(n(), n())
 
-        key = graph.add_increases(a, b, n(), n())
+        key = graph.add_increases(a, b, citation=n(), evidence=n())
         self.assertFalse(has_pathology_causal(graph, a, b, key))
 
-        key = graph.add_increases(b, a, n(), n())
+        key = graph.add_increases(b, a, citation=n(), evidence=n())
         self.assertTrue(has_pathology_causal(graph, b, a, key))
 
-        key = graph.add_association(b, a, n(), n())
+        key = graph.add_association(b, a, citation=n(), evidence=n())
         self.assertFalse(has_pathology_causal(graph, b, a, key))
 
-        key = graph.add_increases(a, c, n(), n())
+        key = graph.add_increases(a, c, citation=n(), evidence=n())
         self.assertFalse(has_pathology_causal(graph, a, c, key))

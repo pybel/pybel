@@ -117,9 +117,9 @@ class TestSummary(unittest.TestCase):
         graph = BELGraph()
         a, b, c, d = protein(n(), n()), protein(n(), n()), pathology(n(), n()), pathology(n(), n())
 
-        graph.add_association(a, c, n(), n())
-        graph.add_association(a, d, n(), n())
-        graph.add_association(b, d, n(), n())
+        graph.add_association(a, c, citation=n(), evidence=n())
+        graph.add_association(a, d, citation=n(), evidence=n())
+        graph.add_association(b, d, citation=n(), evidence=n())
 
         pathology_counter = count_pathologies(graph)
         self.assertIn(c, pathology_counter)
@@ -138,8 +138,8 @@ class TestSummary(unittest.TestCase):
         graph = BELGraph()
         a, b, c = protein(n(), n()), protein(n(), n()), pathology(n(), n())
 
-        graph.add_association(a, b, n(), n())
-        graph.add_association(a, c, n(), n())
+        graph.add_association(a, b, citation=n(), evidence=n())
+        graph.add_association(a, c, citation=n(), evidence=n())
 
         top_hubs = get_top_hubs(graph, n=1)
         self.assertEqual(1, len(top_hubs))

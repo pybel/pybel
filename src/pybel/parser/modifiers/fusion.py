@@ -6,7 +6,9 @@ Gene, RNA, miRNA, and protein  fusions are all represented with the same underly
 it is shown with uppercase letters referring to constants from :code:`pybel.constants` and. For example,
 :code:`g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))` is represented as:
 
-.. code::
+.. code-block:: python
+
+    from pybel.constants import *
 
     {
         FUNCTION: GENE,
@@ -16,15 +18,15 @@ it is shown with uppercase letters referring to constants from :code:`pybel.cons
             RANGE_5P: {
                 FUSION_REFERENCE: 'c',
                 FUSION_START: '?',
-                FUSION_STOP: 1875
+                FUSION_STOP: 1875,
 
             },
             RANGE_3P: {
                 FUSION_REFERENCE: 'c',
                 FUSION_START: 2626,
-                FUSION_STOP: '?'
-            }
-        }
+                FUSION_STOP: '?',
+            },
+        },
     }
 
 

@@ -5,11 +5,7 @@ Data Model
 Constants
 ---------
 These documents refer to many aspects of the data model using constants, which can be found in the top-level module
-:mod:`pybel.constants`. In these examples, all constants are imported with the following code:
-
-.. code-block:: python
-
-    >>> import pybel.constants as pc
+:mod:`pybel.constants`.
 
 Terms describing abundances, annotations, and other internal data are designated in :mod:`pybel.constants`
 with full-caps, such as :data:`pybel.constants.FUNCTION` and :data:`pybel.constants.PROTEIN`.
@@ -20,7 +16,7 @@ strings behind these constants change.
 Function Nomenclature
 ~~~~~~~~~~~~~~~~~~~~~
 The following table shows PyBEL's internal mapping from BEL functions to its own constants. This can be accessed
-programatically via :data:`pybel.parser.language.abundance_labels`
+programatically via :data:`pybel.parser.language.abundance_labels`.
 
 +-------------------------------------------+------------------------------------+-------------------------------------+
 | BEL Function                              | PyBEL Constant                     | PyBEL DSL                           |
@@ -49,17 +45,13 @@ programatically via :data:`pybel.parser.language.abundance_labels`
 Graph
 -----
 .. autoclass:: pybel.BELGraph
-    :exclude-members: nodes_iter, edges_iter, add_warning
+    :exclude-members: nodes_iter, edges_iter, add_warning, fresh_copy, document
     :members:
 
     .. automethod:: __add__
     .. automethod:: __iadd__
     .. automethod:: __and__
     .. automethod:: __iand__
-
-.. autofunction:: pybel.struct.left_full_join
-.. autofunction:: pybel.struct.left_outer_join
-.. autofunction:: pybel.struct.union
 
 Nodes
 -----
@@ -78,14 +70,14 @@ DSL function corresponding to the ``p()`` function in BEL, :class:`pybel.dsl.Pro
 :class:`pybel.dsl.Protein`, like the others mentioned before, inherit from :class:`pybel.dsl.BaseEntity`, which itself
 inherits from :class:`dict`. Therefore, the resulting object can be used like a dict that looks like:
 
-.. code:: python
+.. code-block:: python
 
-    import pybel.constants as pc
+    from pybel.constants import *
 
     {
-        pc.FUNCTION: pc.PROTEIN,
-        pc.NAMESPACE: 'HGNC',
-        pc.NAME: 'GSK3B',
+        FUNCTION: PROTEIN,
+        NAMESPACE: 'HGNC',
+        NAME: 'GSK3B',
     }
 
 Alternatively, it can be used in more exciting ways, outlined later in the documentation for :mod:`pybel.dsl`.
@@ -158,7 +150,9 @@ List Abundances
 Complexes and composites that are defined by lists. As of version 0.9.0, they contain a list of the data dictionaries
 that describe their members. For example :code:`complex(p(HGNC:FOS), p(HGNC:JUN))` becomes:
 
-.. code::
+.. code-block:: python
+
+    from pybel.constants import *
 
     {
         FUNCTION: COMPLEX,
@@ -166,11 +160,11 @@ that describe their members. For example :code:`complex(p(HGNC:FOS), p(HGNC:JUN)
             {
                 FUNCTION: PROTEIN,
                 NAMESPACE: 'HGNC',
-                NAME: 'FOS'
+                NAME: 'FOS',
             }, {
                 FUNCTION: PROTEIN,
                 NAMESPACE: 'HGNC',
-                NAME: 'JUN'
+                NAME: 'JUN',
             }
         ]
     }
@@ -189,7 +183,9 @@ The following edges are also inferred:
 
 Similarly, :code:`composite(a(CHEBI:malonate), p(HGNC:JUN))` becomes:
 
-.. code::
+.. code-block:: python
+
+    from pybel.constants import *
 
     {
         FUNCTION: COMPOSITE,
@@ -197,11 +193,11 @@ Similarly, :code:`composite(a(CHEBI:malonate), p(HGNC:JUN))` becomes:
             {
                 FUNCTION: ABUNDANCE,
                 NAMESPACE: 'CHEBI',
-                NAME: 'malonate'
+                NAME: 'malonate',
             }, {
                 FUNCTION: PROTEIN,
                 NAMESPACE: 'HGNC',
-                NAME: 'JUN'
+                NAME: 'JUN',
             }
         ]
     }
@@ -216,7 +212,7 @@ The following edges are inferred:
 
 .. warning::
 
-    The canonical ordering for the elements of the ``MEMBERS`` list correspond to the sorted
+    The canonical ordering for the elements of the :data:`pybel.constantsMEMBERS` list correspond to the sorted
     order of their corresponding node tuples using :func:`pybel.parser.canonicalize.sort_dict_list`. Rather than
     directly modifying the BELGraph's structure, use :meth:`BELGraph.add_node_from_data`, which takes care of
     automatically canonicalizing this dictionary.
@@ -239,7 +235,9 @@ added to the network for
 As of version 0.9.0, the reactants' and products' data dictionaries are included as sub-lists keyed ``REACTANTS`` and
 ``PRODUCTS``. It becomes:
 
-.. code::
+.. code-block:: python
+
+    from pybel.constants import *
 
     {
         FUNCTION: REACTION
@@ -251,22 +249,22 @@ As of version 0.9.0, the reactants' and products' data dictionaries are included
             }, {
                 FUNCTION: ABUNDANCE,
                 NAMESPACE: 'CHEBI',
-                NAME: 'NADPH'
+                NAME: 'NADPH',
             }, {
                 FUNCTION: ABUNDANCE,
                 NAMESPACE: 'CHEBI',
-                NAME: 'hydron'
+                NAME: 'hydron',
             }
         ],
         PRODUCTS: [
             {
                 FUNCTION: ABUNDANCE,
                 NAMESPACE: 'CHEBI',
-                NAME: 'mevalonate'
+                NAME: 'mevalonate',
             }, {
                 FUNCTION: ABUNDANCE,
                 NAMESPACE: 'CHEBI',
-                NAME: 'NADP(+)'
+                NAME: 'NADP(+)',
             }
         ]
     }
@@ -326,7 +324,9 @@ Because this data is associated with an edge, the node data for the subject and 
 However, information about the activities, modifiers, and transformations on the subject and object are included.
 Below is the "skeleton" for the edge data model in PyBEL:
 
-.. code::
+.. code-block:: python
+
+    from pybel.constants import *
 
     {
         SUBJECT: {
@@ -336,19 +336,19 @@ Below is the "skeleton" for the edge data model in PyBEL:
         OBJECT: {
             # ... modifications to the object node. Only present if non-empty.
         },
-        EVIDENCE: '...',
+        EVIDENCE: ...,
         CITATION : {
             CITATION_TYPE: CITATION_TYPE_PUBMED,
-            CITATION_REFERENCE: '...',
+            CITATION_REFERENCE: ...,
             CITATION_DATE: 'YYYY-MM-DD',
             CITATION_AUTHORS: 'Jon Snow|John Doe',
         },
         ANNOTATIONS: {
             'Disease': {
                 'Colorectal Cancer': True,
-             }
+            },
             # ... additional annotations as tuple[str,dict[str,bool]] pairs
-        }
+        },
     }
 
 Each edge must contain the ``RELATION``, ``EVIDENCE``, and ``CITATION`` entries. The ``CITATION``
@@ -362,7 +362,9 @@ Activities
 Modifiers are added to this structure as well. Under this schema,
 :code:`p(HGNC:GSK3B, pmod(P, S, 9)) pos act(p(HGNC:GSK3B), ma(kin))` becomes:
 
-.. code::
+.. code-block:: python
+
+    from pybel.constants import *
 
     {
         RELATION: POSITIVE_CORRELATION,
@@ -370,18 +372,20 @@ Modifiers are added to this structure as well. Under this schema,
             MODIFIER: ACTIVITY,
             EFFECT: {
                 NAME: 'kin',
-                NAMESPACE: BEL_DEFAULT_NAMESPACE
+                NAMESPACE: BEL_DEFAULT_NAMESPACE,
             }
         },
         CITATION: { ... },
-        EVIDENCE: '...',
-        ANNOTATIONS: { ... }
+        EVIDENCE: ...,
+        ANNOTATIONS: { ... },
     }
 
 Activities without molecular activity annotations do not contain an :data:`pybel.constants.EFFECT` entry: Under this
 schema, :code:`p(HGNC:GSK3B, pmod(P, S, 9)) pos act(p(HGNC:GSK3B))` becomes:
 
-.. code::
+.. code-block:: python
+
+    from pybel.constants import *
 
     {
         RELATION: POSITIVE_CORRELATION,
@@ -389,8 +393,8 @@ schema, :code:`p(HGNC:GSK3B, pmod(P, S, 9)) pos act(p(HGNC:GSK3B))` becomes:
             MODIFIER: ACTIVITY
         },
         CITATION: { ... },
-        EVIDENCE: '...',
-        ANNOTATIONS: { ... }
+        EVIDENCE: ...,
+        ANNOTATIONS: { ... },
     }
 
 
@@ -402,7 +406,9 @@ Translocations
 ~~~~~~~~~~~~~~
 Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:YFG2))` becomes:
 
-.. code::
+.. code-block:: python
+
+    from pybel.constants import *
 
     {
         RELATION: INCREASES,
@@ -410,18 +416,18 @@ Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:Y
             MODIFIER: TRANSLOCATION,
             EFFECT: {
                 FROM_LOC: {
-                    NAMESPACE: 'GOCC',
-                    NAME: 'intracellular'
+                    NAMESPACE: 'GO',
+                    NAME: 'intracellular',
                 },
                 TO_LOC: {
-                    NAMESPACE: 'GOCC',
-                    NAME: 'extracellular space'
+                    NAMESPACE: 'GO',
+                    NAME: 'extracellular space',
                 }
             }
         },
         CITATION: { ... },
-        EVIDENCE: '...',
-        ANNOTATIONS: { ... }
+        EVIDENCE: ...,
+        ANNOTATIONS: { ... },
     }
 
 .. seealso::
@@ -433,16 +439,18 @@ Degradations
 Degradations are more simple, because there's no ::data:`pybel.constants.EFFECT` entry.
 :code:`p(HGNC:YFG1) -> deg(p(HGNC:YFG2))` becomes:
 
-.. code::
+.. code-block:: python
+
+    from pybel.constants import *
 
     {
         RELATION: INCREASES,
         OBJECT: {
-            MODIFIER: DEGRADATION
+            MODIFIER: DEGRADATION,
         },
         CITATION: { ... },
-        EVIDENCE: '...',
-        ANNOTATIONS: { ... }
+        EVIDENCE: ...,
+        ANNOTATIONS: { ... },
     }
 
 .. seealso::

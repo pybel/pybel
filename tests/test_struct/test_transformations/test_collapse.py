@@ -107,7 +107,7 @@ class TestCollapse(unittest.TestCase):
         graph = BELGraph()
         graph.add_node_from_data(p1_phosphorylated)
 
-        graph.add_increases(p1_phosphorylated, p2, n(), n())
+        graph.add_increases(p1_phosphorylated, p2, citation=n(), evidence=n())
 
         self.assertEqual(3, graph.number_of_nodes())
         self.assertEqual(2, graph.number_of_edges())

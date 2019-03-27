@@ -113,5 +113,5 @@ class TestEdgeSummary(unittest.TestCase):
         name = 'test'
         a, b, c = 'abc'
         graph.annotation_list[name] = {a, b, c}
-        graph.add_increases(protein(n(), n()), protein(n(), n()), n(), n(), annotations={name: {a}})
+        graph.add_increases(protein(n(), n()), protein(n(), n()), citation=n(), evidence=n(), annotations={name: {a}})
         self.assertEqual({name: {b, c}}, get_unused_list_annotation_values(graph))
