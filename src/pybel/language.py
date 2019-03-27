@@ -450,14 +450,14 @@ pmod_legacy_labels = {
     'R': 'ADPRib',
     'S': 'Sumo',
     'U': 'Ub',
-    'O': 'Ox'
+    'O': 'Ox',
 }
 
 #: A dictionary of default gene modifications. This is a PyBEL variant to the BEL specification.
 gmod_namespace = {
     'methylation': 'Me',
     'Me': 'Me',
-    'M': 'Me'
+    'M': 'Me',
 }
 
 #: Use Gene Ontology children of GO_0006304: "DNA modification"

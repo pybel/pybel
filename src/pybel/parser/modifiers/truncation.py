@@ -37,7 +37,7 @@ looking up the amino acid sequence.
 
 import logging
 
-from pyparsing import pyparsing_common as ppc
+from pyparsing import ParserElement, pyparsing_common as ppc
 
 from .constants import amino_acid
 from ..utils import nest, one_of_tags
@@ -54,11 +54,8 @@ truncation_tag = one_of_tags(tags=['trunc', 'truncation'], canonical_tag=HGVS, n
 AMINO_ACID = 'aminoacid'
 
 
-def get_truncation_language():
-    """Build a parser for protein truncations.
-
-    :rtype: pyparsing.ParseElement
-    """
+def get_truncation_language() -> ParserElement:
+    """Build a parser for protein truncations."""
     l1 = truncation_tag + nest(amino_acid(AMINO_ACID) + ppc.integer(TRUNCATION_POSITION))
     l1.setParseAction(_handle_trunc)
     l2 = truncation_tag + nest(ppc.integer(TRUNCATION_POSITION))

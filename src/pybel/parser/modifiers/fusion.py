@@ -38,7 +38,10 @@ it is shown with uppercase letters referring to constants from :code:`pybel.cons
     - PyBEL module :py:class:`pybel.parser.modifiers.get_legacy_fusion_language`
 """
 
-from pyparsing import Group, Keyword, Optional, Suppress, oneOf, pyparsing_common, pyparsing_common as ppc, replaceWith
+from pyparsing import (
+    Group, Keyword, Optional, ParserElement, Suppress, oneOf, pyparsing_common,
+    pyparsing_common as ppc, replaceWith,
+)
 
 from ..utils import WCW, nest
 from ...constants import (
@@ -68,11 +71,8 @@ range_coordinate_unquoted = (
 )
 
 
-def get_fusion_language(identifier, permissive=True):
-    """Build a fusion parser.
-
-    :rtype: pyparsing.ParseElement
-    """
+def get_fusion_language(identifier: ParserElement, permissive: bool = True) -> ParserElement:
+    """Build a fusion parser."""
     range_coordinate = Suppress('"') + range_coordinate_unquoted + Suppress('"')
 
     if permissive:  # permissive to wrong quoting
@@ -86,11 +86,8 @@ def get_fusion_language(identifier, permissive=True):
     )
 
 
-def get_legacy_fusion_langauge(identifier, reference):
-    """Build a legacy fusion parser.
-
-    :rtype: pyparsing.ParseElement
-    """
+def get_legacy_fusion_langauge(identifier: ParserElement, reference: str) -> ParserElement:
+    """Build a legacy fusion parser."""
     break_start = (ppc.integer | '?').setParseAction(_fusion_break_handler_wrapper(reference, start=True))
     break_end = (ppc.integer | '?').setParseAction(_fusion_break_handler_wrapper(reference, start=False))
 
@@ -118,7 +115,7 @@ def _fusion_legacy_handler(_, __, tokens):
     return tokens
 
 
-def _fusion_break_handler_wrapper(reference, start):
+def _fusion_break_handler_wrapper(reference: str, start: bool):
     def fusion_break_handler(_, __, tokens):
         if tokens[0] == '?':
             tokens[FUSION_MISSING] = '?'

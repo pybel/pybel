@@ -59,7 +59,7 @@ is represented with the key :data:`pybel.constants.FRAGMENT_MISSING` and the val
     - PyBEL module :py:class:`pybel.parser.modifiers.get_fragment_language`
 """
 
-from pyparsing import And, Keyword, Optional, Suppress, pyparsing_common as ppc
+from pyparsing import And, Keyword, Optional, ParserElement, Suppress, pyparsing_common as ppc
 
 from ..utils import WCW, nest, one_of_tags, quote
 from ...constants import FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP, KIND
@@ -73,14 +73,9 @@ fragment_range = (ppc.integer | '?')(FRAGMENT_START) + '_' + (ppc.integer | '?' 
 missing_fragment = Keyword('?')(FRAGMENT_MISSING)
 
 
-def get_fragment_language():
-    """Build a protein fragment parser.
-
-    :rtype: pyparsing.ParseElement
-    """
+def get_fragment_language() -> ParserElement:
+    """Build a protein fragment parser."""
     _fragment_value_inner = fragment_range | missing_fragment(FRAGMENT_MISSING)
     _fragment_value = _fragment_value_inner | And([Suppress('"'), _fragment_value_inner, Suppress('"')])
-
-    language = fragment_tag + nest(_fragment_value + Optional(WCW + quote(FRAGMENT_DESCRIPTION)))
-
-    return language
+    parser_element = fragment_tag + nest(_fragment_value + Optional(WCW + quote(FRAGMENT_DESCRIPTION)))
+    return parser_element

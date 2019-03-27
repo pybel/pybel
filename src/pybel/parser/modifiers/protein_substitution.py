@@ -33,7 +33,7 @@ The previous statements both produce the underlying data:
 
 import logging
 
-from pyparsing import pyparsing_common as ppc
+from pyparsing import ParserElement, pyparsing_common as ppc
 
 from .constants import amino_acid
 from ..utils import nest, one_of_tags
@@ -50,18 +50,15 @@ log = logging.getLogger(__name__)
 psub_tag = one_of_tags(tags=['sub', 'substitution'], canonical_tag=HGVS, name=KIND)
 
 
-def get_protein_substitution_language():
-    """Build a protein substitution parser.
-
-    :rtype: pyparsing.ParseElement
-    """
-    language = psub_tag + nest(
+def get_protein_substitution_language() -> ParserElement:
+    """Build a protein substitution parser."""
+    parser_element = psub_tag + nest(
         amino_acid(PSUB_REFERENCE),
         ppc.integer(PSUB_POSITION),
         amino_acid(PSUB_VARIANT),
     )
-    language.setParseAction(_handle_psub)
-    return language
+    parser_element.setParseAction(_handle_psub)
+    return parser_element
 
 
 def _handle_psub(line, _, tokens):
