@@ -22,33 +22,32 @@ Function Nomenclature
 The following table shows PyBEL's internal mapping from BEL functions to its own constants. This can be accessed
 programatically via :data:`pybel.parser.language.abundance_labels`
 
-+-------------------------------------------+-------------------------------------+---------------------------------------+
-| BEL Function                              | PyBEL Constant                      | PyBEL DSL                             |
-+===========================================+=====================================+=======================================+
-| ``a()``, ``abundance()``                  | :data:`pybel.constants.ABUNDANCE`   | :class:`pybel.dsl.Abundance`          |
-+-------------------------------------------+-------------------------------------+---------------------------------------+
-| ``g()``, ``geneAbundance()``              | :data:`pybel.constants.GENE`        | :class:`pybel.dsl.Gene`               |
-+-------------------------------------------+-------------------------------------+---------------------------------------+
-| ``r()``, ``rnaAbunance()``                | :data:`pybel.constants.RNA`         | :class:`pybel.dsl.Rna`                |
-+-------------------------------------------+-------------------------------------+---------------------------------------+
-| ``m()``, ``microRNAAbundance()``          | :data:`pybel.constants.MIRNA`       | :class:`pybel.dsl.Mirna`              |
-+-------------------------------------------+-------------------------------------+---------------------------------------+
-| ``p()``, ``proteinAbundance()``           | :data:`pybel.constants.PROTEIN`     | :class:`pybel.dsl.Protein`            |
-+-------------------------------------------+-------------------------------------+---------------------------------------+
-| ``bp()``, ``biologicalProcess()``         | :data:`pybel.constants.BIOPROCESS`  | :class:`pybel.dsl.BiologicalProcess`  |
-+-------------------------------------------+-------------------------------------+---------------------------------------+
-| ``path()``, ``pathology()``               | :data:`pybel.constants.PATHOLOGY`   | :class:`pybel.dsl.Pathology`          |
-+-------------------------------------------+-------------------------------------+---------------------------------------+
-| ``complex()``, ``complexAbundance()``     | :data:`pybel.constants.COMPLEX`     | :class:`pybel.dsl.ComplexAbundance`   |
-+-------------------------------------------+-------------------------------------+---------------------------------------+
-| ``composite()``, ``compositeAbundance()`` | :data:`pybel.constants.COMPOSITE`   | :class:`pybel.dsl.Composite`          |
-+-------------------------------------------+-------------------------------------+---------------------------------------+
-| ``rxn()``, ``reaction()``                 | :data:`pybel.constants.REACTION`    | :class:`pybel.dsl.Reaction`           |
-+-------------------------------------------+-------------------------------------+---------------------------------------+
++-------------------------------------------+------------------------------------+-------------------------------------+
+| BEL Function                              | PyBEL Constant                     | PyBEL DSL                           |
++===========================================+====================================+=====================================+
+| ``a()``, ``abundance()``                  | :data:`pybel.constants.ABUNDANCE`  |:class:`pybel.dsl.Abundance`         |
++-------------------------------------------+------------------------------------+-------------------------------------+
+| ``g()``, ``geneAbundance()``              | :data:`pybel.constants.GENE`       |:class:`pybel.dsl.Gene`              |
++-------------------------------------------+------------------------------------+-------------------------------------+
+| ``r()``, ``rnaAbunance()``                | :data:`pybel.constants.RNA`        |:class:`pybel.dsl.Rna`               |
++-------------------------------------------+------------------------------------+-------------------------------------+
+| ``m()``, ``microRNAAbundance()``          | :data:`pybel.constants.MIRNA`      |:class:`pybel.dsl.Mirna`             |
++-------------------------------------------+------------------------------------+-------------------------------------+
+| ``p()``, ``proteinAbundance()``           | :data:`pybel.constants.PROTEIN`    |:class:`pybel.dsl.Protein`           |
++-------------------------------------------+------------------------------------+-------------------------------------+
+| ``bp()``, ``biologicalProcess()``         | :data:`pybel.constants.BIOPROCESS` |:class:`pybel.dsl.BiologicalProcess` |
++-------------------------------------------+------------------------------------+-------------------------------------+
+| ``path()``, ``pathology()``               | :data:`pybel.constants.PATHOLOGY`  |:class:`pybel.dsl.Pathology`         |
++-------------------------------------------+------------------------------------+-------------------------------------+
+| ``complex()``, ``complexAbundance()``     | :data:`pybel.constants.COMPLEX`    |:class:`pybel.dsl.ComplexAbundance`  |
++-------------------------------------------+------------------------------------+-------------------------------------+
+| ``composite()``, ``compositeAbundance()`` | :data:`pybel.constants.COMPOSITE`  |:class:`pybel.dsl.Composite`         |
++-------------------------------------------+------------------------------------+-------------------------------------+
+| ``rxn()``, ``reaction()``                 | :data:`pybel.constants.REACTION`   |:class:`pybel.dsl.Reaction`          |
++-------------------------------------------+------------------------------------+-------------------------------------+
 
 Graph
 -----
-
 .. autoclass:: pybel.BELGraph
     :exclude-members: nodes_iter, edges_iter, add_warning
     :members:
