@@ -4,92 +4,99 @@ Biological Expression Language (BEL) is a domain-specific language that enables 
 relationships and their context in a machine-readable form. Its simple grammar and expressive power have led to its
 successful use in the to describe complex disease networks with several thousands of relationships.
 
-PyBEL is a pure Python software package that parses BEL scripts, validates their semantics, and facilitates data
+PyBEL is a pure Python software package that parses BEL documents, validates their semantics, and facilitates data
 interchange between common formats and database systems like JSON, CSV, Excel, SQL, CX, and Neo4J. Its companion
 package, `PyBEL-Tools <http://pybel-tools.readthedocs.io/>`_, contains a library of functions for analysis of
 biological networks. For result-oriented guides, see the `PyBEL-Notebooks <https://github.com/pybel/pybel-notebooks>`_
 repository.
 
 Installation is as easy as getting the code from `PyPI <https://pypi.python.org/pypi/pybel>`_ with
-:code:`python3 -m pip install pybel`
+:code:`python3 -m pip install pybel`. See the :doc:`installation <introduction/installation>` documentation.
 
-Citation
---------
-If you use PyBEL in your work, please cite [1]_:
+For citation information, see the :doc:`references <meta/references>` page.
 
-.. [1] Hoyt, C. T., *et al.* (2017). `PyBEL: a Computational Framework for Biological Expression Language <https://doi.org/10.1093/bioinformatics/btx660>`_. Bioinformatics, 34(December), 1–2.
+PyBEL is tested on Python 3.5+ on Mac OS and Linux using
+`Travis CI <https://travis-ci.org/pybel/pybel>`_ as well as on Windows using
+`AppVeyor <https://ci.appveyor.com/project/cthoyt/pybel>`_.
 
-Links
------
-- Specified by `BEL 1.0 <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html>`_ and
-  `BEL 2.0 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html>`_
-- Documented on `Read the Docs <http://pybel.readthedocs.io/>`_
-- Versioned on `GitHub <https://github.com/pybel/pybel>`_
-- Tested on `Travis CI <https://travis-ci.org/pybel/pybel>`_
-- Distributed by `PyPI <https://pypi.python.org/pypi/pybel>`_
-- Chat on `Gitter <https://gitter.im/pybel/Lobby>`_
+.. seealso::
+
+    - Specified by `BEL 1.0 <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html>`_ and
+      `BEL 2.0 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html>`_
+    - Documented on `Read the Docs <http://pybel.readthedocs.io/>`_
+    - Versioned on `GitHub <https://github.com/pybel/pybel>`_
+    - Tested on `Travis CI <https://travis-ci.org/pybel/pybel>`_
+    - Distributed by `PyPI <https://pypi.python.org/pypi/pybel>`_
 
 .. toctree::
    :maxdepth: 2
    :caption: Getting Started
    :name: start
 
-   overview
-   installation
+   introduction/overview
+   introduction/installation
+
+.. toctree::
+   :caption: Tutorials
+   :name: tutorials
+
+   tutorials/loading.ipynb
+
 
 .. toctree::
    :maxdepth: 2
    :caption: Data Structure
    :name: data
 
-   datamodel
-   examples
-   summary
-   operators
-   filters
-   transformations
-   grouping
-   pipeline
+   reference/struct/datamodel
+   reference/struct/examples
+   reference/struct/summary
+   reference/struct/operators
+   reference/struct/filters
+   reference/struct/transformations
+   reference/struct/grouping
+   reference/struct/pipeline
 
 .. toctree::
    :maxdepth: 2
    :caption: Conversion
    :name: conversion
 
-   io
+   reference/io
 
 .. toctree::
    :caption: Database
    :name: database
 
-   manager
-   models
+   reference/database/manager
+   reference/database/models
 
 .. toctree::
    :maxdepth: 2
    :caption: Topic Guide
    :name: topics
 
-   cookbook
-   troubleshooting
-   cli
+   topics/cookbook
+   topics/troubleshooting
+   topics/cli
 
 .. toctree::
    :caption: Reference
    :name: reference
 
-   constants
-   parser
-   dsl
-   logging
+   reference/constants
+   reference/parser
+   reference/dsl
+   reference/logging
 
 .. toctree::
    :caption: Project
    :name: project
 
-   roadmap
-   postmortem
-   technology
+   meta/references
+   meta/roadmap
+   meta/postmortem
+   meta/technology
 
 Indices and Tables
 ------------------

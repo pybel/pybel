@@ -115,7 +115,7 @@ Definition of Resources using OWL
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Previous versions of PyBEL until 0.11.2 had an alternative namespace definition. Now it is recommended to either
 generate namespace files with reproducible build scripts following the Bio2BEL framework, or to directly add them to
-the database with the Bio2BEL NamespaceManagerMixin extension.
+the database with the Bio2BEL :class:`bio2bel.manager.namespace_manager.NamespaceManagerMixin` extension.
 
 Explicit Node Labels
 ~~~~~~~~~~~~~~~~~~~~

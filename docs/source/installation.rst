@@ -1,3 +1,0 @@
-Installation
-============
-.. automodule:: pybel

@@ -29,6 +29,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx_autodoc_typehints',
     'sphinx_click.ext',
+    'nbsphinx',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -89,7 +90,9 @@ language = None
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This patterns also effect to html_static_path and html_extra_path
-exclude_patterns = []
+exclude_patterns = [
+    '**/.ipynb_checkpoints',
+]
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -353,6 +356,7 @@ intersphinx_mapping = {
     'py2neo': ('https://py2neo.org/v3/', None),
     'sqlalchemy': ('https://docs.sqlalchemy.org/en/latest', None),
     'indra': ('https://indra.readthedocs.io/en/latest/', None),
+    'bio2bel': ('https://bio2bel.readthedocs.io/en/latest/', None),
     'requests': ('http://docs.python-requests.org/en/master/', None),
     'setuptools': ('https://setuptools.readthedocs.io/en/latest/', None),
 }

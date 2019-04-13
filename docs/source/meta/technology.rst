@@ -21,8 +21,7 @@ the implementation can be written.
 Test-driven development requires us to think about design before making quick and dirty implementations. This results in
 better code. Additionally, thorough testing suites make it possible to catch when changes break existing functionality.
 
-Tests are written with the standard :mod:`unittest` library. Some functionality, such as the :mod:`mock` module, are
-only available as default in Python 3, so backports must be used for testing in Python 2
+Tests are written with the standard :mod:`unittest` library.
 
 Unit Testing
 ~~~~~~~~~~~~

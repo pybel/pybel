@@ -415,29 +415,23 @@ class BELGraph(nx.MultiDiGraph):
         self.add_unqualified_edge(v, u, relation)
         return self.add_unqualified_edge(u, v, relation)
 
-    def add_equivalence(self, u: BaseEntity, v: BaseEntity) -> str:
-        """Add two equivalence relations for the nodes."""
-        return self._add_two_way_unqualified_edge(u, v, EQUIVALENT_TO)
+    add_equivalence = partialmethod(_add_two_way_unqualified_edge, relation=EQUIVALENT_TO)
+    """Add two equivalence relations for the nodes."""
 
-    def add_orthology(self, u: BaseEntity, v: BaseEntity) -> str:
-        """Add two orthology relations for the nodes."""
-        return self._add_two_way_unqualified_edge(u, v, ORTHOLOGOUS)
+    add_orthology = partialmethod(_add_two_way_unqualified_edge, relation=ORTHOLOGOUS)
+    """Add two orthology relations for the nodes such that ``u orthologousTo v`` and ``v orthologousTo u``."""
 
-    def add_is_a(self, u: BaseEntity, v: BaseEntity) -> str:
-        """Add an isA relationship such that ``u isA v``."""
-        return self.add_unqualified_edge(u, v, IS_A)
+    add_is_a = partialmethod(add_unqualified_edge, relation=IS_A)
+    """Add an ``isA`` relationship such that ``u isA v``."""
 
-    def add_part_of(self, u: BaseEntity, v: BaseEntity) -> str:
-        """Add a ``partOf`` relationship such that ``u partOf v``."""
-        return self.add_unqualified_edge(u, v, PART_OF)
+    add_part_of = partialmethod(add_unqualified_edge, relation=PART_OF)
+    """Add a ``partOf`` relationship such that ``u partOf v``."""
 
-    def add_has_member(self, u: BaseEntity, v: BaseEntity) -> str:
-        """Add a ``hasMember`` relationship such that ``u hasMember v``."""
-        return self.add_unqualified_edge(u, v, HAS_MEMBER)
+    add_has_member = partialmethod(add_unqualified_edge, relation=HAS_MEMBER)
+    """Add a ``hasMember`` relationship such that ``u hasMember v``."""
 
-    def add_has_component(self, u: BaseEntity, v: BaseEntity) -> str:
-        """Add an ``hasComponent`` relationship such that u hasComponent v."""
-        return self.add_unqualified_edge(u, v, HAS_COMPONENT)
+    add_has_component = partialmethod(add_unqualified_edge, relation=HAS_COMPONENT)
+    """Add an ``hasComponent`` relationship such that u hasComponent v."""
 
     add_has_variant = partialmethod(add_unqualified_edge, relation=HAS_VARIANT)
     """Add a ``hasVariant`` relationship such that ``u hasVariant v``."""
@@ -522,11 +516,14 @@ class BELGraph(nx.MultiDiGraph):
     add_negative_correlation = partialmethod(add_qualified_edge, relation=NEGATIVE_CORRELATION)
     add_causes_no_change = partialmethod(add_qualified_edge, relation=CAUSES_NO_CHANGE)
 
-    def add_node_from_data(self, node: BaseEntity) -> BaseEntity:
-        """Convert a PyBEL node data dictionary to a canonical PyBEL node and ensures it is in the graph.
+    add_inhibits = partialmethod(add_directly_increases, object_modifier=activity())
+    """Add an "inhibits" relationship.
 
-        :param node: A PyBEL node
-        """
+    A more specific version of :meth:`add_decreases` that automatically populates the object modifier with an
+    activity."""
+
+    def add_node_from_data(self, node: BaseEntity) -> BaseEntity:
+        """Add an entity to the graph."""
         assert isinstance(node, BaseEntity)
 
         if node in self:
@@ -548,40 +545,6 @@ class BELGraph(nx.MultiDiGraph):
                 self.add_has_product(node, product_tokens)
 
         return node
-
-    def add_inhibits(
-            self,
-            u: BaseEntity,
-            v: BaseEntity,
-            *,
-            evidence: str,
-            citation: Union[str, Mapping[str, str]],
-            annotations: Optional[AnnotationsHint] = None,
-            object_modifier: Optional[Mapping] = None
-    ) -> str:
-        """Add an "inhibits" relationship.
-
-        A more specific version of :meth:`add_decreases` that automatically populates the object modifier with an
-        activity.
-
-        :param u: The source node
-        :param v: The target node
-        :param evidence: The evidence string from an article
-        :param citation: The citation data dictionary for this evidence. If a string is given,
-         assumes it's a PubMed identifier and auto-fills the citation type.
-        :param annotations: The annotations data dictionary
-        :param object_modifier: A non-default activity.
-
-        :return: The hash of the edge
-        """
-        return self.add_decreases(
-            u,
-            v,
-            evidence=evidence,
-            citation=citation,
-            annotations=annotations,
-            object_modifier=object_modifier or activity()
-        )
 
     def _has_edge_attr(self, u: BaseEntity, v: BaseEntity, key: str, attr: Hashable) -> bool:
         assert isinstance(u, BaseEntity)
