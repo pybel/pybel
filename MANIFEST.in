@@ -4,6 +4,7 @@ prune scripts
 
 recursive-include docs/source *.py
 recursive-include docs/source *.rst
+recursive-include docs/source *.ipynb
 recursive-include src/pybel/testing/bel *.bel
 recursive-include src/pybel/testing/belanno *.belanno
 recursive-include src/pybel/testing/belns *.belns
