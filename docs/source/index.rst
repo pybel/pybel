@@ -1,5 +1,5 @@
-PyBEL Documentation
-===================
+PyBEL |release| Documentation
+=============================
 Biological Expression Language (BEL) is a domain-specific language that enables the expression of complex molecular
 relationships and their context in a machine-readable form. Its simple grammar and expressive power have led to its
 successful use in the to describe complex disease networks with several thousands of relationships.
