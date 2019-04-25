@@ -5,6 +5,7 @@
 from typing import Iterable
 
 import networkx as nx
+from tqdm import tqdm
 
 from .utils import update_metadata, update_node_helper
 from ..dsl import BaseEntity
@@ -109,12 +110,13 @@ def _left_outer_join_graphs(target, graphs):
     return target
 
 
-def union(graphs):
+def union(graphs, use_tqdm: bool = False):
     """Take the union over a collection of graphs into a new graph.
 
     Assumes iterator is longer than 2, but not infinite.
 
     :param iter[BELGraph] graphs: An iterator over BEL graphs. Can't be infinite.
+    :param use_tqdm: Should a progress bar be displayed?
     :return: A merged graph
     :rtype: BELGraph
 
@@ -126,19 +128,25 @@ def union(graphs):
     >>> k = pybel.from_path('...')
     >>> merged = union([g, h, k])
     """
-    graphs = tuple(graphs)
+    it = iter(graphs)
 
-    n_graphs = len(graphs)
+    if use_tqdm:
+        it = tqdm(it, desc='taking union')
 
-    if n_graphs == 0:
-        raise ValueError('no graphs given')
+    try:
+        target = next(it)
+    except StopIteration as e:
+        raise ValueError('no graphs given') from e
 
-    if n_graphs == 1:
-        return graphs[0]
+    try:
+        graph = next(it)
+    except StopIteration as e:
+        return target
+    else:
+        target = target.copy()
+        left_full_join(target, graph)
 
-    target = graphs[0].copy()
-
-    for graph in graphs[1:]:
+    for graph in it:
         left_full_join(target, graph)
 
     return target
