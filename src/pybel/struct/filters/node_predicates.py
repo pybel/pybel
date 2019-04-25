@@ -3,17 +3,17 @@
 """Pre-defined predicates for nodes."""
 
 from functools import wraps
-from typing import Callable, Iterable
+from typing import Callable, Iterable, Type
 
 from .node_predicate_builders import function_inclusion_filter_builder
 from .typing import NodePredicate
 from .utils import part_has_modifier
 from ..graph import BELGraph
 from ...constants import (
-    ABUNDANCE, ACTIVITY, CAUSAL_RELATIONS, DEGRADATION, FRAGMENT, FUNCTION, GENE, GMOD, HGVS, KIND, MIRNA, OBJECT,
-    PATHOLOGY, PMOD, PROTEIN, RELATION, RNA, SUBJECT, TRANSLOCATION, VARIANTS,
+    ABUNDANCE, ACTIVITY, CAUSAL_RELATIONS, DEGRADATION, FRAGMENT, FUNCTION, GENE, GMOD, HAS_COMPONENT, HGVS, KIND,
+    MIRNA, OBJECT, PATHOLOGY, PMOD, PROTEIN, RELATION, RNA, SUBJECT, TRANSLOCATION, VARIANTS,
 )
-from ...dsl import BaseEntity
+from ...dsl import BaseEntity, ListAbundance
 
 __all__ = [
     'node_predicate',
@@ -38,6 +38,7 @@ __all__ = [
     'is_causal_source',
     'is_causal_sink',
     'is_causal_central',
+    'is_isolated_list_abundance',
 ]
 
 
@@ -254,3 +255,15 @@ def is_causal_central(graph: BELGraph, node: BaseEntity) -> bool:
     - Does have causal out edge(s)
     """
     return has_causal_in_edges(graph, node) and has_causal_out_edges(graph, node)
+
+
+def is_isolated_list_abundance(graph: BELGraph, node: BaseEntity, cls: Type[ListAbundance] = ListAbundance) -> bool:
+    """Return if the node is a list abundance but has no qualified edges."""
+    return (
+        isinstance(node, cls)
+        and 0 == graph.in_degree(node)
+        and all(
+            data[RELATION] == HAS_COMPONENT
+            for _, __, data in graph.out_edges(node, data=True)
+        )
+    )
