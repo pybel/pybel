@@ -3,7 +3,7 @@
 """Summary functions for edges in BEL graphs."""
 
 from collections import Counter, defaultdict
-from typing import Iterable, Tuple, Mapping, Set
+from typing import Iterable, Mapping, Set, Tuple
 
 from ..filters.edge_predicates import edge_has_annotation
 from ...constants import ANNOTATIONS, RELATION

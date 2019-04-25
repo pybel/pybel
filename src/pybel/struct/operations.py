@@ -140,7 +140,7 @@ def union(graphs, use_tqdm: bool = False):
 
     try:
         graph = next(it)
-    except StopIteration as e:
+    except StopIteration:
         return target
     else:
         target = target.copy()
