@@ -5,15 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-`0.13.1 <https://github.com/pybel/pybel/compare/v0.13.0...HEAD>`_ - UNRELEASED
-------------------------------------------------------------------------------
+`UNRELEASED <https://github.com/pybel/pybel/compare/v0.13.2...HEAD>`_
+---------------------------------------------------------------------
+
+`0.13.2 <https://github.com/pybel/pybel/compare/v0.13.1...v0.13.2>`_ - 2019-04-24
+---------------------------------------------------------------------------------
+Added
+~~~~~
+- BELGraph class now has built-in summaries for authors and citations
+- Added first Jupyter notebook into documentation. More to come!
+
+Changed
+~~~~~~~
+- Authors are always stored as lists inside edges
+- Nodes in node-link JSON always have the BEL string included
+- Updated documentation for data model and DSL
+- Enforce keyword argument usage in BELGraph.add_qualified_edge
+- Use iterator in pybel.union so graphs can be lazily loaded and combine
+
+Removed
+~~~~~~~
+- Remove remaining traces of namespace hierarchy table
+
+Fixed
+~~~~~
+- Union function also takes union of locally defined annotations now
+- Handling of special translocations (sec, surf; https://github.com/pybel/pybel/issues/377)
+- Fixed public header in pybel.to_web
+- Fixed public interface to pipeline and queries
+- Fixed parsing of gene methylations/modifications
+
+`0.13.1 <https://github.com/pybel/pybel/compare/v0.13.0...v0.13.1>`_ - 2019-01-14
+---------------------------------------------------------------------------------
 Fixed
 ~~~~~
 - Fix handling of node JSON with identifier but not name (https://github.com/pybel/pybel/issues/375)
 - Fix handling of isolated nodes in `pybel.union` (https://github.com/pybel/pybel/issues/373)
 
-`0.13.0 <https://github.com/pybel/pybel/compare/v0.12.2...0.13.0>`_ - 2019-01-07
---------------------------------------------------------------------------------
+`0.13.0 <https://github.com/pybel/pybel/compare/v0.12.2...v0.13.0>`_ - 2019-01-07
+---------------------------------------------------------------------------------
 Added
 ~~~~~
 - Add JSON to node and edge SQL models (https://github.com/pybel/pybel/pull/358)
@@ -40,8 +70,8 @@ Removed
 - Dropped Python 2.7 support (https://github.com/pybel/pybel/issues/285)
 - Dropped Python 3.4 support (https://github.com/pybel/pybel/issues/286)
 
-`0.12.2 <https://github.com/pybel/pybel/compare/v0.12.1...0.12.2>`_ - 2018-11-19
---------------------------------------------------------------------------------
+`0.12.2 <https://github.com/pybel/pybel/compare/v0.12.1...v0.12.2>`_ - 2018-11-19
+---------------------------------------------------------------------------------
 Added
 ~~~~~
 - Serialization functions can be accessed directly from the BELGraph class (https://github.com/pybel/pybel/pull/344)
@@ -61,8 +91,8 @@ Fixed
 - Ensure complexes have at least one member (Thanks @10mubeen for pointing this out)
 - Make "Other" as the default namespace domain for generating BEL namespace files
 
-`0.12.1 <https://github.com/pybel/pybel/compare/v0.12.0...0.12.1>`_ - 2018-09-13
---------------------------------------------------------------------------------
+`0.12.1 <https://github.com/pybel/pybel/compare/v0.12.0...v0.12.1>`_ - 2018-09-13
+---------------------------------------------------------------------------------
 Fixed
 ~~~~~
 - Wrong names in CLI
@@ -76,8 +106,8 @@ Added
 ~~~~~
 - More summary functions in pybel.struct
 
-`0.12.0 <https://github.com/pybel/pybel/compare/v0.11.11...0.12.0>`_ - 2018-09-06
----------------------------------------------------------------------------------
+`0.12.0 <https://github.com/pybel/pybel/compare/v0.11.11...v0.12.0>`_ - 2018-09-06
+----------------------------------------------------------------------------------
 Changed
 ~~~~~~~
 - Update edge hashing algorithm (this invalidates old hashes)
@@ -94,8 +124,8 @@ Removed
 - Remove ``pybel.tokens.node_to_tuple`` function and ``pybel.tokens.node_to_bel`` functions
 - All tuple-related functions in the DSL (AKA the tupleectomy)
 
-`0.11.11 <https://github.com/pybel/pybel/compare/v0.11.10...0.11.11>`_ - 2018-07-31
------------------------------------------------------------------------------------
+`0.11.11 <https://github.com/pybel/pybel/compare/v0.11.10...v0.11.11>`_ - 2018-07-31
+------------------------------------------------------------------------------------
 Added
 ~~~~~
 - Automatic generation of CLI documentation with ``sphinx-click``
@@ -115,8 +145,8 @@ Removed
 ~~~~~~~
 - Remove function ``BELGraph.iter_data``
 
-`0.11.10 <https://github.com/pybel/pybel/compare/v0.11.9...0.11.10>`_ - 2018-07-23
-----------------------------------------------------------------------------------
+`0.11.10 <https://github.com/pybel/pybel/compare/v0.11.9...v0.11.10>`_ - 2018-07-23
+-----------------------------------------------------------------------------------
 Added
 ~~~~~
 - Several subgraph functions (https://github.com/pybel/pybel/pull/315)
@@ -125,8 +155,8 @@ Changed
 ~~~~~~~
 - Better SQL implementation of get_recent_networks (https://github.com/pybel/pybel/pull/312)
 
-`0.11.9 <https://github.com/pybel/pybel/compare/v0.11.8...0.11.9>`_ - 2018-07-??
---------------------------------------------------------------------------------
+`0.11.9 <https://github.com/pybel/pybel/compare/v0.11.8...v0.11.9>`_ - 2018-07-??
+---------------------------------------------------------------------------------
 Removed
 ~~~~~~~
 - Removed CX and NDEx IO in favor of https://github.com/pybel/pybel-cx
@@ -144,8 +174,8 @@ Added
 - Add require annotations option to parser (https://github.com/pybel/pybel/issues/255)
 - Data missing key node predicate builder
 
-`0.11.8 <https://github.com/pybel/pybel/compare/v0.11.7...0.11.8>`_ - 2018-06-27
---------------------------------------------------------------------------------
+`0.11.8 <https://github.com/pybel/pybel/compare/v0.11.7...v0.11.8>`_ - 2018-06-27
+---------------------------------------------------------------------------------
 Added
 ~~~~~
 - Deprecation system for pipeline functions (for when they're renamed)
@@ -155,14 +185,14 @@ Changed
 - Rely on edge predicates more heavily in selection/induction/expansion transformations
 - Rename several functions related to the "central dogma" for more clarity
 
-`0.11.7 <https://github.com/pybel/pybel/compare/v0.11.6...0.11.7>`_ - 2018-06-26
---------------------------------------------------------------------------------
+`0.11.7 <https://github.com/pybel/pybel/compare/v0.11.6...v0.11.7>`_ - 2018-06-26
+---------------------------------------------------------------------------------
 Fixed
 ~~~~~
 - Bug where data did not get copied to sub-graphs on induction (https://github.com/pybel/pybel/issues/#307)
 
-`0.11.6 <https://github.com/pybel/pybel/compare/v0.11.5...0.11.6>`_ - 2018-06-25
---------------------------------------------------------------------------------
+`0.11.6 <https://github.com/pybel/pybel/compare/v0.11.5...v0.11.6>`_ - 2018-06-25
+---------------------------------------------------------------------------------
 Added
 ~~~~~
 - Added get_annotation_values function to pybel.struct.summary
@@ -175,15 +205,15 @@ Fixed
 ~~~~~
 - Fixed a bug in Manager.from_connection (https://github.com/pybel/pybel/issues/#306)
 
-`0.11.5 <https://github.com/pybel/pybel/compare/v0.11.4...0.11.5>`_ - 2018-06-22
---------------------------------------------------------------------------------
+`0.11.5 <https://github.com/pybel/pybel/compare/v0.11.4...v0.11.5>`_ - 2018-06-22
+---------------------------------------------------------------------------------
 Changed
 ~~~~~~~
 - Changed arguments in pybel.struct.mutations.get_subgraphs_by_annotation
 - Moved utility functions in pybel.struct.mutations
 
-`0.11.4 <https://github.com/pybel/pybel/compare/v0.11.3...0.11.4>`_ - 2018-06-22
---------------------------------------------------------------------------------
+`0.11.4 <https://github.com/pybel/pybel/compare/v0.11.3...v0.11.4>`_ - 2018-06-22
+---------------------------------------------------------------------------------
 Changed
 ~~~~~~~
 - Use BELGraph.fresh_copy instead of importing the class in mutator functions
@@ -199,8 +229,8 @@ Fixed
 ~~~~~
 - Add missing field from BaseAbundance (https://github.com/pybel/pybel/issues/302)
 
-`0.11.3 <https://github.com/pybel/pybel/compare/v0.11.2...0.11.3>`_ - 2018-06-04
---------------------------------------------------------------------------------
+`0.11.3 <https://github.com/pybel/pybel/compare/v0.11.2...v0.11.3>`_ - 2018-06-04
+---------------------------------------------------------------------------------
 Added
 ~~~~~
 - Made testing code and date install as part of main package(https://github.com/pybel/pybel/pull/298)
@@ -209,8 +239,8 @@ Removed
 ~~~~~~~
 - Remove extension hook and extension loader (https://github.com/pybel/pybel/pull/300)
 
-`0.11.2 <https://github.com/pybel/pybel/compare/v0.11.1...0.11.2>`_ - 2018-05-10
---------------------------------------------------------------------------------
+`0.11.2 <https://github.com/pybel/pybel/compare/v0.11.1...v0.11.2>`_ - 2018-05-10
+---------------------------------------------------------------------------------
 Added
 ~~~~~
 - Calculation of SHA512 hash to DSL abundances
@@ -244,8 +274,8 @@ Removed
 - Removed support for BELEQ files (https://github.com/pybel/pybel/issues/294)
 - Remove artifactory code and migrated to https://github.com/pybel/pybel-artifactory. (https://github.com/pybel/pybel/issues/292)
 
-`0.11.1 <https://github.com/pybel/pybel/compare/v0.11.0...0.11.1>`_ - 2018-02-19
---------------------------------------------------------------------------------
+`0.11.1 <https://github.com/pybel/pybel/compare/v0.11.0...v0.11.1>`_ - 2018-02-19
+---------------------------------------------------------------------------------
 Added
 ~~~~~
 - Added additional DSL shortcuts for building edges with the BELGraph
@@ -253,8 +283,8 @@ Added
 - Added knowledge transfer function
 - Added progress bar for parser
 
-`0.11.0 <https://github.com/pybel/pybel/compare/v0.10.1...0.11.0>`_ - 2018-02-07
---------------------------------------------------------------------------------
+`0.11.0 <https://github.com/pybel/pybel/compare/v0.10.1...v0.11.0>`_ - 2018-02-07
+---------------------------------------------------------------------------------
 Changed
 ~~~~~~~
 - Updated SQL schema and made new minimum unpickle version 0.11.0.
@@ -281,8 +311,8 @@ Added
 - Added graph-based equivalency checking
 - Add more documentation to BELGraph (https://github.com/pybel/pybel/issues/271)
 
-`0.10.1 <https://github.com/pybel/pybel/compare/v0.10.0...0.10.1>`_ - 2017-12-28
---------------------------------------------------------------------------------
+`0.10.1 <https://github.com/pybel/pybel/compare/v0.10.0...v0.10.1>`_ - 2017-12-28
+---------------------------------------------------------------------------------
 Fixed
 ~~~~~
 - Fixed truncation description parsing to handle double quotes
@@ -296,8 +326,8 @@ Added
 ~~~~~
 - Added more edge predicates (has_activity, has_degree, has_translocation, has_annotation)
 
-`0.10.0 <https://github.com/pybel/pybel/compare/v0.9.7...0.10.0>`_ - 2017-12-22
--------------------------------------------------------------------------------
+`0.10.0 <https://github.com/pybel/pybel/compare/v0.9.7...v0.10.0>`_ - 2017-12-22
+--------------------------------------------------------------------------------
 Changed
 ~~~~~~~
 - Updated SQL schema and made new minimum unpickle version 0.10.0.
@@ -323,8 +353,8 @@ Added
 - Implemented from PyBEL Web Function
 - Implemented to INDRA function
 
-`0.9.7 <https://github.com/pybel/pybel/compare/v0.9.6...0.9.7>`_ - 2017-11-20
------------------------------------------------------------------------------
+`0.9.7 <https://github.com/pybel/pybel/compare/v0.9.6...v0.9.7>`_ - 2017-11-20
+------------------------------------------------------------------------------
 Changed
 ~~~~~~~
 - Use ``HASH`` as dictionary key instead of ``ID``
@@ -332,8 +362,8 @@ Changed
 - Rename instance variables in parsers for consistency
 - Greater usage of DSL in parser
 
-`0.9.6 <https://github.com/pybel/pybel/compare/v0.9.5...0.9.6>`_ - 2017-11-12
------------------------------------------------------------------------------
+`0.9.6 <https://github.com/pybel/pybel/compare/v0.9.5...v0.9.6>`_ - 2017-11-12
+------------------------------------------------------------------------------
 Added
 ~~~~~
 - Additional keyword arguments for JSON output functions
@@ -347,8 +377,8 @@ Fixed
 ~~~~~
 - Better handling of citations that have authors pre-parsed into lists (https://github.com/pybel/pybel/issues/247)
 
-`0.9.5 <https://github.com/pybel/pybel/compare/v0.9.4...0.9.5>`_ - 2017-11-07
------------------------------------------------------------------------------
+`0.9.5 <https://github.com/pybel/pybel/compare/v0.9.4...v0.9.5>`_ - 2017-11-07
+------------------------------------------------------------------------------
 Added
 ~~~~~
 - Updates to DSL
@@ -366,8 +396,8 @@ Changed
 - Moved ``pybel.summary`` module to ``pybel.struct.summary``
 
 
-`0.9.4 <https://github.com/pybel/pybel/compare/v0.9.3...0.9.4>`_ - 2017-11-03
------------------------------------------------------------------------------
+`0.9.4 <https://github.com/pybel/pybel/compare/v0.9.3...v0.9.4>`_ - 2017-11-03
+------------------------------------------------------------------------------
 Fixed
 ~~~~~
 - Problem with uploading products, reactants, and members to NDEx (#230)
@@ -383,8 +413,8 @@ Removed
 ~~~~~~~
 - Don't keep blobs in node or edge cache anymore
 
-`0.9.3 <https://github.com/pybel/pybel/compare/v0.9.2...0.9.3>`_ - 2017-10-19
------------------------------------------------------------------------------
+`0.9.3 <https://github.com/pybel/pybel/compare/v0.9.2...v0.9.3>`_ - 2017-10-19
+------------------------------------------------------------------------------
 Added
 ~~~~~
 - Convenience functions for adding qualified and unqualified edges to BELGraph class
@@ -408,14 +438,14 @@ Removed
 ~~~~~~~
 - In-memory caching of authors
 
-`0.9.2 <https://github.com/pybel/pybel/compare/v0.9.1...0.9.2>`_ - 2017-09-27
------------------------------------------------------------------------------
+`0.9.2 <https://github.com/pybel/pybel/compare/v0.9.1...v0.9.2>`_ - 2017-09-27
+------------------------------------------------------------------------------
 Fixed
 ~~~~~
 - JSON Serialization bug for authors in Citation Model
 
-`0.9.1 <https://github.com/pybel/pybel/compare/v0.9.0...0.9.1>`_ - 2017-09-26
------------------------------------------------------------------------------
+`0.9.1 <https://github.com/pybel/pybel/compare/v0.9.0...v0.9.1>`_ - 2017-09-26
+------------------------------------------------------------------------------
 Added
 ~~~~~
 - INDRA Import
@@ -439,8 +469,8 @@ Removed
 ~~~~~~~
 - Don't cache SQLAlchemy models locally (3d7d238)
 
-`0.9.0 <https://github.com/pybel/pybel/compare/v0.8.1...0.9.0>`_ - 2017-09-19
------------------------------------------------------------------------------
+`0.9.0 <https://github.com/pybel/pybel/compare/v0.8.1...v0.9.0>`_ - 2017-09-19
+------------------------------------------------------------------------------
 Added
 ~~~~~
 - Option for setting scopefunc in Manager
