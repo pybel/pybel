@@ -33,11 +33,13 @@ def to_json(graph: BELGraph) -> Mapping[str, Any]:
     # Convert annotation list definitions (which are sets) to canonicalized/sorted lists
     graph_json_dict['graph'][GRAPH_ANNOTATION_LIST] = {
         keyword: list(sorted(values))
-        for keyword, values in graph_json_dict['graph'][GRAPH_ANNOTATION_LIST].items()
+        for keyword, values in graph_json_dict['graph'].get(GRAPH_ANNOTATION_LIST, {}).items()
     }
 
     # Convert set to list
-    graph_json_dict['graph'][GRAPH_UNCACHED_NAMESPACES] = list(graph_json_dict['graph'][GRAPH_UNCACHED_NAMESPACES])
+    graph_json_dict['graph'][GRAPH_UNCACHED_NAMESPACES] = list(
+        graph_json_dict['graph'].get(GRAPH_UNCACHED_NAMESPACES, [])
+    )
 
     return graph_json_dict
 
@@ -130,7 +132,7 @@ def node_link_graph(data: Mapping[str, Any]) -> BELGraph:
     graph.graph = data.get('graph', {})
     graph.graph[GRAPH_ANNOTATION_LIST] = {
         keyword: set(values)
-        for keyword, values in graph.graph[GRAPH_ANNOTATION_LIST].items()
+        for keyword, values in graph.graph.get(GRAPH_ANNOTATION_LIST, {}).items()
     }
 
     mapping = []
