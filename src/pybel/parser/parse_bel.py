@@ -793,8 +793,8 @@ class BELParser(BaseParser):
         """Handle unqualified relations."""
         subject_node_dsl = self.ensure_node(tokens[SUBJECT])
         object_node_dsl = self.ensure_node(tokens[OBJECT])
-        rel = tokens[RELATION]
-        self.graph.add_unqualified_edge(subject_node_dsl, object_node_dsl, rel)
+        relation = tokens[RELATION]
+        self.graph.add_unqualified_edge(subject_node_dsl, object_node_dsl, relation)
         return tokens
 
     def handle_label_relation(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
