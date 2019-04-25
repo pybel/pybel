@@ -110,12 +110,15 @@ Links
     :alt: Code Climate
 
 .. |python_versions| image:: https://img.shields.io/pypi/pyversions/PyBEL.svg
+    :target: https://pypi.python.org/pypi/pybel
     :alt: Stable Supported Python Versions
 
 .. |pypi_version| image:: https://img.shields.io/pypi/v/PyBEL.svg
+    :target: https://pypi.python.org/pypi/pybel
     :alt: Current version on PyPI
 
 .. |pypi_license| image:: https://img.shields.io/pypi/l/PyBEL.svg
+    :target: https://github.com/pybel/pybel/blob/develop/LICENSE
     :alt: Apache 2.0 License
 
 .. |zenodo| image:: https://zenodo.org/badge/68376693.svg
