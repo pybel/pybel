@@ -13,12 +13,12 @@ from pybel import BELGraph, from_database, from_path, to_database
 from pybel.constants import (
     ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_REFERENCE,
     CITATION_TYPE, CITATION_TYPE_OTHER, CITATION_TYPE_PUBMED, DECREASES, HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT,
-    INCREASES, LOCATION, METADATA_NAME, METADATA_VERSION, PATHOLOGY, PROTEIN, RELATION,
+    INCREASES, LOCATION, METADATA_NAME, METADATA_VERSION, MIRNA, PATHOLOGY, PROTEIN, RELATION,
 )
 from pybel.dsl import (
-    BaseEntity, activity, complex_abundance, composite_abundance, degradation, fragment, fusion_range, gene,
-    gene_fusion, gmod, hgvs, location, named_complex_abundance, pmod, protein, protein_fusion, reaction, secretion,
-    translocation,
+    BaseEntity, MicroRna, Pathology, activity, complex_abundance, composite_abundance, degradation, fragment,
+    fusion_range, gene, gene_fusion, gmod, hgvs, location, named_complex_abundance, pmod, protein, protein_fusion,
+    reaction, secretion, translocation,
 )
 from pybel.dsl.namespaces import chebi, hgnc
 from pybel.examples import ras_tloc_graph, sialic_acid_graph
@@ -37,6 +37,9 @@ from tests.constants import (
 
 fos = hgnc('FOS')
 jun = hgnc('JUN')
+mirna_1 = MicroRna('HGNC', n())
+mirna_2 = MicroRna('HGNC', n())
+pathology_1 = Pathology('DO', n())
 ap1_complex = complex_abundance([fos, jun])
 
 egfr_dimer = complex_abundance([egfr, egfr])
@@ -187,6 +190,40 @@ class TestTemporaryInsertNetwork(TemporaryCacheMixin):
 
         # TODO check that the database doesn't have anything for TEST in it
 
+
+class TestTypedQuery(TemporaryCacheMixin):
+    def setUp(self):
+        super().setUp()
+
+        graph = BELGraph(name='test', version='0.0.0')
+        graph.annotation_list['TEST'] = {'a', 'b', 'c'}
+
+        graph.add_positive_correlation(
+            mirna_1,
+            pathology_1,
+            evidence=n(),
+            citation=n(),
+        )
+
+        graph.add_negative_correlation(
+            mirna_2,
+            pathology_1,
+            evidence=n(),
+            citation=n(),
+        )
+
+        make_dummy_namespaces(self.manager, graph)
+        make_dummy_annotations(self.manager, graph)
+
+        with mock_bel_resources:
+            self.manager.insert_graph(graph, store_parts=True)
+
+    def test_query_edge_source_type(self):
+        rv = self.manager.query_edges(source_function=MIRNA).all()
+        self.assertEqual(2, len(rv))
+
+        rv = self.manager.query_edges(target_function=PATHOLOGY).all()
+        self.assertEqual(2, len(rv))
 
 class TestQuery(TemporaryCacheMixin):
     def setUp(self):

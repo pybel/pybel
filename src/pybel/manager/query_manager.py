@@ -6,6 +6,7 @@ import datetime
 from typing import Iterable, List, Optional, Union
 
 from sqlalchemy import and_, or_
+from sqlalchemy.orm import aliased
 
 from .lookup_manager import LookupManager
 from .models import Author, Citation, Edge, Evidence, Namespace, NamespaceEntry, Node
@@ -36,12 +37,13 @@ class QueryManager(LookupManager):
         """Count the number of nodes in the database."""
         return self._count_model(Node)
 
-    def query_nodes(self,
-                    bel: Optional[str] = None,
-                    type: Optional[str] = None,
-                    namespace: Optional[str] = None,
-                    name: Optional[str] = None,
-                    ) -> List[Node]:
+    def query_nodes(
+            self,
+            bel: Optional[str] = None,
+            type: Optional[str] = None,
+            namespace: Optional[str] = None,
+            name: Optional[str] = None,
+    ) -> List[Node]:
         """Query nodes in the database.
 
         :param bel: BEL term that describes the biological entity. e.g. ``p(HGNC:APP)``
@@ -105,14 +107,15 @@ class QueryManager(LookupManager):
         """See usage in self.query_edges."""
         return query.join(Node, edge_node_id == Node.id).filter(Node.type == node_type)
 
-    def query_edges(self,
-                    bel: Optional[str] = None,
-                    source_function: Optional[str] = None,
-                    source: Union[None, str, Node] = None,
-                    target_function: Optional[str] = None,
-                    target: Union[None, str, Node] = None,
-                    relation: Optional[str] = None,
-                    ):
+    def query_edges(
+            self,
+            bel: Optional[str] = None,
+            source_function: Optional[str] = None,
+            source: Union[None, str, Node] = None,
+            target_function: Optional[str] = None,
+            target: Union[None, str, Node] = None,
+            relation: Optional[str] = None,
+    ):
         """Return a query over the edges in the database.
 
         Usually this means that you should call ``list()`` or ``.all()`` on this result.
@@ -133,10 +136,12 @@ class QueryManager(LookupManager):
             query = query.filter(Edge.relation.like(relation))
 
         if source_function:
-            query = self._add_edge_function_filter(query, Edge.source_id, source_function)
+            source_node_table = aliased(Node)
+            query = query.join(source_node_table, Edge.source_id == Node.id).filter(Node.type == source_function)
 
         if target_function:
-            query = self._add_edge_function_filter(query, Edge.target_id, target_function)
+            target_node_table = aliased(Node)
+            query = query.join(target_node_table, Edge.target_id == Node.id).filter(Node.type == target_function)
 
         if source:
             if isinstance(source, str):
@@ -162,14 +167,15 @@ class QueryManager(LookupManager):
 
         return query
 
-    def query_citations(self,
-                        type: Optional[str] = None,
-                        reference: Optional[str] = None,
-                        name: Optional[str] = None,
-                        author: Union[None, str, List[str]] = None,
-                        date: Union[None, str, datetime.date] = None,
-                        evidence_text: Optional[str] = None,
-                        ) -> List[Citation]:
+    def query_citations(
+            self,
+            type: Optional[str] = None,
+            reference: Optional[str] = None,
+            name: Optional[str] = None,
+            author: Union[None, str, List[str]] = None,
+            date: Union[None, str, datetime.date] = None,
+            evidence_text: Optional[str] = None,
+    ) -> List[Citation]:
         """Query citations in the database.
 
         :param type: Type of the citation. e.g. PubMed
