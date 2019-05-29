@@ -137,11 +137,19 @@ class QueryManager(LookupManager):
 
         if source_function:
             source_node_table = aliased(Node)
-            query = query.join(source_node_table, Edge.source_id == Node.id).filter(Node.type == source_function)
+            query = (
+                query
+                .join(source_node_table, Edge.source_id == source_node_table.id)
+                .filter(source_node_table.type == source_function)
+            )
 
         if target_function:
             target_node_table = aliased(Node)
-            query = query.join(target_node_table, Edge.target_id == Node.id).filter(Node.type == target_function)
+            query = (
+                query
+                .join(target_node_table, Edge.target_id == target_node_table.id)
+                .filter(target_node_table.type == target_function)
+            )
 
         if source:
             if isinstance(source, str):
