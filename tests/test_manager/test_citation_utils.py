@@ -2,8 +2,6 @@
 
 """Test the manager's citation utilities."""
 
-from __future__ import unicode_literals
-
 import os
 import unittest
 import time

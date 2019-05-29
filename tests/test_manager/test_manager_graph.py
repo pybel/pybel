@@ -2,8 +2,6 @@
 
 """Tests for manager functions handling BEL networks."""
 
-from __future__ import unicode_literals
-
 import time
 import unittest
 from collections import Counter
