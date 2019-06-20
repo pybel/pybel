@@ -57,12 +57,14 @@ def _fusion_to_dsl(tokens) -> FusionBase:
 
     partner_5p = member_dsl(
         namespace=tokens[FUSION][PARTNER_5P][NAMESPACE],
-        name=tokens[FUSION][PARTNER_5P][NAME]
+        name=tokens[FUSION][PARTNER_5P][NAME],
+        identifier=tokens[FUSION][PARTNER_5P].get(IDENTIFIER),
     )
 
     partner_3p = member_dsl(
         namespace=tokens[FUSION][PARTNER_3P][NAMESPACE],
-        name=tokens[FUSION][PARTNER_3P][NAME]
+        name=tokens[FUSION][PARTNER_3P][NAME],
+        identifier=tokens[FUSION][PARTNER_3P].get(IDENTIFIER),
     )
 
     range_5p = _fusion_range_to_dsl(tokens[FUSION][RANGE_5P])
@@ -87,7 +89,7 @@ def _fusion_range_to_dsl(tokens) -> FusionRangeBase:
     return fusion_range(
         reference=tokens[FUSION_REFERENCE],
         start=tokens[FUSION_START],
-        stop=tokens[FUSION_STOP]
+        stop=tokens[FUSION_STOP],
     )
 
 
@@ -119,6 +121,7 @@ def _variant_po_to_dict(tokens) -> CentralDogma:
     return dsl(
         namespace=tokens[NAMESPACE],
         name=tokens[NAME],
+        identifier=tokens.get(IDENTIFIER),
         variants=[
             _variant_to_dsl_helper(variant_tokens)
             for variant_tokens in tokens[VARIANTS]
@@ -140,12 +143,14 @@ def _variant_to_dsl_helper(tokens) -> Variant:
         return gmod(
             name=tokens[IDENTIFIER][NAME],
             namespace=tokens[IDENTIFIER][NAMESPACE],
+            identifier=tokens[IDENTIFIER].get(IDENTIFIER),
         )
 
     if kind == PMOD:
         return pmod(
             name=tokens[IDENTIFIER][NAME],
             namespace=tokens[IDENTIFIER][NAMESPACE],
+            identifier=tokens[IDENTIFIER].get(IDENTIFIER),
             code=tokens.get(PMOD_CODE),
             position=tokens.get(PMOD_POSITION),
         )

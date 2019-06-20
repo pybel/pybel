@@ -13,7 +13,7 @@ from .exc import (
     UndefinedNamespaceWarning,
 )
 from .utils import quote, word
-from ..constants import DIRTY, NAME, NAMESPACE
+from ..constants import DIRTY, IDENTIFIER, NAME, NAMESPACE
 
 __all__ = ['IdentifierParser']
 
@@ -44,9 +44,18 @@ class IdentifierParser(BaseParser):
         self.default_namespace = set(default_namespace) if default_namespace is not None else None
         self.allow_naked_names = allow_naked_names
 
+        self.identifier_fqualified = (
+                word(NAMESPACE) +
+                Suppress(':') +
+                (word | quote)(IDENTIFIER) +
+                Suppress('!') +
+                (word | quote)(NAME)
+        )
+
         self.identifier_qualified = word(NAMESPACE) + Suppress(':') + (word | quote)(NAME)
 
         if self.namespace_to_terms:
+            self.identifier_fqualified.setParseAction(self.handle_identifier_qualified)
             self.identifier_qualified.setParseAction(self.handle_identifier_qualified)
 
         self.identifier_bare = (word | quote)(NAME)
@@ -57,7 +66,9 @@ class IdentifierParser(BaseParser):
             self.handle_namespace_invalid
         )
 
-        super(IdentifierParser, self).__init__(self.identifier_qualified | self.identifier_bare)
+        super(IdentifierParser, self).__init__(
+            self.identifier_fqualified | self.identifier_qualified | self.identifier_bare
+        )
 
     def has_enumerated_namespace(self, namespace: str) -> bool:
         """Check that the namespace has been defined by an enumeration."""

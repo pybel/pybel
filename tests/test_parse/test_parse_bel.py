@@ -87,6 +87,68 @@ class TestAbundance(TestTokenParserBase):
         self._test_abundance_with_location_helper('abundance(CHEBI:"oxygen atom", location(GO:intracellular))')
 
 
+class TestAbundanceLabeled(TestTokenParserBase):
+    """2.1.1"""
+
+    def setUp(self):
+        self.parser.clear()
+        self.parser.general_abundance.setParseAction(self.parser.handle_term)
+
+        self.expected_node_data = abundance(namespace='chebi', name='oxygen atom', identifier='CHEBI:25805')
+        self.expected_canonical_bel = 'a(chebi:"CHEBI:25805"!"oxygen atom")'
+
+    def _test_abundance_helper(self, statement):
+        result = self.parser.general_abundance.parseString(statement)
+        self.assertEqual(dict(self.expected_node_data), result.asDict())
+
+        self.assertIn(self.expected_node_data, self.graph)
+        self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node_data))
+
+        self.assertEqual({}, modifier_po_to_dict(result), msg='The modifier dictionary should be empty')
+
+    def test_abundance(self):
+        """Test short/long abundance name."""
+        self._test_abundance_helper('a(chebi:"CHEBI:25805"!"oxygen atom")')
+        self._test_abundance_helper('abundance(chebi:"CHEBI:25805"!"oxygen atom")')
+        self._test_abundance_helper('abundance(chebi:"CHEBI:25805" ! "oxygen atom")')
+
+    def _test_abundance_with_location_helper(self, statement):
+        result = self.parser.general_abundance.parseString(statement)
+
+        expected_result = {
+            FUNCTION: ABUNDANCE,
+            NAMESPACE: 'chebi',
+            NAME: 'oxygen atom',
+            IDENTIFIER: 'CHEBI:25805',
+            LOCATION: {
+                NAMESPACE: 'GO',
+                NAME: 'intracellular',
+            }
+        }
+
+        self.assertEqual(expected_result, result.asDict())
+
+        self.assertIn(self.expected_node_data, self.graph)
+        self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node_data))
+
+        modifier = modifier_po_to_dict(result)
+        expected_modifier = {
+            LOCATION: {
+                NAMESPACE: 'GO',
+                NAME: 'intracellular',
+            }
+        }
+        self.assertEqual(expected_modifier, modifier)
+
+    def test_abundance_with_location(self):
+        """Test short/long abundance name and short/long location name."""
+        self._test_abundance_with_location_helper('a(chebi:"CHEBI:25805"!"oxygen atom", loc(GO:intracellular))')
+        self._test_abundance_with_location_helper('abundance(chebi:"CHEBI:25805"!"oxygen atom", loc(GO:intracellular))')
+        self._test_abundance_with_location_helper('a(chebi:"CHEBI:25805"!"oxygen atom", location(GO:intracellular))')
+        self._test_abundance_with_location_helper('abundance(chebi:"CHEBI:25805"!"oxygen atom", location(GO:intracellular))')
+
+
+
 class TestGene(TestTokenParserBase):
     """2.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XgeneA"""
 
