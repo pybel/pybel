@@ -5,7 +5,6 @@
 import unittest
 
 from pybel.examples import sialic_acid_graph
-from pybel.struct import count_citations
 
 
 class TestProvenance(unittest.TestCase):
@@ -13,5 +12,5 @@ class TestProvenance(unittest.TestCase):
 
     def test_count_citations(self):
         """Test counting citations."""
-        count = count_citations(sialic_acid_graph)
+        count = sialic_acid_graph.number_of_citations()
         self.assertEqual(1, count)

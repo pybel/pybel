@@ -11,7 +11,6 @@ from ...constants import CITATION, CITATION_REFERENCE
 __all__ = [
     'iterate_pubmed_identifiers',
     'get_pubmed_identifiers',
-    'count_citations',
 ]
 
 
@@ -35,13 +34,3 @@ def get_pubmed_identifiers(graph) -> Set[str]:
     :return: A set of all PubMed identifiers cited in the construction of this graph
     """
     return set(iterate_pubmed_identifiers(graph))
-
-
-def count_citations(graph) -> int:
-    """Return the number of unique citations.
-
-    :param pybel.BELGraph graph: A BEL graph
-    :return: The number of unique citations in the graph.
-    """
-    warnings.warn('use graph.number_of_citations()', DeprecationWarning)
-    return graph.number_of_citations()
