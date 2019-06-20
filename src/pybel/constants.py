@@ -566,7 +566,7 @@ BELNS_ENCODING_STR = ''.join(sorted(belns_encodings))
 
 PYBEL_REMOTE_HOST = 'PYBEL_REMOTE_HOST'
 PYBEL_REMOTE_USER = 'PYBEL_REMOTE_USER'
-PYBEL_REMOTE_PASSWORD = 'PYBEL_REMOTE_PASSWORD'
+PYBEL_REMOTE_PASSWORD = 'PYBEL_REMOTE_PASSWORD'  # noqa: S105
 
 #: The default location of PyBEL Web
 DEFAULT_SERVICE_URL = 'https://bel-commons.scai.fraunhofer.de'
