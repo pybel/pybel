@@ -32,7 +32,6 @@ jobs:
     - stage: lint
       env: TOXENV=manifest
     - env: TOXENV=flake8
-    - env: TOXENV=xenon
     - env: TOXENV=pyroma
     - env: TOXENV=mypy
     # docs stage
@@ -44,7 +43,6 @@ jobs:
 matrix:
   allow_failures:
     - env: TOXENV=mypy
-    - env: TOXENV=xenon
 
 install:
   - sh -c 'if [ "$TOXENV" = "py" ]; then pip install tox codecov; else pip install tox; fi'

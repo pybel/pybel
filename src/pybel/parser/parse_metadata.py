@@ -44,17 +44,18 @@ class MetadataParser(BaseParser):
         BEL 1.0 Specification for the `DEFINE <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html#_define>`_ keyword
     """
 
-    def __init__(self,
-                 manager,
-                 namespace_to_term: Optional[Mapping[str, Mapping[str, str]]] = None,
-                 namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
-                 annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
-                 annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
-                 annotation_to_local: Optional[Mapping[str, Set[str]]] = None,
-                 default_namespace: Optional[Set[str]] = None,
-                 allow_redefinition: bool = False,
-                 skip_validation: bool = False,
-                 ) -> None:
+    def __init__(
+            self,
+            manager,
+            namespace_to_term: Optional[Mapping[str, Mapping[str, str]]] = None,
+            namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
+            annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
+            annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
+            annotation_to_local: Optional[Mapping[str, Set[str]]] = None,
+            default_namespace: Optional[Set[str]] = None,
+            allow_redefinition: bool = False,
+            skip_validation: bool = False,
+    ) -> None:
         """Build a metadata parser.
 
         :param manager: A cache manager
@@ -124,7 +125,7 @@ class MetadataParser(BaseParser):
             self.annotation_url,
             self.annotation_list,
             self.annotation_pattern,
-            self.namespace_pattern
+            self.namespace_pattern,
         ]).setName('BEL Metadata')
 
         super(MetadataParser, self).__init__(self.language)

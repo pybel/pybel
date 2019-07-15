@@ -222,21 +222,22 @@ partof_tag = Keyword(PART_OF)
 class BELParser(BaseParser):
     """Build a parser backed by a given dictionary of namespaces."""
 
-    def __init__(self,
-                 graph,
-                 namespace_to_term: Optional[Mapping[str, Mapping[str, str]]] = None,
-                 namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
-                 annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
-                 annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
-                 annotation_to_local: Optional[Mapping[str, Set[str]]] = None,
-                 allow_naked_names: bool = False,
-                 allow_nested: bool = False,
-                 disallow_unqualified_translocations: bool = False,
-                 citation_clearing: bool = True,
-                 skip_validation: bool = False,
-                 autostreamline: bool = True,
-                 required_annotations: Optional[List[str]] = None,
-                 ) -> None:
+    def __init__(
+            self,
+            graph,
+            namespace_to_term: Optional[Mapping[str, Mapping[str, str]]] = None,
+            namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
+            annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
+            annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
+            annotation_to_local: Optional[Mapping[str, Set[str]]] = None,
+            allow_naked_names: bool = False,
+            allow_nested: bool = False,
+            disallow_unqualified_translocations: bool = False,
+            citation_clearing: bool = True,
+            skip_validation: bool = False,
+            autostreamline: bool = True,
+            required_annotations: Optional[List[str]] = None,
+    ) -> None:
         """Build a BEL parser.
 
         :param pybel.BELGraph graph: The BEL Graph to use to store the network
@@ -675,8 +676,15 @@ class BELParser(BaseParser):
             raise InvalidEntity(self.get_line_number(), line, position, namespace, name)
 
         if tokens[FUNCTION] not in valid_functions:
-            raise InvalidFunctionSemantic(self.get_line_number(), line, position, tokens[FUNCTION], namespace, name,
-                                          valid_functions)
+            raise InvalidFunctionSemantic(
+                line_number=self.get_line_number(),
+                line=line,
+                position=position,
+                func=tokens[FUNCTION],
+                namespace=namespace,
+                name=name,
+                allowed_functions=valid_functions,
+            )
 
         return tokens
 
@@ -742,8 +750,8 @@ class BELParser(BaseParser):
 
     def _handle_relation(self, tokens: ParseResults) -> str:
         """Handle a relation."""
-        subject_node_dsl = self.ensure_node(tokens[SUBJECT])
-        object_node_dsl = self.ensure_node(tokens[OBJECT])
+        u = self.ensure_node(tokens[SUBJECT])
+        v = self.ensure_node(tokens[OBJECT])
 
         subject_modifier = modifier_po_to_dict(tokens[SUBJECT])
         object_modifier = modifier_po_to_dict(tokens[OBJECT])
@@ -756,15 +764,15 @@ class BELParser(BaseParser):
                 }
                 if isinstance(annotation_entry, set) else
                 {
-                    annotation_entry: True
+                    annotation_entry: True,
                 }
             )
             for annotation_name, annotation_entry in self.control_parser.annotations.items()
         }
 
         return self._add_qualified_edge(
-            subject_node_dsl,
-            object_node_dsl,
+            u,
+            v,
             relation=tokens[RELATION],
             annotations=annotations,
             subject_modifier=subject_modifier,
@@ -812,7 +820,7 @@ class BELParser(BaseParser):
                 position=position,
                 node=self.graph.node,
                 old_label=self.graph.get_node_description(subject_node_dsl),
-                new_label=description
+                new_label=description,
             )
 
         self.graph.set_node_description(subject_node_dsl, description)
@@ -848,7 +856,7 @@ def handle_activity_legacy(_: str, __: int, tokens: ParseResults) -> ParseResult
     tokens[MODIFIER] = ACTIVITY
     tokens[EFFECT] = {
         NAME: legacy_cls,
-        NAMESPACE: BEL_DEFAULT_NAMESPACE
+        NAMESPACE: BEL_DEFAULT_NAMESPACE,
     }
     log.log(5, 'upgraded legacy activity to %s', legacy_cls)
     return tokens

@@ -52,13 +52,14 @@ class ControlParser(BaseParser):
         <http://openbel.org/language/version_1.0/bel_specification_version_1.0.html#_control_records>`_
     """
 
-    def __init__(self,
-                 annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
-                 annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
-                 annotation_to_local: Optional[Mapping[str, Set[str]]] = None,
-                 citation_clearing: bool = True,
-                 required_annotations: Optional[List[str]] = None
-                 ) -> None:
+    def __init__(
+            self,
+            annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
+            annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
+            annotation_to_local: Optional[Mapping[str, Set[str]]] = None,
+            citation_clearing: bool = True,
+            required_annotations: Optional[List[str]] = None
+    ) -> None:
         """Initialize the control statement parser.
 
         :param annotation_to_term: A dictionary of {annotation: set of valid values} defined with URL for parsing
@@ -350,7 +351,7 @@ class ControlParser(BaseParser):
         return {
             EVIDENCE: self.evidence,
             CITATION: self.citation.copy(),
-            ANNOTATIONS: self.annotations.copy()
+            ANNOTATIONS: self.annotations.copy(),
         }
 
     def get_missing_required_annotations(self) -> List[str]:
@@ -361,7 +362,7 @@ class ControlParser(BaseParser):
             if required_annotation not in self.annotations
         ]
 
-    def clear_citation(self):
+    def clear_citation(self) -> None:
         """Clear the citation and if citation clearing is enabled, clear the evidence and annotations."""
         self.citation.clear()
 
@@ -369,7 +370,7 @@ class ControlParser(BaseParser):
             self.evidence = None
             self.annotations.clear()
 
-    def clear(self):
+    def clear(self) -> None:
         """Clear the statement_group, citation, evidence, and annotations."""
         self.statement_group = None
         self.citation.clear()

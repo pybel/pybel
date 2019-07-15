@@ -33,5 +33,5 @@ FUNC_TO_FUSION_DSL = {
 
 FUNC_TO_LIST_DSL = {
     COMPLEX: ComplexAbundance,
-    COMPOSITE: CompositeAbundance
+    COMPOSITE: CompositeAbundance,
 }
