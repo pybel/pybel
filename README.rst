@@ -28,9 +28,8 @@ can be loaded.
 .. code-block:: python
 
    >>> import pybel
-   >>> graph = pybel.from_url('http://resources.openbel.org/belframework/20150611/knowledge/small_corpus.bel')
-   >>> graph.number_of_nodes()  # Will be smaller than expected because we have the most strict settings enabled
-   1207
+   >>> url = 'https://raw.githubusercontent.com/pharmacome/knowledge/master/hbp_knowledge/proteostasis/kim2013.bel'
+   >>> graph = pybel.from_url(url)
 
 More examples can be found in the `documentation <http://pybel.readthedocs.io>`_ and in the
 `PyBEL Notebooks <https://github.com/pybel/pybel-notebooks>`_ repository.

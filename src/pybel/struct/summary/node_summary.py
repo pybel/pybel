@@ -3,8 +3,9 @@
 """Summary functions for nodes in BEL graphs."""
 
 import itertools as itt
+import typing
 from collections import Counter, defaultdict
-from typing import List, Optional, Tuple
+from typing import Any, Iterable, List, Mapping, Optional, Set, Tuple
 
 from ..filters.node_predicates import has_variant
 from ...constants import (
@@ -29,38 +30,33 @@ __all__ = [
 ]
 
 
-def _function_iterator(graph):
-    """Iterate over the functions in a graph.
-
-    :rtype: iter[str]
-    """
+def _function_iterator(graph) -> Iterable[str]:
+    """Iterate over the functions in a graph."""
     return (
         node.function
         for node in graph
     )
 
 
-def get_functions(graph):
+def get_functions(graph) -> Set[str]:
     """Get the set of all functions used in this graph.
 
     :param pybel.BELGraph graph: A BEL graph
     :return: A set of functions
-    :rtype: set[str]
     """
     return set(_function_iterator(graph))
 
 
-def count_functions(graph):
+def count_functions(graph) -> typing.Counter[str]:
     """Count the frequency of each function present in a graph.
 
     :param pybel.BELGraph graph: A BEL graph
     :return: A Counter from {function: frequency}
-    :rtype: collections.Counter
     """
     return Counter(_function_iterator(graph))
 
 
-def _iterate_namespaces(graph):
+def _iterate_namespaces(graph) -> Iterable[str]:
     return (
         node[NAMESPACE]
         for node in graph
@@ -68,7 +64,7 @@ def _iterate_namespaces(graph):
     )
 
 
-def count_namespaces(graph):
+def count_namespaces(graph) -> typing.Counter[str]:
     """Count the frequency of each namespace across all nodes (that have namespaces).
 
     :param pybel.BELGraph graph: A BEL graph
@@ -78,27 +74,25 @@ def count_namespaces(graph):
     return Counter(_iterate_namespaces(graph))
 
 
-def get_namespaces(graph):
+def get_namespaces(graph) -> Set[str]:
     """Get the set of all namespaces used in this graph.
 
     :param pybel.BELGraph graph: A BEL graph
     :return: A set of namespaces
-    :rtype: set[str]
     """
     return set(_iterate_namespaces(graph))
 
 
-def get_unused_namespaces(graph):
+def get_unused_namespaces(graph) -> Set[str]:
     """Get the set of all namespaces that are defined in a graph, but are never used.
 
     :param pybel.BELGraph graph: A BEL graph
     :return: A set of namespaces that are included but not used
-    :rtype: set[str]
     """
     return graph.defined_namespace_keywords - get_namespaces(graph)
 
 
-def get_names(graph):
+def get_names(graph) -> Mapping[str, Set[str]]:
     """Get all names for each namespace.
 
     :type graph: pybel.BELGraph
@@ -110,7 +104,7 @@ def get_names(graph):
     return dict(rv)
 
 
-def _identifier_filtered_iterator(graph):
+def _identifier_filtered_iterator(graph) -> Iterable[Tuple[str, str]]:
     """Iterate over names in the given namespace."""
     for data in graph:
         for pair in _get_node_names(data):
@@ -145,7 +139,7 @@ def _identifier_filtered_iterator(graph):
             yield location[NAMESPACE], location[NAME]
 
 
-def _get_node_names(data):
+def _get_node_names(data: Mapping[str, Any]) -> Iterable[Tuple[str, str]]:
     if NAMESPACE in data:
         yield data[NAMESPACE], data[NAME]
 
@@ -160,20 +154,19 @@ def _get_node_names(data):
                 yield identifier[NAMESPACE], identifier[NAME]
 
 
-def _namespace_filtered_iterator(graph, namespace):
+def _namespace_filtered_iterator(graph, namespace: str) -> Iterable[str]:
     """Iterate over names in the given namespace."""
     for it_namespace, name in _identifier_filtered_iterator(graph):
         if namespace == it_namespace:
             yield name
 
 
-def count_names_by_namespace(graph, namespace):
+def count_names_by_namespace(graph, namespace: str) -> typing.Counter[str]:
     """Get the set of all of the names in a given namespace that are in the graph.
 
     :param pybel.BELGraph graph: A BEL graph
-    :param str namespace: A namespace keyword
+    :param namespace: A namespace keyword
     :return: A counter from {name: frequency}
-    :rtype: collections.Counter
 
     :raises IndexError: if the namespace is not defined in the graph.
     """
@@ -183,13 +176,12 @@ def count_names_by_namespace(graph, namespace):
     return Counter(_namespace_filtered_iterator(graph, namespace))
 
 
-def get_names_by_namespace(graph, namespace):
+def get_names_by_namespace(graph, namespace: str) -> Set[str]:
     """Get the set of all of the names in a given namespace that are in the graph.
 
     :param pybel.BELGraph graph: A BEL graph
     :param str namespace: A namespace keyword
     :return: A set of names belonging to the given namespace that are in the given graph
-    :rtype: set[str]
 
     :raises IndexError: if the namespace is not defined in the graph.
     """
@@ -199,11 +191,10 @@ def get_names_by_namespace(graph, namespace):
     return set(_namespace_filtered_iterator(graph, namespace))
 
 
-def count_variants(graph):
+def count_variants(graph) -> typing.Counter[str]:
     """Count how many of each type of variant a graph has.
 
     :param pybel.BELGraph graph: A BEL graph
-    :rtype: Counter
     """
     return Counter(
         variant_data[KIND]
@@ -222,24 +213,16 @@ def get_top_hubs(graph, *, n: Optional[int] = 15) -> List[Tuple[BaseEntity, int]
     return Counter(dict(graph.degree())).most_common(n=n)
 
 
-def _pathology_iterator(graph):
-    """Iterate over edges in which either the source or target is a pathology node.
-
-    :param pybel.BELGraph graph: A BEL graph
-    :rtype: iter
-    """
-    for node in itt.chain.from_iterable(graph.edges()):
-        if isinstance(node, Pathology):
-            yield node
-
-
-def count_pathologies(graph):
+def count_pathologies(graph) -> typing.Counter[BaseEntity]:
     """Count the number of edges in which each pathology is incident.
 
     :param pybel.BELGraph graph: A BEL graph
-    :rtype: Counter
     """
-    return Counter(_pathology_iterator(graph))
+    return Counter(
+        node
+        for node in itt.chain.from_iterable(graph.edges())
+        if isinstance(node, Pathology)
+    )
 
 
 def get_top_pathologies(graph, n: Optional[int] = 15) -> List[Tuple[BaseEntity, int]]:

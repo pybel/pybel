@@ -7,7 +7,7 @@ from abc import ABCMeta, abstractmethod
 from operator import methodcaller
 from typing import Iterable, List, Optional, Union
 
-from .exc import InferCentralDogmaException, PyBELDSLException
+from .exc import InferCentralDogmaException, ListAbundanceEmptyException, PyBELDSLException, ReactionEmptyException
 from ..constants import (
     ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING,
     FRAGMENT_START, FRAGMENT_STOP, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GENE,
@@ -64,6 +64,7 @@ __all__ = [
     'FusionRangeBase',
 ]
 
+# A methodcaller for the key argument of sorted()
 _as_bel = methodcaller('as_bel')
 
 
@@ -115,7 +116,13 @@ class BaseEntity(dict, metaclass=ABCMeta):
 class BaseAbundance(BaseEntity):
     """The superclass for building node data dictionaries."""
 
-    def __init__(self, func: str, namespace: str, name: Optional[str] = None, identifier: Optional[str] = None) -> None:
+    def __init__(
+            self,
+            func: str,
+            namespace: str,
+            name: Optional[str] = None,
+            identifier: Optional[str] = None,
+    ) -> None:
         """Build an abundance from a function, namespace, and a name and/or identifier.
 
         :param func: The PyBEL function
@@ -222,16 +229,35 @@ class Pathology(BaseAbundance):
         super(Pathology, self).__init__(PATHOLOGY, namespace=namespace, name=name, identifier=identifier)
 
 
+class Variant(dict, metaclass=ABCMeta):
+    """The superclass for variant dictionaries."""
+
+    def __init__(self, kind: str) -> None:
+        """Build the variant data dictionary.
+
+        :param kind: The kind of variant
+        """
+        super().__init__({KIND: kind})
+
+    @abstractmethod
+    def as_bel(self) -> str:
+        """Return this variant as a BEL string."""
+
+    def __str__(self):  # noqa: D105
+        return self.as_bel()
+
+
 class CentralDogma(BaseAbundance):
     """The base class for "central dogma" abundances (i.e., genes, miRNAs, RNAs, and proteins)."""
 
-    def __init__(self,
-                 func: str,
-                 namespace: str,
-                 name: Optional[str] = None,
-                 identifier: Optional[str] = None,
-                 variants: Union[None, 'Variant', Iterable['Variant']] = None,
-                 ) -> None:
+    def __init__(
+            self,
+            func: str,
+            namespace: str,
+            name: Optional[str] = None,
+            identifier: Optional[str] = None,
+            variants: Union[None, Variant, Iterable[Variant]] = None,
+    ) -> None:
         """Build a node for a gene, RNA, miRNA, or protein.
 
         :param func: The PyBEL function to use
@@ -249,7 +275,7 @@ class CentralDogma(BaseAbundance):
             )
 
     @property
-    def variants(self) -> Optional[List['Variant']]:
+    def variants(self) -> Optional[List[Variant]]:
         """Return this entity's variants, if they exist."""
         return self.get(VARIANTS)
 
@@ -272,8 +298,6 @@ class CentralDogma(BaseAbundance):
     def get_parent(self) -> Optional['CentralDogma']:
         """Get the parent, or none if it's already a reference node.
 
-        :rtype: Optional[CentralDogma]
-
         Example usage:
 
         >>> ab42 = Protein(name='APP', namespace='HGNC', variants=[Fragment(start=672, stop=713)])
@@ -285,7 +309,7 @@ class CentralDogma(BaseAbundance):
 
         return self.__class__(namespace=self.namespace, name=self.name, identifier=self.identifier)
 
-    def with_variants(self, variants: Union['Variant', List['Variant']]) -> 'CentralDogma':
+    def with_variants(self, variants: Union[Variant, List[Variant]]) -> 'CentralDogma':
         """Create a new entity with the given variants.
 
         :param variants: An optional variant or list of variants
@@ -304,34 +328,17 @@ class CentralDogma(BaseAbundance):
         )
 
 
-class Variant(dict, metaclass=ABCMeta):
-    """The superclass for variant dictionaries."""
-
-    def __init__(self, kind: str) -> None:
-        """Build the variant data dictionary.
-
-        :param kind: The kind of variant
-        """
-        super(Variant, self).__init__({KIND: kind})
-
-    @abstractmethod
-    def as_bel(self) -> str:
-        """Return this variant as a BEL string."""
-
-    def __str__(self):  # noqa: D105
-        return self.as_bel()
-
-
 class ProteinModification(Variant):
     """Build a protein modification variant dictionary."""
 
-    def __init__(self,
-                 name: str,
-                 code: Optional[str] = None,
-                 position: Optional[int] = None,
-                 namespace: Optional[str] = None,
-                 identifier: Optional[str] = None,
-                 ) -> None:
+    def __init__(
+            self,
+            name: str,
+            code: Optional[str] = None,
+            position: Optional[int] = None,
+            namespace: Optional[str] = None,
+            identifier: Optional[str] = None,
+    ) -> None:
         """Build a protein modification variant data dictionary.
 
         :param name: The name of the modification
@@ -361,7 +368,7 @@ class ProteinModification(Variant):
         self[IDENTIFIER] = Entity(
             namespace=(namespace or BEL_DEFAULT_NAMESPACE),
             name=name,
-            identifier=identifier
+            identifier=identifier,
         )
 
         if code:
@@ -381,12 +388,12 @@ class ProteinModification(Variant):
 class GeneModification(Variant):
     """Build a gene modification variant dictionary."""
 
-    def __init__(self, name, namespace=None, identifier=None):
+    def __init__(self, name: str, namespace: Optional[str] = None, identifier: Optional[str] = None) -> None:
         """Build a gene modification variant data dictionary.
 
-        :param str name: The name of the gene modification
-        :param Optional[str] namespace: The namespace of the gene modification
-        :param Optional[str] identifier: The identifier of the name in the database
+        :param name: The name of the gene modification
+        :param namespace: The namespace of the gene modification
+        :param identifier: The identifier of the name in the database
 
         Either the name or the identifier must be used. If the namespace is omitted, it is assumed that a name is
         specified from the BEL default namespace.
@@ -404,7 +411,7 @@ class GeneModification(Variant):
         self[IDENTIFIER] = Entity(
             namespace=(namespace or BEL_DEFAULT_NAMESPACE),
             name=name,
-            identifier=identifier
+            identifier=identifier,
         )
 
     def as_bel(self) -> str:
@@ -424,7 +431,7 @@ class Hgvs(Variant):
 
         >>> Protein(namespace='HGNC', name='AKT1', variants=[Hgvs('p.Ala127Tyr')])
         """
-        super(Hgvs, self).__init__(HGVS)
+        super().__init__(kind=HGVS)
 
         self[IDENTIFIER] = variant
 
@@ -437,14 +444,14 @@ class HgvsReference(Hgvs):
     """Represents the "reference" variant in HGVS."""
 
     def __init__(self) -> None:
-        super(HgvsReference, self).__init__('=')
+        super().__init__(variant='=')
 
 
 class HgvsUnspecified(Hgvs):
     """Represents an unspecified variant in HGVS."""
 
     def __init__(self) -> None:
-        super(HgvsUnspecified, self).__init__('?')
+        super().__init__(variant='?')
 
 
 class ProteinSubstitution(Hgvs):
@@ -467,14 +474,17 @@ class ProteinSubstitution(Hgvs):
 class Fragment(Variant):
     """Represent the information about a protein fragment."""
 
-    def __init__(self, start=None, stop=None, description=None):
+    def __init__(
+            self,
+            start: Union[None, int, str] = None,
+            stop: Union[None, int, str] = None,
+            description: Optional[str] = None,
+    ) -> None:
         """Build a protein fragment data dictionary.
 
         :param start: The starting position
-        :type start: None or int or str
         :param stop: The stopping position
-        :type stop: None or int or str
-        :param Optional[str] description: An optional description
+        :param description: An optional description
 
         Example of specified fragment:
 
@@ -542,21 +552,26 @@ class _Transcribable(CentralDogma):
         return Gene(
             namespace=self.namespace,
             name=self.name,
-            identifier=self.identifier
+            identifier=self.identifier,
         )
 
 
 class Rna(_Transcribable):
     """Represents an RNA."""
 
-    def __init__(self, namespace, name=None, identifier=None, variants=None):
+    def __init__(
+            self,
+            namespace: str,
+            name: Optional[str] = None,
+            identifier: Optional[str] = None,
+            variants: Union[None, Variant, Iterable[Variant]] = None,
+    ) -> None:
         """Build an RNA node.
 
-        :param str namespace: The name of the database used to identify this entity
-        :param Optional[str] name: The database's preferred name or label for this entity
-        :param Optional[str] identifier: The database's identifier for this entity
+        :param namespace: The name of the database used to identify this entity
+        :param name: The database's preferred name or label for this entity
+        :param identifier: The database's identifier for this entity
         :param variants: An optional variant or list of variants
-        :type variants: None or Variant or list[Variant]
 
         Example: AKT1 protein coding gene's RNA:
 
@@ -572,14 +587,19 @@ class Rna(_Transcribable):
 class MicroRna(_Transcribable):
     """Represents an micro-RNA."""
 
-    def __init__(self, namespace, name=None, identifier=None, variants=None):
+    def __init__(
+            self,
+            namespace: str,
+            name: Optional[str] = None,
+            identifier: Optional[str] = None,
+            variants: Union[None, Variant, Iterable[Variant]] = None,
+    ) -> None:
         """Build an miRNA node.
 
-        :param str namespace: The name of the database used to identify this entity
-        :param Optional[str] name: The database's preferred name or label for this entity
-        :param Optional[str] identifier: The database's identifier for this entity
+        :param namespace: The name of the database used to identify this entity
+        :param name: The database's preferred name or label for this entity
+        :param identifier: The database's identifier for this entity
         :param variants: A list of variants
-        :type variants: None or Variant or list[Variant]
 
         Human miRNA's are listed on HUGO's `MicroRNAs (MIR) <https://www.genenames.org/cgi-bin/genefamilies/set/476>`_
         gene family.
@@ -602,14 +622,19 @@ class MicroRna(_Transcribable):
 class Protein(CentralDogma):
     """Represents a protein."""
 
-    def __init__(self, namespace, name=None, identifier=None, variants=None):
+    def __init__(
+            self,
+            namespace: str,
+            name: Optional[str] = None,
+            identifier: Optional[str] = None,
+            variants: Union[None, Variant, Iterable[Variant]] = None,
+    ) -> None:
         """Build a protein node.
 
-        :param str namespace: The name of the database used to identify this entity
-        :param Optional[str] name: The database's preferred name or label for this entity
-        :param Optional[str] identifier: The database's identifier for this entity
+        :param namespace: The name of the database used to identify this entity
+        :param name: The database's preferred name or label for this entity
+        :param identifier: The database's identifier for this entity
         :param variants: An optional variant or list of variants
-        :type variants: None or Variant or list[Variant]
 
         Example: AKT
 
@@ -636,7 +661,7 @@ class Protein(CentralDogma):
         return Rna(
             namespace=self.namespace,
             name=self.name,
-            identifier=self.identifier
+            identifier=self.identifier,
         )
 
 
@@ -651,13 +676,15 @@ def _entity_list_as_bel(entities: Iterable[BaseEntity]) -> str:
 class Reaction(BaseEntity):
     """Build a reaction node."""
 
-    def __init__(self, reactants, products):
+    def __init__(
+            self,
+            reactants: Union[BaseAbundance, Iterable[BaseAbundance]],
+            products: Union[BaseAbundance, Iterable[BaseAbundance]],
+    ) -> None:
         """Build a reaction node.
 
         :param reactants: A list of PyBEL node data dictionaries representing the reactants
-        :type reactants: BaseAbundance or iter[BaseAbundance]
         :param products: A list of PyBEL node data dictionaries representing the products
-        :type products: BaseAbundance or iter[BaseAbundance]
 
         Example:
 
@@ -675,35 +702,29 @@ class Reaction(BaseEntity):
         else:
             products = sorted(products, key=_as_bel)
 
+        if not reactants and not products:
+            raise ReactionEmptyException('Reaction can not be instantiated with an empty members list.')
+
         self.update({
             REACTANTS: reactants,
             PRODUCTS: products,
         })
 
     @property
-    def reactants(self):
-        """Return the list of reactants in this reaction.
-
-        :rtype: list[BaseAbundance]
-        """
+    def reactants(self) -> List[BaseAbundance]:
+        """Return the list of reactants in this reaction."""
         return self[REACTANTS]
 
     @property
-    def products(self):
-        """Return the list of products in this reaction.
-
-        :rtype: list[BaseAbundance]
-        """
+    def products(self) -> List[BaseAbundance]:
+        """Return the list of products in this reaction."""
         return self[PRODUCTS]
 
-    def as_bel(self):
-        """Return this reaction as a BEL string.
-
-        :rtype: str
-        """
+    def as_bel(self) -> str:
+        """Return this reaction as a BEL string."""
         return 'rxn(reactants({}), products({}))'.format(
             _entity_list_as_bel(self.reactants),
-            _entity_list_as_bel(self.products)
+            _entity_list_as_bel(self.products),
         )
 
 
@@ -713,35 +734,29 @@ reaction = Reaction
 class ListAbundance(BaseEntity):
     """The superclass for building list abundance (complex, abundance) node data dictionaries."""
 
-    def __init__(self, func, members):
+    def __init__(self, func: str, members: Union[BaseAbundance, Iterable[BaseAbundance]]) -> None:
         """Build a list abundance node.
 
-        :param str func: The PyBEL function
+        :param func: The PyBEL function
         :param members: A list of PyBEL node data dictionaries
-        :type members: BaseAbundance or list[BaseAbundance]
         """
-        super(ListAbundance, self).__init__(func=func)
+        super().__init__(func=func)
 
         if isinstance(members, BaseEntity):
             self[MEMBERS] = [members]
-        elif 0 == len(members):
-            raise ValueError('List abundance can not be instantiated with an empty members list.')
         else:
             self[MEMBERS] = sorted(members, key=_as_bel)
 
-    @property
-    def members(self):
-        """Return the list of members in this list abundance.
+        if not self[MEMBERS]:
+            raise ListAbundanceEmptyException('List abundance can not be instantiated with an empty members list.')
 
-        :rtype: list[BaseAbundance]
-        """
+    @property
+    def members(self) -> List[BaseAbundance]:
+        """Return the list of members in this list abundance."""
         return self[MEMBERS]
 
-    def as_bel(self):
-        """Return this list abundance as a BEL string.
-
-        :rtype: str
-        """
+    def as_bel(self) -> str:
+        """Return this list abundance as a BEL string."""
         return '{}({})'.format(
             self._func,
             _entity_list_as_bel(self.members)
@@ -751,13 +766,19 @@ class ListAbundance(BaseEntity):
 class ComplexAbundance(ListAbundance):
     """Build a complex abundance node with the optional ability to specify a name."""
 
-    def __init__(self, members, namespace=None, name=None, identifier=None):
+    def __init__(
+            self,
+            members: Iterable[BaseAbundance],
+            namespace: Optional[str] = None,
+            name: Optional[str] = None,
+            identifier: Optional[str] = None,
+    ) -> None:
         """Build a complex list node.
 
-        :param list[BaseAbundance] members: A list of PyBEL node data dictionaries
-        :param Optional[str] namespace: The namespace from which the name originates
-        :param Optional[str] name: The name of the complex
-        :param Optional[str] identifier: The identifier in the namespace in which the name originates
+        :param members: A list of PyBEL node data dictionaries
+        :param namespace: The namespace from which the name originates
+        :param name: The name of the complex
+        :param identifier: The identifier in the namespace in which the name originates
         """
         super(ComplexAbundance, self).__init__(func=COMPLEX, members=members)
 
@@ -768,12 +789,17 @@ class ComplexAbundance(ListAbundance):
 class NamedComplexAbundance(BaseAbundance):
     """Build a named complex abundance node."""
 
-    def __init__(self, namespace=None, name=None, identifier=None):
+    def __init__(
+            self,
+            namespace: str,
+            name: Optional[str] = None,
+            identifier: Optional[str] = None,
+    ) -> None:
         """Build a complex abundance node.
 
-        :param str namespace: The name of the database used to identify this entity
-        :param str name: The database's preferred name or label for this entity
-        :param str identifier: The database's identifier for this entity
+        :param namespace: The name of the database used to identify this entity
+        :param name: The database's preferred name or label for this entity
+        :param identifier: The database's identifier for this entity
 
         Example:
 
@@ -790,10 +816,10 @@ class NamedComplexAbundance(BaseAbundance):
 class CompositeAbundance(ListAbundance):
     """Build a composite abundance node."""
 
-    def __init__(self, members):
+    def __init__(self, members: Iterable[BaseAbundance]) -> None:
         """Build a composite abundance node.
 
-        :param list[BaseAbundance] members: A list of PyBEL node data dictionaries
+        :param members: A list of PyBEL node data dictionaries
         """
         super(CompositeAbundance, self).__init__(func=COMPOSITE, members=members)
 
@@ -802,11 +828,8 @@ class FusionRangeBase(dict, metaclass=ABCMeta):
     """The superclass for fusion range data dictionaries."""
 
     @abstractmethod
-    def as_bel(self):
-        """Return this fusion range as BEL.
-
-        :rtype: str
-        """
+    def as_bel(self) -> str:
+        """Return this fusion range as BEL."""
 
     def __str__(self):  # noqa: D105
         return self.as_bel()
@@ -818,7 +841,7 @@ class MissingFusionRange(FusionRangeBase):
     def __init__(self):
         """Build a missing fusion range."""
         super(MissingFusionRange, self).__init__({
-            FUSION_MISSING: '?'
+            FUSION_MISSING: '?',
         })
 
     def as_bel(self) -> str:
@@ -859,27 +882,28 @@ class EnumeratedFusionRange(FusionRangeBase):
 class FusionBase(BaseEntity):
     """The superclass for building fusion node data dictionaries."""
 
-    def __init__(self,
-                 func,
-                 partner_5p: CentralDogma,
-                 partner_3p: CentralDogma,
-                 range_5p: Optional[FusionRangeBase] = None,
-                 range_3p: Optional[FusionRangeBase] = None,
-                 ) -> None:
+    def __init__(
+            self,
+            func: str,
+            partner_5p: CentralDogma,
+            partner_3p: CentralDogma,
+            range_5p: Optional[FusionRangeBase] = None,
+            range_3p: Optional[FusionRangeBase] = None,
+    ) -> None:
         """Build a fusion node.
 
         :param func: A PyBEL function
         :param partner_5p: A PyBEL node for the 5-prime partner
         :param partner_3p: A PyBEL node for the 3-prime partner
         :param range_5p: A fusion range for the 5-prime partner
-        :param ange_3p: A fusion range for the 3-prime partner
+        :param range_3p: A fusion range for the 3-prime partner
         """
         super(FusionBase, self).__init__(func=func)
         self[FUSION] = {
             PARTNER_5P: partner_5p,
             PARTNER_3P: partner_3p,
             RANGE_5P: range_5p or MissingFusionRange(),
-            RANGE_3P: range_3p or MissingFusionRange()
+            RANGE_3P: range_3p or MissingFusionRange(),
         }
 
     @property
@@ -918,12 +942,13 @@ class FusionBase(BaseEntity):
 class ProteinFusion(FusionBase):
     """Builds a protein fusion data dictionary."""
 
-    def __init__(self,
-                 partner_5p: Protein,
-                 partner_3p: Protein,
-                 range_5p: Optional[FusionRangeBase] = None,
-                 range_3p: Optional[FusionRangeBase] = None,
-                 ) -> None:
+    def __init__(
+            self,
+            partner_5p: Protein,
+            partner_3p: Protein,
+            range_5p: Optional[FusionRangeBase] = None,
+            range_3p: Optional[FusionRangeBase] = None,
+    ) -> None:
         """Build a protein fusion node.
 
         :param partner_5p: A PyBEL node for the 5-prime partner
@@ -943,12 +968,13 @@ class ProteinFusion(FusionBase):
 class RnaFusion(FusionBase):
     """Builds an RNA fusion data dictionary."""
 
-    def __init__(self,
-                 partner_5p: Rna,
-                 partner_3p: Rna,
-                 range_5p: Optional[FusionRangeBase] = None,
-                 range_3p: Optional[FusionRangeBase] = None,
-                 ) -> None:
+    def __init__(
+            self,
+            partner_5p: Rna,
+            partner_3p: Rna,
+            range_5p: Optional[FusionRangeBase] = None,
+            range_3p: Optional[FusionRangeBase] = None,
+    ) -> None:
         """Build an RNA fusion node.
 
         :param partner_5p: A PyBEL node for the 5-prime partner
@@ -985,12 +1011,13 @@ class RnaFusion(FusionBase):
 class GeneFusion(FusionBase):
     """Builds a gene fusion data dictionary."""
 
-    def __init__(self,
-                 partner_5p: Gene,
-                 partner_3p: Gene,
-                 range_5p: Optional[FusionRangeBase] = None,
-                 range_3p: Optional[FusionRangeBase] = None,
-                 ) -> None:
+    def __init__(
+            self,
+            partner_5p: Gene,
+            partner_3p: Gene,
+            range_5p: Optional[FusionRangeBase] = None,
+            range_3p: Optional[FusionRangeBase] = None,
+    ) -> None:
         """Build a gene fusion node.
 
         :param partner_5p: A PyBEL node for the 5-prime partner

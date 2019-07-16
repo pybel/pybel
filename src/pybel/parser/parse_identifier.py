@@ -26,12 +26,13 @@ class IdentifierParser(BaseParser):
     Can be made more lenient when given a default namespace or enabling the use of naked names.
     """
 
-    def __init__(self,
-                 namespace_to_term: Optional[Mapping[str, Mapping[str, str]]] = None,
-                 namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
-                 default_namespace: Optional[Set[str]] = None,
-                 allow_naked_names: bool = False,
-                 ) -> None:
+    def __init__(
+            self,
+            namespace_to_term: Optional[Mapping[str, Mapping[str, str]]] = None,
+            namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
+            default_namespace: Optional[Set[str]] = None,
+            allow_naked_names: bool = False,
+    ) -> None:
         """Initialize the identifier parser.
 
         :param namespace_to_term: A dictionary of {namespace: {name: encoding}}
@@ -111,7 +112,7 @@ class IdentifierParser(BaseParser):
             raise MissingNamespaceRegexWarning(self.get_line_number(), line, position, namespace, name)
 
     def raise_for_missing_default(self, line: str, position: int, name: str) -> None:
-        """Raise an exeception if the name does not belong to the default namespace."""
+        """Raise an exception if the name does not belong to the default namespace."""
         if not self.default_namespace:
             raise ValueError('Default namespace is not set')
 
@@ -135,7 +136,7 @@ class IdentifierParser(BaseParser):
 
     @staticmethod
     def handle_namespace_lenient(line: str, position: int, tokens: ParseResults) -> ParseResults:
-        """Handle parsing an identifier for name missing a namespac ethat are outside the default namespace."""
+        """Handle parsing an identifier for names missing a namespace that are outside the default namespace."""
         tokens[NAMESPACE] = DIRTY
         log.debug('Naked namespace: [%d] %s', position, line)
         return tokens

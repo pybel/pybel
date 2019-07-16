@@ -6,11 +6,11 @@ import logging
 import time
 from typing import Iterable, List
 
-from pyparsing import ParseResults
-
-log = logging.getLogger(__name__)
+from pyparsing import ParseResults, ParserElement
 
 __all__ = ['BaseParser']
+
+log = logging.getLogger(__name__)
 
 
 class BaseParser(object):
@@ -19,11 +19,11 @@ class BaseParser(object):
     Multiple parsers can be easily chained together when they are all inheriting from this base class.
     """
 
-    def __init__(self, language, streamline=False):
+    def __init__(self, language: ParserElement, streamline: bool = False) -> None:
         """Build a parser wrapper using a PyParsing language.
 
         :param language: The PyParsing language to use
-        :param bool streamline: Should the language be streamlined on instantiation?
+        :param streamline: Should the language be streamlined on instantiation?
         """
         self.language = language
 
@@ -53,7 +53,7 @@ class BaseParser(object):
         """Get the current line number."""
         return self._line_number
 
-    def streamline(self):
+    def streamline(self) -> None:
         """Streamline the language represented by this parser to make queries run faster."""
         t = time.time()
         self.language.streamline()
