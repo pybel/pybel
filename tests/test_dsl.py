@@ -7,8 +7,8 @@ import unittest
 from pybel import BELGraph
 from pybel.constants import NAME
 from pybel.dsl import (
-    abundance, complex_abundance, composite_abundance, fragment, fusion_range, gene, gene_fusion, missing_fusion_range,
-    protein,
+    ComplexAbundance, CompositeAbundance, ListAbundanceEmptyException, Reaction, ReactionEmptyException, abundance,
+    complex_abundance, composite_abundance, fragment, fusion_range, gene, gene_fusion, missing_fusion_range, protein,
 )
 from pybel.language import Entity
 from pybel.testing.utils import n
@@ -172,6 +172,19 @@ class TestCentralDogma(unittest.TestCase):
         ab42 = app.with_variants([fragment(start=672, stop=713)])
         self.assertEqual('p(HGNC:APP)', app.as_bel())
         self.assertEqual('p(HGNC:APP, frag("672_713"))', ab42.as_bel())
+
+    def test_list_abundance_has_contents(self):
+        """Test that the construction of list abundance doesn't have empty lists."""
+        with self.assertRaises(ListAbundanceEmptyException):
+            ComplexAbundance([])
+
+        with self.assertRaises(ListAbundanceEmptyException):
+            CompositeAbundance([])
+
+    def test_reaction_has_contents(self):
+        """Test that the construction of reaction doesn't have empty lists."""
+        with self.assertRaises(ReactionEmptyException):
+            Reaction([], [])
 
 
 if __name__ == '__main__':

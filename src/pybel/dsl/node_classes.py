@@ -7,7 +7,7 @@ from abc import ABCMeta, abstractmethod
 from operator import methodcaller
 from typing import Iterable, List, Optional, Union
 
-from .exc import InferCentralDogmaException, PyBELDSLException
+from .exc import InferCentralDogmaException, ListAbundanceEmptyException, PyBELDSLException, ReactionEmptyException
 from ..constants import (
     ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING,
     FRAGMENT_START, FRAGMENT_STOP, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GENE,
@@ -688,6 +688,9 @@ class Reaction(BaseEntity):
         else:
             products = sorted(products, key=_as_bel)
 
+        if not reactants and not products:
+            raise ReactionEmptyException('Reaction can not be instantiated with an empty members list.')
+
         self.update({
             REACTANTS: reactants,
             PRODUCTS: products,
@@ -707,7 +710,7 @@ class Reaction(BaseEntity):
         """Return this reaction as a BEL string."""
         return 'rxn(reactants({}), products({}))'.format(
             _entity_list_as_bel(self.reactants),
-            _entity_list_as_bel(self.products)
+            _entity_list_as_bel(self.products),
         )
 
 
@@ -723,14 +726,15 @@ class ListAbundance(BaseEntity):
         :param func: The PyBEL function
         :param members: A list of PyBEL node data dictionaries
         """
-        super(ListAbundance, self).__init__(func=func)
+        super().__init__(func=func)
 
         if isinstance(members, BaseEntity):
             self[MEMBERS] = [members]
-        elif 0 == len(members):
-            raise ValueError('List abundance can not be instantiated with an empty members list.')
         else:
             self[MEMBERS] = sorted(members, key=_as_bel)
+
+        if not self[MEMBERS]:
+            raise ListAbundanceEmptyException('List abundance can not be instantiated with an empty members list.')
 
     @property
     def members(self) -> List[BaseAbundance]:
