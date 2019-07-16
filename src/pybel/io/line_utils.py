@@ -33,20 +33,21 @@ LOG_FMT = '%d:%d %s %s'
 LOG_FMT_PATH = '%s:%d:%d %s %s'
 
 
-def parse_lines(graph: BELGraph,
-                lines: Iterable[str],
-                manager: Optional[Manager] = None,
-                allow_nested: bool = False,
-                citation_clearing: bool = True,
-                use_tqdm: bool = False,
-                tqdm_kwargs: Optional[Mapping[str, Any]] = None,
-                no_identifier_validation: bool = False,
-                disallow_unqualified_translocations: bool = False,
-                allow_redefinition: bool = False,
-                allow_definition_failures: bool = False,
-                allow_naked_names: bool = False,
-                required_annotations: Optional[List[str]] = None,
-                ):
+def parse_lines(
+        graph: BELGraph,
+        lines: Iterable[str],
+        manager: Optional[Manager] = None,
+        allow_nested: bool = False,
+        citation_clearing: bool = True,
+        use_tqdm: bool = False,
+        tqdm_kwargs: Optional[Mapping[str, Any]] = None,
+        no_identifier_validation: bool = False,
+        disallow_unqualified_translocations: bool = False,
+        allow_redefinition: bool = False,
+        allow_definition_failures: bool = False,
+        allow_naked_names: bool = False,
+        required_annotations: Optional[List[str]] = None,
+) -> None:
     """Parse an iterable of lines into this graph.
 
     Delegates to :func:`parse_document`, :func:`parse_definitions`, and :func:`parse_statements`.
@@ -126,10 +127,11 @@ def parse_lines(graph: BELGraph,
     log.info('Network has %d nodes and %d edges', graph.number_of_nodes(), graph.number_of_edges())
 
 
-def parse_document(graph: BELGraph,
-                   enumerated_lines: Iterable[Tuple[int, str]],
-                   metadata_parser: MetadataParser,
-                   ) -> None:
+def parse_document(
+        graph: BELGraph,
+        enumerated_lines: Iterable[Tuple[int, str]],
+        metadata_parser: MetadataParser,
+) -> None:
     """Parse the lines in the document section of a BEL script."""
     parse_document_start_time = time.time()
 
@@ -160,13 +162,14 @@ def parse_document(graph: BELGraph,
     log.info('Finished parsing document section in %.02f seconds', time.time() - parse_document_start_time)
 
 
-def parse_definitions(graph: BELGraph,
-                      enumerated_lines: Iterable[Tuple[int, str]],
-                      metadata_parser: MetadataParser,
-                      allow_failures: bool = False,
-                      use_tqdm: bool = False,
-                      tqdm_kwargs: Optional[Mapping[str, Any]] = None,
-                      ) -> None:
+def parse_definitions(
+        graph: BELGraph,
+        enumerated_lines: Iterable[Tuple[int, str]],
+        metadata_parser: MetadataParser,
+        allow_failures: bool = False,
+        use_tqdm: bool = False,
+        tqdm_kwargs: Optional[Mapping[str, Any]] = None,
+) -> None:
     """Parse the lines in the definitions section of a BEL script.
 
     :param graph: A BEL graph
@@ -220,12 +223,13 @@ def parse_definitions(graph: BELGraph,
     log.info('Finished parsing definitions section in %.02f seconds', time.time() - parse_definitions_start_time)
 
 
-def parse_statements(graph: BELGraph,
-                     enumerated_lines: Iterable[Tuple[int, str]],
-                     bel_parser: BELParser,
-                     use_tqdm: bool = False,
-                     tqdm_kwargs: Optional[Mapping[str, Any]] = None,
-                     ) -> None:
+def parse_statements(
+        graph: BELGraph,
+        enumerated_lines: Iterable[Tuple[int, str]],
+        bel_parser: BELParser,
+        use_tqdm: bool = False,
+        tqdm_kwargs: Optional[Mapping[str, Any]] = None,
+) -> None:
     """Parse a list of statements from a BEL Script.
 
     :param graph: A BEL graph
