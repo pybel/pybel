@@ -95,7 +95,7 @@ class TestAbundanceLabeled(TestTokenParserBase):
         self.parser.general_abundance.setParseAction(self.parser.handle_term)
 
         self.expected_node_data = abundance(namespace='chebi', name='oxygen atom', identifier='CHEBI:25805')
-        self.expected_canonical_bel = 'a(chebi:"CHEBI:25805"!"oxygen atom")'
+        self.expected_canonical_bel = 'a(chebi:"oxygen atom")'
 
     def _test_abundance_helper(self, statement):
         result = self.parser.general_abundance.parseString(statement)
@@ -145,8 +145,9 @@ class TestAbundanceLabeled(TestTokenParserBase):
         self._test_abundance_with_location_helper('a(chebi:"CHEBI:25805"!"oxygen atom", loc(GO:intracellular))')
         self._test_abundance_with_location_helper('abundance(chebi:"CHEBI:25805"!"oxygen atom", loc(GO:intracellular))')
         self._test_abundance_with_location_helper('a(chebi:"CHEBI:25805"!"oxygen atom", location(GO:intracellular))')
-        self._test_abundance_with_location_helper('abundance(chebi:"CHEBI:25805"!"oxygen atom", location(GO:intracellular))')
-
+        self._test_abundance_with_location_helper(
+            'abundance(chebi:"CHEBI:25805"!"oxygen atom", location(GO:intracellular))'
+        )
 
 
 class TestGene(TestTokenParserBase):
