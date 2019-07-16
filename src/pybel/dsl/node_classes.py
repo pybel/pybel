@@ -157,25 +157,11 @@ class BaseAbundance(BaseEntity):
 
     def as_bel(self) -> str:
         """Return this node as a BEL string."""
-        if self.name and self.identifier:
-            return "{}({}:{}!{})".format(
-                self._func,
-                self.namespace,
-                ensure_quotes(self.identifier),
-                ensure_quotes(self.name),
-            )
-        # elif self.name:
-        #     return "{}({}!{})".format(
-        #         self._func,
-        #         self.namespace,
-        #         ensure_quotes(self.name),
-        #     )
-        else:
-            return "{}({}:{})".format(
-                self._func,
-                self.namespace,
-                ensure_quotes(self._priority_id),
-            )
+        return "{}({}:{})".format(
+            self._func,
+            self.namespace,
+            ensure_quotes(self._priority_id),
+        )
 
 
 class Abundance(BaseAbundance):
