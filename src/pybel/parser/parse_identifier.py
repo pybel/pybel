@@ -46,11 +46,11 @@ class IdentifierParser(BaseParser):
         self.allow_naked_names = allow_naked_names
 
         self.identifier_fqualified = (
-                word(NAMESPACE) +
-                Suppress(':') +
-                (word | quote)(IDENTIFIER) +
-                Suppress('!') +
-                (word | quote)(NAME)
+            word(NAMESPACE) +
+            Suppress(':') +
+            (word | quote)(IDENTIFIER) +
+            Suppress('!') +
+            (word | quote)(NAME)
         )
 
         self.identifier_qualified = word(NAMESPACE) + Suppress(':') + (word | quote)(NAME)
