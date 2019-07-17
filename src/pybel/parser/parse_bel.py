@@ -262,6 +262,7 @@ class BELParser(BaseParser):
         :param required_annotations: Optional list of required annotations
         """
         self.graph = graph
+        self.metagraph = set()
 
         self.allow_nested = allow_nested
         self.disallow_unqualified_translocations = disallow_unqualified_translocations
@@ -638,17 +639,18 @@ class BELParser(BaseParser):
         if not self.allow_nested:
             raise NestedRelationWarning(self.get_line_number(), line, position)
 
-        self._handle_relation_harness(line, position, {
+        subject_hash = self._handle_relation_checked(line, position, {
             SUBJECT: tokens[SUBJECT],
             RELATION: tokens[RELATION],
             OBJECT: tokens[OBJECT][SUBJECT],
         })
 
-        self._handle_relation_harness(line, position, {
+        object_hash = self._handle_relation_checked(line, position, {
             SUBJECT: tokens[OBJECT][SUBJECT],
             RELATION: tokens[OBJECT][RELATION],
             OBJECT: tokens[OBJECT][OBJECT],
         })
+        self.metagraph.add((subject_hash, object_hash))
         return tokens
 
     def check_function_semantics(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
@@ -784,6 +786,10 @@ class BELParser(BaseParser):
 
         Note: this can't be changed after instantiation!
         """
+        self._handle_relation_checked(line, position, tokens)
+        return tokens
+
+    def _handle_relation_checked(self, line, position, tokens):
         if not self.control_parser.citation:
             raise MissingCitationException(self.get_line_number(), line, position)
 
@@ -794,8 +800,7 @@ class BELParser(BaseParser):
         if missing_required_annotations:
             raise MissingAnnotationWarning(self.get_line_number(), line, position, missing_required_annotations)
 
-        self._handle_relation(tokens)
-        return tokens
+        return self._handle_relation(tokens)
 
     def handle_unqualified_relation(self, _, __, tokens: ParseResults) -> ParseResults:
         """Handle unqualified relations."""
