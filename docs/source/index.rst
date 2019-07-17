@@ -37,13 +37,6 @@ PyBEL is tested on Python 3.5+ on Mac OS and Linux using
    introduction/installation
 
 .. toctree::
-   :caption: Tutorials
-   :name: tutorials
-
-   tutorials/loading.ipynb
-
-
-.. toctree::
    :maxdepth: 2
    :caption: Data Structure
    :name: data
