@@ -2,6 +2,7 @@
 
 """Summary functions for errors and warnings encountered during the compilation of BEL script."""
 
+import typing
 from collections import Counter, defaultdict
 from typing import Iterable, List, Mapping, Set
 
@@ -29,7 +30,7 @@ def get_syntax_errors(graph: BELGraph) -> List[WarningTuple]:
     ]
 
 
-def count_error_types(graph: BELGraph) -> Counter:
+def count_error_types(graph: BELGraph) -> typing.Counter[str]:
     """Count the occurrence of each type of error in a graph.
 
     :return: A Counter of {error type: frequency}
@@ -47,7 +48,7 @@ def _naked_names_iter(graph: BELGraph) -> Iterable[str]:
             yield exc.name
 
 
-def count_naked_names(graph: BELGraph) -> Counter:
+def count_naked_names(graph: BELGraph) -> typing.Counter[str]:
     """Count the frequency of each naked name (names without namespaces).
 
     :return: A Counter from {name: frequency}
@@ -60,7 +61,7 @@ def get_naked_names(graph: BELGraph) -> Set[str]:
     return set(_naked_names_iter(graph))
 
 
-def _iterate_namespace_name(graph: BELGraph):
+def _iterate_namespace_name(graph: BELGraph) -> Iterable[typing.Tuple[str, str]]:
     for _, exc, _ in graph.warnings:
         if not isinstance(exc, (MissingNamespaceNameWarning, MissingNamespaceRegexWarning)):
             continue

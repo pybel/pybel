@@ -1,11 +1,10 @@
 graft src
 graft tests
 prune scripts
-prune docs/source/tutorials/.ipynb_checkpoints
+prune notebooks
 
 recursive-include docs/source *.py
 recursive-include docs/source *.rst
-recursive-include docs/source *.ipynb
 recursive-include docs/source *.png
 recursive-include src/pybel/testing/bel *.bel
 recursive-include src/pybel/testing/belanno *.belanno
