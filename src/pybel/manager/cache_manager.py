@@ -799,7 +799,7 @@ class InsertManager(NamespaceManager, LookupManager):
 
     def get_or_create_evidence(self, citation: Citation, text: str) -> Evidence:
         """Create an entry and object for given evidence if it does not exist."""
-        sha512 = hash_evidence(text=text, type=str(citation.type), reference=str(citation.reference))
+        sha512 = hash_evidence(text=text, citation_type=str(citation.type), citation_reference=str(citation.reference))
 
         if sha512 in self.object_cache_evidence:
             evidence = self.object_cache_evidence[sha512]
@@ -982,7 +982,7 @@ class InsertManager(NamespaceManager, LookupManager):
         if type is None:
             type = CITATION_TYPE_PUBMED
 
-        sha512 = hash_citation(type=type, reference=reference)
+        sha512 = hash_citation(citation_type=type, citation_reference=reference)
 
         if sha512 in self.object_cache_citation:
             citation = self.object_cache_citation[sha512]
