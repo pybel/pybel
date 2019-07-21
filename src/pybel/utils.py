@@ -16,7 +16,6 @@ from .constants import (
     LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT, RELATION, SUBJECT, TO_LOC, TRANSLOCATION,
 )
 from .typing import EdgeData
-from .version import VERSION
 
 log = logging.getLogger(__name__)
 
@@ -69,11 +68,6 @@ def flatten_dict(data, parent_key='', sep='_'):
             items[key] = value
 
     return items
-
-
-def get_version() -> str:
-    """Get the current PyBEL version."""
-    return VERSION
 
 
 def tokenize_version(version_string: str) -> Tuple[int, int, int]:

@@ -11,7 +11,7 @@ from .manager import cache_manager, database_io
 from .manager.cache_manager import *
 from .manager.database_io import *
 from .struct import *
-from .utils import get_version
+from .version import get_version
 
 __all__ = (
     struct.__all__ +
