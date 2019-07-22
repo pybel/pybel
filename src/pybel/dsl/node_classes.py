@@ -5,7 +5,7 @@
 import hashlib
 from abc import ABCMeta, abstractmethod
 from operator import methodcaller
-from typing import Collection, Iterable, List, Optional, Union
+from typing import Iterable, List, Optional, Union
 
 from .exc import InferCentralDogmaException, ListAbundanceEmptyException, ReactionEmptyException
 from ..constants import (
@@ -246,7 +246,7 @@ class CentralDogma(BaseAbundance):
         super().__init__(namespace=namespace, name=name, identifier=identifier)
         if isinstance(variants, Variant):
             self[VARIANTS] = [variants]
-        elif isinstance(variants, Collection):
+        elif isinstance(variants, (list, tuple, set)):
             self[VARIANTS] = sorted(variants, key=_as_bel)
 
     @property
