@@ -34,7 +34,7 @@ from pybel.testing.constants import (
 from pybel.testing.mocks import mock_bel_resources
 from tests.constants import (
     BelReconstitutionMixin, TestTokenParserBase, akt1, casp8, citation_1, egfr, evidence_1, fadd, test_citation_dict,
-    test_evidence_text, test_set_evidence,
+    test_evidence_text, test_set_evidence, SET_CITATION_TEST
 )
 
 logging.getLogger('requests').setLevel(logging.WARNING)
@@ -258,7 +258,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
 namespace_to_term = {
     'TESTNS': {
         "1": "GRP",
-        "2": "GRP"
+        "2": "GRP",
     }
 }
 
@@ -288,12 +288,15 @@ class TestFull(TestTokenParserBase):
         self.assertIn(gene('dbSNP', 'rs10235'), self.parser.graph)
 
     def test_regex_mismatch(self):
-        line = 'g(dbSNP:10234) -- g(dbSNP:rr10235)'
-
+        statement = 'g(dbSNP:10234) -- g(dbSNP:rr10235)'
         with self.assertRaises(MissingNamespaceRegexWarning):
-            self.parser.parseString(line)
+            self.parser.parseString(statement)
 
     def test_semantic_failure(self):
+        self.assertIsNotNone(self.parser.concept_parser.namespace_to_terms)
+        self.assertIn('TESTNS', self.parser.concept_parser.namespace_to_terms)
+        self.assertIn('1', self.parser.concept_parser.namespace_to_terms['TESTNS'])
+        self.assertIn('2', self.parser.concept_parser.namespace_to_terms['TESTNS'])
         statement = "bp(TESTNS:1) -- p(TESTNS:2)"
         with self.assertRaises(InvalidFunctionSemantic):
             self.parser.parseString(statement)

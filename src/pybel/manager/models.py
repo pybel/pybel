@@ -438,11 +438,10 @@ class Node(Base):
     data = Column(Text, nullable=False, doc='PyBEL BaseEntity as JSON')
 
     @staticmethod
-    def _start_from_base_entity(base_entity):
+    def _start_from_base_entity(base_entity) -> 'Node':
         """Convert a base entity to a node model.
 
         :type base_entity: pybel.dsl.BaseEntity
-        :rtype: Node
         """
         return Node(
             type=base_entity.function,

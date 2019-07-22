@@ -5,11 +5,10 @@
 from typing import List
 
 from .constants import (
-    FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_START, FRAGMENT_STOP, FUNCTION,
-    FUSION, FUSION_MISSING, FUSION_REFERENCE,
-    FUSION_START, FUSION_STOP, GMOD, HGVS, IDENTIFIER, KIND, MEMBERS, MODIFIER, NAME, NAMESPACE,
-    PARTNER_3P, PARTNER_5P, PMOD, PMOD_CODE, PMOD_POSITION, PRODUCTS, RANGE_3P, RANGE_5P, REACTANTS,
-    REACTION, TARGET, VARIANTS,
+    CONCEPT, FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_START, FRAGMENT_STOP, FUNCTION, FUSION, FUSION_MISSING,
+    FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, HGVS, IDENTIFIER, KIND, MEMBERS, MODIFIER, NAME, NAMESPACE,
+    PARTNER_3P, PARTNER_5P, PMOD, PMOD_CODE, PMOD_POSITION, PRODUCTS, RANGE_3P, RANGE_5P, REACTANTS, REACTION, TARGET,
+    VARIANTS,
 )
 from .dsl import (
     BaseAbundance, BaseEntity, CentralDogma, FUNC_TO_DSL, FUNC_TO_FUSION_DSL, FUNC_TO_LIST_DSL, FusionBase,
@@ -21,11 +20,10 @@ __all__ = [
 ]
 
 
-def parse_result_to_dsl(tokens):
+def parse_result_to_dsl(tokens) -> BaseEntity:
     """Convert a ParseResult to a PyBEL DSL object.
 
     :type tokens: dict or pyparsing.ParseResults
-    :rtype: BaseEntity
     """
     if MODIFIER in tokens:
         return parse_result_to_dsl(tokens[TARGET])
@@ -55,14 +53,26 @@ def _fusion_to_dsl(tokens) -> FusionBase:
     fusion_dsl = FUNC_TO_FUSION_DSL[func]
     member_dsl = FUNC_TO_DSL[func]
 
+    partner_5p_concept = (
+        tokens[FUSION][PARTNER_5P][CONCEPT]
+        if CONCEPT in tokens[FUSION][PARTNER_5P] else
+        tokens[FUSION][PARTNER_5P]
+    )
     partner_5p = member_dsl(
-        namespace=tokens[FUSION][PARTNER_5P][NAMESPACE],
-        name=tokens[FUSION][PARTNER_5P][NAME]
+        namespace=partner_5p_concept[NAMESPACE],
+        name=partner_5p_concept[NAME],
+        identifier=partner_5p_concept.get(IDENTIFIER),
     )
 
+    partner_3p_concept = (
+        tokens[FUSION][PARTNER_3P][CONCEPT]
+        if CONCEPT in tokens[FUSION][PARTNER_3P] else
+        tokens[FUSION][PARTNER_3P]
+    )
     partner_3p = member_dsl(
-        namespace=tokens[FUSION][PARTNER_3P][NAMESPACE],
-        name=tokens[FUSION][PARTNER_3P][NAME]
+        namespace=partner_3p_concept[NAMESPACE],
+        name=partner_3p_concept[NAME],
+        identifier=partner_3p_concept.get(IDENTIFIER),
     )
 
     range_5p = _fusion_range_to_dsl(tokens[FUSION][RANGE_5P])
@@ -87,7 +97,7 @@ def _fusion_range_to_dsl(tokens) -> FusionRangeBase:
     return fusion_range(
         reference=tokens[FUSION_REFERENCE],
         start=tokens[FUSION_START],
-        stop=tokens[FUSION_STOP]
+        stop=tokens[FUSION_STOP],
     )
 
 
@@ -100,10 +110,11 @@ def _simple_po_to_dict(tokens) -> BaseAbundance:
     if dsl is None:
         raise ValueError('invalid tokens: {}'.format(tokens))
 
+    concept = tokens[CONCEPT]
     return dsl(
-        namespace=tokens[NAMESPACE],
-        name=tokens.get(NAME),
-        identifier=tokens.get(IDENTIFIER),
+        namespace=concept[NAMESPACE],
+        name=concept.get(NAME),
+        identifier=concept.get(IDENTIFIER),
     )
 
 
@@ -116,9 +127,11 @@ def _variant_po_to_dict(tokens) -> CentralDogma:
     if dsl is None:
         raise ValueError('invalid tokens: {}'.format(tokens))
 
+    concept = tokens[CONCEPT]
     return dsl(
-        namespace=tokens[NAMESPACE],
-        name=tokens[NAME],
+        namespace=concept[NAMESPACE],
+        name=concept[NAME],
+        identifier=concept.get(IDENTIFIER),
         variants=[
             _variant_to_dsl_helper(variant_tokens)
             for variant_tokens in tokens[VARIANTS]
@@ -134,18 +147,22 @@ def _variant_to_dsl_helper(tokens) -> Variant:
     kind = tokens[KIND]
 
     if kind == HGVS:
-        return hgvs(tokens[IDENTIFIER])
+        return hgvs(tokens[HGVS])
 
     if kind == GMOD:
+        concept = tokens[CONCEPT]
         return gmod(
-            name=tokens[IDENTIFIER][NAME],
-            namespace=tokens[IDENTIFIER][NAMESPACE],
+            name=concept[NAME],
+            namespace=concept[NAMESPACE],
+            identifier=concept.get(IDENTIFIER),
         )
 
     if kind == PMOD:
+        concept = tokens[CONCEPT]
         return pmod(
-            name=tokens[IDENTIFIER][NAME],
-            namespace=tokens[IDENTIFIER][NAMESPACE],
+            name=concept[NAME],
+            namespace=concept[NAMESPACE],
+            identifier=concept.get(IDENTIFIER),
             code=tokens.get(PMOD_CODE),
             position=tokens.get(PMOD_POSITION),
         )
@@ -155,7 +172,7 @@ def _variant_to_dsl_helper(tokens) -> Variant:
         return fragment(
             start=start,
             stop=stop,
-            description=tokens.get(FRAGMENT_DESCRIPTION)
+            description=tokens.get(FRAGMENT_DESCRIPTION),
         )
 
     raise ValueError('invalid fragment kind: {}'.format(kind))
@@ -167,17 +184,9 @@ def _reaction_po_to_dict(tokens) -> Reaction:
     :type tokens: ParseResult
     """
     return Reaction(
-        reactants=_reaction_part_po_to_dict(tokens[REACTANTS]),
-        products=_reaction_part_po_to_dict(tokens[PRODUCTS]),
+        reactants=_parse_tokens_list(tokens[REACTANTS]),
+        products=_parse_tokens_list(tokens[PRODUCTS]),
     )
-
-
-def _reaction_part_po_to_dict(tokens) -> List[BaseEntity]:
-    """Convert a PyParsing result to a reaction.
-
-    :type tokens: ParseResult
-    """
-    return [parse_result_to_dsl(token) for token in tokens]
 
 
 def _list_po_to_dict(tokens) -> ListAbundance:
@@ -187,7 +196,16 @@ def _list_po_to_dict(tokens) -> ListAbundance:
     """
     func = tokens[FUNCTION]
     dsl = FUNC_TO_LIST_DSL[func]
-
-    members = [parse_result_to_dsl(token) for token in tokens[MEMBERS]]
-
+    members = _parse_tokens_list(tokens[MEMBERS])
     return dsl(members)
+
+
+def _parse_tokens_list(tokens) -> List[BaseEntity]:
+    """Convert a PyParsing result to a reaction.
+
+    :type tokens: ParseResult
+    """
+    return [
+        parse_result_to_dsl(token)
+        for token in tokens
+    ]

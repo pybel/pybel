@@ -9,7 +9,7 @@ from collections import defaultdict
 from collections.abc import Iterable, MutableMapping
 from datetime import datetime
 from pickle import dumps
-from typing import Mapping, Optional, Tuple
+from typing import Any, Mapping, Optional, Tuple
 
 from .constants import (
     ACTIVITY, CITATION, CITATION_REFERENCE, CITATION_TYPE, DEGRADATION, EFFECT, EVIDENCE, FROM_LOC, IDENTIFIER,
@@ -20,11 +20,11 @@ from .typing import EdgeData
 log = logging.getLogger(__name__)
 
 
-def expand_dict(flat_dict, sep='_'):
+def expand_dict(flat_dict, sep: str = '_'):
     """Expand a flattened dictionary.
 
     :param dict flat_dict: a nested dictionary that has been flattened so the keys are composite
-    :param str sep: the separator between concatenated keys
+    :param sep: the separator between concatenated keys
     :rtype: dict
     """
     res = {}
@@ -43,13 +43,12 @@ def expand_dict(flat_dict, sep='_'):
     return res
 
 
-def flatten_dict(data, parent_key='', sep='_'):
+def flatten_dict(data: Mapping[str, Any], parent_key: str = '', sep: str = '_') -> Mapping[str, str]:
     """Flatten a nested dictionary.
 
     :param data: A nested dictionary
-    :type data: dict or MutableMapping
-    :param str parent_key: The parent's key. This is a value for tail recursion, so don't set it yourself.
-    :param str sep: The separator used between dictionary levels
+    :param parent_key: The parent's key. This is a value for tail recursion, so don't set it yourself.
+    :param sep: The separator used between dictionary levels
     :rtype: dict
 
     .. seealso:: http://stackoverflow.com/a/6027615
@@ -110,9 +109,10 @@ def valid_date_version(s: str) -> bool:
 def _validate_date_fmt(s: str, fmt: str) -> bool:
     try:
         datetime.strptime(s, fmt)
-        return True
     except ValueError:
         return False
+    else:
+        return True
 
 
 def parse_datetime(s: str) -> datetime.date:
@@ -273,10 +273,8 @@ def _canonicalize_edge_modifications(edge_data: EdgeData) -> Optional[Tuple]:
                 effect[NAMESPACE],
                 effect_name or effect_identifier,
             )
-
         else:
             t = (ACTIVITY,)
-
         result.append(t)
 
     elif modifier == DEGRADATION:
@@ -285,16 +283,19 @@ def _canonicalize_edge_modifications(edge_data: EdgeData) -> Optional[Tuple]:
 
     elif modifier == TRANSLOCATION:
         if effect:
-            from_loc_name = effect[FROM_LOC].get(NAME)
-            from_loc_identifier = effect[FROM_LOC].get(IDENTIFIER)
-            to_loc_name = effect[TO_LOC].get(NAME)
-            to_loc_identifier = effect[TO_LOC].get(IDENTIFIER)
+            from_loc_concept = effect[FROM_LOC]
+            from_loc_name = from_loc_concept.get(NAME)
+            from_loc_identifier = from_loc_concept.get(IDENTIFIER)
+
+            to_loc_concept = effect[TO_LOC]
+            to_loc_name = to_loc_concept.get(NAME)
+            to_loc_identifier = to_loc_concept.get(IDENTIFIER)
 
             t = (
                 TRANSLOCATION,
-                edge_data[EFFECT][FROM_LOC][NAMESPACE],
+                from_loc_concept[NAMESPACE],
                 from_loc_name or from_loc_identifier,
-                edge_data[EFFECT][TO_LOC][NAMESPACE],
+                to_loc_concept[NAMESPACE],
                 to_loc_name or to_loc_identifier,
             )
         else:

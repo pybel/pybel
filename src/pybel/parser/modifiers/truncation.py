@@ -41,7 +41,7 @@ from pyparsing import ParserElement, pyparsing_common as ppc
 
 from .constants import amino_acid
 from ..utils import nest, one_of_tags
-from ...constants import HGVS, IDENTIFIER, KIND, TRUNCATION_POSITION
+from ...constants import HGVS, KIND, TRUNCATION_POSITION
 
 __all__ = [
     'get_truncation_language',
@@ -67,14 +67,14 @@ def _handle_trunc_legacy(line, _, tokens):
     # FIXME this isn't correct HGVS nomenclature, but truncation isn't forward compatible without more information
     upgraded = 'p.{}*'.format(tokens[TRUNCATION_POSITION])
     log.warning('trunc() is deprecated. Re-encode with reference terminal amino acid in HGVS: %s', line)
-    tokens[IDENTIFIER] = upgraded
+    tokens[HGVS] = upgraded
     del tokens[TRUNCATION_POSITION]
     return tokens
 
 
 def _handle_trunc(_, __, tokens):
     aa, position = tokens[AMINO_ACID], tokens[TRUNCATION_POSITION]
-    tokens[IDENTIFIER] = 'p.{aa}{position}*'.format(aa=aa, position=position)
+    tokens[HGVS] = 'p.{aa}{position}*'.format(aa=aa, position=position)
     del tokens[AMINO_ACID]
     del tokens[TRUNCATION_POSITION]
     return tokens

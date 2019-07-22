@@ -651,13 +651,8 @@ class TestAddNodeFromData(unittest.TestCase):
 class TestReconstituteNodeTuples(TemporaryCacheMixin):
     """Tests the ability to go from PyBEL to relational database"""
 
-    def help_reconstitute(self, node, number_nodes, number_edges):
-        """Help test the round-trip conversion from PyBEL data dictionary to node model.
-
-        :param BaseEntity node: PyBEL node data dictionary
-        :param int number_nodes:
-        :param int number_edges:
-        """
+    def help_reconstitute(self, node: BaseEntity, number_nodes: int, number_edges: int):
+        """Help test the round-trip conversion from PyBEL data dictionary to node model."""
         self.assertIsInstance(node, BaseEntity)
 
         graph = BELGraph(name='test', version='0.0.0')
@@ -674,7 +669,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         self.manager.session.commit()
 
         self.assertEqual(node, node_model.to_json())
-        self.assertEqual(node, self.manager.get_dsl_by_hash(node.as_sha512()))
+        self.assertEqual(node, self.manager.get_dsl_by_hash(node.sha512))
 
     @mock_bel_resources
     def test_simple(self, mock):
@@ -1152,7 +1147,8 @@ class TestNoAddNode(TemporaryCacheMixin):
 
         make_dummy_namespaces(self.manager, graph)
         network = self.manager.insert_graph(graph)
-        self.assertEqual(0, len(network.nodes.all()))
+        nodes = network.nodes.all()
+        self.assertEqual(0, len(nodes), msg='Nodes: {}'.format(nodes))
 
     @mock_bel_resources
     def test_no_node_fusion_3p(self, mock):
@@ -1320,9 +1316,11 @@ class TestNoAddNode(TemporaryCacheMixin):
     @mock_bel_resources
     def test_regex_lookup(self, mock):  # FIXME this test needs to be put somewhere else
         """Test that regular expression nodes get love too."""
-        graph = BELGraph(name='Regular Expression Test Graph',
-                         description='Help test regular expression namespaces',
-                         version='1.0.0')
+        graph = BELGraph(
+            name='Regular Expression Test Graph',
+            description='Help test regular expression namespaces',
+            version='1.0.0',
+        )
         dbsnp = 'dbSNP'
         DBSNP_PATTERN = 'rs[0-9]+'
         graph.namespace_pattern[dbsnp] = DBSNP_PATTERN
@@ -1333,8 +1331,8 @@ class TestNoAddNode(TemporaryCacheMixin):
         graph.add_node_from_data(rs1234)
         graph.add_node_from_data(rs1235)
 
-        rs1234_hash = rs1234.as_sha512()
-        rs1235_hash = rs1235.as_sha512()
+        rs1234_hash = rs1234.sha512
+        rs1235_hash = rs1235.sha512
 
         self.manager.insert_graph(graph, store_parts=True)
 

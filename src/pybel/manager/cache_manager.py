@@ -31,11 +31,11 @@ from .utils import extract_shared_optional, extract_shared_required, update_inse
 from ..constants import (
     ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR,
     CITATION_ISSUE, CITATION_LAST_AUTHOR, CITATION_NAME, CITATION_PAGES, CITATION_REFERENCE, CITATION_TITLE,
-    CITATION_TYPE, CITATION_TYPE_PUBMED, CITATION_VOLUME, DEGRADATION, EFFECT, EVIDENCE, FRAGMENT, FRAGMENT_MISSING,
-    FRAGMENT_START, FRAGMENT_STOP, FUSION, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, HGVS, IDENTIFIER, KIND,
-    LINE, LOCATION, METADATA_INSERT_KEYS, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PMOD, PMOD_CODE,
-    PMOD_POSITION, RANGE_3P, RANGE_5P, RELATION, SUBJECT, TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS, belns_encodings,
-    get_cache_connection,
+    CITATION_TYPE, CITATION_TYPE_PUBMED, CITATION_VOLUME, CONCEPT, DEGRADATION, EFFECT, EVIDENCE, FRAGMENT,
+    FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP, FUSION, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, HGVS,
+    KIND, LINE, LOCATION, METADATA_INSERT_KEYS, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P,
+    PMOD, PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P, RELATION, SUBJECT, TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS,
+    belns_encodings, get_cache_connection,
 )
 from ..dsl import BaseEntity
 from ..language import (
@@ -71,14 +71,17 @@ def _get_namespace_insert_values(bel_resource):
     namespace_insert_values.update(extract_shared_required(bel_resource, 'Namespace'))
     namespace_insert_values.update(extract_shared_optional(bel_resource, 'Namespace'))
 
-    update_insert_values(bel_resource=bel_resource, mapping=_optional_namespace_entries_mapping,
-                         values=namespace_insert_values)
+    update_insert_values(
+        bel_resource=bel_resource,
+        mapping=_optional_namespace_entries_mapping,
+        values=namespace_insert_values,
+    )
 
     return namespace_insert_values
 
 
 _annotation_mapping = {
-    'name': ('Citation', 'NameString')
+    'name': ('Citation', 'NameString'),
 }
 
 
@@ -381,7 +384,7 @@ class NetworkManager(NamespaceManager):
             self.session
             .query(
                 Network.name.label('network_name'),
-                func.max(Network.created).label('max_created')
+                func.max(Network.created).label('max_created'),
             )
             .group_by(Network.name)
             .subquery('most_recent_times')
@@ -623,9 +626,7 @@ class InsertManager(NamespaceManager, LookupManager):
 
         node_model = {}
         for node in nodes:
-            namespace = node.get(NAMESPACE)
-
-            if graph.skip_storing_namespace(namespace):
+            if graph.skip_storing_node(node):
                 continue  # already know this node won't be cached
 
             node_object = self.get_or_create_node(graph, node)
@@ -824,7 +825,7 @@ class InsertManager(NamespaceManager, LookupManager):
 
     def get_or_create_node(self, graph: BELGraph, node: BaseEntity) -> Optional[Node]:
         """Create an entry and object for given node if it does not exist."""
-        sha512 = node.as_sha512()
+        sha512 = node.sha512
         if sha512 in self.object_cache_node:
             return self.object_cache_node[sha512]
 
@@ -836,13 +837,13 @@ class InsertManager(NamespaceManager, LookupManager):
 
         node_model = Node._start_from_base_entity(node)
 
-        namespace = node.get(NAMESPACE)
-        if namespace is None:
+        concept = node.get(CONCEPT)
+        if concept is None:
             pass
 
-        elif namespace in graph.namespace_url:
-            url = graph.namespace_url[namespace]
-            name = node[NAME]
+        elif concept[NAMESPACE] in graph.namespace_url:
+            url = graph.namespace_url[concept[NAMESPACE]]
+            name = concept[NAME]
             entry = self.get_namespace_entry(url, name)
 
             if entry is None:
@@ -852,16 +853,16 @@ class InsertManager(NamespaceManager, LookupManager):
             self.session.add(entry)
             node_model.namespace_entry = entry
 
-        elif namespace in graph.namespace_pattern:
-            name = node[NAME]
-            pattern = graph.namespace_pattern[namespace]
-            entry = self.get_or_create_regex_namespace_entry(namespace, pattern, name)
+        elif concept[NAMESPACE] in graph.namespace_pattern:
+            name = concept[NAME]
+            pattern = graph.namespace_pattern[concept[NAMESPACE]]
+            entry = self.get_or_create_regex_namespace_entry(concept[NAMESPACE], pattern, name)
 
             self.session.add(entry)
             node_model.namespace_entry = entry
 
         else:
-            log.warning("No reference in BELGraph for namespace: {}".format(node[NAMESPACE]))
+            log.warning("No reference in BELGraph for namespace: {}".format(concept[NAMESPACE]))
             return
 
         if VARIANTS in node or FUSION in node:
@@ -898,17 +899,18 @@ class InsertManager(NamespaceManager, LookupManager):
 
         log.info('dropped all edges in %.2f seconds', time.time() - t)
 
-    def get_or_create_edge(self,
-                           source: Node,
-                           target: Node,
-                           relation: str,
-                           bel: str,
-                           sha512: str,
-                           data: EdgeData,
-                           evidence: Optional[Evidence] = None,
-                           annotations: Optional[List[NamespaceEntry]] = None,
-                           properties: Optional[List[Property]] = None,
-                           ) -> Edge:
+    def get_or_create_edge(
+            self,
+            source: Node,
+            target: Node,
+            relation: str,
+            bel: str,
+            sha512: str,
+            data: EdgeData,
+            evidence: Optional[Evidence] = None,
+            annotations: Optional[List[NamespaceEntry]] = None,
+            properties: Optional[List[Property]] = None,
+    ) -> Edge:
         """Create an edge if it does not exist, or return it if it does.
 
         :param source: Source node of the relation
@@ -917,7 +919,7 @@ class InsertManager(NamespaceManager, LookupManager):
         :param bel: BEL statement that describes the relation
         :param sha512: The SHA512 hash of the edge as a string
         :param data: The PyBEL data dictionary
-        :param Evidence evidence: Evidence object that proves the given relation
+        :param evidence: Evidence object that proves the given relation
         :param properties: List of all properties that belong to the edge
         :param annotations: List of all annotations that belong to the edge
         """
@@ -952,19 +954,20 @@ class InsertManager(NamespaceManager, LookupManager):
         self.object_cache_edge[sha512] = edge
         return edge
 
-    def get_or_create_citation(self,
-                               reference: str,
-                               type: Optional[str] = None,
-                               name: Optional[str] = None,
-                               title: Optional[str] = None,
-                               volume: Optional[str] = None,
-                               issue: Optional[str] = None,
-                               pages: Optional[str] = None,
-                               date: Optional[str] = None,
-                               first: Optional[str] = None,
-                               last: Optional[str] = None,
-                               authors: Union[None, List[str]] = None,
-                               ) -> Citation:
+    def get_or_create_citation(
+            self,
+            reference: str,
+            type: Optional[str] = None,
+            name: Optional[str] = None,
+            title: Optional[str] = None,
+            volume: Optional[str] = None,
+            issue: Optional[str] = None,
+            pages: Optional[str] = None,
+            date: Optional[str] = None,
+            first: Optional[str] = None,
+            last: Optional[str] = None,
+            authors: Union[None, List[str]] = None,
+    ) -> Citation:
         """Create a citation if it does not exist, or return it if it does.
 
         :param type: Citation type (e.g. PubMed)
@@ -1051,6 +1054,7 @@ class InsertManager(NamespaceManager, LookupManager):
 
         Return ``None`` if the list can not be constructed, and the node should also be skipped.
 
+        :param graph: A BEL graph
         :param dict node: Describes the given node and contains is_variant information
         :return: A list of modification objects belonging to the given node
         """
@@ -1058,26 +1062,29 @@ class InsertManager(NamespaceManager, LookupManager):
         if FUSION in node:
             mod_type = FUSION
             node = node[FUSION]
-            p3_namespace_url = graph.namespace_url[node[PARTNER_3P][NAMESPACE]]
+
+            partner_3p_concept = node[PARTNER_3P][CONCEPT]
+            p3_namespace_url = graph.namespace_url[partner_3p_concept[NAMESPACE]]
 
             if p3_namespace_url in graph.uncached_namespaces:
                 log.warning('uncached namespace %s in fusion()', p3_namespace_url)
                 return
 
-            p3_name = node[PARTNER_3P][NAME]
+            p3_name = partner_3p_concept[NAME]
             p3_namespace_entry = self.get_namespace_entry(p3_namespace_url, p3_name)
 
             if p3_namespace_entry is None:
                 log.warning('Could not find namespace entry %s %s', p3_namespace_url, p3_name)
                 return  # FIXME raise?
 
-            p5_namespace_url = graph.namespace_url[node[PARTNER_5P][NAMESPACE]]
+            partner_5p_concept = node[PARTNER_5P][CONCEPT]
+            p5_namespace_url = graph.namespace_url[partner_5p_concept[NAMESPACE]]
 
             if p5_namespace_url in graph.uncached_namespaces:
                 log.warning('uncached namespace %s in fusion()', p5_namespace_url)
                 return
 
-            p5_name = node[PARTNER_5P][NAME]
+            p5_name = partner_5p_concept[NAME]
             p5_namespace_entry = self.get_namespace_entry(p5_namespace_url, p5_name)
 
             if p5_namespace_entry is None:
@@ -1114,7 +1121,7 @@ class InsertManager(NamespaceManager, LookupManager):
                 if mod_type == HGVS:
                     modification_list.append({
                         'type': mod_type,
-                        'variantString': variant[IDENTIFIER]
+                        'variantString': variant[HGVS],
                     })
 
                 elif mod_type == FRAGMENT:
@@ -1126,23 +1133,26 @@ class InsertManager(NamespaceManager, LookupManager):
                         modification_list.append({
                             'type': mod_type,
                             'p3_start': variant[FRAGMENT_START],
-                            'p3_stop': variant[FRAGMENT_STOP]
+                            'p3_stop': variant[FRAGMENT_STOP],
                         })
 
                 elif mod_type in {GMOD, PMOD}:
-                    variant_identifier = variant[IDENTIFIER]
+                    variant_identifier = variant[CONCEPT]
                     namespace_url = _normalize_url(graph, variant_identifier[NAMESPACE])
 
                     if namespace_url in graph.uncached_namespaces:
                         log.warning('uncached namespace %s in fusion()', namespace_url)
                         return
 
-                    mod_entry = self.get_namespace_entry(namespace_url, variant_identifier[NAME])
+                    mod_entry = self.get_namespace_entry(
+                        namespace_url,
+                        variant_identifier[NAME],
+                    )
 
                     if mod_type == GMOD:
                         modification_list.append({
                             'type': mod_type,
-                            'identifier': mod_entry
+                            'identifier': mod_entry,
                         })
                     if mod_type == PMOD:
                         modification_list.append({
@@ -1206,7 +1216,7 @@ class InsertManager(NamespaceManager, LookupManager):
             if location is not None:
                 location_property_dict = {
                     'is_subject': participant == SUBJECT,
-                    'modifier': LOCATION
+                    'modifier': LOCATION,
                 }
 
                 location_namespace = location[NAMESPACE]
@@ -1229,7 +1239,7 @@ class InsertManager(NamespaceManager, LookupManager):
             if modifier is not None:
                 modifier_property_dict = {
                     'is_subject': participant == SUBJECT,
-                    'modifier': modifier
+                    'modifier': modifier,
                 }
 
                 if modifier == TRANSLOCATION:

@@ -16,9 +16,9 @@ __all__ = [
 ]
 
 _responses = [
-    ('go.belns', os.path.join(belns_dir_path, 'go.belns')),
-    ('hgnc-human-genes-20170725.belns', os.path.join(belns_dir_path, 'hgnc-human-genes.belns')),
-    ('chebi-20170725.belns', os.path.join(belns_dir_path, 'chebi.belns')),
+    ('go.belns', os.path.join(belns_dir_path, 'go-names.belns')),
+    ('hgnc-human-genes-20170725.belns', os.path.join(belns_dir_path, 'hgnc-names.belns')),
+    ('chebi-20170725.belns', os.path.join(belns_dir_path, 'chebi-names.belns')),
     ('species-taxonomy-id-20170511.belanno', os.path.join(belanno_dir_path, 'species-taxonomy-id.belanno')),
     ('confidence-1.0.0.belanno', os.path.join(belanno_dir_path, 'confidence-1.0.0.belanno')),
 ]

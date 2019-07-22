@@ -137,6 +137,8 @@ CELL_SURFACE = 'cell surface'
 # Internal node data format keys
 #: The node data key specifying the node's function (e.g. :data:`GENE`, :data:`MIRNA`, :data:`BIOPROCESS`, etc.)
 FUNCTION = 'function'
+#: The key specifying a concept
+CONCEPT = 'concept'
 #: The key specifying an identifier dictionary's namespace. Used for nodes, activities, and transformations.
 NAMESPACE = 'namespace'
 #: The key specifying an identifier dictionary's name. Used for nodes, activities, and transformations.
@@ -190,7 +192,7 @@ PYBEL_VARIANT_KINDS = {
     HGVS,
     PMOD,
     GMOD,
-    FRAGMENT
+    FRAGMENT,
 }
 
 #: The group of all BEL-provided keys for node data dictionaries, used for hashing.
