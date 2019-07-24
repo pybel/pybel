@@ -46,7 +46,7 @@ testan1 = '1'
 class TestExampleInterchange(unittest.TestCase):
     """Test round-trip interchange of the sialic acid graph example."""
 
-    def help_test_equal(self, graph: BELGraph):
+    def _help_test_equal(self, graph: BELGraph):
         """Check that a graph is equal to the sialic acid graph example."""
         for node in graph:
             self.assertIsInstance(node, BaseEntity)
@@ -58,7 +58,7 @@ class TestExampleInterchange(unittest.TestCase):
         """Test the round-trip through bytes."""
         graph_bytes = to_bytes(sialic_acid_graph)
         graph = from_bytes(graph_bytes)
-        self.help_test_equal(graph)
+        self._help_test_equal(graph)
 
     def test_example_pickle(self):
         """Test the round-trip through a pickle."""
@@ -66,19 +66,19 @@ class TestExampleInterchange(unittest.TestCase):
         to_pickle(sialic_acid_graph, bio)
         bio.seek(0)
         graph = from_pickle(bio)
-        self.help_test_equal(graph)
+        self._help_test_equal(graph)
 
     def test_thorough_json(self):
         """Test the round-trip through node-link JSON."""
         graph_json_dict = to_json(sialic_acid_graph)
         graph = from_json(graph_json_dict)
-        self.help_test_equal(graph)
+        self._help_test_equal(graph)
 
     def test_thorough_jsons(self):
         """Test the round-trip through a node-link JSON string."""
         graph_json_str = to_jsons(sialic_acid_graph)
         graph = from_jsons(graph_json_str)
-        self.help_test_equal(graph)
+        self._help_test_equal(graph)
 
     def test_thorough_json_file(self):
         """Test the round-trip through a node-link JSON file."""
@@ -86,7 +86,7 @@ class TestExampleInterchange(unittest.TestCase):
         to_json_file(sialic_acid_graph, sio)
         sio.seek(0)
         graph = from_json_file(sio)
-        self.help_test_equal(graph)
+        self._help_test_equal(graph)
 
 
 class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):

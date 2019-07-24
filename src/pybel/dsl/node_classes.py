@@ -259,7 +259,10 @@ class CentralDogma(BaseAbundance):
         if not self.variants:
             return super().as_bel(use_identifiers=use_identifiers)
 
-        variants_canon = sorted([v.as_bel(use_identifiers=use_identifiers) for v in self.variants])
+        variants_canon = sorted([
+            variant.as_bel(use_identifiers=use_identifiers)
+            for variant in self.variants
+        ])
 
         return "{}({}, {})".format(
             self._bel_function,
@@ -277,9 +280,13 @@ class CentralDogma(BaseAbundance):
         >>> assert 'p(HGNC:APP)' == app.as_bel()
         """
         if VARIANTS not in self:
-            return
+            return None
 
-        return self.__class__(namespace=self.namespace, name=self.name, identifier=self.identifier)
+        return self.__class__(
+            namespace=self.namespace,
+            name=self.name,
+            identifier=self.identifier,
+        )
 
     def with_variants(self, variants: Union[Variant, List[Variant]]) -> 'CentralDogma':
         """Create a new entity with the given variants.

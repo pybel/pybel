@@ -27,11 +27,8 @@ class TestGraphProperties(unittest.TestCase):
             self.disclaimer
         ) = [n() for _ in range(8)]
 
-    def help_test_metadata(self, graph):
-        """Help test the right metadata got in the graph.
-
-        :type graph: BELGraph
-        """
+    def _help_test_metadata(self, graph: BELGraph) -> None:
+        """Help test the right metadata got in the graph."""
         self.assertEqual(self.name, graph.name)
         self.assertEqual(self.version, graph.version)
         self.assertEqual(self.description, graph.description)
@@ -55,7 +52,7 @@ class TestGraphProperties(unittest.TestCase):
             copyright=self.copyrights,
             disclaimer=self.disclaimer
         )
-        self.help_test_metadata(graph)
+        self._help_test_metadata(graph)
 
     def test_name(self):
         """Test setting of metadata through attributes."""
@@ -70,7 +67,7 @@ class TestGraphProperties(unittest.TestCase):
         graph.copyright = self.copyrights
         graph.disclaimer = self.disclaimer
 
-        self.help_test_metadata(graph)
+        self._help_test_metadata(graph)
 
 
 class TestStruct(unittest.TestCase):

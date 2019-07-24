@@ -651,7 +651,7 @@ class TestAddNodeFromData(unittest.TestCase):
 class TestReconstituteNodeTuples(TemporaryCacheMixin):
     """Tests the ability to go from PyBEL to relational database"""
 
-    def help_reconstitute(self, node: BaseEntity, number_nodes: int, number_edges: int):
+    def _help_reconstitute(self, node: BaseEntity, number_nodes: int, number_edges: int):
         """Help test the round-trip conversion from PyBEL data dictionary to node model."""
         self.assertIsInstance(node, BaseEntity)
 
@@ -673,40 +673,40 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_simple(self, mock):
-        self.help_reconstitute(yfg_data, 1, 0)
+        self._help_reconstitute(yfg_data, 1, 0)
 
     @mock_bel_resources
     def test_hgvs(self, mock):
         node_data = gene(namespace='HGNC', name='AKT1', variants=hgvs('p.Phe508del'))
-        self.help_reconstitute(node_data, 2, 1)
+        self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
     def test_fragment_unspecified(self, mock):
         dummy_namespace = n()
         dummy_name = n()
         node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[fragment()])
-        self.help_reconstitute(node_data, 2, 1)
+        self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
     def test_fragment_specified(self, mock):
         dummy_namespace = n()
         dummy_name = n()
         node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[fragment(start=5, stop=8)])
-        self.help_reconstitute(node_data, 2, 1)
+        self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
     def test_fragment_specified_start_only(self, mock):
         dummy_namespace = n()
         dummy_name = n()
         node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[fragment(start=5, stop='*')])
-        self.help_reconstitute(node_data, 2, 1)
+        self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
     def test_fragment_specified_end_only(self, mock):
         dummy_namespace = n()
         dummy_name = n()
         node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[fragment(start='*', stop=1000)])
-        self.help_reconstitute(node_data, 2, 1)
+        self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
     def test_gmod_custom(self, mock):
@@ -718,16 +718,16 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
         node_data = gene(namespace=dummy_namespace, name=dummy_name,
                          variants=[gmod(name=dummy_mod_name, namespace=dummy_mod_namespace)])
-        self.help_reconstitute(node_data, 2, 1)
+        self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
     def test_gmod_default(self, mock):
-        """Tests a gene modification that uses the BEL default namespace"""
+        """Test a gene modification that uses the BEL default namespace."""
         dummy_namespace = n()
         dummy_name = n()
 
         node_data = gene(namespace=dummy_namespace, name=dummy_name, variants=[gmod('Me')])
-        self.help_reconstitute(node_data, 2, 1)
+        self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
     def test_pmod_default_simple(self, mock):
@@ -735,7 +735,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         dummy_name = n()
 
         node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[pmod('Me')])
-        self.help_reconstitute(node_data, 2, 1)
+        self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
     def test_pmod_custom_simple(self, mock):
@@ -746,7 +746,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
         node_data = protein(namespace=dummy_namespace, name=dummy_name,
                             variants=[pmod(name=dummy_mod_name, namespace=dummy_mod_namespace)])
-        self.help_reconstitute(node_data, 2, 1)
+        self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
     def test_pmod_default_with_residue(self, mock):
@@ -754,7 +754,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         dummy_name = n()
 
         node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[pmod('Me', code='Ser')])
-        self.help_reconstitute(node_data, 2, 1)
+        self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
     def test_pmod_custom_with_residue(self, mock):
@@ -768,7 +768,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
             name=dummy_name,
             variants=[pmod(name=dummy_mod_name, namespace=dummy_mod_namespace, code='Ser')]
         )
-        self.help_reconstitute(node_data, 2, 1)
+        self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
     def test_pmod_default_full(self, mock):
@@ -776,7 +776,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         dummy_name = n()
 
         node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[pmod('Me', code='Ser', position=5)])
-        self.help_reconstitute(node_data, 2, 1)
+        self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
     def test_pmod_custom_full(self, mock):
@@ -790,7 +790,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
             name=dummy_name,
             variants=[pmod(name=dummy_mod_name, namespace=dummy_mod_namespace, code='Ser', position=5)]
         )
-        self.help_reconstitute(node_data, 2, 1)
+        self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
     def test_multiple_variants(self, mock):
@@ -798,7 +798,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
             hgvs('p.Phe508del'),
             hgvs('p.Phe509del')
         ])
-        self.help_reconstitute(node_data, 2, 1)
+        self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
     def test_fusion_specified(self, mock):
@@ -808,7 +808,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
             fusion_range('c', 1, 79),
             fusion_range('c', 312, 5034),
         )
-        self.help_reconstitute(node_data, 1, 0)
+        self._help_reconstitute(node_data, 1, 0)
 
     @mock_bel_resources
     def test_fusion_unspecified(self, mock):
@@ -816,7 +816,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
             gene('HGNC', 'TMPRSS2'),
             gene('HGNC', 'ERG'),
         )
-        self.help_reconstitute(node_data, 1, 0)
+        self._help_reconstitute(node_data, 1, 0)
 
     @mock_bel_resources
     def test_composite(self, mock):
@@ -824,19 +824,19 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         il6 = hgnc('IL6')
         interleukin_23_and_il6 = composite_abundance([interleukin_23_complex, il6])
 
-        self.help_reconstitute(interleukin_23_and_il6, 3, 2)
+        self._help_reconstitute(interleukin_23_and_il6, 3, 2)
 
     @mock_bel_resources
     def test_reaction(self, mock):
-        self.help_reconstitute(superoxide_decomposition, 4, 3)
+        self._help_reconstitute(superoxide_decomposition, 4, 3)
 
     @mock_bel_resources
     def test_complex(self, mock):
-        self.help_reconstitute(ap1_complex, 3, 2)
+        self._help_reconstitute(ap1_complex, 3, 2)
 
     @mock_bel_resources
     def test_nested_complex(self, mock):
-        self.help_reconstitute(bound_ap1_e2f4, 5, 4)
+        self._help_reconstitute(bound_ap1_e2f4, 5, 4)
 
 
 class TestReconstituteEdges(TemporaryCacheMixin):

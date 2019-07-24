@@ -267,7 +267,7 @@ class TestFragmentParser(unittest.TestCase):
     def setUp(self):
         self.parser = get_fragment_language()
 
-    def help_test_known_length(self, s):
+    def _help_test_known_length(self, s):
         result = self.parser.parseString(s)
         expected = {
             KIND: FRAGMENT,
@@ -279,14 +279,14 @@ class TestFragmentParser(unittest.TestCase):
     def test_known_length_unquoted(self):
         """test known length"""
         s = 'frag(5_20)'
-        self.help_test_known_length(s)
+        self._help_test_known_length(s)
 
     def test_known_length_quotes(self):
         """test known length"""
         s = 'frag("5_20")'
-        self.help_test_known_length(s)
+        self._help_test_known_length(s)
 
-    def help_test_unknown_length(self, s):
+    def _help_test_unknown_length(self, s):
         result = self.parser.parseString(s)
         expected = {
             KIND: FRAGMENT,
@@ -298,14 +298,14 @@ class TestFragmentParser(unittest.TestCase):
     def test_unknown_length_unquoted(self):
         """amino-terminal fragment of unknown length"""
         s = 'frag(1_?)'
-        self.help_test_unknown_length(s)
+        self._help_test_unknown_length(s)
 
     def test_unknown_length_quoted(self):
         """amino-terminal fragment of unknown length"""
         s = 'frag("1_?")'
-        self.help_test_unknown_length(s)
+        self._help_test_unknown_length(s)
 
-    def help_test_unknown_start_stop(self, s):
+    def _help_test_unknown_start_stop(self, s):
         result = self.parser.parseString(s)
         expected = {
             KIND: FRAGMENT,
@@ -317,14 +317,14 @@ class TestFragmentParser(unittest.TestCase):
     def test_unknown_start_stop_unquoted(self):
         """fragment with unknown start/stop"""
         s = 'frag(?_*)'
-        self.help_test_unknown_start_stop(s)
+        self._help_test_unknown_start_stop(s)
 
     def test_unknown_start_stop_quoted(self):
         """fragment with unknown start/stop"""
         s = 'frag("?_*")'
-        self.help_test_unknown_start_stop(s)
+        self._help_test_unknown_start_stop(s)
 
-    def help_test_descriptor(self, s):
+    def _help_test_descriptor(self, s):
         result = self.parser.parseString(s)
         expected = {
             KIND: FRAGMENT,
@@ -336,12 +336,12 @@ class TestFragmentParser(unittest.TestCase):
     def test_descriptor_unquoted(self):
         """fragment with unknown start/stop and a descriptor"""
         s = 'frag(?, "55kD")'
-        self.help_test_descriptor(s)
+        self._help_test_descriptor(s)
 
     def test_descriptor_quoted(self):
         """fragment with unknown start/stop and a descriptor"""
         s = 'frag("?", "55kD")'
-        self.help_test_descriptor(s)
+        self._help_test_descriptor(s)
 
 
 class TestTruncationParser(unittest.TestCase):

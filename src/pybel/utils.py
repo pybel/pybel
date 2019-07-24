@@ -19,6 +19,8 @@ from .typing import EdgeData
 
 log = logging.getLogger(__name__)
 
+CanonicalEdge = Tuple[str, Optional[Tuple], Optional[Tuple]]
+
 
 def expand_dict(flat_dict, sep: str = '_'):
     """Expand a flattened dictionary.
@@ -43,7 +45,11 @@ def expand_dict(flat_dict, sep: str = '_'):
     return res
 
 
-def flatten_dict(data: Mapping[str, Any], parent_key: str = '', sep: str = '_') -> Mapping[str, str]:
+def flatten_dict(
+        data: Mapping[str, Any],
+        parent_key: str = '',
+        sep: str = '_',
+) -> Mapping[str, str]:
     """Flatten a nested dictionary.
 
     :param data: A nested dictionary
@@ -134,18 +140,15 @@ def _hash_tuple(t):
 
 def _get_citation_str(data: Mapping) -> Optional[str]:
     citation = data.get(CITATION)
-
-    if citation is None:
-        return
-
-    return '{type}:{reference}'.format(type=citation[CITATION_TYPE], reference=citation[CITATION_REFERENCE])
+    if citation is not None:
+        return '{type}:{reference}'.format(type=citation[CITATION_TYPE], reference=citation[CITATION_REFERENCE])
 
 
 def _get_edge_tuple(
         source,
         target,
         edge_data: EdgeData,
-) -> Tuple[str, str, str, Optional[str], Tuple[str, Optional[Tuple], Optional[Tuple]]]:
+) -> Tuple[str, str, Optional[str], Optional[str], CanonicalEdge]:
     """Convert an edge to a consistent tuple.
 
     :param BaseEntity source: The source BEL node
@@ -225,7 +228,10 @@ def hash_citation(citation_type: str, citation_reference: str) -> str:
     :param citation_type: The corresponding citation type
     :param citation_reference: The citation reference
     """
-    s = u'{type}:{reference}'.format(type=citation_type, reference=citation_reference)
+    s = '{citation_type}:{citation_reference}'.format(
+        citation_type=citation_type,
+        citation_reference=citation_reference,
+    )
     return hashlib.sha512(s.encode('utf8')).hexdigest()
 
 
@@ -236,11 +242,15 @@ def hash_evidence(text: str, citation_type: str, citation_reference: str) -> str
     :param citation_type: The corresponding citation type
     :param citation_reference: The citation reference
     """
-    s = u'{type}:{reference}:{text}'.format(type=citation_type, reference=citation_reference, text=text)
+    s = '{citation_type}:{citation_reference}:{text}'.format(
+        citation_type=citation_type,
+        citation_reference=citation_reference,
+        text=text,
+    )
     return hashlib.sha512(s.encode('utf8')).hexdigest()
 
 
-def canonicalize_edge(edge_data: EdgeData) -> Tuple[str, Optional[Tuple], Optional[Tuple]]:
+def canonicalize_edge(edge_data: EdgeData) -> CanonicalEdge:
     """Canonicalize the edge to a tuple based on the relation, subject modifications, and object modifications."""
     return (
         edge_data[RELATION],
