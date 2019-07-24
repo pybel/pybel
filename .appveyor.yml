@@ -11,6 +11,7 @@ build: off
 
 install:
   - "%PYTHON%\\python.exe -m pip install tox"
+  - "%PYTHON%\\python.exe -m pip install --upgrade pip"
 
 test_script:
   - "%PYTHON%\\python.exe -m tox -e py"
