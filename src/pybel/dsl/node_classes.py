@@ -5,7 +5,7 @@
 import hashlib
 from abc import ABCMeta, abstractmethod
 from operator import methodcaller
-from typing import Iterable, List, Optional, Union
+from typing import Iterable, List, Optional, Set, Union
 
 from .exc import InferCentralDogmaException, ListAbundanceEmptyException, PyBELDSLException, ReactionEmptyException
 from ..constants import (
@@ -705,6 +705,10 @@ class Reaction(BaseEntity):
     def products(self) -> List[BaseAbundance]:
         """Return the list of products in this reaction."""
         return self[PRODUCTS]
+
+    def get_catalysts(self) -> Set[BaseAbundance]:
+        """Get entities appearing in both the reactants and products."""
+        return set(self.reactants).intersection(self.products)
 
     def as_bel(self) -> str:
         """Return this reaction as a BEL string."""

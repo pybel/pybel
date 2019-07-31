@@ -46,7 +46,7 @@ class LookupManager(BaseManager):
 
     def get_citation_by_reference(self, type: str, reference: str) -> Optional[Citation]:
         """Get a citation object by its type and reference."""
-        citation_hash = hash_citation(type=type, reference=reference)
+        citation_hash = hash_citation(citation_type=type, citation_reference=reference)
         return self.get_citation_by_hash(citation_hash)
 
     def get_citation_by_hash(self, citation_hash: str) -> Optional[Citation]:

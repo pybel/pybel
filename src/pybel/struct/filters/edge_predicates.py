@@ -23,6 +23,7 @@ __all__ = [
     'has_pubmed',
     'has_authors',
     'is_causal_relation',
+    'not_causal_relation',
     'is_direct_causal_relation',
     'is_associative_relation',
     'has_polarity',
@@ -87,6 +88,12 @@ def has_authors(edge_data: EdgeData) -> bool:
 def is_causal_relation(edge_data: EdgeData) -> bool:
     """Check if the given relation is causal."""
     return edge_data[RELATION] in CAUSAL_RELATIONS
+
+
+@edge_predicate
+def not_causal_relation(edge_data: EdgeData) -> bool:
+    """Check if the given relation is not causal."""
+    return edge_data[RELATION] not in CAUSAL_RELATIONS
 
 
 @edge_predicate

@@ -3,7 +3,7 @@
 """Functions for deleting nodes and edges in networks."""
 
 from ...filters.edge_filters import filter_edges
-from ...filters.edge_predicates import is_associative_relation
+from ...filters.edge_predicates import is_associative_relation, not_causal_relation
 from ...filters.node_filters import filter_nodes
 from ...filters.node_predicate_builders import function_inclusion_filter_builder
 from ...filters.node_predicates import is_isolated_list_abundance
@@ -17,6 +17,7 @@ __all__ = [
     'remove_pathologies',
     'remove_biological_processes',
     'remove_isolated_list_abundances',
+    'remove_non_causal_edges',
 ]
 
 
@@ -78,3 +79,9 @@ def remove_isolated_list_abundances(graph):
     :param pybel.BELGraph graph: A BEL graph
     """
     remove_filtered_nodes(graph, is_isolated_list_abundance)
+
+
+@in_place_transformation
+def remove_non_causal_edges(graph):
+    """Remove non-causal edges from the graph."""
+    remove_filtered_edges(graph, not_causal_relation)
