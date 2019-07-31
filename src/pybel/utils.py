@@ -16,7 +16,6 @@ from .constants import (
     LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT, RELATION, SUBJECT, TO_LOC, TRANSLOCATION,
 )
 from .typing import EdgeData
-from .version import VERSION
 
 log = logging.getLogger(__name__)
 
@@ -69,11 +68,6 @@ def flatten_dict(data, parent_key='', sep='_'):
             items[key] = value
 
     return items
-
-
-def get_version() -> str:
-    """Get the current PyBEL version."""
-    return VERSION
 
 
 def tokenize_version(version_string: str) -> Tuple[int, int, int]:
@@ -147,10 +141,11 @@ def _get_citation_str(data: Mapping) -> Optional[str]:
     return '{type}:{reference}'.format(type=citation[CITATION_TYPE], reference=citation[CITATION_REFERENCE])
 
 
-def _get_edge_tuple(source,
-                    target,
-                    edge_data: EdgeData,
-                    ) -> Tuple[str, str, str, Optional[str], Tuple[str, Optional[Tuple], Optional[Tuple]]]:
+def _get_edge_tuple(
+        source,
+        target,
+        edge_data: EdgeData,
+) -> Tuple[str, str, str, Optional[str], Tuple[str, Optional[Tuple], Optional[Tuple]]]:
     """Convert an edge to a consistent tuple.
 
     :param BaseEntity source: The source BEL node
@@ -173,7 +168,8 @@ def hash_edge(source, target, edge_data: EdgeData) -> str:
     :param BaseEntity source: The source BEL node
     :param BaseEntity target: The target BEL node
     :param edge_data: The edge's data dictionary
-    :return: A hashed version of the edge tuple using md5 hash of the binary pickle dump of u, v, and the json dump of d
+    :return: A hashed version of the edge tuple using SHA-512 hash of the binary pickle dump of u, v, and the json dump
+     of d
     """
     edge_tuple = _get_edge_tuple(source, target, edge_data)
     return _hash_tuple(edge_tuple)
@@ -223,24 +219,24 @@ def hash_dump(data) -> str:
     return hashlib.sha512(json.dumps(data, sort_keys=True).encode('utf-8')).hexdigest()
 
 
-def hash_citation(type: str, reference: str) -> str:
+def hash_citation(citation_type: str, citation_reference: str) -> str:
     """Create a hash for a type/reference pair of a citation.
 
-    :param type: The corresponding citation type
-    :param reference: The citation reference
+    :param citation_type: The corresponding citation type
+    :param citation_reference: The citation reference
     """
-    s = u'{type}:{reference}'.format(type=type, reference=reference)
+    s = u'{type}:{reference}'.format(type=citation_type, reference=citation_reference)
     return hashlib.sha512(s.encode('utf8')).hexdigest()
 
 
-def hash_evidence(text: str, type: str, reference: str) -> str:
+def hash_evidence(text: str, citation_type: str, citation_reference: str) -> str:
     """Create a hash for an evidence and its citation.
 
     :param text: The evidence text
-    :param type: The corresponding citation type
-    :param reference: The citation reference
+    :param citation_type: The corresponding citation type
+    :param citation_reference: The citation reference
     """
-    s = u'{type}:{reference}:{text}'.format(type=type, reference=reference, text=text)
+    s = u'{type}:{reference}:{text}'.format(type=citation_type, reference=citation_reference, text=text)
     return hashlib.sha512(s.encode('utf8')).hexdigest()
 
 

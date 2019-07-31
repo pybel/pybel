@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 
 
 @in_place_transformation
-def strip_annotations(graph):
+def strip_annotations(graph) -> None:
     """Strip all the annotations from a BEL graph.
 
     :param pybel.BELGraph graph: A BEL graph
@@ -29,12 +29,12 @@ def strip_annotations(graph):
 
 
 @in_place_transformation
-def add_annotation_value(graph, annotation, value):
+def add_annotation_value(graph, annotation: str, value: str) -> None:
     """Add the given annotation/value pair to all qualified edges.
 
     :param pybel.BELGraph graph:
-    :param str annotation:
-    :param str value:
+    :param annotation:
+    :param value:
     """
     if annotation not in graph.defined_annotation_keywords:
         raise ValueError('annotation not defined: {}'.format(annotation))
@@ -50,12 +50,12 @@ def add_annotation_value(graph, annotation, value):
 
 
 @in_place_transformation
-def remove_annotation_value(graph, annotation, value):
+def remove_annotation_value(graph, annotation: str, value: str) -> None:
     """Remove the given annotation/value pair to all qualified edges.
 
     :param pybel.BELGraph graph:
-    :param str annotation:
-    :param str value:
+    :param annotation:
+    :param value:
     """
     if annotation not in graph.defined_annotation_keywords:
         log.warning('annotation was not defined: %s', annotation)
@@ -78,7 +78,7 @@ _CITATION_KEEP_KEYS = {CITATION_REFERENCE, CITATION_TYPE}
 
 
 @in_place_transformation
-def remove_citation_metadata(graph):
+def remove_citation_metadata(graph) -> None:
     """Remove the metadata associated with a citation.
 
     Best practice is to add this information programmatically.

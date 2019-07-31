@@ -16,11 +16,11 @@ from pybel.constants import (
     INCREASES, LOCATION, METADATA_NAME, METADATA_VERSION, MIRNA, PATHOLOGY, PROTEIN, RELATION,
 )
 from pybel.dsl import (
-    BaseEntity, MicroRna, Pathology, activity, complex_abundance, composite_abundance, degradation, fragment,
-    fusion_range, gene, gene_fusion, gmod, hgvs, location, named_complex_abundance, pmod, protein, protein_fusion,
-    reaction, secretion, translocation,
+    BaseEntity, Pathology, activity, complex_abundance, composite_abundance, degradation, fragment, fusion_range,
+    gene, gene_fusion, gmod, hgvs, location, named_complex_abundance, pmod, protein, protein_fusion, reaction,
+    secretion, translocation,
 )
-from pybel.dsl.namespaces import chebi, hgnc
+from pybel.dsl.namespaces import chebi, hgnc, mirbase
 from pybel.examples import ras_tloc_graph, sialic_acid_graph
 from pybel.language import Entity
 from pybel.manager import models
@@ -37,8 +37,8 @@ from tests.constants import (
 
 fos = hgnc('FOS')
 jun = hgnc('JUN')
-mirna_1 = MicroRna('HGNC', n())
-mirna_2 = MicroRna('HGNC', n())
+mirna_1 = mirbase(n())
+mirna_2 = mirbase(n())
 pathology_1 = Pathology('DO', n())
 ap1_complex = complex_abundance([fos, jun])
 
@@ -54,25 +54,14 @@ oxygen = chebi('oxygen')
 superoxide_decomposition = reaction(reactants=[superoxide], products=[hydrogen_peroxide, oxygen])
 
 
-def assert_unqualified_edge(self, u, v, rel):
-    """Assert there's only one edge and get the data for it
-
-    :param unittest.TestCase self:
-    :param u:
-    :param v:
-    :param rel:
-    :return:
-    """
-    if isinstance(u, BaseEntity):
-        u = u
-    self.assertIn(u, self.graph)
-    if isinstance(v, BaseEntity):
-        v = v
-    self.assertIn(v, self.graph[u])
-    edges = list(self.graph[u][v].values())
-    self.assertEqual(1, len(edges))
+def assert_unqualified_edge(test_case, u: BaseEntity, v: BaseEntity, rel: str) -> None:
+    """Assert there's only one edge and get the data for it"""
+    test_case.assertIn(u, test_case.graph)
+    test_case.assertIn(v, test_case.graph[u])
+    edges = list(test_case.graph[u][v].values())
+    test_case.assertEqual(1, len(edges))
     data = edges[0]
-    self.assertEqual(rel, data[RELATION])
+    test_case.assertEqual(rel, data[RELATION])
 
 
 class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
@@ -225,6 +214,7 @@ class TestTypedQuery(TemporaryCacheMixin):
         rv = self.manager.query_edges(target_function=PATHOLOGY).all()
         self.assertEqual(2, len(rv))
 
+
 class TestQuery(TemporaryCacheMixin):
     def setUp(self):
         super(TestQuery, self).setUp()
@@ -364,7 +354,8 @@ class TestEnsure(TemporaryCacheMixin):
             CITATION_REFERENCE: reference,
         }
 
-        citation_hash = hash_citation(type=citation_dict[CITATION_TYPE], reference=citation_dict[CITATION_REFERENCE])
+        citation_hash = hash_citation(citation_type=citation_dict[CITATION_TYPE],
+                                      citation_reference=citation_dict[CITATION_REFERENCE])
 
         citation = self.manager.get_or_create_citation(**citation_dict)
         self.manager.session.commit()
@@ -394,7 +385,8 @@ class TestEnsure(TemporaryCacheMixin):
             CITATION_AUTHORS: sorted(['Jackson M', 'Lajoie J'])
         }
 
-        citation_hash = hash_citation(type=citation_dict[CITATION_TYPE], reference=citation_dict[CITATION_REFERENCE])
+        citation_hash = hash_citation(citation_type=citation_dict[CITATION_TYPE],
+                                      citation_reference=citation_dict[CITATION_REFERENCE])
 
         citation = self.manager.get_or_create_citation(**citation_dict)
         self.manager.session.commit()
@@ -429,8 +421,8 @@ class TestEnsure(TemporaryCacheMixin):
         utf8_test_evidence = u"Yes, all the information is true! This contains a unicode alpha: α"
         evidence_hash = hash_evidence(
             text=utf8_test_evidence,
-            type=CITATION_TYPE_PUBMED,
-            reference=test_citation_dict[CITATION_REFERENCE]
+            citation_type=CITATION_TYPE_PUBMED,
+            citation_reference=test_citation_dict[CITATION_REFERENCE]
         )
 
         evidence = self.manager.get_or_create_evidence(basic_citation, utf8_test_evidence)

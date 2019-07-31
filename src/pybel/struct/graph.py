@@ -27,7 +27,8 @@ from ..constants import (
 from ..dsl import BaseEntity, Gene, MicroRna, Protein, Rna, activity
 from ..parser.exc import BELParserWarning
 from ..typing import EdgeData
-from ..utils import get_version, hash_edge
+from ..utils import hash_edge
+from ..version import get_version
 
 __all__ = [
     'BELGraph',

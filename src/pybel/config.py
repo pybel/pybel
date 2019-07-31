@@ -2,6 +2,7 @@
 
 """Connection configuration for PyBEL."""
 
+import configparser
 import json
 import logging
 import os
@@ -31,21 +32,19 @@ DEFAULT_CACHE_PATH = os.path.join(CACHE_DIRECTORY, DEFAULT_CACHE_NAME)
 #: The default cache connection string uses sqlite.
 DEFAULT_CACHE_CONNECTION = 'sqlite:///' + DEFAULT_CACHE_PATH
 
-PYBEL_CONFIG_DIRECTORY = 'PYBEL_CONFIG_DIRECTORY'
-PYBEL_DEV_CONFIG_DIRECTORY = 'PYBEL_DEV_CONFIG_DIRECTORY'
-DEFAULT_CONFIG_DIRECTORY = os.path.join(os.path.expanduser('~'), '.config')
-if VERSION.endswith('-dev'):
-    CONFIG_DIRECTORY = os.environ.get(PYBEL_DEV_CONFIG_DIRECTORY, os.path.join(DEFAULT_CONFIG_DIRECTORY, 'pybel-dev'))
-else:
-    CONFIG_DIRECTORY = os.environ.get(PYBEL_CONFIG_DIRECTORY, os.path.join(DEFAULT_CONFIG_DIRECTORY, 'pybel'))
-
-PYBEL_CONFIG_PATH = 'PYBEL_CONFIG_PATH'
-DEFAULT_CONFIG_PATH = os.path.join(CONFIG_DIRECTORY, 'config.json')
-CONFIG_PATH = os.environ.get(PYBEL_CONFIG_PATH, DEFAULT_CONFIG_PATH)
-
-if os.path.exists(CONFIG_PATH):
-    with open(CONFIG_PATH) as file:
-        config.update(json.load(file))
+CONFIG_FILE_PATHS = [
+    os.path.join(os.path.expanduser('~'), '.config', 'pybel.ini'),
+    os.path.join(os.path.expanduser('~'), '.config', 'pybel.cfg'),
+    os.path.join(os.path.expanduser('~'), '.config', 'pybel', 'pybel.ini'),
+    os.path.join(os.path.expanduser('~'), '.config', 'pybel', 'pybel.cfg'),
+    os.path.join(os.path.expanduser('~'), '.config', 'pybel', 'config.ini'),
+]
+config_parser = configparser.ConfigParser()
+config_parser.read(CONFIG_FILE_PATHS)
+if 'pybel' in config_parser:
+    config.update(config_parser['pybel'])
+if VERSION.endswith('-dev') and 'pybel-dev' in config_parser:
+    config.update(config_parser['pybel-dev'])
 
 #: The environment variable that contains the default SQL connection information for the PyBEL cache
 PYBEL_CONNECTION = 'PYBEL_CONNECTION'
@@ -53,8 +52,8 @@ PYBEL_CONNECTION = 'PYBEL_CONNECTION'
 if PYBEL_CONNECTION in os.environ:
     connection = os.environ[PYBEL_CONNECTION]
     log.info('got environment-defined connection: %s', connection)
-elif PYBEL_CONNECTION in config:
-    connection = config[PYBEL_CONNECTION]
+elif 'connection' in config:
+    connection = config['connection']
     log.info('getting configured connection: %s', connection)
 else:  # This means that there will have to be a cache directory created
     os.makedirs(CACHE_DIRECTORY, exist_ok=True)

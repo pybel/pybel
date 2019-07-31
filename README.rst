@@ -22,8 +22,8 @@ If you find PyBEL useful for your work, please consider citing:
 
 Getting Started
 ---------------
-This example illustrates how the `Selventa Small Corpus <https://wiki.openbel.org/display/home/Summary+of+Large+and+Small+BEL+Corpuses>`_
-can be loaded.
+This example illustrates how the a BEL document from the `Human Brain Pharmacome
+<https://raw.githubusercontent.com/pharmacome/knowledge>`_ project can be loaded from GitHub.
 
 .. code-block:: python
 
