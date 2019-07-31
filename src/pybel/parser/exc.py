@@ -7,6 +7,7 @@ number and original statement are printed for the user to debug.
 """
 
 from ..exceptions import PyBELWarning
+from ..utils import ensure_quotes
 
 
 class BELParserWarning(PyBELWarning):
@@ -379,7 +380,7 @@ class InvalidEntity(BELParserWarning):
         self.name = name
 
     def __str__(self):
-        return '{}:{} should not be coded as an entity'.format(self.namespace, self.name)
+        return '{}:{} should not be coded as an entity'.format(self.namespace, ensure_quotes(self.name))
 
 
 class InvalidFunctionSemantic(BELParserWarning):
@@ -400,8 +401,8 @@ class InvalidFunctionSemantic(BELParserWarning):
         return "{} {}:{} should be encoded as one of: {}".format(
             self.func,
             self.namespace,
-            self.name,
-            ', '.join(self.allowed_functions)
+            ensure_quotes(self.name),
+            ', '.join(self.allowed_functions),
         )
 
 
