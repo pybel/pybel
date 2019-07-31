@@ -10,7 +10,8 @@ environment:
 build: off
 
 install:
-  - "%PYTHON%\\python.exe -m pip install tox"
+  - "%PYTHON%\\python.exe -m pip install --upgrade"
+  - "%PYTHON%\\python.exe -m pip install tox --no-warn-script-location"
 
 test_script:
   - "%PYTHON%\\python.exe -m tox -e py"
