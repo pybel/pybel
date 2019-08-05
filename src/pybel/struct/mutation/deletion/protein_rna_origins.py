@@ -5,7 +5,7 @@
 from typing import Iterable
 
 from ...filters.node_selection import get_nodes_by_function
-from ...pipeline.decorators import in_place_transformation, register_deprecated
+from ...pipeline.decorators import in_place_transformation
 from ....constants import GENE, RELATION, RNA, TRANSCRIBED_TO, TRANSLATED_TO
 from ....dsl import BaseEntity
 
@@ -70,7 +70,6 @@ def prune_protein_origins(graph):
     graph.remove_nodes_from(rna_leaves)
 
 
-@register_deprecated('prune_central_dogma')
 @in_place_transformation
 def prune_protein_rna_origins(graph):
     """Delete genes that are only connected to one node, their correspond RNA, by a translation edge.

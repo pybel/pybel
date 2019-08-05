@@ -33,7 +33,7 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
         self.assertTrue(self.parser.has_annotation(annotation))
         self.assertNotIn(annotation, self.parser.annotation_to_term)
         self.assertFalse(self.parser.has_enumerated_annotation(annotation))
-        self.assertNotIn(annotation, self.parser.annotation_pattern)
+        self.assertNotIn(annotation, self.parser.annotation_to_pattern)
         self.assertFalse(self.parser.has_regex_annotation(annotation))
         self.assertIn(annotation, self.parser.annotation_to_local)
         self.assertTrue(self.parser.has_local_annotation(annotation))
