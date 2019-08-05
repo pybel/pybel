@@ -16,7 +16,6 @@ __all__ = [
     'uni_in_place_transformation',
     'uni_transformation',
     'transformation',
-    'register_deprecated',
     'get_transformation',
     'mapped',
     'has_arguments_map',
@@ -30,7 +29,6 @@ universe_map = {}
 in_place_map = {}
 has_arguments_map = {}
 no_arguments_map = {}
-deprecated = {}
 
 
 def _has_arguments(func, universe):
@@ -100,43 +98,6 @@ uni_in_place_transformation = _build_register_function(universe=True, in_place=T
 uni_transformation = _build_register_function(universe=True, in_place=False)
 #: A decorator for functions that create new BEL graphs from old BEL graphs
 transformation = _build_register_function(universe=False, in_place=False)
-
-
-def register_deprecated(deprecated_name: str):
-    """Register a function as deprecated.
-
-    :param deprecated_name: The old name of the function
-    :return: A decorator
-
-    Usage:
-
-    This function must be applied last, since it introspects on the definitions from before
-
-    >>> @register_deprecated('my_function')
-    >>> @transformation
-    >>> def my_old_function()
-    >>> ... pass
-    """
-    if deprecated_name in mapped:
-        raise DeprecationMappingError('function name already mapped. can not register as deprecated name.')
-
-    def register_deprecated_f(func):
-        name = func.__name__
-
-        log.debug('%s is deprecated. please migrate to %s', deprecated_name, name)
-
-        if name not in mapped:
-            raise MissingPipelineFunctionError('function not mapped with transformation, uni_transformation, etc.')
-
-        universe = name in universe_map
-        in_place = name in in_place_map
-
-        # Add back-reference from deprecated function name to actual function name
-        deprecated[deprecated_name] = name
-
-        return _register_function(deprecated_name, func, universe, in_place)
-
-    return register_deprecated_f
 
 
 def get_transformation(name: str):
