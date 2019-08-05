@@ -7,9 +7,9 @@ from io import StringIO
 from pybel import BELGraph
 from pybel.examples.egf_example import egf_graph
 from pybel.struct.mutation import enrich_protein_and_rna_origins
-from pybel.struct.pipeline import Pipeline, transformation
-from pybel.struct.pipeline.decorators import get_transformation, in_place_map, mapped, universe_map
-from pybel.struct.pipeline.exc import DeprecationMappingError, MetaValueError, MissingPipelineFunctionError
+from pybel.struct.pipeline import Pipeline
+from pybel.struct.pipeline.decorators import get_transformation, mapped
+from pybel.struct.pipeline.exc import MetaValueError, MissingPipelineFunctionError
 
 log = logging.getLogger(__name__)
 log.setLevel(10)
@@ -74,11 +74,11 @@ class TestPipeline(TestEgfExample):
         pipeline = Pipeline()
         self.assertEqual(0, len(pipeline))
 
-        pipeline.append('infer_central_dogma')
+        pipeline.append('enrich_protein_and_rna_origins')
         self.assertEqual(1, len(pipeline))
 
     def test_extend(self):
-        p1 = Pipeline.from_functions(['infer_central_dogma'])
+        p1 = Pipeline.from_functions(['enrich_protein_and_rna_origins'])
         self.assertEqual(1, len(p1))
 
         p2 = Pipeline.from_functions(['remove_pathologies'])
@@ -87,13 +87,13 @@ class TestPipeline(TestEgfExample):
         self.assertEqual(2, len(p1))
 
     def test_serialize_string(self):
-        p = Pipeline.from_functions(['infer_central_dogma'])
+        p = Pipeline.from_functions(['enrich_protein_and_rna_origins'])
         s = p.dumps()
         p_reconstituted = Pipeline.loads(s)
         self.assertEqual(p.protocol, p_reconstituted.protocol)
 
     def test_serialize_file(self):
-        p = Pipeline.from_functions(['infer_central_dogma'])
+        p = Pipeline.from_functions(['enrich_protein_and_rna_origins'])
         sio = StringIO()
         p.dump(sio)
         sio.seek(0)
@@ -102,7 +102,7 @@ class TestPipeline(TestEgfExample):
 
     def test_pipeline_by_string(self):
         pipeline = Pipeline.from_functions([
-            'infer_central_dogma',
+            'enrich_protein_and_rna_origins',
         ])
         result = pipeline(self.graph)
 
