@@ -328,7 +328,7 @@ class ProteinModification(Variant):
             position: Optional[int] = None,
             namespace: Optional[str] = None,
             identifier: Optional[str] = None,
-            xrefs: Optional[List[Entity]] =  None,
+            xrefs: Optional[List[Entity]] = None,
     ) -> None:
         """Build a protein modification variant data dictionary.
 
