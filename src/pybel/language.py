@@ -25,7 +25,7 @@ class Entity(dict):
             *,
             namespace: str,
             name: Optional[str] = None,
-            identifier: Optional[str] = None,
+            identifier: Optional[str] = None
     ) -> None:
         """Create a dictionary representing a reference to an entity.
 
