@@ -134,7 +134,8 @@ class BaseAbundance(BaseEntity):
             name=name,
             identifier=identifier,
         )
-        self['xrefs'] = xrefs or []
+        if xrefs:
+            self['xrefs'] = xrefs
 
     @property
     def entity(self) -> Entity:  # noqa:D401
@@ -144,7 +145,7 @@ class BaseAbundance(BaseEntity):
     @property
     def xrefs(self):  # noqa:D401
         """Alternative identifiers for the node's concept."""
-        return self['xrefs']
+        return self.get('xrefs', [])
 
     @property
     def namespace(self) -> str:  # noqa:D401
@@ -362,7 +363,8 @@ class ProteinModification(Variant):
             name=name,
             identifier=identifier,
         )
-        self['xref'] = xrefs or []
+        if xrefs:
+            self['xref'] = xrefs
 
         if code:
             self[PMOD_CODE] = code
@@ -422,7 +424,8 @@ class GeneModification(Variant):
             name=name,
             identifier=identifier,
         )
-        self['xrefs'] = xrefs or []
+        if xrefs:
+            self['xrefs'] = xrefs
 
     @property
     def entity(self) -> Entity:
@@ -771,7 +774,8 @@ class ComplexAbundance(ListAbundance):
                 name=name,
                 identifier=identifier,
             )
-            self['xrefs'] = xrefs or []
+            if xrefs:
+                self['xrefs'] = xrefs
 
     @property
     def entity(self) -> Optional[Entity]:  # noqa:D401
@@ -781,7 +785,7 @@ class ComplexAbundance(ListAbundance):
     @property
     def xrefs(self):  # noqa:D401
         """Alternative identifiers for the concept if it has been named."""
-        return self.get('xrefs')
+        return self.get('xrefs', [])
 
 
 class NamedComplexAbundance(BaseAbundance):
