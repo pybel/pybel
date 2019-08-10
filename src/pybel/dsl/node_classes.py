@@ -119,12 +119,14 @@ class BaseAbundance(BaseEntity):
             namespace: str,
             name: Optional[str] = None,
             identifier: Optional[str] = None,
+            xrefs: Optional[List[Entity]] = None,
     ) -> None:
         """Build an abundance from a function, namespace, and a name and/or identifier.
 
         :param namespace: The name of the namespace
         :param name: The name of this abundance
         :param identifier: The database identifier for this abundance
+        :param xrefs: Alternate identifiers for the entity
         """
         super().__init__()
         self[CONCEPT] = Entity(
@@ -132,11 +134,17 @@ class BaseAbundance(BaseEntity):
             name=name,
             identifier=identifier,
         )
+        self['xrefs'] = xrefs or []
 
     @property
     def entity(self) -> Entity:  # noqa:D401
         """This node's concept."""
         return self[CONCEPT]
+
+    @property
+    def xrefs(self):  # noqa:D401
+        """Alternative identifiers for the node's concept."""
+        return self['xrefs']
 
     @property
     def namespace(self) -> str:  # noqa:D401
@@ -234,6 +242,7 @@ class CentralDogma(BaseAbundance):
             namespace: str,
             name: Optional[str] = None,
             identifier: Optional[str] = None,
+            xrefs: Optional[List[Entity]] = None,
             variants: Union[None, Variant, Iterable[Variant]] = None,
     ) -> None:
         """Build a node for a gene, RNA, miRNA, or protein.
@@ -241,9 +250,11 @@ class CentralDogma(BaseAbundance):
         :param namespace: The name of the database used to identify this entity
         :param name: The database's preferred name or label for this entity
         :param identifier: The database's identifier for this entity
+        :param xrefs: Alternative database cross references
         :param variants: An optional variant or list of variants
         """
-        super().__init__(namespace=namespace, name=name, identifier=identifier)
+        super().__init__(namespace=namespace, name=name, identifier=identifier, xrefs=xrefs)
+
         if isinstance(variants, Variant):
             self[VARIANTS] = [variants]
         elif isinstance(variants, (list, tuple, set)):
@@ -317,6 +328,7 @@ class ProteinModification(Variant):
             position: Optional[int] = None,
             namespace: Optional[str] = None,
             identifier: Optional[str] = None,
+            xrefs: Optional[List[Entity]] =  None,
     ) -> None:
         """Build a protein modification variant data dictionary.
 
@@ -325,6 +337,7 @@ class ProteinModification(Variant):
         :param position: The position of the affected residue
         :param namespace: The namespace to which the name of this modification belongs
         :param identifier: The identifier of the name of the modification
+        :param xrefs: Alternative database xrefs
 
         Either the name or the identifier must be used. If the namespace is omitted, it is assumed that a name is
         specified from the BEL default namespace.
@@ -349,6 +362,7 @@ class ProteinModification(Variant):
             name=name,
             identifier=identifier,
         )
+        self['xref'] = xrefs or []
 
         if code:
             self[PMOD_CODE] = code
@@ -377,7 +391,13 @@ class ProteinModification(Variant):
 class GeneModification(Variant):
     """Build a gene modification variant dictionary."""
 
-    def __init__(self, name: str, namespace: Optional[str] = None, identifier: Optional[str] = None) -> None:
+    def __init__(
+            self,
+            name: str,
+            namespace: Optional[str] = None,
+            identifier: Optional[str] = None,
+            xrefs: Optional[List[Entity]] = None,
+    ) -> None:
         """Build a gene modification variant data dictionary.
 
         :param name: The name of the gene modification
@@ -402,6 +422,7 @@ class GeneModification(Variant):
             name=name,
             identifier=identifier,
         )
+        self['xrefs'] = xrefs or []
 
     @property
     def entity(self) -> Entity:
@@ -547,6 +568,7 @@ class _Transcribable(CentralDogma):
             namespace=self.namespace,
             name=self.name,
             identifier=self.identifier,
+            xrefs=self.xrefs,
         )
 
 
@@ -617,6 +639,7 @@ class Protein(CentralDogma):
             namespace=self.namespace,
             name=self.name,
             identifier=self.identifier,
+            xrefs=self.xrefs,
         )
 
 
@@ -727,6 +750,7 @@ class ComplexAbundance(ListAbundance):
             namespace: Optional[str] = None,
             name: Optional[str] = None,
             identifier: Optional[str] = None,
+            xrefs: Optional[List[Entity]] = None,
     ) -> None:
         """Build a complex list node.
 
@@ -734,6 +758,7 @@ class ComplexAbundance(ListAbundance):
         :param namespace: The namespace from which the name originates
         :param name: The name of the complex
         :param identifier: The identifier in the namespace in which the name originates
+        :param xrefs: Alternate identifiers for the entity if it is named
         """
         super().__init__(members=members)
         if namespace:
@@ -742,11 +767,17 @@ class ComplexAbundance(ListAbundance):
                 name=name,
                 identifier=identifier,
             )
+            self['xrefs'] = xrefs or []
 
     @property
     def entity(self) -> Optional[Entity]:  # noqa:D401
         """The concept represented by this complex if it has been named."""
         return self.get(CONCEPT)
+
+    @property
+    def xrefs(self):  # noqa:D401
+        """Alternative identifiers for the concept if it has been named."""
+        return self.get('xrefs')
 
 
 class NamedComplexAbundance(BaseAbundance):
