@@ -11,8 +11,8 @@ from .exc import InferCentralDogmaException, ListAbundanceEmptyException, Reacti
 from ..constants import (
     ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, CONCEPT, FRAGMENT, FRAGMENT_DESCRIPTION,
     FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE, FUSION_START,
-    FUSION_STOP, GENE, GMOD, HGVS, KIND, MEMBERS, MIRNA, PARTNER_3P, PARTNER_5P, PATHOLOGY, PMOD, PMOD_CODE,
-    PMOD_ORDER, PMOD_POSITION, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P, REACTANTS, REACTION, RNA, VARIANTS,
+    FUSION_STOP, GENE, GMOD, HGVS, KIND, MEMBERS, MIRNA, PARTNER_3P, PARTNER_5P, PATHOLOGY, PMOD, PMOD_CODE, PMOD_ORDER,
+    PMOD_POSITION, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P, REACTANTS, REACTION, RNA, VARIANTS, XREFS,
     rev_abundance_labels,
 )
 from ..language import Entity
@@ -53,6 +53,7 @@ __all__ = [
     'Fragment',
 
     # Base Classes
+    'Entity',
     'BaseEntity',
     'BaseAbundance',
     'CentralDogma',
@@ -135,7 +136,7 @@ class BaseAbundance(BaseEntity):
             identifier=identifier,
         )
         if xrefs:
-            self['xrefs'] = xrefs
+            self[XREFS] = xrefs
 
     @property
     def entity(self) -> Entity:  # noqa:D401
@@ -143,9 +144,9 @@ class BaseAbundance(BaseEntity):
         return self[CONCEPT]
 
     @property
-    def xrefs(self):  # noqa:D401
+    def xrefs(self) -> List[Entity]:  # noqa:D401
         """Alternative identifiers for the node's concept."""
-        return self.get('xrefs', [])
+        return self.get(XREFS, [])
 
     @property
     def namespace(self) -> str:  # noqa:D401
@@ -298,6 +299,7 @@ class CentralDogma(BaseAbundance):
             namespace=self.namespace,
             name=self.name,
             identifier=self.identifier,
+            xrefs=self.xrefs,
         )
 
     def with_variants(self, variants: Union[Variant, List[Variant]]) -> 'CentralDogma':
@@ -315,6 +317,7 @@ class CentralDogma(BaseAbundance):
             namespace=self.namespace,
             name=self.name,
             identifier=self.identifier,
+            xrefs=self.xrefs,
             variants=variants,
         )
 
@@ -425,7 +428,7 @@ class GeneModification(Variant):
             identifier=identifier,
         )
         if xrefs:
-            self['xrefs'] = xrefs
+            self[XREFS] = xrefs
 
     @property
     def entity(self) -> Entity:
@@ -775,7 +778,7 @@ class ComplexAbundance(ListAbundance):
                 identifier=identifier,
             )
             if xrefs:
-                self['xrefs'] = xrefs
+                self[XREFS] = xrefs
 
     @property
     def entity(self) -> Optional[Entity]:  # noqa:D401
@@ -783,9 +786,9 @@ class ComplexAbundance(ListAbundance):
         return self.get(CONCEPT)
 
     @property
-    def xrefs(self):  # noqa:D401
+    def xrefs(self) -> List[Entity]:  # noqa:D401
         """Alternative identifiers for the concept if it has been named."""
-        return self.get('xrefs', [])
+        return self.get(XREFS, [])
 
 
 class NamedComplexAbundance(BaseAbundance):

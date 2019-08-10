@@ -20,7 +20,13 @@ log = logging.getLogger(__name__)
 class Entity(dict):
     """Represents a named entity with a namespace and name/identifier."""
 
-    def __init__(self, namespace: str, name: Optional[str] = None, identifier: Optional[str] = None) -> None:
+    def __init__(
+            self,
+            *,
+            namespace: str,
+            name: Optional[str] = None,
+            identifier: Optional[str] = None,
+    ) -> None:
         """Create a dictionary representing a reference to an entity.
 
         :param namespace: The namespace to which the entity belongs

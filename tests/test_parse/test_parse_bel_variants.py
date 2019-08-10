@@ -182,7 +182,7 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            CONCEPT: Entity('MOD', 'PhosRes'),
+            CONCEPT: Entity(namespace='MOD', name='PhosRes'),
             PMOD_CODE: 'Ser',
             PMOD_POSITION: 473,
         }

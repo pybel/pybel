@@ -18,13 +18,12 @@ from pybel.config import PYBEL_MINIMUM_IMPORT_VERSION
 from pybel.constants import (
     ANNOTATIONS, CITATION, DECREASES, DIRECTLY_DECREASES, EVIDENCE, GRAPH_PYBEL_VERSION, INCREASES, RELATION,
 )
-from pybel.dsl import BaseEntity, gene
-from pybel.examples import sialic_acid_graph
+from pybel.dsl import BaseEntity, Protein, gene
+from pybel.examples.sialic_acid_example import sialic_acid_graph
 from pybel.io.exc import ImportVersionWarning, import_version_message_fmt
 from pybel.parser import BELParser
 from pybel.parser.exc import (
-    BELSyntaxError, InvalidFunctionSemantic, MissingCitationException,
-    MissingNamespaceRegexWarning,
+    BELSyntaxError, InvalidFunctionSemantic, MissingCitationException, MissingNamespaceRegexWarning,
 )
 from pybel.struct.summary import get_syntax_errors
 from pybel.testing.cases import TemporaryCacheClsMixin
@@ -34,7 +33,7 @@ from pybel.testing.constants import (
 from pybel.testing.mocks import mock_bel_resources
 from tests.constants import (
     BelReconstitutionMixin, TestTokenParserBase, akt1, casp8, citation_1, egfr, evidence_1, fadd, test_citation_dict,
-    test_evidence_text, test_set_evidence, SET_CITATION_TEST
+    test_evidence_text, test_set_evidence,
 )
 
 logging.getLogger('requests').setLevel(logging.WARNING)
@@ -53,6 +52,13 @@ class TestExampleInterchange(unittest.TestCase):
 
         self.assertEqual(set(sialic_acid_graph), set(graph))
         self.assertEqual(set(sialic_acid_graph.edges()), set(graph.edges()))
+
+        for node in sialic_acid_graph:
+            if not isinstance(node, Protein):
+                continue
+            if node.namespace == 'HGNC' and node.name == 'CD33' and not node.variants:
+                self.assertIsNotNone(node.xrefs)
+                self.assertEqual(1, len(node.xrefs))
 
     def test_example_bytes(self):
         """Test the round-trip through bytes."""
