@@ -7,7 +7,7 @@ from typing import Dict, Set
 
 from .collapse import collapse_nodes
 from ..inference import enrich_protein_and_rna_origins
-from ...pipeline.decorators import in_place_transformation, register_deprecated
+from ...pipeline.decorators import in_place_transformation
 from ....constants import RELATION, TRANSCRIBED_TO, TRANSLATED_TO
 from ....dsl import BaseEntity
 
@@ -44,7 +44,6 @@ def _build_collapse_to_gene_dict(graph) -> Dict[BaseEntity, Set[BaseEntity]]:
     return collapse_dict
 
 
-@register_deprecated('collapse_by_central_dogma')
 @in_place_transformation
 def collapse_to_genes(graph):
     """Collapse all protein, RNA, and miRNA nodes to their corresponding gene nodes.

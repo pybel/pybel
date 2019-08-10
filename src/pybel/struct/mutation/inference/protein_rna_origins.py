@@ -2,10 +2,9 @@
 
 """Functions for enriching the origins of Proteins, RNAs, and miRNAs."""
 
-from pybel.dsl import Protein
 from ...pipeline import in_place_transformation
-from ...pipeline.decorators import register_deprecated
 from ....constants import FUNCTION, FUSION, MIRNA, RNA, VARIANTS
+from ....dsl import Protein
 
 __all__ = [
     'enrich_rnas_with_genes',
@@ -14,9 +13,8 @@ __all__ = [
 ]
 
 
-@register_deprecated('infer_central_dogmatic_translations')
 @in_place_transformation
-def enrich_proteins_with_rnas(graph):
+def enrich_proteins_with_rnas(graph) -> None:
     """Add the corresponding RNA node for each protein node and connect them with a translation edge.
 
     :param pybel.BELGraph graph: A BEL graph
@@ -32,9 +30,8 @@ def enrich_proteins_with_rnas(graph):
         graph.add_translation(rna_node, protein_node)
 
 
-@register_deprecated('infer_central_dogmatic_transcriptions')
 @in_place_transformation
-def enrich_rnas_with_genes(graph):
+def enrich_rnas_with_genes(graph) -> None:
     """Add the corresponding gene node for each RNA/miRNA node and connect them with a transcription edge.
 
     :param pybel.BELGraph graph: A BEL graph
@@ -47,9 +44,8 @@ def enrich_rnas_with_genes(graph):
         graph.add_transcription(gene_node, rna_node)
 
 
-@register_deprecated('infer_central_dogma')
 @in_place_transformation
-def enrich_protein_and_rna_origins(graph):
+def enrich_protein_and_rna_origins(graph) -> None:
     """Add the corresponding RNA for each protein then the corresponding gene for each RNA/miRNA.
 
     :param pybel.BELGraph graph: A BEL graph
