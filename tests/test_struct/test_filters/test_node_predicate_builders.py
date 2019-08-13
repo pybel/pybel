@@ -5,12 +5,12 @@
 import unittest
 
 from pybel import BELGraph
-from pybel.constants import GENE, NAME, PROTEIN
+from pybel.constants import GENE, PROTEIN
 from pybel.dsl import bioprocess, gene, protein
 from pybel.struct import filter_nodes
 from pybel.struct.filters import invert_node_predicate
 from pybel.struct.filters.node_predicate_builders import (
-    build_node_graph_data_search, build_node_key_search, build_node_name_search, data_missing_key_builder,
+    build_node_graph_data_search, build_node_name_search, data_missing_key_builder,
     function_inclusion_filter_builder,
 )
 from pybel.testing.utils import n
@@ -132,24 +132,12 @@ class TestNodePredicateBuilders(unittest.TestCase):
         graph.add_node_from_data(p3)
         self.assertFalse(data_predicate(graph, p3))
 
-    def test_build_node_key_search(self):
-        """Test build_node_key_search."""
-        node_key_search = build_node_key_search(query='app', key=NAME)
-        node_name_search = build_node_name_search(query='app')
-
+    def test_build_node_name_search(self):
         graph = BELGraph()
-
         p1 = protein('HGNC', 'APP')
         graph.add_node_from_data(p1)
-        self.assertTrue(node_key_search(graph, p1))
-        self.assertTrue(node_name_search(graph, p1))
-
-        p2 = protein('MGI', 'app')
+        p2 = protein('HGNC', 'MAPK')
         graph.add_node_from_data(p2)
-        self.assertTrue(node_key_search(graph, p2))
-        self.assertTrue(node_name_search(graph, p2))
-
-        p3 = protein('HGNC', 'nope')
-        graph.add_node_from_data(p3)
-        self.assertFalse(node_key_search(graph, p3))
-        self.assertFalse(node_name_search(graph, p3))
+        node_name_search = build_node_name_search(query='APP')
+        self.assertTrue(node_name_search(graph, p1))
+        self.assertFalse(node_name_search(graph, p2))

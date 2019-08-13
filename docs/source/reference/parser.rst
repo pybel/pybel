@@ -21,9 +21,9 @@ Control Parser
 .. autoclass:: pybel.parser.parse_control.ControlParser
     :members:
 
-Identifier Parser
------------------
-.. autoclass:: pybel.parser.parse_identifier.IdentifierParser
+Concept Parser
+--------------
+.. autoclass:: pybel.parser.parse_concept.ConceptParser
     :members:
 
 BEL Parser

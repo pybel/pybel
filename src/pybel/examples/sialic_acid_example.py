@@ -30,7 +30,7 @@
 """
 
 from ..constants import hbp_namespace
-from ..dsl import abundance, activity, bioprocess, complex_abundance, pmod, protein
+from ..dsl import Abundance, Entity, Protein, activity, bioprocess, complex_abundance, pmod
 from ..struct.graph import BELGraph
 
 __all__ = [
@@ -69,15 +69,22 @@ sialic_acid_graph.annotation_url.update({
                'species-taxonomy-id-20170511.belanno'
 })
 
-sialic_acid = abundance(name='sialic acid', namespace='CHEBI', identifier='26667')
-cd33 = protein(name='CD33', namespace='HGNC', identifier='1659')
+sialic_acid = Abundance(name='sialic acid', namespace='CHEBI', identifier='26667')
+cd33 = Protein(
+    name='CD33',
+    namespace='HGNC',
+    identifier='1659',
+    xrefs=[
+        Entity(namespace='uniprot', identifier='P20138'),
+    ],
+)
 sialic_acid_cd33_complex = complex_abundance([sialic_acid, cd33])
-shp1 = protein(namespace='HGNC', name='PTPN6', identifier='9658')
-shp2 = protein(namespace='HGNC', name='PTPN11', identifier='9644')
-syk = protein(namespace='HGNC', name='SYK', identifier='11491')
-dap12 = protein(namespace='HGNC', name='TYROBP', identifier='12449')
-trem2 = protein(namespace='HGNC', name='TREM2', identifier='17761')
-cd33_phosphorylated = protein(name='CD33', namespace='HGNC', identifier='1659', variants=[pmod('Ph')])
+shp1 = Protein(namespace='HGNC', name='PTPN6', identifier='9658')
+shp2 = Protein(namespace='HGNC', name='PTPN11', identifier='9644')
+syk = Protein(namespace='HGNC', name='SYK', identifier='11491')
+dap12 = Protein(namespace='HGNC', name='TYROBP', identifier='12449')
+trem2 = Protein(namespace='HGNC', name='TREM2', identifier='17761')
+cd33_phosphorylated = Protein(name='CD33', namespace='HGNC', identifier='1659', variants=[pmod('Ph')])
 immune_response = bioprocess(name='immune response', namespace='GO', identifier='0006955')
 
 sialic_acid_graph.add_increases(

@@ -3,6 +3,7 @@
 """Tests for canonicalization functions."""
 
 import unittest
+from typing import Iterable
 
 from pybel import BELGraph
 from pybel.canonicalize import _to_bel_lines_body, postpend_location
@@ -237,11 +238,8 @@ class TestSerializeBEL(unittest.TestCase):
         self.graph = BELGraph()
         self.graph.namespace_url['HGNC'] = self.url
 
-    def help_check_lines(self, lines):
-        """Checks the given lines match the graph built during the tests
-
-        :type lines: list[str]
-        """
+    def _help_check_lines(self, lines: Iterable[str]):
+        """Check the given lines match the graph built during the tests."""
         self.assertEqual(lines, list(_to_bel_lines_body(self.graph)))
 
     def test_simple(self):
@@ -265,7 +263,7 @@ class TestSerializeBEL(unittest.TestCase):
             '#' * 80,
         ]
 
-        self.help_check_lines(expected_lines)
+        self._help_check_lines(expected_lines)
 
     def test_single_annotation(self):
         """Tests a scenario with a qualified edge, but no annotaitons"""
@@ -295,7 +293,7 @@ class TestSerializeBEL(unittest.TestCase):
             '#' * 80,
         ]
 
-        self.help_check_lines(expected_lines)
+        self._help_check_lines(expected_lines)
 
     def test_multiple_annotations(self):
         a1, v1, v2 = map(lambda _: n(), range(3))
@@ -325,4 +323,4 @@ class TestSerializeBEL(unittest.TestCase):
             ('#' * 80),
         ]
 
-        self.help_check_lines(expected_lines)
+        self._help_check_lines(expected_lines)

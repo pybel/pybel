@@ -24,17 +24,17 @@ from .modifiers import (
     get_hgvs_language, get_legacy_fusion_langauge, get_location_language, get_protein_modification_language,
     get_protein_substitution_language, get_truncation_language,
 )
+from .parse_concept import ConceptParser
 from .parse_control import ControlParser
-from .parse_identifier import IdentifierParser
 from .utils import WCW, nest, one_of_tags, quote, triple
 from .. import language
 from ..constants import (
     ABUNDANCE, ACTIVITY, ASSOCIATION, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE, CELL_SECRETION,
-    CELL_SURFACE_EXPRESSION, COMPLEX, COMPOSITE, DECREASES, DEGRADATION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, DIRTY,
-    EFFECT, EQUIVALENT_TO, FROM_LOC, FUNCTION, FUSION, GENE, HAS_COMPONENT, HAS_MEMBER, IDENTIFIER, INCREASES, IS_A,
-    LINE, LOCATION, MEMBERS, MIRNA, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, PART_OF, PATHOLOGY,
-    POSITIVE_CORRELATION, PRODUCTS, PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, TARGET, TO_LOC,
-    TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, TWO_WAY_RELATIONS, VARIANTS, belns_encodings,
+    CELL_SURFACE_EXPRESSION, COMPLEX, COMPOSITE, CONCEPT, DECREASES, DEGRADATION, DIRECTLY_DECREASES,
+    DIRECTLY_INCREASES, DIRTY, EFFECT, EQUIVALENT_TO, FROM_LOC, FUNCTION, FUSION, GENE, HAS_COMPONENT, HAS_MEMBER,
+    INCREASES, IS_A, LINE, LOCATION, MEMBERS, MIRNA, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, PART_OF,
+    PATHOLOGY, POSITIVE_CORRELATION, PRODUCTS, PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, TARGET,
+    TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, TWO_WAY_RELATIONS, VARIANTS, belns_encodings,
 )
 from ..dsl import BaseEntity, cell_surface_expression, secretion
 from ..tokens import parse_result_to_dsl
@@ -273,7 +273,7 @@ class BELParser(BaseParser):
                 required_annotations=required_annotations,
             )
 
-            self.identifier_parser = IdentifierParser(
+            self.concept_parser = ConceptParser(
                 allow_naked_names=allow_naked_names,
             )
         else:
@@ -285,45 +285,44 @@ class BELParser(BaseParser):
                 required_annotations=required_annotations,
             )
 
-            self.identifier_parser = IdentifierParser(
+            self.concept_parser = ConceptParser(
                 allow_naked_names=allow_naked_names,
                 namespace_to_term=namespace_to_term,
                 namespace_to_pattern=namespace_to_pattern,
             )
 
         self.control_parser.get_line_number = self.get_line_number
-        self.identifier_parser.get_line_number = self.get_line_number
+        self.concept_parser.get_line_number = self.get_line_number
 
-        identifier = Group(self.identifier_parser.language)(IDENTIFIER)
-        ungrouped_identifier = self.identifier_parser.language
+        concept = Group(self.concept_parser.language)(CONCEPT)
 
         # 2.2 Abundance Modifier Functions
 
         #: `2.2.1 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_protein_modifications>`_
-        self.pmod = get_protein_modification_language(self.identifier_parser.identifier_qualified)
+        self.pmod = get_protein_modification_language(self.concept_parser.identifier_qualified)
 
         #: `2.2.4 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_cellular_location>`_
-        self.location = get_location_language(self.identifier_parser.language)
+        self.location = get_location_language(self.concept_parser.language)
         opt_location = pyparsing.Optional(WCW + self.location)
 
         #: PyBEL BEL Specification variant
-        self.gmod = get_gene_modification_language(self.identifier_parser.identifier_qualified)
+        self.gmod = get_gene_modification_language(self.concept_parser.identifier_qualified)
 
         # 2.6 Other Functions
 
         #: `2.6.1 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_fusion_fus>`_
-        self.fusion = get_fusion_language(self.identifier_parser.language)
+        self.fusion = get_fusion_language(self.concept_parser.language)
 
         # 2.1 Abundance Functions
 
         #: `2.1.1 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XcomplexA>`_
-        self.general_abundance = general_abundance_tags + nest(ungrouped_identifier + opt_location)
+        self.general_abundance = general_abundance_tags + nest(concept + opt_location)
 
-        self.gene_modified = ungrouped_identifier + pyparsing.Optional(
+        self.gene_modified = concept + pyparsing.Optional(
             WCW + delimitedList(Group(variant | gsub | self.gmod))(VARIANTS))
 
         self.gene_fusion = Group(self.fusion)(FUSION)
-        self.gene_fusion_legacy = Group(get_legacy_fusion_langauge(identifier, 'c'))(FUSION)
+        self.gene_fusion_legacy = Group(get_legacy_fusion_langauge(concept, 'c'))(FUSION)
 
         #: `2.1.4 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XgeneA>`_
         self.gene = gene_tag + nest(MatchFirst([
@@ -332,18 +331,18 @@ class BELParser(BaseParser):
             self.gene_modified
         ]) + opt_location)
 
-        self.mirna_modified = ungrouped_identifier + pyparsing.Optional(
+        self.mirna_modified = concept + pyparsing.Optional(
             WCW + delimitedList(Group(variant))(VARIANTS)) + opt_location
 
         #: `2.1.5 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XmicroRNAA>`_
         self.mirna = mirna_tag + nest(self.mirna_modified)
 
-        self.protein_modified = ungrouped_identifier + pyparsing.Optional(
+        self.protein_modified = concept + pyparsing.Optional(
             WCW + delimitedList(Group(MatchFirst([self.pmod, variant, fragment, psub, trunc])))(
                 VARIANTS))
 
         self.protein_fusion = Group(self.fusion)(FUSION)
-        self.protein_fusion_legacy = Group(get_legacy_fusion_langauge(identifier, 'p'))(FUSION)
+        self.protein_fusion_legacy = Group(get_legacy_fusion_langauge(concept, 'p'))(FUSION)
 
         #: `2.1.6 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XproteinA>`_
         self.protein = protein_tag + nest(MatchFirst([
@@ -352,10 +351,10 @@ class BELParser(BaseParser):
             self.protein_modified,
         ]) + opt_location)
 
-        self.rna_modified = ungrouped_identifier + pyparsing.Optional(WCW + delimitedList(Group(variant))(VARIANTS))
+        self.rna_modified = concept + pyparsing.Optional(WCW + delimitedList(Group(variant))(VARIANTS))
 
         self.rna_fusion = Group(self.fusion)(FUSION)
-        self.rna_fusion_legacy = Group(get_legacy_fusion_langauge(identifier, 'r'))(FUSION)
+        self.rna_fusion_legacy = Group(get_legacy_fusion_langauge(concept, 'r'))(FUSION)
 
         #: `2.1.7 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XrnaA>`_
         self.rna = rna_tag + nest(MatchFirst([
@@ -373,7 +372,7 @@ class BELParser(BaseParser):
         ])
 
         #: `2.1.2 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XcomplexA>`_
-        self.complex_singleton = complex_tag + nest(ungrouped_identifier + opt_location)
+        self.complex_singleton = complex_tag + nest(concept + opt_location)
 
         self.complex_list = complex_tag + nest(
             delimitedList(Group(self.single_abundance | self.complex_singleton))(MEMBERS) + opt_location)
@@ -401,16 +400,16 @@ class BELParser(BaseParser):
         #: `2.4.1 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XmolecularA>`_
         self.molecular_activity = molecular_activity_tags + nest(
             molecular_activity_default |
-            self.identifier_parser.language
+            self.concept_parser.language
         )
 
         # 2.3 Process Functions
 
         #: `2.3.1 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_biologicalprocess_bp>`_
-        self.biological_process = biological_process_tag + nest(ungrouped_identifier)
+        self.biological_process = biological_process_tag + nest(concept)
 
         #: `2.3.2 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_pathology_path>`_
-        self.pathology = pathology_tag + nest(ungrouped_identifier)
+        self.pathology = pathology_tag + nest(concept)
 
         self.bp_path = self.biological_process | self.pathology
         self.bp_path.setParseAction(self.check_function_semantics)
@@ -431,8 +430,8 @@ class BELParser(BaseParser):
 
         # 2.5 Transformation Functions
 
-        from_loc = Suppress(FROM_LOC) + nest(identifier(FROM_LOC))
-        to_loc = Suppress(TO_LOC) + nest(identifier(TO_LOC))
+        from_loc = Suppress(FROM_LOC) + nest(concept(FROM_LOC))
+        to_loc = Suppress(TO_LOC) + nest(concept(TO_LOC))
 
         self.cell_secretion = cell_secretion_tag + nest(Group(self.simple_abundance)(TARGET))
 
@@ -447,7 +446,7 @@ class BELParser(BaseParser):
         self.translocation_legacy = nest(
             Group(self.simple_abundance)(TARGET) +
             WCW +
-            Group(identifier(FROM_LOC) + WCW + identifier(TO_LOC))(EFFECT)
+            Group(concept(FROM_LOC) + WCW + concept(TO_LOC))(EFFECT)
         )
 
         self.translocation_legacy.addParseAction(handle_legacy_tloc)
@@ -613,12 +612,12 @@ class BELParser(BaseParser):
     @property
     def _namespace_dict(self) -> Mapping[str, Mapping[str, str]]:
         """Get the dictionary of {namespace: {name: encoding}} stored in the internal identifier parser."""
-        return self.identifier_parser.namespace_to_terms
+        return self.concept_parser.namespace_to_terms
 
     @property
     def _allow_naked_names(self) -> bool:
         """Return if naked names should be parsed (``True``), or if errors should be thrown (``False``)."""
-        return self.identifier_parser.allow_naked_names
+        return self.concept_parser.allow_naked_names
 
     def get_annotations(self) -> Dict:
         """Get the current annotations in this parser."""
@@ -658,15 +657,16 @@ class BELParser(BaseParser):
 
         :raises: InvalidFunctionSemantic
         """
-        if not self._namespace_dict or NAMESPACE not in tokens:
+        concept = tokens.get(CONCEPT)
+        if not self._namespace_dict or concept is None:
             return tokens
 
-        namespace, name = tokens[NAMESPACE], tokens[NAME]
+        namespace, name = concept[NAMESPACE], concept[NAME]
 
-        if namespace in self.identifier_parser.namespace_to_pattern:
+        if namespace in self.concept_parser.namespace_to_pattern:
             return tokens
 
-        if self._allow_naked_names and tokens[NAMESPACE] == DIRTY:  # Don't check dirty names in lenient mode
+        if self._allow_naked_names and namespace == DIRTY:  # Don't check dirty names in lenient mode
             return tokens
 
         valid_functions = set(itt.chain.from_iterable(

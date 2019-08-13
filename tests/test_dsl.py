@@ -70,14 +70,14 @@ class TestDSL(unittest.TestCase):
         namespace, identifier = n(), n()
         node = abundance(namespace=namespace, identifier=identifier)
         self.assertEqual(
-            'a({namespace}:{identifier})'.format(namespace=namespace, identifier=ensure_quotes(identifier)),
+            'a({namespace}:{identifier})'.format(namespace=namespace, identifier=identifier),
             node.as_bel())
 
     def test_str_has_both(self):
         namespace, identifier = n(), n()
         node = abundance(namespace=namespace, identifier=identifier)
         self.assertEqual(
-            'a({namespace}:{identifier})'.format(namespace=namespace, identifier=ensure_quotes(identifier)),
+            'a({namespace}:{identifier})'.format(namespace=namespace, identifier=identifier),
             node.as_bel())
 
     def test_as_tuple(self):

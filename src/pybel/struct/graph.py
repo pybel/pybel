@@ -16,13 +16,13 @@ from .operations import left_full_join, left_node_intersection_join, left_outer_
 from ..canonicalize import edge_to_bel
 from ..constants import (
     ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_REFERENCE, CITATION_TYPE,
-    CITATION_TYPE_PUBMED, DECREASES, DESCRIPTION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO, EVIDENCE,
-    GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN,
-    GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION, GRAPH_UNCACHED_NAMESPACES, HAS_COMPONENT, HAS_MEMBER,
-    HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A, MEMBERS, METADATA_AUTHORS, METADATA_CONTACT,
-    METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION,
-    NAMESPACE, NEGATIVE_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, PRODUCTS, REACTANTS, REGULATES,
-    RELATION, SUBJECT, TRANSCRIBED_TO, TRANSLATED_TO, VARIANTS,
+    CITATION_TYPE_PUBMED, CONCEPT, DECREASES, DESCRIPTION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO,
+    EVIDENCE, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_METADATA,
+    GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION, GRAPH_UNCACHED_NAMESPACES,
+    HAS_COMPONENT, HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A, MEMBERS, METADATA_AUTHORS,
+    METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME,
+    METADATA_VERSION, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, PRODUCTS,
+    REACTANTS, REGULATES, RELATION, SUBJECT, TRANSCRIBED_TO, TRANSLATED_TO, VARIANTS,
 )
 from ..dsl import BaseEntity, Gene, MicroRna, Protein, Rna, activity
 from ..parser.exc import BELParserWarning
@@ -343,21 +343,22 @@ class BELGraph(nx.MultiDiGraph):
     def __str__(self):
         return '{} v{}'.format(self.name, self.version)
 
-    def skip_storing_namespace(self, namespace: Optional[str]) -> bool:
+    def skip_storing_node(self, node: BaseEntity) -> bool:
         """Check if the namespace should be skipped.
 
-        :param namespace: The keyword of the namespace to check.
+        :param node: The node to check
         """
         return (
-            namespace is not None and
-            namespace in self.namespace_url and
-            self.namespace_url[namespace] in self.uncached_namespaces
+            CONCEPT in node and
+            node[CONCEPT][NAMESPACE] in self.namespace_url and
+            self.namespace_url[node[CONCEPT][NAMESPACE]] in self.uncached_namespaces
         )
 
-    def add_warning(self,
-                    exception: BELParserWarning,
-                    context: Optional[Mapping[str, Any]] = None,
-                    ) -> None:
+    def add_warning(
+            self,
+            exception: BELParserWarning,
+            context: Optional[Mapping[str, Any]] = None,
+    ) -> None:
         """Add a warning to the internal warning log in the graph, with optional context information.
 
         :param exception: The exception that occurred
@@ -744,7 +745,7 @@ class BELGraph(nx.MultiDiGraph):
 
         Might have cross references in future.
         """
-        return namespace == node.get(NAMESPACE)
+        return CONCEPT in node and node[CONCEPT][NAMESPACE] == namespace
 
     def node_has_namespace(self, node: BaseEntity, namespace: str) -> bool:
         """Check if the node have the given namespace.

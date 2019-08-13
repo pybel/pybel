@@ -9,8 +9,8 @@ from typing import Any, Iterable, List, Mapping, Optional, Set, Tuple
 
 from ..filters.node_predicates import has_variant
 from ...constants import (
-    ACTIVITY, EFFECT, FROM_LOC, FUSION, IDENTIFIER, KIND, LOCATION, MEMBERS, MODIFIER, NAME, NAMESPACE,
-    OBJECT, PARTNER_3P, PARTNER_5P, SUBJECT, TO_LOC, TRANSLOCATION, VARIANTS,
+    ACTIVITY, CONCEPT, EFFECT, FROM_LOC, FUSION, KIND, LOCATION, MEMBERS, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P,
+    PARTNER_5P, SUBJECT, TO_LOC, TRANSLOCATION, VARIANTS,
 )
 from ...dsl import BaseEntity, Pathology
 
@@ -58,9 +58,9 @@ def count_functions(graph) -> typing.Counter[str]:
 
 def _iterate_namespaces(graph) -> Iterable[str]:
     return (
-        node[NAMESPACE]
+        node[CONCEPT][NAMESPACE]
         for node in graph
-        if NAMESPACE in node
+        if CONCEPT in node
     )
 
 
@@ -140,18 +140,20 @@ def _identifier_filtered_iterator(graph) -> Iterable[Tuple[str, str]]:
 
 
 def _get_node_names(data: Mapping[str, Any]) -> Iterable[Tuple[str, str]]:
-    if NAMESPACE in data:
-        yield data[NAMESPACE], data[NAME]
+    if CONCEPT in data:
+        yield data[CONCEPT][NAMESPACE], data[CONCEPT][NAME]
 
     elif FUSION in data:
-        yield data[FUSION][PARTNER_3P][NAMESPACE], data[FUSION][PARTNER_3P][NAME]
-        yield data[FUSION][PARTNER_5P][NAMESPACE], data[FUSION][PARTNER_5P][NAME]
+        partner_5p_concept = data[FUSION][PARTNER_5P][CONCEPT]
+        partner_3p_concept = data[FUSION][PARTNER_3P][CONCEPT]
+        yield partner_5p_concept[NAMESPACE], partner_5p_concept[NAME]
+        yield partner_3p_concept[NAMESPACE], partner_3p_concept[NAME]
 
     if VARIANTS in data:
         for variant in data[VARIANTS]:
-            identifier = variant.get(IDENTIFIER)
-            if identifier is not None and NAMESPACE in identifier and NAME in identifier:
-                yield identifier[NAMESPACE], identifier[NAME]
+            concept = variant.get(CONCEPT)
+            if concept is not None and NAMESPACE in concept and NAME in concept:
+                yield concept[NAMESPACE], concept[NAME]
 
 
 def _namespace_filtered_iterator(graph, namespace: str) -> Iterable[str]:
@@ -180,7 +182,7 @@ def get_names_by_namespace(graph, namespace: str) -> Set[str]:
     """Get the set of all of the names in a given namespace that are in the graph.
 
     :param pybel.BELGraph graph: A BEL graph
-    :param str namespace: A namespace keyword
+    :param namespace: A namespace keyword
     :return: A set of names belonging to the given namespace that are in the given graph
 
     :raises IndexError: if the namespace is not defined in the graph.
