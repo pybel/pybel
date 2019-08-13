@@ -36,20 +36,20 @@ class TestLeftFullJoin(unittest.TestCase):
         self.g = g
         self.h = h
 
-        self.help_check_initial_g(self.g)
-        self.help_check_initial_h(self.h)
+        self._help_check_initial_g(self.g)
+        self._help_check_initial_h(self.h)
 
-    def help_check_initial_g(self, graph: BELGraph):
+    def _help_check_initial_g(self, graph: BELGraph):
         """Test the initial G graph."""
         self.assertEqual(2, graph.number_of_nodes(), msg='initial graph G had wrong number of nodes')
         self.assertEqual(1, graph.number_of_edges(), msg='initial graph G had wrong number of edges')
 
-    def help_check_initial_h(self, graph: BELGraph):
+    def _help_check_initial_h(self, graph: BELGraph):
         """Test the initial H graph."""
         self.assertEqual(3, graph.number_of_nodes(), msg='initial graph H had wrong number of nodes')
         self.assertEqual(3, graph.number_of_edges(), msg='initial graph H had wrong number of edges')
 
-    def help_check_result(self, j: BELGraph):
+    def _help_check_result(self, j: BELGraph):
         """Help check the result of left joining H into G.
 
         :param j: The resulting graph from G += H
@@ -66,8 +66,8 @@ class TestLeftFullJoin(unittest.TestCase):
     def test_function(self):
         """Test full joining two networks using the function."""
         left_full_join(self.g, self.h)
-        self.help_check_result(self.g)
-        self.help_check_initial_h(self.h)
+        self._help_check_result(self.g)
+        self._help_check_initial_h(self.h)
 
     def test_full_join_with_isolated_nodes(self):
         """Test what happens when there are isolated nodes."""
@@ -89,8 +89,8 @@ class TestLeftFullJoin(unittest.TestCase):
     def test_in_place_operator(self):
         """Test full joining two networks using the BELGraph in-place addition operator."""
         self.g += self.h
-        self.help_check_result(self.g)
-        self.help_check_initial_h(self.h)
+        self._help_check_result(self.g)
+        self._help_check_initial_h(self.h)
 
     def test_operator_failure(self):
         """Test that using the wrong type with the addition operator raises an error."""
@@ -100,9 +100,9 @@ class TestLeftFullJoin(unittest.TestCase):
     def test_operator(self):
         """Test full joining two networks using the BELGraph addition operator."""
         j = self.g + self.h
-        self.help_check_result(j)
-        self.help_check_initial_g(self.g)
-        self.help_check_initial_h(self.h)
+        self._help_check_result(j)
+        self._help_check_initial_g(self.g)
+        self._help_check_initial_h(self.h)
 
     def test_union_failure(self):
         """Test that the union of no graphs raises a value error."""
@@ -117,9 +117,9 @@ class TestLeftFullJoin(unittest.TestCase):
     def test_union(self):
         """Test that the union of a pair of graphs is the same as the full join."""
         j = union([self.g, self.h])
-        self.help_check_result(j)
-        self.help_check_initial_g(self.g)
-        self.help_check_initial_h(self.h)
+        self._help_check_result(j)
+        self._help_check_initial_g(self.g)
+        self._help_check_initial_h(self.h)
 
 
 class TestLeftFullOuterJoin(unittest.TestCase):
@@ -138,19 +138,19 @@ class TestLeftFullOuterJoin(unittest.TestCase):
         self.g = g
         self.h = h
 
-    def help_check_initial_g(self, g):
+    def _help_check_initial_g(self, g):
         self.assertEqual(2, g.number_of_nodes())
         self.assertEqual({p1, p2}, set(g))
         self.assertEqual(1, g.number_of_edges())
         self.assertEqual({(p1, p2)}, set(g.edges()))
 
-    def help_check_initial_h(self, h):
+    def _help_check_initial_h(self, h):
         self.assertEqual(6, h.number_of_nodes())
         self.assertEqual({p1, p3, p4, p5, p6, p7}, set(h))
         self.assertEqual(3, h.number_of_edges())
         self.assertEqual({(p1, p3), (p1, p4), (p5, p6)}, set(h.edges()))
 
-    def help_check_result(self, j):
+    def _help_check_result(self, j):
         """After H has been full outer joined into G, this is what it should be"""
         self.assertEqual(4, j.number_of_nodes())
         self.assertEqual({p1, p2, p3, p4}, set(j))
@@ -168,26 +168,26 @@ class TestLeftFullOuterJoin(unittest.TestCase):
     def test_magic(self):
         # left_outer_join(g, h)
         self.g &= self.h
-        self.help_check_initial_h(self.h)
-        self.help_check_result(self.g)
+        self._help_check_initial_h(self.h)
+        self._help_check_result(self.g)
 
     def test_operator(self):
         # left_outer_join(g, h)
         j = self.g & self.h
-        self.help_check_initial_h(self.h)
-        self.help_check_initial_g(self.g)
-        self.help_check_result(j)
+        self._help_check_initial_h(self.h)
+        self._help_check_initial_g(self.g)
+        self._help_check_result(j)
 
     def test_left_outer_join(self):
         left_outer_join(self.g, self.h)
-        self.help_check_initial_h(self.h)
-        self.help_check_result(self.g)
+        self._help_check_initial_h(self.h)
+        self._help_check_result(self.g)
 
     def test_left_outer_exhaustive_join(self):
         self.g &= self.h
         left_outer_join(self.g, self.h)
-        self.help_check_initial_h(self.h)
-        self.help_check_result(self.g)
+        self._help_check_initial_h(self.h)
+        self._help_check_result(self.g)
 
 
 class TestInnerJoin(unittest.TestCase):
@@ -209,21 +209,21 @@ class TestInnerJoin(unittest.TestCase):
         self.g = g
         self.h = h
 
-    def help_check_initialize_g(self, graph):
+    def _help_check_initialize_g(self, graph):
         self.assertEqual(4, graph.number_of_nodes())
         self.assertEqual(3, graph.number_of_edges())
 
-    def help_check_initialize_h(self, graph):
+    def _help_check_initialize_h(self, graph):
         self.assertEqual(6, graph.number_of_nodes())
         self.assertEqual({p1, p3, p4, p5, p6, p7}, set(graph))
         self.assertEqual(3, graph.number_of_edges())
         self.assertEqual({(p1, p3), (p1, p4), (p5, p6)}, set(graph.edges()))
 
     def test_initialize(self):
-        self.help_check_initialize_g(self.g)
-        self.help_check_initialize_h(self.h)
+        self._help_check_initialize_g(self.g)
+        self._help_check_initialize_h(self.h)
 
-    def help_check_join(self, j):
+    def _help_check_join(self, j):
         self.assertEqual(2, j.number_of_nodes())
         self.assertEqual({p1, p3}, set(j))
         self.assertEqual(1, j.number_of_edges())
@@ -239,21 +239,21 @@ class TestInnerJoin(unittest.TestCase):
 
     def test_magic(self):
         j = self.g ^ self.h
-        self.help_check_join(j)
-        self.help_check_initialize_h(self.h)
-        self.help_check_initialize_g(self.g)
+        self._help_check_join(j)
+        self._help_check_initialize_h(self.h)
+        self._help_check_initialize_g(self.g)
 
     def test_left_node_intersection_join(self):
         j = left_node_intersection_join(self.g, self.h)
-        self.help_check_join(j)
-        self.help_check_initialize_h(self.h)
-        self.help_check_initialize_g(self.g)
+        self._help_check_join(j)
+        self._help_check_initialize_h(self.h)
+        self._help_check_initialize_g(self.g)
 
     def test_node_intersection(self):
         j = node_intersection([self.h, self.g])
-        self.help_check_join(j)
-        self.help_check_initialize_h(self.h)
-        self.help_check_initialize_g(self.g)
+        self._help_check_join(j)
+        self._help_check_initialize_h(self.h)
+        self._help_check_initialize_g(self.g)
 
     def test_intersection_failure(self):
         with self.assertRaises(ValueError):

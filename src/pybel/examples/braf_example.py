@@ -18,7 +18,7 @@
     UNSET ALL
 """
 
-from ..dsl import activity, protein
+from ..dsl import Entity, Protein, activity
 from ..struct.graph import BELGraph
 
 __all__ = [
@@ -41,10 +41,17 @@ braf_graph.annotation_url.update({
     'Species': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/species-taxonomy-id/species-taxonomy-id-20170511.belanno'
 })
 
-thpo = protein(namespace='HGNC', name='THPO', identifier='11795')
-braf = protein(namespace='HGNC', name='BRAF', identifier='1097')
-raf1 = protein(namespace='HGNC', name='RAF1', identifier='9829')
-elk1 = protein(namespace='HGNC', name='ELK1', identifier='3321')
+thpo = Protein(
+    namespace='HGNC',
+    name='THPO',
+    identifier='11795',
+    xrefs=[
+        Entity(namespace='uniprot', identifier='P40225'),
+    ],
+)
+braf = Protein(namespace='HGNC', name='BRAF', identifier='1097')
+raf1 = Protein(namespace='HGNC', name='RAF1', identifier='9829')
+elk1 = Protein(namespace='HGNC', name='ELK1', identifier='3321')
 
 evidence = "Expression of both dominant negative forms, RasN17 and Rap1N17, in UT7-Mpl cells decreased " \
            "thrombopoietin-mediated Elk1-dependent transcription. This suggests that both Ras and Rap1 contribute to " \
@@ -56,7 +63,7 @@ braf_graph.add_increases(
     evidence=evidence,
     citation='11283246',
     object_modifier=activity(name='kin'),
-    annotations={'Species': '9606'}
+    annotations={'Species': '9606'},
 )
 
 braf_graph.add_increases(
@@ -65,7 +72,7 @@ braf_graph.add_increases(
     evidence=evidence,
     citation='11283246',
     object_modifier=activity(name='kin'),
-    annotations={'Species': '9606'}
+    annotations={'Species': '9606'},
 )
 
 braf_graph.add_increases(
@@ -75,5 +82,5 @@ braf_graph.add_increases(
     citation='11283246',
     subject_modifier=activity(name='kin'),
     object_modifier=activity(name='tscript'),
-    annotations={'Species': '9606'}
+    annotations={'Species': '9606'},
 )

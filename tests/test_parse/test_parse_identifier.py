@@ -3,17 +3,17 @@
 import unittest
 
 from pybel.constants import DIRTY
+from pybel.parser import ConceptParser
 from pybel.parser.exc import NakedNameWarning
-from pybel.parser.parse_identifier import IdentifierParser
 
 
 class TestIdentifierParser(unittest.TestCase):
     def setUp(self):
         self.namespace_to_term = {
-            'A': dict(zip('123','PPP')),
-            'B': dict(zip('456','PPP')),
+            'A': dict(zip('123', 'PPP')),
+            'B': dict(zip('456', 'PPP')),
         }
-        self.parser = IdentifierParser(namespace_to_term=self.namespace_to_term)
+        self.parser = ConceptParser(namespace_to_term=self.namespace_to_term)
 
     def test_valid_1(self):
         s = 'A:3'
@@ -62,7 +62,7 @@ class TestNamespaceParserDefault(unittest.TestCase):
         }
 
         default_namespace = {'X', 'Y', 'W Z'}
-        self.parser = IdentifierParser(namespace_to_term=namespace_to_term, default_namespace=default_namespace)
+        self.parser = ConceptParser(namespace_to_term=namespace_to_term, default_namespace=default_namespace)
 
     def test_valid_1(self):
         s = 'A:3'
@@ -100,7 +100,7 @@ class TestNamespaceParserLenient(unittest.TestCase):
             'B': dict(zip('456', 'PPP')),
         }
 
-        self.parser = IdentifierParser(namespace_to_term=namespace_to_term, allow_naked_names=True)
+        self.parser = ConceptParser(namespace_to_term=namespace_to_term, allow_naked_names=True)
 
     def test_valid_1(self):
         s = 'A:3'

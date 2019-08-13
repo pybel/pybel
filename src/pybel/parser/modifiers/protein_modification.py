@@ -80,7 +80,7 @@ from pyparsing import Group, MatchFirst, Optional, ParseResults, ParserElement, 
 
 from .constants import amino_acid
 from ..utils import WCW, nest, one_of_tags
-from ...constants import BEL_DEFAULT_NAMESPACE, IDENTIFIER, KIND, NAME, NAMESPACE, PMOD, PMOD_CODE, PMOD_POSITION
+from ...constants import BEL_DEFAULT_NAMESPACE, CONCEPT, KIND, NAME, NAMESPACE, PMOD, PMOD_CODE, PMOD_POSITION
 from ...language import pmod_legacy_labels, pmod_namespace
 
 __all__ = [
@@ -109,16 +109,16 @@ pmod_default_ns = oneOf(list(pmod_namespace)).setParseAction(_handle_pmod_defaul
 pmod_legacy_ns = oneOf(list(pmod_legacy_labels)).setParseAction(_handle_pmod_legacy_ns)
 
 
-def get_protein_modification_language(identifier_qualified: ParserElement) -> ParserElement:
+def get_protein_modification_language(concept_qualified: ParserElement) -> ParserElement:
     """Build a protein modification parser."""
-    pmod_identifier = MatchFirst([
-        identifier_qualified,
+    pmod_concept = MatchFirst([
+        concept_qualified,
         pmod_default_ns,
         pmod_legacy_ns
     ])
 
     return pmod_tag + nest(
-        Group(pmod_identifier)(IDENTIFIER) +
+        Group(pmod_concept)(CONCEPT) +
         Optional(
             WCW +
             amino_acid(PMOD_CODE) +

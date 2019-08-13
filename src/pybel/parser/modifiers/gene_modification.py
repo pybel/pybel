@@ -45,7 +45,7 @@ in the OpenBEL community.
 from pyparsing import Group, MatchFirst, ParserElement, oneOf
 
 from ..utils import nest, one_of_tags
-from ...constants import BEL_DEFAULT_NAMESPACE, GMOD, IDENTIFIER, KIND, NAME, NAMESPACE
+from ...constants import BEL_DEFAULT_NAMESPACE, CONCEPT, GMOD, KIND, NAME, NAMESPACE
 from ...language import gmod_namespace
 
 __all__ = [
@@ -63,13 +63,10 @@ gmod_tag = one_of_tags(tags=['gmod', 'geneModification'], canonical_tag=GMOD, na
 gmod_default_ns = oneOf(list(gmod_namespace)).setParseAction(_handle_gmod_default)
 
 
-def get_gene_modification_language(identifier_qualified: ParserElement) -> ParserElement:
+def get_gene_modification_language(concept_qualified: ParserElement) -> ParserElement:
     """Build a gene modification parser."""
-    gmod_identifier = MatchFirst([
-        identifier_qualified,
+    concept = MatchFirst([
+        concept_qualified,
         gmod_default_ns,
     ])
-
-    return gmod_tag + nest(
-        Group(gmod_identifier)(IDENTIFIER)
-    )
+    return gmod_tag + nest(Group(concept)(CONCEPT))

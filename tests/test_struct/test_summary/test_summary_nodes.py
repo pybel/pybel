@@ -45,7 +45,7 @@ class TestSummary(unittest.TestCase):
         """Test getting and counting namespaces' contents on the sialic acid graph."""
         result = {
             'HGNC': 7,
-            'CHEBI': 1
+            'CHEBI': 1,
         }
 
         self.assertEqual(set(result), get_namespaces(sialic_acid_graph))
@@ -80,14 +80,14 @@ class TestSummary(unittest.TestCase):
         graph = BELGraph()
         graph.namespace_url['HGNC'] = 'http://dummy'
 
-        n = protein_fusion(
+        node = protein_fusion(
             partner_5p=protein(name='A', namespace='HGNC'),
             range_5p=fusion_range('p', 1, 15),
             partner_3p=protein(name='B', namespace='HGNC'),
             range_3p=fusion_range('p', 1, 100)
         )
 
-        graph.add_node_from_data(n)
+        graph.add_node_from_data(node)
 
         result = {
             'A': 1,

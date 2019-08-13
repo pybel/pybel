@@ -45,7 +45,7 @@ Either way, the resulting object can be used like a dict that looks like:
 from pyparsing import ParserElement, Word, alphanums
 
 from ..utils import nest, one_of_tags, quote
-from ...constants import HGVS, IDENTIFIER, KIND
+from ...constants import HGVS, KIND
 
 __all__ = [
     'get_hgvs_language',
@@ -57,6 +57,6 @@ variant_characters = Word(alphanums + '._*=?>')
 
 def get_hgvs_language() -> ParserElement:
     """Build a HGVS :class:`pyparsing.ParseElement`."""
-    hgvs = (variant_characters | quote)(IDENTIFIER)
+    hgvs = (variant_characters | quote)(HGVS)
     language = variant_tags + nest(hgvs)
     return language

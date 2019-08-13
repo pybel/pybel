@@ -10,12 +10,11 @@ from typing import Iterable, List, Mapping, Optional, TextIO, Tuple
 import bel_resources.constants
 from bel_resources import make_knowledge_header
 from .constants import (
-    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CELL_SURFACE, CITATION, CITATION_REFERENCE, CITATION_TYPE, COMPLEX,
-    COMPOSITE, DEGRADATION, EFFECT, EVIDENCE, EXTRACELLULAR, FROM_LOC, FUNCTION, FUSION, IDENTIFIER, INTRACELLULAR,
-    LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT, PYBEL_AUTOEVIDENCE, REACTION, RELATION, SUBJECT, TO_LOC, TRANSLOCATION,
-    UNQUALIFIED_EDGES, VARIANTS,
+    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CELL_SURFACE, CITATION, CITATION_REFERENCE, CITATION_TYPE,
+    DEGRADATION, EFFECT, EVIDENCE, EXTRACELLULAR, FROM_LOC, INTRACELLULAR, LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT,
+    PYBEL_AUTOEVIDENCE, RELATION, SUBJECT, TO_LOC, TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS,
 )
-from .dsl import BaseEntity
+from .dsl import BaseAbundance, BaseEntity, FusionBase, ListAbundance, Reaction
 from .typing import EdgeData
 from .utils import ensure_quotes
 from .version import VERSION
@@ -306,30 +305,19 @@ def to_bel_path(graph, path: str, mode: str = 'w', **kwargs) -> None:
         to_bel(graph, bel_file)
 
 
-def calculate_canonical_name(data: BaseEntity) -> str:
+def calculate_canonical_name(node: BaseEntity) -> str:
     """Calculate the canonical name for a given node.
 
     If it is a simple node, uses the already given name. Otherwise, it uses the BEL string.
     """
-    if data[FUNCTION] == COMPLEX and NAMESPACE in data:
-        return data[NAME]
+    if isinstance(node, (Reaction, ListAbundance, FusionBase)):
+        return node.as_bel(use_identifiers=True)
 
-    if VARIANTS in data:
-        return data.as_bel()
+    elif isinstance(node, BaseAbundance):
+        if VARIANTS in node:
+            return node.as_bel(use_identifiers=True)
+        else:
+            return node.obo
 
-    if FUSION in data:
-        return data.as_bel()
-
-    if data[FUNCTION] in {REACTION, COMPOSITE, COMPLEX}:
-        return data.as_bel()
-
-    if VARIANTS not in data and FUSION not in data:  # this is should be a simple node
-        if IDENTIFIER in data and NAME in data:
-            return '{namespace}:{identifier} ({name})'.format(**data)
-
-        if IDENTIFIER in data:
-            return '{namespace}:{identifier}'.format(namespace=data[NAMESPACE], identifier=data[IDENTIFIER])
-
-        return data[NAME]
-
-    raise ValueError('Unexpected node data: {}'.format(data))
+    else:
+        raise TypeError('Unhandled node: {}'.format(node))

@@ -50,10 +50,10 @@ def activity(
 ) -> ModifierDict:
     """Make a subject/object modifier dictionary.
 
-    :param str name: The name of the activity. If no namespace given, uses BEL default namespace
-    :param Optional[str] namespace: The namespace of the activity
-    :param Optional[str] identifier: The identifier of the name in the database
-    :param Optional[dict] location: An entity from :func:`pybel.dsl.entity` representing the location of the node
+    :param name: The name of the activity. If no namespace given, uses BEL default namespace
+    :param namespace: The namespace of the activity
+    :param identifier: The identifier of the name in the database
+    :param location: An entity from :func:`pybel.dsl.entity` representing the location of the node
     """
     rv = _modifier_helper(ACTIVITY, location=location)
 
@@ -70,7 +70,7 @@ def activity(
 def degradation(location: Optional[LocationDict] = None) -> ModifierDict:
     """Make a degradation dictionary.
 
-    :param Optional[dict] location: An entity from :func:`pybel.dsl.entity` representing the location of the node
+    :param location: An entity from :func:`pybel.dsl.entity` representing the location of the node
     """
     return _modifier_helper(DEGRADATION, location=location)
 
@@ -86,9 +86,20 @@ def translocation(
     :rtype: dict
     """
     rv = _modifier_helper(TRANSLOCATION)
+    if isinstance(from_loc, str):
+        from_loc = Entity(
+            namespace=BEL_DEFAULT_NAMESPACE,
+            name=from_loc,
+        )
+    if isinstance(to_loc, str):
+        to_loc = Entity(
+            namespace=BEL_DEFAULT_NAMESPACE,
+            name=to_loc,
+        )
+
     rv[EFFECT] = {
-        FROM_LOC: Entity(namespace=BEL_DEFAULT_NAMESPACE, name=from_loc) if isinstance(from_loc, str) else from_loc,
-        TO_LOC: Entity(namespace=BEL_DEFAULT_NAMESPACE, name=to_loc) if isinstance(to_loc, str) else to_loc,
+        FROM_LOC: from_loc,
+        TO_LOC: to_loc,
     }
     return rv
 

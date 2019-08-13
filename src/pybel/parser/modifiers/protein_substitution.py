@@ -37,9 +37,7 @@ from pyparsing import ParserElement, pyparsing_common as ppc
 
 from .constants import amino_acid
 from ..utils import nest, one_of_tags
-from ...constants import (
-    HGVS, IDENTIFIER, KIND, PSUB_POSITION, PSUB_REFERENCE, PSUB_VARIANT,
-)
+from ...constants import HGVS, KIND, PSUB_POSITION, PSUB_REFERENCE, PSUB_VARIANT
 
 __all__ = [
     'get_protein_substitution_language',
@@ -64,7 +62,7 @@ def get_protein_substitution_language() -> ParserElement:
 def _handle_psub(line, _, tokens):
     upgraded = 'p.{}{}{}'.format(tokens[PSUB_REFERENCE], tokens[PSUB_POSITION], tokens[PSUB_VARIANT])
     log.log(5, 'sub() in p() is deprecated: %s. Upgraded to %s', line, upgraded)
-    tokens[IDENTIFIER] = upgraded
+    tokens[HGVS] = upgraded
     del tokens[PSUB_REFERENCE]
     del tokens[PSUB_POSITION]
     del tokens[PSUB_VARIANT]
