@@ -36,7 +36,7 @@ from pyparsing import ParserElement, oneOf, pyparsing_common as ppc
 
 from ..utils import nest, one_of_tags
 from ... import language
-from ...constants import GSUB_POSITION, GSUB_REFERENCE, GSUB_VARIANT, HGVS, IDENTIFIER, KIND
+from ...constants import GSUB_POSITION, GSUB_REFERENCE, GSUB_VARIANT, HGVS, KIND
 
 __all__ = [
     'get_gene_substitution_language',
@@ -62,7 +62,7 @@ def get_gene_substitution_language() -> ParserElement:
 def _handle_gsub(line, _, tokens):
     upgraded = 'c.{}{}>{}'.format(tokens[GSUB_POSITION], tokens[GSUB_REFERENCE], tokens[GSUB_VARIANT])
     log.debug('legacy sub() %s upgraded to %s', line, upgraded)
-    tokens[IDENTIFIER] = upgraded
+    tokens[HGVS] = upgraded
     del tokens[GSUB_POSITION]
     del tokens[GSUB_REFERENCE]
     del tokens[GSUB_VARIANT]

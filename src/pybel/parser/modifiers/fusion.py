@@ -19,7 +19,6 @@ it is shown with uppercase letters referring to constants from :code:`pybel.cons
                 FUSION_REFERENCE: 'c',
                 FUSION_START: '?',
                 FUSION_STOP: 1875,
-
             },
             RANGE_3P: {
                 FUSION_REFERENCE: 'c',
@@ -45,8 +44,8 @@ from pyparsing import (
 
 from ..utils import WCW, nest
 from ...constants import (
-    FUSION, FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, PARTNER_3P, PARTNER_5P,
-    RANGE_3P, RANGE_5P,
+    CONCEPT, FUSION, FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, PARTNER_3P, PARTNER_5P, RANGE_3P,
+    RANGE_5P,
 )
 
 __all__ = [
@@ -71,7 +70,7 @@ range_coordinate_unquoted = (
 )
 
 
-def get_fusion_language(identifier: ParserElement, permissive: bool = True) -> ParserElement:
+def get_fusion_language(concept: ParserElement, permissive: bool = True) -> ParserElement:
     """Build a fusion parser."""
     range_coordinate = Suppress('"') + range_coordinate_unquoted + Suppress('"')
 
@@ -79,30 +78,29 @@ def get_fusion_language(identifier: ParserElement, permissive: bool = True) -> P
         range_coordinate = range_coordinate | range_coordinate_unquoted
 
     return fusion_tags + nest(
-        Group(identifier)(PARTNER_5P),
+        Group(Group(concept)(CONCEPT))(PARTNER_5P),
         Group(range_coordinate)(RANGE_5P),
-        Group(identifier)(PARTNER_3P),
+        Group(Group(concept)(CONCEPT))(PARTNER_3P),
         Group(range_coordinate)(RANGE_3P),
     )
 
 
-def get_legacy_fusion_langauge(identifier: ParserElement, reference: str) -> ParserElement:
+def get_legacy_fusion_langauge(concept: ParserElement, reference: str) -> ParserElement:
     """Build a legacy fusion parser."""
     break_start = (ppc.integer | '?').setParseAction(_fusion_break_handler_wrapper(reference, start=True))
     break_end = (ppc.integer | '?').setParseAction(_fusion_break_handler_wrapper(reference, start=False))
 
     res = (
-        identifier(PARTNER_5P) +
+        Group(concept(CONCEPT))(PARTNER_5P) +
         WCW +
         fusion_tags +
         nest(
-            identifier(PARTNER_3P) +
+            Group(concept(CONCEPT))(PARTNER_3P) +
             Optional(WCW + Group(break_start)(RANGE_5P) + WCW + Group(break_end)(RANGE_3P))
         )
     )
 
     res.setParseAction(_fusion_legacy_handler)
-
     return res
 
 

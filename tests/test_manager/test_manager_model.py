@@ -84,7 +84,7 @@ class TestModels(unittest.TestCase):
             version='1.0.0',
             author='Charles Tapley Hoyt',
             contact='charles.hoyt@scai.fraunhofer.de',
-            uploaded=uploaded
+            uploaded=uploaded,
         )
 
         expected = dict(
@@ -112,7 +112,7 @@ class TestModels(unittest.TestCase):
             version='1.0.0',
             author='Charles Tapley Hoyt',
             contact='charles.hoyt@scai.fraunhofer.de',
-            uploaded=uploaded
+            uploaded=uploaded,
         )
 
         expected = dict(
@@ -132,7 +132,7 @@ class TestModels(unittest.TestCase):
 
         expected = {
             NAMESPACE: 'test',
-            NAME: 'entry'
+            NAME: 'entry',
         }
 
         self.assertEqual(model.to_json(), expected)
@@ -149,11 +149,11 @@ class TestModels(unittest.TestCase):
         ref = n()
         model = Citation(
             type=CITATION_TYPE_PUBMED,
-            reference=ref
+            reference=ref,
         )
         expected = {
             CITATION_TYPE: CITATION_TYPE_PUBMED,
-            CITATION_REFERENCE: ref
+            CITATION_REFERENCE: ref,
         }
 
         self.assertEqual(expected, model.to_json())

@@ -20,8 +20,8 @@ __all__ = ['ras_tloc_graph']
 
 ras_tloc_graph = BELGraph(
     name='RAS Transocation Graph',
-    version='1.0.0',
-    description='The farnesylation of RAS causes its translocation to the cell membrange.'
+    version='1.0.1',
+    description='The farnesylation of RAS causes its translocation to the cell membrane.'
 )
 
 ras_tloc_graph.namespace_url.update({

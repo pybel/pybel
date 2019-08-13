@@ -7,6 +7,7 @@ import os
 import tempfile
 import unittest
 
+from ..config import config
 from ..manager import Manager
 
 __all__ = [
@@ -18,7 +19,7 @@ __all__ = [
 
 log = logging.getLogger(__name__)
 
-TEST_CONNECTION = os.environ.get('PYBEL_TEST_CONNECTION')
+TEST_CONNECTION = config.get('test_connection')
 
 
 class TemporaryCacheMixin(unittest.TestCase):
@@ -37,7 +38,7 @@ class TemporaryCacheMixin(unittest.TestCase):
         self.manager.create_all()
 
     def tearDown(self):
-        """Tear down the test functing by closing the session and removing the database."""
+        """Tear down the test function by closing the session and removing the database."""
         self.manager.session.close()
 
         if not TEST_CONNECTION:

@@ -28,9 +28,9 @@ class LookupManager(BaseManager):
         """Look up several nodes by their hashes."""
         return self.session.query(Node).filter(Node.sha512.in_(node_hashes)).all()
 
-    def get_node_by_dsl(self, node_dict: BaseEntity) -> Optional[Node]:
+    def get_node_by_dsl(self, node: BaseEntity) -> Optional[Node]:
         """Look up a node by its data dictionary by hashing it then using :func:`get_node_by_hash`."""
-        return self.get_node_by_hash(node_dict.as_sha512())
+        return self.get_node_by_hash(node.sha512)
 
     def get_edge_by_hash(self, edge_hash: str) -> Optional[Edge]:
         """Look up an edge by the hash of a PyBEL edge data dictionary."""

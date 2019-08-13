@@ -4,6 +4,6 @@
 
 from .modifiers import *
 from .parse_bel import BELParser
+from .parse_concept import ConceptParser
 from .parse_control import ControlParser
-from .parse_identifier import IdentifierParser
 from .parse_metadata import MetadataParser

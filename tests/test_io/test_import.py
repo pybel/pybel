@@ -18,13 +18,12 @@ from pybel.config import PYBEL_MINIMUM_IMPORT_VERSION
 from pybel.constants import (
     ANNOTATIONS, CITATION, DECREASES, DIRECTLY_DECREASES, EVIDENCE, GRAPH_PYBEL_VERSION, INCREASES, RELATION,
 )
-from pybel.dsl import BaseEntity, gene
-from pybel.examples import sialic_acid_graph
+from pybel.dsl import BaseEntity, Protein, gene
+from pybel.examples.sialic_acid_example import sialic_acid_graph
 from pybel.io.exc import ImportVersionWarning, import_version_message_fmt
 from pybel.parser import BELParser
 from pybel.parser.exc import (
-    BELSyntaxError, InvalidFunctionSemantic, MissingCitationException,
-    MissingNamespaceRegexWarning,
+    BELSyntaxError, InvalidFunctionSemantic, MissingCitationException, MissingNamespaceRegexWarning,
 )
 from pybel.struct.summary import get_syntax_errors
 from pybel.testing.cases import TemporaryCacheClsMixin
@@ -46,7 +45,7 @@ testan1 = '1'
 class TestExampleInterchange(unittest.TestCase):
     """Test round-trip interchange of the sialic acid graph example."""
 
-    def help_test_equal(self, graph: BELGraph):
+    def _help_test_equal(self, graph: BELGraph):
         """Check that a graph is equal to the sialic acid graph example."""
         for node in graph:
             self.assertIsInstance(node, BaseEntity)
@@ -54,11 +53,18 @@ class TestExampleInterchange(unittest.TestCase):
         self.assertEqual(set(sialic_acid_graph), set(graph))
         self.assertEqual(set(sialic_acid_graph.edges()), set(graph.edges()))
 
+        for node in sialic_acid_graph:
+            if not isinstance(node, Protein):
+                continue
+            if node.namespace == 'HGNC' and node.name == 'CD33' and not node.variants:
+                self.assertIsNotNone(node.xrefs)
+                self.assertEqual(1, len(node.xrefs))
+
     def test_example_bytes(self):
         """Test the round-trip through bytes."""
         graph_bytes = to_bytes(sialic_acid_graph)
         graph = from_bytes(graph_bytes)
-        self.help_test_equal(graph)
+        self._help_test_equal(graph)
 
     def test_example_pickle(self):
         """Test the round-trip through a pickle."""
@@ -66,19 +72,19 @@ class TestExampleInterchange(unittest.TestCase):
         to_pickle(sialic_acid_graph, bio)
         bio.seek(0)
         graph = from_pickle(bio)
-        self.help_test_equal(graph)
+        self._help_test_equal(graph)
 
     def test_thorough_json(self):
         """Test the round-trip through node-link JSON."""
         graph_json_dict = to_json(sialic_acid_graph)
         graph = from_json(graph_json_dict)
-        self.help_test_equal(graph)
+        self._help_test_equal(graph)
 
     def test_thorough_jsons(self):
         """Test the round-trip through a node-link JSON string."""
         graph_json_str = to_jsons(sialic_acid_graph)
         graph = from_jsons(graph_json_str)
-        self.help_test_equal(graph)
+        self._help_test_equal(graph)
 
     def test_thorough_json_file(self):
         """Test the round-trip through a node-link JSON file."""
@@ -86,7 +92,7 @@ class TestExampleInterchange(unittest.TestCase):
         to_json_file(sialic_acid_graph, sio)
         sio.seek(0)
         graph = from_json_file(sio)
-        self.help_test_equal(graph)
+        self._help_test_equal(graph)
 
 
 class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
@@ -258,7 +264,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
 namespace_to_term = {
     'TESTNS': {
         "1": "GRP",
-        "2": "GRP"
+        "2": "GRP",
     }
 }
 
@@ -288,12 +294,15 @@ class TestFull(TestTokenParserBase):
         self.assertIn(gene('dbSNP', 'rs10235'), self.parser.graph)
 
     def test_regex_mismatch(self):
-        line = 'g(dbSNP:10234) -- g(dbSNP:rr10235)'
-
+        statement = 'g(dbSNP:10234) -- g(dbSNP:rr10235)'
         with self.assertRaises(MissingNamespaceRegexWarning):
-            self.parser.parseString(line)
+            self.parser.parseString(statement)
 
     def test_semantic_failure(self):
+        self.assertIsNotNone(self.parser.concept_parser.namespace_to_terms)
+        self.assertIn('TESTNS', self.parser.concept_parser.namespace_to_terms)
+        self.assertIn('1', self.parser.concept_parser.namespace_to_terms['TESTNS'])
+        self.assertIn('2', self.parser.concept_parser.namespace_to_terms['TESTNS'])
         statement = "bp(TESTNS:1) -- p(TESTNS:2)"
         with self.assertRaises(InvalidFunctionSemantic):
             self.parser.parseString(statement)

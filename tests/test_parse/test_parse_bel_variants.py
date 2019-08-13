@@ -6,18 +6,18 @@ import logging
 import unittest
 
 from pybel.constants import (
-    BEL_DEFAULT_NAMESPACE, FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP,
-    FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, IDENTIFIER, KIND, LOCATION, NAME, NAMESPACE,
+    BEL_DEFAULT_NAMESPACE, CONCEPT, FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP,
+    FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, KIND, LOCATION, NAME, NAMESPACE,
     PARTNER_3P, PARTNER_5P, PMOD, PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P,
 )
 from pybel.dsl import gmod, hgvs, pmod
 from pybel.language import Entity
+from pybel.parser import ConceptParser
 from pybel.parser.modifiers import (
     get_fragment_language, get_fusion_language, get_gene_modification_language, get_gene_substitution_language,
     get_hgvs_language, get_location_language, get_protein_modification_language, get_protein_substitution_language,
     get_truncation_language,
 )
-from pybel.parser.parse_identifier import IdentifierParser
 
 log = logging.getLogger(__name__)
 
@@ -95,7 +95,7 @@ class TestHGVSParser(unittest.TestCase):
 
 class TestPmod(unittest.TestCase):
     def setUp(self):
-        identifier_parser = IdentifierParser()
+        identifier_parser = ConceptParser()
         identifier_qualified = identifier_parser.identifier_qualified
         self.parser = get_protein_modification_language(identifier_qualified)
 
@@ -104,7 +104,7 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            IDENTIFIER: {
+            CONCEPT: {
                 NAMESPACE: BEL_DEFAULT_NAMESPACE,
                 NAME: 'Ph',
             },
@@ -132,7 +132,7 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            IDENTIFIER: {
+            CONCEPT: {
                 NAMESPACE: BEL_DEFAULT_NAMESPACE,
                 NAME: 'Ph',
             },
@@ -152,12 +152,12 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            IDENTIFIER: {
+            CONCEPT: {
                 NAMESPACE: BEL_DEFAULT_NAMESPACE,
                 NAME: 'Ph',
             },
             PMOD_CODE: 'Ser',
-            PMOD_POSITION: 473
+            PMOD_POSITION: 473,
         }
 
         self.assertEqual(expected, pmod('Ph', code='Ser', position=473))
@@ -182,9 +182,9 @@ class TestPmod(unittest.TestCase):
 
         expected = {
             KIND: PMOD,
-            IDENTIFIER: Entity('MOD', 'PhosRes'),
+            CONCEPT: Entity(namespace='MOD', name='PhosRes'),
             PMOD_CODE: 'Ser',
-            PMOD_POSITION: 473
+            PMOD_POSITION: 473,
         }
 
         self.assertEqual(expected, pmod(name='PhosRes', namespace='MOD', code='Ser', position=473))
@@ -199,7 +199,7 @@ class TestPmod(unittest.TestCase):
 
 class TestGeneModification(unittest.TestCase):
     def setUp(self):
-        identifier_parser = IdentifierParser()
+        identifier_parser = ConceptParser()
         identifier_qualified = identifier_parser.identifier_qualified
         self.parser = get_gene_modification_language(identifier_qualified)
 
@@ -208,9 +208,9 @@ class TestGeneModification(unittest.TestCase):
     def test_dsl(self):
         self.assertEqual({
             KIND: GMOD,
-            IDENTIFIER: {
+            CONCEPT: {
                 NAME: 'Me',
-                NAMESPACE: BEL_DEFAULT_NAMESPACE
+                NAMESPACE: BEL_DEFAULT_NAMESPACE,
             }
         }, self.expected)
 
@@ -267,7 +267,7 @@ class TestFragmentParser(unittest.TestCase):
     def setUp(self):
         self.parser = get_fragment_language()
 
-    def help_test_known_length(self, s):
+    def _help_test_known_length(self, s):
         result = self.parser.parseString(s)
         expected = {
             KIND: FRAGMENT,
@@ -279,14 +279,14 @@ class TestFragmentParser(unittest.TestCase):
     def test_known_length_unquoted(self):
         """test known length"""
         s = 'frag(5_20)'
-        self.help_test_known_length(s)
+        self._help_test_known_length(s)
 
     def test_known_length_quotes(self):
         """test known length"""
         s = 'frag("5_20")'
-        self.help_test_known_length(s)
+        self._help_test_known_length(s)
 
-    def help_test_unknown_length(self, s):
+    def _help_test_unknown_length(self, s):
         result = self.parser.parseString(s)
         expected = {
             KIND: FRAGMENT,
@@ -298,14 +298,14 @@ class TestFragmentParser(unittest.TestCase):
     def test_unknown_length_unquoted(self):
         """amino-terminal fragment of unknown length"""
         s = 'frag(1_?)'
-        self.help_test_unknown_length(s)
+        self._help_test_unknown_length(s)
 
     def test_unknown_length_quoted(self):
         """amino-terminal fragment of unknown length"""
         s = 'frag("1_?")'
-        self.help_test_unknown_length(s)
+        self._help_test_unknown_length(s)
 
-    def help_test_unknown_start_stop(self, s):
+    def _help_test_unknown_start_stop(self, s):
         result = self.parser.parseString(s)
         expected = {
             KIND: FRAGMENT,
@@ -317,14 +317,14 @@ class TestFragmentParser(unittest.TestCase):
     def test_unknown_start_stop_unquoted(self):
         """fragment with unknown start/stop"""
         s = 'frag(?_*)'
-        self.help_test_unknown_start_stop(s)
+        self._help_test_unknown_start_stop(s)
 
     def test_unknown_start_stop_quoted(self):
         """fragment with unknown start/stop"""
         s = 'frag("?_*")'
-        self.help_test_unknown_start_stop(s)
+        self._help_test_unknown_start_stop(s)
 
-    def help_test_descriptor(self, s):
+    def _help_test_descriptor(self, s):
         result = self.parser.parseString(s)
         expected = {
             KIND: FRAGMENT,
@@ -336,12 +336,12 @@ class TestFragmentParser(unittest.TestCase):
     def test_descriptor_unquoted(self):
         """fragment with unknown start/stop and a descriptor"""
         s = 'frag(?, "55kD")'
-        self.help_test_descriptor(s)
+        self._help_test_descriptor(s)
 
     def test_descriptor_quoted(self):
         """fragment with unknown start/stop and a descriptor"""
         s = 'frag("?", "55kD")'
-        self.help_test_descriptor(s)
+        self._help_test_descriptor(s)
 
 
 class TestTruncationParser(unittest.TestCase):
@@ -367,12 +367,12 @@ class TestTruncationParser(unittest.TestCase):
         """Test that an error is raised for a truncation in which the position is omitted."""
         statement = 'trunc(Gly)'
         with self.assertRaises(Exception):
-            result = self.parser.parseString(statement)
+            self.parser.parseString(statement)
 
 
 class TestFusionParser(unittest.TestCase):
     def setUp(self):
-        identifier_parser = IdentifierParser()
+        identifier_parser = ConceptParser()
         identifier_qualified = identifier_parser.identifier_qualified
         self.parser = get_fusion_language(identifier_qualified)
 
@@ -383,23 +383,26 @@ class TestFusionParser(unittest.TestCase):
 
         expected = {
             PARTNER_5P: {
-                NAMESPACE: 'HGNC',
-                NAME: 'TMPRSS2'
+                CONCEPT: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'TMPRSS2',
+                },
             },
             RANGE_5P: {
                 FUSION_REFERENCE: 'r',
                 FUSION_START: 1,
                 FUSION_STOP: 79
-
             },
             PARTNER_3P: {
-                NAMESPACE: 'HGNC',
-                NAME: 'ERG'
+                CONCEPT: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'ERG',
+                },
             },
             RANGE_3P: {
                 FUSION_REFERENCE: 'r',
                 FUSION_START: 312,
-                FUSION_STOP: 5034
+                FUSION_STOP: 5034,
             }
         }
 
@@ -412,16 +415,19 @@ class TestFusionParser(unittest.TestCase):
 
         expected = {
             PARTNER_5P: {
-                NAMESPACE: 'HGNC',
-                NAME: 'TMPRSS2'
+                CONCEPT: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'TMPRSS2',
+                }
             },
             RANGE_5P: {
                 FUSION_MISSING: '?'
-
             },
             PARTNER_3P: {
-                NAMESPACE: 'HGNC',
-                NAME: 'ERG'
+                CONCEPT: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'ERG',
+                },
             },
             RANGE_3P: {
                 FUSION_MISSING: '?'
@@ -437,8 +443,10 @@ class TestFusionParser(unittest.TestCase):
 
         expected = {
             PARTNER_5P: {
-                NAMESPACE: 'HGNC',
-                NAME: 'TMPRSS2'
+                CONCEPT: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'TMPRSS2',
+                },
             },
             RANGE_5P: {
                 FUSION_REFERENCE: 'r',
@@ -447,8 +455,10 @@ class TestFusionParser(unittest.TestCase):
 
             },
             PARTNER_3P: {
-                NAMESPACE: 'HGNC',
-                NAME: 'ERG'
+                CONCEPT: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'ERG',
+                },
             },
             RANGE_3P: {
                 FUSION_REFERENCE: 'r',
@@ -466,8 +476,10 @@ class TestFusionParser(unittest.TestCase):
 
         expected = {
             PARTNER_5P: {
-                NAMESPACE: 'HGNC',
-                NAME: 'TMPRSS2'
+                CONCEPT: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'TMPRSS2',
+                },
             },
             RANGE_5P: {
                 FUSION_REFERENCE: 'r',
@@ -476,8 +488,10 @@ class TestFusionParser(unittest.TestCase):
 
             },
             PARTNER_3P: {
-                NAMESPACE: 'HGNC',
-                NAME: 'ERG'
+                CONCEPT: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'ERG',
+                },
             },
             RANGE_3P: {
                 FUSION_REFERENCE: 'r',
@@ -491,7 +505,7 @@ class TestFusionParser(unittest.TestCase):
 
 class TestLocation(unittest.TestCase):
     def setUp(self):
-        identifier_parser = IdentifierParser()
+        identifier_parser = ConceptParser()
         identifier_qualified = identifier_parser.identifier_qualified
         self.parser = get_location_language(identifier_qualified)
 

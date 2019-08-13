@@ -3,11 +3,6 @@
 """Constants for PyBEL.
 
 This module maintains the strings used throughout the PyBEL codebase to promote consistency.
-
-Configuration Loading
----------------------
-By default, PyBEL loads its configuration from ``~/.config/pybel/config.json``. This json is stored in the object
-:data:`pybel.constants.config`.
 """
 
 from typing import Optional
@@ -24,9 +19,6 @@ def hbp_namespace(name: str, sha: Optional[str] = None) -> str:
     """Format a namespace URL."""
     return HBP_NAMESPACE_URL.format(sha=sha or LAST_HASH, keyword=name)
 
-
-SMALL_CORPUS_URL = OPENBEL_DOMAIN + '/belframework/20150611/knowledge/small_corpus.bel'
-LARGE_CORPUS_URL = OPENBEL_DOMAIN + '/belframework/20150611/knowledge/large_corpus.bel'
 
 FRAUNHOFER_RESOURCES = 'https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path='
 OPENBEL_NAMESPACE_RESOURCES = OPENBEL_DOMAIN + '/belframework/20150611/namespace/'
@@ -137,6 +129,8 @@ CELL_SURFACE = 'cell surface'
 # Internal node data format keys
 #: The node data key specifying the node's function (e.g. :data:`GENE`, :data:`MIRNA`, :data:`BIOPROCESS`, etc.)
 FUNCTION = 'function'
+#: The key specifying a concept
+CONCEPT = 'concept'
 #: The key specifying an identifier dictionary's namespace. Used for nodes, activities, and transformations.
 NAMESPACE = 'namespace'
 #: The key specifying an identifier dictionary's name. Used for nodes, activities, and transformations.
@@ -147,6 +141,8 @@ IDENTIFIER = 'identifier'
 LABEL = 'label'
 #: The key specifying an optional description for the node
 DESCRIPTION = 'description'
+#: The key specifying xrefs
+XREFS = 'xref'
 
 #: They key representing the nodes that are a member of a composite or complex
 MEMBERS = 'members'
@@ -190,7 +186,7 @@ PYBEL_VARIANT_KINDS = {
     HGVS,
     PMOD,
     GMOD,
-    FRAGMENT
+    FRAGMENT,
 }
 
 #: The group of all BEL-provided keys for node data dictionaries, used for hashing.

@@ -2,6 +2,8 @@
 
 """Mocks for PyBEL testing."""
 
+from typing import Iterable
+
 from ..manager.models import Network
 from ..struct import union
 
@@ -26,18 +28,14 @@ class MockQueryManager:
             for graph in graphs:
                 self.insert_graph(graph)
 
-    def count_networks(self):
-        """Count networks in the manager.
-
-        :rtype: int
-        """
+    def count_networks(self) -> int:
+        """Count networks in the manager."""
         return len(self.graphs)
 
-    def insert_graph(self, graph):
+    def insert_graph(self, graph) -> Network:
         """Insert a graph and ensure its nodes are cached.
 
         :param pybel.BELGraph graph:
-        :rtype: Network
         """
         network_id = len(self.graphs)
         self.graphs.append(graph)
@@ -48,10 +46,10 @@ class MockQueryManager:
 
         return Network(id=network_id)
 
-    def get_graph_by_ids(self, network_ids):
+    def get_graph_by_ids(self, network_ids: Iterable[int]):
         """Get a graph from the union of multiple networks.
 
-        :param iter[int] network_ids: The identifiers of networks in the database
+        :param network_ids: The identifiers of networks in the database
         :rtype: pybel.BELGraph
         """
         network_ids = list(network_ids)
@@ -66,10 +64,9 @@ class MockQueryManager:
 
         return union(graphs)
 
-    def get_dsl_by_hash(self, sha512):
+    def get_dsl_by_hash(self, sha512: str):
         """Get a DSL by its hash.
 
-        :param str sha512:
         :rtype: Optional[BaseEntity]
         """
         return self.hash_to_node.get(sha512)

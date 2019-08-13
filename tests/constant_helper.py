@@ -28,19 +28,19 @@ expected_test_thorough_metadata = {
     METADATA_COPYRIGHT: "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
     METADATA_AUTHORS: "Charles Tapley Hoyt",
     METADATA_LICENSES: "WTF License",
-    METADATA_CONTACT: "charles.hoyt@scai.fraunhofer.de"
+    METADATA_CONTACT: "charles.hoyt@scai.fraunhofer.de",
 }
 
 citation_1 = {
     CITATION_TYPE: 'PubMed',
     CITATION_NAME: 'That one article from last week',
-    CITATION_REFERENCE: '123455'
+    CITATION_REFERENCE: '123455',
 }
 
 citation_2 = {
     CITATION_TYPE: 'PubMed',
     CITATION_NAME: 'That one article from last week #2',
-    CITATION_REFERENCE: '123456'
+    CITATION_REFERENCE: '123456',
 }
 
 evidence_1 = "Evidence 1"

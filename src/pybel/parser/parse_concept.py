@@ -15,13 +15,15 @@ from .exc import (
 from .utils import quote, word
 from ..constants import DIRTY, IDENTIFIER, NAME, NAMESPACE
 
-__all__ = ['IdentifierParser']
+__all__ = [
+    'ConceptParser',
+]
 
 log = logging.getLogger(__name__)
 
 
-class IdentifierParser(BaseParser):
-    """A parser for identifiers in the form of ``namespace:name``.
+class ConceptParser(BaseParser):
+    """A parser for concepts in the form of ``namespace:name`` or ``namespace:identifier!name``.
 
     Can be made more lenient when given a default namespace or enabling the use of naked names.
     """
@@ -33,7 +35,7 @@ class IdentifierParser(BaseParser):
             default_namespace: Optional[Set[str]] = None,
             allow_naked_names: bool = False,
     ) -> None:
-        """Initialize the identifier parser.
+        """Initialize the concept parser.
 
         :param namespace_to_term: A dictionary of {namespace: {name: encoding}}
         :param namespace_to_pattern: A dictionary of {namespace: regular expression string} to compile
@@ -67,7 +69,7 @@ class IdentifierParser(BaseParser):
             self.handle_namespace_invalid
         )
 
-        super(IdentifierParser, self).__init__(
+        super().__init__(
             self.identifier_fqualified | self.identifier_qualified | self.identifier_bare
         )
 
