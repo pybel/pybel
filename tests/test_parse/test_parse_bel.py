@@ -119,9 +119,11 @@ class TestAbundanceLabeled(TestTokenParserBase):
 
         expected_result = {
             FUNCTION: ABUNDANCE,
-            NAMESPACE: 'chebi',
-            NAME: 'oxygen atom',
-            IDENTIFIER: 'CHEBI:25805',
+            CONCEPT: {
+                NAMESPACE: 'chebi',
+                NAME: 'oxygen atom',
+                IDENTIFIER: 'CHEBI:25805',
+            },
             LOCATION: {
                 NAMESPACE: 'GO',
                 NAME: 'intracellular',
