@@ -575,6 +575,7 @@ class TestRelations(TestTokenParserBase):
 
         self.assert_has_edge(cat, h2o2)
         self.assert_has_edge(h2o2, apoptosis)
+        self.assertEqual(1, len(self.parser.metagraph))
 
         self.parser.lenient = False
 
