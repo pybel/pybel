@@ -61,7 +61,7 @@ class MetadataParser(BaseParser):
 
         :param manager: A cache manager
         :param namespace_to_term_to_encoding:
-          An enumerated namespace mapping from {namespace keyword: {(identifier, name_: encoding}}
+          An enumerated namespace mapping from {namespace keyword: {(identifier, name): encoding}}
         :param namespace_to_pattern:
           A regular expression namespace mapping from {namespace keyword: regex string}
         :param annotation_to_term: Enumerated annotation mapping from {annotation keyword: set of valid values}
