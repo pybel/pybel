@@ -18,7 +18,7 @@ from ..constants import (
     ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_REFERENCE, CITATION_TYPE,
     CITATION_TYPE_PUBMED, CONCEPT, DECREASES, DESCRIPTION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO,
     EVIDENCE, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_METADATA,
-    GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION, GRAPH_UNCACHED_NAMESPACES,
+    GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION,
     HAS_COMPONENT, HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A, MEMBERS, METADATA_AUTHORS,
     METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME,
     METADATA_VERSION, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, PRODUCTS,
@@ -45,17 +45,18 @@ WarningTuple = Tuple[Optional[str], BELParserWarning, EdgeData]
 class BELGraph(nx.MultiDiGraph):
     """An extension to :class:`networkx.MultiDiGraph` to represent BEL."""
 
-    def __init__(self,
-                 name: Optional[str] = None,
-                 version: Optional[str] = None,
-                 description: Optional[str] = None,
-                 authors: Optional[str] = None,
-                 contact: Optional[str] = None,
-                 license: Optional[str] = None,
-                 copyright: Optional[str] = None,
-                 disclaimer: Optional[str] = None,
-                 path: Optional[str] = None,
-                 ) -> None:
+    def __init__(
+        self,
+        name: Optional[str] = None,
+        version: Optional[str] = None,
+        description: Optional[str] = None,
+        authors: Optional[str] = None,
+        contact: Optional[str] = None,
+        license: Optional[str] = None,
+        copyright: Optional[str] = None,
+        disclaimer: Optional[str] = None,
+        path: Optional[str] = None,
+    ) -> None:
         """Initialize a BEL graph with its associated metadata.
 
         :param name: The graph's name
@@ -77,7 +78,6 @@ class BELGraph(nx.MultiDiGraph):
 
         self.graph[GRAPH_NAMESPACE_URL] = {}
         self.graph[GRAPH_NAMESPACE_PATTERN] = {}
-        self.graph[GRAPH_UNCACHED_NAMESPACES] = set()
 
         self.graph[GRAPH_ANNOTATION_URL] = {}
         self.graph[GRAPH_ANNOTATION_PATTERN] = {}
@@ -254,14 +254,6 @@ class BELGraph(nx.MultiDiGraph):
         return set(self.namespace_pattern) | set(self.namespace_url)
 
     @property
-    def uncached_namespaces(self) -> Set[str]:  # noqa: D401
-        """The set of namespaces URLs that are present in the graph, but cannot be cached.
-
-        Namespaces are added to this set when their corresponding resources' cachable flags being set to "no."
-        """
-        return self.graph[GRAPH_UNCACHED_NAMESPACES]
-
-    @property
     def namespace_pattern(self) -> Dict[str, str]:  # noqa: D401
         """The mapping from the namespace keywords used to create this graph to their regex patterns.
 
@@ -343,21 +335,10 @@ class BELGraph(nx.MultiDiGraph):
     def __str__(self):
         return '{} v{}'.format(self.name, self.version)
 
-    def skip_storing_node(self, node: BaseEntity) -> bool:
-        """Check if the namespace should be skipped.
-
-        :param node: The node to check
-        """
-        return (
-            CONCEPT in node and
-            node[CONCEPT][NAMESPACE] in self.namespace_url and
-            self.namespace_url[node[CONCEPT][NAMESPACE]] in self.uncached_namespaces
-        )
-
     def add_warning(
-            self,
-            exception: BELParserWarning,
-            context: Optional[Mapping[str, Any]] = None,
+        self,
+        exception: BELParserWarning,
+        context: Optional[Mapping[str, Any]] = None,
     ) -> None:
         """Add a warning to the internal warning log in the graph, with optional context information.
 
@@ -445,17 +426,17 @@ class BELGraph(nx.MultiDiGraph):
     """Add a ``hasProduct`` relationship such that ``u hasProduct v``."""
 
     def add_qualified_edge(
-            self,
-            u,
-            v,
-            *,
-            relation: str,
-            evidence: str,
-            citation: Union[str, Mapping[str, str]],
-            annotations: Optional[AnnotationsHint] = None,
-            subject_modifier: Optional[Mapping] = None,
-            object_modifier: Optional[Mapping] = None,
-            **attr
+        self,
+        u,
+        v,
+        *,
+        relation: str,
+        evidence: str,
+        citation: Union[str, Mapping[str, str]],
+        annotations: Optional[AnnotationsHint] = None,
+        subject_modifier: Optional[Mapping] = None,
+        object_modifier: Optional[Mapping] = None,
+        **attr
     ) -> str:
         """Add a qualified edge.
 

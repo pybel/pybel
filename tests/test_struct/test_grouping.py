@@ -5,7 +5,7 @@
 import unittest
 
 from pybel import BELGraph
-from pybel.constants import CITATION_TYPE_PUBMED, FUNCTION, PROTEIN
+from pybel.constants import CITATION_TYPE_PUBMED
 from pybel.dsl import protein
 from pybel.struct.grouping import get_subgraphs_by_annotation, get_subgraphs_by_citation
 from pybel.testing.utils import n

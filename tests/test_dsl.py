@@ -12,7 +12,6 @@ from pybel.dsl import (
 )
 from pybel.language import Entity
 from pybel.testing.utils import n
-from pybel.utils import ensure_quotes
 
 
 class TestDSL(unittest.TestCase):

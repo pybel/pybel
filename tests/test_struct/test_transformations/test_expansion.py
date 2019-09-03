@@ -5,7 +5,6 @@
 import unittest
 
 from pybel import BELGraph
-from pybel.constants import COMPLEX, FUNCTION
 from pybel.examples.sialic_acid_example import (
     cd33, cd33_phosphorylated, shp1, shp2, sialic_acid, sialic_acid_cd33_complex, sialic_acid_graph, syk,
 )

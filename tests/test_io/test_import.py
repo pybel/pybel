@@ -263,8 +263,8 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
 
 namespace_to_term = {
     'TESTNS': {
-        "1": "GRP",
-        "2": "GRP",
+        (None, "1"): "GRP",
+        (None, "2"): "GRP",
     }
 }
 
@@ -281,7 +281,7 @@ class TestFull(TestTokenParserBase):
         cls.graph = BELGraph()
         cls.parser = BELParser(
             cls.graph,
-            namespace_to_term=namespace_to_term,
+            namespace_to_term_to_encoding=namespace_to_term,
             annotation_to_term=annotation_to_term,
             namespace_to_pattern={'dbSNP': re.compile('rs[0-9]*')}
         )
@@ -299,10 +299,10 @@ class TestFull(TestTokenParserBase):
             self.parser.parseString(statement)
 
     def test_semantic_failure(self):
-        self.assertIsNotNone(self.parser.concept_parser.namespace_to_terms)
-        self.assertIn('TESTNS', self.parser.concept_parser.namespace_to_terms)
-        self.assertIn('1', self.parser.concept_parser.namespace_to_terms['TESTNS'])
-        self.assertIn('2', self.parser.concept_parser.namespace_to_terms['TESTNS'])
+        self.assertIsNotNone(self.parser.concept_parser.namespace_to_name_to_encoding)
+        self.assertIn('TESTNS', self.parser.concept_parser.namespace_to_name_to_encoding)
+        self.assertIn('1', self.parser.concept_parser.namespace_to_name_to_encoding['TESTNS'])
+        self.assertIn('2', self.parser.concept_parser.namespace_to_name_to_encoding['TESTNS'])
         statement = "bp(TESTNS:1) -- p(TESTNS:2)"
         with self.assertRaises(InvalidFunctionSemantic):
             self.parser.parseString(statement)

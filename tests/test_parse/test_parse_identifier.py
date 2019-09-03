@@ -7,13 +7,26 @@ from pybel.parser import ConceptParser
 from pybel.parser.exc import NakedNameWarning
 
 
-class TestIdentifierParser(unittest.TestCase):
+class _ParserMixin(unittest.TestCase):
     def setUp(self):
         self.namespace_to_term = {
-            'A': dict(zip('123', 'PPP')),
-            'B': dict(zip('456', 'PPP')),
+            'A': {
+                (None, '1'): 'P',
+                (None, '2'): 'P',
+                (None, '3'): 'P',
+            },
+            'B': {
+                (None, '4'): 'P',
+                (None, '5'): 'P',
+                (None, '6'): 'P',
+            }
         }
-        self.parser = ConceptParser(namespace_to_term=self.namespace_to_term)
+
+
+class TestIdentifierParser(_ParserMixin):
+    def setUp(self):
+        super().setUp()
+        self.parser = ConceptParser(namespace_to_term_to_encoding=self.namespace_to_term)
 
     def test_valid_1(self):
         s = 'A:3'
@@ -54,15 +67,14 @@ class TestIdentifierParser(unittest.TestCase):
             self.parser.parseString(s)
 
 
-class TestNamespaceParserDefault(unittest.TestCase):
+class TestNamespaceParserDefault(_ParserMixin):
     def setUp(self):
-        namespace_to_term = {
-            'A': dict(zip('123', 'PPP')),
-            'B': dict(zip('456', 'PPP')),
-        }
-
+        super().setUp()
         default_namespace = {'X', 'Y', 'W Z'}
-        self.parser = ConceptParser(namespace_to_term=namespace_to_term, default_namespace=default_namespace)
+        self.parser = ConceptParser(
+            namespace_to_term_to_encoding=self.namespace_to_term,
+            default_namespace=default_namespace,
+        )
 
     def test_valid_1(self):
         s = 'A:3'
@@ -93,14 +105,13 @@ class TestNamespaceParserDefault(unittest.TestCase):
             self.parser.parseString(s)
 
 
-class TestNamespaceParserLenient(unittest.TestCase):
+class TestNamespaceParserLenient(_ParserMixin):
     def setUp(self):
-        namespace_to_term = {
-            'A': dict(zip('123', 'PPP')),
-            'B': dict(zip('456', 'PPP')),
-        }
-
-        self.parser = ConceptParser(namespace_to_term=namespace_to_term, allow_naked_names=True)
+        super().setUp()
+        self.parser = ConceptParser(
+            namespace_to_term_to_encoding=self.namespace_to_term,
+            allow_naked_names=True,
+        )
 
     def test_valid_1(self):
         s = 'A:3'

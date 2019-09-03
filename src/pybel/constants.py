@@ -443,7 +443,6 @@ GRAPH_ANNOTATION_PATTERN = 'annotation_pattern'
 GRAPH_ANNOTATION_LIST = 'annotation_list'
 GRAPH_WARNINGS = 'warnings'
 GRAPH_PYBEL_VERSION = 'pybel_version'
-GRAPH_UNCACHED_NAMESPACES = 'namespaces_uncached'
 GRAPH_PATH = 'path'
 
 #: The key for the document name. Can be accessed by :code:`graph.document[METADATA_NAME]` or by using the property

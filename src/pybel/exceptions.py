@@ -5,7 +5,3 @@
 
 class PyBELWarning(Exception):
     """The base class for warnings during compilation from which PyBEL can recover."""
-
-
-class PyBELCanonicalizeError(PyBELWarning, IndexError):
-    """Raised when problem canonicalizing a node."""

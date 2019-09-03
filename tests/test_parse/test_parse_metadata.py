@@ -14,7 +14,7 @@ from pybel.parser.exc import (
     InvalidMetadataException, RedefinedAnnotationError, RedefinedNamespaceError, VersionFormatWarning,
 )
 from pybel.testing.cases import FleetingTemporaryCacheMixin
-from pybel.testing.constants import test_an_1, test_ns_1, test_ns_nocache_path
+from pybel.testing.constants import test_an_1, test_ns_1
 from pybel.testing.mocks import mock_bel_resources
 from tests.constants import (
     HGNC_KEYWORD, HGNC_URL, MESH_DISEASES_KEYWORD, MESH_DISEASES_URL, help_check_hgnc,
@@ -38,25 +38,18 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
         self.assertIn(annotation, self.parser.annotation_to_local)
         self.assertTrue(self.parser.has_local_annotation(annotation))
 
-    def test_namespace_nocache(self):
-        """Checks namespace is loaded into parser but not cached"""
-        s = NAMESPACE_URL_FMT.format('TESTNS3', test_ns_nocache_path)
-        self.parser.parseString(s)
-        self.assertIn('TESTNS3', self.parser.namespace_to_term)
-        self.assertEqual(0, len(self.manager.list_namespaces()))
-
     @mock_bel_resources
     def test_namespace_name_persistience(self, mock_get):
         """Tests that a namespace defined by a URL can't be overwritten by a definition by another URL"""
         s = NAMESPACE_URL_FMT.format(HGNC_KEYWORD, HGNC_URL)
         self.parser.parseString(s)
-        help_check_hgnc(self, self.parser.namespace_to_term)
+        help_check_hgnc(self, self.parser.namespace_to_term_to_encoding)
 
         s = NAMESPACE_URL_FMT.format(HGNC_KEYWORD, 'XXXXX')
         with self.assertRaises(RedefinedNamespaceError):
             self.parser.parseString(s)
 
-        help_check_hgnc(self, self.parser.namespace_to_term)
+        help_check_hgnc(self, self.parser.namespace_to_term_to_encoding)
 
     @mock_bel_resources
     def test_annotation_name_persistience_1(self, mock_get):
@@ -104,14 +97,14 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
         self.parser.parse_lines(lines)
 
         self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotation_to_term)
-        self.assertIn(HGNC_KEYWORD, self.parser.namespace_to_term)
+        self.assertIn(HGNC_KEYWORD, self.parser.namespace_to_term_to_encoding)
         self._help_test_local_annotation(text_location)
 
     @unittest.skipUnless('PYBEL_BASE' in os.environ, "Need local files to test local files")
     def test_squiggly_filepath(self):
         line = NAMESPACE_URL_FMT.format(HGNC_KEYWORD, "~/dev/pybel/src/pybel/testing/resources/belns/hgnc-names.belns")
         self.parser.parseString(line)
-        help_check_hgnc(self, self.parser.namespace_to_term)
+        help_check_hgnc(self, self.parser.namespace_to_term_to_encoding)
 
     def test_document_metadata_exception(self):
         s = 'SET DOCUMENT InvalidKey = "nope"'
@@ -144,11 +137,12 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
             'TestValue5': {'O'}
         }
 
-        self.assertIn('TESTNS1', self.parser.namespace_to_term)
+        self.assertIn('TESTNS1', self.parser.namespace_to_term_to_encoding)
 
         for k, values in expected_values.items():
-            self.assertIn(k, self.parser.namespace_to_term['TESTNS1'])
-            self.assertEqual(set(values), set(self.parser.namespace_to_term['TESTNS1'][k]))
+            k = (None, k)
+            self.assertIn(k, self.parser.namespace_to_term_to_encoding['TESTNS1'])
+            self.assertEqual(set(values), set(self.parser.namespace_to_term_to_encoding['TESTNS1'][k]))
 
     def test_parse_annotation_url_file(self):
         """Tests parsing an annotation by file URL"""
@@ -179,7 +173,7 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
         s = 'DEFINE NAMESPACE dbSNP AS PATTERN "rs[0-9]*"'
         self.parser.parseString(s)
 
-        self.assertNotIn('dbSNP', self.parser.namespace_to_term)
+        self.assertNotIn('dbSNP', self.parser.namespace_to_term_to_encoding)
         self.assertIn('dbSNP', self.parser.namespace_to_pattern)
         self.assertEqual(re.compile('rs[0-9]*'), self.parser.namespace_to_pattern['dbSNP'])
 

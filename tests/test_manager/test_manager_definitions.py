@@ -6,7 +6,7 @@ from pathlib import Path
 from pybel import BELGraph
 from pybel.constants import ANNOTATIONS, OPENBEL_ANNOTATION_RESOURCES
 from pybel.testing.cases import TemporaryCacheClsMixin
-from pybel.testing.constants import belns_dir_path, test_ns_nocache_path
+from pybel.testing.constants import belns_dir_path
 from pybel.testing.mocks import mock_bel_resources
 from tests.constants import HGNC_URL
 
@@ -55,16 +55,6 @@ class TestDefinitionManagers(TemporaryCacheClsMixin):
         self._help_check_hgnc(self.manager)
 
         self.manager.drop_namespace_by_url(HGNC_URL)
-        self.assertEqual(0, self.manager.count_namespaces())
-        self.assertEqual(0, self.manager.count_namespace_entries())
-
-    def test_insert_namespace_nocache(self):
-        """Test that this namespace isn't cached"""
-        self.assertEqual(0, self.manager.count_namespaces())
-        self.assertEqual(0, self.manager.count_namespace_entries())
-
-        self.manager.get_or_create_namespace(test_ns_nocache_path)
-
         self.assertEqual(0, self.manager.count_namespaces())
         self.assertEqual(0, self.manager.count_namespace_entries())
 

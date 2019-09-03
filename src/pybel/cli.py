@@ -344,10 +344,7 @@ def ls(manager: Manager, url: Optional[str], namespace_id: Optional[int]):
     """List cached namespaces."""
     if url:
         n = manager.get_or_create_namespace(url)
-        if isinstance(n, Namespace):
-            _page(n.entries)
-        else:
-            click.echo('uncachable namespace')
+        _page(n.entries)
     elif namespace_id is not None:
         _ls(manager, Namespace, namespace_id)
     else:

@@ -6,7 +6,7 @@ import datetime
 import hashlib
 import json
 from collections import defaultdict
-from typing import Iterable, Mapping
+from typing import Iterable, Mapping, Optional, Tuple
 
 from sqlalchemy import (
     Boolean, Column, Date, DateTime, ForeignKey, Integer, LargeBinary, String, Table, Text, UniqueConstraint,
@@ -123,6 +123,13 @@ class Namespace(Base):
 
     def __str__(self):
         return self.keyword
+
+    def get_term_to_encodings(self) -> Mapping[Tuple[Optional[str], str], str]:
+        """Return the term (db, id, name) to encodings from this namespace."""
+        return {
+            (entry.identifier, entry.name): entry.encoding
+            for entry in self.entries
+        }
 
     def to_json(self, include_id: bool = False) -> Mapping[str, str]:
         """Return the most useful entries as a dictionary.

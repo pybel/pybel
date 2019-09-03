@@ -3,8 +3,9 @@
 """Test the manager's citation utilities."""
 
 import os
-import unittest
 import time
+import unittest
+
 from pybel import BELGraph
 from pybel.constants import (
     CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_TYPE_PUBMED,

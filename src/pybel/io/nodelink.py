@@ -9,7 +9,7 @@ from operator import methodcaller
 from typing import Any, Mapping, TextIO
 
 from .utils import ensure_version
-from ..constants import GRAPH_ANNOTATION_LIST, GRAPH_UNCACHED_NAMESPACES, MEMBERS, PRODUCTS, REACTANTS
+from ..constants import GRAPH_ANNOTATION_LIST, MEMBERS, PRODUCTS, REACTANTS
 from ..dsl import BaseEntity
 from ..struct import BELGraph
 from ..tokens import parse_result_to_dsl
@@ -35,11 +35,6 @@ def to_json(graph: BELGraph) -> Mapping[str, Any]:
         keyword: list(sorted(values))
         for keyword, values in graph_json_dict['graph'].get(GRAPH_ANNOTATION_LIST, {}).items()
     }
-
-    # Convert set to list
-    graph_json_dict['graph'][GRAPH_UNCACHED_NAMESPACES] = list(
-        graph_json_dict['graph'].get(GRAPH_UNCACHED_NAMESPACES, [])
-    )
 
     return graph_json_dict
 

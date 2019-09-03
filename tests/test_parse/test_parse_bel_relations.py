@@ -5,12 +5,14 @@
 import logging
 import unittest
 
+from pyparsing import ParseException
+
 from pybel import BELGraph
 from pybel.canonicalize import edge_to_bel
 from pybel.constants import (
     ABUNDANCE, ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE, CITATION, COMPLEX, COMPOSITE,
     CONCEPT, DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE, FROM_LOC, FUNCTION,
-    GENE, GMOD, HAS_COMPONENT, HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, IDENTIFIER, INCREASES, IS_A,
+    GENE, GMOD, HAS_COMPONENT, HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, INCREASES, IS_A,
     KIND, LOCATION, MEMBERS, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, PATHOLOGY,
     POSITIVE_CORRELATION, PRODUCTS, PROTEIN, RATE_LIMITING_STEP_OF, REACTANTS, REACTION, REGULATES, RELATION, RNA,
     SUBJECT, SUBPROCESS_OF, TARGET, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, VARIANTS,
@@ -25,7 +27,6 @@ from pybel.parser import BELParser
 from pybel.parser.exc import (
     MissingNamespaceNameWarning, NestedRelationWarning, RelabelWarning, UndefinedNamespaceWarning,
 )
-from pyparsing import ParseException
 from tests.constants import TestTokenParserBase, test_citation_dict, test_evidence_text
 
 log = logging.getLogger(__name__)
@@ -176,8 +177,8 @@ class TestRelations(TestTokenParserBase):
         """Test translocation in object. See BEL 2.0 specification
         `3.1.2 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdIncreases>`_
         """
-        statement = 'a(ADO:"Abeta_42") => tloc(a(CHEBI:"calcium(2+)"),fromLoc(MESHCS:"Cell Membrane"),' \
-                    'toLoc(MESHCS:"Intracellular Space"))'
+        statement = 'a(ADO:"Abeta_42") => tloc(a(CHEBI:"calcium(2+)"),fromLoc(MESH:"Cell Membrane"),' \
+                    'toLoc(MESH:"Intracellular Space"))'
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
@@ -199,8 +200,8 @@ class TestRelations(TestTokenParserBase):
                 },
                 MODIFIER: TRANSLOCATION,
                 EFFECT: {
-                    FROM_LOC: {NAMESPACE: 'MESHCS', NAME: 'Cell Membrane'},
-                    TO_LOC: {NAMESPACE: 'MESHCS', NAME: 'Intracellular Space'}
+                    FROM_LOC: {NAMESPACE: 'MESH', NAME: 'Cell Membrane'},
+                    TO_LOC: {NAMESPACE: 'MESH', NAME: 'Intracellular Space'}
                 }
             }
         }
@@ -217,8 +218,8 @@ class TestRelations(TestTokenParserBase):
             OBJECT: {
                 MODIFIER: TRANSLOCATION,
                 EFFECT: {
-                    FROM_LOC: {NAMESPACE: 'MESHCS', NAME: 'Cell Membrane'},
-                    TO_LOC: {NAMESPACE: 'MESHCS', NAME: 'Intracellular Space'}
+                    FROM_LOC: {NAMESPACE: 'MESH', NAME: 'Cell Membrane'},
+                    TO_LOC: {NAMESPACE: 'MESH', NAME: 'Intracellular Space'}
                 }
             }
         }
@@ -1050,24 +1051,24 @@ class TestCustom(unittest.TestCase):
 
         namespace_to_term = {
             'HGNC': {
-                'AKT1': 'GRP',
-                'YFG': 'GRP'
+                (None, 'AKT1'): 'GRP',
+                (None, 'YFG'): 'GRP'
             },
-            'MESHCS': {
-                'nucleus': 'A'
+            'MESH': {
+                (None, 'nucleus'): 'A'
             }
         }
 
-        self.parser = BELParser(graph, namespace_to_term=namespace_to_term, autostreamline=False)
+        self.parser = BELParser(graph, namespace_to_term_to_encoding=namespace_to_term, autostreamline=False)
 
     def test_tloc_undefined_namespace(self):
-        s = 'tloc(p(HGNC:AKT1), fromLoc(MESHCS:nucleus), toLoc(MISSING:"undefined"))'
+        s = 'tloc(p(HGNC:AKT1), fromLoc(MESH:nucleus), toLoc(MISSING:"undefined"))'
 
         with self.assertRaises(UndefinedNamespaceWarning):
             self.parser.translocation.parseString(s)
 
     def test_tloc_undefined_name(self):
-        s = 'tloc(p(HGNC:AKT1), fromLoc(MESHCS:nucleus), toLoc(MESHCS:"undefined"))'
+        s = 'tloc(p(HGNC:AKT1), fromLoc(MESH:nucleus), toLoc(MESH:"undefined"))'
 
         with self.assertRaises(MissingNamespaceNameWarning):
             self.parser.translocation.parseString(s)
@@ -1079,7 +1080,7 @@ class TestCustom(unittest.TestCase):
             self.parser.protein.parseString(s)
 
     def test_location_undefined_name(self):
-        s = 'p(HGNC:AKT1, loc(MESHCS:"undefined")'
+        s = 'p(HGNC:AKT1, loc(MESH:"undefined")'
 
         with self.assertRaises(MissingNamespaceNameWarning):
             self.parser.protein.parseString(s)

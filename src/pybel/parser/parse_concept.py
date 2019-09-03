@@ -3,11 +3,13 @@
 """A module holding the :class:`IdentifierParser`."""
 
 import logging
+from collections import defaultdict
 from typing import Mapping, Optional, Pattern, Set
 
 from pyparsing import ParseResults, Suppress
 
 from .baseparser import BaseParser
+from .constants import NamespaceTermEncodingMapping
 from .exc import (
     MissingDefaultNameWarning, MissingNamespaceNameWarning, MissingNamespaceRegexWarning, NakedNameWarning,
     UndefinedNamespaceWarning,
@@ -29,24 +31,19 @@ class ConceptParser(BaseParser):
     """
 
     def __init__(
-            self,
-            namespace_to_term: Optional[Mapping[str, Mapping[str, str]]] = None,
-            namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
-            default_namespace: Optional[Set[str]] = None,
-            allow_naked_names: bool = False,
+        self,
+        namespace_to_term_to_encoding: Optional[NamespaceTermEncodingMapping] = None,
+        namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
+        default_namespace: Optional[Set[str]] = None,
+        allow_naked_names: bool = False,
     ) -> None:
         """Initialize the concept parser.
 
-        :param namespace_to_term: A dictionary of {namespace: {name: encoding}}
+        :param namespace_to_term_to_encoding: A dictionary of {namespace: {(identifier, name): encoding}}
         :param namespace_to_pattern: A dictionary of {namespace: regular expression string} to compile
         :param default_namespace: A set of strings that can be used without a namespace
         :param allow_naked_names: If true, turn off naked namespace failures
         """
-        self.namespace_to_terms = namespace_to_term or {}
-        self.namespace_to_pattern = namespace_to_pattern or {}
-        self.default_namespace = set(default_namespace) if default_namespace is not None else None
-        self.allow_naked_names = allow_naked_names
-
         self.identifier_fqualified = (
             word(NAMESPACE) +
             Suppress(':') +
@@ -54,15 +51,30 @@ class ConceptParser(BaseParser):
             Suppress('!') +
             (word | quote)(NAME)
         )
-
         self.identifier_qualified = word(NAMESPACE) + Suppress(':') + (word | quote)(NAME)
 
-        if self.namespace_to_terms:
+        if namespace_to_term_to_encoding is not None:
+            self.namespace_to_name_to_encoding = defaultdict(dict)
+            self.namespace_to_identifier_to_encoding = defaultdict(dict)
+            for namespace, term_mapping in namespace_to_term_to_encoding.items():
+                for (identifier, name), encoding in term_mapping.items():
+                    self.namespace_to_name_to_encoding[namespace][name] = encoding
+                    self.namespace_to_identifier_to_encoding[namespace][identifier] = encoding
+
+            self.namespace_to_name_to_encoding = dict(self.namespace_to_name_to_encoding)
+            self.namespace_to_identifier_to_encoding = dict(self.namespace_to_identifier_to_encoding)
+
             self.identifier_fqualified.setParseAction(self.handle_identifier_qualified)
             self.identifier_qualified.setParseAction(self.handle_identifier_qualified)
+        else:
+            self.namespace_to_name_to_encoding = {}
+            self.namespace_to_identifier_to_encoding = {}
+
+        self.namespace_to_pattern = namespace_to_pattern or {}
+        self.default_namespace = set(default_namespace) if default_namespace is not None else None
+        self.allow_naked_names = allow_naked_names
 
         self.identifier_bare = (word | quote)(NAME)
-
         self.identifier_bare.setParseAction(
             self.handle_namespace_default if self.default_namespace else
             self.handle_namespace_lenient if self.allow_naked_names else
@@ -75,7 +87,7 @@ class ConceptParser(BaseParser):
 
     def has_enumerated_namespace(self, namespace: str) -> bool:
         """Check that the namespace has been defined by an enumeration."""
-        return namespace in self.namespace_to_terms
+        return namespace in self.namespace_to_name_to_encoding
 
     def has_regex_namespace(self, namespace: str) -> bool:
         """Check that the namespace has been defined by a regular expression."""
@@ -87,7 +99,7 @@ class ConceptParser(BaseParser):
 
     def has_enumerated_namespace_name(self, namespace: str, name: str) -> bool:
         """Check that the namespace is defined by an enumeration and that the name is a member."""
-        return self.has_enumerated_namespace(namespace) and name in self.namespace_to_terms[namespace]
+        return self.has_enumerated_namespace(namespace) and name in self.namespace_to_name_to_encoding[namespace]
 
     def has_regex_namespace_name(self, namespace: str, name: str) -> bool:
         """Check that the namespace is defined as a regular expression and the name matches it."""

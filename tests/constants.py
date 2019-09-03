@@ -184,14 +184,17 @@ def help_check_hgnc(test_case: unittest.TestCase, namespace_dict) -> None:
     """Assert that the namespace dictionary is correct."""
     test_case.assertIn(HGNC_KEYWORD, namespace_dict)
 
-    test_case.assertIn('MHS2', namespace_dict[HGNC_KEYWORD])
-    test_case.assertEqual(set('G'), set(namespace_dict[HGNC_KEYWORD]['MHS2']))
+    MHS2 = None, 'MHS2'
+    test_case.assertIn(MHS2, namespace_dict[HGNC_KEYWORD])
+    test_case.assertEqual(set('G'), set(namespace_dict[HGNC_KEYWORD][MHS2]))
 
-    test_case.assertIn('MIATNB', namespace_dict[HGNC_KEYWORD])
-    test_case.assertEqual(set('GR'), set(namespace_dict[HGNC_KEYWORD]['MIATNB']))
+    MIATNB = None, 'MIATNB'
+    test_case.assertIn(MIATNB, namespace_dict[HGNC_KEYWORD])
+    test_case.assertEqual(set('GR'), set(namespace_dict[HGNC_KEYWORD][MIATNB]))
 
-    test_case.assertIn('MIA', namespace_dict[HGNC_KEYWORD])
-    test_case.assertEqual(set('GRP'), set(namespace_dict[HGNC_KEYWORD]['MIA']))
+    MIA = None, 'MIA'
+    test_case.assertIn(MIA, namespace_dict[HGNC_KEYWORD])
+    test_case.assertEqual(set('GRP'), set(namespace_dict[HGNC_KEYWORD][MIA]))
 
 
 class BelReconstitutionMixin(TestGraphMixin):

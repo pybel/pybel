@@ -15,6 +15,7 @@ from pyparsing import (
 )
 
 from .baseparser import BaseParser
+from .constants import NamespaceTermEncodingMapping
 from .exc import (
     InvalidEntity, InvalidFunctionSemantic, MalformedTranslocationWarning, MissingAnnotationWarning,
     MissingCitationException, MissingSupportWarning, NestedRelationWarning, RelabelWarning,
@@ -223,25 +224,25 @@ class BELParser(BaseParser):
     """Build a parser backed by a given dictionary of namespaces."""
 
     def __init__(
-            self,
-            graph,
-            namespace_to_term: Optional[Mapping[str, Mapping[str, str]]] = None,
-            namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
-            annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
-            annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
-            annotation_to_local: Optional[Mapping[str, Set[str]]] = None,
-            allow_naked_names: bool = False,
-            allow_nested: bool = False,
-            disallow_unqualified_translocations: bool = False,
-            citation_clearing: bool = True,
-            skip_validation: bool = False,
-            autostreamline: bool = True,
-            required_annotations: Optional[List[str]] = None,
+        self,
+        graph,
+        namespace_to_term_to_encoding: Optional[NamespaceTermEncodingMapping] = None,
+        namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
+        annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
+        annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
+        annotation_to_local: Optional[Mapping[str, Set[str]]] = None,
+        allow_naked_names: bool = False,
+        allow_nested: bool = False,
+        disallow_unqualified_translocations: bool = False,
+        citation_clearing: bool = True,
+        skip_validation: bool = False,
+        autostreamline: bool = True,
+        required_annotations: Optional[List[str]] = None,
     ) -> None:
         """Build a BEL parser.
 
         :param pybel.BELGraph graph: The BEL Graph to use to store the network
-        :param namespace_to_term: A dictionary of {namespace: {name: encoding}}. Delegated to
+        :param namespace_to_term_to_encoding: A dictionary of {namespace: {name: encoding}}. Delegated to
          :class:`pybel.parser.parse_identifier.IdentifierParser`
         :param namespace_to_pattern: A dictionary of {namespace: regular expression strings}. Delegated to
          :class:`pybel.parser.parse_identifier.IdentifierParser`
@@ -287,7 +288,7 @@ class BELParser(BaseParser):
 
             self.concept_parser = ConceptParser(
                 allow_naked_names=allow_naked_names,
-                namespace_to_term=namespace_to_term,
+                namespace_to_term_to_encoding=namespace_to_term_to_encoding,
                 namespace_to_pattern=namespace_to_pattern,
             )
 
@@ -612,7 +613,7 @@ class BELParser(BaseParser):
     @property
     def _namespace_dict(self) -> Mapping[str, Mapping[str, str]]:
         """Get the dictionary of {namespace: {name: encoding}} stored in the internal identifier parser."""
-        return self.concept_parser.namespace_to_terms
+        return self.concept_parser.namespace_to_name_to_encoding
 
     @property
     def _allow_naked_names(self) -> bool:
@@ -670,8 +671,8 @@ class BELParser(BaseParser):
             return tokens
 
         valid_functions = set(itt.chain.from_iterable(
-            belns_encodings.get(k, set())
-            for k in self._namespace_dict[namespace][name]
+            belns_encodings.get(encoding, set())
+            for encoding in self._namespace_dict[namespace][name]
         ))
 
         if not valid_functions:

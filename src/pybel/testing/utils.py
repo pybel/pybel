@@ -7,7 +7,9 @@ from uuid import uuid4
 from requests.compat import urlparse
 
 from ..constants import BEL_DEFAULT_NAMESPACE, FRAUNHOFER_RESOURCES
+from ..manager import Manager
 from ..manager.models import Namespace, NamespaceEntry
+from ..struct import BELGraph
 from ..struct.summary import get_annotation_values_by_annotation
 from ..struct.summary.node_summary import get_names
 
@@ -28,17 +30,10 @@ def n() -> str:
     return str(uuid4())[:15]
 
 
-def make_dummy_namespaces(manager, graph):
-    """Make dummy namespaces for the test.
-
-    :type manager: pybel.manager.Manager
-    :type graph: pybel.BELGraph
-    """
+def make_dummy_namespaces(manager: Manager, graph: BELGraph) -> None:
+    """Make dummy namespaces for the test."""
     for keyword, names in get_names(graph).items():
         if keyword == BEL_DEFAULT_NAMESPACE:
-            continue
-
-        if keyword in graph.namespace_url and graph.namespace_url[keyword] in graph.uncached_namespaces:
             continue
 
         graph.namespace_url[keyword] = url = n()
@@ -53,12 +48,8 @@ def make_dummy_namespaces(manager, graph):
     manager.session.commit()
 
 
-def make_dummy_annotations(manager, graph):
-    """Make dummy annotations for the test.
-
-    :param pybel.manager.Manager manager:
-    :param pybel.BELGraph graph:
-    """
+def make_dummy_annotations(manager: Manager, graph: BELGraph):
+    """Make dummy annotations for the test."""
     annotation_names = get_annotation_values_by_annotation(graph)
 
     for keyword, names in annotation_names.items():

@@ -13,6 +13,7 @@ from copy import deepcopy
 from itertools import chain
 from typing import Dict, Iterable, List, Mapping, Optional, Set, Tuple, Union
 
+import requests
 import sqlalchemy
 from sqlalchemy import and_, exists, func
 from sqlalchemy.orm import aliased
@@ -180,7 +181,7 @@ class NamespaceManager(BaseManager):
 
         return namespace
 
-    def get_or_create_namespace(self, url: str) -> Union[Namespace, Dict]:
+    def get_or_create_namespace(self, url: str) -> Namespace:
         """Insert the namespace file at the given location to the cache.
 
         If not cachable, returns the dict of the values of this namespace.
@@ -200,19 +201,27 @@ class NamespaceManager(BaseManager):
 
         values = bel_resource['Values']
 
-        if not_resource_cachable(bel_resource):
-            log.debug('not caching namespace: %s (%d terms in %.2f seconds)', url, len(values), time.time() - t)
-            log.debug('loaded uncached namespace: %s (%d)', url, len(values))
-            return values
-
         namespace_insert_values = _get_namespace_insert_values(bel_resource)
+
+        name_to_id = {}
+        if url.endswith('-names.belns'):
+            mapping_url = url[:-len('-names.belns')] + '.belns.mapping'
+            try:
+                res = requests.get(mapping_url)
+                res.raise_for_status()
+            except requests.exceptions.HTTPError:
+                log.warning('No mappings found for %s', url)
+            else:
+                mappings = res.json()
+                log.debug('got %d mappings', len(mappings))
+                name_to_id.update({v: k for k, v in res.json().items()})
 
         namespace = Namespace(
             url=url,
             **namespace_insert_values
         )
         namespace.entries = [
-            NamespaceEntry(name=name, encoding=encoding)
+            NamespaceEntry(name=name, encoding=encoding, identifier=name_to_id.get(name))
             for name, encoding in values.items()
         ]
 
@@ -577,10 +586,8 @@ class InsertManager(NamespaceManager, LookupManager):
         namespace_urls = graph.namespace_url.values()
         if use_tqdm:
             namespace_urls = tqdm(namespace_urls, desc='namespaces')
-
         for namespace_url in namespace_urls:
-            if namespace_url not in graph.uncached_namespaces:
-                self.get_or_create_namespace(namespace_url)
+            self.get_or_create_namespace(namespace_url)
 
         for keyword, pattern in graph.namespace_pattern.items():
             self.ensure_regex_namespace(keyword, pattern)
@@ -588,7 +595,6 @@ class InsertManager(NamespaceManager, LookupManager):
         annotation_urls = graph.annotation_url.values()
         if use_tqdm:
             annotation_urls = tqdm(annotation_urls, desc='annotations')
-
         for annotation_url in annotation_urls:
             self.get_or_create_annotation(annotation_url)
 
@@ -626,9 +632,6 @@ class InsertManager(NamespaceManager, LookupManager):
 
         node_model = {}
         for node in nodes:
-            if graph.skip_storing_node(node):
-                continue  # already know this node won't be cached
-
             node_object = self.get_or_create_node(graph, node)
 
             if node_object is None:
@@ -667,12 +670,12 @@ class InsertManager(NamespaceManager, LookupManager):
         for u, v, key, data in edges:
             source = tuple_model.get(u)
             if source is None or source.sha512 not in self.object_cache_node:
-                log.debug('skipping uncached source node: %s', u)
+                log.warning('skipping uncached source node: %s', u)
                 continue
 
             target = tuple_model.get(v)
             if target is None or target.sha512 not in self.object_cache_node:
-                log.debug('skipping uncached target node: %s', v)
+                log.warning('skipping uncached target node: %s', v)
                 continue
 
             relation = data[RELATION]
@@ -1065,11 +1068,6 @@ class InsertManager(NamespaceManager, LookupManager):
 
             partner_3p_concept = node[PARTNER_3P][CONCEPT]
             p3_namespace_url = graph.namespace_url[partner_3p_concept[NAMESPACE]]
-
-            if p3_namespace_url in graph.uncached_namespaces:
-                log.warning('uncached namespace %s in fusion()', p3_namespace_url)
-                return
-
             p3_name = partner_3p_concept[NAME]
             p3_namespace_entry = self.get_namespace_entry(p3_namespace_url, p3_name)
 
@@ -1079,11 +1077,6 @@ class InsertManager(NamespaceManager, LookupManager):
 
             partner_5p_concept = node[PARTNER_5P][CONCEPT]
             p5_namespace_url = graph.namespace_url[partner_5p_concept[NAMESPACE]]
-
-            if p5_namespace_url in graph.uncached_namespaces:
-                log.warning('uncached namespace %s in fusion()', p5_namespace_url)
-                return
-
             p5_name = partner_5p_concept[NAME]
             p5_namespace_entry = self.get_namespace_entry(p5_namespace_url, p5_name)
 
@@ -1139,11 +1132,6 @@ class InsertManager(NamespaceManager, LookupManager):
                 elif mod_type in {GMOD, PMOD}:
                     variant_identifier = variant[CONCEPT]
                     namespace_url = _normalize_url(graph, variant_identifier[NAMESPACE])
-
-                    if namespace_url in graph.uncached_namespaces:
-                        log.warning('uncached namespace %s in fusion()', namespace_url)
-                        return
-
                     mod_entry = self.get_namespace_entry(
                         namespace_url,
                         variant_identifier[NAME],
@@ -1222,12 +1210,6 @@ class InsertManager(NamespaceManager, LookupManager):
                 location_namespace = location[NAMESPACE]
 
                 namespace_url = graph.namespace_url[location_namespace]
-
-                if namespace_url in graph.uncached_namespaces:
-                    log.warning('uncached namespace %s in loc() on line %s', location_namespace,
-                                edge_data.get(LINE))
-                    return
-
                 participant_name = location[NAME]
                 location_property_dict['effect'] = self.get_namespace_entry(namespace_url, participant_name)
                 if location_property_dict['effect'] is None:
@@ -1261,11 +1243,6 @@ class InsertManager(NamespaceManager, LookupManager):
                                 log.warning('namespace not enumerated in modifier %s', effect_namespace)
                                 return
 
-                            if namespace_url in graph.uncached_namespaces:
-                                log.warning('uncached namespace %s in tloc() on line %s ', effect_namespace,
-                                            edge_data.get(LINE))
-                                return
-
                             effect_name = effect_value[NAME]
                             tmp_dict['effect'] = self.get_namespace_entry(namespace_url, effect_name)
 
@@ -1279,11 +1256,6 @@ class InsertManager(NamespaceManager, LookupManager):
                     effect = participant_data.get(EFFECT)
                     if effect is not None:
                         namespace_url = _normalize_url(graph, effect[NAMESPACE])
-
-                        if namespace_url in graph.uncached_namespaces:
-                            log.warning('uncached namespace %s in fusion()', namespace_url)
-                            return
-
                         modifier_property_dict['effect'] = self.get_namespace_entry(namespace_url, effect[NAME])
 
                     property_list.append(modifier_property_dict)

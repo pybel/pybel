@@ -102,7 +102,7 @@ def parse_lines(
     bel_parser = BELParser(
         graph=graph,
         # terminologies
-        namespace_to_term=metadata_parser.namespace_to_term,
+        namespace_to_term_to_encoding=metadata_parser.namespace_to_term_to_encoding,
         namespace_to_pattern=metadata_parser.namespace_to_pattern,
         annotation_to_term=metadata_parser.annotation_to_term,
         annotation_to_pattern=metadata_parser.annotation_to_pattern,
@@ -218,7 +218,6 @@ def parse_definitions(
         for keyword, pattern in metadata_parser.annotation_to_pattern.items()
     })
     graph.annotation_list.update(metadata_parser.annotation_to_local)
-    graph.uncached_namespaces.update(metadata_parser.uncachable_namespaces)
 
     log.info('Finished parsing definitions section in %.02f seconds', time.time() - parse_definitions_start_time)
 

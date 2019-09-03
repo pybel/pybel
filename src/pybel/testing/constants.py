@@ -9,8 +9,6 @@ __all__ = [
     # BELNS
     'test_ns_1',
     'test_ns_2',
-    'test_ns_nocache',
-    'test_ns_nocache_path',
     'test_ns_empty',
     # BELANNO
     'test_an_1',
@@ -35,8 +33,6 @@ belns_dir_path = os.path.join(resources_dir, 'belns')
 
 test_ns_1 = os.path.join(belns_dir_path, 'test_ns_1.belns')
 test_ns_2 = os.path.join(belns_dir_path, 'test_ns_1_updated.belns')
-test_ns_nocache = os.path.join(belns_dir_path, 'test_nocache.belns')
-test_ns_nocache_path = Path(test_ns_nocache).as_uri()
 test_ns_empty = os.path.join(belns_dir_path, 'test_ns_empty.belns')
 
 # BELANNO Files

@@ -9,6 +9,7 @@ from typing import Mapping, Optional, Pattern, Set
 from pyparsing import And, MatchFirst, ParseResults, Suppress, Word, pyparsing_common as ppc
 
 from .baseparser import BaseParser
+from .constants import NamespaceTermEncodingMapping
 from .exc import InvalidMetadataException, RedefinedAnnotationError, RedefinedNamespaceError, VersionFormatWarning
 from .utils import delimited_quoted_list, qid, quote, word
 from ..constants import (
@@ -47,7 +48,7 @@ class MetadataParser(BaseParser):
     def __init__(
             self,
             manager,
-            namespace_to_term: Optional[Mapping[str, Mapping[str, str]]] = None,
+            namespace_to_term_to_encoding: Optional[NamespaceTermEncodingMapping] = None,
             namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
             annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
             annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
@@ -59,8 +60,10 @@ class MetadataParser(BaseParser):
         """Build a metadata parser.
 
         :param manager: A cache manager
-        :param namespace_to_term: Enumerated namespace mapping from {namespace keyword: {name: encoding}}
-        :param namespace_to_pattern: Regular expression namespace mapping from {namespace keyword: regex string}
+        :param namespace_to_term_to_encoding:
+          An enumerated namespace mapping from {namespace keyword: {(identifier, name_: encoding}}
+        :param namespace_to_pattern:
+          A regular expression namespace mapping from {namespace keyword: regex string}
         :param annotation_to_term: Enumerated annotation mapping from {annotation keyword: set of valid values}
         :param annotation_to_pattern: Regular expression annotation mapping from {annotation keyword: regex string}
         :param default_namespace: A set of strings that can be used without a namespace
@@ -71,8 +74,8 @@ class MetadataParser(BaseParser):
         self.disallow_redefinition = not allow_redefinition
         self.skip_validation = skip_validation
 
-        #: A dictionary of cached {namespace keyword: {name: encoding}}
-        self.namespace_to_term = namespace_to_term or {}
+        #: A dictionary of cached {namespace keyword: {(identifier, name): encoding}}
+        self.namespace_to_term_to_encoding = namespace_to_term_to_encoding or {}
         #: A set of namespaces's URLs that can't be cached
         self.uncachable_namespaces = set()
         #: A dictionary of {namespace keyword: regular expression string}
@@ -169,22 +172,17 @@ class MetadataParser(BaseParser):
         :raises: RedefinedNamespaceError
         :raises: pybel.resources.exc.ResourceError
         """
-        namespace = tokens['name']
-        self.raise_for_redefined_namespace(line, position, namespace)
+        namespace_keyword = tokens['name']
+        self.raise_for_redefined_namespace(line, position, namespace_keyword)
 
         url = tokens['url']
-        self.namespace_url_dict[namespace] = url
+        self.namespace_url_dict[namespace_keyword] = url
 
         if self.skip_validation:
             return tokens
 
-        namespace_result = self.manager.get_or_create_namespace(url)
-
-        if isinstance(namespace_result, dict):
-            self.namespace_to_term[namespace] = namespace_result
-            self.uncachable_namespaces.add(url)
-        else:
-            self.namespace_to_term[namespace] = self.manager.get_namespace_encoding(url)
+        namespace = self.manager.get_or_create_namespace(url)
+        self.namespace_to_term_to_encoding[namespace_keyword] = namespace.get_term_to_encodings()
 
         return tokens
 
@@ -266,7 +264,7 @@ class MetadataParser(BaseParser):
 
     def has_enumerated_namespace(self, namespace: str) -> bool:
         """Check if this namespace is defined by an enumeration."""
-        return namespace in self.namespace_to_term
+        return namespace in self.namespace_to_term_to_encoding
 
     def has_regex_namespace(self, namespace: str) -> bool:
         """Check if this namespace is defined by a regular expression."""
