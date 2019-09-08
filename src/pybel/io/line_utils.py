@@ -34,19 +34,19 @@ LOG_FMT_PATH = '%s:%d:%d %s %s'
 
 
 def parse_lines(
-        graph: BELGraph,
-        lines: Iterable[str],
-        manager: Optional[Manager] = None,
-        allow_nested: bool = False,
-        citation_clearing: bool = True,
-        use_tqdm: bool = False,
-        tqdm_kwargs: Optional[Mapping[str, Any]] = None,
-        no_identifier_validation: bool = False,
-        disallow_unqualified_translocations: bool = False,
-        allow_redefinition: bool = False,
-        allow_definition_failures: bool = False,
-        allow_naked_names: bool = False,
-        required_annotations: Optional[List[str]] = None,
+    graph: BELGraph,
+    lines: Iterable[str],
+    manager: Optional[Manager] = None,
+    allow_nested: bool = False,
+    citation_clearing: bool = True,
+    use_tqdm: bool = False,
+    tqdm_kwargs: Optional[Mapping[str, Any]] = None,
+    no_identifier_validation: bool = False,
+    disallow_unqualified_translocations: bool = False,
+    allow_redefinition: bool = False,
+    allow_definition_failures: bool = False,
+    allow_naked_names: bool = False,
+    required_annotations: Optional[List[str]] = None,
 ) -> None:
     """Parse an iterable of lines into this graph.
 
@@ -128,9 +128,9 @@ def parse_lines(
 
 
 def parse_document(
-        graph: BELGraph,
-        enumerated_lines: Iterable[Tuple[int, str]],
-        metadata_parser: MetadataParser,
+    graph: BELGraph,
+    enumerated_lines: Iterable[Tuple[int, str]],
+    metadata_parser: MetadataParser,
 ) -> None:
     """Parse the lines in the document section of a BEL script."""
     parse_document_start_time = time.time()
@@ -163,12 +163,12 @@ def parse_document(
 
 
 def parse_definitions(
-        graph: BELGraph,
-        enumerated_lines: Iterable[Tuple[int, str]],
-        metadata_parser: MetadataParser,
-        allow_failures: bool = False,
-        use_tqdm: bool = False,
-        tqdm_kwargs: Optional[Mapping[str, Any]] = None,
+    graph: BELGraph,
+    enumerated_lines: Iterable[Tuple[int, str]],
+    metadata_parser: MetadataParser,
+    allow_failures: bool = False,
+    use_tqdm: bool = False,
+    tqdm_kwargs: Optional[Mapping[str, Any]] = None,
 ) -> None:
     """Parse the lines in the definitions section of a BEL script.
 
@@ -197,8 +197,9 @@ def parse_definitions(
             parser_logger.exception(LOG_FMT, line_number, 0, e.__class__.__name__, line)
             raise e
         except OperationalError as e:
-            parser_logger.warning('Need to upgrade database. See '
-                              'http://pybel.readthedocs.io/en/latest/installation.html#upgrading')
+            parser_logger.warning(
+                'Need to upgrade database. See http://pybel.readthedocs.io/en/latest/installation.html#upgrading',
+            )
             raise e
         except Exception as e:
             if not allow_failures:
@@ -223,11 +224,11 @@ def parse_definitions(
 
 
 def parse_statements(
-        graph: BELGraph,
-        enumerated_lines: Iterable[Tuple[int, str]],
-        bel_parser: BELParser,
-        use_tqdm: bool = False,
-        tqdm_kwargs: Optional[Mapping[str, Any]] = None,
+    graph: BELGraph,
+    enumerated_lines: Iterable[Tuple[int, str]],
+    bel_parser: BELParser,
+    use_tqdm: bool = False,
+    tqdm_kwargs: Optional[Mapping[str, Any]] = None,
 ) -> None:
     """Parse a list of statements from a BEL Script.
 
@@ -263,8 +264,11 @@ def parse_statements(
             parser_logger.exception(LOG_FMT, line_number, 0, 'General Failure', line)
             raise
 
-    logger.info('Parsed statements section in %.02f seconds with %d warnings', time.time() - parse_statements_start_time,
-                len(graph.warnings))
+    logger.info(
+        'Parsed statements section in %.02f seconds with %d warnings',
+        time.time() - parse_statements_start_time,
+        len(graph.warnings),
+    )
 
 
 def _log_parse_exception(graph: BELGraph, exc: BELParserWarning):
