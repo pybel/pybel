@@ -7,4 +7,5 @@ from .dsl import BaseAbundance, BaseEntity
 from .io import *
 from .manager import Manager, from_database, to_database
 from .struct import BELGraph, Pipeline, Query
+from .struct.operations import union
 from .version import get_version
