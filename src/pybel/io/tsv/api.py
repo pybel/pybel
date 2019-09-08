@@ -49,7 +49,7 @@ def get_triples(graph: BELGraph, use_tqdm: bool = True) -> List[Tuple[str, str, 
     it = graph.edges(keys=True)
 
     if use_tqdm:
-        it = tqdm(it, total=graph.number_of_edges(), desc=f'Preparing TSV')
+        it = tqdm(it, total=graph.number_of_edges(), desc='Preparing TSV')
 
     triples = (
         get_triple(graph, u, v, key)
