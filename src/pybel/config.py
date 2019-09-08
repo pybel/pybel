@@ -18,7 +18,7 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 #: The last PyBEL version where the graph data definition changed
-PYBEL_MINIMUM_IMPORT_VERSION = 0, 13, 0
+PYBEL_MINIMUM_IMPORT_VERSION = 0, 14, 0
 
 config = {}
 
