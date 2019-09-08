@@ -43,7 +43,7 @@ __all__ = [
     'get_protein_substitution_language',
 ]
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 psub_tag = one_of_tags(tags=['sub', 'substitution'], canonical_tag=HGVS, name=KIND)
 
@@ -61,7 +61,7 @@ def get_protein_substitution_language() -> ParserElement:
 
 def _handle_psub(line, _, tokens):
     upgraded = 'p.{}{}{}'.format(tokens[PSUB_REFERENCE], tokens[PSUB_POSITION], tokens[PSUB_VARIANT])
-    log.log(5, 'sub() in p() is deprecated: %s. Upgraded to %s', line, upgraded)
+    logger.log(5, 'sub() in p() is deprecated: %s. Upgraded to %s', line, upgraded)
     tokens[HGVS] = upgraded
     del tokens[PSUB_REFERENCE]
     del tokens[PSUB_POSITION]

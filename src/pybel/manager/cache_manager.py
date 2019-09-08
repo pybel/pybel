@@ -53,7 +53,7 @@ __all__ = [
     'NetworkManager',
 ]
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
 
@@ -210,10 +210,10 @@ class NamespaceManager(BaseManager):
                 res = requests.get(mapping_url)
                 res.raise_for_status()
             except requests.exceptions.HTTPError:
-                log.warning('No mappings found for %s', url)
+                logger.warning('No mappings found for %s', url)
             else:
                 mappings = res.json()
-                log.debug('got %d mappings', len(mappings))
+                logger.debug('got %d mappings', len(mappings))
                 name_to_id.update({v: k for k, v in res.json().items()})
 
         namespace = Namespace(
@@ -225,7 +225,7 @@ class NamespaceManager(BaseManager):
             for name, encoding in values.items()
         ]
 
-        log.info('inserted namespace: %s (%d terms in %.2f seconds)', url, len(values), time.time() - t)
+        logger.info('inserted namespace: %s (%d terms in %.2f seconds)', url, len(values), time.time() - t)
 
         self.session.add(namespace)
         self.session.commit()
@@ -249,7 +249,7 @@ class NamespaceManager(BaseManager):
         namespace = self.get_namespace_by_keyword_pattern(keyword, pattern)
 
         if namespace is None:
-            log.info('creating regex namespace: %s:%s', keyword, pattern)
+            logger.info('creating regex namespace: %s:%s', keyword, pattern)
             namespace = Namespace(
                 keyword=keyword,
                 pattern=pattern
@@ -272,7 +272,7 @@ class NamespaceManager(BaseManager):
             return
 
         if 1 < len(result):
-            log.warning('result for get_namespace_entry is too long. Returning first of %s', [str(r) for r in result])
+            logger.warning('result for get_namespace_entry is too long. Returning first of %s', [str(r) for r in result])
 
         return result[0]
 
@@ -345,8 +345,8 @@ class NamespaceManager(BaseManager):
         self.session.add(result)
         self.session.commit()
 
-        log.info('inserted annotation: %s (%d terms in %.2f seconds)', url, len(bel_resource['Values']),
-                 time.time() - t)
+        logger.info('inserted annotation: %s (%d terms in %.2f seconds)', url, len(bel_resource['Values']),
+                    time.time() - t)
 
         return result
 
@@ -517,7 +517,7 @@ class NetworkManager(NamespaceManager):
     def get_graph_by_id(self, network_id: int) -> BELGraph:
         """Get a network from the database by its identifier and converts it to a BEL graph."""
         network = self.get_network_by_id(network_id)
-        log.debug('converting network [id=%d] %s to bel graph', network_id, network)
+        logger.debug('converting network [id=%d] %s to bel graph', network_id, network)
         return network.as_bel()
 
     def get_networks_by_ids(self, network_ids: Iterable[int]) -> List[Network]:
@@ -525,7 +525,7 @@ class NetworkManager(NamespaceManager):
 
         Note: order is not necessarily preserved.
         """
-        log.debug('getting networks by identifiers: %s', network_ids)
+        logger.debug('getting networks by identifiers: %s', network_ids)
         return self.session.query(Network).filter(Network.id_in(network_ids)).all()
 
     def get_graphs_by_ids(self, network_ids: Iterable[int]) -> List[BELGraph]:
@@ -534,7 +534,7 @@ class NetworkManager(NamespaceManager):
             self.get_graph_by_id(network_id)
             for network_id in network_ids
         ]
-        log.debug('returning graphs for network identifiers: %s', network_ids)
+        logger.debug('returning graphs for network identifiers: %s', network_ids)
         return rv
 
     def get_graph_by_ids(self, network_ids: List[int]) -> BELGraph:
@@ -542,10 +542,10 @@ class NetworkManager(NamespaceManager):
         if len(network_ids) == 1:
             return self.get_graph_by_id(network_ids[0])
 
-        log.debug('getting graph by identifiers: %s', network_ids)
+        logger.debug('getting graph by identifiers: %s', network_ids)
         graphs = self.get_graphs_by_ids(network_ids)
 
-        log.debug('getting union of graphs: %s', network_ids)
+        logger.debug('getting union of graphs: %s', network_ids)
         rv = union(graphs)
 
         return rv
@@ -577,7 +577,7 @@ class InsertManager(NamespaceManager, LookupManager):
         if not graph.version:
             raise ValueError('Can not upload a graph without a version')
 
-        log.debug('inserting %s v%s', graph.name, graph.version)
+        logger.debug('inserting %s v%s', graph.name, graph.version)
 
         t = time.time()
 
@@ -612,7 +612,7 @@ class InsertManager(NamespaceManager, LookupManager):
         self.session.add(network)
         self.session.commit()
 
-        log.info('inserted %s v%s in %.2f seconds', graph.name, graph.version, time.time() - t)
+        logger.info('inserted %s v%s in %.2f seconds', graph.name, graph.version, time.time() - t)
 
         return network
 
@@ -622,8 +622,8 @@ class InsertManager(NamespaceManager, LookupManager):
         :raises: pybel.resources.exc.ResourceError
         :raises: EdgeAddError
         """
-        log.debug('inserting %s into edge store', graph)
-        log.debug('building node models')
+        logger.debug('inserting %s into edge store', graph)
+        logger.debug('building node models')
         node_model_build_start = time.time()
 
         nodes = list(graph)
@@ -635,20 +635,20 @@ class InsertManager(NamespaceManager, LookupManager):
             node_object = self.get_or_create_node(graph, node)
 
             if node_object is None:
-                log.warning('can not add node %s', node)
+                logger.warning('can not add node %s', node)
                 continue
 
             node_model[node] = node_object
 
         node_models = list(node_model.values())
-        log.debug('built %d node models in %.2f seconds', len(node_models), time.time() - node_model_build_start)
+        logger.debug('built %d node models in %.2f seconds', len(node_models), time.time() - node_model_build_start)
 
         node_model_commit_start = time.time()
         self.session.add_all(node_models)
         self.session.commit()
-        log.debug('stored %d node models in %.2f seconds', len(node_models), time.time() - node_model_commit_start)
+        logger.debug('stored %d node models in %.2f seconds', len(node_models), time.time() - node_model_commit_start)
 
-        log.debug('building edge models')
+        logger.debug('building edge models')
         edge_model_build_start = time.time()
 
         edges = graph.edges(keys=True, data=True)
@@ -657,12 +657,12 @@ class InsertManager(NamespaceManager, LookupManager):
 
         edge_models = list(self._get_edge_models(graph, node_model, edges))
 
-        log.debug('built %d edge models in %.2f seconds', len(edge_models), time.time() - edge_model_build_start)
+        logger.debug('built %d edge models in %.2f seconds', len(edge_models), time.time() - edge_model_build_start)
 
         edge_model_commit_start = time.time()
         self.session.add_all(edge_models)
         self.session.commit()
-        log.debug('stored %d edge models in %.2f seconds', len(edge_models), time.time() - edge_model_commit_start)
+        logger.debug('stored %d edge models in %.2f seconds', len(edge_models), time.time() - edge_model_commit_start)
 
         return node_models, edge_models
 
@@ -670,12 +670,12 @@ class InsertManager(NamespaceManager, LookupManager):
         for u, v, key, data in edges:
             source = tuple_model.get(u)
             if source is None or source.sha512 not in self.object_cache_node:
-                log.warning('skipping uncached source node: %s', u)
+                logger.warning('skipping uncached source node: %s', u)
                 continue
 
             target = tuple_model.get(v)
             if target is None or target.sha512 not in self.object_cache_node:
-                log.warning('skipping uncached target node: %s', v)
+                logger.warning('skipping uncached target node: %s', v)
                 continue
 
             relation = data[RELATION]
@@ -693,7 +693,7 @@ class InsertManager(NamespaceManager, LookupManager):
                         continue
                 except Exception as e:
                     self.session.rollback()
-                    log.exception('error storing edge in database. edge data: %s', data)
+                    logger.exception('error storing edge in database. edge data: %s', data)
                     raise EdgeAddError(e, u, v, key, data) from e
                 else:
                     yield edge
@@ -719,7 +719,7 @@ class InsertManager(NamespaceManager, LookupManager):
                         continue
                 except Exception as e:
                     self.session.rollback()
-                    log.exception('error storing edge in database. edge data: %s', data)
+                    logger.exception('error storing edge in database. edge data: %s', data)
                     raise EdgeAddError(e, u, v, key, data) from e
                 else:
                     yield edge
@@ -735,7 +735,7 @@ class InsertManager(NamespaceManager, LookupManager):
             elif key in graph.annotation_list:
                 continue  # skip those
             elif key in graph.annotation_pattern:
-                log.debug('pattern annotation in database not implemented yet not implemented')  # FIXME
+                logger.debug('pattern annotation in database not implemented yet not implemented')  # FIXME
                 continue
             else:
                 raise ValueError('Graph resources does not contain keyword: {}'.format(key))
@@ -850,7 +850,7 @@ class InsertManager(NamespaceManager, LookupManager):
             entry = self.get_namespace_entry(url, name)
 
             if entry is None:
-                log.debug('skipping node with identifier %s: %s', url, name)
+                logger.debug('skipping node with identifier %s: %s', url, name)
                 return
 
             self.session.add(entry)
@@ -865,7 +865,7 @@ class InsertManager(NamespaceManager, LookupManager):
             node_model.namespace_entry = entry
 
         else:
-            log.warning("No reference in BELGraph for namespace: {}".format(concept[NAMESPACE]))
+            logger.warning("No reference in BELGraph for namespace: {}".format(concept[NAMESPACE]))
             return
 
         if VARIANTS in node or FUSION in node:
@@ -875,7 +875,7 @@ class InsertManager(NamespaceManager, LookupManager):
             modifications = self.get_or_create_modification(graph, node)
 
             if modifications is None:
-                log.warning('could not create %s because had an uncachable modification', node.as_bel())
+                logger.warning('could not create %s because had an uncachable modification', node.as_bel())
                 return
 
             node_model.modifications = modifications
@@ -891,7 +891,7 @@ class InsertManager(NamespaceManager, LookupManager):
         self.session.query(Node).delete()
         self.session.commit()
 
-        log.info('dropped all nodes in %.2f seconds', time.time() - t)
+        logger.info('dropped all nodes in %.2f seconds', time.time() - t)
 
     def drop_edges(self) -> None:
         """Drop all edges in the database."""
@@ -900,7 +900,7 @@ class InsertManager(NamespaceManager, LookupManager):
         self.session.query(Edge).delete()
         self.session.commit()
 
-        log.info('dropped all edges in %.2f seconds', time.time() - t)
+        logger.info('dropped all edges in %.2f seconds', time.time() - t)
 
     def get_or_create_edge(
             self,
@@ -1072,7 +1072,7 @@ class InsertManager(NamespaceManager, LookupManager):
             p3_namespace_entry = self.get_namespace_entry(p3_namespace_url, p3_name)
 
             if p3_namespace_entry is None:
-                log.warning('Could not find namespace entry %s %s', p3_namespace_url, p3_name)
+                logger.warning('Could not find namespace entry %s %s', p3_namespace_url, p3_name)
                 return  # FIXME raise?
 
             partner_5p_concept = node[PARTNER_5P][CONCEPT]
@@ -1081,7 +1081,7 @@ class InsertManager(NamespaceManager, LookupManager):
             p5_namespace_entry = self.get_namespace_entry(p5_namespace_url, p5_name)
 
             if p5_namespace_entry is None:
-                log.warning('Could not find namespace entry %s %s', p5_namespace_url, p5_name)
+                logger.warning('Could not find namespace entry %s %s', p5_namespace_url, p5_name)
                 return  # FIXME raise?
 
             fusion_dict = {
@@ -1240,14 +1240,14 @@ class InsertManager(NamespaceManager, LookupManager):
                             elif effect_namespace == BEL_DEFAULT_NAMESPACE:
                                 namespace_url = BEL_DEFAULT_NAMESPACE_URL
                             else:
-                                log.warning('namespace not enumerated in modifier %s', effect_namespace)
+                                logger.warning('namespace not enumerated in modifier %s', effect_namespace)
                                 return
 
                             effect_name = effect_value[NAME]
                             tmp_dict['effect'] = self.get_namespace_entry(namespace_url, effect_name)
 
                             if tmp_dict['effect'] is None:
-                                log.warning('could not find tloc() %s %s', namespace_url, effect_name)
+                                logger.warning('could not find tloc() %s %s', namespace_url, effect_name)
                                 return  # FIXME raise?
 
                         property_list.append(tmp_dict)

@@ -17,7 +17,7 @@ __all__ = [
     'FleetingTemporaryCacheMixin',
 ]
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 TEST_CONNECTION = config.get('test_connection')
 
@@ -32,7 +32,7 @@ class TemporaryCacheMixin(unittest.TestCase):
         else:
             self.fd, self.path = tempfile.mkstemp()
             self.connection = 'sqlite:///' + self.path
-            log.info('Test generated connection string %s', self.connection)
+            logger.info('Test generated connection string %s', self.connection)
 
         self.manager = Manager(connection=self.connection)
         self.manager.create_all()
@@ -61,7 +61,7 @@ class TemporaryCacheClsMixin(unittest.TestCase):
         else:
             cls.fd, cls.path = tempfile.mkstemp()
             cls.connection = 'sqlite:///' + cls.path
-            log.info('Test generated connection string %s', cls.connection)
+            logger.info('Test generated connection string %s', cls.connection)
 
         cls.manager = Manager(connection=cls.connection)
         cls.manager.create_all()

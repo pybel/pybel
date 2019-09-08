@@ -34,7 +34,7 @@ __all__ = [
     'BELGraph',
 ]
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 CitationDict = Mapping[str, str]
 AnnotationsDict = Mapping[str, Mapping[str, bool]]

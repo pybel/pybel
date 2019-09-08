@@ -40,7 +40,7 @@ from .struct import get_unused_annotations, get_unused_list_annotation_values, g
 from .struct.graph import BELGraph, WarningTuple
 from .utils import get_corresponding_pickle_path
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def _page(it):
@@ -109,8 +109,8 @@ def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified
     """Compile a BEL script to a graph."""
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
-        log.setLevel(logging.DEBUG)
-        log.debug('using connection: %s', manager.engine.url)
+        logger.setLevel(logging.DEBUG)
+        logger.debug('using connection: %s', manager.engine.url)
 
     click.secho('Compilation', fg='red', bold=True)
     if skip_tqdm:
@@ -225,27 +225,27 @@ def post(graph: BELGraph, host: str):
 def serialize(graph: BELGraph, csv, sif, gsea, graphml, json, bel):
     """Serialize a graph to various formats."""
     if csv:
-        log.info('Outputting CSV to %s', csv)
+        logger.info('Outputting CSV to %s', csv)
         to_csv(graph, csv)
 
     if sif:
-        log.info('Outputting SIF to %s', sif)
+        logger.info('Outputting SIF to %s', sif)
         to_sif(graph, sif)
 
     if graphml:
-        log.info('Outputting GraphML to %s', graphml)
+        logger.info('Outputting GraphML to %s', graphml)
         to_graphml(graph, graphml)
 
     if gsea:
-        log.info('Outputting GRP to %s', gsea)
+        logger.info('Outputting GRP to %s', gsea)
         to_gsea(graph, gsea)
 
     if json:
-        log.info('Outputting JSON to %s', json)
+        logger.info('Outputting JSON to %s', json)
         to_nodelink_file(graph, json)
 
     if bel:
-        log.info('Outputting BEL to %s', bel)
+        logger.info('Outputting BEL to %s', bel)
         to_bel_script(graph, bel)
 
 

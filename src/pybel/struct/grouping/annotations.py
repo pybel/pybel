@@ -8,11 +8,11 @@ from collections import defaultdict
 from .utils import cleanup
 from ...constants import ANNOTATIONS
 
-log = logging.getLogger(__name__)
-
 __all__ = [
     'get_subgraphs_by_annotation',
 ]
+
+logger = logging.getLogger(__name__)
 
 
 def _get_subgraphs_by_annotation_disregard_undefined(graph, annotation):

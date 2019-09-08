@@ -8,12 +8,12 @@ from .utils import get_subgraph_by_edge_filter
 from ...filters import build_annotation_dict_all_filter, build_annotation_dict_any_filter
 from ...pipeline import transformation
 
-log = logging.getLogger(__name__)
-
 __all__ = [
     'get_subgraph_by_annotation_value',
     'get_subgraph_by_annotations',
 ]
+
+logger = logging.getLogger(__name__)
 
 
 @transformation

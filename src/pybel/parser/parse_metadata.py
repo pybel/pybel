@@ -21,7 +21,7 @@ from ..utils import valid_date_version
 
 __all__ = ['MetadataParser']
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 as_tag = Suppress(BEL_KEYWORD_AS)
 url_tag = Suppress(BEL_KEYWORD_URL)
@@ -148,7 +148,7 @@ class MetadataParser(BaseParser):
         norm_key = DOCUMENT_KEYS[key]
 
         if norm_key in self.document_metadata:
-            log.warning('Tried to overwrite metadata: %s', key)
+            logger.warning('Tried to overwrite metadata: %s', key)
             return tokens
 
         self.document_metadata[norm_key] = value

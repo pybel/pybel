@@ -14,7 +14,7 @@ __all__ = [
     'from_database'
 ]
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def to_database(
@@ -37,7 +37,7 @@ def to_database(
         return manager.insert_graph(graph, store_parts=store_parts, use_tqdm=use_tqdm)
     except (IntegrityError, OperationalError):
         manager.session.rollback()
-        log.exception('Error storing graph')
+        logger.exception('Error storing graph')
     except Exception as e:
         manager.session.rollback()
         raise e

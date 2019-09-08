@@ -42,7 +42,7 @@ __all__ = [
     'get_gene_substitution_language',
 ]
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 dna_nucleotide = oneOf(list(language.dna_nucleotide_labels.keys()))
 gsub_tag = one_of_tags(tags=['sub', 'substitution'], canonical_tag=HGVS, name=KIND)
@@ -61,7 +61,7 @@ def get_gene_substitution_language() -> ParserElement:
 
 def _handle_gsub(line, _, tokens):
     upgraded = 'c.{}{}>{}'.format(tokens[GSUB_POSITION], tokens[GSUB_REFERENCE], tokens[GSUB_VARIANT])
-    log.debug('legacy sub() %s upgraded to %s', line, upgraded)
+    logger.debug('legacy sub() %s upgraded to %s', line, upgraded)
     tokens[HGVS] = upgraded
     del tokens[GSUB_POSITION]
     del tokens[GSUB_REFERENCE]

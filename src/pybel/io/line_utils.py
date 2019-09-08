@@ -25,8 +25,8 @@ __all__ = [
     'parse_lines',
 ]
 
-log = logging.getLogger(__name__)
-parse_log = logging.getLogger('pybel.parser')
+logger = logging.getLogger(__name__)
+parser_logger = logging.getLogger('pybel.parser')
 
 METADATA_LINE_RE = re.compile(r"(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
 LOG_FMT = '%d:%d %s %s'
@@ -124,7 +124,7 @@ def parse_lines(
         tqdm_kwargs=tqdm_kwargs,
     )
 
-    log.info('Network has %d nodes and %d edges', graph.number_of_nodes(), graph.number_of_edges())
+    logger.info('Network has %d nodes and %d edges', graph.number_of_nodes(), graph.number_of_edges())
 
 
 def parse_document(
@@ -159,7 +159,7 @@ def parse_document(
 
     graph.document.update(metadata_parser.document_metadata)
 
-    log.info('Finished parsing document section in %.02f seconds', time.time() - parse_document_start_time)
+    logger.info('Finished parsing document section in %.02f seconds', time.time() - parse_document_start_time)
 
 
 def parse_definitions(
@@ -194,10 +194,10 @@ def parse_definitions(
         try:
             metadata_parser.parseString(line, line_number=line_number)
         except (InconsistentDefinitionError, ResourceError) as e:
-            parse_log.exception(LOG_FMT, line_number, 0, e.__class__.__name__, line)
+            parser_logger.exception(LOG_FMT, line_number, 0, e.__class__.__name__, line)
             raise e
         except OperationalError as e:
-            parse_log.warning('Need to upgrade database. See '
+            parser_logger.warning('Need to upgrade database. See '
                               'http://pybel.readthedocs.io/en/latest/installation.html#upgrading')
             raise e
         except Exception as e:
@@ -219,7 +219,7 @@ def parse_definitions(
     })
     graph.annotation_list.update(metadata_parser.annotation_to_local)
 
-    log.info('Finished parsing definitions section in %.02f seconds', time.time() - parse_definitions_start_time)
+    logger.info('Finished parsing definitions section in %.02f seconds', time.time() - parse_definitions_start_time)
 
 
 def parse_statements(
@@ -260,15 +260,15 @@ def parse_statements(
             _log_parse_exception(graph, exc)
             graph.add_warning(exc, bel_parser.get_annotations())
         except Exception:
-            parse_log.exception(LOG_FMT, line_number, 0, 'General Failure', line)
+            parser_logger.exception(LOG_FMT, line_number, 0, 'General Failure', line)
             raise
 
-    log.info('Parsed statements section in %.02f seconds with %d warnings', time.time() - parse_statements_start_time,
-             len(graph.warnings))
+    logger.info('Parsed statements section in %.02f seconds with %d warnings', time.time() - parse_statements_start_time,
+                len(graph.warnings))
 
 
 def _log_parse_exception(graph: BELGraph, exc: BELParserWarning):
     if graph.path:
-        parse_log.error(LOG_FMT_PATH, graph.path, exc.line_number, exc.position, exc.__class__.__name__, exc)
+        parser_logger.error(LOG_FMT_PATH, graph.path, exc.line_number, exc.position, exc.__class__.__name__, exc)
     else:
-        parse_log.error(LOG_FMT, exc.line_number, exc.position, exc.__class__.__name__, exc)
+        parser_logger.error(LOG_FMT, exc.line_number, exc.position, exc.__class__.__name__, exc)

@@ -16,7 +16,7 @@ __all__ = [
     'from_bel_script_url'
 ]
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @open_file(0, mode='r')
@@ -28,7 +28,7 @@ def from_bel_script(path: Union[str, TextIO], **kwargs) -> BELGraph:
     The remaining keyword arguments are passed to :func:`pybel.io.line_utils.parse_lines`,
     which populates a :class:`BELGraph`.
     """
-    log.warning('Reading BEL script at %s', path.name)
+    logger.info('Reading BEL script at %s', path.name)
     graph = BELGraph(path=path.name)
     parse_lines(graph=graph, lines=path, **kwargs)
     return graph
@@ -41,7 +41,7 @@ def from_bel_script_url(url: str, **kwargs) -> BELGraph:
 
     The remaining keyword arguments are passed to :func:`pybel.io.line_utils.parse_lines`.
     """
-    log.info('Loading from url: %s', url)
+    logger.info('Loading from url: %s', url)
     res = download(url)
     lines = (line.decode('utf-8') for line in res.iter_lines())
 

@@ -15,7 +15,7 @@ __all__ = [
     'Query',
 ]
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class Query:
@@ -122,10 +122,10 @@ class Query:
         if not self.network_ids:
             raise QueryMissingNetworksError('can not run query without network identifiers')
 
-        log.debug('query universe consists of networks: %s', self.network_ids)
+        logger.debug('query universe consists of networks: %s', self.network_ids)
 
         universe = manager.get_graph_by_ids(self.network_ids)
-        log.debug('query universe has %d nodes/%d edges', universe.number_of_nodes(), universe.number_of_edges())
+        logger.debug('query universe has %d nodes/%d edges', universe.number_of_nodes(), universe.number_of_edges())
 
         return universe
 

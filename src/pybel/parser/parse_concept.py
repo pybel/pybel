@@ -21,7 +21,7 @@ __all__ = [
     'ConceptParser',
 ]
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class ConceptParser(BaseParser):
@@ -152,7 +152,7 @@ class ConceptParser(BaseParser):
     def handle_namespace_lenient(line: str, position: int, tokens: ParseResults) -> ParseResults:
         """Handle parsing an identifier for names missing a namespace that are outside the default namespace."""
         tokens[NAMESPACE] = DIRTY
-        log.debug('Naked namespace: [%d] %s', position, line)
+        logger.debug('Naked namespace: [%d] %s', position, line)
         return tokens
 
     def handle_namespace_invalid(self, line: str, position: int, tokens: ParseResults) -> None:

@@ -19,7 +19,7 @@ __all__ = [
     'from_web',
 ]
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 RECIEVE_ENDPOINT = '/api/receive/'
 GET_ENDPOINT = '/api/network/{}/export/nodelink'
@@ -70,7 +70,7 @@ def to_web(
     """
     if host is None:
         host = _get_host()
-        log.debug('using host: %s', host)
+        logger.debug('using host: %s', host)
 
     if user is None:
         user = _get_user()
@@ -96,7 +96,7 @@ def to_web(
         },
         auth=(user, password),
     )
-    log.debug('received response: %s', response)
+    logger.debug('received response: %s', response)
 
     return response
 

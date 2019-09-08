@@ -15,7 +15,7 @@ __all__ = [
     'PYBEL_MINIMUM_IMPORT_VERSION',
 ]
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 #: The last PyBEL version where the graph data definition changed
 PYBEL_MINIMUM_IMPORT_VERSION = 0, 13, 0
@@ -51,11 +51,11 @@ PYBEL_CONNECTION = 'PYBEL_CONNECTION'
 
 if PYBEL_CONNECTION in os.environ:
     connection = os.environ[PYBEL_CONNECTION]
-    log.info('got environment-defined connection: %s', connection)
+    logger.info('got environment-defined connection: %s', connection)
 elif 'connection' in config:
     connection = config['connection']
-    log.info('getting configured connection: %s', connection)
+    logger.info('getting configured connection: %s', connection)
 else:  # This means that there will have to be a cache directory created
     os.makedirs(CACHE_DIRECTORY, exist_ok=True)
     connection = DEFAULT_CACHE_CONNECTION
-    log.info('no configuration found, using default sqlite connection %s', connection)
+    logger.info('no configuration found, using default sqlite connection %s', connection)

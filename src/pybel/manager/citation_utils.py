@@ -21,7 +21,7 @@ __all__ = [
     'enrich_pubmed_citations',
 ]
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 EUTILS_URL_FMT = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&retmode=json&id={}"
 
@@ -105,7 +105,7 @@ def enrich_citation_model(manager, citation, p) -> bool:
     :param dict p: The dictionary from PubMed E-Utils corresponding to d["result"][pmid]
     """
     if 'error' in p:
-        log.warning('Error downloading PubMed')
+        logger.warning('Error downloading PubMed')
         return False
 
     citation.name = p['fulljournalname']
@@ -128,7 +128,7 @@ def enrich_citation_model(manager, citation, p) -> bool:
     if sanitized_publication_date:
         citation.date = datetime.strptime(sanitized_publication_date, '%Y-%m-%d')
     else:
-        log.info('result had date with strange format: %s', publication_date)
+        logger.info('result had date with strange format: %s', publication_date)
 
     return True
 
@@ -151,7 +151,7 @@ def get_citations_by_pmids(manager,
     sleep_time = sleep_time if sleep_time is not None else 1
 
     pmids = clean_pubmed_identifiers(pmids)
-    log.info('Ensuring %d PubMed identifiers', len(pmids))
+    logger.info('Ensuring %d PubMed identifiers', len(pmids))
 
     result = {}
     unenriched_pmids = {}
@@ -167,20 +167,20 @@ def get_citations_by_pmids(manager,
 
     manager.session.commit()
 
-    log.debug('Found %d PubMed identifiers in database', len(pmids) - len(unenriched_pmids))
+    logger.debug('Found %d PubMed identifiers in database', len(pmids) - len(unenriched_pmids))
 
     if not unenriched_pmids:
         return result, set()
 
     number_unenriched = len(unenriched_pmids)
-    log.info('Querying PubMed for %d identifiers', number_unenriched)
+    logger.info('Querying PubMed for %d identifiers', number_unenriched)
 
     errors = set()
     t = time.time()
 
     for pmid_group_index, pmid_list in enumerate(grouper(group_size, unenriched_pmids), start=1):
         pmid_list = list(pmid_list)
-        log.info('Getting group %d having %d PubMed identifiers', pmid_group_index, len(pmid_list))
+        logger.info('Getting group %d having %d PubMed identifiers', pmid_group_index, len(pmid_list))
 
         response = get_pubmed_citation_response(pmid_list)
         response_pmids = response['result']['uids']
@@ -192,7 +192,7 @@ def get_citations_by_pmids(manager,
             successful_enrichment = enrich_citation_model(manager, citation, p)
 
             if not successful_enrichment:
-                log.warning("Error downloading PubMed identifier: %s", pmid)
+                logger.warning("Error downloading PubMed identifier: %s", pmid)
                 errors.add(pmid)
                 continue
 
@@ -204,7 +204,7 @@ def get_citations_by_pmids(manager,
         # Don't want to hit that rate limit
         time.sleep(sleep_time)
 
-    log.info('retrieved %d PubMed identifiers in %.02f seconds', len(unenriched_pmids), time.time() - t)
+    logger.info('retrieved %d PubMed identifiers in %.02f seconds', len(unenriched_pmids), time.time() - t)
 
     return result, errors
 
@@ -232,7 +232,7 @@ def enrich_pubmed_citations(manager,
         pmid = graph[u][v][k][CITATION][CITATION_REFERENCE].strip()
 
         if pmid not in pmid_data:
-            log.warning('Missing data for PubMed identifier: %s', pmid)
+            logger.warning('Missing data for PubMed identifier: %s', pmid)
             errors.add(pmid)
             continue
 

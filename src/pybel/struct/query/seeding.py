@@ -14,7 +14,7 @@ from ...dsl import BaseEntity
 from ...struct import union
 from ...tokens import parse_result_to_dsl
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 SEED_METHOD = 'type'
 SEED_DATA = 'data'
@@ -95,7 +95,7 @@ class Seeding(UserList):
         :rtype: Optional[pybel.BELGraph]
         """
         if not self:
-            log.debug('no seeding, returning graph: %s', graph)
+            logger.debug('no seeding, returning graph: %s', graph)
             return graph
 
         subgraphs = []
@@ -103,17 +103,17 @@ class Seeding(UserList):
         for seed in self:
             seed_method, seed_data = seed[SEED_METHOD], seed[SEED_DATA]
 
-            log.debug('seeding with %s: %s', seed_method, seed_data)
+            logger.debug('seeding with %s: %s', seed_method, seed_data)
             subgraph = get_subgraph(graph, seed_method=seed_method, seed_data=seed_data)
 
             if subgraph is None:
-                log.debug('seed returned empty graph: %s', seed)
+                logger.debug('seed returned empty graph: %s', seed)
                 continue
 
             subgraphs.append(subgraph)
 
         if not subgraphs:
-            log.debug('no subgraphs returned')
+            logger.debug('no subgraphs returned')
             return
 
         return union(subgraphs)

@@ -9,7 +9,6 @@ from typing import Optional
 
 from .config import connection
 
-BELFRAMEWORK_DOMAIN = 'http://resource.belframework.org'
 OPENBEL_DOMAIN = 'http://resources.openbel.org'
 HBP_NAMESPACE_URL = 'https://raw.githubusercontent.com/pharmacome/terminology/{sha}/external/{keyword}-names.belns'
 LAST_HASH = '73688d6dc24e309fca59a1340dc9ee971e9f3baa'

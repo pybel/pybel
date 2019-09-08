@@ -47,7 +47,7 @@ __all__ = [
     'get_truncation_language',
 ]
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 truncation_tag = one_of_tags(tags=['trunc', 'truncation'], canonical_tag=HGVS, name=KIND)
 
@@ -66,7 +66,7 @@ def get_truncation_language() -> ParserElement:
 def _handle_trunc_legacy(line, _, tokens):
     # FIXME this isn't correct HGVS nomenclature, but truncation isn't forward compatible without more information
     upgraded = 'p.{}*'.format(tokens[TRUNCATION_POSITION])
-    log.warning('trunc() is deprecated. Re-encode with reference terminal amino acid in HGVS: %s', line)
+    logger.warning('trunc() is deprecated. Re-encode with reference terminal amino acid in HGVS: %s', line)
     tokens[HGVS] = upgraded
     del tokens[TRUNCATION_POSITION]
     return tokens

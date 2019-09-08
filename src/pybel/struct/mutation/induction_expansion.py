@@ -18,7 +18,7 @@ __all__ = [
     'get_subgraph_by_second_neighbors',
 ]
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @transformation

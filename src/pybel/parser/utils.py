@@ -13,7 +13,7 @@ from pyparsing import (
 
 from ..constants import OBJECT, RELATION, SUBJECT
 
-log = logging.getLogger('pybel')
+logger = logging.getLogger('pybel')
 
 
 def is_int(s: Any) -> bool:

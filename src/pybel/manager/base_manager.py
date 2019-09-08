@@ -16,17 +16,19 @@ __all__ = [
     'build_engine_session',
 ]
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 X = TypeVar('X')
 
 
-def build_engine_session(connection: str,
-                         echo: bool = False,
-                         autoflush: Optional[bool] = None,
-                         autocommit: Optional[bool] = None,
-                         expire_on_commit: Optional[bool] = None,
-                         scopefunc=None) -> Tuple:
+def build_engine_session(
+    connection: str,
+    echo: bool = False,
+    autoflush: Optional[bool] = None,
+    autocommit: Optional[bool] = None,
+    expire_on_commit: Optional[bool] = None,
+    scopefunc=None,
+) -> Tuple:
     """Build an engine and a session.
 
     :param connection: An RFC-1738 database connection string
@@ -59,7 +61,7 @@ def build_engine_session(connection: str,
     if expire_on_commit is None:
         expire_on_commit = config.get('PYBEL_MANAGER_AUTOEXPIRE', True)
 
-    log.debug('auto flush: %s, auto commit: %s, expire on commmit: %s', autoflush, autocommit, expire_on_commit)
+    logger.debug('auto flush: %s, auto commit: %s, expire on commmit: %s', autoflush, autocommit, expire_on_commit)
 
     #: A SQLAlchemy session maker
     session_maker = sessionmaker(

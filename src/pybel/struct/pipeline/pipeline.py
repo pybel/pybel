@@ -16,7 +16,7 @@ __all__ = [
     'Pipeline',
 ]
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 META_UNION = 'union'
 META_INTERSECTION = 'intersection'

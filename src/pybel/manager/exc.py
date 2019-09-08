@@ -14,7 +14,7 @@ class EdgeAddError(PyBELWarning):
     """When there's a problem inserting an edge."""
 
     def __init__(self, e, u, v, key, data):  # noqa: D107
-        super(EdgeAddError, self).__init__(e, u, v, key, data)
+        super().__init__(e, u, v, key, data)
         self.error = e
         self.source = u
         self.target = v
@@ -33,9 +33,6 @@ class EdgeAddError(PyBELWarning):
         )
 
     @property
-    def line(self):
-        """Return the BEL script's line on which this error occurred.
-
-        :rtype: str
-        """
+    def line(self) -> str:
+        """Return the BEL script's line on which this error occurred."""
         return self.data.get(LINE)

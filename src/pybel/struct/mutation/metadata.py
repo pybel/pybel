@@ -14,7 +14,7 @@ __all__ = [
     'remove_citation_metadata',
 ]
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @in_place_transformation
@@ -58,7 +58,7 @@ def remove_annotation_value(graph, annotation: str, value: str) -> None:
     :param value:
     """
     if annotation not in graph.defined_annotation_keywords:
-        log.warning('annotation was not defined: %s', annotation)
+        logger.warning('annotation was not defined: %s', annotation)
         return
 
     for u, v, k in graph.edges(keys=True):

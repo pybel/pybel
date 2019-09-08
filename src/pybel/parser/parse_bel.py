@@ -45,7 +45,7 @@ __all__ = [
     'modifier_po_to_dict',
 ]
 
-log = logging.getLogger('pybel.parser')
+logger = logging.getLogger('pybel.parser')
 
 ###########################
 # 2.1 Abundance Functions #
@@ -864,13 +864,13 @@ def handle_activity_legacy(_: str, __: int, tokens: ParseResults) -> ParseResult
         NAME: legacy_cls,
         NAMESPACE: BEL_DEFAULT_NAMESPACE,
     }
-    log.log(5, 'upgraded legacy activity to %s', legacy_cls)
+    logger.log(5, 'upgraded legacy activity to %s', legacy_cls)
     return tokens
 
 
 def handle_legacy_tloc(line: str, position: int, tokens: ParseResults) -> ParseResults:
     """Handle translocations that lack the ``fromLoc`` and ``toLoc`` entries."""
-    log.log(5, 'legacy translocation statement: %s [%d]', line, position)
+    logger.log(5, 'legacy translocation statement: %s [%d]', line, position)
     return tokens
 
 

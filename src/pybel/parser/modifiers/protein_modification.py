@@ -87,7 +87,7 @@ __all__ = [
     'get_protein_modification_language',
 ]
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def _handle_pmod_default_ns(_, __, tokens: ParseResults) -> ParseResults:
@@ -98,7 +98,7 @@ def _handle_pmod_default_ns(_, __, tokens: ParseResults) -> ParseResults:
 
 def _handle_pmod_legacy_ns(line, _, tokens: ParseResults) -> ParseResults:
     upgraded = pmod_legacy_labels[tokens[0]]
-    log.log(5, 'legacy pmod() value %s upgraded to %s', line, upgraded)
+    logger.log(5, 'legacy pmod() value %s upgraded to %s', line, upgraded)
     tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
     tokens[NAME] = upgraded
     return tokens

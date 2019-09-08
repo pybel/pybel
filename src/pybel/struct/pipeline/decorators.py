@@ -22,7 +22,7 @@ __all__ = [
     'no_arguments_map',
 ]
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 mapped = {}
 universe_map = {}

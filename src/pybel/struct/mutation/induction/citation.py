@@ -13,7 +13,7 @@ __all__ = [
     'get_subgraph_by_authors',
 ]
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @transformation

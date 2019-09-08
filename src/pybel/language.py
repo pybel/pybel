@@ -14,7 +14,7 @@ from .constants import (
 )
 from .utils import ensure_quotes
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class Entity(dict):

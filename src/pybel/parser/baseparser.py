@@ -10,7 +10,7 @@ from pyparsing import ParseResults, ParserElement
 
 __all__ = ['BaseParser']
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class BaseParser(object):
@@ -57,4 +57,4 @@ class BaseParser(object):
         """Streamline the language represented by this parser to make queries run faster."""
         t = time.time()
         self.language.streamline()
-        log.info('streamlined %s in %.02f seconds', self.__class__.__name__, time.time() - t)
+        logger.info('streamlined %s in %.02f seconds', self.__class__.__name__, time.time() - t)

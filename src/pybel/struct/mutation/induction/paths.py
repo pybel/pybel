@@ -20,7 +20,7 @@ __all__ = [
     'get_random_path',
 ]
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 def _remove_pathologies_oop(graph):
@@ -35,10 +35,11 @@ def _remove_pathologies_oop(graph):
     return rv
 
 
-def _iterate_nodes_in_shortest_paths(graph,
-                                     nodes: Iterable[BaseEntity],
-                                     weight: Optional[str] = None,
-                                     ) -> Iterable[BaseEntity]:
+def _iterate_nodes_in_shortest_paths(
+    graph,
+    nodes: Iterable[BaseEntity],
+    weight: Optional[str] = None,
+) -> Iterable[BaseEntity]:
     """Iterate over nodes in the shortest paths between all pairs of nodes in the given list.
 
     :type graph: pybel.BELGraph
@@ -53,11 +54,12 @@ def _iterate_nodes_in_shortest_paths(graph,
             continue
 
 
-def get_nodes_in_all_shortest_paths(graph,
-                                    nodes: Iterable[BaseEntity],
-                                    weight: Optional[str] = None,
-                                    remove_pathologies: bool = False,
-                                    ):
+def get_nodes_in_all_shortest_paths(
+    graph,
+    nodes: Iterable[BaseEntity],
+    weight: Optional[str] = None,
+    remove_pathologies: bool = False,
+):
     """Get a set of nodes in all shortest paths between the given nodes.
 
     Thinly wraps :func:`networkx.all_shortest_paths`.
@@ -77,11 +79,12 @@ def get_nodes_in_all_shortest_paths(graph,
 
 
 @transformation
-def get_subgraph_by_all_shortest_paths(graph,
-                                       nodes: Iterable[BaseEntity],
-                                       weight: Optional[str] = None,
-                                       remove_pathologies: bool = False,
-                                       ):
+def get_subgraph_by_all_shortest_paths(
+    graph,
+    nodes: Iterable[BaseEntity],
+    weight: Optional[str] = None,
+    remove_pathologies: bool = False,
+):
     """Induce a subgraph over the nodes in the pairwise shortest paths between all of the nodes in the given list.
 
     :param pybel.BELGraph graph: A BEL graph
@@ -95,15 +98,19 @@ def get_subgraph_by_all_shortest_paths(graph,
 
     for node in nodes:
         if node not in graph:
-            log.debug('%s not in %s', node, graph)
+            logger.debug('%s not in %s', node, graph)
             continue
         query_nodes.append(node)
 
     if not query_nodes:
         return
 
-    induced_nodes = get_nodes_in_all_shortest_paths(graph, query_nodes, weight=weight,
-                                                    remove_pathologies=remove_pathologies)
+    induced_nodes = get_nodes_in_all_shortest_paths(
+        graph,
+        query_nodes,
+        weight=weight,
+        remove_pathologies=remove_pathologies,
+    )
 
     if not induced_nodes:
         return

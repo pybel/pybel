@@ -27,7 +27,7 @@ __all__ = [
     'to_jgif',
 ]
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 annotation_map = {
     'tissue': 'Tissue',
@@ -85,13 +85,13 @@ def map_cbn(d):
 
             for key, value in evidence[EXPERIMENT_CONTEXT].items():
                 if not value:
-                    log.debug('key %s without value', key)
+                    logger.debug('key %s without value', key)
                     continue
 
                 value = value.strip()
 
                 if not value:
-                    log.debug('key %s without value', key)
+                    logger.debug('key %s without value', key)
                     continue
 
                 key = key.strip().lower()
@@ -227,32 +227,32 @@ def from_jgif(graph_jgif_dict):
         node_label = node.get('label')
 
         if node_label is None:
-            log.warning('node missing label: %s', node)
+            logger.warning('node missing label: %s', node)
             continue
 
         try:
             parser.bel_term.parseString(node_label)
         except NakedNameWarning as e:
-            log.info('Naked name: %s', e)
+            logger.info('Naked name: %s', e)
         except ParseException:
-            log.info('Parse exception for %s', node_label)
+            logger.info('Parse exception for %s', node_label)
 
     for i, edge in enumerate(root['edges']):
         relation = edge.get('relation')
         if relation is None:
-            log.warning('no relation for edge: %s', edge)
+            logger.warning('no relation for edge: %s', edge)
 
         if relation in {'actsIn', 'translocates'}:
             continue  # don't need legacy BEL format
 
         edge_metadata = edge.get('metadata')
         if edge_metadata is None:
-            log.warning('no metadata for edge: %s', edge)
+            logger.warning('no metadata for edge: %s', edge)
             continue
 
         bel_statement = edge.get('label')
         if bel_statement is None:
-            log.debug('No BEL statement for edge %s', edge)
+            logger.debug('No BEL statement for edge %s', edge)
 
         evidences = edge_metadata.get('evidences')
 
@@ -261,7 +261,7 @@ def from_jgif(graph_jgif_dict):
 
         else:
             if not evidences:  # is none or is empty list
-                log.debug('No evidence for edge %s', edge)
+                logger.debug('No evidence for edge %s', edge)
                 continue
 
             for evidence in evidences:
@@ -286,7 +286,7 @@ def from_jgif(graph_jgif_dict):
                 try:
                     parser.parseString(bel_statement, line_number=i)
                 except Exception as e:
-                    log.warning('JGIF relation parse error: %s for %s', e, bel_statement)
+                    logger.warning('JGIF relation parse error: %s for %s', e, bel_statement)
 
     return graph
 

@@ -27,7 +27,7 @@ __all__ = [
     'edge_to_bel',
 ]
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 EdgeTuple = Tuple[BaseEntity, BaseEntity, str, EdgeData]
 

@@ -30,7 +30,7 @@ from ..utils import valid_date
 
 __all__ = ['ControlParser']
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 set_tag = Suppress(BEL_KEYWORD_SET)
 unset_tag = Suppress(BEL_KEYWORD_UNSET)
@@ -229,7 +229,7 @@ class ControlParser(BaseParser):
             raise InvalidPubMedIdentifierWarning(self.get_line_number(), line, position, citation_reference)
 
         if 4 <= len(values) and not valid_date(values[3]):
-            log.debug('Invalid date: %s. Truncating entry.', values[3])
+            logger.debug('Invalid date: %s. Truncating entry.', values[3])
             self.citation = dict(zip(CITATION_ENTRIES, values[:3]))
             return tokens
 
