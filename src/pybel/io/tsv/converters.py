@@ -6,14 +6,27 @@ from abc import ABC, abstractmethod
 from typing import Dict, Tuple
 
 from ...constants import (
-    ACTIVITY, ASSOCIATION, CORRELATIVE_RELATIONS, DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO,
-    HAS_COMPONENT, INCREASES, IS_A, MODIFIER, OBJECT, PART_OF, REGULATES, RELATION,
+    ACTIVITY, ASSOCIATION, CAUSES_NO_CHANGE, CORRELATIVE_RELATIONS, DECREASES, DEGRADATION, DIRECTLY_DECREASES,
+    DIRECTLY_INCREASES, EQUIVALENT_TO, HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A, MODIFIER,
+    OBJECT, PART_OF, REGULATES, RELATION,
 )
 from ...dsl import (
-    Abundance, BaseAbundance, BaseEntity, BiologicalProcess, ComplexAbundance, MicroRna, NamedComplexAbundance,
-    Pathology, Protein, Rna,
+    Abundance, BaseAbundance, BaseEntity, BiologicalProcess, CentralDogma, ComplexAbundance, MicroRna,
+    NamedComplexAbundance, Pathology, Protein, Reaction, Rna,
 )
 from ...typing import EdgeData
+
+
+def _safe_label(u: BaseEntity):
+    if isinstance(u, CentralDogma) and u.variants:
+        return u.as_bel()
+
+    try:
+        curie = u.curie
+    except AttributeError:
+        return u.as_bel()
+    else:
+        return curie
 
 
 class Converter(ABC):
@@ -36,7 +49,7 @@ class SimpleConverter(Converter):
     @classmethod
     def convert(cls, u: BaseAbundance, v: BaseAbundance, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
         """Convert a BEL edge."""
-        return u.curie, edge_data[RELATION], v.curie
+        return _safe_label(u), edge_data[RELATION], _safe_label(v)
 
 
 class TypedConverter(Converter):
@@ -47,11 +60,7 @@ class TypedConverter(Converter):
     @classmethod
     def convert(cls, u: BaseAbundance, v: BaseAbundance, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
         """Convert a BEL edge."""
-        return (
-            u.curie,
-            cls.target_relation,
-            v.curie,
-        )
+        return _safe_label(u), cls.target_relation, _safe_label(v)
 
 
 class SimplePredicate(Converter):
@@ -80,6 +89,14 @@ class SimpleTypedPredicate(SimplePredicate):
         )
 
 
+class HasVariantConverter(SimpleConverter, SimpleTypedPredicate):
+    """Converts BEL statements like ``p(X) hasVariant p(X, ...)``."""
+
+    subject_type = CentralDogma
+    relation = HAS_VARIANT
+    object_type = CentralDogma
+
+
 class _PartOfConverter(SimpleTypedPredicate, TypedConverter):
     relation = PART_OF
     target_relation = 'partOf'
@@ -106,6 +123,57 @@ class ProteinPartOfBiologicalProcess(_PartOfConverter):
     object_type = BiologicalProcess
 
 
+class _ReactionTypedPredicate(SimpleTypedPredicate):
+    subject_type = Reaction
+    object_type = BaseAbundance
+
+
+class _ReactionHasMemberConverter(_ReactionTypedPredicate):
+    """Converts BEL statements like ``complex(X) hasComponent p(Y)``."""
+
+    target_relation = ...
+
+    @classmethod
+    def predicate(cls, u: Reaction, v: BaseAbundance, key: str, edge_data: EdgeData) -> bool:
+        """Test a BEL edge."""
+        return super().predicate(u, v, key, edge_data) and v not in u.get_catalysts()
+
+    @classmethod
+    def convert(cls, u: Reaction, v: BaseAbundance, key: str, data: Dict) -> Tuple[str, str, str]:
+        """Convert a BEL edge."""
+        return u.as_bel(), cls.target_relation, v.curie
+
+
+class ReactionHasReactantConverter(_ReactionHasMemberConverter):
+    """Converts BEL statements like ``rxn(X) hasReactant a(Y)``."""
+
+    relation = HAS_REACTANT
+    target_relation = 'hasReactant'
+
+
+class ReactionHasProductConverter(_ReactionHasMemberConverter):
+    """Converts BEL statements like ``rxn(X) hasProduct a(Y)``."""
+
+    relation = HAS_PRODUCT
+    target_relation = 'hasProduct'
+
+
+class ReactionHasCatalystConverter(_ReactionTypedPredicate):
+    """Converts BEL statements that simultaneously ``rxn(X) hasProduct a(Y)`` and ``rxn(X) hasReactant a(Y)``."""
+
+    target_relation = 'hasCatalyst'
+
+    @classmethod
+    def predicate(cls, u: Reaction, v: BaseAbundance, key: str, edge_data: EdgeData) -> bool:
+        """Test a BEL edge."""
+        return super().predicate(u, v, key, edge_data) and v in u.get_catalysts()
+
+    @classmethod
+    def convert(cls, u: Reaction, v: BaseAbundance, key: str, data: Dict) -> Tuple[str, str, str]:
+        """Convert a BEL edge."""
+        return u.as_bel(), cls.target_relation, v.curie
+
+
 class NamedComplexHasComponentConverter(SimpleTypedPredicate):
     """Converts BEL statements like ``complex(X) hasComponent p(Y)``."""
 
@@ -125,7 +193,7 @@ class ListComplexHasComponentConverter(SimpleTypedPredicate):
 
     subject_type = ComplexAbundance
     relation = HAS_COMPONENT
-    object_type = Protein
+    object_type = BaseAbundance
     target_relation = 'partOf'
 
     @classmethod
@@ -169,7 +237,7 @@ class AssociationConverter(Converter):
     def convert(u: BaseAbundance, v: BaseAbundance, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
         """Convert a BEL edge."""
         relation = edge_data.get('association_type', ASSOCIATION)  # allow more specific association to be defined
-        return u.curie, relation, v.curie
+        return _safe_label(u), relation, _safe_label(v)
 
 
 class DrugEffectConverter(SimpleConverter, SimpleTypedPredicate):
@@ -219,6 +287,51 @@ class DecreasesAmountConverter(RegulatesAmountConverter):
     target_relation = 'decreasesAmountOf'
 
 
+class NoChangeAmountConverter(RegulatesAmountConverter):
+    """Converts BEL statements like ``A(B) cnc C(D)``."""
+
+    relation = CAUSES_NO_CHANGE
+    target_relation = 'notRegulatesAmountOf'
+
+
+class RegulatesDegradationConverter(TypedConverter):
+    """Converts BEL statements like ``A(B) reg deg(C(D))``."""
+
+    relation = REGULATES
+    target_relation = 'regulatesAmountOf'
+
+    @classmethod
+    def predicate(cls, u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> bool:
+        """Test a BEL edge."""
+        object_modifier = edge_data.get(OBJECT)
+        return (
+            edge_data[RELATION] == cls.relation
+            and object_modifier
+            and object_modifier.get(MODIFIER) == DEGRADATION
+        )
+
+
+class IncreasesDegradationConverter(RegulatesDegradationConverter):
+    """Converts BEL statements like ``A(B) -> def(C(D))``."""
+
+    relation = INCREASES
+    target_relation = 'decreasesAmountOf'
+
+
+class DecreasesDegradationConverter(RegulatesDegradationConverter):
+    """Converts BEL statements like ``A(B) -| def(C(D))``."""
+
+    relation = DECREASES
+    target_relation = 'increasesAmountOf'
+
+
+class NoChangeDegradationConverter(RegulatesDegradationConverter):
+    """Converts BEL statements like ``A(B) cnc def(C(D))``."""
+
+    relation = CAUSES_NO_CHANGE
+    target_relation = 'notRegulatesAmountOf'
+
+
 class RegulatesActivityConverter(TypedConverter):
     """Converts BEL statements like ``A(B) reg act(C(D) [, ma(E)])``."""
 
@@ -229,7 +342,11 @@ class RegulatesActivityConverter(TypedConverter):
     def predicate(cls, u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> bool:
         """Test a BEL edge."""
         object_modifier = edge_data.get(OBJECT)
-        return edge_data[RELATION] == cls.relation and object_modifier and object_modifier.get(MODIFIER) == ACTIVITY
+        return (
+            edge_data[RELATION] == cls.relation
+            and object_modifier
+            and object_modifier.get(MODIFIER) == ACTIVITY
+        )
 
 
 class IncreasesActivityConverter(RegulatesActivityConverter):
@@ -244,6 +361,13 @@ class DecreasesActivityConverter(RegulatesActivityConverter):
 
     relation = DECREASES
     target_relation = 'activityDirectlyNegativelyRegulatesActivityOf'
+
+
+class NoChangeActivityConverter(RegulatesActivityConverter):
+    """Converts BEL statements like ``A(B) cnc act(C(D) [, ma(E)])``."""
+
+    relation = CAUSES_NO_CHANGE
+    target_relation = 'notActivityDirectlyRegulatesActivityOf'
 
 
 class MiRNARegulatesExpressionConverter(TypedConverter, SimpleTypedPredicate):

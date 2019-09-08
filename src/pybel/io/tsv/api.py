@@ -9,11 +9,14 @@ from networkx.utils import open_file
 from tqdm import tqdm
 
 from .converters import (
-    AssociationConverter, CorrelationConverter, DecreasesAmountConverter, DrugIndicationConverter,
-    DrugSideEffectConverter, EquivalenceConverter, IncreasesAmountConverter, IsAConverter,
-    ListComplexHasComponentConverter, MiRNADecreasesExpressionConverter, MiRNADirectlyDecreasesExpressionConverter,
-    NamedComplexHasComponentConverter, PartOfNamedComplexConverter, ProteinPartOfBiologicalProcess,
-    RegulatesActivityConverter, RegulatesAmountConverter, SubprocessPartOfBiologicalProcess,
+    AssociationConverter, CorrelationConverter, DecreasesActivityConverter, DecreasesAmountConverter,
+    DecreasesDegradationConverter, DrugIndicationConverter, DrugSideEffectConverter, EquivalenceConverter,
+    HasVariantConverter, IncreasesActivityConverter, IncreasesAmountConverter, IncreasesDegradationConverter,
+    IsAConverter, ListComplexHasComponentConverter, MiRNADecreasesExpressionConverter,
+    MiRNADirectlyDecreasesExpressionConverter, NamedComplexHasComponentConverter, NoChangeActivityConverter,
+    NoChangeAmountConverter, NoChangeDegradationConverter, PartOfNamedComplexConverter, ProteinPartOfBiologicalProcess,
+    ReactionHasCatalystConverter, ReactionHasProductConverter, ReactionHasReactantConverter, RegulatesActivityConverter,
+    RegulatesAmountConverter, RegulatesDegradationConverter, SubprocessPartOfBiologicalProcess,
 )
 from ...dsl import BaseEntity
 from ...struct import BELGraph
@@ -28,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 @open_file(1, mode='w')
-def to_tsv(graph: BELGraph, path: Union[str, TextIO], *, use_tqdm: bool = True, sep='\t') -> None:
+def to_tsv(graph: BELGraph, path: Union[str, TextIO], *, use_tqdm: bool = False, sep='\t') -> None:
     """Write the graph as a TSV.
 
     :param graph: A BEL graph
@@ -40,7 +43,7 @@ def to_tsv(graph: BELGraph, path: Union[str, TextIO], *, use_tqdm: bool = True, 
         print(h, r, t, sep=sep, file=path)
 
 
-def get_triples(graph: BELGraph, use_tqdm: bool = True) -> List[Tuple[str, str, str]]:
+def get_triples(graph: BELGraph, use_tqdm: bool = False) -> List[Tuple[str, str, str]]:
     """Get a non-redundant list of triples representing the graph.
 
     :param graph: A BEL graph
@@ -92,6 +95,18 @@ def get_triple(
         RegulatesAmountConverter,
         IncreasesAmountConverter,
         DecreasesAmountConverter,
+        NoChangeAmountConverter,
+        IncreasesActivityConverter,
+        DecreasesActivityConverter,
+        NoChangeActivityConverter,
+        ReactionHasProductConverter,
+        ReactionHasReactantConverter,
+        ReactionHasCatalystConverter,
+        HasVariantConverter,
+        IncreasesDegradationConverter,
+        DecreasesDegradationConverter,
+        RegulatesDegradationConverter,
+        NoChangeDegradationConverter,
     ]
 
     for converter in converters:

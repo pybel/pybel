@@ -28,8 +28,7 @@ from .canonicalize import to_bel_script
 from .constants import get_cache_connection
 from .examples import braf_graph, egf_graph, homology_graph, sialic_acid_graph, statin_graph
 from .io import (
-    from_bel_script, from_pickle, to_csv, to_graphml, to_gsea, to_neo4j, to_nodelink_file, to_pickle, to_sif,
-    to_web,
+    from_bel_script, from_pickle, to_graphml, to_gsea, to_neo4j, to_nodelink_file, to_pickle, to_sif, to_tsv, to_web,
 )
 from .io.web import _get_host
 from .manager import Manager
@@ -216,17 +215,17 @@ def post(graph: BELGraph, host: str):
 
 @main.command()
 @graph_pickle_argument
-@click.option('--csv', type=click.File('w'), help='Path to output a CSV file.')
+@click.option('--tsv', type=click.File('w'), help='Path to output a TSV file.')
 @click.option('--sif', type=click.File('w'), help='Path to output an SIF file.')
 @click.option('--gsea', type=click.File('w'), help='Path to output a GRP file for gene set enrichment analysis.')
 @click.option('--graphml', help='Path to output a GraphML file. Use .graphml for Cytoscape.')
-@click.option('--json', type=click.File('w'), help='Path to output a node-link JSON file.')
+@click.option('--nodelink', type=click.File('w'), help='Path to output a node-link JSON file.')
 @click.option('--bel', type=click.File('w'), help='Output canonical BEL.')
-def serialize(graph: BELGraph, csv, sif, gsea, graphml, json, bel):
+def serialize(graph: BELGraph, tsv, sif, gsea, graphml, nodelink, bel):
     """Serialize a graph to various formats."""
-    if csv:
-        logger.info('Outputting CSV to %s', csv)
-        to_csv(graph, csv)
+    if tsv:
+        logger.info('Outputting TSV to %s', tsv)
+        to_tsv(graph, tsv)
 
     if sif:
         logger.info('Outputting SIF to %s', sif)
@@ -240,12 +239,12 @@ def serialize(graph: BELGraph, csv, sif, gsea, graphml, json, bel):
         logger.info('Outputting GRP to %s', gsea)
         to_gsea(graph, gsea)
 
-    if json:
-        logger.info('Outputting JSON to %s', json)
-        to_nodelink_file(graph, json)
+    if nodelink:
+        logger.info('Outputting Nodelink JSON to %s', nodelink)
+        to_nodelink_file(graph, nodelink)
 
     if bel:
-        logger.info('Outputting BEL to %s', bel)
+        logger.info('Outputting BEL script to %s', bel)
         to_bel_script(graph, bel)
 
 
