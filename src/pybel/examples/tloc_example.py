@@ -12,7 +12,7 @@
     p(SFAM:"RAS Family",pmod(F)) directlyIncreases tloc(p(SFAM:"RAS Family"),MESHCS:"Intracellular Space",MESHCS:"Cell Membrane")
 """
 
-from ..dsl import activity, complex_abundance, pmod, protein, translocation
+from ..dsl import ComplexAbundance, Protein, ProteinModification, activity, translocation
 from ..language import Entity
 from ..struct.graph import BELGraph
 
@@ -33,11 +33,11 @@ ras_tloc_graph.namespace_url.update({
 evidence = "These modifications render Ras functional and capable of localizing to the lipid-rich inner surface of the cell membrane. The first and most critical modification, farnesylation, which is principally catalyzed by protein FTase, adds a 15-carbon hydrobobic farnesyl isoprenyl tail to the carboxyl terminus of Ras."
 pmid = '16170185'
 
-fnta = protein(namespace='HGNC', name='FNTA', identifier='3782')
-fntb = protein(namespace='HGNC', name='FNTA', identifier='3785')
-fnt = complex_abundance(namespace='FPLX', name='FNT', identifier='RAS', members=[fnta, fntb])
-ras = protein(namespace='FPLX', name='RAS', identifier='RAS')
-ras_farn = ras.with_variants(pmod('Farn'))
+fnta = Protein(namespace='HGNC', name='FNTA', identifier='3782')
+fntb = Protein(namespace='HGNC', name='FNTA', identifier='3785')
+fnt = ComplexAbundance(namespace='FPLX', name='FNT', identifier='RAS', members=[fnta, fntb])
+ras = Protein(namespace='FPLX', name='RAS', identifier='RAS')
+ras_farn = ras.with_variants(ProteinModification('Farn'))
 
 ras_tloc_graph.add_directly_increases(
     fnt,

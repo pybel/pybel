@@ -15,7 +15,7 @@ __all__ = [
 ]
 
 
-def to_neo4j(graph, neo_connection, use_tqdm=False):
+def to_neo4j(graph, neo_connection, use_tqdm: bool = False):
     """Upload a BEL graph to a Neo4j graph database using :mod:`py2neo`.
 
     :param pybel.BELGraph graph: A BEL Graph

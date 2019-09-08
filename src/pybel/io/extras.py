@@ -6,18 +6,17 @@ import json
 from typing import BinaryIO, Optional, TextIO, Union
 
 import networkx as nx
+from networkx.utils import open_file
 
-from ..constants import NAME, NAMESPACE, RELATION
+from ..constants import RELATION
+from ..dsl import CentralDogma
 from ..struct import BELGraph
 
 __all__ = [
     'to_graphml',
     'to_csv',
-    'to_csv_path',
     'to_sif',
-    'to_sif_path',
     'to_gsea',
-    'to_gsea_path',
 ]
 
 
@@ -43,7 +42,8 @@ def to_graphml(graph: BELGraph, path: Union[str, BinaryIO]) -> None:
     nx.write_graphml(rv, path)
 
 
-def to_csv(graph: BELGraph, file: Optional[TextIO] = None, sep: Optional[str] = None) -> None:
+@open_file(1, mode='w')
+def to_csv(graph: BELGraph, path: Union[str, TextIO], sep: Optional[str] = None) -> None:
     """Write the graph as a tab-separated edge list.
 
     The resulting file will contain the following columns:
@@ -64,17 +64,12 @@ def to_csv(graph: BELGraph, file: Optional[TextIO] = None, sep: Optional[str] = 
             graph.edge_to_bel(u, v, edge_data=data, sep=sep),
             json.dumps(data),
             sep=sep,
-            file=file,
+            file=path,
         )
 
 
-def to_csv_path(graph: BELGraph, path: str, sep: Optional[str] = None) -> None:
-    """Write the graph as a tab-separated edge list to a file at the given path."""
-    with open(path, 'w') as file:
-        to_csv(graph, file, sep=sep)
-
-
-def to_sif(graph: BELGraph, file: Optional[TextIO] = None, sep: Optional[str] = None) -> None:
+@open_file(1, mode='w')
+def to_sif(graph: BELGraph, path: Union[str, TextIO], sep: Optional[str] = None) -> None:
     """Write the graph as a tab-separated SIF file.
 
     The resulting file will contain the following columns:
@@ -92,17 +87,12 @@ def to_sif(graph: BELGraph, file: Optional[TextIO] = None, sep: Optional[str] = 
     for u, v, data in graph.edges(data=True):
         print(
             graph.edge_to_bel(u, v, edge_data=data, sep=sep),
-            file=file,
+            file=path,
         )
 
 
-def to_sif_path(graph: BELGraph, path: str, sep: Optional[str] = None) -> None:
-    """Write the graph as a tab-separated SIF file. to a file at the given path."""
-    with open(path, 'w') as file:
-        to_sif(graph, file, sep=sep)
-
-
-def to_gsea(graph: BELGraph, file: Optional[TextIO] = None) -> None:
+@open_file(1, mode='w')
+def to_gsea(graph: BELGraph, path: Union[str, TextIO]) -> None:
     """Write the genes/gene products to a GRP file for use with GSEA gene set enrichment analysis.
 
     .. seealso::
@@ -110,17 +100,11 @@ def to_gsea(graph: BELGraph, file: Optional[TextIO] = None) -> None:
         - GRP `format specification <http://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats#GRP:_Gene_set_file_format_.28.2A.grp.29>`_
         - GSEA `publication <https://doi.org/10.1073/pnas.0506580102>`_
     """
-    print('# {}'.format(graph.name), file=file)
-    nodes = {
-        data[NAME]
-        for data in graph
-        if NAMESPACE in data and data[NAMESPACE].upper() == 'HGNC' and NAME in data
+    print('# {}'.format(graph.name), file=path)
+    hgnc_gene_symbols = {
+        node.name
+        for node in graph
+        if isinstance(node, CentralDogma) and node.namespace.lower() == 'hgnc'
     }
-    for node in sorted(nodes):
-        print(node, file=file)
-
-
-def to_gsea_path(graph: BELGraph, path: str) -> None:
-    """Write the genes/gene products to a GRP file at the given path for use with GSEA gene set enrichment analysis."""
-    with open(path, 'w') as file:
-        to_gsea(graph, file)
+    for hgnc_gene_symbol in sorted(hgnc_gene_symbols):
+        print(hgnc_gene_symbol, file=path)

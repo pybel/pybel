@@ -8,11 +8,12 @@ from .constants import (
     CONCEPT, FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_START, FRAGMENT_STOP, FUNCTION, FUSION, FUSION_MISSING,
     FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, HGVS, IDENTIFIER, KIND, MEMBERS, MODIFIER, NAME, NAMESPACE,
     PARTNER_3P, PARTNER_5P, PMOD, PMOD_CODE, PMOD_POSITION, PRODUCTS, RANGE_3P, RANGE_5P, REACTANTS, REACTION, TARGET,
-    VARIANTS, XREFS
+    VARIANTS, XREFS,
 )
 from .dsl import (
-    BaseAbundance, BaseEntity, CentralDogma, FUNC_TO_DSL, FUNC_TO_FUSION_DSL, FUNC_TO_LIST_DSL, FusionBase,
-    FusionRangeBase, ListAbundance, Reaction, Variant, fragment, fusion_range, gmod, hgvs, missing_fusion_range, pmod,
+    BaseAbundance, BaseEntity, CentralDogma, EnumeratedFusionRange, FUNC_TO_DSL, FUNC_TO_FUSION_DSL, FUNC_TO_LIST_DSL,
+    Fragment, FusionBase, FusionRangeBase, GeneModification, Hgvs, ListAbundance, MissingFusionRange,
+    ProteinModification, Reaction, Variant,
 )
 
 __all__ = [
@@ -96,9 +97,9 @@ def _fusion_range_to_dsl(tokens) -> FusionRangeBase:
     :type tokens: ParseResult
     """
     if FUSION_MISSING in tokens:
-        return missing_fusion_range()
+        return MissingFusionRange()
 
-    return fusion_range(
+    return EnumeratedFusionRange(
         reference=tokens[FUSION_REFERENCE],
         start=tokens[FUSION_START],
         stop=tokens[FUSION_STOP],
@@ -153,11 +154,11 @@ def _variant_to_dsl_helper(tokens) -> Variant:
     kind = tokens[KIND]
 
     if kind == HGVS:
-        return hgvs(tokens[HGVS])
+        return Hgvs(tokens[HGVS])
 
     if kind == GMOD:
         concept = tokens[CONCEPT]
-        return gmod(
+        return GeneModification(
             name=concept[NAME],
             namespace=concept[NAMESPACE],
             identifier=concept.get(IDENTIFIER),
@@ -166,7 +167,7 @@ def _variant_to_dsl_helper(tokens) -> Variant:
 
     if kind == PMOD:
         concept = tokens[CONCEPT]
-        return pmod(
+        return ProteinModification(
             name=concept[NAME],
             namespace=concept[NAMESPACE],
             identifier=concept.get(IDENTIFIER),
@@ -177,7 +178,7 @@ def _variant_to_dsl_helper(tokens) -> Variant:
 
     if kind == FRAGMENT:
         start, stop = tokens.get(FRAGMENT_START), tokens.get(FRAGMENT_STOP)
-        return fragment(
+        return Fragment(
             start=start,
             stop=stop,
             description=tokens.get(FRAGMENT_DESCRIPTION),

@@ -9,16 +9,16 @@ from collections import Counter
 import sqlalchemy.exc
 from sqlalchemy import not_
 
-from pybel import BELGraph, from_database, from_path, to_database
+from pybel import BELGraph, from_bel_script, from_database, to_database
 from pybel.constants import (
     ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_REFERENCE,
     CITATION_TYPE, CITATION_TYPE_OTHER, CITATION_TYPE_PUBMED, DECREASES, HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT,
     INCREASES, METADATA_NAME, METADATA_VERSION, MIRNA, PATHOLOGY, PROTEIN, RELATION,
 )
 from pybel.dsl import (
-    BaseEntity, Pathology, activity, complex_abundance, composite_abundance, degradation, fragment, fusion_range,
-    gene, gene_fusion, gmod, hgvs, location, named_complex_abundance, pmod, protein, reaction,
-    secretion, translocation,
+    BaseEntity, ComplexAbundance, CompositeAbundance, EnumeratedFusionRange, Fragment, Gene, GeneFusion,
+    GeneModification, Hgvs, NamedComplexAbundance, Pathology, Protein, ProteinModification, Reaction, activity,
+    degradation, location, secretion, translocation,
 )
 from pybel.dsl.namespaces import chebi, hgnc, mirbase
 from pybel.examples import ras_tloc_graph, sialic_acid_graph
@@ -40,18 +40,18 @@ jun = hgnc('JUN')
 mirna_1 = mirbase(n())
 mirna_2 = mirbase(n())
 pathology_1 = Pathology('DO', n())
-ap1_complex = complex_abundance([fos, jun])
+ap1_complex = ComplexAbundance([fos, jun])
 
-egfr_dimer = complex_abundance([egfr, egfr])
+egfr_dimer = ComplexAbundance([egfr, egfr])
 
 yfg_data = hgnc('YFG')
 e2f4_data = hgnc('E2F4')
-bound_ap1_e2f4 = complex_abundance([ap1_complex, e2f4_data])
+bound_ap1_e2f4 = ComplexAbundance([ap1_complex, e2f4_data])
 
 superoxide = chebi('superoxide')
 hydrogen_peroxide = chebi('hydrogen peroxide')
 oxygen = chebi('oxygen')
-superoxide_decomposition = reaction(reactants=[superoxide], products=[hydrogen_peroxide, oxygen])
+superoxide_decomposition = Reaction(reactants=[superoxide], products=[hydrogen_peroxide, oxygen])
 
 
 def assert_unqualified_edge(test_case, u: BaseEntity, v: BaseEntity, rel: str) -> None:
@@ -460,10 +460,11 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
     @classmethod
     def setUpClass(cls):
         """Set up the class with a BEL graph and its corresponding SQLAlchemy model."""
-        super(TestEdgeStore, cls).setUpClass()
+        super().setUpClass()
 
         with mock_bel_resources:
-            cls.graph = from_path(test_bel_simple, manager=cls.manager, allow_nested=True)
+            cls.graph = from_bel_script(test_bel_simple, manager=cls.manager, allow_nested=True)
+            print(cls.graph.graph)
             cls.network = cls.manager.insert_graph(cls.graph, store_parts=True)
 
     def test_citations(self):
@@ -539,7 +540,7 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertEqual(1, self.graph.number_of_nodes())
 
     def test_single_variant(self):
-        node_data = gene('HGNC', 'AKT1', variants=hgvs('p.Phe508del'))
+        node_data = Gene('HGNC', 'AKT1', variants=Hgvs('p.Phe508del'))
         node_parent_data = node_data.get_parent()
 
         self.graph.add_node_from_data(node_data)
@@ -549,8 +550,8 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertEqual(1, self.graph.number_of_edges())
 
     def test_multiple_variants(self):
-        node_data = gene('HGNC', 'AKT1', variants=[
-            hgvs('p.Phe508del'), hgvs('p.Phe509del')
+        node_data = Gene('HGNC', 'AKT1', variants=[
+            Hgvs('p.Phe508del'), Hgvs('p.Phe509del')
         ])
         node_parent_data = node_data.get_parent()
         node_parent_tuple = node_parent_data
@@ -562,11 +563,11 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertEqual(1, self.graph.number_of_edges())
 
     def test_fusion(self):
-        node_data = gene_fusion(
-            partner_5p=gene('HGNC', 'TMPRSS2'),
-            partner_3p=gene('HGNC', 'ERG'),
-            range_5p=fusion_range('c', 1, 79),
-            range_3p=fusion_range('c', 312, 5034)
+        node_data = GeneFusion(
+            partner_5p=Gene('HGNC', 'TMPRSS2'),
+            partner_3p=Gene('HGNC', 'ERG'),
+            range_5p=EnumeratedFusionRange('c', 1, 79),
+            range_3p=EnumeratedFusionRange('c', 312, 5034)
         )
         node_data = node_data
 
@@ -576,9 +577,9 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertEqual(0, self.graph.number_of_edges())
 
     def test_composite(self):
-        il23 = named_complex_abundance('GO', 'interleukin-23 complex')
-        il6 = protein('HGNC', 'IL6')
-        node_data = composite_abundance([il23, il6])
+        il23 = NamedComplexAbundance(namespace='GO', name='interleukin-23 complex')
+        il6 = Protein(namespace='HGNC', name='IL6')
+        node_data = CompositeAbundance([il23, il6])
 
         self.graph.add_node_from_data(node_data)
         self.assertIn(node_data, self.graph)
@@ -610,7 +611,7 @@ class TestAddNodeFromData(unittest.TestCase):
         assert_unqualified_edge(self, superoxide_decomposition, oxygen, HAS_PRODUCT)
 
     def test_complex(self):
-        node = complex_abundance(members=[fos, jun])
+        node = ComplexAbundance(members=[fos, jun])
 
         self.graph.add_node_from_data(node)
         self.assertIn(node, self.graph)
@@ -676,36 +677,36 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         self._help_reconstitute(yfg_data, 1, 0)
 
     @mock_bel_resources
-    def test_hgvs(self, mock):
-        node_data = gene(namespace='HGNC', name='AKT1', variants=hgvs('p.Phe508del'))
+    def test_Hgvs(self, mock):
+        node_data = Gene(namespace='HGNC', name='AKT1', variants=Hgvs('p.Phe508del'))
         self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
     def test_fragment_unspecified(self, mock):
         dummy_namespace = n()
         dummy_name = n()
-        node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[fragment()])
+        node_data = Protein(namespace=dummy_namespace, name=dummy_name, variants=[Fragment()])
         self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
     def test_fragment_specified(self, mock):
         dummy_namespace = n()
         dummy_name = n()
-        node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[fragment(start=5, stop=8)])
+        node_data = Protein(namespace=dummy_namespace, name=dummy_name, variants=[Fragment(start=5, stop=8)])
         self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
     def test_fragment_specified_start_only(self, mock):
         dummy_namespace = n()
         dummy_name = n()
-        node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[fragment(start=5, stop='*')])
+        node_data = Protein(namespace=dummy_namespace, name=dummy_name, variants=[Fragment(start=5, stop='*')])
         self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
     def test_fragment_specified_end_only(self, mock):
         dummy_namespace = n()
         dummy_name = n()
-        node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[fragment(start='*', stop=1000)])
+        node_data = Protein(namespace=dummy_namespace, name=dummy_name, variants=[Fragment(start='*', stop=1000)])
         self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
@@ -716,8 +717,8 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         dummy_mod_namespace = 'GO'
         dummy_mod_name = 'DNA Methylation'
 
-        node_data = gene(namespace=dummy_namespace, name=dummy_name,
-                         variants=[gmod(name=dummy_mod_name, namespace=dummy_mod_namespace)])
+        node_data = Gene(namespace=dummy_namespace, name=dummy_name,
+                         variants=[GeneModification(name=dummy_mod_name, namespace=dummy_mod_namespace)])
         self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
@@ -726,7 +727,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         dummy_namespace = n()
         dummy_name = n()
 
-        node_data = gene(namespace=dummy_namespace, name=dummy_name, variants=[gmod('Me')])
+        node_data = Gene(namespace=dummy_namespace, name=dummy_name, variants=[GeneModification('Me')])
         self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
@@ -734,7 +735,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         dummy_namespace = n()
         dummy_name = n()
 
-        node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[pmod('Me')])
+        node_data = Protein(namespace=dummy_namespace, name=dummy_name, variants=[ProteinModification('Me')])
         self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
@@ -744,8 +745,8 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         dummy_mod_namespace = 'GO'
         dummy_mod_name = 'Protein phosphorylation'
 
-        node_data = protein(namespace=dummy_namespace, name=dummy_name,
-                            variants=[pmod(name=dummy_mod_name, namespace=dummy_mod_namespace)])
+        node_data = Protein(namespace=dummy_namespace, name=dummy_name,
+                            variants=[ProteinModification(name=dummy_mod_name, namespace=dummy_mod_namespace)])
         self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
@@ -753,7 +754,8 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         dummy_namespace = n()
         dummy_name = n()
 
-        node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[pmod('Me', code='Ser')])
+        node_data = Protein(namespace=dummy_namespace, name=dummy_name,
+                            variants=[ProteinModification('Me', code='Ser')])
         self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
@@ -763,10 +765,10 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         dummy_mod_namespace = 'GO'
         dummy_mod_name = 'Protein phosphorylation'
 
-        node_data = protein(
+        node_data = Protein(
             namespace=dummy_namespace,
             name=dummy_name,
-            variants=[pmod(name=dummy_mod_name, namespace=dummy_mod_namespace, code='Ser')]
+            variants=[ProteinModification(name=dummy_mod_name, namespace=dummy_mod_namespace, code='Ser')]
         )
         self._help_reconstitute(node_data, 2, 1)
 
@@ -775,7 +777,8 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         dummy_namespace = n()
         dummy_name = n()
 
-        node_data = protein(namespace=dummy_namespace, name=dummy_name, variants=[pmod('Me', code='Ser', position=5)])
+        node_data = Protein(namespace=dummy_namespace, name=dummy_name,
+                            variants=[ProteinModification('Me', code='Ser', position=5)])
         self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
@@ -785,44 +788,44 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         dummy_mod_namespace = 'GO'
         dummy_mod_name = 'Protein phosphorylation'
 
-        node_data = protein(
+        node_data = Protein(
             namespace=dummy_namespace,
             name=dummy_name,
-            variants=[pmod(name=dummy_mod_name, namespace=dummy_mod_namespace, code='Ser', position=5)]
+            variants=[ProteinModification(name=dummy_mod_name, namespace=dummy_mod_namespace, code='Ser', position=5)]
         )
         self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
     def test_multiple_variants(self, mock):
-        node_data = gene(namespace='HGNC', name='AKT1', variants=[
-            hgvs('p.Phe508del'),
-            hgvs('p.Phe509del')
+        node_data = Gene(namespace='HGNC', name='AKT1', variants=[
+            Hgvs('p.Phe508del'),
+            Hgvs('p.Phe509del')
         ])
         self._help_reconstitute(node_data, 2, 1)
 
     @mock_bel_resources
     def test_fusion_specified(self, mock):
-        node_data = gene_fusion(
-            gene('HGNC', 'TMPRSS2'),
-            gene('HGNC', 'ERG'),
-            fusion_range('c', 1, 79),
-            fusion_range('c', 312, 5034),
+        node_data = GeneFusion(
+            Gene('HGNC', 'TMPRSS2'),
+            Gene('HGNC', 'ERG'),
+            EnumeratedFusionRange('c', 1, 79),
+            EnumeratedFusionRange('c', 312, 5034),
         )
         self._help_reconstitute(node_data, 1, 0)
 
     @mock_bel_resources
     def test_fusion_unspecified(self, mock):
-        node_data = gene_fusion(
-            gene('HGNC', 'TMPRSS2'),
-            gene('HGNC', 'ERG'),
+        node_data = GeneFusion(
+            Gene('HGNC', 'TMPRSS2'),
+            Gene('HGNC', 'ERG'),
         )
         self._help_reconstitute(node_data, 1, 0)
 
     @mock_bel_resources
     def test_composite(self, mock):
-        interleukin_23_complex = named_complex_abundance('GO', 'interleukin-23 complex')
+        interleukin_23_complex = NamedComplexAbundance('GO', 'interleukin-23 complex')
         il6 = hgnc('IL6')
-        interleukin_23_and_il6 = composite_abundance([interleukin_23_complex, il6])
+        interleukin_23_and_il6 = CompositeAbundance([interleukin_23_complex, il6])
 
         self._help_reconstitute(interleukin_23_and_il6, 3, 2)
 
@@ -851,8 +854,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
     def test_translocation_default(self, mock):
         """This test checks that a translocation gets in the database properly"""
         self.graph.add_increases(
-            protein(name='F2', namespace='HGNC'),
-            protein(name='EDN1', namespace='HGNC'),
+            Protein(name='F2', namespace='HGNC'),
+            Protein(name='EDN1', namespace='HGNC'),
             evidence='In endothelial cells, ET-1 secretion is detectable under basal conditions, whereas thrombin '
                      'induces its secretion.',
             citation='10473669',
@@ -871,8 +874,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
     @mock_bel_resources
     def test_subject_translocation_custom_to_loc(self, mock):
         self.graph.add_increases(
-            protein(name='F2', namespace='HGNC'),
-            protein(name='EDN1', namespace='HGNC'),
+            Protein(name='F2', namespace='HGNC'),
+            Protein(name='EDN1', namespace='HGNC'),
             evidence='In endothelial cells, ET-1 secretion is detectable under basal conditions, whereas thrombin induces its secretion.',
             citation='10473669',
             subject_modifier=translocation(
@@ -896,8 +899,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         p2_name = n()
 
         self.graph.add_increases(
-            protein(name=p1_name, namespace='HGNC'),
-            protein(name=p2_name, namespace='HGNC'),
+            Protein(name=p1_name, namespace='HGNC'),
+            Protein(name=p2_name, namespace='HGNC'),
             evidence=n(),
             citation=n(),
             subject_modifier=activity('kin')
@@ -926,8 +929,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         dummy_activity_name = n()
 
         self.graph.add_increases(
-            protein(name=p1_name, namespace='HGNC'),
-            protein(name=p2_name, namespace='HGNC'),
+            Protein(name=p1_name, namespace='HGNC'),
+            Protein(name=p2_name, namespace='HGNC'),
             evidence=n(),
             citation=n(),
             subject_modifier=activity(name=dummy_activity_name, namespace=dummy_activity_namespace)
@@ -954,8 +957,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         p2_name = n()
 
         self.graph.add_increases(
-            protein(name=p1_name, namespace='HGNC'),
-            protein(name=p2_name, namespace='HGNC'),
+            Protein(name=p1_name, namespace='HGNC'),
+            Protein(name=p2_name, namespace='HGNC'),
             evidence=n(),
             citation=n(),
             object_modifier=activity('kin')
@@ -984,8 +987,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         dummy_activity_name = n()
 
         self.graph.add_increases(
-            protein(name=p1_name, namespace='HGNC'),
-            protein(name=p2_name, namespace='HGNC'),
+            Protein(name=p1_name, namespace='HGNC'),
+            Protein(name=p2_name, namespace='HGNC'),
             evidence=n(),
             citation=n(),
             object_modifier=activity(name=dummy_activity_name, namespace=dummy_activity_namespace)
@@ -1008,8 +1011,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
     def test_subject_degradation(self):
         self.graph.add_association(
-            protein(name='YFG', namespace='HGNC'),
-            protein(name='YFG2', namespace='HGNC'),
+            Protein(name='YFG', namespace='HGNC'),
+            Protein(name='YFG2', namespace='HGNC'),
             evidence=n(),
             citation=n(),
             subject_modifier=degradation(),
@@ -1026,8 +1029,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
     def test_object_degradation(self):
         self.graph.add_association(
-            protein(name='YFG', namespace='HGNC'),
-            protein(name='YFG2', namespace='HGNC'),
+            Protein(name='YFG', namespace='HGNC'),
+            Protein(name='YFG2', namespace='HGNC'),
             evidence=n(),
             citation=n(),
             object_modifier=degradation(),
@@ -1044,8 +1047,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
     def test_subject_location(self):
         self.graph.add_association(
-            protein(name='YFG', namespace='HGNC'),
-            protein(name='YFG2', namespace='HGNC'),
+            Protein(name='YFG', namespace='HGNC'),
+            Protein(name='YFG2', namespace='HGNC'),
             evidence=n(),
             citation=n(),
             subject_modifier=location(Entity(namespace='GO', name='nucleus', identifier='GO:0005634'))
@@ -1063,8 +1066,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
     def test_mixed_1(self):
         """Test mixed having location and something else."""
         self.graph.add_increases(
-            protein(namespace='HGNC', name='CDC42'),
-            protein(namespace='HGNC', name='PAK2'),
+            Protein(namespace='HGNC', name='CDC42'),
+            Protein(namespace='HGNC', name='PAK2'),
             evidence="""Summary: PAK proteins, a family of serine/threonine p21-activating kinases, include PAK1, PAK2,
          PAK3 and PAK4. PAK proteins are critical effectors that link Rho GTPases to cytoskeleton reorganization
          and nuclear signaling. They serve as targets for the small GTP binding proteins Cdc42 and Rac and have
@@ -1103,8 +1106,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
     def test_mixed_2(self):
         """Tests both subject and object activity with location information as well."""
         self.graph.add_directly_increases(
-            protein(namespace='HGNC', name='HDAC4'),
-            protein(namespace='HGNC', name='MEF2A'),
+            Protein(namespace='HGNC', name='HDAC4'),
+            Protein(namespace='HGNC', name='MEF2A'),
             citation='10487761',
             evidence=""""In the nucleus, HDAC4 associates with the myocyte enhancer factor MEF2A. Binding of HDAC4 to
         MEF2A results in the repression of MEF2A transcriptional activation, a function that requires the
@@ -1143,8 +1146,8 @@ class TestNoAddNode(TemporaryCacheMixin):
         DBSNP_PATTERN = 'rs[0-9]+'
         graph.namespace_pattern[dbsnp] = DBSNP_PATTERN
 
-        rs1234 = gene(namespace=dbsnp, name='rs1234')
-        rs1235 = gene(namespace=dbsnp, name='rs1235')
+        rs1234 = Gene(namespace=dbsnp, name='rs1234')
+        rs1235 = Gene(namespace=dbsnp, name='rs1235')
 
         graph.add_node_from_data(rs1234)
         graph.add_node_from_data(rs1235)
@@ -1179,8 +1182,8 @@ class TestEquivalentNodes(unittest.TestCase):
     def test_direct_has_namespace(self):
         graph = BELGraph()
 
-        n1 = protein(namespace='HGNC', name='CD33', identifier='1659')
-        n2 = protein(namespace='NOPE', name='NOPE', identifier='NOPE')
+        n1 = Protein(namespace='HGNC', name='CD33', identifier='1659')
+        n2 = Protein(namespace='NOPE', name='NOPE', identifier='NOPE')
 
         graph.add_increases(n1, n2, citation=n(), evidence=n())
 
@@ -1192,8 +1195,8 @@ class TestEquivalentNodes(unittest.TestCase):
     def test_indirect_has_namespace(self):
         graph = BELGraph()
 
-        a = protein(namespace='HGNC', name='CD33')
-        b = protein(namespace='HGNCID', identifier='1659')
+        a = Protein(namespace='HGNC', name='CD33')
+        b = Protein(namespace='HGNCID', identifier='1659')
 
         graph.add_equivalence(a, b)
 
@@ -1206,10 +1209,10 @@ class TestEquivalentNodes(unittest.TestCase):
     def test_triangle_has_namespace(self):
         graph = BELGraph()
 
-        a = protein(namespace='A', name='CD33')
-        b = protein(namespace='B', identifier='1659')
-        c = protein(namespace='C', identifier='1659')
-        d = protein(namespace='HGNC', identifier='1659')
+        a = Protein(namespace='A', name='CD33')
+        b = Protein(namespace='B', identifier='1659')
+        c = Protein(namespace='C', identifier='1659')
+        d = Protein(namespace='HGNC', identifier='1659')
 
         graph.add_equivalence(a, b)
         graph.add_equivalence(b, c)

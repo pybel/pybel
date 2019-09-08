@@ -5,7 +5,9 @@
 import itertools as itt
 import logging
 import time
-from typing import Iterable, List, Mapping, Optional, TextIO, Tuple
+from typing import Iterable, List, Mapping, Optional, TextIO, Tuple, Union
+
+from networkx.utils import open_file
 
 import bel_resources.constants
 from bel_resources import make_knowledge_header
@@ -20,15 +22,37 @@ from .utils import ensure_quotes
 from .version import VERSION
 
 __all__ = [
-    'to_bel_lines',
-    'to_bel',
-    'to_bel_path',
+    'to_bel_script',
+    'to_bel_script_lines',
     'edge_to_bel',
 ]
 
 log = logging.getLogger(__name__)
 
 EdgeTuple = Tuple[BaseEntity, BaseEntity, str, EdgeData]
+
+
+@open_file(1, mode='w')
+def to_bel_script(graph, path: Union[str, TextIO]) -> None:
+    """Write the BELGraph as a canonical BEL script.
+
+    :param BELGraph graph: the BEL Graph to output as a BEL Script
+    :param path: A path or file-like.
+    """
+    for line in to_bel_script_lines(graph):
+        print(line, file=path)
+
+
+def to_bel_script_lines(graph) -> Iterable[str]:
+    """Iterate over the lines of the BEL graph as a canonical BEL script.
+
+    :param pybel.BELGraph graph: A BEL Graph
+    """
+    return itt.chain(
+        _to_bel_lines_header(graph),
+        _to_bel_lines_body(graph),
+        _to_bel_lines_footer(graph),
+    )
 
 
 def postpend_location(bel_string: str, location_model) -> str:
@@ -270,39 +294,6 @@ def _to_bel_lines_footer(graph) -> Iterable[str]:
 
         yield 'UNSET SupportingText'
         yield 'UNSET Citation'
-
-
-def to_bel_lines(graph) -> Iterable[str]:
-    """Iterate over the lines of the BEL graph as a canonical BEL Script (.bel).
-
-    :param pybel.BELGraph graph: the BEL Graph to output as a BEL Script
-    """
-    return itt.chain(
-        _to_bel_lines_header(graph),
-        _to_bel_lines_body(graph),
-        _to_bel_lines_footer(graph),
-    )
-
-
-def to_bel(graph, file: Optional[TextIO] = None) -> None:
-    """Output the BEL graph as canonical BEL to the given file/file-like/stream.
-
-    :param BELGraph graph: the BEL Graph to output as a BEL Script
-    :param file: A writable file-like object. If None, defaults to standard out.
-    """
-    for line in to_bel_lines(graph):
-        print(line, file=file)
-
-
-def to_bel_path(graph, path: str, mode: str = 'w', **kwargs) -> None:
-    """Write the BEL graph as a canonical BEL Script to the given path.
-
-    :param BELGraph graph: the BEL Graph to output as a BEL Script
-    :param path: A file path
-    :param mode: The file opening mode. Defaults to 'w'
-    """
-    with open(path, mode=mode, **kwargs) as bel_file:
-        to_bel(graph, bel_file)
 
 
 def calculate_canonical_name(node: BaseEntity) -> str:

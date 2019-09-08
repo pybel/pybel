@@ -22,7 +22,7 @@ from ..constants import (
     METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION,
     MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PMOD, RANGE_3P, RANGE_5P, SUBJECT,
 )
-from ..dsl import fragment, fusion_range, gmod, hgvs, missing_fusion_range, pmod
+from ..dsl import EnumeratedFusionRange, Fragment, GeneModification, Hgvs, MissingFusionRange, ProteinModification
 from ..io.gpickle import from_bytes, to_bytes
 from ..tokens import parse_result_to_dsl
 
@@ -363,22 +363,22 @@ class Modification(Base):
         :rtype: dict
         """
         if self.p5_reference:
-            range_5p = fusion_range(
+            range_5p = EnumeratedFusionRange(
                 reference=str(self.p5_reference),
                 start=int_or_str(self.p5_start),
                 stop=int_or_str(self.p5_stop),
             )
         else:
-            range_5p = missing_fusion_range()
+            range_5p = MissingFusionRange()
 
         if self.p3_reference:
-            range_3p = fusion_range(
+            range_3p = EnumeratedFusionRange(
                 reference=str(self.p3_reference),
                 start=int_or_str(self.p3_start),
                 stop=int_or_str(self.p3_stop),
             )
         else:
-            range_3p = missing_fusion_range()
+            range_3p = MissingFusionRange()
 
         return {
             PARTNER_5P: self.p5_partner.to_json(),  # just the identifier pair
@@ -397,23 +397,23 @@ class Modification(Base):
             return self._fusion_to_json()
 
         if self.type == FRAGMENT:
-            return fragment(
+            return Fragment(
                 start=int_or_str(self.p3_start),
                 stop=int_or_str(self.p3_stop),
             )
 
         if self.type == HGVS:
-            return hgvs(str(self.variantString))
+            return Hgvs(str(self.variantString))
 
         if self.type == GMOD:
-            return gmod(
+            return GeneModification(
                 namespace=self.identifier.namespace.keyword,
                 name=self.identifier.name,
                 identifier=self.identifier.identifier,
             )
 
         if self.type == PMOD:
-            return pmod(
+            return ProteinModification(
                 namespace=self.identifier.namespace.keyword,
                 name=self.identifier.name,
                 identifier=self.identifier.identifier,

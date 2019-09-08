@@ -12,7 +12,7 @@ from pybel.constants import (
     EVIDENCE, INCREASES, METADATA_AUTHORS, METADATA_DESCRIPTION, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION,
     OPENBEL_ANNOTATION_RESOURCES, RELATION, hbp_namespace,
 )
-from pybel.dsl import BaseEntity, complex_abundance, pathology, protein
+from pybel.dsl import BaseEntity, ComplexAbundance, Pathology, Protein
 from pybel.dsl.namespaces import hgnc
 from pybel.parser.exc import (
     BELParserWarning, BELSyntaxError, IllegalAnnotationValueWarning, InvalidCitationLengthException,
@@ -433,10 +433,10 @@ class BelReconstitutionMixin(TestGraphMixin):
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)
 
-        adgrb1 = protein(namespace='HGNC', name='ADGRB1')
-        adgrb2 = protein(namespace='HGNC', name='ADGRB2')
-        adgrb_complex = complex_abundance([adgrb1, adgrb2])
-        achlorhydria = pathology(namespace='MESHD', name='Achlorhydria')
+        adgrb1 = Protein(namespace='HGNC', name='ADGRB1')
+        adgrb2 = Protein(namespace='HGNC', name='ADGRB2')
+        adgrb_complex = ComplexAbundance([adgrb1, adgrb2])
+        achlorhydria = Pathology(namespace='MESHD', name='Achlorhydria')
 
         for node in graph:
             self.assertIsInstance(node, BaseEntity)

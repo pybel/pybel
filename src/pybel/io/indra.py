@@ -43,16 +43,17 @@ __all__ = [
 ]
 
 
-def from_indra_statements(stmts,
-                          name: Optional[str] = None,
-                          version: Optional[str] = None,
-                          description: Optional[str] = None,
-                          authors: Optional[str] = None,
-                          contact: Optional[str] = None,
-                          license: Optional[str] = None,
-                          copyright: Optional[str] = None,
-                          disclaimer: Optional[str] = None,
-                          ):
+def from_indra_statements(
+    stmts,
+    name: Optional[str] = None,
+    version: Optional[str] = None,
+    description: Optional[str] = None,
+    authors: Optional[str] = None,
+    contact: Optional[str] = None,
+    license: Optional[str] = None,
+    copyright: Optional[str] = None,
+    disclaimer: Optional[str] = None,
+):
     """Import a model from :mod:`indra`.
 
     :param List[indra.statements.Statement] stmts: A list of statements
@@ -85,16 +86,17 @@ def from_indra_statements(stmts,
     return graph
 
 
-def from_indra_pickle(path: str,
-                      name: Optional[str] = None,
-                      version: Optional[str] = None,
-                      description: Optional[str] = None,
-                      authors: Optional[str] = None,
-                      contact: Optional[str] = None,
-                      license: Optional[str] = None,
-                      copyright: Optional[str] = None,
-                      disclaimer: Optional[str] = None,
-                      ):
+def from_indra_pickle(
+    path: str,
+    name: Optional[str] = None,
+    version: Optional[str] = None,
+    description: Optional[str] = None,
+    authors: Optional[str] = None,
+    contact: Optional[str] = None,
+    license: Optional[str] = None,
+    copyright: Optional[str] = None,
+    disclaimer: Optional[str] = None,
+):
     """Import a model from :mod:`indra`.
 
     :param path: Path to pickled list of :class:`indra.statements.Statement`
@@ -136,16 +138,17 @@ def to_indra_statements(graph):
     return pbp.statements
 
 
-def from_biopax(path: str,
-                name: Optional[str] = None,
-                version: Optional[str] = None,
-                description: Optional[str] = None,
-                authors: Optional[str] = None,
-                contact: Optional[str] = None,
-                license: Optional[str] = None,
-                copyright: Optional[str] = None,
-                disclaimer: Optional[str] = None,
-                ):
+def from_biopax(
+    path: str,
+    name: Optional[str] = None,
+    version: Optional[str] = None,
+    description: Optional[str] = None,
+    authors: Optional[str] = None,
+    contact: Optional[str] = None,
+    license: Optional[str] = None,
+    copyright: Optional[str] = None,
+    disclaimer: Optional[str] = None,
+):
     """Import a model encoded in Pathway Commons `BioPAX <http://www.biopax.org/>`_ via :mod:`indra`.
 
     :param path: Path to a BioPAX OWL file

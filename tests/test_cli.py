@@ -12,7 +12,7 @@ from click.testing import CliRunner
 
 from pybel import Manager, cli
 from pybel.constants import METADATA_NAME, PYBEL_CONTEXT_TAG
-from pybel.io import from_json, from_path, from_pickle
+from pybel.io import from_nodelink, from_bel_script, from_pickle
 from pybel.manager.database_io import from_database
 from pybel.testing.cases import FleetingTemporaryCacheMixin
 from pybel.testing.constants import test_bel_simple, test_bel_thorough
@@ -59,7 +59,7 @@ class TestCli(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
             self.assertTrue(os.path.exists(test_csv))
 
             self.bel_thorough_reconstituted(from_pickle(test_gpickle))
-            self.bel_thorough_reconstituted(from_path(test_canon))
+            self.bel_thorough_reconstituted(from_bel_script(test_canon))
 
             manager = Manager(connection=self.connection)
             self.bel_thorough_reconstituted(
@@ -82,7 +82,7 @@ class TestCli(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
             self.assertEqual(0, result.exit_code, msg=result.exc_info)
 
             with open(test_json) as f:
-                self.bel_thorough_reconstituted(from_json(json.load(f)))
+                self.bel_thorough_reconstituted(from_nodelink(json.load(f)))
 
     @unittest.skipUnless('NEO_PATH' in os.environ, 'Need environmental variable $NEO_PATH')
     @mock_bel_resources

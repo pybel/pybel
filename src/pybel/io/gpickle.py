@@ -48,20 +48,20 @@ def from_bytes(bytes_graph: bytes, check_version: bool = True) -> BELGraph:
     return graph
 
 
-def to_pickle(graph: BELGraph, file: Union[str, BinaryIO], protocol: int = HIGHEST_PROTOCOL) -> None:
+def to_pickle(graph: BELGraph, path: Union[str, BinaryIO], protocol: int = HIGHEST_PROTOCOL) -> None:
     """Write this graph to a pickle object with :func:`networkx.write_gpickle`.
 
     Note that the pickle module has some incompatibilities between Python 2 and 3. To export a universally importable
     pickle, choose 0, 1, or 2.
 
     :param graph: A BEL graph
-    :param file: A file or filename to write to
+    :param path: A path or file-like
     :param protocol: Pickling protocol to use. Defaults to ``HIGHEST_PROTOCOL``.
 
     .. seealso:: https://docs.python.org/3.6/library/pickle.html#data-stream-format
     """
     raise_for_not_bel(graph)
-    nx.write_gpickle(graph, file, protocol=protocol)
+    nx.write_gpickle(graph, path, protocol=protocol)
 
 
 def from_pickle(path: Union[str, BinaryIO], check_version: bool = True) -> BELGraph:

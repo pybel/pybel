@@ -2,7 +2,7 @@
 
 """An example describing statins."""
 
-from ..dsl import abundance, protein
+from ..dsl import Abundance, Protein
 from ..struct.graph import BELGraph
 
 __all__ = [
@@ -27,17 +27,17 @@ statin_graph.annotation_url.update({
     'Confidence': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/confidence/confidence-1.0.0.belanno',
 })
 
-fluvastatin = abundance(namespace='CHEBI', name='fluvastatin', identifier='38561')
-avorastatin = abundance(namespace='CHEBI', name='atorvastatin', identifier='39548')
-synthetic_statin = abundance(namespace='CHEBI', name='statin (synthetic)', identifier='87635')
-statin = abundance(namespace='CHEBI', name='statin', identifier='87631')
-mevinolinic_acid = abundance(namespace='CHEBI', name='mevinolinic acid', identifier='82985')
-hmgcr_inhibitor = abundance(namespace='CHEBI', identifier='35664',
+fluvastatin = Abundance(namespace='CHEBI', name='fluvastatin', identifier='38561')
+avorastatin = Abundance(namespace='CHEBI', name='atorvastatin', identifier='39548')
+synthetic_statin = Abundance(namespace='CHEBI', name='statin (synthetic)', identifier='87635')
+statin = Abundance(namespace='CHEBI', name='statin', identifier='87631')
+mevinolinic_acid = Abundance(namespace='CHEBI', name='mevinolinic acid', identifier='82985')
+hmgcr_inhibitor = Abundance(namespace='CHEBI', identifier='35664',
                             name='EC 1.1.1.34/EC 1.1.1.88 (hydroxymethylglutaryl-CoA reductase) inhibitor')
-ec_11134 = protein(namespace='EC', name='1.1.1.34')
-ec_11188 = protein(namespace='EC', name='1.1.1.88')
+ec_11134 = Protein(namespace='EC', name='1.1.1.34')
+ec_11188 = Protein(namespace='EC', name='1.1.1.88')
 
-hmgcr = protein(namespace='HGNC', name='HMGCR', identifier='5006')
+hmgcr = Protein(namespace='HGNC', name='HMGCR', identifier='5006')
 
 statin_graph.add_is_a(avorastatin, synthetic_statin)
 statin_graph.add_is_a(fluvastatin, synthetic_statin)
@@ -53,8 +53,8 @@ statin_graph.add_inhibits(
     evidence='From ChEBI',
     citation='23180789',
     annotations={
-        'Confidence': 'Axiomatic'
-    }
+        'Confidence': 'Axiomatic',
+    },
 )
 
 statin_graph.add_inhibits(
@@ -63,6 +63,6 @@ statin_graph.add_inhibits(
     evidence='From ChEBI',
     citation='23180789',
     annotations={
-        'Confidence': 'Axiomatic'
-    }
+        'Confidence': 'Axiomatic',
+    },
 )

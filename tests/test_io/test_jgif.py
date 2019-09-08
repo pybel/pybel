@@ -12,7 +12,7 @@ from pybel.constants import (
     ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_OTHER,
     CITATION_TYPE_PUBMED, DECREASES, DIRECTLY_INCREASES, EFFECT, EVIDENCE, MODIFIER, NAME, NAMESPACE, OBJECT, RELATION,
 )
-from pybel.dsl import Abundance, BiologicalProcess, ComplexAbundance, NamedComplexAbundance, Pathology, Protein, pmod
+from pybel.dsl import Abundance, BiologicalProcess, ComplexAbundance, NamedComplexAbundance, Pathology, Protein, ProteinModification
 from pybel.testing.constants import test_jgif_path
 from tests.constants import TestGraphMixin
 
@@ -71,7 +71,7 @@ jgif_expected_nodes = {
     Protein('SFAM', 'Chemokine Receptor Family'),
     ComplexAbundance([Protein('HGNC', 'CD8A'), Protein('HGNC', 'CD8B')]),
     ComplexAbundance([Protein('HGNC', 'CD8A'), Protein('HGNC', 'CD8B')]),
-    Protein('HGNC', 'PLCG1', variants=pmod('Ph', 'Tyr')),
+    Protein('HGNC', 'PLCG1', variants=ProteinModification('Ph', 'Tyr')),
     Protein('EGID', '21577'),
 }
 

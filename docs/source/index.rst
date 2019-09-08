@@ -70,7 +70,6 @@ PyBEL is tested on Python 3.5+ on Mac OS and Linux using
    :name: topics
 
    topics/cookbook
-   topics/troubleshooting
    topics/cli
 
 .. toctree::

@@ -11,6 +11,13 @@ of these parsers.
 
 See: https://github.com/OpenBEL/language/blob/master/version_2.0/MIGRATE_BEL1_BEL2.md
 
+BEL Parser
+----------
+.. autoclass:: pybel.parser.parse_bel.BELParser
+    :members:
+
+.. autofunction:: pybel.io.line_utils.parse_lines
+
 Metadata Parser
 ---------------
 .. autoclass:: pybel.parser.parse_metadata.MetadataParser
@@ -24,11 +31,6 @@ Control Parser
 Concept Parser
 --------------
 .. autoclass:: pybel.parser.parse_concept.ConceptParser
-    :members:
-
-BEL Parser
-----------
-.. autoclass:: pybel.parser.parse_bel.BELParser
     :members:
 
 Sub-Parsers

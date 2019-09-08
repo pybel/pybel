@@ -5,7 +5,11 @@
 import logging
 
 from pybel.constants import *
-from pybel.dsl import *
+from pybel.dsl import (
+    Abundance, BiologicalProcess, ComplexAbundance, CompositeAbundance, EnumeratedFusionRange, Fragment, Gene,
+    GeneFusion, GeneModification, Hgvs, HgvsReference, HgvsUnspecified, MicroRna, NamedComplexAbundance, Pathology,
+    Protein, ProteinFusion, ProteinModification, Reaction, Rna, RnaFusion, secretion, translocation,
+)
 from pybel.dsl.namespaces import hgnc
 
 log = logging.getLogger(__name__)
@@ -52,89 +56,89 @@ fadd = hgnc(name='FADD')
 casp8 = hgnc(name='CASP8')
 mia = hgnc(name='MIA')
 
-il6 = protein('HGNC', 'IL6')
+il6 = Protein('HGNC', 'IL6')
 
-adgrb1 = protein(namespace='HGNC', name='ADGRB1')
-adgrb2 = protein(namespace='HGNC', name='ADGRB2')
-adgrb_complex = complex_abundance([adgrb1, adgrb2])
-achlorhydria = pathology(namespace='MESHD', name='Achlorhydria')
+adgrb1 = Protein(namespace='HGNC', name='ADGRB1')
+adgrb2 = Protein(namespace='HGNC', name='ADGRB2')
+adgrb_complex = ComplexAbundance([adgrb1, adgrb2])
+achlorhydria = Pathology(namespace='MESHD', name='Achlorhydria')
 
 akt1_rna = akt1.get_rna()
 akt1_gene = akt1_rna.get_gene()
-akt_methylated = akt1_gene.with_variants(gmod('Me'))
-akt1_phe_508_del = akt1_gene.with_variants(hgvs('p.Phe508del'))
+akt_methylated = akt1_gene.with_variants(GeneModification('Me'))
+akt1_phe_508_del = akt1_gene.with_variants(Hgvs('p.Phe508del'))
 
 cftr = hgnc('CFTR')
-cftr_protein_unspecified_variant = cftr.with_variants(hgvs_unspecified())
-cftr_protein_phe_508_del = cftr.with_variants(hgvs('p.Phe508del'))
+cftr_protein_unspecified_variant = cftr.with_variants(HgvsUnspecified())
+cftr_protein_phe_508_del = cftr.with_variants(Hgvs('p.Phe508del'))
 
-adenocarcinoma = pathology('MESHD', 'Adenocarcinoma')
-interleukin_23_complex = named_complex_abundance('GO', 'interleukin-23 complex')
+adenocarcinoma = Pathology('MESHD', 'Adenocarcinoma')
+interleukin_23_complex = NamedComplexAbundance('GO', 'interleukin-23 complex')
 
-oxygen_atom = abundance(namespace='CHEBI', name='oxygen atom')
-hydrogen_peroxide = abundance('CHEBI', 'hydrogen peroxide')
+oxygen_atom = Abundance(namespace='CHEBI', name='oxygen atom')
+hydrogen_peroxide = Abundance('CHEBI', 'hydrogen peroxide')
 
-tmprss2_gene = gene('HGNC', 'TMPRSS2')
+tmprss2_gene = Gene('HGNC', 'TMPRSS2')
 
-tmprss2_erg_gene_fusion = gene_fusion(
+tmprss2_erg_gene_fusion = GeneFusion(
     partner_5p=tmprss2_gene,
-    range_5p=fusion_range('c', 1, 79),
-    partner_3p=gene('HGNC', 'ERG'),
-    range_3p=fusion_range('c', 312, 5034)
+    range_5p=EnumeratedFusionRange('c', 1, 79),
+    partner_3p=Gene('HGNC', 'ERG'),
+    range_3p=EnumeratedFusionRange('c', 312, 5034)
 )
 
-bcr_jak2_gene_fusion = gene_fusion(
-    partner_5p=gene('HGNC', 'BCR'),
-    range_5p=fusion_range('c', '?', 1875),
-    partner_3p=gene('HGNC', 'JAK2'),
-    range_3p=fusion_range('c', 2626, '?')
+bcr_jak2_gene_fusion = GeneFusion(
+    partner_5p=Gene('HGNC', 'BCR'),
+    range_5p=EnumeratedFusionRange('c', '?', 1875),
+    partner_3p=Gene('HGNC', 'JAK2'),
+    range_3p=EnumeratedFusionRange('c', 2626, '?')
 )
 
-chchd4_aifm1_gene_fusion = gene_fusion(
-    partner_5p=gene('HGNC', 'CHCHD4'),
-    partner_3p=gene('HGNC', 'AIFM1')
+chchd4_aifm1_gene_fusion = GeneFusion(
+    partner_5p=Gene('HGNC', 'CHCHD4'),
+    partner_3p=Gene('HGNC', 'AIFM1')
 )
 
-tmprss2_erg_protein_fusion = protein_fusion(
-    partner_5p=protein('HGNC', 'TMPRSS2'),
-    range_5p=fusion_range('p', 1, 79),
-    partner_3p=protein('HGNC', 'ERG'),
-    range_3p=fusion_range('p', 312, 5034)
+tmprss2_erg_protein_fusion = ProteinFusion(
+    partner_5p=Protein('HGNC', 'TMPRSS2'),
+    range_5p=EnumeratedFusionRange('p', 1, 79),
+    partner_3p=Protein('HGNC', 'ERG'),
+    range_3p=EnumeratedFusionRange('p', 312, 5034)
 )
 
-bcr_jak2_protein_fusion = protein_fusion(
-    partner_5p=protein('HGNC', 'BCR'),
-    range_5p=fusion_range('p', '?', 1875),
-    partner_3p=protein('HGNC', 'JAK2'),
-    range_3p=fusion_range('p', 2626, '?')
+bcr_jak2_protein_fusion = ProteinFusion(
+    partner_5p=Protein('HGNC', 'BCR'),
+    range_5p=EnumeratedFusionRange('p', '?', 1875),
+    partner_3p=Protein('HGNC', 'JAK2'),
+    range_3p=EnumeratedFusionRange('p', 2626, '?')
 )
 
-chchd4_aifm1_protein_fusion = protein_fusion(
-    protein('HGNC', 'CHCHD4'),
-    protein('HGNC', 'AIFM1')
+chchd4_aifm1_protein_fusion = ProteinFusion(
+    Protein('HGNC', 'CHCHD4'),
+    Protein('HGNC', 'AIFM1')
 )
 
-bcr_jak2_rna_fusion = rna_fusion(
-    partner_5p=rna('HGNC', 'BCR'),
-    range_5p=fusion_range('r', '?', 1875),
-    partner_3p=rna('HGNC', 'JAK2'),
-    range_3p=fusion_range('r', 2626, '?')
+bcr_jak2_rna_fusion = RnaFusion(
+    partner_5p=Rna('HGNC', 'BCR'),
+    range_5p=EnumeratedFusionRange('r', '?', 1875),
+    partner_3p=Rna('HGNC', 'JAK2'),
+    range_3p=EnumeratedFusionRange('r', 2626, '?')
 )
 
-chchd4_aifm1_rna_fusion = rna_fusion(
-    partner_5p=rna('HGNC', 'CHCHD4'),
-    partner_3p=rna('HGNC', 'AIFM1')
+chchd4_aifm1_rna_fusion = RnaFusion(
+    partner_5p=Rna('HGNC', 'CHCHD4'),
+    partner_3p=Rna('HGNC', 'AIFM1')
 )
 
-tmprss2_erg_rna_fusion = rna_fusion(
-    partner_5p=rna('HGNC', 'TMPRSS2'),
-    range_5p=fusion_range('r', 1, 79),
-    partner_3p=rna('HGNC', 'ERG'),
-    range_3p=fusion_range('r', 312, 5034)
+tmprss2_erg_rna_fusion = RnaFusion(
+    partner_5p=Rna('HGNC', 'TMPRSS2'),
+    range_5p=EnumeratedFusionRange('r', 1, 79),
+    partner_3p=Rna('HGNC', 'ERG'),
+    range_3p=EnumeratedFusionRange('r', 312, 5034)
 )
-tmprss2_erg_rna_fusion_unspecified = rna_fusion(
-    partner_5p=rna('HGNC', 'TMPRSS2'),
-    partner_3p=rna('HGNC', 'ERG')
+tmprss2_erg_rna_fusion_unspecified = RnaFusion(
+    partner_5p=Rna('HGNC', 'TMPRSS2'),
+    partner_3p=Rna('HGNC', 'ERG')
 )
 
 BEL_THOROUGH_NODES = {
@@ -147,180 +151,181 @@ BEL_THOROUGH_NODES = {
     akt1_gene,
     akt1_phe_508_del,
     akt1,
-    gene('HGNC', 'AKT1', variants=hgvs('c.308G>A')),
+    Gene('HGNC', 'AKT1', variants=Hgvs('c.308G>A')),
     tmprss2_erg_gene_fusion,
-    gene('HGNC', 'AKT1', variants=[hgvs('c.1521_1523delCTT'), hgvs('c.308G>A'), hgvs('p.Phe508del')]),
-    mirna('HGNC', 'MIR21'),
+    Gene('HGNC', 'AKT1', variants=[Hgvs('c.1521_1523delCTT'), Hgvs('c.308G>A'), Hgvs('p.Phe508del')]),
+    MicroRna('HGNC', 'MIR21'),
     bcr_jak2_gene_fusion,
-    gene('HGNC', 'CFTR', variants=hgvs('c.1521_1523delCTT')),
-    gene('HGNC', 'CFTR'),
-    gene('HGNC', 'CFTR', variants=hgvs('g.117199646_117199648delCTT')),
-    gene('HGNC', 'CFTR', variants=hgvs('c.1521_1523delCTT')),
-    protein('HGNC', 'AKT1', variants=pmod('Ph', 'Ser', 473)),
-    mirna('HGNC', 'MIR21', variants=hgvs('p.Phe508del')),
-    protein('HGNC', 'AKT1', variants=hgvs('p.C40*')),
-    protein('HGNC', 'AKT1', variants=[hgvs('p.Ala127Tyr'), pmod('Ph', 'Ser')]),
+    Gene('HGNC', 'CFTR', variants=Hgvs('c.1521_1523delCTT')),
+    Gene('HGNC', 'CFTR'),
+    Gene('HGNC', 'CFTR', variants=Hgvs('g.117199646_117199648delCTT')),
+    Gene('HGNC', 'CFTR', variants=Hgvs('c.1521_1523delCTT')),
+    Protein('HGNC', 'AKT1', variants=ProteinModification('Ph', 'Ser', 473)),
+    MicroRna('HGNC', 'MIR21', variants=Hgvs('p.Phe508del')),
+    Protein('HGNC', 'AKT1', variants=Hgvs('p.C40*')),
+    Protein('HGNC', 'AKT1', variants=[Hgvs('p.Ala127Tyr'), ProteinModification('Ph', 'Ser')]),
     chchd4_aifm1_gene_fusion,
     tmprss2_erg_protein_fusion,
-    protein('HGNC', 'AKT1', variants=hgvs('p.Arg1851*')),
+    Protein('HGNC', 'AKT1', variants=Hgvs('p.Arg1851*')),
     bcr_jak2_protein_fusion,
-    protein('HGNC', 'AKT1', variants=hgvs('p.40*')),
+    Protein('HGNC', 'AKT1', variants=Hgvs('p.40*')),
     chchd4_aifm1_protein_fusion,
-    protein('HGNC', 'CFTR', variants=hgvs_reference()),
+    Protein('HGNC', 'CFTR', variants=HgvsReference()),
     cftr,
     egfr,
     cftr_protein_unspecified_variant,
     adenocarcinoma,
     cftr_protein_phe_508_del,
-    protein('HGNC', 'MIA', variants=fragment(5, 20)),
+    Protein('HGNC', 'MIA', variants=Fragment(5, 20)),
     mia,
     interleukin_23_complex,
-    protein('HGNC', 'MIA', variants=fragment(1, '?')),
-    protein('HGNC', 'MIA', variants=fragment()),
-    protein('HGNC', 'MIA', variants=fragment(description='55kD')),
-    protein('HGNC', 'CFTR', variants=hgvs('p.Gly576Ala')),
+    Protein('HGNC', 'MIA', variants=Fragment(1, '?')),
+    Protein('HGNC', 'MIA', variants=Fragment()),
+    Protein('HGNC', 'MIA', variants=Fragment(description='55kD')),
+    Protein('HGNC', 'CFTR', variants=Hgvs('p.Gly576Ala')),
     akt1_rna,
-    rna('HGNC', 'AKT1', variants=[hgvs('c.1521_1523delCTT'), hgvs('p.Phe508del')]),
-    gene('HGNC', 'NCF1'),
-    complex_abundance([
-        gene('HGNC', 'NCF1'),
-        protein('HGNC', 'HBP1')
+    Rna('HGNC', 'AKT1', variants=[Hgvs('c.1521_1523delCTT'), Hgvs('p.Phe508del')]),
+    Gene('HGNC', 'NCF1'),
+    ComplexAbundance([
+        Gene('HGNC', 'NCF1'),
+        Protein('HGNC', 'HBP1')
     ]),
-    protein('HGNC', 'HBP1'),
-    complex_abundance([protein('HGNC', 'FOS'), protein('HGNC', 'JUN')]),
-    protein('HGNC', 'FOS'),
-    protein('HGNC', 'JUN'),
-    rna('HGNC', 'CFTR', variants=hgvs('r.1521_1523delcuu')),
-    rna('HGNC', 'CFTR'),
-    rna('HGNC', 'CFTR', variants=hgvs('r.1653_1655delcuu')),
-    composite_abundance([
+    Protein('HGNC', 'HBP1'),
+    ComplexAbundance([Protein('HGNC', 'FOS'), Protein('HGNC', 'JUN')]),
+    Protein('HGNC', 'FOS'),
+    Protein('HGNC', 'JUN'),
+    Rna('HGNC', 'CFTR', variants=Hgvs('r.1521_1523delcuu')),
+    Rna('HGNC', 'CFTR'),
+    Rna('HGNC', 'CFTR', variants=Hgvs('r.1653_1655delcuu')),
+    CompositeAbundance([
         interleukin_23_complex,
         il6
     ]),
     il6,
-    bioprocess('GO', 'cell cycle arrest'),
+    BiologicalProcess('GO', 'cell cycle arrest'),
     hydrogen_peroxide,
-    protein('HGNC', 'CAT'),
-    gene('HGNC', 'CAT'),
-    protein('HGNC', 'HMGCR'),
-    bioprocess('GO', 'cholesterol biosynthetic process'),
-    gene('HGNC', 'APP', variants=hgvs('c.275341G>C')),
-    gene('HGNC', 'APP'),
-    pathology('MESHD', 'Alzheimer Disease'),
-    complex_abundance([protein('HGNC', 'F3'), protein('HGNC', 'F7')]),
-    protein('HGNC', 'F3'),
-    protein('HGNC', 'F7'),
-    protein('HGNC', 'F9'),
-    protein('HGNC', 'GSK3B', variants=pmod('Ph', 'Ser', 9)),
-    protein('HGNC', 'GSK3B'),
-    pathology('MESHD', 'Psoriasis'),
-    pathology('MESHD', 'Skin Diseases'),
-    reaction(
+    Protein('HGNC', 'CAT'),
+    Gene('HGNC', 'CAT'),
+    Protein('HGNC', 'HMGCR'),
+    BiologicalProcess('GO', 'cholesterol biosynthetic process'),
+    Gene('HGNC', 'APP', variants=Hgvs('c.275341G>C')),
+    Gene('HGNC', 'APP'),
+    Pathology('MESHD', 'Alzheimer Disease'),
+    ComplexAbundance([Protein('HGNC', 'F3'), Protein('HGNC', 'F7')]),
+    Protein('HGNC', 'F3'),
+    Protein('HGNC', 'F7'),
+    Protein('HGNC', 'F9'),
+    Protein('HGNC', 'GSK3B', variants=ProteinModification('Ph', 'Ser', 9)),
+    Protein('HGNC', 'GSK3B'),
+    Pathology('MESHD', 'Psoriasis'),
+    Pathology('MESHD', 'Skin Diseases'),
+    Reaction(
         reactants=[
-            abundance('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
-            abundance('CHEBI', 'NADPH'),
-            abundance('CHEBI', 'hydron')
+            Abundance('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
+            Abundance('CHEBI', 'NADPH'),
+            Abundance('CHEBI', 'hydron')
         ],
         products=[
-            abundance('CHEBI', 'NADP(+)'),
-            abundance('CHEBI', 'mevalonate')
+            Abundance('CHEBI', 'NADP(+)'),
+            Abundance('CHEBI', 'mevalonate')
         ]
     ),
-    abundance('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
-    abundance('CHEBI', 'NADPH'),
-    abundance('CHEBI', 'hydron'),
-    abundance('CHEBI', 'mevalonate'),
-    abundance('CHEBI', 'NADP(+)'),
-    abundance('CHEBI', 'nitric oxide'),
-    complex_abundance([
-        protein('HGNC', 'ITGAV'),
-        protein('HGNC', 'ITGB3')
+    Abundance('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
+    Abundance('CHEBI', 'NADPH'),
+    Abundance('CHEBI', 'hydron'),
+    Abundance('CHEBI', 'mevalonate'),
+    Abundance('CHEBI', 'NADP(+)'),
+    Abundance('CHEBI', 'nitric oxide'),
+    ComplexAbundance([
+        Protein('HGNC', 'ITGAV'),
+        Protein('HGNC', 'ITGB3')
     ]),
-    protein('HGNC', 'ITGAV'),
-    protein('HGNC', 'ITGB3'),
-    protein('HGNC', 'FADD'),
-    abundance('TESTNS2', 'Abeta_42'),
-    protein('TESTNS2', 'GSK3 Family'),
-    protein('HGNC', 'PRKCA'),
-    protein('HGNC', 'CDK5'),
-    protein('HGNC', 'CASP8'),
-    protein('HGNC', 'AKT1', variants=pmod(namespace='TESTNS2', name='PhosRes', code='Ser', position=473)),
-    protein('HGNC', 'HRAS', variants=pmod('Palm')),
-    bioprocess('GO', 'apoptotic process'),
-    composite_abundance([
-        abundance('TESTNS2', 'Abeta_42'),
-        protein('HGNC', 'CASP8'),
-        protein('HGNC', 'FADD')
+    Protein('HGNC', 'ITGAV'),
+    Protein('HGNC', 'ITGB3'),
+    Protein('HGNC', 'FADD'),
+    Abundance('TESTNS2', 'Abeta_42'),
+    Protein('TESTNS2', 'GSK3 Family'),
+    Protein('HGNC', 'PRKCA'),
+    Protein('HGNC', 'CDK5'),
+    Protein('HGNC', 'CASP8'),
+    Protein('HGNC', 'AKT1',
+            variants=ProteinModification(namespace='TESTNS2', name='PhosRes', code='Ser', position=473)),
+    Protein('HGNC', 'HRAS', variants=ProteinModification('Palm')),
+    BiologicalProcess('GO', 'apoptotic process'),
+    CompositeAbundance([
+        Abundance('TESTNS2', 'Abeta_42'),
+        Protein('HGNC', 'CASP8'),
+        Protein('HGNC', 'FADD')
     ]),
-    reaction(
-        reactants=[protein('HGNC', 'CDK5R1')],
-        products=[protein('HGNC', 'CDK5')],
+    Reaction(
+        reactants=[Protein('HGNC', 'CDK5R1')],
+        products=[Protein('HGNC', 'CDK5')],
     ),
-    protein('HGNC', 'PRKCB'),
-    named_complex_abundance('TESTNS2', 'AP-1 Complex'),
-    protein('HGNC', 'PRKCE'),
-    protein('HGNC', 'PRKCD'),
-    protein('TESTNS2', 'CAPN Family'),
-    gene('TESTNS2', 'AKT1 ortholog'),
-    protein('HGNC', 'HRAS'),
-    protein('HGNC', 'CDK5R1'),
-    protein('TESTNS2', 'PRKC'),
-    bioprocess('GO', 'neuron apoptotic process'),
-    protein('HGNC', 'MAPT', variants=pmod('Ph')),
-    protein('HGNC', 'MAPT'),
-    gene('HGNC', 'ARRDC2'),
-    gene('HGNC', 'ARRDC3'),
-    gene('dbSNP', 'rs123456')
+    Protein('HGNC', 'PRKCB'),
+    NamedComplexAbundance('TESTNS2', 'AP-1 Complex'),
+    Protein('HGNC', 'PRKCE'),
+    Protein('HGNC', 'PRKCD'),
+    Protein('TESTNS2', 'CAPN Family'),
+    Gene('TESTNS2', 'AKT1 ortholog'),
+    Protein('HGNC', 'HRAS'),
+    Protein('HGNC', 'CDK5R1'),
+    Protein('TESTNS2', 'PRKC'),
+    BiologicalProcess('GO', 'neuron apoptotic process'),
+    Protein('HGNC', 'MAPT', variants=ProteinModification('Ph')),
+    Protein('HGNC', 'MAPT'),
+    Gene('HGNC', 'ARRDC2'),
+    Gene('HGNC', 'ARRDC3'),
+    Gene('dbSNP', 'rs123456')
 }
 
 BEL_THOROUGH_EDGES = [
-    (gene('HGNC', 'AKT1', variants=hgvs('p.Phe508del')), akt1, {
+    (Gene('HGNC', 'AKT1', variants=Hgvs('p.Phe508del')), akt1, {
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: DIRECTLY_DECREASES,
     }),
-    (akt1, protein('HGNC', 'AKT1', variants=pmod('Ph', 'Ser', 473)), {
+    (akt1, Protein('HGNC', 'AKT1', variants=ProteinModification('Ph', 'Ser', 473)), {
         RELATION: HAS_VARIANT,
     }),
-    (akt1, protein('HGNC', 'AKT1', variants=hgvs('p.C40*')), {
+    (akt1, Protein('HGNC', 'AKT1', variants=Hgvs('p.C40*')), {
         RELATION: HAS_VARIANT,
     }),
     (akt1,
-     protein('HGNC', 'AKT1', variants=[hgvs('p.Ala127Tyr'), pmod('Ph', 'Ser')]), {
+     Protein('HGNC', 'AKT1', variants=[Hgvs('p.Ala127Tyr'), ProteinModification('Ph', 'Ser')]), {
          RELATION: HAS_VARIANT,
      }),
     (akt1,
-     protein('HGNC', 'AKT1', variants=[hgvs('p.Ala127Tyr'), pmod('Ph', 'Ser')]), {
+     Protein('HGNC', 'AKT1', variants=[Hgvs('p.Ala127Tyr'), ProteinModification('Ph', 'Ser')]), {
          EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: DIRECTLY_DECREASES,
          SUBJECT: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
          OBJECT: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
      }),
-    (akt1, protein('HGNC', 'AKT1', variants=hgvs('p.Arg1851*')), {
+    (akt1, Protein('HGNC', 'AKT1', variants=Hgvs('p.Arg1851*')), {
         RELATION: HAS_VARIANT,
     }),
-    (akt1, protein('HGNC', 'AKT1', variants=hgvs('p.40*')), {
+    (akt1, Protein('HGNC', 'AKT1', variants=Hgvs('p.40*')), {
         RELATION: HAS_VARIANT,
     }),
-    (akt1, protein('HGNC', 'MIA', variants=fragment()), {
+    (akt1, Protein('HGNC', 'MIA', variants=Fragment()), {
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
         SUBJECT: {MODIFIER: DEGRADATION},
     }),
-    (akt1, protein('HGNC', 'CFTR', variants=hgvs('p.Gly576Ala')), {
+    (akt1, Protein('HGNC', 'CFTR', variants=Hgvs('p.Gly576Ala')), {
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
     }),
-    (akt1, rna('HGNC', 'CFTR', variants=hgvs('r.1521_1523delcuu')), {
+    (akt1, Rna('HGNC', 'CFTR', variants=Hgvs('r.1521_1523delcuu')), {
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
         SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
     }),
-    (akt1, rna('HGNC', 'CFTR', variants=hgvs('r.1653_1655delcuu')), {
+    (akt1, Rna('HGNC', 'CFTR', variants=Hgvs('r.1653_1655delcuu')), {
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
@@ -352,57 +357,57 @@ BEL_THOROUGH_EDGES = [
             {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'extracellular space'}
         ),
     }),
-    (gene('HGNC', 'AKT1', variants=hgvs('c.308G>A')), tmprss2_erg_gene_fusion, {
+    (Gene('HGNC', 'AKT1', variants=Hgvs('c.308G>A')), tmprss2_erg_gene_fusion, {
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: CAUSES_NO_CHANGE,
     }),
-    (gene('HGNC', 'AKT1', variants=hgvs('c.308G>A')),
-     gene('HGNC', 'AKT1', variants=[hgvs('c.1521_1523delCTT'), hgvs('c.308G>A'), hgvs('p.Phe508del')]), {
+    (Gene('HGNC', 'AKT1', variants=Hgvs('c.308G>A')),
+     Gene('HGNC', 'AKT1', variants=[Hgvs('c.1521_1523delCTT'), Hgvs('c.308G>A'), Hgvs('p.Phe508del')]), {
          EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: INCREASES,
          SUBJECT: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
      }),
-    (mirna('HGNC', 'MIR21'), bcr_jak2_gene_fusion,
+    (MicroRna('HGNC', 'MIR21'), bcr_jak2_gene_fusion,
      {
          EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: DIRECTLY_INCREASES,
      }),
-    (mirna('HGNC', 'MIR21'), protein('HGNC', 'AKT1', variants=pmod('Ph', 'Ser', 473)),
+    (MicroRna('HGNC', 'MIR21'), Protein('HGNC', 'AKT1', variants=ProteinModification('Ph', 'Ser', 473)),
      {
          EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: DECREASES,
          SUBJECT: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
      }),
-    (mirna('HGNC', 'MIR21'), mirna('HGNC', 'MIR21', variants=hgvs('p.Phe508del')), {
+    (MicroRna('HGNC', 'MIR21'), MicroRna('HGNC', 'MIR21', variants=Hgvs('p.Phe508del')), {
         RELATION: HAS_VARIANT,
     }),
-    (gene('HGNC', 'CFTR', variants=hgvs('c.1521_1523delCTT')), akt1,
+    (Gene('HGNC', 'CFTR', variants=Hgvs('c.1521_1523delCTT')), akt1,
      {
          EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: INCREASES,
          OBJECT: {MODIFIER: DEGRADATION},
      }),
-    (gene('HGNC', 'CFTR'), gene('HGNC', 'CFTR', variants=hgvs('c.1521_1523delCTT')), {
+    (Gene('HGNC', 'CFTR'), Gene('HGNC', 'CFTR', variants=Hgvs('c.1521_1523delCTT')), {
         RELATION: HAS_VARIANT,
     }),
-    (gene('HGNC', 'CFTR'), gene('HGNC', 'CFTR', variants=hgvs('g.117199646_117199648delCTT')), {
+    (Gene('HGNC', 'CFTR'), Gene('HGNC', 'CFTR', variants=Hgvs('g.117199646_117199648delCTT')), {
         RELATION: HAS_VARIANT,
     }),
-    (gene('HGNC', 'CFTR'), gene('HGNC', 'CFTR', variants=hgvs('c.1521_1523delCTT')), {
+    (Gene('HGNC', 'CFTR'), Gene('HGNC', 'CFTR', variants=Hgvs('c.1521_1523delCTT')), {
         RELATION: HAS_VARIANT,
     }),
-    (gene('HGNC', 'CFTR', variants=hgvs('g.117199646_117199648delCTT')),
-     gene('HGNC', 'CFTR', variants=hgvs('c.1521_1523delCTT')), {
+    (Gene('HGNC', 'CFTR', variants=Hgvs('g.117199646_117199648delCTT')),
+     Gene('HGNC', 'CFTR', variants=Hgvs('c.1521_1523delCTT')), {
          EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: INCREASES,
      }),
-    (mirna('HGNC', 'MIR21', variants=hgvs('p.Phe508del')), protein('HGNC', 'AKT1', variants=hgvs('p.C40*')),
+    (MicroRna('HGNC', 'MIR21', variants=Hgvs('p.Phe508del')), Protein('HGNC', 'AKT1', variants=Hgvs('p.C40*')),
      {
          EVIDENCE: dummy_evidence,
          CITATION: citation_1,
@@ -414,118 +419,118 @@ BEL_THOROUGH_EDGES = [
         CITATION: citation_1,
         RELATION: INCREASES,
     }),
-    (protein('HGNC', 'AKT1', variants=hgvs('p.Arg1851*')), bcr_jak2_protein_fusion, {
+    (Protein('HGNC', 'AKT1', variants=Hgvs('p.Arg1851*')), bcr_jak2_protein_fusion, {
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
     }),
-    (protein('HGNC', 'AKT1', variants=hgvs('p.40*')), chchd4_aifm1_protein_fusion,
+    (Protein('HGNC', 'AKT1', variants=Hgvs('p.40*')), chchd4_aifm1_protein_fusion,
      {
          EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: INCREASES,
      }),
-    (protein('HGNC', 'CFTR', variants=hgvs_reference()), egfr, {
+    (Protein('HGNC', 'CFTR', variants=HgvsReference()), egfr, {
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
         OBJECT: translocation(INTRACELLULAR, CELL_SURFACE),
     }),
-    (cftr, protein('HGNC', 'CFTR', variants=hgvs('=')), {
+    (cftr, Protein('HGNC', 'CFTR', variants=Hgvs('=')), {
         RELATION: HAS_VARIANT,
     }),
-    (cftr, protein('HGNC', 'CFTR', variants=hgvs('?')), {
+    (cftr, Protein('HGNC', 'CFTR', variants=Hgvs('?')), {
         RELATION: HAS_VARIANT,
     }),
-    (cftr, protein('HGNC', 'CFTR', variants=hgvs('p.Phe508del')), {
+    (cftr, Protein('HGNC', 'CFTR', variants=Hgvs('p.Phe508del')), {
         RELATION: HAS_VARIANT,
     }),
-    (cftr, protein('HGNC', 'CFTR', variants=hgvs('p.Gly576Ala')), {
+    (cftr, Protein('HGNC', 'CFTR', variants=Hgvs('p.Gly576Ala')), {
         RELATION: HAS_VARIANT,
     }),
-    (mia, protein('HGNC', 'MIA', variants=fragment(5, 20)), {
+    (mia, Protein('HGNC', 'MIA', variants=Fragment(5, 20)), {
         RELATION: HAS_VARIANT,
     }),
-    (mia, protein('HGNC', 'MIA', variants=fragment(1, '?')), {
+    (mia, Protein('HGNC', 'MIA', variants=Fragment(1, '?')), {
         RELATION: HAS_VARIANT,
     }),
-    (mia, protein('HGNC', 'MIA', variants=fragment()), {
+    (mia, Protein('HGNC', 'MIA', variants=Fragment()), {
         RELATION: HAS_VARIANT,
     }),
-    (mia, protein('HGNC', 'MIA', variants=fragment(description='55kD')), {
+    (mia, Protein('HGNC', 'MIA', variants=Fragment(description='55kD')), {
         RELATION: HAS_VARIANT,
     }),
-    (akt1_rna, rna('HGNC', 'AKT1', variants=[hgvs('c.1521_1523delCTT'), hgvs('p.Phe508del')]), {
+    (akt1_rna, Rna('HGNC', 'AKT1', variants=[Hgvs('c.1521_1523delCTT'), Hgvs('p.Phe508del')]), {
         RELATION: HAS_VARIANT,
     }),
     (akt1_rna, akt1, {
         RELATION: TRANSLATED_TO,
     }),
-    (gene('HGNC', 'APP'), gene('HGNC', 'APP', variants=hgvs('c.275341G>C')), {
+    (Gene('HGNC', 'APP'), Gene('HGNC', 'APP', variants=Hgvs('c.275341G>C')), {
         RELATION: HAS_VARIANT,
     }),
-    (complex_abundance([protein('HGNC', 'F3'), protein('HGNC', 'F7')]), protein('HGNC', 'F3'), {
+    (ComplexAbundance([Protein('HGNC', 'F3'), Protein('HGNC', 'F7')]), Protein('HGNC', 'F3'), {
         RELATION: HAS_COMPONENT,
     }),
-    (complex_abundance([protein('HGNC', 'F3'), protein('HGNC', 'F7')]), protein('HGNC', 'F7'), {
+    (ComplexAbundance([Protein('HGNC', 'F3'), Protein('HGNC', 'F7')]), Protein('HGNC', 'F7'), {
         RELATION: HAS_COMPONENT,
     }),
-    (protein('HGNC', 'GSK3B'), protein('HGNC', 'GSK3B', variants=pmod('Ph', 'Ser', 9)), {
+    (Protein('HGNC', 'GSK3B'), Protein('HGNC', 'GSK3B', variants=ProteinModification('Ph', 'Ser', 9)), {
         RELATION: HAS_VARIANT,
     }),
-    (pathology('MESHD', 'Psoriasis'), pathology('MESHD', 'Skin Diseases'), {
+    (Pathology('MESHD', 'Psoriasis'), Pathology('MESHD', 'Skin Diseases'), {
         RELATION: IS_A,
     }),
 
-    (complex_abundance([gene('HGNC', 'NCF1'), protein('HGNC', 'HBP1')]), protein('HGNC', 'HBP1'), {
+    (ComplexAbundance([Gene('HGNC', 'NCF1'), Protein('HGNC', 'HBP1')]), Protein('HGNC', 'HBP1'), {
         RELATION: HAS_COMPONENT,
     }),
-    (complex_abundance([gene('HGNC', 'NCF1'), protein('HGNC', 'HBP1')]), gene('HGNC', 'NCF1'), {
+    (ComplexAbundance([Gene('HGNC', 'NCF1'), Protein('HGNC', 'HBP1')]), Gene('HGNC', 'NCF1'), {
         RELATION: HAS_COMPONENT,
     }),
 
-    (complex_abundance([protein('HGNC', 'FOS'), protein('HGNC', 'JUN')]), protein('HGNC', 'FOS'), {
+    (ComplexAbundance([Protein('HGNC', 'FOS'), Protein('HGNC', 'JUN')]), Protein('HGNC', 'FOS'), {
         RELATION: HAS_COMPONENT,
     }),
-    (complex_abundance([protein('HGNC', 'FOS'), protein('HGNC', 'JUN')]), protein('HGNC', 'JUN'), {
+    (ComplexAbundance([Protein('HGNC', 'FOS'), Protein('HGNC', 'JUN')]), Protein('HGNC', 'JUN'), {
         RELATION: HAS_COMPONENT,
     }),
-    (rna('HGNC', 'CFTR'), rna('HGNC', 'CFTR', variants=hgvs('r.1521_1523delcuu')), {
+    (Rna('HGNC', 'CFTR'), Rna('HGNC', 'CFTR', variants=Hgvs('r.1521_1523delcuu')), {
         RELATION: HAS_VARIANT,
     }),
-    (rna('HGNC', 'CFTR'), rna('HGNC', 'CFTR', variants=hgvs('r.1653_1655delcuu')), {
+    (Rna('HGNC', 'CFTR'), Rna('HGNC', 'CFTR', variants=Hgvs('r.1653_1655delcuu')), {
         RELATION: HAS_VARIANT,
     }),
-    (composite_abundance([interleukin_23_complex, il6]), il6, {
+    (CompositeAbundance([interleukin_23_complex, il6]), il6, {
         RELATION: HAS_COMPONENT,
     }),
-    (composite_abundance([interleukin_23_complex, il6]), interleukin_23_complex, {
+    (CompositeAbundance([interleukin_23_complex, il6]), interleukin_23_complex, {
         RELATION: HAS_COMPONENT,
     }),
-    (protein('HGNC', 'CFTR', variants=hgvs('?')), pathology('MESHD', 'Adenocarcinoma'), {
+    (Protein('HGNC', 'CFTR', variants=Hgvs('?')), Pathology('MESHD', 'Adenocarcinoma'), {
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
     }),
-    (rna('HGNC', 'AKT1', variants=[hgvs('c.1521_1523delCTT'), hgvs('p.Phe508del')]),
+    (Rna('HGNC', 'AKT1', variants=[Hgvs('c.1521_1523delCTT'), Hgvs('p.Phe508del')]),
      tmprss2_erg_rna_fusion, {
          EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: DIRECTLY_INCREASES,
      }),
-    (rna_fusion(rna('HGNC', 'TMPRSS2'), rna('HGNC', 'ERG')),
-     complex_abundance([gene('HGNC', 'NCF1'), protein('HGNC', 'HBP1')]), {
+    (RnaFusion(Rna('HGNC', 'TMPRSS2'), Rna('HGNC', 'ERG')),
+     ComplexAbundance([Gene('HGNC', 'NCF1'), Protein('HGNC', 'HBP1')]), {
          EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: INCREASES,
      }),
-    (protein('HGNC', 'MIA', variants=fragment(5, 20)), named_complex_abundance('GO', 'interleukin-23 complex'), {
+    (Protein('HGNC', 'MIA', variants=Fragment(5, 20)), NamedComplexAbundance('GO', 'interleukin-23 complex'), {
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
         OBJECT: secretion(),
     }),
-    (protein('HGNC', 'MIA', variants=fragment(1, '?')), egfr, {
+    (Protein('HGNC', 'MIA', variants=Fragment(1, '?')), egfr, {
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
@@ -548,154 +553,154 @@ BEL_THOROUGH_EDGES = [
             }
         },
     }),
-    (rna_fusion(rna('HGNC', 'CHCHD4'), rna('HGNC', 'AIFM1'), ),
-     complex_abundance([protein('HGNC', 'FOS'), protein('HGNC', 'JUN')]),
+    (RnaFusion(Rna('HGNC', 'CHCHD4'), Rna('HGNC', 'AIFM1'), ),
+     ComplexAbundance([Protein('HGNC', 'FOS'), Protein('HGNC', 'JUN')]),
      {
          EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: INCREASES,
      }),
-    (composite_abundance([interleukin_23_complex, il6]),
-     bioprocess('GO', 'cell cycle arrest'), {
+    (CompositeAbundance([interleukin_23_complex, il6]),
+     BiologicalProcess('GO', 'cell cycle arrest'), {
          EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: DECREASES,
      }),
-    (protein('HGNC', 'CAT'), hydrogen_peroxide, {
+    (Protein('HGNC', 'CAT'), hydrogen_peroxide, {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: DIRECTLY_DECREASES,
         SUBJECT: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
     }),
-    (gene('HGNC', 'CAT'), hydrogen_peroxide, {
+    (Gene('HGNC', 'CAT'), hydrogen_peroxide, {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: DIRECTLY_DECREASES,
         SUBJECT: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
     }),
-    (protein('HGNC', 'HMGCR'), bioprocess('GO', 'cholesterol biosynthetic process'), {
+    (Protein('HGNC', 'HMGCR'), BiologicalProcess('GO', 'cholesterol biosynthetic process'), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: RATE_LIMITING_STEP_OF,
         SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'cat'}},
     }),
-    (gene('HGNC', 'APP', variants=hgvs('c.275341G>C')), pathology('MESHD', 'Alzheimer Disease'),
+    (Gene('HGNC', 'APP', variants=Hgvs('c.275341G>C')), Pathology('MESHD', 'Alzheimer Disease'),
      {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
          RELATION: CAUSES_NO_CHANGE,
      }),
 
-    (complex_abundance([protein('HGNC', 'F3'), protein('HGNC', 'F7')]), protein('HGNC', 'F9'), {
+    (ComplexAbundance([Protein('HGNC', 'F3'), Protein('HGNC', 'F7')]), Protein('HGNC', 'F9'), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: REGULATES,
         SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: BEL_DEFAULT_NAMESPACE}},
         OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: BEL_DEFAULT_NAMESPACE}},
     }),
-    (protein('HGNC', 'GSK3B', variants=pmod('Ph', 'Ser', 9)), protein('HGNC', 'GSK3B'), {
+    (Protein('HGNC', 'GSK3B', variants=ProteinModification('Ph', 'Ser', 9)), Protein('HGNC', 'GSK3B'), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: POSITIVE_CORRELATION,
         OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
     }),
 
-    (protein('HGNC', 'GSK3B'), protein('HGNC', 'GSK3B', variants=pmod('Ph', 'Ser', 9)), {
+    (Protein('HGNC', 'GSK3B'), Protein('HGNC', 'GSK3B', variants=ProteinModification('Ph', 'Ser', 9)), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: POSITIVE_CORRELATION,
         SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
     }),
 
-    (reaction(
+    (Reaction(
         reactants=(
-            abundance('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
-            abundance('CHEBI', 'NADPH'),
-            abundance('CHEBI', 'hydron')
+            Abundance('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
+            Abundance('CHEBI', 'NADPH'),
+            Abundance('CHEBI', 'hydron')
         ),
         products=(
-            abundance('CHEBI', 'NADP(+)'),
-            abundance('CHEBI', 'mevalonate')
+            Abundance('CHEBI', 'NADP(+)'),
+            Abundance('CHEBI', 'mevalonate')
         )
     ),
-     abundance('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'), {
+     Abundance('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'), {
          RELATION: HAS_REACTANT,
      }),
-    (reaction(
+    (Reaction(
         reactants=(
-            abundance('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
-            abundance('CHEBI', 'NADPH'),
-            abundance('CHEBI', 'hydron')
+            Abundance('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
+            Abundance('CHEBI', 'NADPH'),
+            Abundance('CHEBI', 'hydron')
         ),
         products=(
-            abundance('CHEBI', 'NADP(+)'),
-            abundance('CHEBI', 'mevalonate')
+            Abundance('CHEBI', 'NADP(+)'),
+            Abundance('CHEBI', 'mevalonate')
         )
     ),
-     abundance('CHEBI', 'NADPH'), {
+     Abundance('CHEBI', 'NADPH'), {
          RELATION: HAS_REACTANT,
      }),
     (
-        reaction(
+        Reaction(
             reactants=(
-                abundance('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
-                abundance('CHEBI', 'NADPH'),
-                abundance('CHEBI', 'hydron')
+                Abundance('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
+                Abundance('CHEBI', 'NADPH'),
+                Abundance('CHEBI', 'hydron')
             ),
             products=(
-                abundance('CHEBI', 'NADP(+)'),
-                abundance('CHEBI', 'mevalonate')
+                Abundance('CHEBI', 'NADP(+)'),
+                Abundance('CHEBI', 'mevalonate')
             )
         ),
-        abundance('CHEBI', 'hydron'), {
+        Abundance('CHEBI', 'hydron'), {
             RELATION: HAS_REACTANT,
         }),
-    (reaction(
+    (Reaction(
         reactants=(
-            abundance('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
-            abundance('CHEBI', 'NADPH'),
-            abundance('CHEBI', 'hydron')
+            Abundance('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
+            Abundance('CHEBI', 'NADPH'),
+            Abundance('CHEBI', 'hydron')
         ),
         products=(
-            abundance('CHEBI', 'NADP(+)'),
-            abundance('CHEBI', 'mevalonate'))
+            Abundance('CHEBI', 'NADP(+)'),
+            Abundance('CHEBI', 'mevalonate'))
     ),
-     abundance('CHEBI', 'mevalonate'), {
+     Abundance('CHEBI', 'mevalonate'), {
          RELATION: HAS_PRODUCT,
      }),
-    (reaction(
+    (Reaction(
         reactants=(
-            abundance('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
-            abundance('CHEBI', 'NADPH'),
-            abundance('CHEBI', 'hydron')
+            Abundance('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
+            Abundance('CHEBI', 'NADPH'),
+            Abundance('CHEBI', 'hydron')
         ),
         products=(
-            abundance('CHEBI', 'NADP(+)'),
-            abundance('CHEBI', 'mevalonate')
+            Abundance('CHEBI', 'NADP(+)'),
+            Abundance('CHEBI', 'mevalonate')
         )
     ),
-     abundance('CHEBI', 'NADP(+)'), {
+     Abundance('CHEBI', 'NADP(+)'), {
          RELATION: HAS_PRODUCT,
      }),
-    (reaction(
+    (Reaction(
         reactants=(
-            abundance('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
-            abundance('CHEBI', 'NADPH'),
-            abundance('CHEBI', 'hydron')
+            Abundance('CHEBI', '(3S)-3-hydroxy-3-methylglutaryl-CoA'),
+            Abundance('CHEBI', 'NADPH'),
+            Abundance('CHEBI', 'hydron')
         ),
         products=(
-            abundance('CHEBI', 'NADP(+)'),
-            abundance('CHEBI', 'mevalonate')
+            Abundance('CHEBI', 'NADP(+)'),
+            Abundance('CHEBI', 'mevalonate')
         )
     ),
-     bioprocess('GO', 'cholesterol biosynthetic process'),
+     BiologicalProcess('GO', 'cholesterol biosynthetic process'),
      {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
          RELATION: SUBPROCESS_OF,
      }),
-    (abundance('CHEBI', 'nitric oxide'),
-     complex_abundance([protein('HGNC', 'ITGAV'), protein('HGNC', 'ITGB3')]), {
+    (Abundance('CHEBI', 'nitric oxide'),
+     ComplexAbundance([Protein('HGNC', 'ITGAV'), Protein('HGNC', 'ITGB3')]), {
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
          RELATION: INCREASES,
@@ -707,26 +712,26 @@ BEL_THOROUGH_EDGES = [
              }
          },
      }),
-    (complex_abundance([protein('HGNC', 'ITGAV'), protein('HGNC', 'ITGB3')]), protein('HGNC', 'ITGAV'), {
+    (ComplexAbundance([Protein('HGNC', 'ITGAV'), Protein('HGNC', 'ITGB3')]), Protein('HGNC', 'ITGAV'), {
         RELATION: HAS_COMPONENT,
     }),
-    (complex_abundance([protein('HGNC', 'ITGAV'), protein('HGNC', 'ITGB3')]), protein('HGNC', 'ITGB3'), {
+    (ComplexAbundance([Protein('HGNC', 'ITGAV'), Protein('HGNC', 'ITGB3')]), Protein('HGNC', 'ITGB3'), {
         RELATION: HAS_COMPONENT,
     }),
-    (gene('HGNC', 'ARRDC2'), gene('HGNC', 'ARRDC3'), {
+    (Gene('HGNC', 'ARRDC2'), Gene('HGNC', 'ARRDC3'), {
         RELATION: EQUIVALENT_TO,
     }),
-    (gene('HGNC', 'ARRDC3'), gene('HGNC', 'ARRDC2'), {
+    (Gene('HGNC', 'ARRDC3'), Gene('HGNC', 'ARRDC2'), {
         RELATION: EQUIVALENT_TO,
         CITATION: citation_2,
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification'
     }),
-    (gene('dbSNP', 'rs123456'), gene('HGNC', 'CFTR', variants=hgvs('c.1521_1523delCTT')), {
+    (Gene('dbSNP', 'rs123456'), Gene('HGNC', 'CFTR', variants=Hgvs('c.1521_1523delCTT')), {
         RELATION: ASSOCIATION,
         CITATION: citation_2,
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification'
     }),
-    (gene('HGNC', 'CFTR', variants=hgvs('c.1521_1523delCTT')), gene('dbSNP', 'rs123456'), {
+    (Gene('HGNC', 'CFTR', variants=Hgvs('c.1521_1523delCTT')), Gene('dbSNP', 'rs123456'), {
         RELATION: ASSOCIATION,
         CITATION: citation_2,
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification'

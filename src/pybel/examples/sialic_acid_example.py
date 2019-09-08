@@ -30,7 +30,7 @@
 """
 
 from ..constants import hbp_namespace
-from ..dsl import Abundance, Entity, Protein, activity, bioprocess, complex_abundance, pmod
+from ..dsl import Abundance, BiologicalProcess, ComplexAbundance, Entity, Protein, ProteinModification, activity
 from ..struct.graph import BELGraph
 
 __all__ = [
@@ -78,14 +78,14 @@ cd33 = Protein(
         Entity(namespace='uniprot', identifier='P20138'),
     ],
 )
-sialic_acid_cd33_complex = complex_abundance([sialic_acid, cd33])
+sialic_acid_cd33_complex = ComplexAbundance([sialic_acid, cd33])
 shp1 = Protein(namespace='HGNC', name='PTPN6', identifier='9658')
 shp2 = Protein(namespace='HGNC', name='PTPN11', identifier='9644')
 syk = Protein(namespace='HGNC', name='SYK', identifier='11491')
 dap12 = Protein(namespace='HGNC', name='TYROBP', identifier='12449')
 trem2 = Protein(namespace='HGNC', name='TREM2', identifier='17761')
-cd33_phosphorylated = Protein(name='CD33', namespace='HGNC', identifier='1659', variants=[pmod('Ph')])
-immune_response = bioprocess(name='immune response', namespace='GO', identifier='0006955')
+cd33_phosphorylated = Protein(name='CD33', namespace='HGNC', identifier='1659', variants=ProteinModification('Ph'))
+immune_response = BiologicalProcess(name='immune response', namespace='GO', identifier='0006955')
 
 sialic_acid_graph.add_increases(
     sialic_acid_cd33_complex,
@@ -93,7 +93,7 @@ sialic_acid_graph.add_increases(
     citation=citation,
     annotations={'Species': '9606', 'Confidence': 'High'},
     evidence=evidence_1,
-    object_modifier=activity()
+    object_modifier=activity(),
 )
 
 sialic_acid_graph.add_increases(
@@ -102,7 +102,7 @@ sialic_acid_graph.add_increases(
     citation=citation,
     annotations={'Species': '9606', 'Confidence': 'High'},
     evidence=evidence_1,
-    subject_modifier=activity()
+    subject_modifier=activity(),
 )
 
 sialic_acid_graph.add_directly_increases(
@@ -132,7 +132,7 @@ sialic_acid_graph.add_directly_decreases(
     evidence=evidence_2,
     annotations={'Species': '9606', 'Confidence': 'High'},
     subject_modifier=activity(),
-    object_modifier=activity()
+    object_modifier=activity(),
 )
 
 sialic_acid_graph.add_directly_decreases(
@@ -142,7 +142,7 @@ sialic_acid_graph.add_directly_decreases(
     evidence=evidence_2,
     annotations={'Species': '9606', 'Confidence': 'High'},
     subject_modifier=activity(),
-    object_modifier=activity()
+    object_modifier=activity(),
 )
 
 sialic_acid_graph.add_increases(
@@ -152,7 +152,7 @@ sialic_acid_graph.add_increases(
     evidence=evidence_2,
     annotations={'Species': '9606', 'Confidence': 'Low'},
     subject_modifier=activity(),
-    object_modifier=activity()
+    object_modifier=activity(),
 )
 
 sialic_acid_graph.add_increases(
@@ -162,5 +162,5 @@ sialic_acid_graph.add_increases(
     evidence=evidence_2,
     annotations={'Species': '9606', 'Confidence': 'Low'},
     subject_modifier=activity(),
-    object_modifier=activity()
+    object_modifier=activity(),
 )

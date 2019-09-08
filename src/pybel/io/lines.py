@@ -2,54 +2,39 @@
 
 """This module contains IO functions for BEL scripts."""
 
-import codecs
 import logging
-import os
-from typing import Iterable
+from typing import TextIO, Union
+
+from networkx.utils import open_file
 
 from bel_resources.utils import download
 from .line_utils import parse_lines
 from ..struct import BELGraph
 
 __all__ = [
-    'from_lines',
-    'from_path',
-    'from_url'
+    'from_bel_script',
+    'from_bel_script_url'
 ]
 
 log = logging.getLogger(__name__)
 
 
-def from_lines(lines: Iterable[str], **kwargs) -> BELGraph:
-    """Load a BEL graph from an iterable over the lines of a BEL script.
-
-    :param lines: An iterable of strings (the lines in a BEL script)
-
-    The remaining keyword arguments are passed to :func:`pybel.io.line_utils.parse_lines`.
-    """
-    graph = BELGraph()
-    parse_lines(graph=graph, lines=lines, **kwargs)
-    return graph
-
-
-def from_path(path: str, encoding: str = 'utf-8', **kwargs) -> BELGraph:
+@open_file(0, mode='r')
+def from_bel_script(path: Union[str, TextIO], **kwargs) -> BELGraph:
     """Load a BEL graph from a file resource. This function is a thin wrapper around :func:`from_lines`.
 
-    :param path: A file path
-    :param encoding: the encoding to use when reading this file. Is passed to :code:`codecs.open`. See the python
-     `docs <https://docs.python.org/3/library/codecs.html#standard-encodings>`_ for a list of standard encodings. For
-     example, files starting with a UTF-8 BOM should use :code:`utf_8_sig`.
+    :param path: A path or file-like
 
-    The remaining keyword arguments are passed to :func:`pybel.io.line_utils.parse_lines`.
+    The remaining keyword arguments are passed to :func:`pybel.io.line_utils.parse_lines`,
+    which populates a :class:`BELGraph`.
     """
-    log.info('Loading from path: %s', path)
-    graph = BELGraph(path=path)
-    with codecs.open(os.path.expanduser(path), encoding=encoding) as lines:
-        parse_lines(graph=graph, lines=lines, **kwargs)
+    log.warning('Reading BEL script at %s', path.name)
+    graph = BELGraph(path=path.name)
+    parse_lines(graph=graph, lines=path, **kwargs)
     return graph
 
 
-def from_url(url: str, **kwargs) -> BELGraph:
+def from_bel_script_url(url: str, **kwargs) -> BELGraph:
     """Load a BEL graph from a URL resource.
 
     :param url: A valid URL pointing to a BEL document

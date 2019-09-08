@@ -31,16 +31,9 @@ to re-enable strict parsing.
 
 Reference
 ~~~~~~~~~
-.. autofunction:: pybel.from_lines
-.. autofunction:: pybel.from_path
-.. autofunction:: pybel.from_url
-.. autofunction:: pybel.io.line_utils.parse_lines
-
-Canonicalization
-----------------
-.. autofunction:: pybel.to_bel_lines
-.. autofunction:: pybel.to_bel
-.. autofunction:: pybel.to_bel_path
+.. autofunction:: pybel.from_bel_script
+.. autofunction:: pybel.from_bel_script_url
+.. autofunction:: pybel.to_bel_script
 
 Transport
 ---------
@@ -49,31 +42,31 @@ All transport pairs are reflective and data-preserving.
 Bytes
 ~~~~~
 .. automodule:: pybel.io.gpickle
-.. autofunction:: pybel.from_pickle
-.. autofunction:: pybel.to_pickle
+
 .. autofunction:: pybel.from_bytes
 .. autofunction:: pybel.to_bytes
+
+.. autofunction:: pybel.from_pickle
+.. autofunction:: pybel.to_pickle
 
 Node-Link JSON
 ~~~~~~~~~~~~~~
 .. automodule:: pybel.io.nodelink
 
-.. autofunction:: pybel.from_json
-.. autofunction:: pybel.to_json
-.. autofunction:: pybel.from_json_file
-.. autofunction:: pybel.to_json_file
-.. autofunction:: pybel.from_json_path
-.. autofunction:: pybel.to_json_path
-.. autofunction:: pybel.from_jsons
-.. autofunction:: pybel.to_jsons
+.. autofunction:: pybel.from_nodelink
+.. autofunction:: pybel.to_nodelink
+
+.. autofunction:: pybel.from_nodelink_file
+.. autofunction:: pybel.to_nodelink_file
 
 JSON Graph Interchange Format
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. automodule:: pybel.io.jgif
 
 .. autofunction:: pybel.from_jgif
-.. autofunction:: pybel.from_cbn_jgif
 .. autofunction:: pybel.to_jgif
+
+.. autofunction:: pybel.from_cbn_jgif
 
 Export
 ------
@@ -83,6 +76,7 @@ Export
 .. autofunction:: pybel.to_csv
 .. autofunction:: pybel.to_sif
 .. autofunction:: pybel.to_gsea
+.. autofunction:: pybel.to_tsv
 
 Database
 --------
@@ -110,4 +104,5 @@ INDRA
 
 .. autofunction:: pybel.from_indra_statements
 .. autofunction:: pybel.to_indra_statements
+
 .. autofunction:: pybel.from_biopax

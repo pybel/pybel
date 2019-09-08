@@ -40,7 +40,7 @@
     UNSET ALL
 """
 
-from ..dsl import activity, bioprocess, complex_abundance, protein, translocation
+from ..dsl import BiologicalProcess, ComplexAbundance, Protein, activity, translocation
 from ..language import cytoplasm, nucleus
 from ..struct.graph import BELGraph
 
@@ -67,21 +67,21 @@ egf_graph.annotation_url.update({
     'Species': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/species-taxonomy-id/species-taxonomy-id-20170511.belanno'
 })
 
-ar = protein(name='AR', namespace='HGNC')
-egf = protein(name='EGF', namespace='HGNC')
-ifna1 = protein(name='IFNA1', namespace='HGNC')
-ifng = protein(name='IFNG', namespace='HGNC')
-vcp = protein(name='VCP', namespace='HGNC')
+ar = Protein(name='AR', namespace='HGNC')
+egf = Protein(name='EGF', namespace='HGNC')
+ifna1 = Protein(name='IFNA1', namespace='HGNC')
+ifng = Protein(name='IFNG', namespace='HGNC')
+vcp = Protein(name='VCP', namespace='HGNC')
 
-nfkb1 = protein(name='NFKB1', namespace='HGNC')
-nfkb2 = protein(name='NFKB2', namespace='HGNC')
-rel = protein(name='REL', namespace='HGNC')
-rela = protein(name='RELA', namespace='HGNC')
-relb = protein(name='RELB', namespace='HGNC')
+nfkb1 = Protein(name='NFKB1', namespace='HGNC')
+nfkb2 = Protein(name='NFKB2', namespace='HGNC')
+rel = Protein(name='REL', namespace='HGNC')
+rela = Protein(name='RELA', namespace='HGNC')
+relb = Protein(name='RELB', namespace='HGNC')
 
-nfkb_complex = complex_abundance([nfkb1, nfkb2, rel, rela, relb])
+nfkb_complex = ComplexAbundance([nfkb1, nfkb2, rel, rela, relb])
 
-apoptosis = bioprocess(namespace='GO', name='apoptotic process', identifier='GO:0006915')
+apoptosis = BiologicalProcess(namespace='GO', name='apoptotic process', identifier='GO:0006915')
 
 egf_graph.add_increases(
     ar,
@@ -99,7 +99,7 @@ egf_graph.add_decreases(
     citation='9639405',
     evidence='DU-145 cells treated with 5000 U/ml of IFNgamma and IFN alpha, both reduced EGF production with IFN '
              'gamma reduction more significant.',
-    annotations={'Species': '9606'}
+    annotations={'Species': '9606'},
 )
 
 egf_graph.add_decreases(
@@ -108,7 +108,7 @@ egf_graph.add_decreases(
     citation='9639405',
     evidence='DU-145 cells treated with 5000 U/ml of IFNgamma and IFN alpha, both reduced EGF production with IFN '
              'gamma reduction more significant.',
-    annotations={'Species': '9606'}
+    annotations={'Species': '9606'},
 )
 
 egf_graph.add_increases(

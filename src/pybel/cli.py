@@ -24,10 +24,13 @@ from click_plugins import with_plugins
 from pkg_resources import iter_entry_points
 from tqdm import tqdm
 
-from .canonicalize import to_bel
+from .canonicalize import to_bel_script
 from .constants import get_cache_connection
 from .examples import braf_graph, egf_graph, homology_graph, sialic_acid_graph, statin_graph
-from .io import from_path, from_pickle, to_csv, to_graphml, to_gsea, to_json_file, to_neo4j, to_pickle, to_sif, to_web
+from .io import (
+    from_bel_script, from_pickle, to_csv, to_graphml, to_gsea, to_neo4j, to_nodelink_file, to_pickle, to_sif,
+    to_web,
+)
 from .io.web import _get_host
 from .manager import Manager
 from .manager.database_io import to_database
@@ -112,7 +115,7 @@ def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified
     click.secho('Compilation', fg='red', bold=True)
     if skip_tqdm:
         click.echo('```')
-    graph = from_path(
+    graph = from_bel_script(
         path,
         manager=manager,
         use_tqdm=(not (skip_tqdm or verbose)),
@@ -239,11 +242,11 @@ def serialize(graph: BELGraph, csv, sif, gsea, graphml, json, bel):
 
     if json:
         log.info('Outputting JSON to %s', json)
-        to_json_file(graph, json)
+        to_nodelink_file(graph, json)
 
     if bel:
         log.info('Outputting BEL to %s', bel)
-        to_bel(graph, bel)
+        to_bel_script(graph, bel)
 
 
 @main.command()

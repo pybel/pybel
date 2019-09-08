@@ -8,7 +8,7 @@ from typing import Optional
 
 import requests
 
-from .nodelink import from_json, to_json
+from .nodelink import from_nodelink, to_nodelink
 from ..config import config
 from ..constants import DEFAULT_SERVICE_URL, PYBEL_REMOTE_HOST, PYBEL_REMOTE_PASSWORD, PYBEL_REMOTE_USER
 from ..struct.graph import BELGraph
@@ -49,12 +49,13 @@ def _get_password() -> Optional[str]:
     return _get_config_or_env(PYBEL_REMOTE_PASSWORD)
 
 
-def to_web(graph: BELGraph,
-           host: Optional[str] = None,
-           user: Optional[str] = None,
-           password: Optional[str] = None,
-           public: bool = False,
-           ) -> requests.Response:
+def to_web(
+    graph: BELGraph,
+    host: Optional[str] = None,
+    user: Optional[str] = None,
+    password: Optional[str] = None,
+    public: bool = False,
+) -> requests.Response:
     """Send a graph to the receiver service and returns the :mod:`requests` response object.
 
     :param graph: A BEL graph
@@ -87,7 +88,7 @@ def to_web(graph: BELGraph,
 
     response = requests.post(
         url,
-        json=to_json(graph),
+        json=to_nodelink(graph),
         headers={
             'content-type': 'application/json',
             'User-Agent': 'PyBEL v{}'.format(get_version()),
@@ -105,11 +106,10 @@ def from_web(network_id: int, host: Optional[str] = None) -> BELGraph:
 
     In the future, this function may be extended to support authentication.
 
-    :param int network_id: The BEL Commons network identifier
-    :param Optional[str] host: The location of the BEL Commons server. Alternatively, looks up in PyBEL config with
+    :param network_id: The BEL Commons network identifier
+    :param host: The location of the BEL Commons server. Alternatively, looks up in PyBEL config with
      ``PYBEL_REMOTE_HOST`` or the environment as ``PYBEL_REMOTE_HOST`` Defaults to
      :data:`pybel.constants.DEFAULT_SERVICE_URL`
-    :rtype: pybel.BELGraph
     """
     if host is None:
         host = _get_host()
@@ -117,5 +117,5 @@ def from_web(network_id: int, host: Optional[str] = None) -> BELGraph:
     url = host + GET_ENDPOINT.format(network_id)
     res = requests.get(url)
     graph_json = res.json()
-    graph = from_json(graph_json)
+    graph = from_nodelink(graph_json)
     return graph

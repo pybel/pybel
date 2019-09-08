@@ -10,7 +10,7 @@ from pybel.constants import (
     FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, KIND, LOCATION, NAME, NAMESPACE,
     PARTNER_3P, PARTNER_5P, PMOD, PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P,
 )
-from pybel.dsl import gmod, hgvs, pmod
+from pybel.dsl import GeneModification, Hgvs, ProteinModification
 from pybel.language import Entity
 from pybel.parser import ConceptParser
 from pybel.parser.modifiers import (
@@ -28,68 +28,68 @@ class TestHGVSParser(unittest.TestCase):
 
     def test_protein_del(self):
         statement = 'variant(p.Phe508del)'
-        expected = hgvs('p.Phe508del')
+        expected = Hgvs('p.Phe508del')
         result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_protein_del_quoted(self):
         statement = 'variant("p.Phe508del")'
-        expected = hgvs('p.Phe508del')
+        expected = Hgvs('p.Phe508del')
         result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_protein_mut(self):
         statement = 'var(p.Gly576Ala)'
-        expected = hgvs('p.Gly576Ala')
+        expected = Hgvs('p.Gly576Ala')
         result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_unspecified(self):
         statement = 'var(=)'
-        expected = hgvs('=')
+        expected = Hgvs('=')
         result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_frameshift(self):
         statement = 'variant(p.Thr1220Lysfs)'
-        expected = hgvs('p.Thr1220Lysfs')
+        expected = Hgvs('p.Thr1220Lysfs')
         result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_snp(self):
         statement = 'var(c.1521_1523delCTT)'
-        expected = hgvs('c.1521_1523delCTT')
+        expected = Hgvs('c.1521_1523delCTT')
         result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_chromosome_1(self):
         statement = 'variant(g.117199646_117199648delCTT)'
-        expected = hgvs('g.117199646_117199648delCTT')
+        expected = Hgvs('g.117199646_117199648delCTT')
         result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_chromosome_2(self):
         statement = 'var(c.1521_1523delCTT)'
-        expected = hgvs('c.1521_1523delCTT')
+        expected = Hgvs('c.1521_1523delCTT')
         result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_rna_del(self):
         statement = 'var(r.1653_1655delcuu)'
-        expected = hgvs('r.1653_1655delcuu')
+        expected = Hgvs('r.1653_1655delcuu')
         result = self.parser.parseString(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_protein_trunc_triple(self):
         statement = 'var(p.Cys65*)'
         result = self.parser.parseString(statement)
-        expected = hgvs('p.Cys65*')
+        expected = Hgvs('p.Cys65*')
         self.assertEqual(expected, result.asDict())
 
     def test_protein_trunc_legacy(self):
         statement = 'var(p.65*)'
         result = self.parser.parseString(statement)
-        expected = hgvs('p.65*')
+        expected = Hgvs('p.65*')
         self.assertEqual(expected, result.asDict())
 
 
@@ -109,7 +109,7 @@ class TestPmod(unittest.TestCase):
                 NAME: 'Ph',
             },
         }
-        self.assertEqual(expected, pmod('Ph'))
+        self.assertEqual(expected, ProteinModification('Ph'))
         self.assertEqual(expected, result.asDict())
 
     def test_bel_name(self):
@@ -138,7 +138,7 @@ class TestPmod(unittest.TestCase):
             },
             PMOD_CODE: 'Ser',
         }
-        self.assertEqual(expected, pmod('Ph', code='Ser'))
+        self.assertEqual(expected, ProteinModification('Ph', code='Ser'))
         self.assertEqual(expected, result.asDict())
 
     def test_residue(self):
@@ -160,7 +160,7 @@ class TestPmod(unittest.TestCase):
             PMOD_POSITION: 473,
         }
 
-        self.assertEqual(expected, pmod('Ph', code='Ser', position=473))
+        self.assertEqual(expected, ProteinModification('Ph', code='Ser', position=473))
         self.assertEqual(expected, result.asDict())
 
     def test_full(self):
@@ -187,14 +187,14 @@ class TestPmod(unittest.TestCase):
             PMOD_POSITION: 473,
         }
 
-        self.assertEqual(expected, pmod(name='PhosRes', namespace='MOD', code='Ser', position=473))
+        self.assertEqual(expected, ProteinModification(name='PhosRes', namespace='MOD', code='Ser', position=473))
         self.assertEqual(expected, result.asDict())
 
     def test_full_with_non_standard_namespace(self):
         self._help_test_non_standard_namespace('proteinModification(MOD:PhosRes, S, 473)')
         self._help_test_non_standard_namespace('proteinModification(MOD:PhosRes, Ser, 473)')
-        self._help_test_non_standard_namespace('pmod(MOD:PhosRes, S, 473)')
-        self._help_test_non_standard_namespace('pmod(MOD:PhosRes, Ser, 473)')
+        self._help_test_non_standard_namespace('proteinModification(MOD:PhosRes, S, 473)')
+        self._help_test_non_standard_namespace('proteinModification(MOD:PhosRes, Ser, 473)')
 
 
 class TestGeneModification(unittest.TestCase):
@@ -203,7 +203,7 @@ class TestGeneModification(unittest.TestCase):
         identifier_qualified = identifier_parser.identifier_qualified
         self.parser = get_gene_modification_language(identifier_qualified)
 
-        self.expected = gmod('Me')
+        self.expected = GeneModification('Me')
 
     def test_dsl(self):
         self.assertEqual({
@@ -215,12 +215,12 @@ class TestGeneModification(unittest.TestCase):
         }, self.expected)
 
     def test_gmod_short(self):
-        statement = 'gmod(M)'
+        statement = 'geneModification(M)'
         result = self.parser.parseString(statement)
         self.assertEqual(self.expected, result.asDict())
 
     def test_gmod_unabbreviated(self):
-        statement = 'gmod(Me)'
+        statement = 'geneModification(Me)'
         result = self.parser.parseString(statement)
         self.assertEqual(self.expected, result.asDict())
 
@@ -238,14 +238,14 @@ class TestProteinSubstitution(unittest.TestCase):
         statement = 'sub(A, 127, Y)'
         result = self.parser.parseString(statement)
 
-        expected_list = hgvs('p.Ala127Tyr')
+        expected_list = Hgvs('p.Ala127Tyr')
         self.assertEqual(expected_list, result.asDict())
 
     def test_psub_2(self):
         statement = 'sub(Ala, 127, Tyr)'
         result = self.parser.parseString(statement)
 
-        expected_list = hgvs('p.Ala127Tyr')
+        expected_list = Hgvs('p.Ala127Tyr')
         self.assertEqual(expected_list, result.asDict())
 
 
@@ -257,7 +257,7 @@ class TestGeneSubstitutionParser(unittest.TestCase):
         statement = 'sub(G,308,A)'
         result = self.parser.parseString(statement)
 
-        expected_dict = hgvs('c.308G>A')
+        expected_dict = Hgvs('c.308G>A')
         self.assertEqual(expected_dict, result.asDict())
 
 
@@ -352,7 +352,7 @@ class TestTruncationParser(unittest.TestCase):
         statement = 'trunc(40)'
         result = self.parser.parseString(statement)
 
-        expected = hgvs('p.40*')
+        expected = Hgvs('p.40*')
         self.assertEqual(expected, result.asDict())
 
     def test_trunc_2(self):
@@ -360,7 +360,7 @@ class TestTruncationParser(unittest.TestCase):
         statement = 'trunc(Gly40)'
         result = self.parser.parseString(statement)
 
-        expected = hgvs('p.Gly40*')
+        expected = Hgvs('p.Gly40*')
         self.assertEqual(expected, result.asDict())
 
     def test_trunc_missing_number(self):

@@ -10,7 +10,7 @@ from pybel import BELGraph
 from pybel.constants import (
     CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_TYPE_PUBMED,
 )
-from pybel.dsl import protein
+from pybel.dsl import Protein
 from pybel.manager.citation_utils import enrich_pubmed_citations, get_citations_by_pmids, sanitize_date
 from pybel.manager.models import Citation
 from pybel.testing.cases import TemporaryCacheMixin
@@ -58,7 +58,7 @@ class TestCitations(TemporaryCacheMixin):
 
     def setUp(self):
         super(TestCitations, self).setUp()
-        self.u, self.v = (protein(n(), n()) for _ in range(2))
+        self.u, self.v = (Protein(n(), n()) for _ in range(2))
         self.pmid = "9611787"
         self.graph = BELGraph()
         self.graph.add_increases(self.u, self.v, citation=self.pmid, evidence=n())

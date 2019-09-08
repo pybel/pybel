@@ -11,16 +11,18 @@ from io import BytesIO, StringIO
 from pathlib import Path
 
 from pybel import (
-    BELGraph, from_bytes, from_json, from_json_file, from_jsons, from_lines, from_path, from_pickle, from_url,
-    to_bel_lines, to_bytes, to_csv, to_graphml, to_gsea, to_json, to_json_file, to_jsons, to_pickle, to_sif,
+    BELGraph, from_bel_script, from_bel_script_url, from_bytes, from_nodelink, from_nodelink_file, from_pickle,
+    to_bel_script_lines, to_bytes, to_csv, to_graphml, to_gsea, to_nodelink, to_nodelink_file, to_pickle, to_sif,
 )
 from pybel.config import PYBEL_MINIMUM_IMPORT_VERSION
 from pybel.constants import (
     ANNOTATIONS, CITATION, DECREASES, DIRECTLY_DECREASES, EVIDENCE, GRAPH_PYBEL_VERSION, INCREASES, RELATION,
 )
-from pybel.dsl import BaseEntity, Protein, gene
+from pybel.dsl import BaseEntity, Gene, Protein
 from pybel.examples.sialic_acid_example import sialic_acid_graph
 from pybel.io.exc import ImportVersionWarning, import_version_message_fmt
+from pybel.io.line_utils import parse_lines
+from pybel.io.nodelink import from_nodelink_jsons, to_nodelink_jsons
 from pybel.parser import BELParser
 from pybel.parser.exc import (
     BELSyntaxError, InvalidFunctionSemantic, MissingCitationException, MissingNamespaceRegexWarning,
@@ -76,22 +78,22 @@ class TestExampleInterchange(unittest.TestCase):
 
     def test_thorough_json(self):
         """Test the round-trip through node-link JSON."""
-        graph_json_dict = to_json(sialic_acid_graph)
-        graph = from_json(graph_json_dict)
+        graph_json_dict = to_nodelink(sialic_acid_graph)
+        graph = from_nodelink(graph_json_dict)
         self._help_test_equal(graph)
 
     def test_thorough_jsons(self):
         """Test the round-trip through a node-link JSON string."""
-        graph_json_str = to_jsons(sialic_acid_graph)
-        graph = from_jsons(graph_json_str)
+        graph_json_str = to_nodelink_jsons(sialic_acid_graph)
+        graph = from_nodelink_jsons(graph_json_str)
         self._help_test_equal(graph)
 
     def test_thorough_json_file(self):
         """Test the round-trip through a node-link JSON file."""
         sio = StringIO()
-        to_json_file(sialic_acid_graph, sio)
+        to_nodelink_file(sialic_acid_graph, sio)
         sio.seek(0)
-        graph = from_json_file(sio)
+        graph = from_nodelink_file(sio)
         self._help_test_equal(graph)
 
 
@@ -102,11 +104,12 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
         super(TestInterchange, cls).setUpClass()
 
         with mock_bel_resources:
-            cls.thorough_graph = from_path(test_bel_thorough, manager=cls.manager, allow_nested=True)
-            cls.slushy_graph = from_path(test_bel_slushy, manager=cls.manager, disallow_unqualified_translocations=True)
-            cls.simple_graph = from_url(Path(test_bel_simple).as_uri(), manager=cls.manager)
-            cls.isolated_graph = from_path(test_bel_isolated, manager=cls.manager)
-            cls.misordered_graph = from_path(test_bel_misordered, manager=cls.manager, citation_clearing=False)
+            cls.thorough_graph = from_bel_script(test_bel_thorough, manager=cls.manager, allow_nested=True)
+            cls.slushy_graph = from_bel_script(test_bel_slushy, manager=cls.manager,
+                                               disallow_unqualified_translocations=True)
+            cls.simple_graph = from_bel_script_url(Path(test_bel_simple).as_uri(), manager=cls.manager)
+            cls.isolated_graph = from_bel_script(test_bel_isolated, manager=cls.manager)
+            cls.misordered_graph = from_bel_script(test_bel_misordered, manager=cls.manager, citation_clearing=False)
 
     def test_thorough_path(self):
         self.bel_thorough_reconstituted(self.thorough_graph)
@@ -124,20 +127,20 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
         self.bel_thorough_reconstituted(graph)
 
     def test_thorough_json(self):
-        graph_json_dict = to_json(self.thorough_graph)
-        graph = from_json(graph_json_dict)
+        graph_json_dict = to_nodelink(self.thorough_graph)
+        graph = from_nodelink(graph_json_dict)
         self.bel_thorough_reconstituted(graph)
 
     def test_thorough_jsons(self):
-        graph_json_str = to_jsons(self.thorough_graph)
-        graph = from_jsons(graph_json_str)
+        graph_json_str = to_nodelink_jsons(self.thorough_graph)
+        graph = from_nodelink_jsons(graph_json_str)
         self.bel_thorough_reconstituted(graph)
 
     def test_thorough_json_file(self):
         sio = StringIO()
-        to_json_file(self.thorough_graph, sio)
+        to_nodelink_file(self.thorough_graph, sio)
         sio.seek(0)
-        graph = from_json_file(sio)
+        graph = from_nodelink_file(sio)
         self.bel_thorough_reconstituted(graph)
 
     def test_thorough_graphml(self):
@@ -177,8 +180,9 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
         os.remove(path)
 
     def test_thorough_upgrade(self):
-        lines = to_bel_lines(self.thorough_graph)
-        reconstituted = from_lines(lines, manager=self.manager)
+        lines = to_bel_script_lines(self.thorough_graph)
+        reconstituted = BELGraph()
+        parse_lines(reconstituted, lines, manager=self.manager)
         self.bel_thorough_reconstituted(reconstituted, check_citation_name=False, check_path=False)
 
     def test_slushy(self):
@@ -198,8 +202,8 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
         self.assertEqual(98, first_exc.line_number)
 
     def test_slushy_json(self):
-        graph_json = to_json(self.slushy_graph)
-        graph = from_json(graph_json)
+        graph_json = to_nodelink(self.slushy_graph)
+        graph = from_nodelink(graph_json)
         self.bel_slushy_reconstituted(graph)
 
     def test_slushy_graphml(self):
@@ -218,10 +222,11 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
         self.bel_isolated_reconstituted(self.isolated_graph)
 
     def test_isolated_upgrade(self):
-        lines = to_bel_lines(self.isolated_graph)
+        lines = to_bel_script_lines(self.isolated_graph)
 
         with mock_bel_resources:
-            reconstituted = from_lines(lines, manager=self.manager)
+            reconstituted = BELGraph()
+            parse_lines(graph=reconstituted, lines=lines, manager=self.manager)
 
         self.bel_isolated_reconstituted(reconstituted)
 
@@ -290,8 +295,8 @@ class TestFull(TestTokenParserBase):
         line = 'g(dbSNP:rs10234) -- g(dbSNP:rs10235)'
         self.add_default_provenance()
         self.parser.parseString(line)
-        self.assertIn(gene('dbSNP', 'rs10234'), self.parser.graph)
-        self.assertIn(gene('dbSNP', 'rs10235'), self.parser.graph)
+        self.assertIn(Gene('dbSNP', 'rs10234'), self.parser.graph)
+        self.assertIn(Gene('dbSNP', 'rs10235'), self.parser.graph)
 
     def test_regex_mismatch(self):
         statement = 'g(dbSNP:10234) -- g(dbSNP:rr10235)'
@@ -329,8 +334,8 @@ class TestFull(TestTokenParserBase):
 
         self.parser.parse_lines(statements)
 
-        test_node_1 = gene(namespace='TESTNS', name='1')
-        test_node_2 = gene(namespace='TESTNS', name='2')
+        test_node_1 = Gene(namespace='TESTNS', name='1')
+        test_node_2 = Gene(namespace='TESTNS', name='2')
 
         self.assertEqual(2, self.graph.number_of_nodes())
         self.assertIn(test_node_1, self.graph)
@@ -358,8 +363,8 @@ class TestFull(TestTokenParserBase):
         ]
         self.parser.parse_lines(statements)
 
-        test_node_1_dict = gene(namespace='TESTNS', name='1')
-        test_node_2_dict = gene(namespace='TESTNS', name='2')
+        test_node_1_dict = Gene(namespace='TESTNS', name='1')
+        test_node_2_dict = Gene(namespace='TESTNS', name='2')
 
         self.assertEqual(2, self.parser.graph.number_of_nodes())
         self.assertIn(test_node_1_dict, self.graph)
@@ -387,8 +392,8 @@ class TestFull(TestTokenParserBase):
         ]
         self.parser.parse_lines(statements)
 
-        test_node_1_dict = gene(namespace='TESTNS', name='1')
-        test_node_2_dict = gene(namespace='TESTNS', name='2')
+        test_node_1_dict = Gene(namespace='TESTNS', name='1')
+        test_node_2_dict = Gene(namespace='TESTNS', name='2')
 
         self.assertEqual(2, self.parser.graph.number_of_nodes())
         self.assertIn(test_node_1_dict, self.graph)

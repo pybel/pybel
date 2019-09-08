@@ -36,7 +36,7 @@ def upload_cbn_dir(dir_path, manager):
 
         out_path = os.path.join(dir_path, jfg_path.replace('.jgf', '.bel'))
         with open(out_path, 'w') as o:
-            pybel.to_bel(graph, o)
+            pybel.to_bel_script(graph, o)
 
         strip_annotations(graph)
         enrich_pubmed_citations(manager=manager, graph=graph)

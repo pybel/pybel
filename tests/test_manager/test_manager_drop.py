@@ -4,16 +4,16 @@ import json
 
 from pybel import BELGraph
 from pybel.constants import INCREASES, RELATION
-from pybel.dsl import protein
+from pybel.dsl import hgnc
 from pybel.manager.models import Edge, Namespace, NamespaceEntry, Network, Node
 from pybel.testing.cases import TemporaryCacheMixin
 from pybel.testing.mocks import mock_bel_resources
 from pybel.testing.utils import make_dummy_annotations, make_dummy_namespaces, n
 from tests.constants import test_citation_dict, test_evidence_text
 
-yfg1 = protein(name='YFG1', namespace='HGNC')
-yfg2 = protein(name='YFG1', namespace='HGNC')
-yfg3 = protein(name='YFG3', namespace='HGNC')
+yfg1 = hgnc(name='YFG1')
+yfg2 = hgnc(name='YFG1')
+yfg3 = hgnc(name='YFG3')
 
 
 def make_increase_edge(u, v):

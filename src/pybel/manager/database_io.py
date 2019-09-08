@@ -17,7 +17,12 @@ __all__ = [
 log = logging.getLogger(__name__)
 
 
-def to_database(graph, manager: Optional[Manager] = None, store_parts: bool = True, use_tqdm: bool = False):
+def to_database(
+    graph,
+    manager: Optional[Manager] = None,
+    store_parts: bool = True,
+    use_tqdm: bool = False,
+):
     """Store a graph in a database.
 
     :param BELGraph graph: A BEL graph
@@ -38,7 +43,11 @@ def to_database(graph, manager: Optional[Manager] = None, store_parts: bool = Tr
         raise e
 
 
-def from_database(name: str, version: Optional[str] = None, manager: Optional[Manager] = None):
+def from_database(
+    name: str,
+    version: Optional[str] = None,
+    manager: Optional[Manager] = None,
+):
     """Load a BEL graph from a database.
 
     If name and version are given, finds it exactly with

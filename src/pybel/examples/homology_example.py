@@ -13,7 +13,7 @@ The following is an example of orthology annotations from
     p(MGI:Csf1) increases kin(p(MGI:Mapk1))
 """
 
-from ..dsl import activity, gene, protein, rna
+from ..dsl import Gene, Protein, Rna, activity
 from ..struct.graph import BELGraph
 
 __all__ = [
@@ -44,35 +44,35 @@ homology_graph.annotation_url.update({
     'Species': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/species-taxonomy-id/species-taxonomy-id-20170511.belanno'
 })
 
-human_mapk1_gene = gene(namespace='HGNC', name='MAPK1', identifier='HGNC:6871')
-human_mapk1_gene_entrez = gene(namespace='ENTREZ', name='5594')
-human_mapk1_rna = rna(namespace='HGNC', name='MAPK1', identifier='HGNC:6871')
-human_mapk1_protein = protein(namespace='HGNC', name='MAPK1', identifier='HGNC:6871')
+human_mapk1_gene = Gene(namespace='HGNC', name='MAPK1', identifier='HGNC:6871')
+human_mapk1_gene_entrez = Gene(namespace='ENTREZ', name='5594')
+human_mapk1_rna = Rna(namespace='HGNC', name='MAPK1', identifier='HGNC:6871')
+human_mapk1_protein = Protein(namespace='HGNC', name='MAPK1', identifier='HGNC:6871')
 
-mouse_mapk1_gene = gene(namespace='MGI', name='Mapk1', identifier='MGI:1346858')
-mouse_mapk1_gene_entrez = gene(namespace='ENTREZ', name='26413')
-mouse_mapk1_rna = rna(namespace='MGI', name='Mapk1', identifier='MGI:1346858')
-mouse_mapk1_protein = protein(namespace='MGI', name='Mapk1', identifier='MGI:1346858')
+mouse_mapk1_gene = Gene(namespace='MGI', name='Mapk1', identifier='MGI:1346858')
+mouse_mapk1_gene_entrez = Gene(namespace='ENTREZ', name='26413')
+mouse_mapk1_rna = Rna(namespace='MGI', name='Mapk1', identifier='MGI:1346858')
+mouse_mapk1_protein = Protein(namespace='MGI', name='Mapk1', identifier='MGI:1346858')
 
-rat_mapk1 = gene(namespace='RGD', name='Mapk1', identifier='70500')
-rat_mapk1_entrez = gene(namespace='ENTREZ', name='116590')
+rat_mapk1 = Gene(namespace='RGD', name='Mapk1', identifier='70500')
+rat_mapk1_entrez = Gene(namespace='ENTREZ', name='116590')
 
-fly_mapk1 = gene(namespace='FLYBASE', name='rl', identifier='FBgn0003256')
-fly_mapk1_entrez = gene(namespace='ENTREZ', name='3354888')
+fly_mapk1 = Gene(namespace='FLYBASE', name='rl', identifier='FBgn0003256')
+fly_mapk1_entrez = Gene(namespace='ENTREZ', name='3354888')
 
-human_csf1_gene = gene(namespace='HGNC', name='CSF1', identifier='HGNC:2432')
-human_csf1_rna = rna(namespace='HGNC', name='CSF1', identifier='HGNC:2432')
-human_csf1_protein = protein(namespace='HGNC', name='CSF1', identifier='HGNC:2432')
+human_csf1_gene = Gene(namespace='HGNC', name='CSF1', identifier='HGNC:2432')
+human_csf1_rna = Rna(namespace='HGNC', name='CSF1', identifier='HGNC:2432')
+human_csf1_protein = Protein(namespace='HGNC', name='CSF1', identifier='HGNC:2432')
 
-mouse_csf1_gene = gene(namespace='MGI', name='Csf1', identifier='MGI:1339753')
-mouse_csf1_rna = rna(namespace='MGI', name='Csf1', identifier='MGI:1339753')
-mouse_csf1_protein = protein(namespace='MGI', name='Csf1', identifier='MGI:1339753')
+mouse_csf1_gene = Gene(namespace='MGI', name='Csf1', identifier='MGI:1339753')
+mouse_csf1_rna = Rna(namespace='MGI', name='Csf1', identifier='MGI:1339753')
+mouse_csf1_protein = Protein(namespace='MGI', name='Csf1', identifier='MGI:1339753')
 
-# yeast_mapk1 = gene(namespace='SGD', name='KSS1', identifier='SGD:S000003272')
-# yeast_mapk1_entrez = gene(namespace='ENTREZ', name='KSS1', identifier='852931')
+# yeast_mapk1 = Gene(namespace='SGD', name='KSS1', identifier='SGD:S000003272')
+# yeast_mapk1_entrez = Gene(namespace='ENTREZ', name='KSS1', identifier='852931')
 
 # TODO make homologene resource and add is_a relationships for this
-# mapk1_homologene = gene(namespace='HOMOLOGENE', identifier='37670')
+# mapk1_homologene = Gene(namespace='HOMOLOGENE', identifier='37670')
 
 homology_graph.add_equivalence(human_mapk1_gene, human_mapk1_gene_entrez)
 homology_graph.add_equivalence(mouse_mapk1_gene, mouse_mapk1_gene_entrez)
