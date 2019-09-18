@@ -3,7 +3,8 @@
 """Convenient dictionaries for mapping constants to DSL classes."""
 
 from .node_classes import (
-    Abundance, BiologicalProcess, ComplexAbundance, CompositeAbundance, Gene, GeneFusion, MicroRna, NamedComplexAbundance,
+    Abundance, BiologicalProcess, ComplexAbundance, CompositeAbundance, Gene, GeneFusion, MicroRna,
+    NamedComplexAbundance,
     Pathology, Protein, ProteinFusion, Rna, RnaFusion,
 )
 from ..constants import ABUNDANCE, BIOPROCESS, COMPLEX, COMPOSITE, GENE, MIRNA, PATHOLOGY, PROTEIN, RNA

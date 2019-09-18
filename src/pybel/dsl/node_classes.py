@@ -116,11 +116,11 @@ class BaseAbundance(BaseEntity):
     """
 
     def __init__(
-            self,
-            namespace: str,
-            name: Optional[str] = None,
-            identifier: Optional[str] = None,
-            xrefs: Optional[List[Entity]] = None,
+        self,
+        namespace: str,
+        name: Optional[str] = None,
+        identifier: Optional[str] = None,
+        xrefs: Optional[List[Entity]] = None,
     ) -> None:
         """Build an abundance from a function, namespace, and a name and/or identifier.
 
@@ -240,12 +240,12 @@ class CentralDogma(BaseAbundance):
     """The base class for "central dogma" abundances (i.e., genes, miRNAs, RNAs, and proteins)."""
 
     def __init__(
-            self,
-            namespace: str,
-            name: Optional[str] = None,
-            identifier: Optional[str] = None,
-            xrefs: Optional[List[Entity]] = None,
-            variants: Union[None, Variant, Iterable[Variant]] = None,
+        self,
+        namespace: str,
+        name: Optional[str] = None,
+        identifier: Optional[str] = None,
+        xrefs: Optional[List[Entity]] = None,
+        variants: Union[None, Variant, Iterable[Variant]] = None,
     ) -> None:
         """Build a node for a gene, RNA, miRNA, or protein.
 
@@ -326,13 +326,13 @@ class ProteinModification(Variant):
     """Build a protein modification variant dictionary."""
 
     def __init__(
-            self,
-            name: str,
-            code: Optional[str] = None,
-            position: Optional[int] = None,
-            namespace: Optional[str] = None,
-            identifier: Optional[str] = None,
-            xrefs: Optional[List[Entity]] = None,
+        self,
+        name: str,
+        code: Optional[str] = None,
+        position: Optional[int] = None,
+        namespace: Optional[str] = None,
+        identifier: Optional[str] = None,
+        xrefs: Optional[List[Entity]] = None,
     ) -> None:
         """Build a protein modification variant data dictionary.
 
@@ -397,11 +397,11 @@ class GeneModification(Variant):
     """Build a gene modification variant dictionary."""
 
     def __init__(
-            self,
-            name: str,
-            namespace: Optional[str] = None,
-            identifier: Optional[str] = None,
-            xrefs: Optional[List[Entity]] = None,
+        self,
+        name: str,
+        namespace: Optional[str] = None,
+        identifier: Optional[str] = None,
+        xrefs: Optional[List[Entity]] = None,
     ) -> None:
         """Build a gene modification variant data dictionary.
 
@@ -505,10 +505,10 @@ class Fragment(Variant):
     """Represent the information about a protein fragment."""
 
     def __init__(
-            self,
-            start: Union[None, int, str] = None,
-            stop: Union[None, int, str] = None,
-            description: Optional[str] = None,
+        self,
+        start: Union[None, int, str] = None,
+        stop: Union[None, int, str] = None,
+        description: Optional[str] = None,
     ) -> None:
         """Build a protein fragment data dictionary.
 
@@ -663,9 +663,9 @@ class Reaction(BaseEntity):
     function = REACTION
 
     def __init__(
-            self,
-            reactants: Union[BaseAbundance, Iterable[BaseAbundance]],
-            products: Union[BaseAbundance, Iterable[BaseAbundance]],
+        self,
+        reactants: Union[BaseAbundance, Iterable[BaseAbundance]],
+        products: Union[BaseAbundance, Iterable[BaseAbundance]],
     ) -> None:
         """Build a reaction node.
 
@@ -755,12 +755,12 @@ class ComplexAbundance(ListAbundance):
     function = COMPLEX
 
     def __init__(
-            self,
-            members: Iterable[BaseAbundance],
-            namespace: Optional[str] = None,
-            name: Optional[str] = None,
-            identifier: Optional[str] = None,
-            xrefs: Optional[List[Entity]] = None,
+        self,
+        members: Iterable[BaseAbundance],
+        namespace: Optional[str] = None,
+        name: Optional[str] = None,
+        identifier: Optional[str] = None,
+        xrefs: Optional[List[Entity]] = None,
     ) -> None:
         """Build a complex list node.
 
@@ -867,11 +867,11 @@ class FusionBase(BaseEntity):
     """The superclass for building fusion node data dictionaries."""
 
     def __init__(
-            self,
-            partner_5p: CentralDogma,
-            partner_3p: CentralDogma,
-            range_5p: Optional[FusionRangeBase] = None,
-            range_3p: Optional[FusionRangeBase] = None,
+        self,
+        partner_5p: CentralDogma,
+        partner_3p: CentralDogma,
+        range_5p: Optional[FusionRangeBase] = None,
+        range_3p: Optional[FusionRangeBase] = None,
     ) -> None:
         """Build a fusion node.
 

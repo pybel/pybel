@@ -260,9 +260,9 @@ def is_causal_central(graph: BELGraph, node: BaseEntity) -> bool:
 def is_isolated_list_abundance(graph: BELGraph, node: BaseEntity, cls: Type[ListAbundance] = ListAbundance) -> bool:
     """Return if the node is a list abundance but has no qualified edges."""
     return (
-        isinstance(node, cls) and
-        0 == graph.in_degree(node) and
-        all(
+        isinstance(node, cls)
+        and 0 == graph.in_degree(node)
+        and all(
             data[RELATION] == HAS_COMPONENT
             for _, __, data in graph.out_edges(node, data=True)
         )

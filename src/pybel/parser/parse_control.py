@@ -53,12 +53,12 @@ class ControlParser(BaseParser):
     """
 
     def __init__(
-            self,
-            annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
-            annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
-            annotation_to_local: Optional[Mapping[str, Set[str]]] = None,
-            citation_clearing: bool = True,
-            required_annotations: Optional[List[str]] = None
+        self,
+        annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
+        annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
+        annotation_to_local: Optional[Mapping[str, Set[str]]] = None,
+        citation_clearing: bool = True,
+        required_annotations: Optional[List[str]] = None
     ) -> None:
         """Initialize the control statement parser.
 
@@ -150,9 +150,9 @@ class ControlParser(BaseParser):
     def has_annotation(self, annotation: str) -> bool:
         """Check if the annotation is defined."""
         return (
-            self.has_enumerated_annotation(annotation) or
-            self.has_regex_annotation(annotation) or
-            self.has_local_annotation(annotation)
+            self.has_enumerated_annotation(annotation)
+            or self.has_regex_annotation(annotation)
+            or self.has_local_annotation(annotation)
         )
 
     def raise_for_undefined_annotation(self, line: str, position: int, annotation: str) -> None:

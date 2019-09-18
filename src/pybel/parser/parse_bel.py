@@ -386,8 +386,7 @@ class BELParser(BaseParser):
 
         #: `2.1.3 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XcompositeA>`_
         self.composite_abundance = composite_abundance_tag + nest(
-            delimitedList(Group(self.simple_abundance))(MEMBERS) +
-            opt_location
+            delimitedList(Group(self.simple_abundance))(MEMBERS) + opt_location
         )
 
         self.abundance = self.simple_abundance | self.composite_abundance
@@ -400,8 +399,7 @@ class BELParser(BaseParser):
 
         #: `2.4.1 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XmolecularA>`_
         self.molecular_activity = molecular_activity_tags + nest(
-            molecular_activity_default |
-            self.concept_parser.language
+            molecular_activity_default | self.concept_parser.language
         )
 
         # 2.3 Process Functions
@@ -416,8 +414,7 @@ class BELParser(BaseParser):
         self.bp_path.setParseAction(self.check_function_semantics)
 
         self.activity_standard = activity_tag + nest(
-            Group(self.simple_abundance)(TARGET) +
-            pyparsing.Optional(WCW + Group(self.molecular_activity)(EFFECT))
+            Group(self.simple_abundance)(TARGET) + pyparsing.Optional(WCW + Group(self.molecular_activity)(EFFECT))
         )
 
         activity_legacy_tags = oneOf(language.activities)(MODIFIER)
@@ -439,15 +436,15 @@ class BELParser(BaseParser):
         self.cell_surface_expression = cell_surface_expression_tag + nest(Group(self.simple_abundance)(TARGET))
 
         self.translocation_standard = nest(
-            Group(self.simple_abundance)(TARGET) +
-            WCW +
-            Group(from_loc + WCW + to_loc)(EFFECT)
+            Group(self.simple_abundance)(TARGET)
+            + WCW
+            + Group(from_loc + WCW + to_loc)(EFFECT)
         )
 
         self.translocation_legacy = nest(
-            Group(self.simple_abundance)(TARGET) +
-            WCW +
-            Group(concept(FROM_LOC) + WCW + concept(TO_LOC))(EFFECT)
+            Group(self.simple_abundance)(TARGET)
+            + WCW
+            + Group(concept(FROM_LOC) + WCW + concept(TO_LOC))(EFFECT)
         )
 
         self.translocation_legacy.addParseAction(handle_legacy_tloc)
@@ -569,7 +566,7 @@ class BELParser(BaseParser):
             self.has_member,
             self.has_component,
             self.has_variant_relation,
-            self.part_of_reaction
+            self.part_of_reaction,
         ])
 
         self.unqualified_relation.setParseAction(self.handle_unqualified_relation)
@@ -579,13 +576,13 @@ class BELParser(BaseParser):
             increases_tag,
             decreases_tag,
             directly_decreases_tag,
-            directly_increases_tag
+            directly_increases_tag,
         ])
 
         self.nested_causal_relationship = triple(
             self.bel_term,
             causal_relation_tags,
-            nest(triple(self.bel_term, causal_relation_tags, self.bel_term))
+            nest(triple(self.bel_term, causal_relation_tags, self.bel_term)),
         )
 
         self.nested_causal_relationship.setParseAction(self.handle_nested_relation)

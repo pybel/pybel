@@ -11,7 +11,7 @@ import logging
 import time
 from copy import deepcopy
 from itertools import chain
-from typing import Dict, Iterable, List, Mapping, Optional, Set, Tuple, Union
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Set, Tuple, Union
 
 import requests
 import sqlalchemy
@@ -34,7 +34,7 @@ from ..constants import (
     CITATION_ISSUE, CITATION_LAST_AUTHOR, CITATION_NAME, CITATION_PAGES, CITATION_REFERENCE, CITATION_TITLE,
     CITATION_TYPE, CITATION_TYPE_PUBMED, CITATION_VOLUME, CONCEPT, DEGRADATION, EFFECT, EVIDENCE, FRAGMENT,
     FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP, FUSION, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, HGVS,
-    KIND, LINE, LOCATION, METADATA_INSERT_KEYS, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P,
+    KIND, LOCATION, METADATA_INSERT_KEYS, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P,
     PMOD, PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P, RELATION, SUBJECT, TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS,
     belns_encodings, get_cache_connection,
 )
@@ -166,7 +166,6 @@ class NamespaceManager(BaseManager):
         if namespace is None:
             namespace = Namespace(
                 name='BEL Default Namespace',
-                contact='charles.hoyt@scai.fraunhofer.de',
                 keyword=BEL_DEFAULT_NAMESPACE,
                 version=BEL_DEFAULT_NAMESPACE_VERSION,
                 url=BEL_DEFAULT_NAMESPACE_URL,
@@ -220,16 +219,19 @@ class NamespaceManager(BaseManager):
             url=url,
             **namespace_insert_values
         )
+
+        logger.debug('building NamespaceEntry instances')
         namespace.entries = [
             NamespaceEntry(name=name, encoding=encoding, identifier=name_to_id.get(name))
             for name, encoding in values.items()
         ]
 
-        logger.info('inserted namespace: %s (%d terms in %.2f seconds)', url, len(values), time.time() - t)
-
         self.session.add(namespace)
+
+        logger.debug('committing namespace')
         self.session.commit()
 
+        logger.info('inserted namespace: %s (%d terms in %.2f seconds)', url, len(values), time.time() - t)
         return namespace
 
     def get_namespace_by_keyword_pattern(self, keyword: str, pattern: str) -> Optional[Namespace]:
@@ -272,7 +274,8 @@ class NamespaceManager(BaseManager):
             return
 
         if 1 < len(result):
-            logger.warning('result for get_namespace_entry is too long. Returning first of %s', [str(r) for r in result])
+            logger.warning('result for get_namespace_entry is too long. Returning first of %s',
+                           [str(r) for r in result])
 
         return result[0]
 
@@ -566,7 +569,12 @@ class InsertManager(NamespaceManager, LookupManager):
         self.object_cache_citation = {}
         self.object_cache_author = {}
 
-    def insert_graph(self, graph: BELGraph, store_parts: bool = True, use_tqdm: bool = False) -> Network:
+    def insert_graph(
+        self,
+        graph: BELGraph,
+        use_tqdm: bool = False,
+        tqdm_kwargs: Optional[Mapping[str, Any]] = None,
+    ) -> Network:
         """Insert a graph in the database and returns the corresponding Network model.
 
         :raises: pybel.resources.exc.ResourceError
@@ -585,8 +593,10 @@ class InsertManager(NamespaceManager, LookupManager):
 
         namespace_urls = graph.namespace_url.values()
         if use_tqdm:
-            namespace_urls = tqdm(namespace_urls, desc='namespaces')
+            namespace_urls = tqdm(namespace_urls, **(tqdm_kwargs or {}))
         for namespace_url in namespace_urls:
+            if use_tqdm:
+                namespace_urls.write('inserting namespace: {}'.format(namespace_url))
             self.get_or_create_namespace(namespace_url)
 
         for keyword, pattern in graph.namespace_pattern.items():
@@ -606,8 +616,7 @@ class InsertManager(NamespaceManager, LookupManager):
 
         network.store_bel(graph)
 
-        if store_parts:
-            network.nodes, network.edges = self._store_graph_parts(graph, use_tqdm=use_tqdm)
+        network.nodes, network.edges = self._store_graph_parts(graph, use_tqdm=use_tqdm)
 
         self.session.add(network)
         self.session.commit()
@@ -903,16 +912,16 @@ class InsertManager(NamespaceManager, LookupManager):
         logger.info('dropped all edges in %.2f seconds', time.time() - t)
 
     def get_or_create_edge(
-            self,
-            source: Node,
-            target: Node,
-            relation: str,
-            bel: str,
-            sha512: str,
-            data: EdgeData,
-            evidence: Optional[Evidence] = None,
-            annotations: Optional[List[NamespaceEntry]] = None,
-            properties: Optional[List[Property]] = None,
+        self,
+        source: Node,
+        target: Node,
+        relation: str,
+        bel: str,
+        sha512: str,
+        data: EdgeData,
+        evidence: Optional[Evidence] = None,
+        annotations: Optional[List[NamespaceEntry]] = None,
+        properties: Optional[List[Property]] = None,
     ) -> Edge:
         """Create an edge if it does not exist, or return it if it does.
 
@@ -958,18 +967,18 @@ class InsertManager(NamespaceManager, LookupManager):
         return edge
 
     def get_or_create_citation(
-            self,
-            reference: str,
-            type: Optional[str] = None,
-            name: Optional[str] = None,
-            title: Optional[str] = None,
-            volume: Optional[str] = None,
-            issue: Optional[str] = None,
-            pages: Optional[str] = None,
-            date: Optional[str] = None,
-            first: Optional[str] = None,
-            last: Optional[str] = None,
-            authors: Union[None, List[str]] = None,
+        self,
+        reference: str,
+        type: Optional[str] = None,
+        name: Optional[str] = None,
+        title: Optional[str] = None,
+        volume: Optional[str] = None,
+        issue: Optional[str] = None,
+        pages: Optional[str] = None,
+        date: Optional[str] = None,
+        first: Optional[str] = None,
+        last: Optional[str] = None,
+        authors: Union[None, List[str]] = None,
     ) -> Citation:
         """Create a citation if it does not exist, or return it if it does.
 

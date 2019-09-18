@@ -20,12 +20,12 @@ from .node_selection import *
 from .utils import *
 
 __all__ = (
-    edge_filters.__all__ +
-    edge_predicates.__all__ +
-    edge_predicate_builders.__all__ +
-    node_filters.__all__ +
-    node_predicate_builders.__all__ +
-    node_predicates.__all__ +
-    node_selection.__all__ +
-    utils.__all__
+    edge_filters.__all__
+    + edge_predicates.__all__
+    + edge_predicate_builders.__all__
+    + node_filters.__all__
+    + node_predicate_builders.__all__
+    + node_predicates.__all__
+    + node_selection.__all__
+    + utils.__all__
 )

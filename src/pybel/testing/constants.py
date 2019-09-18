@@ -3,7 +3,6 @@
 """Testing resources for PyBEL."""
 
 import os
-from pathlib import Path
 
 __all__ = [
     # BELNS

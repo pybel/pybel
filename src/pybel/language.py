@@ -21,11 +21,11 @@ class Entity(dict):
     """Represents a named entity with a namespace and name/identifier."""
 
     def __init__(
-            self,
-            *,
-            namespace: str,
-            name: Optional[str] = None,
-            identifier: Optional[str] = None
+        self,
+        *,
+        namespace: str,
+        name: Optional[str] = None,
+        identifier: Optional[str] = None
     ) -> None:
         """Create a dictionary representing a reference to an entity.
 

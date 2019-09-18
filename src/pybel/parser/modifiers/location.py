@@ -58,7 +58,4 @@ location_tag = Suppress(oneOf(['loc', 'location']))
 
 def get_location_language(identifier: ParserElement) -> ParserElement:
     """Build a location parser."""
-    return Group(
-        location_tag +
-        nest(identifier)
-    )(LOCATION)
+    return Group(location_tag + nest(identifier))(LOCATION)

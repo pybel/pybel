@@ -171,7 +171,7 @@ def has_pathology_causal(graph: BELGraph, u: BaseEntity, v: BaseEntity, k: str) 
     :return: If the subject of this edge is a pathology and it participates in a causal reaction.
     """
     return (
-        isinstance(u, Pathology) and
-        is_causal_relation(graph, u, v, k) and
-        not isinstance(v, (Pathology, BiologicalProcess))
+        isinstance(u, Pathology)
+        and is_causal_relation(graph, u, v, k)
+        and not isinstance(v, (Pathology, BiologicalProcess))
     )

@@ -83,9 +83,10 @@ class SimpleTypedPredicate(SimplePredicate):
     @classmethod
     def predicate(cls, u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> bool:
         """Test a BEL edge."""
-        return super().predicate(u, v, key, edge_data) and (
-            isinstance(u, cls.subject_type) and
-            isinstance(v, cls.object_type)
+        return (
+            super().predicate(u, v, key, edge_data)
+            and isinstance(u, cls.subject_type)
+            and isinstance(v, cls.object_type)
         )
 
 

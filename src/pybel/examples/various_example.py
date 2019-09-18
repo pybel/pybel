@@ -3,6 +3,7 @@
 """Small graphs with grouped nodes"."""
 
 from ..dsl import Abundance, ComplexAbundance, CompositeAbundance, Protein, Reaction
+from ..resources import CHEBI_URL, GO_URL, HGNC_URL
 from ..struct.graph import BELGraph
 
 __all__ = [
@@ -20,15 +21,13 @@ single_reaction_graph = BELGraph(
     version='1.0.0',
     description="Example graph",
     authors='Charles Tapley Hoyt',
-    contact='charles.hoyt@scai.fraunhofer.de',
+    contact='cthoyt@gmail.com',
 )
 
 single_reaction_graph.namespace_url.update({
-    'HGNC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/hgnc-human-genes/'
-            'hgnc-human-genes-20170725.belns',
-    'CHEBI': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/chebi/chebi-20170725.belns',
-    'GO': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process/'
-          'go-biological-process-20170725.belns'
+    'HGNC': HGNC_URL,
+    'CHEBI': CHEBI_URL,
+    'GO': GO_URL,
 })
 
 hk1 = Protein(name='HK1', namespace='HGNC', identifier='4922')
@@ -49,15 +48,13 @@ single_complex_graph = BELGraph(
     version='1.0.0',
     description="Example graph",
     authors='Charles Tapley Hoyt',
-    contact='charles.hoyt@scai.fraunhofer.de',
+    contact='cthoyt@gmail.com',
 )
 
 single_complex_graph.namespace_url.update({
-    'HGNC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/hgnc-human-genes/'
-            'hgnc-human-genes-20170725.belns',
-    'CHEBI': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/chebi/chebi-20170725.belns',
-    'GO': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process/'
-          'go-biological-process-20170725.belns'
+    'HGNC': HGNC_URL,
+    'CHEBI': CHEBI_URL,
+    'GO': GO_URL,
 })
 
 single_complex_graph.add_node_from_data(complex_example)
@@ -67,15 +64,13 @@ single_composite_graph = BELGraph(
     version='1.0.0',
     description="Example graph",
     authors='Charles Tapley Hoyt',
-    contact='charles.hoyt@scai.fraunhofer.de',
+    contact='cthoyt@gmail.com',
 )
 
 single_composite_graph.namespace_url.update({
-    'HGNC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/hgnc-human-genes/'
-            'hgnc-human-genes-20170725.belns',
-    'CHEBI': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/chebi/chebi-20170725.belns',
-    'GO': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process/'
-          'go-biological-process-20170725.belns'
+    'HGNC': HGNC_URL,
+    'CHEBI': CHEBI_URL,
+    'GO': GO_URL,
 })
 
 single_composite_graph.add_node_from_data(composite_example)

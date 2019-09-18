@@ -24,8 +24,8 @@ LocationDict = Dict
 
 
 def _modifier_helper(
-        modifier: str,
-        location: Optional[LocationDict] = None,
+    modifier: str,
+    location: Optional[LocationDict] = None,
 ) -> ModifierDict:
     """Make a modifier dictionary.
 
@@ -43,10 +43,10 @@ def _modifier_helper(
 
 
 def activity(
-        name: Optional[str] = None,
-        namespace: Optional[str] = None,
-        identifier: Optional[str] = None,
-        location: Optional[LocationDict] = None,
+    name: Optional[str] = None,
+    namespace: Optional[str] = None,
+    identifier: Optional[str] = None,
+    location: Optional[LocationDict] = None,
 ) -> ModifierDict:
     """Make a subject/object modifier dictionary.
 
@@ -76,8 +76,8 @@ def degradation(location: Optional[LocationDict] = None) -> ModifierDict:
 
 
 def translocation(
-        from_loc: Union[str, Entity],
-        to_loc: Union[str, Entity],
+    from_loc: Union[str, Entity],
+    to_loc: Union[str, Entity],
 ) -> ModifierDict:
     """Make a translocation dictionary.
 

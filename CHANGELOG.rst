@@ -5,8 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-`UNRELEASED <https://github.com/pybel/pybel/compare/v0.13.2...HEAD>`_
+`UNRELEASED (0.14.0) <https://github.com/pybel/pybel/compare/v0.13.2...HEAD>`_
 ---------------------------------------------------------------------
+Added
+~~~~~
+- Add metagraph for nested statements
+- Add xrefs to DSL model
+- Add OBO-style identifier parsing and export
+- Add TSV exporter that does reasoning over edges (originally from BioKEEN)
+
+Changed
+~~~~~~~
+- DSL format now stores all data in a 'concept' entry
+- Try looking up namespace to identifiers mapping by default
+- Changed name of pybel.to_bel_path to pybel.to_bel_script
+- Used magic to combine ``to_*_file`` and ``to_*_path`` functions
+
 
 `0.13.2 <https://github.com/pybel/pybel/compare/v0.13.1...v0.13.2>`_ - 2019-04-24
 ---------------------------------------------------------------------------------

@@ -13,11 +13,12 @@ from pybel.parser import MetadataParser
 from pybel.parser.exc import (
     InvalidMetadataException, RedefinedAnnotationError, RedefinedNamespaceError, VersionFormatWarning,
 )
+from pybel.resources import HGNC_URL
 from pybel.testing.cases import FleetingTemporaryCacheMixin
 from pybel.testing.constants import test_an_1, test_ns_1
 from pybel.testing.mocks import mock_bel_resources
 from tests.constants import (
-    HGNC_KEYWORD, HGNC_URL, MESH_DISEASES_KEYWORD, MESH_DISEASES_URL, help_check_hgnc,
+    HGNC_KEYWORD, MESH_DISEASES_KEYWORD, MESH_DISEASES_URL, help_check_hgnc,
 )
 
 logging.getLogger("requests").setLevel(logging.WARNING)

@@ -1,3 +1,7 @@
+.. image:: docs/source/PyBEL-square-100.png
+   :height: 150px
+   :align: center
+
 PyBEL |zenodo| |build| |windows_build| |coverage| |documentation|
 =================================================================
 `PyBEL <http://pybel.readthedocs.io>`_ is a pure Python package for parsing and handling biological networks encoded in

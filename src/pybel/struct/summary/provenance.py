@@ -2,7 +2,6 @@
 
 """Summary functions for citation and provenance information in BEL graphs."""
 
-import warnings
 from typing import Iterable, Set
 
 from ..filters.edge_predicates import has_pubmed

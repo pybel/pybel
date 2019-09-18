@@ -73,8 +73,8 @@ def data_missing_key_builder(key: str) -> NodePredicate:  # noqa: D202
 
 
 def build_node_data_search(
-        key: Union[str, List[str]],
-        data_predicate: Callable[[Any], bool],
+    key: Union[str, List[str]],
+    data_predicate: Callable[[Any], bool],
 ) -> NodePredicate:  # noqa: D202
     """Build a filter for nodes whose associated data with the given key passes the given predicate.
 
@@ -95,8 +95,8 @@ def build_node_data_search(
 
 
 def build_node_graph_data_search(
-        key: Union[str, List[str]],
-        data_predicate: Callable[[Any], bool],
+    key: Union[str, List[str]],
+    data_predicate: Callable[[Any], bool],
 ):  # noqa: D202
     """Build a function for testing data associated with the node in the graph.
 

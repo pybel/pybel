@@ -118,13 +118,10 @@ def get_protein_modification_language(concept_qualified: ParserElement) -> Parse
     ])
 
     return pmod_tag + nest(
-        Group(pmod_concept)(CONCEPT) +
-        Optional(
-            WCW +
-            amino_acid(PMOD_CODE) +
-            Optional(
-                WCW +
-                ppc.integer(PMOD_POSITION)
-            )
+        Group(pmod_concept)(CONCEPT)
+        + Optional(
+            WCW
+            + amino_acid(PMOD_CODE)
+            + Optional(WCW + ppc.integer(PMOD_POSITION))
         )
     )

@@ -3,12 +3,12 @@
 import os
 from pathlib import Path
 
-from pybel import BELGraph
+from pybel import BELGraph, Manager
 from pybel.constants import ANNOTATIONS, OPENBEL_ANNOTATION_RESOURCES
+from pybel.resources import HGNC_URL
 from pybel.testing.cases import TemporaryCacheClsMixin
 from pybel.testing.constants import belns_dir_path
 from pybel.testing.mocks import mock_bel_resources
-from tests.constants import HGNC_URL
 
 ns1 = Path(os.path.join(belns_dir_path, 'disease-ontology.belns')).as_uri()
 ns1_url = 'http://resources.openbel.org/belframework/20150611/namespace/disease-ontology-ids.belns'
@@ -21,11 +21,8 @@ CELL_LINE_KEYWORD = 'CellLine'
 
 
 class TestDefinitionManagers(TemporaryCacheClsMixin):
-    def _help_check_hgnc(self, manager):
-        """Help check the HGNC namespace was loaded properly.
-
-        :type manager: pybel.Manager
-        """
+    def _help_check_hgnc(self, manager: Manager) -> None:
+        """Help check the HGNC namespace was loaded properly."""
         entry = manager.get_namespace_entry(HGNC_URL, 'MHS2')
         self.assertIsNotNone(entry)
         self.assertEqual('MHS2', entry.name)
@@ -83,9 +80,9 @@ class TestDefinitionManagers(TemporaryCacheClsMixin):
         data = {
             ANNOTATIONS: {
                 CELL_LINE_KEYWORD: {
-                    '1321N1 cell': True
-                }
-            }
+                    '1321N1 cell': True,
+                },
+            },
         }
 
         annotations_iter = dict(self.manager._iter_from_annotations_dict(graph, annotations_dict=data[ANNOTATIONS]))

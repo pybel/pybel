@@ -6,7 +6,4 @@ from . import annotations, provenance
 from .annotations import *
 from .provenance import *
 
-__all__ = (
-    annotations.__all__ +
-    provenance.__all__
-)
+__all__ = annotations.__all__ + provenance.__all__

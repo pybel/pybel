@@ -3,6 +3,7 @@
 """An example describing statins."""
 
 from ..dsl import Abundance, Protein
+from ..resources import CHEBI_URL, CONFIDENCE_URL, EC_URL, HGNC_URL
 from ..struct.graph import BELGraph
 
 __all__ = [
@@ -14,17 +15,17 @@ statin_graph = BELGraph(
     version='1.0.1',
     description="The effects of statins from ChEBI",
     authors='Charles Tapley Hoyt',
-    contact='charles.hoyt@scai.fraunhofer.de',
+    contact='cthoyt@gmail.com',
 )
 
 statin_graph.namespace_url.update({
-    'HGNC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/hgnc-human-genes/hgnc-human-genes-20170725.belns',
-    'CHEBI': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/chebi/chebi-20170725.belns',
-    'EC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/enzyme-class/enzyme-class-20170508.belns'
+    'HGNC': HGNC_URL,
+    'CHEBI': CHEBI_URL,
+    'EC': EC_URL,
 })
 
 statin_graph.annotation_url.update({
-    'Confidence': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/confidence/confidence-1.0.0.belanno',
+    'Confidence': CONFIDENCE_URL,
 })
 
 fluvastatin = Abundance(namespace='CHEBI', name='fluvastatin', identifier='38561')

@@ -304,9 +304,14 @@ def drop(manager: Manager):
 
 
 @manage.command()
+@click.option('-v', '--debug', is_flag=True)
 @click.pass_obj
-def examples(manager: Manager):
+def examples(manager: Manager, debug: bool):
     """Load examples to the database."""
+    level = logging.DEBUG if debug else logging.INFO
+    logging.basicConfig(level=level)
+    logging.getLogger('pybel').setLevel(level)
+
     for graph in (sialic_acid_graph, statin_graph, homology_graph, braf_graph, egf_graph):
         if manager.has_name_version(graph.name, graph.version):
             click.echo('already inserted {}'.format(graph))

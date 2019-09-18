@@ -13,8 +13,8 @@ ignore =
     F403
     # docstring in magic method
     D105
-    # Line break after operator
-    W504
+    # line break before binary operator
+    W503
     # Docstring in __init__
     D107
     # Complaining about assert statements

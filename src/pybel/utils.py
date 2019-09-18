@@ -46,9 +46,9 @@ def expand_dict(flat_dict, sep: str = '_'):
 
 
 def flatten_dict(
-        data: Mapping[str, Any],
-        parent_key: str = '',
-        sep: str = '_',
+    data: Mapping[str, Any],
+    parent_key: str = '',
+    sep: str = '_',
 ) -> Mapping[str, str]:
     """Flatten a nested dictionary.
 
@@ -145,9 +145,9 @@ def _get_citation_str(data: Mapping) -> Optional[str]:
 
 
 def _get_edge_tuple(
-        source,
-        target,
-        edge_data: EdgeData,
+    source,
+    target,
+    edge_data: EdgeData,
 ) -> Tuple[str, str, Optional[str], Optional[str], CanonicalEdge]:
     """Convert an edge to a consistent tuple.
 

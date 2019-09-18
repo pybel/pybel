@@ -19,6 +19,7 @@
 """
 
 from ..dsl import Entity, Protein, activity
+from ..resources import HGNC_URL, SPECIES_PATTERN
 from ..struct.graph import BELGraph
 
 __all__ = [
@@ -30,15 +31,15 @@ braf_graph = BELGraph(
     version='1.0.0',
     description="Some relations surrounding BRAF",
     authors='Charles Tapley Hoyt',
-    contact='charles.hoyt@scai.fraunhofer.de',
+    contact='cthoyt@gmail.com',
 )
 
 braf_graph.namespace_url.update({
-    'HGNC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/hgnc-human-genes/hgnc-human-genes-20170725.belns',
+    'HGNC': HGNC_URL,
 })
 
-braf_graph.annotation_url.update({
-    'Species': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/species-taxonomy-id/species-taxonomy-id-20170511.belanno'
+braf_graph.annotation_pattern.update({
+    'Species': SPECIES_PATTERN,
 })
 
 thpo = Protein(

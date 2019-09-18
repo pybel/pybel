@@ -14,20 +14,25 @@
 
 from ..dsl import ComplexAbundance, Protein, ProteinModification, activity, translocation
 from ..language import Entity
+from ..resources import FPLX_URL, GO_URL, HGNC_URL
 from ..struct.graph import BELGraph
 
-__all__ = ['ras_tloc_graph']
+__all__ = [
+    'ras_tloc_graph',
+]
 
 ras_tloc_graph = BELGraph(
     name='RAS Transocation Graph',
     version='1.0.1',
-    description='The farnesylation of RAS causes its translocation to the cell membrane.'
+    description='The farnesylation of RAS causes its translocation to the cell membrane.',
+    authors='Charles Tapley Hoyt',
+    contact='cthoyt@gmail.com',
 )
 
 ras_tloc_graph.namespace_url.update({
-    'HGNC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/hgnc-human-genes/hgnc-human-genes-20170725.belns',
-    'FPLX': 'https://raw.githubusercontent.com/sorgerlab/famplex/1b7e14ec0fd02ee7ed71514c6e267f57d5641a4b/export/famplex.belns',
-    'GO': "https://raw.githubusercontent.com/pharmacome/terminology/1b20f0637c395f8aa89c2e2e342d7b704062c242/external/go-names.belns"
+    'HGNC': HGNC_URL,
+    'GO': GO_URL,
+    'FPLX': FPLX_URL,
 })
 
 evidence = "These modifications render Ras functional and capable of localizing to the lipid-rich inner surface of the cell membrane. The first and most critical modification, farnesylation, which is principally catalyzed by protein FTase, adds a 15-carbon hydrobobic farnesyl isoprenyl tail to the carboxyl terminus of Ras."
@@ -55,5 +60,5 @@ ras_tloc_graph.add_directly_increases(
     object_modifier=translocation(
         from_loc=Entity(namespace='GO', name='intracellular', identifier='GO:0005622'),
         to_loc=Entity(namespace='GO', name='plasma membrane', identifier='GO:0005886'),
-    )
+    ),
 )

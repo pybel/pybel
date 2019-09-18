@@ -38,11 +38,11 @@ class QueryManager(LookupManager):
         return self._count_model(Node)
 
     def query_nodes(
-            self,
-            bel: Optional[str] = None,
-            type: Optional[str] = None,
-            namespace: Optional[str] = None,
-            name: Optional[str] = None,
+        self,
+        bel: Optional[str] = None,
+        type: Optional[str] = None,
+        namespace: Optional[str] = None,
+        name: Optional[str] = None,
     ) -> List[Node]:
         """Query nodes in the database.
 
@@ -108,13 +108,13 @@ class QueryManager(LookupManager):
         return query.join(Node, edge_node_id == Node.id).filter(Node.type == node_type)
 
     def query_edges(
-            self,
-            bel: Optional[str] = None,
-            source_function: Optional[str] = None,
-            source: Union[None, str, Node] = None,
-            target_function: Optional[str] = None,
-            target: Union[None, str, Node] = None,
-            relation: Optional[str] = None,
+        self,
+        bel: Optional[str] = None,
+        source_function: Optional[str] = None,
+        source: Union[None, str, Node] = None,
+        target_function: Optional[str] = None,
+        target: Union[None, str, Node] = None,
+        relation: Optional[str] = None,
     ):
         """Return a query over the edges in the database.
 
@@ -137,19 +137,15 @@ class QueryManager(LookupManager):
 
         if source_function:
             source_node_table = aliased(Node)
-            query = (
-                query
-                .join(source_node_table, Edge.source_id == source_node_table.id)
+            query = query \
+                .join(source_node_table, Edge.source_id == source_node_table.id) \
                 .filter(source_node_table.type == source_function)
-            )
 
         if target_function:
             target_node_table = aliased(Node)
-            query = (
-                query
-                .join(target_node_table, Edge.target_id == target_node_table.id)
+            query = query \
+                .join(target_node_table, Edge.target_id == target_node_table.id) \
                 .filter(target_node_table.type == target_function)
-            )
 
         if source:
             if isinstance(source, str):
@@ -176,13 +172,13 @@ class QueryManager(LookupManager):
         return query
 
     def query_citations(
-            self,
-            type: Optional[str] = None,
-            reference: Optional[str] = None,
-            name: Optional[str] = None,
-            author: Union[None, str, List[str]] = None,
-            date: Union[None, str, datetime.date] = None,
-            evidence_text: Optional[str] = None,
+        self,
+        type: Optional[str] = None,
+        reference: Optional[str] = None,
+        name: Optional[str] = None,
+        author: Union[None, str, List[str]] = None,
+        date: Union[None, str, datetime.date] = None,
+        evidence_text: Optional[str] = None,
     ) -> List[Citation]:
         """Query citations in the database.
 

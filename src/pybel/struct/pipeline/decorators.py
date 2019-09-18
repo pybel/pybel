@@ -9,7 +9,7 @@ A transformation function takes in a :class:`pybel.BELGraph` and either returns 
 import logging
 from inspect import signature
 
-from .exc import DeprecationMappingError, MissingPipelineFunctionError, PipelineNameError
+from .exc import MissingPipelineFunctionError, PipelineNameError
 
 __all__ = [
     'in_place_transformation',
@@ -34,8 +34,8 @@ no_arguments_map = {}
 def _has_arguments(func, universe):
     sig = signature(func)
     return (
-        (universe and 3 <= len(sig.parameters)) or
-        (not universe and 2 <= len(sig.parameters))
+        (universe and 3 <= len(sig.parameters))
+        or (not universe and 2 <= len(sig.parameters))
     )
 
 
@@ -53,7 +53,7 @@ def _register_function(name: str, func, universe: bool, in_place: bool):
         raise PipelineNameError('{name} is already registered with {func_mod}.{func_name}'.format(
             name=name,
             func_mod=mapped_func.__module__,
-            func_name=mapped_func.__name__
+            func_name=mapped_func.__name__,
         ))
 
     mapped[name] = func

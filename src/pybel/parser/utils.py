@@ -52,9 +52,9 @@ def nest(*content):
 
 
 def one_of_tags(
-        tags: List[str],
-        canonical_tag: str,
-        name: Optional[str] = None,
+    tags: List[str],
+    canonical_tag: str,
+    name: Optional[str] = None,
 ) -> ParserElement:
     """Define the tags usable in the :class:`BelParser`.
 

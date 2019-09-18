@@ -16,10 +16,10 @@ from .models import *
 from .query_manager import *
 
 __all__ = (
-    base_manager.__all__ +
-    cache_manager.__all__ +
-    citation_utils.__all__ +
-    database_io.__all__ +
-    models.__all__ +
-    query_manager.__all__
+    base_manager.__all__
+    + cache_manager.__all__
+    + citation_utils.__all__
+    + database_io.__all__
+    + models.__all__
+    + query_manager.__all__
 )

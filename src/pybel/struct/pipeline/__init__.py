@@ -8,7 +8,7 @@ from .exc import *
 from .pipeline import *
 
 __all__ = (
-    decorators.__all__ +
-    exc.__all__ +
-    pipeline.__all__
+    decorators.__all__
+    + exc.__all__
+    + pipeline.__all__
 )

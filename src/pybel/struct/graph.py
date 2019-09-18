@@ -293,9 +293,9 @@ class BELGraph(nx.MultiDiGraph):
     def defined_annotation_keywords(self) -> Set[str]:
         """Get the set of all keywords defined as annotations in this graph."""
         return (
-            set(self.annotation_pattern) |
-            set(self.annotation_url) |
-            set(self.annotation_list)
+            set(self.annotation_pattern)
+            | set(self.annotation_url)
+            | set(self.annotation_list)
         )
 
     @property

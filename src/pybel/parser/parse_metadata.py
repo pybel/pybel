@@ -36,6 +36,8 @@ SEMANTIC_VERSION_STRING_RE = re.compile(
 
 MALFORMED_VERSION_STRING_RE = re.compile(r'(?P<major>\d+)(\.(?P<minor>\d+)(\.(?P<patch>\d+))?)?')
 
+NAMESPACE_BLACKLIST = {'SCOMP', 'SFAM'}
+
 
 class MetadataParser(BaseParser):
     """A parser for the document and definitions section of a BEL document.
@@ -46,16 +48,16 @@ class MetadataParser(BaseParser):
     """
 
     def __init__(
-            self,
-            manager,
-            namespace_to_term_to_encoding: Optional[NamespaceTermEncodingMapping] = None,
-            namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
-            annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
-            annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
-            annotation_to_local: Optional[Mapping[str, Set[str]]] = None,
-            default_namespace: Optional[Set[str]] = None,
-            allow_redefinition: bool = False,
-            skip_validation: bool = False,
+        self,
+        manager,
+        namespace_to_term_to_encoding: Optional[NamespaceTermEncodingMapping] = None,
+        namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
+        annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
+        annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
+        annotation_to_local: Optional[Mapping[str, Set[str]]] = None,
+        default_namespace: Optional[Set[str]] = None,
+        allow_redefinition: bool = False,
+        skip_validation: bool = False,
     ) -> None:
         """Build a metadata parser.
 
@@ -173,6 +175,10 @@ class MetadataParser(BaseParser):
         :raises: pybel.resources.exc.ResourceError
         """
         namespace_keyword = tokens['name']
+
+        if namespace_keyword in NAMESPACE_BLACKLIST:
+            raise ValueError('Upgrade usage to FamPlex')
+
         self.raise_for_redefined_namespace(line, position, namespace_keyword)
 
         url = tokens['url']
@@ -257,9 +263,9 @@ class MetadataParser(BaseParser):
     def has_annotation(self, annotation: str) -> bool:
         """Check if this annotation is defined."""
         return (
-            self.has_enumerated_annotation(annotation) or
-            self.has_regex_annotation(annotation) or
-            self.has_local_annotation(annotation)
+            self.has_enumerated_annotation(annotation)
+            or self.has_regex_annotation(annotation)
+            or self.has_local_annotation(annotation)
         )
 
     def has_enumerated_namespace(self, namespace: str) -> bool:

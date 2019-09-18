@@ -7,7 +7,7 @@ SET DOCUMENT Version = "0.1.0"
 SET DOCUMENT Copyright = "Copyright (c) Charles Tapley Hoyt. All Rights Reserved."
 SET DOCUMENT Authors = "Charles Tapley Hoyt"
 SET DOCUMENT Licenses = "WTF License"
-SET DOCUMENT ContactInfo = "charles.hoyt@scai.fraunhofer.de"
+SET DOCUMENT ContactInfo = "cthoyt@gmail.com"
 
 ##################################################################################
 # Definitions Section

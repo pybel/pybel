@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from pybel.constants import hbp_namespace
 from pybel.examples import sialic_acid_graph
 from pybel.examples.sialic_acid_example import cd33, cd33_phosphorylated, shp2, syk, trem2
 from pybel.manager.models import Edge, Namespace, Network
 from pybel.manager.query_manager import graph_from_edges
+from pybel.resources import CHEBI_URL, GO_URL, HGNC_URL
 from pybel.testing.cases import TemporaryCacheClsMixin
 from pybel.testing.mocks import mock_bel_resources
 
@@ -18,23 +18,23 @@ class TestSeeding(TemporaryCacheClsMixin):
         super().setUpClass()
 
         with mock_bel_resources:
-            cls.manager.insert_graph(sialic_acid_graph, store_parts=True)
+            cls.manager.insert_graph(sialic_acid_graph)
 
     def test_namespace_existence(self):
         """Check the sialic acid graph has the right namespaces, and they're uploaded properly."""
-        ns = self.manager.session.query(Namespace).filter(Namespace.url == hbp_namespace('hgnc')).one()
+        ns = self.manager.session.query(Namespace).filter(Namespace.url == HGNC_URL).one()
         self.assertIsNotNone(ns)
 
-        ns = self.manager.session.query(Namespace).filter(Namespace.url == hbp_namespace('chebi')).one()
+        ns = self.manager.session.query(Namespace).filter(Namespace.url == CHEBI_URL).one()
         self.assertIsNotNone(ns)
 
-        ns = self.manager.session.query(Namespace).filter(Namespace.url == hbp_namespace('go')).one()
+        ns = self.manager.session.query(Namespace).filter(Namespace.url == GO_URL).one()
         self.assertIsNotNone(ns)
 
     def test_sialic_acid_in_node_store(self):
         r = 'sialic acid'
 
-        n = self.manager.get_namespace_entry(hbp_namespace('chebi'), r)
+        n = self.manager.get_namespace_entry(CHEBI_URL, r)
         self.assertIsNotNone(n)
 
         self.assertEqual(r, n.name)

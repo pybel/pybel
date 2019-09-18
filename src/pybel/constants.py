@@ -5,19 +5,9 @@
 This module maintains the strings used throughout the PyBEL codebase to promote consistency.
 """
 
-from typing import Optional
-
 from .config import connection
 
 OPENBEL_DOMAIN = 'http://resources.openbel.org'
-HBP_NAMESPACE_URL = 'https://raw.githubusercontent.com/pharmacome/terminology/{sha}/external/{keyword}-names.belns'
-LAST_HASH = '73688d6dc24e309fca59a1340dc9ee971e9f3baa'
-
-
-def hbp_namespace(name: str, sha: Optional[str] = None) -> str:
-    """Format a namespace URL."""
-    return HBP_NAMESPACE_URL.format(sha=sha or LAST_HASH, keyword=name)
-
 
 FRAUNHOFER_RESOURCES = 'https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path='
 OPENBEL_NAMESPACE_RESOURCES = OPENBEL_DOMAIN + '/belframework/20150611/namespace/'
@@ -60,7 +50,7 @@ CITATION_TYPES = {
     CITATION_TYPE_ONLINE,
     CITATION_TYPE_URL,
     CITATION_TYPE_DOI,
-    CITATION_TYPE_OTHER
+    CITATION_TYPE_OTHER,
 }
 
 NAMESPACE_DOMAIN_BIOPROCESS = 'BiologicalProcess'
@@ -73,7 +63,7 @@ NAMESPACE_DOMAIN_TYPES = {
     NAMESPACE_DOMAIN_BIOPROCESS,
     NAMESPACE_DOMAIN_CHEMICAL,
     NAMESPACE_DOMAIN_GENE,
-    NAMESPACE_DOMAIN_OTHER
+    NAMESPACE_DOMAIN_OTHER,
 }
 
 #: Represents the key for the citation type in a citation dictionary
@@ -246,7 +236,7 @@ PYBEL_NODE_FUNCTIONS = {
     PATHOLOGY,
     COMPOSITE,
     COMPLEX,
-    REACTION
+    REACTION,
 }
 
 #: The mapping from PyBEL node functions to BEL strings
@@ -259,7 +249,7 @@ rev_abundance_labels = {
     BIOPROCESS: 'bp',
     PATHOLOGY: 'path',
     COMPLEX: 'complex',
-    COMPOSITE: 'composite'
+    COMPOSITE: 'composite',
 }
 
 # Internal edge data keys
@@ -379,7 +369,7 @@ TWO_WAY_RELATIONS = {
 #: A set of all correlative relationships
 CORRELATIVE_RELATIONS = {
     POSITIVE_CORRELATION,
-    NEGATIVE_CORRELATION
+    NEGATIVE_CORRELATION,
 }
 
 #: A set of polar relations
@@ -498,7 +488,7 @@ REQUIRED_METADATA = {
     METADATA_VERSION,
     METADATA_DESCRIPTION,
     METADATA_AUTHORS,
-    METADATA_CONTACT
+    METADATA_CONTACT,
 }
 
 # Modifier parser constants
@@ -553,7 +543,7 @@ belns_encodings = {
     'A': {ABUNDANCE, RNA, MIRNA, PROTEIN, GENE, COMPLEX},
     'B': {PATHOLOGY, BIOPROCESS},
     'O': {PATHOLOGY},
-    'C': {COMPLEX}
+    'C': {COMPLEX},
 }
 
 BELNS_ENCODING_STR = ''.join(sorted(belns_encodings))

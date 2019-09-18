@@ -42,6 +42,7 @@
 
 from ..dsl import BiologicalProcess, ComplexAbundance, Protein, activity, translocation
 from ..language import cytoplasm, nucleus
+from ..resources import CHEBI_URL, CONFIDENCE_URL, GO_URL, HGNC_URL, SPECIES_PATTERN
 from ..struct.graph import BELGraph
 
 __all__ = [
@@ -53,18 +54,21 @@ egf_graph = BELGraph(
     version='1.0.0',
     description="The downstream effects of EGF",
     authors='Charles Tapley Hoyt',
-    contact='charles.hoyt@scai.fraunhofer.de',
+    contact='cthoyt@gmail.com',
 )
 
 egf_graph.namespace_url.update({
-    'HGNC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/hgnc-human-genes/hgnc-human-genes-20170725.belns',
-    'CHEBI': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/chebi/chebi-20170725.belns',
-    'GO': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process/go-biological-process-20170725.belns'
+    'HGNC': HGNC_URL,
+    'CHEBI': CHEBI_URL,
+    'GO': GO_URL,
 })
 
 egf_graph.annotation_url.update({
-    'Confidence': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/confidence/confidence-1.0.0.belanno',
-    'Species': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/species-taxonomy-id/species-taxonomy-id-20170511.belanno'
+    'Confidence': CONFIDENCE_URL,
+})
+
+egf_graph.annotation_pattern.update({
+    'Species': SPECIES_PATTERN,
 })
 
 ar = Protein(name='AR', namespace='HGNC')
