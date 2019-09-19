@@ -29,14 +29,15 @@ def strip_annotations(graph) -> None:
 
 
 @in_place_transformation
-def add_annotation_value(graph, annotation: str, value: str) -> None:
+def add_annotation_value(graph, annotation: str, value: str, strict: bool = True) -> None:
     """Add the given annotation/value pair to all qualified edges.
 
     :param pybel.BELGraph graph:
     :param annotation:
     :param value:
+    :param strict: Should the function ensure the annotation has already been defined?
     """
-    if annotation not in graph.defined_annotation_keywords:
+    if strict and annotation not in graph.defined_annotation_keywords:
         raise ValueError('annotation not defined: {}'.format(annotation))
 
     for u, v, k in graph.edges(keys=True):
