@@ -61,7 +61,7 @@ def from_nodelink(graph_json_dict: Mapping[str, Any], check_version: bool = True
     return ensure_version(graph, check_version=check_version)
 
 
-@open_file(0, mode='w')
+@open_file(0, mode='r')
 def from_nodelink_file(path: Union[str, TextIO], check_version: bool = True) -> BELGraph:
     """Build a graph from the Node-Link JSON contained in the given file.
 
