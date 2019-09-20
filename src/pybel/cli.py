@@ -100,11 +100,13 @@ def main(ctx, connection):
 @click.option('--no-identifier-validation', is_flag=True, help='Turn off identifier validation')
 @click.option('--no-citation-clearing', is_flag=True, help='Turn off citation clearing')
 @click.option('-r', '--required-annotations', multiple=True, help='Specify multiple required annotations')
+@click.option('--upgrade-urls', is_flag=True)
 @click.option('--skip-tqdm', is_flag=True)
 @click.option('-v', '--verbose', is_flag=True)
 @click.pass_obj
 def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified_translocations,
-            no_identifier_validation, no_citation_clearing, required_annotations, skip_tqdm, verbose):
+            no_identifier_validation, no_citation_clearing, required_annotations, upgrade_urls,
+            skip_tqdm, verbose):
     """Compile a BEL script to a graph."""
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
@@ -125,6 +127,7 @@ def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified
         required_annotations=required_annotations,
         no_identifier_validation=no_identifier_validation,
         allow_definition_failures=True,
+        upgrade_urls=upgrade_urls,
     )
     if skip_tqdm:
         click.echo('```')

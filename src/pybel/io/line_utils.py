@@ -47,6 +47,7 @@ def parse_lines(
     allow_definition_failures: bool = False,
     allow_naked_names: bool = False,
     required_annotations: Optional[List[str]] = None,
+    upgrade_urls: bool = False,
 ) -> None:
     """Parse an iterable of lines into this graph.
 
@@ -62,6 +63,7 @@ def parse_lines(
     :param tqdm_kwargs: Keywords to pass to ``tqdm``
     :param disallow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
     :param required_annotations: Annotations that are required for all statements
+    :param upgrade_urls: Automatically upgrade old namespace URLs. Defaults to false.
 
     .. warning::
 
@@ -82,6 +84,7 @@ def parse_lines(
         manager,
         allow_redefinition=allow_redefinition,
         skip_validation=no_identifier_validation,
+        upgrade_urls=upgrade_urls,
     )
 
     parse_document(

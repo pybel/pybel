@@ -17,9 +17,12 @@ from ..constants import (
     BEL_KEYWORD_NAMESPACE, BEL_KEYWORD_PATTERN, BEL_KEYWORD_SET, BEL_KEYWORD_URL, DOCUMENT_KEYS, METADATA_VERSION,
     belns_encodings,
 )
+from ..resources.resources import keyword_to_url
 from ..utils import valid_date_version
 
-__all__ = ['MetadataParser']
+__all__ = [
+    'MetadataParser',
+]
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +61,7 @@ class MetadataParser(BaseParser):
         default_namespace: Optional[Set[str]] = None,
         allow_redefinition: bool = False,
         skip_validation: bool = False,
+        upgrade_urls: bool = False,
     ) -> None:
         """Build a metadata parser.
 
@@ -75,6 +79,7 @@ class MetadataParser(BaseParser):
         self.manager = manager
         self.disallow_redefinition = not allow_redefinition
         self.skip_validation = skip_validation
+        self.upgrade_urls = upgrade_urls
 
         #: A dictionary of cached {namespace keyword: {(identifier, name): encoding}}
         self.namespace_to_term_to_encoding = namespace_to_term_to_encoding or {}
@@ -182,6 +187,9 @@ class MetadataParser(BaseParser):
         self.raise_for_redefined_namespace(line, position, namespace_keyword)
 
         url = tokens['url']
+        if self.upgrade_urls and namespace_keyword.lower() in keyword_to_url:
+            url = keyword_to_url[namespace_keyword.lower()]
+
         self.namespace_url_dict[namespace_keyword] = url
 
         if self.skip_validation:
