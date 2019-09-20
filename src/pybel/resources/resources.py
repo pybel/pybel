@@ -12,4 +12,18 @@ MGI_URL = 'https://raw.githubusercontent.com/pharmacome/conso/efc856fb009a39e4d2
 NCBIGENE_URL = 'https://raw.githubusercontent.com/pharmacome/conso/d67144bc27a21626a514837b3b4382413dd6866b/external/ncbigene-names.belns'
 RGD_URL = 'https://raw.githubusercontent.com/pharmacome/conso/efc856fb009a39e4d284269a6801f79ed3d3cf56/external/rgd-names.belns'
 
-FPLX_URL = 'https://raw.githubusercontent.com/sorgerlab/famplex/06031bb27637e49d9f5eeffd1fb80e50b3cc020c/export/famplex.belns'
+FPLX_URL = 'https://raw.githubusercontent.com/sorgerlab/famplex/da9f2187b694e6b425e668604e24ac9fac0f2c31/export/famplex.belns'
+
+#: Default URL lookup for some keywords
+keyword_to_url = dict(
+    chebi=CHEBI_URL,
+    ec=EC_URL,
+    fb=FB_URL,
+    go=GO_URL,
+    hgnc=HGNC_URL,
+    mesh=MESH_URL,
+    mgi=MGI_URL,
+    ncbigene=NCBIGENE_URL,
+    rgd=RGD_URL,
+    fplx=FPLX_URL,
+)
