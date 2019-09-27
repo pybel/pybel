@@ -2,6 +2,7 @@
 
 """TSV conversion."""
 
+import json
 import logging
 from typing import List, Optional, TextIO, Tuple, Union
 
@@ -23,6 +24,7 @@ from ...struct import BELGraph
 
 __all__ = [
     'to_tsv',
+    'to_edgelist',
     'get_triples',
     'get_triple',
 ]
@@ -41,6 +43,19 @@ def to_tsv(graph: BELGraph, path: Union[str, TextIO], *, use_tqdm: bool = False,
     """
     for h, r, t in get_triples(graph, use_tqdm=use_tqdm):
         print(h, r, t, sep=sep, file=path)
+
+
+@open_file(1, mode='w')
+def to_edgelist(graph: BELGraph, path: Union[str, TextIO], *, use_tqdm: bool = False, sep='\t') -> None:
+    """Write the graph as an edgelist.
+
+    :param graph: A BEL graph
+    :param path: A path or file-like
+    :param use_tqdm: Should a progress bar be shown?
+    :param sep: The separator to use
+    """
+    for h, r, t in get_triples(graph, use_tqdm=use_tqdm):
+        print(h, t, json.dumps(dict(relation=r)), sep=sep, file=path)
 
 
 def get_triples(graph: BELGraph, use_tqdm: bool = False) -> List[Tuple[str, str, str]]:
