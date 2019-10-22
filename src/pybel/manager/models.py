@@ -6,7 +6,7 @@ import datetime
 import hashlib
 import json
 from collections import defaultdict
-from typing import Iterable, Mapping, Optional, Tuple
+from typing import Any, Iterable, Mapping, Optional, Tuple
 
 from sqlalchemy import (
     Boolean, Column, Date, DateTime, ForeignKey, Integer, LargeBinary, String, Table, Text, UniqueConstraint,
@@ -239,15 +239,10 @@ class Network(Base):
     nodes = relationship('Node', secondary=network_node, lazy='dynamic', backref=backref('networks', lazy='dynamic'))
     edges = relationship('Edge', secondary=network_edge, lazy='dynamic', backref=backref('networks', lazy='dynamic'))
 
-    __table_args__ = (
-        UniqueConstraint(name, version),
-    )
-
-    def to_json(self, include_id: bool = False):
+    def to_json(self, include_id: bool = False) -> Mapping[str, Any]:
         """Return this network as JSON.
 
         :param include_id: If true, includes the model identifier
-        :rtype: dict[str,str]
         """
         result = {
             METADATA_NAME: self.name,
@@ -355,12 +350,10 @@ class Modification(Base):
 
     sha512 = Column(String(255), index=True)
 
-    def _fusion_to_json(self):
+    def _fusion_to_json(self) -> Mapping[str, Any]:
         """Convert this modification to a FUSION data dictionary.
 
         Don't use this without checking ``self.type == FUSION`` first.
-
-        :rtype: dict
         """
         if self.p5_reference:
             range_5p = EnumeratedFusionRange(
@@ -458,11 +451,8 @@ class Node(Base):
         )
 
     @classmethod
-    def bel_contains(cls, bel_query):
-        """Build a filter for nodes whose BEL contain the query.
-
-        :type bel_query: str
-        """
+    def bel_contains(cls, bel_query: str):
+        """Build a filter for nodes whose BEL contain the query."""
         return cls.bel.contains(bel_query)
 
     def __str__(self):
@@ -511,32 +501,22 @@ class Author(Base):
         return Author(name=name, sha512=cls.hash_name(name))
 
     @staticmethod
-    def hash_name(name):
-        """Hash a name.
-
-        :param str name: Name of an author
-        :rtype: str
-        """
+    def hash_name(name: str) -> str:
+        """Hash a name."""
         return hashlib.sha512(name.encode('utf-8')).hexdigest()
 
     @classmethod
-    def name_contains(cls, name_query):
-        """Build a filter for authors whose names contain the given query.
-
-        :type name_query: str
-        """
+    def name_contains(cls, name_query: str):
+        """Build a filter for authors whose names contain the given query."""
         return cls.name.contains(name_query)
 
     @classmethod
-    def has_name(cls, name):
-        """Build a filter for if an author has a name.
-
-        :type name: str
-        """
+    def has_name(cls, name: str):
+        """Build a filter for if an author has a name."""
         return cls.sha512 == cls.hash_name(name)
 
     @classmethod
-    def has_name_in(cls, names):
+    def has_name_in(cls, names: Iterable[str]):
         """Build a filter if the author has any of the given names."""
         return cls.sha512.in_({
             cls.hash_name(name)
@@ -581,27 +561,20 @@ class Citation(Base):
         return '{}:{}'.format(self.type, self.reference)
 
     @property
-    def is_pubmed(self):
-        """Return if this is a PubMed citation.
-
-        :rtype: bool
-        """
+    def is_pubmed(self) -> bool:
+        """Return if this is a PubMed citation."""
         return CITATION_TYPE_PUBMED == self.type
 
     @property
-    def is_enriched(self):
-        """Return if this citation has been enriched for name, title, and other metadata.
-
-        :rtype: bool
-        """
+    def is_enriched(self) -> bool:
+        """Return if this citation has been enriched for name, title, and other metadata."""
         return self.title is not None and self.name is not None
 
-    def to_json(self, include_id=False):
+    def to_json(self, include_id: bool = False) -> Mapping[str, Any]:
         """Create a citation dictionary that is used to recreate the edge data dictionary of a :class:`BELGraph`.
 
         :param bool include_id: If true, includes the model identifier
         :return: Citation dictionary for the recreation of a :class:`BELGraph`.
-        :rtype: dict[str,str]
         """
         result = {
             CITATION_REFERENCE: self.reference,
@@ -790,13 +763,12 @@ class Edge(Base):
 
         return dict(annotations) or None
 
-    def to_json(self, include_id=False):
+    def to_json(self, include_id: bool = False) -> Mapping[str, Any]:
         """Create a dictionary of one BEL Edge that can be used to create an edge in a :class:`BELGraph`.
 
         :param bool include_id: Include the database identifier?
         :return: Dictionary that contains information about an edge of a :class:`BELGraph`. Including participants
                  and edge data information.
-        :rtype: dict
         """
         source_dict = self.source.to_json()
         source_dict['sha512'] = source_dict.sha512

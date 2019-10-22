@@ -140,6 +140,18 @@ def _get_tloc_terminal(side, data):
     )
 
 
+def edge_to_tuple(u: BaseEntity, v: BaseEntity, data: EdgeData) -> Tuple[str, str, str]:
+    """Take two nodes and gives back a BEL string representing the statement.
+
+    :param u: The edge's source's PyBEL node data dictionary
+    :param v: The edge's target's PyBEL node data dictionary
+    :param data: The edge's data dictionary
+    """
+    u_str = _decanonicalize_edge_node(u, data, node_position=SUBJECT)
+    v_str = _decanonicalize_edge_node(v, data, node_position=OBJECT)
+    return u_str, data[RELATION], v_str
+
+
 def edge_to_bel(u: BaseEntity, v: BaseEntity, data: EdgeData, sep: Optional[str] = None) -> str:
     """Take two nodes and gives back a BEL string representing the statement.
 
@@ -149,10 +161,7 @@ def edge_to_bel(u: BaseEntity, v: BaseEntity, data: EdgeData, sep: Optional[str]
     :param sep: The separator between the source, relation, and target. Defaults to ' '
     """
     sep = sep or ' '
-    u_str = _decanonicalize_edge_node(u, data, node_position=SUBJECT)
-    v_str = _decanonicalize_edge_node(v, data, node_position=OBJECT)
-
-    return sep.join((u_str, data[RELATION], v_str))
+    return sep.join(edge_to_tuple(u=u, v=v, data=data))
 
 
 def _sort_qualified_edges_helper(t: EdgeTuple) -> Tuple[str, str, str]:
