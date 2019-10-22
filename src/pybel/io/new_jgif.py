@@ -3,7 +3,7 @@
 """Export JGIF for TriplesDB."""
 
 import json
-from typing import Mapping, Optional, TextIO, Union
+from typing import Any, Mapping, Optional, TextIO, Union
 
 import requests
 from networkx.utils import open_file
@@ -21,23 +21,21 @@ __all__ = [
 DEFAULT_API = ''
 
 
-def post_jgif(graph: BELGraph, base_url: Optional[str] = None) -> requests.Response:
-    url = _build_endpoint(base_url)
+def post_jgif(graph: BELGraph, url: Optional[str] = None) -> requests.Response:
+    """Post the JGIF to a given URL."""
     jgif = to_jgif(graph)
     return requests.post(url, data=jgif)
 
 
-def _build_endpoint(url):  # FIXME
-    return url
-
-
 @open_file(1, mode='w')
 def to_jgif_file(graph: BELGraph, file: Union[str, TextIO], **kwargs) -> None:
+    """Write JGIF to a file."""
     jgif = to_jgif(graph)
     json.dump(jgif, file, **kwargs)
 
 
-def to_jgif(graph: BELGraph) -> Mapping:
+def to_jgif(graph: BELGraph) -> Mapping[str, Any]:
+    """Generate JGIF from the graph."""
     rv = dict(
         label=graph.name,
         metadata=dict(
@@ -72,9 +70,3 @@ def to_jgif(graph: BELGraph) -> Mapping:
     rv['nodes'] = list(nodes.values())
 
     return rv
-
-
-if __name__ == '__main__':
-    from pybel.examples import sialic_acid_graph
-
-    to_jgif_file(sialic_acid_graph, '/Users/cthoyt/Desktop/sialic_acid.bel.jgif.json')

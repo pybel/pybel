@@ -570,7 +570,7 @@ class Citation(Base):
         """Return if this citation has been enriched for name, title, and other metadata."""
         return self.title is not None and self.name is not None
 
-    def to_json(self, include_id: bool=False) -> Mapping[str, Any]:
+    def to_json(self, include_id: bool = False) -> Mapping[str, Any]:
         """Create a citation dictionary that is used to recreate the edge data dictionary of a :class:`BELGraph`.
 
         :param bool include_id: If true, includes the model identifier
@@ -763,7 +763,7 @@ class Edge(Base):
 
         return dict(annotations) or None
 
-    def to_json(self, include_id: bool=False) -> Mapping[str, Any]:
+    def to_json(self, include_id: bool = False) -> Mapping[str, Any]:
         """Create a dictionary of one BEL Edge that can be used to create an edge in a :class:`BELGraph`.
 
         :param bool include_id: Include the database identifier?
