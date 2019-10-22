@@ -110,13 +110,6 @@ class BELGraph(nx.MultiDiGraph):
         if path:
             self.path = path
 
-    def fresh_copy(self) -> 'BELGraph':
-        """Create an unfilled :class:`BELGraph` as a hook for other :mod:`networkx` functions.
-
-        Is necessary for .copy() to work.
-        """
-        return BELGraph()
-
     @property
     def path(self) -> Optional[str]:  # noqa: D401
         """The graph's path, if it was derived from a BEL document."""

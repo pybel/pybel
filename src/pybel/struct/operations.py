@@ -28,7 +28,7 @@ def subgraph(graph, nodes: Iterable[BaseEntity]):
     sg = graph.subgraph(nodes)
 
     # see implementation for .copy()
-    result = graph.fresh_copy()
+    result = graph.__class__()
     result.graph.update(sg.graph)
 
     for node, data in sg.nodes(data=True):

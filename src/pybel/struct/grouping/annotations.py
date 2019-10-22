@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 def _get_subgraphs_by_annotation_disregard_undefined(graph, annotation):
-    result = defaultdict(graph.fresh_copy)
+    result = defaultdict(graph.__class__)
 
     for source, target, key, data in graph.edges(keys=True, data=True):
         annotation_dict = data.get(ANNOTATIONS)
@@ -34,7 +34,7 @@ def _get_subgraphs_by_annotation_disregard_undefined(graph, annotation):
 
 
 def _get_subgraphs_by_annotation_keep_undefined(graph, annotation, sentinel):
-    result = defaultdict(graph.fresh_copy)
+    result = defaultdict(graph.__class__)
 
     for source, target, key, data in graph.edges(keys=True, data=True):
         annotation_dict = data.get(ANNOTATIONS)

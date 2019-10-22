@@ -25,7 +25,7 @@ def get_subgraph_by_edge_filter(graph, edge_predicates: Optional[EdgePredicates]
     :return: A BEL sub-graph induced over the edges passing the given filters
     :rtype: pybel.BELGraph
     """
-    rv = graph.fresh_copy()
+    rv = graph.__class__()
     expand_by_edge_filter(graph, rv, edge_predicates=edge_predicates)
     return rv
 
