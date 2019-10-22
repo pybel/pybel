@@ -14,5 +14,5 @@ from .jgif import from_cbn_jgif, from_jgif, to_jgif
 from .lines import from_bel_script, from_bel_script_url
 from .neo4j import to_neo4j
 from .nodelink import from_nodelink, from_nodelink_file, to_nodelink, to_nodelink_file
-from .tsv import to_tsv, to_edgelist
+from .tsv import to_edgelist, to_tsv
 from .web import from_web, to_web
