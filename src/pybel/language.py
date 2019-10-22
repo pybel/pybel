@@ -5,7 +5,6 @@
 This module contains mappings between PyBEL's internal constants and BEL language keywords.
 """
 
-import logging
 from typing import Optional
 
 from .constants import (
@@ -13,8 +12,6 @@ from .constants import (
     INTRACELLULAR, MIRNA, NAME, NAMESPACE, PATHOLOGY, PROTEIN, RNA, TRANSCRIBED_TO, TRANSLATED_TO,
 )
 from .utils import ensure_quotes
-
-logger = logging.getLogger(__name__)
 
 
 class Entity(dict):

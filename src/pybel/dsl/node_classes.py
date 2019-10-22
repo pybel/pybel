@@ -585,9 +585,9 @@ class Rna(_Transcribable):
 
     >>> Rna(namespace='HGNC', name='AKT1', identifier='391')
 
-    Non-coding RNA's can also be encoded such as `U85 <https://www-snorna.biotoul.fr/plus.php?id=U85>`_:
+    Non-coding RNAs can also be encoded such as `U85 <https://www-snorna.biotoul.fr/plus.php?id=U85>`_:
 
-    >>> Rna(namespace='SNORNABASE', identifer='SR0000073')
+    >>> Rna(namespace='SNORNABASE', identifier='SR0000073')
     """
 
     function = RNA
@@ -796,7 +796,7 @@ class NamedComplexAbundance(BaseAbundance):
 
     Example:
 
-        >>> NamedComplexAbundance(namespace='FPLX', name='Calcineurin Complex')
+    >>> NamedComplexAbundance(namespace='FPLX', name='Calcineurin Complex')
     """
 
     function = COMPLEX

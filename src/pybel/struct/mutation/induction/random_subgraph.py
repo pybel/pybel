@@ -44,7 +44,7 @@ def get_graph_with_random_edges(graph, n_edges: int):
     :param n_edges: Number of edges to randomly select from the given graph
     :rtype: pybel.BELGraph
     """
-    result = graph.fresh_copy()
+    result = graph.__class__()
     result.add_edges_from(_random_edge_iterator(graph, n_edges))
 
     update_metadata(graph, result)

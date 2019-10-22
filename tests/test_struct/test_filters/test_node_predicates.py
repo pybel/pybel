@@ -47,8 +47,8 @@ class TestNodePredicates(unittest.TestCase):
     def test_none(self):
         """Test permissive node predicate with graph and tuple."""
         g = BELGraph()
-        p1_tuple = g.add_node_from_data(p1)
-        self.assertTrue(keep_node_permissive(g, p1_tuple))
+        g.add_node_from_data(p1)
+        self.assertTrue(keep_node_permissive(g, p1))
 
     def test_p1_data_variants(self):
         """Test node predicates on BRAF."""
@@ -139,15 +139,13 @@ class TestNodePredicates(unittest.TestCase):
     def test_p1_active(self):
         """cat(p(HGNC:HSD11B1)) increases deg(a(CHEBI:cortisol))"""
         g = BELGraph()
-        u_node = protein(name='HSD11B1', namespace='HGNC')
-        v_node = abundance(name='cortisol', namespace='CHEBI', identifier='17650')
-        u = g.add_node_from_data(u_node)
-        v = g.add_node_from_data(v_node)
 
-        g.add_qualified_edge(
-            u_node,
-            v_node,
-            relation=INCREASES,
+        u = protein(name='HSD11B1', namespace='HGNC')
+        v = abundance(name='cortisol', namespace='CHEBI', identifier='17650')
+
+        g.add_increases(
+            u,
+            v,
             citation={
                 CITATION_TYPE: CITATION_TYPE_ONLINE, CITATION_REFERENCE: 'https://www.ncbi.nlm.nih.gov/gene/3290'
             },
@@ -176,10 +174,9 @@ class TestNodePredicates(unittest.TestCase):
         u = protein(name='EFG', namespace='HGNC')
         v = protein(name='VCP', namespace='HGNC')
 
-        g.add_qualified_edge(
+        g.add_increases(
             u,
             v,
-            relation=INCREASES,
             citation='10855792',
             evidence="Although found predominantly in the cytoplasm and, less abundantly, in the nucleus, VCP can be "
                      "translocated from the nucleus after stimulation with epidermal growth factor.",
@@ -292,9 +289,14 @@ class TestNodePredicates(unittest.TestCase):
 
     def test_node_exclusion_tuples(self):
         g = BELGraph()
-        u = g.add_node_from_data(protein(name='S100b', namespace='MGI'))
-        v = g.add_node_from_data(abundance(name='nitric oxide', namespace='CHEBI'))
-        w = g.add_node_from_data(abundance(name='cortisol', namespace='CHEBI', identifier='17650'))
+
+        u = protein(name='S100b', namespace='MGI')
+        v = abundance(name='nitric oxide', namespace='CHEBI')
+        w = abundance(name='cortisol', namespace='CHEBI', identifier='17650')
+
+        g.add_node_from_data(u)
+        g.add_node_from_data(v)
+        g.add_node_from_data(w)
 
         f = node_exclusion_predicate_builder([u])
 
@@ -345,9 +347,14 @@ class TestNodePredicates(unittest.TestCase):
 
     def test_node_inclusion_tuples(self):
         g = BELGraph()
-        u = g.add_node_from_data(protein(name='S100b', namespace='MGI'))
-        v = g.add_node_from_data(abundance(name='nitric oxide', namespace='CHEBI'))
-        w = g.add_node_from_data(abundance(name='cortisol', namespace='CHEBI', identifier='17650'))
+
+        u=protein(name='S100b', namespace='MGI')
+        v=abundance(name='nitric oxide', namespace='CHEBI')
+        w = abundance(name='cortisol', namespace='CHEBI', identifier='17650')
+
+        g.add_node_from_data(u)
+        g.add_node_from_data(v)
+        g.add_node_from_data(w)
 
         f = node_inclusion_predicate_builder([u])
 
