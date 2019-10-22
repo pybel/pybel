@@ -129,8 +129,8 @@ def _from_nodelink_json_helper(data: Mapping[str, Any]) -> BELGraph:
     mapping = []
 
     for node_data in data['nodes']:
-        _dsl = parse_result_to_dsl(node_data)
-        node = graph.add_node_from_data(_dsl)
+        node = parse_result_to_dsl(node_data)
+        graph.add_node_from_data(node)
         mapping.append(node)
 
     for data in data['links']:

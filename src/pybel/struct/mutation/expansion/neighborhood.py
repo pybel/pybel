@@ -32,7 +32,7 @@ def expand_node_predecessors(universe, graph, node: BaseEntity) -> None:
             skip_successors.add(successor)
             continue
 
-        graph.add_node(successor, **universe.nodes[successor])
+        graph.add_node_from_data(successor)
 
     graph.add_edges_from(
         (source, successor, key, data)
@@ -58,7 +58,7 @@ def expand_node_successors(universe, graph, node: BaseEntity) -> None:
             skip_predecessors.add(predecessor)
             continue
 
-        graph.add_node(predecessor, **universe.nodes[predecessor])
+        graph.add_node_from_data(predecessor)
 
     graph.add_edges_from(
         (predecessor, target, key, data)

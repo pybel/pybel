@@ -498,12 +498,12 @@ class BELGraph(nx.MultiDiGraph):
     A more specific version of :meth:`add_decreases` that automatically populates the object modifier with an
     activity."""
 
-    def add_node_from_data(self, node: BaseEntity) -> BaseEntity:
+    def add_node_from_data(self, node: BaseEntity) -> None:
         """Add an entity to the graph."""
         assert isinstance(node, BaseEntity)
 
         if node in self:
-            return node
+            return
 
         self.add_node(node)
 
@@ -512,6 +512,7 @@ class BELGraph(nx.MultiDiGraph):
 
         elif MEMBERS in node:
             for member in node[MEMBERS]:
+                # FIXME switch to self.add_part_of(member, node)
                 self.add_has_component(node, member)
 
         elif PRODUCTS in node and REACTANTS in node:
@@ -519,8 +520,6 @@ class BELGraph(nx.MultiDiGraph):
                 self.add_has_reactant(node, reactant_tokens)
             for product_tokens in node[PRODUCTS]:
                 self.add_has_product(node, product_tokens)
-
-        return node
 
     def _has_edge_attr(self, u: BaseEntity, v: BaseEntity, key: str, attr: Hashable) -> bool:
         assert isinstance(u, BaseEntity)
