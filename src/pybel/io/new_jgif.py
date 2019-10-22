@@ -15,6 +15,7 @@ from pybel.constants import ANNOTATIONS
 __all__ = [
     'post_jgif',
     'to_jgif_file',
+    'to_jgif',
 ]
 
 DEFAULT_API = ''
