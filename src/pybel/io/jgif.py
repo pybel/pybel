@@ -10,21 +10,27 @@ JSON. Interchange with this format provides compatibilty with other software and
 import logging
 from collections import defaultdict
 from operator import methodcaller
+from typing import Optional, TextIO, Union
 
+import requests
+from networkx.utils import open_file
 from pyparsing import ParseException
 
 from ..constants import (
-    ANNOTATIONS, CITATION, CITATION_REFERENCE, CITATION_TYPE, EVIDENCE, FUNCTION, METADATA_AUTHORS, METADATA_CONTACT,
+    ANNOTATIONS, CITATION, CITATION_REFERENCE, CITATION_TYPE, EVIDENCE, METADATA_AUTHORS, METADATA_CONTACT,
     METADATA_INSERT_KEYS, METADATA_LICENSES, RELATION, UNQUALIFIED_EDGES,
 )
 from ..parser import BELParser
 from ..parser.exc import NakedNameWarning
 from ..struct import BELGraph
+from ..version import get_version
 
 __all__ = [
     'from_cbn_jgif',
     'from_jgif',
     'to_jgif',
+    'to_jgif_file',
+    'post_jgif',
 ]
 
 logger = logging.getLogger(__name__)
@@ -291,7 +297,7 @@ def from_jgif(graph_jgif_dict):
     return graph
 
 
-def to_jgif(graph):
+def to_jgif(graph: 'pybel.BELGraph'):
     """Build a JGIF dictionary from a BEL graph.
 
     :param pybel.BELGraph graph: A BEL graph
@@ -319,21 +325,16 @@ def to_jgif(graph):
     edges_entry = []
 
     for i, node in enumerate(sorted(graph, key=methodcaller('as_bel'))):
-        node_bel[node] = bel = node.as_bel()
-
         nodes_entry.append({
-            'id': bel,
-            'label': bel,
-            'nodeId': i,
-            'bel_function_type': node[FUNCTION],
-            'metadata': {}
+            'id': node.sha512[:12],
+            'label': node.as_bel(),
+            'bel_function_type': node.function,
         })
 
     for u, v in graph.edges():
         relation_evidences = defaultdict(list)
 
-        for data in graph[u][v].values():
-
+        for key, data in graph[u][v].items():
             if (u, v, data[RELATION]) not in u_v_r_bel:
                 u_v_r_bel[u, v, data[RELATION]] = graph.edge_to_bel(u, v, edge_data=data)
 
@@ -341,6 +342,7 @@ def to_jgif(graph):
 
             evidence_dict = {
                 'bel_statement': bel,
+                'key': key[:12],
             }
 
             if ANNOTATIONS in data:
@@ -356,19 +358,41 @@ def to_jgif(graph):
 
         for relation, evidences in relation_evidences.items():
             edges_entry.append({
-                'source': node_bel[u],
-                'target': node_bel[v],
+                'source': u.sha512[:12],
+                'target': v.sha512[:12],
                 'relation': relation,
                 'label': u_v_r_bel[u, v, relation],
                 'metadata': {
-                    'evidences': evidences
+                    'evidences': evidences,
                 }
             })
 
     return {
-        'graph': {
-            'metadata': graph.document,
-            'nodes': nodes_entry,
-            'edges': edges_entry
-        }
+        'metadata': dict(
+            origin=dict(name='pybel', version=get_version()),
+            **graph.document
+        ),
+        'nodes': nodes_entry,
+        'edges': edges_entry,
     }
+
+
+@open_file(1, mode='w')
+def to_jgif_file(graph: BELGraph, file: Union[str, TextIO], **kwargs) -> None:
+    """Write JGIF to a file."""
+    jgif = to_jgif(graph)
+    json.dump(jgif, file, **kwargs)
+
+
+def post_jgif(graph: BELGraph, url: Optional[str] = None) -> requests.Response:
+    """Post the JGIF to a given URL."""
+    jgif = to_jgif(graph)
+    return requests.post(url, data=jgif)
+
+
+if __name__ == '__main__':
+    import json
+    from pybel.examples import sialic_acid_graph
+
+    with open('/Users/cthoyt/Desktop/example.json', 'w') as file:
+        json.dump(to_jgif(sialic_acid_graph), file, indent=2)
