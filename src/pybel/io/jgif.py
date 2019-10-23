@@ -384,10 +384,10 @@ def to_jgif_file(graph: BELGraph, file: Union[str, TextIO], **kwargs) -> None:
     json.dump(jgif, file, **kwargs)
 
 
-def post_jgif(graph: BELGraph, url: Optional[str] = None) -> requests.Response:
+def post_jgif(graph: BELGraph, url: Optional[str] = None, **kwargs) -> requests.Response:
     """Post the JGIF to a given URL."""
     jgif = to_jgif(graph)
-    return requests.post(url, data=jgif)
+    return requests.post(url, json=jgif, **kwargs)
 
 
 if __name__ == '__main__':
