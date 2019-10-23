@@ -368,12 +368,14 @@ def to_jgif(graph: 'pybel.BELGraph'):
             })
 
     return {
-        'metadata': dict(
-            origin=dict(name='pybel', version=get_version()),
-            **graph.document
-        ),
-        'nodes': nodes_entry,
-        'edges': edges_entry,
+        'graph': {
+            'metadata': dict(
+                origin=dict(name='pybel', version=get_version()),
+                **graph.document
+            ),
+            'nodes': nodes_entry,
+            'edges': edges_entry,
+        }
     }
 
 
