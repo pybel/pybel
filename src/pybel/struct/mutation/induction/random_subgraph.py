@@ -58,7 +58,7 @@ SAMPLE_RANDOM_EDGE_COUNT = 250
 SAMPLE_RANDOM_EDGE_SEED_COUNT = 5
 
 
-class WeightedRandomGenerator(object):
+class WeightedRandomGenerator:
     """A weighted random number generator.
 
     Adapted from: https://eli.thegreenplace.net/2010/01/22/weighted-random-generation-in-python
@@ -92,10 +92,11 @@ class WeightedRandomGenerator(object):
         return self.values[self.next_index()]
 
 
-def get_random_node(graph,
-                    node_blacklist: Set[BaseEntity],
-                    invert_degrees: Optional[bool] = None,
-                    ) -> Optional[BaseEntity]:
+def get_random_node(
+    graph,
+    node_blacklist: Set[BaseEntity],
+    invert_degrees: Optional[bool] = None,
+) -> Optional[BaseEntity]:
     """Choose a node from the graph with probabilities based on their degrees.
 
     :type graph: networkx.Graph
@@ -116,15 +117,16 @@ def get_random_node(graph,
         degrees = [1 / degree for degree in degrees]
 
     wrg = WeightedRandomGenerator(nodes, degrees)
-    return wrg.next()
+    return wrg.next()  # noqa: B305
 
 
-def _helper(result,
-            graph,
-            number_edges_remaining: int,
-            node_blacklist: Set[BaseEntity],
-            invert_degrees: Optional[bool] = None,
-            ):
+def _helper(
+    result,
+    graph,
+    number_edges_remaining: int,
+    node_blacklist: Set[BaseEntity],
+    invert_degrees: Optional[bool] = None,
+) -> None:
     """Help build a random graph.
 
     :type result: networkx.Graph

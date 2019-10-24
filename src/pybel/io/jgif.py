@@ -75,13 +75,13 @@ def map_cbn(d):
     :rtype: dict
     """
     for i, edge in enumerate(d['graph']['edges']):
-        if 'metadata' not in d['graph']['edges'][i]:
+        if 'metadata' not in edge:
             continue
 
-        if 'evidences' not in d['graph']['edges'][i]['metadata']:
+        if 'evidences' not in edge['metadata']:
             continue
 
-        for j, evidence in enumerate(d['graph']['edges'][i]['metadata']['evidences']):
+        for j, evidence in enumerate(edge['metadata']['evidences']):
             if EXPERIMENT_CONTEXT not in evidence:
                 continue
 
@@ -125,6 +125,7 @@ def map_cbn(d):
                     'species_common_name']
             '''
 
+            # TODO can this be replaced with edge as well?
             d['graph']['edges'][i]['metadata']['evidences'][j][EXPERIMENT_CONTEXT] = new_context
 
     return d
@@ -297,7 +298,7 @@ def from_jgif(graph_jgif_dict):
     return graph
 
 
-def to_jgif(graph: 'pybel.BELGraph'):
+def to_jgif(graph):
     """Build a JGIF dictionary from a BEL graph.
 
     :param pybel.BELGraph graph: A BEL graph
@@ -318,13 +319,12 @@ def to_jgif(graph: 'pybel.BELGraph'):
     >>> with open(os.path.expanduser('~/Desktop/small_corpus.json'), 'w') as f:
     ...     json.dump(graph_jgif_json, f)
     """
-    node_bel = {}
     u_v_r_bel = {}
 
     nodes_entry = []
     edges_entry = []
 
-    for i, node in enumerate(sorted(graph, key=methodcaller('as_bel'))):
+    for node in sorted(graph, key=methodcaller('as_bel')):
         nodes_entry.append({
             'id': node.sha512[:12],
             'label': node.as_bel(),
