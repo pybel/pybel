@@ -314,7 +314,7 @@ def to_jgif(graph):
 
     >>> import pybel, os, json
     >>> graph_url = 'https://arty.scai.fraunhofer.de/artifactory/bel/knowledge/selventa-small-corpus/selventa-small-corpus-20150611.bel'
-    >>> graph = pybel.from_url(graph_url)
+    >>> graph = pybel.from_bel_script_url(graph_url)
     >>> graph_jgif_json = pybel.to_jgif(graph)
     >>> with open(os.path.expanduser('~/Desktop/small_corpus.json'), 'w') as f:
     ...     json.dump(graph_jgif_json, f)
