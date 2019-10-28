@@ -364,7 +364,10 @@ def ls(manager: Manager, url: Optional[str], namespace_id: Optional[int]):
     elif namespace_id is not None:
         _ls(manager, Namespace, namespace_id)
     else:
-        click.echo('Missing argument -i or -u')
+        click.echo_via_pager('\n'.join(
+            "{}\t{}\t{}".format(n.id, n.name, n.url)
+            for n in manager.session.query(Namespace)
+        ))
 
 
 @namespaces.command()  # noqa:F811
