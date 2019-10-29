@@ -125,7 +125,7 @@ class HipathiaConverter:
                 return
             return g.add_edge(_u, _v, relation=_relation)
 
-        for u, v, k, d in sorted(self.graph.edges(keys=True, data=True)):
+        for u, v, d in sorted(self.graph.edges(data=True)):
             relation = d[RELATION]
             if isinstance(u, Protein) and isinstance(v, Protein):
                 if relation == DIRECTLY_INCREASES:
