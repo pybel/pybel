@@ -7,7 +7,7 @@ from typing import Tuple, Type
 
 from pybel import BELGraph
 from pybel.constants import (
-    ASSOCIATION, DECREASES, EQUIVALENT_TO, HAS_COMPONENT, INCREASES, IS_A, NEGATIVE_CORRELATION, OBJECT, PART_OF,
+    ASSOCIATION, DECREASES, EQUIVALENT_TO, INCREASES, IS_A, NEGATIVE_CORRELATION, OBJECT, PART_OF,
     POSITIVE_CORRELATION, REGULATES, RELATION,
 )
 from pybel.dsl import (
@@ -18,9 +18,8 @@ from pybel.io.tsv.api import get_triple
 from pybel.io.tsv.converters import (
     AssociationConverter, Converter, CorrelationConverter, DecreasesAmountConverter, DrugIndicationConverter,
     DrugSideEffectConverter, EquivalenceConverter, IncreasesAmountConverter, IsAConverter,
-    MiRNADecreasesExpressionConverter, NamedComplexHasComponentConverter,
-    PartOfNamedComplexConverter, RegulatesActivityConverter, RegulatesAmountConverter,
-    SubprocessPartOfBiologicalProcess,
+    MiRNADecreasesExpressionConverter, PartOfNamedComplexConverter, RegulatesActivityConverter,
+    RegulatesAmountConverter, SubprocessPartOfBiologicalProcess,
 )
 from pybel.testing.utils import n
 from pybel.typing import EdgeData
@@ -50,7 +49,6 @@ r2 = Rna('HGNC', '2')
 nca1 = NamedComplexAbundance('FPLX', '1')
 
 converters_true_list = [
-    (NamedComplexHasComponentConverter, nca1, p1, _rel(HAS_COMPONENT), ('HGNC:1', 'partOf', 'FPLX:1')),
     (PartOfNamedComplexConverter, p1, nca1, _rel(PART_OF), ('HGNC:1', 'partOf', 'FPLX:1')),
     (SubprocessPartOfBiologicalProcess, b1, b2, _rel(PART_OF), ('GO:1', 'partOf', 'GO:2')),
     (AssociationConverter, r1, r2, _rel(ASSOCIATION), ('HGNC:1', 'association', 'HGNC:2')),
@@ -79,8 +77,7 @@ converters_true_list = [
 ]
 
 converters_false_list = [
-    (NamedComplexHasComponentConverter, nca1, p1, _rel(PART_OF)),
-    (PartOfNamedComplexConverter, nca1, p1, _rel(HAS_COMPONENT)),
+    (PartOfNamedComplexConverter, nca1, p1, _rel(IS_A)),
 ]
 
 

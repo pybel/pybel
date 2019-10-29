@@ -10,7 +10,7 @@ from pybel import BELGraph
 from pybel.constants import (
     ANNOTATIONS, ASSOCIATION, CITATION, CITATION_NAME, CITATION_REFERENCE, CITATION_TYPE, DECREASES, DIRECTLY_DECREASES,
     EVIDENCE, INCREASES, METADATA_AUTHORS, METADATA_DESCRIPTION, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION,
-    OPENBEL_ANNOTATION_RESOURCES, RELATION,
+    PART_OF, RELATION,
 )
 from pybel.dsl import BaseEntity, ComplexAbundance, Pathology, Protein
 from pybel.dsl.namespaces import hgnc
@@ -31,7 +31,10 @@ from tests.constant_helper import (
     expected_test_thorough_metadata,
 )
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
+
+OPENBEL_DOMAIN = 'http://resources.openbel.org'
+OPENBEL_ANNOTATION_RESOURCES = OPENBEL_DOMAIN + '/belframework/20150611/annotation/'
 
 test_citation_dict = {
     CITATION_TYPE: 'PubMed',
@@ -107,7 +110,14 @@ def any_subdict_matches(dict_of_dicts, query_dict):
     )
 
 
-def assert_has_edge(self: unittest.TestCase, u: BaseEntity, v: BaseEntity, graph: BELGraph, permissive=True, **kwargs):
+def assert_has_edge(
+    self: unittest.TestCase,
+    u: BaseEntity,
+    v: BaseEntity,
+    graph: BELGraph,
+    permissive=True,
+    **kwargs,
+):
     """A helper function for checking if an edge with the given properties is contained within a graph."""
     self.assertIsInstance(u, BaseEntity)
     self.assertIsInstance(v, BaseEntity)
@@ -183,17 +193,17 @@ def help_check_hgnc(test_case: unittest.TestCase, namespace_dict) -> None:
     """Assert that the namespace dictionary is correct."""
     test_case.assertIn(HGNC_KEYWORD, namespace_dict)
 
-    MHS2 = None, 'MHS2'
-    test_case.assertIn(MHS2, namespace_dict[HGNC_KEYWORD])
-    test_case.assertEqual(set('G'), set(namespace_dict[HGNC_KEYWORD][MHS2]))
+    mhs2 = '7071', 'MHS2'
+    test_case.assertIn(mhs2, namespace_dict[HGNC_KEYWORD])
+    test_case.assertEqual(set('G'), set(namespace_dict[HGNC_KEYWORD][mhs2]))
 
-    MIATNB = None, 'MIATNB'
-    test_case.assertIn(MIATNB, namespace_dict[HGNC_KEYWORD])
-    test_case.assertEqual(set('GR'), set(namespace_dict[HGNC_KEYWORD][MIATNB]))
+    miatnb = '50731', 'MIATNB'
+    test_case.assertIn(miatnb, namespace_dict[HGNC_KEYWORD])
+    test_case.assertEqual(set('GR'), set(namespace_dict[HGNC_KEYWORD][miatnb]))
 
-    MIA = None, 'MIA'
-    test_case.assertIn(MIA, namespace_dict[HGNC_KEYWORD])
-    test_case.assertEqual(set('GRP'), set(namespace_dict[HGNC_KEYWORD][MIA]))
+    mia = '7076', 'MIA'
+    test_case.assertIn(mia, namespace_dict[HGNC_KEYWORD])
+    test_case.assertEqual(set('GRP'), set(namespace_dict[HGNC_KEYWORD][mia]))
 
 
 class BelReconstitutionMixin(TestGraphMixin):
@@ -290,14 +300,15 @@ class BelReconstitutionMixin(TestGraphMixin):
             EVIDENCE: evidence_3,
         })
 
-    def bel_thorough_reconstituted(self,
-                                   graph: BELGraph,
-                                   check_metadata: bool = True,
-                                   check_warnings: bool = True,
-                                   check_provenance: bool = True,
-                                   check_citation_name: bool = True,
-                                   check_path: bool = True,
-                                   ):
+    def bel_thorough_reconstituted(
+        self,
+        graph: BELGraph,
+        check_metadata: bool = True,
+        check_warnings: bool = True,
+        check_provenance: bool = True,
+        check_citation_name: bool = True,
+        check_path: bool = True,
+    ):
         """Check that thorough.bel was loaded properly.
 
         :param graph: A BEL graph
@@ -445,5 +456,5 @@ class BelReconstitutionMixin(TestGraphMixin):
         self.assertIn(adgrb_complex, graph)
         self.assertIn(achlorhydria, graph)
 
-        assert_has_edge(self, adgrb_complex, adgrb1, graph)
-        assert_has_edge(self, adgrb_complex, adgrb2, graph)
+        assert_has_edge(self, adgrb1, adgrb_complex, graph, relation=PART_OF)
+        assert_has_edge(self, adgrb2, adgrb_complex, graph, relation=PART_OF)

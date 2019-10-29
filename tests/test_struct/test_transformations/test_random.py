@@ -132,4 +132,4 @@ class TestRandomPath(unittest.TestCase):
         """Test getting random paths doesn't crash."""
         for graph in (sialic_acid_graph, statin_graph):
             for _ in range(100):
-                get_random_path(graph)
+                get_random_path(graph.copy())

@@ -141,7 +141,6 @@ def from_cbn_jgif(graph_jgif_dict):
     :rtype: BELGraph
 
     Example:
-
     >>> import requests
     >>> from pybel import from_cbn_jgif
     >>> apoptosis_url = 'http://causalbionet.com/Networks/GetJSONGraphFile?networkId=810385422'
@@ -153,6 +152,7 @@ def from_cbn_jgif(graph_jgif_dict):
         Handling the annotations is not yet supported, since the CBN documents do not refer to the resources used
         to create them. This may be added in the future, but the annotations must be stripped from the graph
         before uploading to the network store using :func:`pybel.struct.mutation.strip_annotations`.
+
     """
     graph_jgif_dict = map_cbn(graph_jgif_dict)
 
@@ -311,13 +311,13 @@ def to_jgif(graph):
         use Cytoscape.js, we suggest using :func:`pybel.to_cx` instead.
 
     Example:
-
     >>> import pybel, os, json
     >>> graph_url = 'https://arty.scai.fraunhofer.de/artifactory/bel/knowledge/selventa-small-corpus/selventa-small-corpus-20150611.bel'
     >>> graph = pybel.from_bel_script_url(graph_url)
     >>> graph_jgif_json = pybel.to_jgif(graph)
     >>> with open(os.path.expanduser('~/Desktop/small_corpus.json'), 'w') as f:
     ...     json.dump(graph_jgif_json, f)
+
     """
     u_v_r_bel = {}
 

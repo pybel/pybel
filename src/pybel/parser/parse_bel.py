@@ -32,10 +32,10 @@ from .. import language
 from ..constants import (
     ABUNDANCE, ACTIVITY, ASSOCIATION, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE, CELL_SECRETION,
     CELL_SURFACE_EXPRESSION, COMPLEX, COMPOSITE, CONCEPT, DECREASES, DEGRADATION, DIRECTLY_DECREASES,
-    DIRECTLY_INCREASES, DIRTY, EFFECT, EQUIVALENT_TO, FROM_LOC, FUNCTION, FUSION, GENE, HAS_COMPONENT, HAS_MEMBER,
-    INCREASES, IS_A, LINE, LOCATION, MEMBERS, MIRNA, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, PART_OF,
-    PATHOLOGY, POSITIVE_CORRELATION, PRODUCTS, PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, TARGET,
-    TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, TWO_WAY_RELATIONS, VARIANTS, belns_encodings,
+    DIRECTLY_INCREASES, DIRTY, EFFECT, EQUIVALENT_TO, FROM_LOC, FUNCTION, FUSION, GENE, INCREASES, IS_A, LINE, LOCATION,
+    MEMBERS, MIRNA, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, PART_OF, PATHOLOGY, POSITIVE_CORRELATION,
+    PRODUCTS, PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, TARGET, TO_LOC, TRANSCRIBED_TO,
+    TRANSLATED_TO, TRANSLOCATION, TWO_WAY_RELATIONS, VARIANTS, belns_encodings,
 )
 from ..dsl import BaseEntity, cell_surface_expression, secretion
 from ..tokens import parse_result_to_dsl
@@ -232,7 +232,7 @@ class BELParser(BaseParser):
         annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
         annotation_to_local: Optional[Mapping[str, Set[str]]] = None,
         allow_naked_names: bool = False,
-        allow_nested: bool = False,
+        disallow_nested: bool = False,
         disallow_unqualified_translocations: bool = False,
         citation_clearing: bool = True,
         skip_validation: bool = False,
@@ -254,7 +254,7 @@ class BELParser(BaseParser):
          :class:`pybel.parser.ControlParser`
         :param allow_naked_names: If true, turn off naked namespace failures. Delegated to
          :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :param allow_nested: If true, turn off nested statement failures. Delegated to
+        :param disallow_nested: If true, turn on nested statement failures. Delegated to
          :class:`pybel.parser.parse_identifier.IdentifierParser`
         :param disallow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
         :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
@@ -265,7 +265,7 @@ class BELParser(BaseParser):
         self.graph = graph
         self.metagraph = set()
 
-        self.allow_nested = allow_nested
+        self.disallow_nested = disallow_nested
         self.disallow_unqualified_translocations = disallow_unqualified_translocations
 
         if skip_validation:
@@ -537,7 +537,7 @@ class BELParser(BaseParser):
 
         # `3.4.3 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_hascomponent>`_
         self.has_component = triple(
-            self.complex_abundances | self.composite_abundance,
+            self.abundance,
             has_component_tag,
             self.abundance
         )
@@ -559,19 +559,23 @@ class BELParser(BaseParser):
             # self.has_variant_relation,
             # self.part_of_reaction,
         ])
-
         self.relation.setParseAction(self._handle_relation_harness)
 
-        self.unqualified_relation = MatchFirst([
+        self.inverted_unqualified_relation = MatchFirst([
+            self.has_member,
+            self.has_component,
+        ])
+        self.inverted_unqualified_relation.setParseAction(self.handle_inverse_unqualified_relation)
+
+        self.normal_unqualified_relation = MatchFirst([
             self.has_member,
             self.has_component,
             self.has_variant_relation,
             self.part_of_reaction,
         ])
+        self.normal_unqualified_relation.setParseAction(self.handle_unqualified_relation)
 
-        self.unqualified_relation.setParseAction(self.handle_unqualified_relation)
-
-        #: 3.1 Causal Relationships - nested. Not enabled by default.
+        #: 3.1 Causal Relationships - nested.
         causal_relation_tags = MatchFirst([
             increases_tag,
             decreases_tag,
@@ -595,7 +599,8 @@ class BELParser(BaseParser):
             self.has_list,
             self.nested_causal_relationship,
             self.relation,
-            self.unqualified_relation,
+            self.inverted_unqualified_relation,
+            self.normal_unqualified_relation,
             self.label_relationship,
         ])
 
@@ -629,11 +634,11 @@ class BELParser(BaseParser):
     def handle_nested_relation(self, line: str, position: int, tokens: ParseResults):
         """Handle nested statements.
 
-        If :code:`allow_nested` is False, raises a ``NestedRelationWarning``.
+        If :code:`self.disallow_nested` is True, raises a ``NestedRelationWarning``.
 
         :raises: NestedRelationWarning
         """
-        if not self.allow_nested:
+        if self.disallow_nested:
             raise NestedRelationWarning(self.get_line_number(), line, position)
 
         subject_hash = self._handle_relation_checked(line, position, {
@@ -699,17 +704,19 @@ class BELParser(BaseParser):
 
         for child_tokens in tokens[2]:
             child_node_dsl = self.ensure_node(child_tokens)
-            self.graph.add_unqualified_edge(parent_node_dsl, child_node_dsl, relation)
+            # Note that the polarity is switched since this is just for hasMembers
+            # and hasComponents, which are both deprecated as of BEL v2.2
+            self.graph.add_unqualified_edge(child_node_dsl, parent_node_dsl, relation)
 
         return tokens
 
     def handle_has_members(self, _, __, tokens: ParseResults) -> ParseResults:
         """Handle list relations like ``p(X) hasMembers list(p(Y), p(Z), ...)``."""
-        return self._handle_list_helper(tokens, HAS_MEMBER)
+        return self._handle_list_helper(tokens, IS_A)
 
     def handle_has_components(self, _, __, tokens: ParseResults) -> ParseResults:
         """Handle list relations like ``p(X) hasComponents list(p(Y), p(Z), ...)``."""
-        return self._handle_list_helper(tokens, HAS_COMPONENT)
+        return self._handle_list_helper(tokens, PART_OF)
 
     def _add_qualified_edge_helper(self, u, v, relation, annotations, subject_modifier, object_modifier) -> str:
         """Add a qualified edge from the internal aspects of the parser."""
@@ -808,6 +815,14 @@ class BELParser(BaseParser):
         self.graph.add_unqualified_edge(subject_node_dsl, object_node_dsl, relation)
         return tokens
 
+    def handle_inverse_unqualified_relation(self, _, __, tokens: ParseResults) -> ParseResults:
+        """Handle unqualified relations that should go reverse."""
+        subject_node_dsl = self.ensure_node(tokens[SUBJECT])
+        object_node_dsl = self.ensure_node(tokens[OBJECT])
+        relation = tokens[RELATION]
+        self.graph.add_unqualified_edge(object_node_dsl, subject_node_dsl, relation)
+        return tokens
+
     def handle_label_relation(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
         """Handle statements like ``p(X) label "Label for X"``.
 
@@ -821,7 +836,7 @@ class BELParser(BaseParser):
                 line_number=self.get_line_number(),
                 line=line,
                 position=position,
-                node=self.graph.node,
+                node=subject_node_dsl,
                 old_label=self.graph.get_node_description(subject_node_dsl),
                 new_label=description,
             )

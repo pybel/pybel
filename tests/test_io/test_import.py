@@ -39,7 +39,7 @@ from tests.constants import (
 )
 
 logging.getLogger('requests').setLevel(logging.WARNING)
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 testan1 = '1'
 
@@ -101,12 +101,16 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
     @classmethod
     def setUpClass(cls):
         """Set up this class with several pre-loaded BEL graphs."""
-        super(TestInterchange, cls).setUpClass()
+        super().setUpClass()
 
         with mock_bel_resources:
-            cls.thorough_graph = from_bel_script(test_bel_thorough, manager=cls.manager, allow_nested=True)
-            cls.slushy_graph = from_bel_script(test_bel_slushy, manager=cls.manager,
-                                               disallow_unqualified_translocations=True)
+            cls.thorough_graph = from_bel_script(test_bel_thorough, manager=cls.manager, disallow_nested=False)
+            cls.slushy_graph = from_bel_script(
+                test_bel_slushy,
+                manager=cls.manager,
+                disallow_unqualified_translocations=True,
+                disallow_nested=True,
+            )
             cls.simple_graph = from_bel_script_url(Path(test_bel_simple).as_uri(), manager=cls.manager)
             cls.isolated_graph = from_bel_script(test_bel_isolated, manager=cls.manager)
             cls.misordered_graph = from_bel_script(test_bel_misordered, manager=cls.manager, citation_clearing=False)
@@ -208,10 +212,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
 
     def test_slushy_graphml(self):
         handle, path = tempfile.mkstemp()
-
-        with open(path, 'wb') as f:
-            to_graphml(self.slushy_graph, f)
-
+        to_graphml(self.slushy_graph, path)
         os.close(handle)
         os.remove(path)
 
@@ -260,8 +261,8 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
             CITATION: citation_1,
             EVIDENCE: evidence_1,
             ANNOTATIONS: {
-                'TESTAN1': {testan1: True}
-            }
+                'TESTAN1': {testan1: True},
+            },
         }
         self.assert_has_edge(self.misordered_graph, egfr, casp8, **e3)
 
@@ -276,7 +277,7 @@ namespace_to_term = {
 annotation_to_term = {
     'TestAnnotation1': {'A', 'B', 'C'},
     'TestAnnotation2': {'X', 'Y', 'Z'},
-    'TestAnnotation3': {'D', 'E', 'F'}
+    'TestAnnotation3': {'D', 'E', 'F'},
 }
 
 
@@ -288,7 +289,7 @@ class TestFull(TestTokenParserBase):
             cls.graph,
             namespace_to_term_to_encoding=namespace_to_term,
             annotation_to_term=annotation_to_term,
-            namespace_to_pattern={'dbSNP': re.compile('rs[0-9]*')}
+            namespace_to_pattern={'dbSNP': re.compile('rs[0-9]*')},
         )
 
     def test_regex_match(self):
@@ -317,7 +318,7 @@ class TestFull(TestTokenParserBase):
             test_set_evidence,
             'SET TestAnnotation1 = "A"',
             'SET TestAnnotation2 = "X"',
-            'g(TESTNS:1) -> g(TESTNS:2)'
+            'g(TESTNS:1) -> g(TESTNS:2)',
         ]
 
         with self.assertRaises(MissingCitationException):

@@ -6,14 +6,13 @@ import time
 import unittest
 from collections import Counter
 
-import sqlalchemy.exc
 from sqlalchemy import not_
 
 from pybel import BELGraph, from_bel_script, from_database, to_database
 from pybel.constants import (
     ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_REFERENCE,
-    CITATION_TYPE, CITATION_TYPE_OTHER, CITATION_TYPE_PUBMED, DECREASES, HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT,
-    INCREASES, METADATA_NAME, METADATA_VERSION, MIRNA, PATHOLOGY, PROTEIN, RELATION,
+    CITATION_TYPE, CITATION_TYPE_OTHER, CITATION_TYPE_PUBMED, DECREASES, HAS_PRODUCT, HAS_REACTANT, INCREASES,
+    METADATA_NAME, METADATA_VERSION, MIRNA, PART_OF, PATHOLOGY, PROTEIN, RELATION,
 )
 from pybel.dsl import (
     BaseEntity, ComplexAbundance, CompositeAbundance, EnumeratedFusionRange, Fragment, Gene, GeneFusion,
@@ -76,11 +75,11 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
 
     @mock_bel_resources
     def test_reload(self, mock_get):
-        """Tests that a graph with the same name and version can't be added twice"""
+        """Test that a graph with the same name and version can't be added twice."""
         graph = sialic_acid_graph.copy()
         self.assertEqual('1.0.0', graph.version)
 
-        to_database(graph, manager=self.manager, store_parts=False)
+        to_database(graph, manager=self.manager)
         time.sleep(1)
 
         self.assertEqual(1, self.manager.count_networks())
@@ -99,18 +98,11 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         self.assertEqual(graph.nodes(data=True), reconstituted.nodes(data=True))
         # self.bel_thorough_reconstituted(reconstituted)
 
-        # Test that the graph can't be added a second time
-        with self.assertRaises(sqlalchemy.exc.IntegrityError):
-            self.manager.insert_graph(graph, store_parts=False)
-
-        self.manager.session.rollback()
-        time.sleep(1)
-
         self.assertEqual(1, self.manager.count_networks())
 
         graph_copy = graph.copy()
         graph_copy.version = '1.0.1'
-        network_copy = self.manager.insert_graph(graph_copy, store_parts=False)
+        network_copy = self.manager.insert_graph(graph_copy)
 
         time.sleep(1)  # Sleep so the first graph always definitely goes in first
 
@@ -175,7 +167,7 @@ class TestTemporaryInsertNetwork(TemporaryCacheMixin):
 
         make_dummy_namespaces(self.manager, graph)
 
-        self.manager.insert_graph(graph, store_parts=True)
+        self.manager.insert_graph(graph)
 
         # TODO check that the database doesn't have anything for TEST in it
 
@@ -205,7 +197,7 @@ class TestTypedQuery(TemporaryCacheMixin):
         make_dummy_annotations(self.manager, graph)
 
         with mock_bel_resources:
-            self.manager.insert_graph(graph, store_parts=True)
+            self.manager.insert_graph(graph)
 
     def test_query_edge_source_type(self):
         rv = self.manager.query_edges(source_function=MIRNA).all()
@@ -236,7 +228,7 @@ class TestQuery(TemporaryCacheMixin):
         make_dummy_annotations(self.manager, graph)
 
         with mock_bel_resources:
-            self.manager.insert_graph(graph, store_parts=True)
+            self.manager.insert_graph(graph)
 
     def test_query_node_bel_1(self):
         rv = self.manager.query_nodes(bel='p(HGNC:FOS)').all()
@@ -463,9 +455,9 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         super().setUpClass()
 
         with mock_bel_resources:
-            cls.graph = from_bel_script(test_bel_simple, manager=cls.manager, allow_nested=True)
+            cls.graph = from_bel_script(test_bel_simple, manager=cls.manager, disallow_nested=False)
             print(cls.graph.graph)
-            cls.network = cls.manager.insert_graph(cls.graph, store_parts=True)
+            cls.network = cls.manager.insert_graph(cls.graph)
 
     def test_citations(self):
         citations = self.manager.session.query(Citation).all()
@@ -588,17 +580,17 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertIn(il23, self.graph)
         self.assertEqual(2, self.graph.number_of_edges())
 
-        self.assertIn(il6, self.graph[node_data])
-        edges = list(self.graph[node_data][il6].values())
+        self.assertIn(node_data, self.graph[il6])
+        edges = list(self.graph[il6][node_data].values())
         self.assertEqual(1, len(edges))
         data = edges[0]
-        self.assertEqual(HAS_COMPONENT, data[RELATION])
+        self.assertEqual(PART_OF, data[RELATION])
 
-        self.assertIn(il23, self.graph[node_data])
-        edges = list(self.graph[node_data][il23].values())
+        self.assertIn(node_data, self.graph[il23])
+        edges = list(self.graph[il23][node_data].values())
         self.assertEqual(1, len(edges))
         data = edges[0]
-        self.assertEqual(HAS_COMPONENT, data[RELATION])
+        self.assertEqual(PART_OF, data[RELATION])
 
     def test_reaction(self):
         self.graph.add_node_from_data(superoxide_decomposition)
@@ -618,8 +610,8 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertEqual(3, self.graph.number_of_nodes())
         self.assertEqual(2, self.graph.number_of_edges())
 
-        assert_unqualified_edge(self, node, fos, HAS_COMPONENT)
-        assert_unqualified_edge(self, node, jun, HAS_COMPONENT)
+        assert_unqualified_edge(self, fos, node, PART_OF)
+        assert_unqualified_edge(self, jun, node, PART_OF)
 
     def test_dimer_complex(self):
         """Tests what happens if a BEL statement complex(p(X), p(X)) is added"""
@@ -630,7 +622,7 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertEqual(2, self.graph.number_of_nodes())
         self.assertEqual(1, self.graph.number_of_edges())
 
-        assert_unqualified_edge(self, egfr_dimer, egfr, HAS_COMPONENT)
+        assert_unqualified_edge(self, egfr, egfr_dimer, PART_OF)
 
     def test_nested_complex(self):
         """Checks what happens if a theoretical BEL statement `complex(p(X), complex(p(Y), p(Z)))` is added"""
@@ -643,10 +635,10 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertIn(ap1_complex, self.graph)
         self.assertEqual(4, self.graph.number_of_edges())
 
-        assert_unqualified_edge(self, ap1_complex, fos, HAS_COMPONENT)
-        assert_unqualified_edge(self, ap1_complex, jun, HAS_COMPONENT)
-        assert_unqualified_edge(self, bound_ap1_e2f4, ap1_complex, HAS_COMPONENT)
-        assert_unqualified_edge(self, bound_ap1_e2f4, e2f4_data, HAS_COMPONENT)
+        assert_unqualified_edge(self, fos, ap1_complex, PART_OF)
+        assert_unqualified_edge(self, jun, ap1_complex, PART_OF)
+        assert_unqualified_edge(self, ap1_complex, bound_ap1_e2f4, PART_OF)
+        assert_unqualified_edge(self, e2f4_data, bound_ap1_e2f4, PART_OF)
 
 
 class TestReconstituteNodeTuples(TemporaryCacheMixin):
@@ -661,7 +653,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
         make_dummy_namespaces(self.manager, graph)
 
-        self.manager.insert_graph(graph, store_parts=True)
+        self.manager.insert_graph(graph)
         self.assertEqual(number_nodes, self.manager.count_nodes())
         self.assertEqual(number_edges, self.manager.count_edges())
 
@@ -864,7 +856,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
         make_dummy_namespaces(self.manager, self.graph)
 
-        network = self.manager.insert_graph(self.graph, store_parts=True)
+        network = self.manager.insert_graph(self.graph)
         self.assertEqual(2, network.nodes.count(), msg='Missing one or both of the nodes.')
         self.assertEqual(1, network.edges.count(), msg='Missing the edge')
 
@@ -886,7 +878,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
         make_dummy_namespaces(self.manager, self.graph)
 
-        network = self.manager.insert_graph(self.graph, store_parts=True)
+        network = self.manager.insert_graph(self.graph)
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
@@ -908,7 +900,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
         make_dummy_namespaces(self.manager, self.graph)
 
-        network = self.manager.insert_graph(self.graph, store_parts=True)
+        network = self.manager.insert_graph(self.graph)
         self.assertEqual(2, network.nodes.count(), msg='number of nodes')
         self.assertEqual(1, network.edges.count(), msg='number of edges')
 
@@ -938,7 +930,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
         make_dummy_namespaces(self.manager, self.graph)
 
-        network = self.manager.insert_graph(self.graph, store_parts=True)
+        network = self.manager.insert_graph(self.graph)
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
@@ -966,7 +958,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
         make_dummy_namespaces(self.manager, self.graph)
 
-        network = self.manager.insert_graph(self.graph, store_parts=True)
+        network = self.manager.insert_graph(self.graph)
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
@@ -996,7 +988,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
         make_dummy_namespaces(self.manager, self.graph)
 
-        network = self.manager.insert_graph(self.graph, store_parts=True)
+        network = self.manager.insert_graph(self.graph)
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
@@ -1019,7 +1011,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         )
         make_dummy_namespaces(self.manager, self.graph)
 
-        network = self.manager.insert_graph(self.graph, store_parts=True)
+        network = self.manager.insert_graph(self.graph)
 
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
@@ -1037,7 +1029,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         )
         make_dummy_namespaces(self.manager, self.graph)
 
-        network = self.manager.insert_graph(self.graph, store_parts=True)
+        network = self.manager.insert_graph(self.graph)
 
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
@@ -1055,7 +1047,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         )
         make_dummy_namespaces(self.manager, self.graph)
 
-        network = self.manager.insert_graph(self.graph, store_parts=True)
+        network = self.manager.insert_graph(self.graph)
 
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
@@ -1084,7 +1076,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         make_dummy_namespaces(self.manager, self.graph)
         make_dummy_annotations(self.manager, self.graph)
 
-        network = self.manager.insert_graph(self.graph, store_parts=True)
+        network = self.manager.insert_graph(self.graph)
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
@@ -1120,7 +1112,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         make_dummy_namespaces(self.manager, self.graph)
         make_dummy_annotations(self.manager, self.graph)
 
-        network = self.manager.insert_graph(self.graph, store_parts=True)
+        network = self.manager.insert_graph(self.graph)
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
@@ -1155,7 +1147,7 @@ class TestNoAddNode(TemporaryCacheMixin):
         rs1234_hash = rs1234.sha512
         rs1235_hash = rs1235.sha512
 
-        self.manager.insert_graph(graph, store_parts=True)
+        self.manager.insert_graph(graph)
 
         rs1234_lookup = self.manager.get_node_by_hash(rs1234_hash)
         self.assertIsNotNone(rs1234_lookup)

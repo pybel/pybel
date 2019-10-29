@@ -37,7 +37,7 @@ def parse_lines(
     graph: BELGraph,
     lines: Iterable[str],
     manager: Optional[Manager] = None,
-    allow_nested: bool = False,
+    disallow_nested: bool = False,
     citation_clearing: bool = True,
     use_tqdm: bool = False,
     tqdm_kwargs: Optional[Mapping[str, Any]] = None,
@@ -56,7 +56,7 @@ def parse_lines(
     :param graph: A BEL graph
     :param lines: An iterable over lines of BEL script
     :param manager: A PyBEL database manager
-    :param allow_nested: If true, turns off nested statement failures
+    :param disallow_nested: If true, turns on nested statement failures
     :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
                                    Delegated to :class:`pybel.parser.ControlParser`
     :param use_tqdm: Use :mod:`tqdm` to show a progress bar?
@@ -111,7 +111,7 @@ def parse_lines(
         annotation_to_pattern=metadata_parser.annotation_to_pattern,
         annotation_to_local=metadata_parser.annotation_to_local,
         # language settings
-        allow_nested=allow_nested,
+        disallow_nested=disallow_nested,
         citation_clearing=citation_clearing,
         skip_validation=no_identifier_validation,
         allow_naked_names=allow_naked_names,

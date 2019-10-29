@@ -10,8 +10,8 @@ from .typing import NodePredicate
 from .utils import part_has_modifier
 from ..graph import BELGraph
 from ...constants import (
-    ABUNDANCE, ACTIVITY, CAUSAL_RELATIONS, DEGRADATION, FRAGMENT, FUNCTION, GENE, GMOD, HAS_COMPONENT, HGVS, KIND,
-    MIRNA, OBJECT, PATHOLOGY, PMOD, PROTEIN, RELATION, RNA, SUBJECT, TRANSLOCATION, VARIANTS,
+    ABUNDANCE, ACTIVITY, CAUSAL_RELATIONS, DEGRADATION, FRAGMENT, FUNCTION, GENE, GMOD, HGVS, KIND, MIRNA, OBJECT,
+    PART_OF, PATHOLOGY, PMOD, PROTEIN, RELATION, RNA, SUBJECT, TRANSLOCATION, VARIANTS,
 )
 from ...dsl import BaseEntity, ListAbundance
 
@@ -261,9 +261,9 @@ def is_isolated_list_abundance(graph: BELGraph, node: BaseEntity, cls: Type[List
     """Return if the node is a list abundance but has no qualified edges."""
     return (
         isinstance(node, cls)
-        and 0 == graph.in_degree(node)
+        and 0 == graph.out_degree(node)
         and all(
-            data[RELATION] == HAS_COMPONENT
-            for _, __, data in graph.out_edges(node, data=True)
+            data[RELATION] == PART_OF
+            for _, __, data in graph.in_edges(node, data=True)
         )
     )

@@ -9,9 +9,9 @@ from pybel import BELGraph
 from pybel.constants import (
     ABUNDANCE, ACTIVITY, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, CONCEPT, DEGRADATION,
     DIRECTLY_INCREASES, DIRTY, EFFECT, FRAGMENT, FROM_LOC, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE,
-    FUSION_START, FUSION_STOP, GENE, HAS_COMPONENT, HAS_VARIANT, HGVS, IDENTIFIER, KIND, LOCATION, MEMBERS, MIRNA,
-    MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PATHOLOGY, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P,
-    REACTANTS, REACTION, RELATION, RNA, SUBJECT, TARGET, TO_LOC, TRANSLOCATION, VARIANTS,
+    FUSION_START, FUSION_STOP, GENE, HAS_VARIANT, HGVS, IDENTIFIER, KIND, LOCATION, MEMBERS, MIRNA, MODIFIER, NAME,
+    NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PART_OF, PATHOLOGY, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P, REACTANTS,
+    REACTION, RELATION, RNA, SUBJECT, TARGET, TO_LOC, TRANSLOCATION, VARIANTS,
 )
 from pybel.dsl import (
     Fragment, abundance, bioprocess, cell_surface_expression, complex_abundance, composite_abundance, fragment,
@@ -25,7 +25,7 @@ from pybel.parser.exc import MalformedTranslocationWarning
 from pybel.parser.parse_bel import modifier_po_to_dict
 from tests.constants import TestTokenParserBase, assert_has_edge, assert_has_node, update_provenance
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 TEST_GENE_VARIANT = 'c.308G>A'
 TEST_PROTEIN_VARIANT = 'p.Phe508del'
@@ -1379,8 +1379,8 @@ class TestComplex(TestTokenParserBase):
         expected_node = complex_abundance([child_1, child_2])
         self.assert_has_node(expected_node)
 
-        self.assert_has_edge(expected_node, child_1, relation=HAS_COMPONENT)
-        self.assert_has_edge(expected_node, child_2, relation=HAS_COMPONENT)
+        self.assert_has_edge(child_1, expected_node, relation=PART_OF)
+        self.assert_has_edge(child_2, expected_node, relation=PART_OF)
 
     def test_complex_list_long(self):
         statement = 'complexAbundance(proteinAbundance(HGNC:HBP1),geneAbundance(HGNC:NCF1))'

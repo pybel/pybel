@@ -18,11 +18,11 @@ from ..constants import (
     ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_REFERENCE, CITATION_TYPE,
     CITATION_TYPE_PUBMED, CONCEPT, DECREASES, DESCRIPTION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO,
     EVIDENCE, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_METADATA,
-    GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION,
-    HAS_COMPONENT, HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A, MEMBERS, METADATA_AUTHORS,
-    METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME,
-    METADATA_VERSION, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, PRODUCTS,
-    REACTANTS, REGULATES, RELATION, SUBJECT, TRANSCRIBED_TO, TRANSLATED_TO, VARIANTS,
+    GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION, HAS_PRODUCT, HAS_REACTANT,
+    HAS_VARIANT, INCREASES, IS_A, MEMBERS, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION,
+    METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAMESPACE, NEGATIVE_CORRELATION, OBJECT,
+    ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, PRODUCTS, REACTANTS, REGULATES, RELATION, SUBJECT, TRANSCRIBED_TO,
+    TRANSLATED_TO, VARIANTS,
 )
 from ..dsl import BaseEntity, Gene, MicroRna, Protein, Rna, activity
 from ..parser.exc import BELParserWarning
@@ -403,12 +403,6 @@ class BELGraph(nx.MultiDiGraph):
     add_part_of = partialmethod(add_unqualified_edge, relation=PART_OF)
     """Add a ``partOf`` relationship such that ``u partOf v``."""
 
-    add_has_member = partialmethod(add_unqualified_edge, relation=HAS_MEMBER)
-    """Add a ``hasMember`` relationship such that ``u hasMember v``."""
-
-    add_has_component = partialmethod(add_unqualified_edge, relation=HAS_COMPONENT)
-    """Add an ``hasComponent`` relationship such that u hasComponent v."""
-
     add_has_variant = partialmethod(add_unqualified_edge, relation=HAS_VARIANT)
     """Add a ``hasVariant`` relationship such that ``u hasVariant v``."""
 
@@ -513,7 +507,7 @@ class BELGraph(nx.MultiDiGraph):
         elif MEMBERS in node:
             for member in node[MEMBERS]:
                 # FIXME switch to self.add_part_of(member, node)
-                self.add_has_component(node, member)
+                self.add_part_of(member, node)
 
         elif PRODUCTS in node and REACTANTS in node:
             for reactant_tokens in node[REACTANTS]:

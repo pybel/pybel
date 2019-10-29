@@ -6,7 +6,7 @@ from uuid import uuid4
 
 from requests.compat import urlparse
 
-from ..constants import BEL_DEFAULT_NAMESPACE, FRAUNHOFER_RESOURCES
+from ..constants import BEL_DEFAULT_NAMESPACE
 from ..manager import Manager
 from ..manager.models import Namespace, NamespaceEntry
 from ..struct import BELGraph
@@ -17,12 +17,8 @@ from ..struct.summary.node_summary import get_names
 def get_uri_name(url: str) -> str:
     """Get the file name from the end of the URL."""
     url_parsed = urlparse(url)
-
-    if url.startswith(FRAUNHOFER_RESOURCES):
-        return url_parsed.query.split('=')[-1]
-    else:
-        url_parts = url_parsed.path.split('/')
-        return url_parts[-1]
+    url_parts = url_parsed.path.split('/')
+    return url_parts[-1]
 
 
 def n() -> str:

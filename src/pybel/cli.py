@@ -96,7 +96,7 @@ def main(ctx, connection):
 @main.command()
 @click.argument('path')
 @click.option('--allow-naked-names', is_flag=True, help="Enable lenient parsing for naked names")
-@click.option('--allow-nested', is_flag=True, help="Enable lenient parsing for nested statements")
+@click.option('--disallow-nested', is_flag=True, help="Disable lenient parsing for nested statements")
 @click.option('--disallow-unqualified-translocations', is_flag=True, help="Disallow unqualified translocations")
 @click.option('--no-identifier-validation', is_flag=True, help='Turn off identifier validation')
 @click.option('--no-citation-clearing', is_flag=True, help='Turn off citation clearing')
@@ -105,7 +105,7 @@ def main(ctx, connection):
 @click.option('--skip-tqdm', is_flag=True)
 @click.option('-v', '--verbose', is_flag=True)
 @click.pass_obj
-def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified_translocations,
+def compile(manager, path, allow_naked_names, disallow_nested, disallow_unqualified_translocations,
             no_identifier_validation, no_citation_clearing, required_annotations, upgrade_urls,
             skip_tqdm, verbose):
     """Compile a BEL script to a graph."""
@@ -121,7 +121,7 @@ def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified
         path,
         manager=manager,
         use_tqdm=(not (skip_tqdm or verbose)),
-        allow_nested=allow_nested,
+        disallow_nested=disallow_nested,
         allow_naked_names=allow_naked_names,
         disallow_unqualified_translocations=disallow_unqualified_translocations,
         citation_clearing=(not no_citation_clearing),

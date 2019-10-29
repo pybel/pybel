@@ -12,7 +12,7 @@ from pybel.dsl import (
 )
 from pybel.dsl.namespaces import hgnc
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 expected_test_simple_metadata = {
     METADATA_NAME: "PyBEL Test Simple",
@@ -469,44 +469,74 @@ BEL_THOROUGH_EDGES = [
     (Gene('HGNC', 'APP'), Gene('HGNC', 'APP', variants=Hgvs('c.275341G>C')), {
         RELATION: HAS_VARIANT,
     }),
-    (ComplexAbundance([Protein('HGNC', 'F3'), Protein('HGNC', 'F7')]), Protein('HGNC', 'F3'), {
-        RELATION: HAS_COMPONENT,
-    }),
-    (ComplexAbundance([Protein('HGNC', 'F3'), Protein('HGNC', 'F7')]), Protein('HGNC', 'F7'), {
-        RELATION: HAS_COMPONENT,
-    }),
+    (
+        Protein('HGNC', 'F3'),
+        ComplexAbundance([Protein('HGNC', 'F3'), Protein('HGNC', 'F7')]),
+        {
+            RELATION: PART_OF,
+        }
+    ),
+    (
+        Protein('HGNC', 'F7'),
+        ComplexAbundance([Protein('HGNC', 'F3'), Protein('HGNC', 'F7')]),
+        {
+            RELATION: PART_OF,
+        }
+    ),
     (Protein('HGNC', 'GSK3B'), Protein('HGNC', 'GSK3B', variants=ProteinModification('Ph', 'Ser', 9)), {
         RELATION: HAS_VARIANT,
     }),
     (Pathology('MESHD', 'Psoriasis'), Pathology('MESHD', 'Skin Diseases'), {
         RELATION: IS_A,
     }),
-
-    (ComplexAbundance([Gene('HGNC', 'NCF1'), Protein('HGNC', 'HBP1')]), Protein('HGNC', 'HBP1'), {
-        RELATION: HAS_COMPONENT,
-    }),
-    (ComplexAbundance([Gene('HGNC', 'NCF1'), Protein('HGNC', 'HBP1')]), Gene('HGNC', 'NCF1'), {
-        RELATION: HAS_COMPONENT,
-    }),
-
-    (ComplexAbundance([Protein('HGNC', 'FOS'), Protein('HGNC', 'JUN')]), Protein('HGNC', 'FOS'), {
-        RELATION: HAS_COMPONENT,
-    }),
-    (ComplexAbundance([Protein('HGNC', 'FOS'), Protein('HGNC', 'JUN')]), Protein('HGNC', 'JUN'), {
-        RELATION: HAS_COMPONENT,
-    }),
+    (
+        Protein('HGNC', 'HBP1'),
+        ComplexAbundance([Gene('HGNC', 'NCF1'), Protein('HGNC', 'HBP1')]),
+        {
+            RELATION: PART_OF,
+        },
+    ),
+    (
+        Gene('HGNC', 'NCF1'),
+        ComplexAbundance([Gene('HGNC', 'NCF1'), Protein('HGNC', 'HBP1')]),
+        {
+            RELATION: PART_OF,
+        },
+    ),
+    (
+        Protein('HGNC', 'FOS'),
+        ComplexAbundance([Protein('HGNC', 'FOS'), Protein('HGNC', 'JUN')]),
+        {
+            RELATION: PART_OF,
+        }
+    ),
+    (
+        Protein('HGNC', 'JUN'),
+        ComplexAbundance([Protein('HGNC', 'FOS'), Protein('HGNC', 'JUN')]),
+        {
+            RELATION: PART_OF,
+        }
+    ),
     (Rna('HGNC', 'CFTR'), Rna('HGNC', 'CFTR', variants=Hgvs('r.1521_1523delcuu')), {
         RELATION: HAS_VARIANT,
     }),
     (Rna('HGNC', 'CFTR'), Rna('HGNC', 'CFTR', variants=Hgvs('r.1653_1655delcuu')), {
         RELATION: HAS_VARIANT,
     }),
-    (CompositeAbundance([interleukin_23_complex, il6]), il6, {
-        RELATION: HAS_COMPONENT,
-    }),
-    (CompositeAbundance([interleukin_23_complex, il6]), interleukin_23_complex, {
-        RELATION: HAS_COMPONENT,
-    }),
+    (
+        il6,
+        CompositeAbundance([interleukin_23_complex, il6]),
+        {
+            RELATION: PART_OF,
+        }
+    ),
+    (
+        interleukin_23_complex,
+        CompositeAbundance([interleukin_23_complex, il6]),
+        {
+            RELATION: PART_OF,
+        }
+    ),
     (Protein('HGNC', 'CFTR', variants=Hgvs('?')), Pathology('MESHD', 'Adenocarcinoma'), {
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
@@ -712,12 +742,20 @@ BEL_THOROUGH_EDGES = [
              }
          },
      }),
-    (ComplexAbundance([Protein('HGNC', 'ITGAV'), Protein('HGNC', 'ITGB3')]), Protein('HGNC', 'ITGAV'), {
-        RELATION: HAS_COMPONENT,
-    }),
-    (ComplexAbundance([Protein('HGNC', 'ITGAV'), Protein('HGNC', 'ITGB3')]), Protein('HGNC', 'ITGB3'), {
-        RELATION: HAS_COMPONENT,
-    }),
+    (
+        Protein('HGNC', 'ITGAV'),
+        ComplexAbundance([Protein('HGNC', 'ITGAV'), Protein('HGNC', 'ITGB3')]),
+        {
+            RELATION: PART_OF,
+        }
+    ),
+    (
+        Protein('HGNC', 'ITGB3'),
+        ComplexAbundance([Protein('HGNC', 'ITGAV'), Protein('HGNC', 'ITGB3')]),
+        {
+            RELATION: PART_OF,
+        }
+    ),
     (Gene('HGNC', 'ARRDC2'), Gene('HGNC', 'ARRDC3'), {
         RELATION: EQUIVALENT_TO,
     }),

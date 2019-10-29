@@ -14,8 +14,8 @@ from .converters import (
     DecreasesDegradationConverter, DrugIndicationConverter, DrugSideEffectConverter, EquivalenceConverter,
     HasVariantConverter, IncreasesActivityConverter, IncreasesAmountConverter, IncreasesDegradationConverter,
     IsAConverter, ListComplexHasComponentConverter, MiRNADecreasesExpressionConverter,
-    MiRNADirectlyDecreasesExpressionConverter, NamedComplexHasComponentConverter, NoChangeActivityConverter,
-    NoChangeAmountConverter, NoChangeDegradationConverter, PartOfNamedComplexConverter, ProteinPartOfBiologicalProcess,
+    MiRNADirectlyDecreasesExpressionConverter, NoChangeActivityConverter, NoChangeAmountConverter,
+    NoChangeDegradationConverter, PartOfNamedComplexConverter, ProteinPartOfBiologicalProcess,
     ReactionHasCatalystConverter, ReactionHasProductConverter, ReactionHasReactantConverter, RegulatesActivityConverter,
     RegulatesAmountConverter, RegulatesDegradationConverter, SubprocessPartOfBiologicalProcess,
 )
@@ -93,7 +93,6 @@ def get_triple(
 
     # order is important
     converters = [
-        NamedComplexHasComponentConverter,
         ListComplexHasComponentConverter,
         PartOfNamedComplexConverter,
         SubprocessPartOfBiologicalProcess,

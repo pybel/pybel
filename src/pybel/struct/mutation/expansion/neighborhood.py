@@ -74,6 +74,8 @@ def expand_node_successors(universe, graph, node: BaseEntity) -> None:
 def expand_node_neighborhood(universe, graph, node: BaseEntity) -> None:
     """Expand around the neighborhoods of the given node in the result graph.
 
+    Note: expands complexes' members
+
     :param pybel.BELGraph universe: The graph containing the stuff to add
     :param pybel.BELGraph graph: The graph to add stuff to
     :param node: A BEL node

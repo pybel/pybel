@@ -44,7 +44,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         make_dummy_namespaces(self.manager, graph)
         make_dummy_annotations(self.manager, graph)
 
-        network = self.manager.insert_graph(graph, store_parts=True)
+        network = self.manager.insert_graph(graph)
 
         self.manager.drop_network_by_id(network.id)
 
