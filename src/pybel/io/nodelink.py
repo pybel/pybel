@@ -107,7 +107,7 @@ def _to_nodelink_json_helper(graph: BELGraph) -> Mapping[str, Any]:
 def _augment_node(node: BaseEntity) -> BaseEntity:
     """Add the SHA-512 identifier to a node's dictionary."""
     rv = node.copy()
-    rv['id'] = node.sha512
+    rv['id'] = node.md5
     rv['bel'] = node.as_bel()
     for m in chain(node.get(MEMBERS, []), node.get(REACTANTS, []), node.get(PRODUCTS, [])):
         m.update(_augment_node(m))

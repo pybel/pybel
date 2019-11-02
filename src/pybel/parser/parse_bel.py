@@ -734,7 +734,7 @@ class BELParser(BaseParser):
 
     def _add_qualified_edge(self, u, v, relation, annotations, subject_modifier, object_modifier) -> str:
         """Add an edge, then adds the opposite direction edge if it should."""
-        sha512 = self._add_qualified_edge_helper(
+        edge_hash = self._add_qualified_edge_helper(
             u,
             v,
             relation=relation,
@@ -753,7 +753,7 @@ class BELParser(BaseParser):
                 subject_modifier=object_modifier,
             )
 
-        return sha512
+        return edge_hash
 
     def _handle_relation(self, tokens: ParseResults) -> str:
         """Handle a relation."""

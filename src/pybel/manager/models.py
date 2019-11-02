@@ -348,7 +348,7 @@ class Modification(Base):
     residue = Column(String(3), nullable=True, doc='Three letter amino acid code if PMOD')
     position = Column(Integer, nullable=True, doc='Position of PMOD or GMOD')
 
-    sha512 = Column(String(255), index=True)
+    md5 = Column(String(255), index=True)
 
     def _fusion_to_json(self) -> Mapping[str, Any]:
         """Convert this modification to a FUSION data dictionary.
@@ -427,7 +427,7 @@ class Node(Base):
     is_variant = Column(Boolean, default=False, doc='Identifies weather or not the given node is a variant')
     has_fusion = Column(Boolean, default=False, doc='Identifies weather or not the given node is a fusion')
     bel = Column(String(255), nullable=False, doc='Canonical BEL term that represents the given node')
-    sha512 = Column(String(255), nullable=True, index=True)
+    md5 = Column(String(255), nullable=True, index=True)
 
     namespace_entry_id = Column(Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), nullable=True)
     namespace_entry = relationship(NamespaceEntry, foreign_keys=[namespace_entry_id])
@@ -446,7 +446,7 @@ class Node(Base):
         return Node(
             type=base_entity.function,
             bel=base_entity.as_bel(),
-            sha512=base_entity.sha512,
+            md5=base_entity.md5,
             data=json.dumps(base_entity),
         )
 
@@ -459,7 +459,7 @@ class Node(Base):
         return self.bel
 
     def __repr__(self):
-        return '<Node {}: {}>'.format(self.sha512[:10], self.bel)
+        return '<Node {}: {}>'.format(self.md5[:10], self.bel)
 
     def _get_list_by_relation(self, relation):
         return [
@@ -493,17 +493,17 @@ class Author(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False, unique=True, index=True)
-    sha512 = Column(String(255), nullable=False, index=True, unique=True)
+    md5 = Column(String(255), nullable=False, index=True, unique=True)
 
     @classmethod
     def from_name(cls, name):
         """Create an author by name, automatically populating the hash."""
-        return Author(name=name, sha512=cls.hash_name(name))
+        return Author(name=name, md5=cls.hash_name(name))
 
     @staticmethod
     def hash_name(name: str) -> str:
         """Hash a name."""
-        return hashlib.sha512(name.encode('utf-8')).hexdigest()
+        return hashlib.md5(name.encode('utf-8')).hexdigest()
 
     @classmethod
     def name_contains(cls, name_query: str):
@@ -513,12 +513,12 @@ class Author(Base):
     @classmethod
     def has_name(cls, name: str):
         """Build a filter for if an author has a name."""
-        return cls.sha512 == cls.hash_name(name)
+        return cls.md5 == cls.hash_name(name)
 
     @classmethod
     def has_name_in(cls, names: Iterable[str]):
         """Build a filter if the author has any of the given names."""
-        return cls.sha512.in_({
+        return cls.md5.in_({
             cls.hash_name(name)
             for name in names
         })
@@ -536,7 +536,7 @@ class Citation(Base):
 
     type = Column(String(16), nullable=False, doc='Type of the stored publication e.g. PubMed')
     reference = Column(String(255), nullable=False, doc='Reference identifier of the publication e.g. PubMed_ID')
-    sha512 = Column(String(255), index=True)
+    md5 = Column(String(255), index=True)
 
     name = Column(String(255), nullable=True, doc='Journal name')
     title = Column(Text, nullable=True, doc='Title of the publication')
@@ -625,10 +625,10 @@ class Evidence(Base):
     citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)), nullable=False)
     citation = relationship(Citation, backref=backref('evidences'))
 
-    sha512 = Column(String(255), index=True)
+    md5 = Column(String(255), index=True)
 
     def __str__(self):
-        return '{}:{}'.format(self.citation, self.sha512[:8])
+        return '{}:{}'.format(self.citation, self.md5[:8])
 
     def to_json(self, include_id: bool = False):
         """Create a dictionary that is used to recreate the edge data dictionary for a :class:`BELGraph`.
@@ -673,7 +673,7 @@ class Property(Base):
 
     relative_key = Column(String(255), nullable=True, doc='Relative key of effect e.g. to_tloc or from_tloc')
 
-    sha512 = Column(String(255), index=True)
+    md5 = Column(String(255), index=True)
 
     effect_id = Column(Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), nullable=True)
     effect = relationship(NamespaceEntry)
@@ -741,7 +741,7 @@ class Edge(Base):
                                backref=backref('edges', lazy='dynamic'))
     properties = relationship(Property, secondary=edge_property, lazy="dynamic")  # , cascade='all, delete-orphan')
 
-    sha512 = Column(String(255), index=True, doc='The hash of the source, target, and associated metadata')
+    md5 = Column(String(255), index=True, doc='The hash of the source, target, and associated metadata')
 
     data = Column(Text, nullable=False, doc='The stringified JSON representing this edge')
 
@@ -749,7 +749,7 @@ class Edge(Base):
         return self.bel
 
     def __repr__(self):
-        return '<Edge {}: {}>'.format(self.sha512[:10], self.bel)
+        return '<Edge {}: {}>'.format(self.md5, self.bel)
 
     def get_annotations_json(self):
         """Format the annotations properly.
@@ -771,14 +771,14 @@ class Edge(Base):
                  and edge data information.
         """
         source_dict = self.source.to_json()
-        source_dict['sha512'] = source_dict.sha512
+        source_dict['md5'] = source_dict.md5
         target_dict = self.target.to_json()
-        target_dict['sha512'] = target_dict.sha512
+        target_dict['md5'] = target_dict.md5
 
         result = {
             'source': source_dict,
             'target': target_dict,
-            'key': self.sha512,
+            'key': self.md5,
             'data': json.loads(self.data),
         }
 

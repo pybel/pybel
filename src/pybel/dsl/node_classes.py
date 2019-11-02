@@ -78,7 +78,7 @@ class BaseEntity(dict, metaclass=ABCMeta):
     def __init__(self) -> None:
         """Build a PyBEL node."""
         super().__init__(**{FUNCTION: self.function})
-        self._sha512 = None
+        self._md5 = None
 
     @property
     def _bel_function(self) -> str:
@@ -89,11 +89,11 @@ class BaseEntity(dict, metaclass=ABCMeta):
         """Return this entity as a BEL string."""
 
     @property
-    def sha512(self) -> str:
-        """Get the SHA512 hash of this node."""
-        if self._sha512 is None:
-            self._sha512 = hashlib.md5(self.as_bel().encode('utf8')).hexdigest()  # noqa: S303
-        return self._sha512
+    def md5(self) -> str:
+        """Get the MD5 hash of this node."""
+        if self._md5 is None:
+            self._md5 = hashlib.md5(self.as_bel().encode('utf8')).hexdigest()  # noqa: S303
+        return self._md5
 
     def __hash__(self):  # noqa: D105
         return hash(self.as_bel())

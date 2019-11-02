@@ -42,7 +42,7 @@ class MockQueryManager:
         self.id_graph[network_id] = graph
 
         for node in graph:
-            self.hash_to_node[node.sha512] = node
+            self.hash_to_node[node.md5] = node
 
         return Network(id=network_id)
 
@@ -64,9 +64,9 @@ class MockQueryManager:
 
         return union(graphs)
 
-    def get_dsl_by_hash(self, sha512: str):
+    def get_dsl_by_hash(self, md5: str):
         """Get a DSL by its hash.
 
         :rtype: Optional[BaseEntity]
         """
-        return self.hash_to_node.get(sha512)
+        return self.hash_to_node.get(md5)

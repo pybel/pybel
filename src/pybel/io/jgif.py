@@ -326,7 +326,7 @@ def to_jgif(graph):
 
     for node in sorted(graph, key=methodcaller('as_bel')):
         nodes_entry.append({
-            'id': node.sha512[:12],
+            'id': node.md5,
             'label': node.as_bel(),
             'bel_function_type': node.function,
         })
@@ -342,7 +342,7 @@ def to_jgif(graph):
 
             evidence_dict = {
                 'bel_statement': bel,
-                'key': key[:12],
+                'key': key,
             }
 
             if ANNOTATIONS in data:
@@ -358,8 +358,8 @@ def to_jgif(graph):
 
         for relation, evidences in relation_evidences.items():
             edges_entry.append({
-                'source': u.sha512[:12],
-                'target': v.sha512[:12],
+                'source': u.md5,
+                'target': v.md5,
                 'relation': relation,
                 'label': u_v_r_bel[u, v, relation],
                 'metadata': {

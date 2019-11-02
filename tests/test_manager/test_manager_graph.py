@@ -658,11 +658,11 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         self.assertEqual(number_edges, self.manager.count_edges())
 
         node_model = self.manager.get_or_create_node(graph, node)
-        self.assertEqual(node.sha512, node_model.sha512)
+        self.assertEqual(node.md5, node_model.md5)
         self.manager.session.commit()
 
         self.assertEqual(node, node_model.to_json())
-        self.assertEqual(node, self.manager.get_dsl_by_hash(node.sha512))
+        self.assertEqual(node, self.manager.get_dsl_by_hash(node.md5))
 
     @mock_bel_resources
     def test_simple(self, mock):
@@ -1144,8 +1144,8 @@ class TestNoAddNode(TemporaryCacheMixin):
         graph.add_node_from_data(rs1234)
         graph.add_node_from_data(rs1235)
 
-        rs1234_hash = rs1234.sha512
-        rs1235_hash = rs1235.sha512
+        rs1234_hash = rs1234.md5
+        rs1235_hash = rs1235.md5
 
         self.manager.insert_graph(graph)
 
@@ -1153,7 +1153,7 @@ class TestNoAddNode(TemporaryCacheMixin):
         self.assertIsNotNone(rs1234_lookup)
         self.assertEqual('Gene', rs1234_lookup.type)
         self.assertEqual('g(dbSNP:rs1234)', rs1234_lookup.bel)
-        self.assertEqual(rs1234_hash, rs1234_lookup.sha512)
+        self.assertEqual(rs1234_hash, rs1234_lookup.md5)
         self.assertIsNotNone(rs1234_lookup.namespace_entry)
         self.assertEqual('rs1234', rs1234_lookup.namespace_entry.name)
         self.assertEqual('dbSNP', rs1234_lookup.namespace_entry.namespace.keyword)
@@ -1163,7 +1163,7 @@ class TestNoAddNode(TemporaryCacheMixin):
         self.assertIsNotNone(rs1235_lookup)
         self.assertEqual('Gene', rs1235_lookup.type)
         self.assertEqual('g(dbSNP:rs1235)', rs1235_lookup.bel)
-        self.assertEqual(rs1235_hash, rs1235_lookup.sha512)
+        self.assertEqual(rs1235_hash, rs1235_lookup.md5)
         self.assertIsNotNone(rs1235_lookup.namespace_entry)
         self.assertEqual('rs1235', rs1235_lookup.namespace_entry.name)
         self.assertEqual('dbSNP', rs1235_lookup.namespace_entry.namespace.keyword)

@@ -678,12 +678,12 @@ class InsertManager(NamespaceManager, LookupManager):
     def _get_edge_models(self, graph: BELGraph, tuple_model: Mapping[BaseEntity, Node], edges):
         for u, v, key, data in edges:
             source = tuple_model.get(u)
-            if source is None or source.sha512 not in self.object_cache_node:
+            if source is None or source.md5 not in self.object_cache_node:
                 logger.warning('skipping uncached source node: %s', u)
                 continue
 
             target = tuple_model.get(v)
-            if target is None or target.sha512 not in self.object_cache_node:
+            if target is None or target.md5 not in self.object_cache_node:
                 logger.warning('skipping uncached target node: %s', v)
                 continue
 
@@ -792,7 +792,7 @@ class InsertManager(NamespaceManager, LookupManager):
             target=target,
             relation=data[RELATION],
             bel=bel,
-            sha512=key,
+            md5=key,
             data=data,
             evidence=evidence,
             properties=properties,
@@ -806,45 +806,45 @@ class InsertManager(NamespaceManager, LookupManager):
             target=target,
             relation=data[RELATION],
             bel=bel,
-            sha512=key,
+            md5=key,
             data=data,
         )
 
     def get_or_create_evidence(self, citation: Citation, text: str) -> Evidence:
         """Create an entry and object for given evidence if it does not exist."""
-        sha512 = hash_evidence(text=text, citation_type=str(citation.type), citation_reference=str(citation.reference))
+        evidence_md5 = hash_evidence(text=text, citation_type=str(citation.type), citation_reference=str(citation.reference))
 
-        if sha512 in self.object_cache_evidence:
-            evidence = self.object_cache_evidence[sha512]
+        if evidence_md5 in self.object_cache_evidence:
+            evidence = self.object_cache_evidence[evidence_md5]
             self.session.add(evidence)
             return evidence
 
-        evidence = self.get_evidence_by_hash(sha512)
+        evidence = self.get_evidence_by_hash(evidence_md5)
 
         if evidence is not None:
-            self.object_cache_evidence[sha512] = evidence
+            self.object_cache_evidence[evidence_md5] = evidence
             return evidence
 
         evidence = Evidence(
             text=text,
             citation=citation,
-            sha512=sha512,
+            md5=evidence_md5,
         )
 
         self.session.add(evidence)
-        self.object_cache_evidence[sha512] = evidence
+        self.object_cache_evidence[evidence_md5] = evidence
         return evidence
 
     def get_or_create_node(self, graph: BELGraph, node: BaseEntity) -> Optional[Node]:
         """Create an entry and object for given node if it does not exist."""
-        sha512 = node.sha512
-        if sha512 in self.object_cache_node:
-            return self.object_cache_node[sha512]
+        node_md5 = node.md5
+        if node_md5 in self.object_cache_node:
+            return self.object_cache_node[node_md5]
 
-        node_model = self.get_node_by_hash(sha512)
+        node_model = self.get_node_by_hash(node_md5)
 
         if node_model is not None:
-            self.object_cache_node[sha512] = node_model
+            self.object_cache_node[node_md5] = node_model
             return node_model
 
         node_model = Node._start_from_base_entity(node)
@@ -890,7 +890,7 @@ class InsertManager(NamespaceManager, LookupManager):
             node_model.modifications = modifications
 
         self.session.add(node_model)
-        self.object_cache_node[sha512] = node_model
+        self.object_cache_node[node_md5] = node_model
         return node_model
 
     def drop_nodes(self) -> None:
@@ -917,7 +917,7 @@ class InsertManager(NamespaceManager, LookupManager):
         target: Node,
         relation: str,
         bel: str,
-        sha512: str,
+        md5: str,
         data: EdgeData,
         evidence: Optional[Evidence] = None,
         annotations: Optional[List[NamespaceEntry]] = None,
@@ -929,21 +929,21 @@ class InsertManager(NamespaceManager, LookupManager):
         :param target: Target node of the relation
         :param relation: Type of the relation between source and target node
         :param bel: BEL statement that describes the relation
-        :param sha512: The SHA512 hash of the edge as a string
+        :param md5: The MD5 hash of the edge as a string
         :param data: The PyBEL data dictionary
         :param evidence: Evidence object that proves the given relation
         :param properties: List of all properties that belong to the edge
         :param annotations: List of all annotations that belong to the edge
         """
-        if sha512 in self.object_cache_edge:
-            edge = self.object_cache_edge[sha512]
+        if md5 in self.object_cache_edge:
+            edge = self.object_cache_edge[md5]
             self.session.add(edge)
             return edge
 
-        edge = self.get_edge_by_hash(sha512)
+        edge = self.get_edge_by_hash(md5)
 
         if edge is not None:
-            self.object_cache_edge[sha512] = edge
+            self.object_cache_edge[md5] = edge
             return edge
 
         edge = Edge(
@@ -951,7 +951,7 @@ class InsertManager(NamespaceManager, LookupManager):
             target=target,
             relation=relation,
             bel=bel,
-            sha512=sha512,
+            md5=md5,
             data=json.dumps(data),
         )
 
@@ -963,7 +963,7 @@ class InsertManager(NamespaceManager, LookupManager):
             edge.annotations = annotations
 
         self.session.add(edge)
-        self.object_cache_edge[sha512] = edge
+        self.object_cache_edge[md5] = edge
         return edge
 
     def get_or_create_citation(
@@ -997,23 +997,23 @@ class InsertManager(NamespaceManager, LookupManager):
         if type is None:
             type = CITATION_TYPE_PUBMED
 
-        sha512 = hash_citation(citation_type=type, citation_reference=reference)
+        citation_md5 = hash_citation(citation_type=type, citation_reference=reference)
 
-        if sha512 in self.object_cache_citation:
-            citation = self.object_cache_citation[sha512]
+        if citation_md5 in self.object_cache_citation:
+            citation = self.object_cache_citation[citation_md5]
             self.session.add(citation)
             return citation
 
-        citation = self.get_citation_by_hash(sha512)
+        citation = self.get_citation_by_hash(citation_md5)
 
         if citation is not None:
-            self.object_cache_citation[sha512] = citation
+            self.object_cache_citation[citation_md5] = citation
             return citation
 
         citation = Citation(
             type=type,
             reference=reference,
-            sha512=sha512,
+            md5=citation_md5,
             name=name,
             title=title,
             volume=volume,
@@ -1036,7 +1036,7 @@ class InsertManager(NamespaceManager, LookupManager):
                     citation.authors.append(author_model)
 
         self.session.add(citation)
-        self.object_cache_citation[sha512] = citation
+        self.object_cache_citation[citation_md5] = citation
         return citation
 
     def get_or_create_author(self, name: str) -> Author:
@@ -1057,9 +1057,9 @@ class InsertManager(NamespaceManager, LookupManager):
         self.session.add(author)
         return author
 
-    def get_modification_by_hash(self, sha512: str) -> Optional[Modification]:
-        """Get a modification by a SHA512 hash."""
-        return self.session.query(Modification).filter(Modification.sha512 == sha512).one_or_none()
+    def get_modification_by_hash(self, md5: str) -> Optional[Modification]:
+        """Get a modification by a MD5 hash."""
+        return self.session.query(Modification).filter(Modification.md5 == md5).one_or_none()
 
     def get_or_create_modification(self, graph: BELGraph, node: BaseEntity) -> Optional[List[Modification]]:
         """Create a list of node modification objects that belong to the node described by node_data.
@@ -1167,7 +1167,7 @@ class InsertManager(NamespaceManager, LookupManager):
             if mod is None:
                 mod = self.get_modification_by_hash(mod_hash)
                 if not mod:
-                    modification['sha512'] = mod_hash
+                    modification['md5'] = mod_hash
                     mod = Modification(**modification)
 
                 self.object_cache_modification[mod_hash] = mod
@@ -1177,7 +1177,7 @@ class InsertManager(NamespaceManager, LookupManager):
 
     def get_property_by_hash(self, property_hash: str) -> Optional[Property]:
         """Get a property by its hash if it exists."""
-        return self.session.query(Property).filter(Property.sha512 == property_hash).one_or_none()
+        return self.session.query(Property).filter(Property.md5 == property_hash).one_or_none()
 
     def _make_property_from_dict(self, property_def: Dict) -> Property:
         """Build an edge property from a dictionary."""
@@ -1188,7 +1188,7 @@ class InsertManager(NamespaceManager, LookupManager):
             edge_property_model = self.get_property_by_hash(property_hash)
 
             if not edge_property_model:
-                property_def['sha512'] = property_hash
+                property_def['md5'] = property_hash
                 edge_property_model = Property(**property_def)
 
             self.object_cache_property[property_hash] = edge_property_model

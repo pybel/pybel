@@ -135,7 +135,7 @@ def parse_datetime(s: str) -> datetime.date:
 
 
 def _hash_tuple(t):
-    return hashlib.sha512(dumps(t)).hexdigest()
+    return hashlib.md5(dumps(t)).hexdigest()
 
 
 def _get_citation_str(data: Mapping) -> Optional[str]:
@@ -219,7 +219,7 @@ def hash_dump(data) -> str:
     :param data: An arbitrary JSON-serializable object
     :type data: dict or list or tuple
     """
-    return hashlib.sha512(json.dumps(data, sort_keys=True).encode('utf-8')).hexdigest()
+    return hashlib.md5(json.dumps(data, sort_keys=True).encode('utf-8')).hexdigest()
 
 
 def hash_citation(citation_type: str, citation_reference: str) -> str:
@@ -232,7 +232,7 @@ def hash_citation(citation_type: str, citation_reference: str) -> str:
         citation_type=citation_type,
         citation_reference=citation_reference,
     )
-    return hashlib.sha512(s.encode('utf8')).hexdigest()
+    return hashlib.md5(s.encode('utf8')).hexdigest()
 
 
 def hash_evidence(text: str, citation_type: str, citation_reference: str) -> str:
@@ -247,7 +247,7 @@ def hash_evidence(text: str, citation_type: str, citation_reference: str) -> str
         citation_reference=citation_reference,
         text=text,
     )
-    return hashlib.sha512(s.encode('utf8')).hexdigest()
+    return hashlib.md5(s.encode('utf8')).hexdigest()
 
 
 def canonicalize_edge(edge_data: EdgeData) -> CanonicalEdge:
