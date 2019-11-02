@@ -14,6 +14,7 @@ from ..constants import GRAPH_ANNOTATION_LIST, MEMBERS, PRODUCTS, REACTANTS
 from ..dsl import BaseEntity
 from ..struct import BELGraph
 from ..tokens import parse_result_to_dsl
+from ..utils import tokenize_version
 
 __all__ = [
     'to_nodelink',
@@ -57,6 +58,9 @@ def to_nodelink_jsons(graph: BELGraph, **kwargs) -> str:
 
 def from_nodelink(graph_json_dict: Mapping[str, Any], check_version: bool = True) -> BELGraph:
     """Build a graph from Node-Link JSON Object."""
+    pybel_version = tokenize_version(graph_json_dict['graph']['pybel_version'])
+    if pybel_version[1] < 14:  # if minor version is less than 14
+        raise ValueError('Invalid NodeLink JSON from old version of PyBEL (v{}.{}.{})'.format(*pybel_version))
     graph = _from_nodelink_json_helper(graph_json_dict)
     return ensure_version(graph, check_version=check_version)
 
