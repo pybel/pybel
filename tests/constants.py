@@ -116,7 +116,7 @@ def assert_has_edge(
     v: BaseEntity,
     graph: BELGraph,
     permissive=True,
-    **kwargs,
+    **kwargs
 ):
     """A helper function for checking if an edge with the given properties is contained within a graph."""
     self.assertIsInstance(u, BaseEntity)
