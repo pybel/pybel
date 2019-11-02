@@ -13,12 +13,17 @@ from ..struct import BELGraph
 from ..struct.summary import get_annotation_values_by_annotation
 from ..struct.summary.node_summary import get_names
 
+_FRAUNHOFER_RESOURCES = 'https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path='
+
 
 def get_uri_name(url: str) -> str:
     """Get the file name from the end of the URL."""
     url_parsed = urlparse(url)
-    url_parts = url_parsed.path.split('/')
-    return url_parts[-1]
+    if url.startswith(_FRAUNHOFER_RESOURCES):
+        return url_parsed.query.split('=')[-1]
+    else:
+        url_parts = url_parsed.path.split('/')
+        return url_parts[-1]
 
 
 def n() -> str:
