@@ -24,10 +24,10 @@ from networkx.utils import open_file
 
 from ..canonicalize import calculate_canonical_name
 from ..constants import (
-    ANNOTATIONS, CITATION, COMPLEX, COMPOSITE, EVIDENCE, FUNCTION, FUSION, GRAPH_ANNOTATION_LIST,
+    ANNOTATIONS, CITATION, EVIDENCE, FUSION, GRAPH_ANNOTATION_LIST,
     GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL,
-    MEMBERS, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PRODUCTS, RANGE_3P, RANGE_5P, REACTANTS,
-    REACTION, RELATION, SUBJECT, UNQUALIFIED_EDGES, VARIANTS,
+    MEMBERS, NAME, OBJECT, PARTNER_3P, PARTNER_5P, PRODUCTS, RANGE_3P, RANGE_5P, REACTANTS,
+    RELATION, SUBJECT, UNQUALIFIED_EDGES, VARIANTS,
 )
 from ..dsl import BaseAbundance, BaseEntity
 from ..struct import BELGraph
@@ -79,30 +79,6 @@ def _restore_fusion_dict(d: Dict) -> Dict:
     }
 
 
-def calculate_canonical_cx_identifier(node: BaseEntity) -> str:
-    """Calculate the canonical name for a given node.
-
-    If it is a simple node, uses the namespace:name combination. Otherwise, it uses the BEL string.
-    """
-    if node[FUNCTION] == COMPLEX and NAMESPACE in node:
-        return '{}:{}'.format(node[NAMESPACE], node[NAME])
-
-    if VARIANTS in node or FUSION in node or node[FUNCTION] in {REACTION, COMPOSITE, COMPLEX}:
-        return node.as_bel()
-
-    namespace = node.namespace
-    name = node.name
-    identifier = node.identifier
-
-    if VARIANTS not in node and FUSION not in node:  # this is should be a simple node
-        if name:
-            return name
-        if identifier:
-            return '{}:{}'.format(namespace, identifier)
-
-    raise ValueError('Unexpected node data: {}'.format(node))
-
-
 def build_node_mapping(graph: BELGraph) -> Mapping[BaseEntity, int]:
     """Build a mapping from a graph's nodes to their canonical sort order."""
     return {
@@ -132,10 +108,8 @@ def to_cx(graph: BELGraph) -> List[Dict]:  # noqa: C901
             'n': calculate_canonical_name(node),
         }
 
-        try:
+        if isinstance(node, BaseAbundance):
             node_entry_dict['r'] = node.curie
-        except AttributeError:
-            pass  # don't worry if node doesn't have curie
 
         nodes_entry.append(node_entry_dict)
 
@@ -352,7 +326,7 @@ def to_cx_file(graph: BELGraph, path: Union[str, TextIO], indent: Optional[int] 
 
     Example:
     >>> from pybel.examples import sialic_acid_graph
-    >>> from pybel_cx import to_cx_file
+    >>> from pybel import to_cx_file
     >>> with open('graph.cx', 'w') as f:
     >>> ... to_cx_file(sialic_acid_graph, f)
 
@@ -498,11 +472,11 @@ def from_cx(cx: List[Dict]) -> BELGraph:  # noqa: C901
         eid_source_nid[eid] = data['s']
         eid_target_nid[eid] = data['t']
 
-    edge_data: Dict[str, Dict[str, str]] = defaultdict(dict)
+    edge_data = defaultdict(dict)  # type: Dict[str, Dict[str, str]]
     for data in edge_annotations_aspect:
         edge_data[data['po']][data['n']] = data['v']
 
-    edge_citation: Dict[str, Dict[str, str]] = defaultdict(dict)
+    edge_citation = defaultdict(dict)  # type: Dict[str, Dict[str, str]]
     edge_subject = defaultdict(dict)
     edge_object = defaultdict(dict)
     edge_annotations = defaultdict(lambda: defaultdict(dict))
@@ -511,13 +485,13 @@ def from_cx(cx: List[Dict]) -> BELGraph:  # noqa: C901
     for eid, data in edge_data.items():
         for key, value in data.items():
             if key.startswith(CITATION):
-                vl = after_underscore(key)
+                vl = _after_underscore(key)
                 edge_citation[eid][vl] = value
             elif key.startswith(SUBJECT):
-                vl = after_underscore(key)
+                vl = _after_underscore(key)
                 edge_subject[eid][vl] = value
             elif key.startswith(OBJECT):
-                vl = after_underscore(key)
+                vl = _after_underscore(key)
                 edge_object[eid][vl] = value
             elif key == EVIDENCE:
                 edge_data_pp[eid][EVIDENCE] = value
@@ -563,7 +537,7 @@ def from_cx(cx: List[Dict]) -> BELGraph:  # noqa: C901
     return graph
 
 
-def after_underscore(key):
+def _after_underscore(key):
     _, vl = key.split('_', 1)
     return vl
 

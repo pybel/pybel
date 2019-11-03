@@ -25,6 +25,7 @@ __all__ = [
     'to_bel_script',
     'to_bel_script_lines',
     'edge_to_bel',
+    'calculate_canonical_name',
 ]
 
 logger = logging.getLogger(__name__)
