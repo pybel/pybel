@@ -370,11 +370,8 @@ class NamespaceManager(BaseManager):
 
     def get_namespace_encoding(self, url: str) -> Mapping[str, str]:
         annotation = self.get_or_create_annotation(url)
-        return dict(
-            self.session.query(NamespaceEntry.name, NamespaceEntry.encoding).filter(
-            NamespaceEntry.namespace == annotation,
-            ),
-        )
+        namespace_filter = NamespaceEntry.namespace == annotation
+        return dict(self.session.query(NamespaceEntry.name, NamespaceEntry.encoding).filter(namespace_filter))
 
     def get_annotation_entries_by_names(self, url: str, names: Iterable[str]) -> List[NamespaceEntry]:
         """Get annotation entries by URL and names.
