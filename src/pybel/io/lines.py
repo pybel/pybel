@@ -13,7 +13,7 @@ from ..struct import BELGraph
 
 __all__ = [
     'from_bel_script',
-    'from_bel_script_url'
+    'from_bel_script_url',
 ]
 
 logger = logging.getLogger(__name__)

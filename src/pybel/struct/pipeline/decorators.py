@@ -50,11 +50,13 @@ def _register_function(name: str, func, universe: bool, in_place: bool):
     """
     if name in mapped:
         mapped_func = mapped[name]
-        raise PipelineNameError('{name} is already registered with {func_mod}.{func_name}'.format(
-            name=name,
-            func_mod=mapped_func.__module__,
-            func_name=mapped_func.__name__,
-        ))
+        raise PipelineNameError(
+            '{name} is already registered with {func_mod}.{func_name}'.format(
+                name=name,
+                func_mod=mapped_func.__module__,
+                func_name=mapped_func.__name__,
+            ),
+        )
 
     mapped[name] = func
 

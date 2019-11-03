@@ -12,7 +12,7 @@ from ..constants import ABUNDANCE, BIOPROCESS, COMPLEX, COMPOSITE, GENE, MIRNA, 
 __all__ = [
     'FUNC_TO_DSL',
     'FUNC_TO_FUSION_DSL',
-    'FUNC_TO_LIST_DSL'
+    'FUNC_TO_LIST_DSL',
 ]
 
 FUNC_TO_DSL = {

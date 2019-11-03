@@ -281,7 +281,7 @@ def _canonicalize_edge_modifications(edge_data: EdgeData) -> Optional[Tuple]:
             LOCATION,
             location[NAMESPACE],
             location.get(IDENTIFIER),
-            location.get(NAME)
+            location.get(NAME),
         )
         result.append(t)
 
@@ -304,7 +304,7 @@ def citation_dict(*, db, db_id, db_name=None, **kwargs):
     r = {
         CITATION_DB: db,
         CITATION_IDENTIFIER: db_id,
-        **kwargs
+        **kwargs,
     }
     if db_name is not None:
         r[CITATION_DB_NAME] = db_name

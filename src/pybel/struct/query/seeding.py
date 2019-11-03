@@ -48,11 +48,13 @@ class Seeding(UserList):
         :param values: The values of the annotation to keep
         :returns: self for fluid API
         """
-        return self._append_seed(SEED_TYPE_ANNOTATION, {
-            'annotations': {
-                annotation: values,
-            }
-        })
+        return self._append_seed(
+            SEED_TYPE_ANNOTATION, {
+                'annotations': {
+                    annotation: values,
+                },
+            },
+        )
 
     def append_sample(self, **kwargs) -> 'Seeding':
         """Add seed induction methods.
@@ -62,7 +64,7 @@ class Seeding(UserList):
         :returns: self for fluid API
         """
         data = {
-            'seed': random.randint(0, 1000000)
+            'seed': random.randint(0, 1000000),
         }
         data.update(kwargs)
 

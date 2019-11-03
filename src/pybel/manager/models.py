@@ -82,15 +82,21 @@ class Namespace(Base):
     uploaded = Column(DateTime, nullable=False, default=datetime.datetime.utcnow, doc='The date of upload')
 
     # logically the "namespace"
-    keyword = Column(String(255), nullable=True, index=True,
-                     doc='Keyword that is used in a BEL file to identify a specific namespace')
+    keyword = Column(
+        String(255), nullable=True, index=True,
+        doc='Keyword that is used in a BEL file to identify a specific namespace',
+    )
 
     # A namespace either needs a URL or a pattern
-    pattern = Column(String(255), nullable=True, index=True,
-                     doc="Contains regex pattern for value identification.")
+    pattern = Column(
+        String(255), nullable=True, index=True,
+        doc="Contains regex pattern for value identification.",
+    )
 
-    miriam_id = Column(String(16), nullable=True,
-                       doc=r'MIRIAM resource identifier matching the regular expression ``^MIR:001\d{5}$``')
+    miriam_id = Column(
+        String(16), nullable=True,
+        doc=r'MIRIAM resource identifier matching the regular expression ``^MIR:001\d{5}$``',
+    )
     miriam_name = Column(String(255), nullable=True)
     miriam_namespace = Column(String(255), nullable=True)
     miriam_uri = Column(String(255), nullable=True)
@@ -158,8 +164,10 @@ class NamespaceEntry(Base):
     __tablename__ = NAME_TABLE_NAME
     id = Column(Integer, primary_key=True)
 
-    name = Column(String(1023), index=True, nullable=False,
-                  doc='Name that is defined in the corresponding namespace definition file')
+    name = Column(
+        String(1023), index=True, nullable=False,
+        doc='Name that is defined in the corresponding namespace definition file',
+    )
     identifier = Column(String(255), index=True, nullable=True, doc='The database accession number')
     encoding = Column(String(8), nullable=True, doc='The biological entity types for which this name is valid')
 
@@ -206,13 +214,13 @@ class NamespaceEntry(Base):
 network_edge = Table(
     NETWORK_EDGE_TABLE_NAME, Base.metadata,
     Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
-    Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True)
+    Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True),
 )
 
 network_node = Table(
     NETWORK_NODE_TABLE_NAME, Base.metadata,
     Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
-    Column('node_id', Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), primary_key=True)
+    Column('node_id', Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), primary_key=True),
 )
 
 
@@ -313,7 +321,7 @@ class Network(Base):
 node_modification = Table(
     NODE_MODIFICATION_TABLE_NAME, Base.metadata,
     Column('node_id', Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), primary_key=True),
-    Column('modification_id', Integer, ForeignKey('{}.id'.format(MODIFICATION_TABLE_NAME)), primary_key=True)
+    Column('modification_id', Integer, ForeignKey('{}.id'.format(MODIFICATION_TABLE_NAME)), primary_key=True),
 )
 
 
@@ -410,7 +418,7 @@ class Modification(Base):
                 name=self.identifier.name,
                 identifier=self.identifier.identifier,
                 code=self.residue,
-                position=self.position
+                position=self.position,
             )
 
         raise TypeError('unhandled type ({}) for modification {}'.format(self.type, self))
@@ -431,8 +439,10 @@ class Node(Base):
     namespace_entry_id = Column(Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), nullable=True)
     namespace_entry = relationship(NamespaceEntry, foreign_keys=[namespace_entry_id])
 
-    modifications = relationship(Modification, secondary=node_modification, lazy='dynamic',
-                                 backref=backref('nodes', lazy='dynamic'))
+    modifications = relationship(
+        Modification, secondary=node_modification, lazy='dynamic',
+        backref=backref('nodes', lazy='dynamic'),
+    )
 
     data = Column(Text, nullable=False, doc='PyBEL BaseEntity as JSON')
 
@@ -481,7 +491,7 @@ class Node(Base):
 author_citation = Table(
     AUTHOR_CITATION_TABLE_NAME, Base.metadata,
     Column('author_id', Integer, ForeignKey('{}.id'.format(AUTHOR_TABLE_NAME)), primary_key=True),
-    Column('citation_id', Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)), primary_key=True)
+    Column('citation_id', Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)), primary_key=True),
 )
 
 
@@ -632,13 +642,13 @@ class Evidence(Base):
 edge_annotation = Table(
     EDGE_ANNOTATION_TABLE_NAME, Base.metadata,
     Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True),
-    Column('name_id', Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), primary_key=True)
+    Column('name_id', Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), primary_key=True),
 )
 
 edge_property = Table(
     EDGE_PROPERTY_TABLE_NAME, Base.metadata,
     Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True),
-    Column('property_id', Integer, ForeignKey('{}.id'.format(PROPERTY_TABLE_NAME)), primary_key=True)
+    Column('property_id', Integer, ForeignKey('{}.id'.format(PROPERTY_TABLE_NAME)), primary_key=True),
 )
 
 
@@ -674,17 +684,17 @@ class Property(Base):
 
         prop_dict = {
             participant: {
-                MODIFIER: self.modifier  # FIXME this is probably wrong for location
-            }
+                MODIFIER: self.modifier,  # FIXME this is probably wrong for location
+            },
         }
 
         if self.modifier == LOCATION:
             prop_dict[participant] = {
-                LOCATION: self.effect.to_json()
+                LOCATION: self.effect.to_json(),
             }
         if self.relative_key:  # for translocations
             prop_dict[participant][EFFECT] = {
-                self.relative_key: self.effect.to_json()
+                self.relative_key: self.effect.to_json(),
             }
         elif self.effect:  # for activities
             prop_dict[participant][EFFECT] = self.effect.to_json()
@@ -705,18 +715,24 @@ class Edge(Base):
     relation = Column(String(255), nullable=False)
 
     source_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), nullable=False)
-    source = relationship(Node, foreign_keys=[source_id],
-                          backref=backref('out_edges', lazy='dynamic', cascade='all, delete-orphan'))
+    source = relationship(
+        Node, foreign_keys=[source_id],
+        backref=backref('out_edges', lazy='dynamic', cascade='all, delete-orphan'),
+    )
 
     target_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), nullable=False)
-    target = relationship(Node, foreign_keys=[target_id],
-                          backref=backref('in_edges', lazy='dynamic', cascade='all, delete-orphan'))
+    target = relationship(
+        Node, foreign_keys=[target_id],
+        backref=backref('in_edges', lazy='dynamic', cascade='all, delete-orphan'),
+    )
 
     evidence_id = Column(Integer, ForeignKey('{}.id'.format(EVIDENCE_TABLE_NAME)), nullable=True)
     evidence = relationship(Evidence, backref=backref('edges', lazy='dynamic'))
 
-    annotations = relationship(NamespaceEntry, secondary=edge_annotation, lazy="dynamic",
-                               backref=backref('edges', lazy='dynamic'))
+    annotations = relationship(
+        NamespaceEntry, secondary=edge_annotation, lazy="dynamic",
+        backref=backref('edges', lazy='dynamic'),
+    )
     properties = relationship(Property, secondary=edge_property, lazy="dynamic")  # , cascade='all, delete-orphan')
 
     md5 = Column(String(255), index=True, doc='The hash of the source, target, and associated metadata')

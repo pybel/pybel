@@ -353,18 +353,18 @@ def to_jgif(graph):
                 'label': u_v_r_bel[u, v, relation],
                 'metadata': {
                     'evidences': evidences,
-                }
+                },
             })
 
     return {
         'graph': {
             'metadata': dict(
                 origin=dict(name='pybel', version=get_version()),
-                **graph.document
+                **graph.document,
             ),
             'nodes': nodes_entry,
             'edges': edges_entry,
-        }
+        },
     }
 
 

@@ -78,11 +78,11 @@ class ConceptParser(BaseParser):
         self.identifier_bare.setParseAction(
             self.handle_namespace_default if self.default_namespace else
             self.handle_namespace_lenient if self.allow_naked_names else
-            self.handle_namespace_invalid
+            self.handle_namespace_invalid,
         )
 
         super().__init__(
-            self.identifier_fqualified | self.identifier_qualified | self.identifier_bare
+            self.identifier_fqualified | self.identifier_qualified | self.identifier_bare,
         )
 
     def has_enumerated_namespace(self, namespace: str) -> bool:

@@ -119,10 +119,14 @@ activity_mapping = {
     'kin': Entity(namespace='GO', name='kinase activity', identifier='GO:0016301'),
     'pep': Entity(namespace='GO', name='peptidase activity', identifier='GO:0008233'),
     'phos': Entity(namespace='GO', name='phosphatase activity', identifier='GO:0016791'),
-    'ribo': Entity(namespace='GO', name='NAD(P)+-protein-arginine ADP-ribosyltransferase activity',
-                   identifier='GO:0003956'),
-    'tscript': Entity(namespace='GO', name='nucleic acid binding transcription factor activity',
-                      identifier='GO:0001071'),
+    'ribo': Entity(
+        namespace='GO', name='NAD(P)+-protein-arginine ADP-ribosyltransferase activity',
+        identifier='GO:0003956',
+    ),
+    'tscript': Entity(
+        namespace='GO', name='nucleic acid binding transcription factor activity',
+        identifier='GO:0001071',
+    ),
     'tport': Entity(namespace='GO', name='transporter activity', identifier='GO:0005215'),
     'molecularActivity': Entity(namespace='GO', name='molecular_function', identifier='GO:0003674'),
     'gef': Entity(namespace='GO', name='guanyl-nucleotide exchange factor activity', identifier='GO:0005085'),
@@ -304,8 +308,10 @@ pmod_mappings = {
         'synonyms': ['ADPRib', 'ADP-ribosylation', 'ADPRib', 'ADP-rybosylation', 'adenosine diphosphoribosyl'],
         'xrefs': [
             Entity(namespace='GO', identifier='GO:0006471', name='protein ADP-ribosylation'),
-            Entity(namespace='MOD', identifier='MOD:00752',
-                   name='adenosine diphosphoribosyl (ADP-ribosyl) modified residue'),
+            Entity(
+                namespace='MOD', identifier='MOD:00752',
+                name='adenosine diphosphoribosyl (ADP-ribosyl) modified residue',
+            ),
             Entity(namespace='MOP', identifier='MOP:0000220', name='adenosinediphosphoribosylation'),
         ],
     },
@@ -330,7 +336,7 @@ pmod_mappings = {
         'xrefs': [
             Entity(namespace='GO', identifier='GO:0006486', name='protein glycosylation'),
             Entity(namespace='MOD', identifier='MOD:00693', name='glycosylated residue'),
-            Entity(namespace='MOP', identifier='MOP:0000162', name='glycosylation')
+            Entity(namespace='MOP', identifier='MOP:0000162', name='glycosylation'),
         ],
     },
     'Hy': {
@@ -437,8 +443,10 @@ pmod_mappings = {
         ],
     },
     'Sulf': {
-        'synonyms': ['Sulf', 'sulfation', 'sulphation', 'sulfur addition', 'sulphur addition', 'sulfonation',
-                     'sulphonation'],
+        'synonyms': [
+            'Sulf', 'sulfation', 'sulphation', 'sulfur addition', 'sulphur addition', 'sulfonation',
+            'sulphonation',
+        ],
         'xrefs': [
             Entity(namespace='GO', identifier='GO:0006477', name='protein sulfation'),
             Entity(namespace='MOD', identifier='MOD:00695', name='sulfated residue'),
@@ -455,8 +463,8 @@ pmod_mappings = {
             Entity(namespace='MOD', identifier='MOD:01149', name='sumoylated lysine'),
         ],
         'activities': [
-            Entity(namespace='GO', identifier='GO:0019789', name='SUMO transferase activity')
-        ]
+            Entity(namespace='GO', identifier='GO:0019789', name='SUMO transferase activity'),
+        ],
     },
     'Ub': {
         'synonyms': ['Ub', 'ubiquitination', 'ubiquitinylation', 'ubiquitylation'],

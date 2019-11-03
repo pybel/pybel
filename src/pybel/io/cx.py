@@ -132,7 +132,7 @@ def to_cx(graph: BELGraph) -> List[Dict]:  # noqa: C901
                         node_attributes_entry.append({
                             'po': node_index,
                             'n': '{}_{}_{}'.format(k, i, a),
-                            'v': b
+                            'v': b,
                         })
             elif k == FUSION:
                 v = _cleanse_fusion_dict(v)
@@ -303,7 +303,7 @@ def to_cx(graph: BELGraph) -> List[Dict]:  # noqa: C901
         cx_metadata.append(aspect_dict)
 
     cx.append({
-        'metaData': cx_metadata
+        'metaData': cx_metadata,
     })
 
     for key, aspect in cx_pairs:
@@ -529,7 +529,7 @@ def from_cx(cx: List[Dict]) -> BELGraph:  # noqa: C901
             graph.add_unqualified_edge(
                 nid_node_tuple[eid_source_nid[eid]],
                 nid_node_tuple[eid_target_nid[eid]],
-                edge_relation[eid]
+                edge_relation[eid],
             )
         else:
             raise ValueError('problem adding edge: {}'.format(eid))

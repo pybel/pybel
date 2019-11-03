@@ -46,7 +46,7 @@ from ..resources import CHEBI_URL, CONFIDENCE_URL, GO_URL, HGNC_URL, SPECIES_PAT
 from ..struct.graph import BELGraph
 
 __all__ = [
-    'egf_graph'
+    'egf_graph',
 ]
 
 egf_graph = BELGraph(
@@ -125,7 +125,7 @@ egf_graph.add_increases(
     object_modifier=translocation(
         from_loc=nucleus,
         to_loc=cytoplasm,
-    )
+    ),
 )
 
 egf_graph.add_increases(

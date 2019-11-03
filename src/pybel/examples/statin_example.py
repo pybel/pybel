@@ -7,7 +7,7 @@ from ..resources import CHEBI_URL, CONFIDENCE_URL, EC_URL, HGNC_URL
 from ..struct.graph import BELGraph
 
 __all__ = [
-    'statin_graph'
+    'statin_graph',
 ]
 
 statin_graph = BELGraph(
@@ -33,8 +33,10 @@ avorastatin = Abundance(namespace='CHEBI', name='atorvastatin', identifier='3954
 synthetic_statin = Abundance(namespace='CHEBI', name='statin (synthetic)', identifier='87635')
 statin = Abundance(namespace='CHEBI', name='statin', identifier='87631')
 mevinolinic_acid = Abundance(namespace='CHEBI', name='mevinolinic acid', identifier='82985')
-hmgcr_inhibitor = Abundance(namespace='CHEBI', identifier='35664',
-                            name='EC 1.1.1.34/EC 1.1.1.88 (hydroxymethylglutaryl-CoA reductase) inhibitor')
+hmgcr_inhibitor = Abundance(
+    namespace='CHEBI', identifier='35664',
+    name='EC 1.1.1.34/EC 1.1.1.88 (hydroxymethylglutaryl-CoA reductase) inhibitor',
+)
 ec_11134 = Protein(namespace='EC', name='1.1.1.34')
 ec_11188 = Protein(namespace='EC', name='1.1.1.88')
 

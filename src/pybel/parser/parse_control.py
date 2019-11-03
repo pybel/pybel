@@ -58,7 +58,7 @@ class ControlParser(BaseParser):
         annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
         annotation_to_local: Optional[Mapping[str, Set[str]]] = None,
         citation_clearing: bool = True,
-        required_annotations: Optional[List[str]] = None
+        required_annotations: Optional[List[str]] = None,
     ) -> None:
         """Initialize the control statement parser.
 
@@ -125,7 +125,7 @@ class ControlParser(BaseParser):
             self.unset_evidence,
             self.unset_statement_group,
             self.unset_command,
-            self.unset_list
+            self.unset_list,
         ])
 
         self.language = self.set_statements | self.unset_statements

@@ -392,7 +392,7 @@ class ProteinModification(Variant):
 
         return 'pmod({}{})'.format(
             x,
-            ''.join(', {}'.format(self[x]) for x in PMOD_ORDER[2:] if x in self)
+            ''.join(', {}'.format(self[x]) for x in PMOD_ORDER[2:] if x in self),
         )
 
 
@@ -749,7 +749,7 @@ class ListAbundance(BaseEntity):
         """Return this list abundance as a BEL string."""
         return '{}({})'.format(
             self._bel_function,
-            _entity_list_as_bel(self.members, use_identifiers=use_identifiers)
+            _entity_list_as_bel(self.members, use_identifiers=use_identifiers),
         )
 
 

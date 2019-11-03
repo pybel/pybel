@@ -35,7 +35,8 @@ define_tag = Suppress(BEL_KEYWORD_DEFINE)
 function_tags = Word(''.join(belns_encodings))
 
 SEMANTIC_VERSION_STRING_RE = re.compile(
-    r'(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(?:-(?P<release>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+(?P<build>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?')
+    r'(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(?:-(?P<release>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+(?P<build>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?',
+)
 
 MALFORMED_VERSION_STRING_RE = re.compile(r'(?P<major>\d+)(\.(?P<minor>\d+)(\.(?P<patch>\d+))?)?')
 
@@ -110,7 +111,7 @@ class MetadataParser(BaseParser):
             Suppress(BEL_KEYWORD_DOCUMENT),
             word('key'),
             Suppress('='),
-            qid('value')
+            qid('value'),
         ])
 
         namespace_tag = And([define_tag, Suppress(BEL_KEYWORD_NAMESPACE), ppc.identifier('name'), as_tag])

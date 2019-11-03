@@ -34,7 +34,7 @@ from ..resources import CHEBI_URL, CONFIDENCE_URL, GO_URL, HGNC_URL, SPECIES_PAT
 from ..struct.graph import BELGraph
 
 __all__ = [
-    'sialic_acid_graph'
+    'sialic_acid_graph',
 ]
 
 citation = '26438529'

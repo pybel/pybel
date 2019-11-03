@@ -11,7 +11,7 @@ from .cache_manager import Manager
 
 __all__ = [
     'to_database',
-    'from_database'
+    'from_database',
 ]
 
 logger = logging.getLogger(__name__)

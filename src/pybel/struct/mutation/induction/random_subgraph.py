@@ -104,11 +104,13 @@ def get_random_node(
     :param invert_degrees: Should the degrees be inverted? Defaults to true.
     """
     try:
-        nodes, degrees = zip(*(
-            (node, degree)
-            for node, degree in sorted(graph.degree(), key=itemgetter(1))
-            if node not in node_blacklist
-        ))
+        nodes, degrees = zip(
+            *(
+                (node, degree)
+                for node, degree in sorted(graph.degree(), key=itemgetter(1))
+                if node not in node_blacklist
+            ),
+        )
     except ValueError:  # something wrong with graph, probably no elements in graph.degree_iter
         return
 
@@ -156,7 +158,8 @@ def _helper(
 
             if not possible_step_nodes:
                 node_blacklist.add(
-                    source)  # there aren't any possible nodes to step to, so try growing from somewhere else
+                    source,
+                )  # there aren't any possible nodes to step to, so try growing from somewhere else
 
         step_node = random.choice(list(possible_step_nodes))
 
@@ -193,8 +196,10 @@ def get_random_subgraph(graph, number_edges=None, number_seed_edges=None, seed=N
         logger.info('sampled full graph')
         return graph.copy()
 
-    logger.debug('getting random sub-graph with %d seed edges, %d final edges, and seed=%s', number_seed_edges,
-                 number_edges, seed)
+    logger.debug(
+        'getting random sub-graph with %d seed edges, %d final edges, and seed=%s', number_seed_edges,
+        number_edges, seed,
+    )
 
     # Get initial graph with `number_seed_edges` edges
     result = get_graph_with_random_edges(graph, number_seed_edges)

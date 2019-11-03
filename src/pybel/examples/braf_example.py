@@ -23,7 +23,7 @@ from ..resources import HGNC_URL, SPECIES_PATTERN
 from ..struct.graph import BELGraph
 
 __all__ = [
-    'braf_graph'
+    'braf_graph',
 ]
 
 braf_graph = BELGraph(

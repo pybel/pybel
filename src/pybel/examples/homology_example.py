@@ -94,7 +94,7 @@ homology_graph.add_increases(
     citation='10452980',
     evidence='M-CSF triggers the activation of extracellular signal-regulated protein kinases (ERK)-1/2.',
     object_modifier=activity('kin'),
-    annotations={'Species': '10090'}
+    annotations={'Species': '10090'},
 )
 
 homology_graph.add_transcription(mouse_mapk1_gene, mouse_mapk1_rna)

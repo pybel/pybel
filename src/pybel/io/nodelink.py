@@ -99,12 +99,14 @@ def _to_nodelink_json_helper(graph: BELGraph) -> Mapping[str, Any]:
             for node in nodes
         ],
         'links': [
-            dict(chain(
-                data.copy().items(),
-                [('source', mapping[u]), ('target', mapping[v]), ('key', key)]
-            ))
+            dict(
+                chain(
+                    data.copy().items(),
+                    [('source', mapping[u]), ('target', mapping[v]), ('key', key)],
+                ),
+            )
             for u, v, key, data in graph.edges(keys=True, data=True)
-        ]
+        ],
     }
 
 

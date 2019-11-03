@@ -217,7 +217,7 @@ class NamespaceManager(BaseManager):
 
         namespace = Namespace(
             url=url,
-            **namespace_insert_values
+            **namespace_insert_values,
         )
 
         logger.debug('building NamespaceEntry instances')
@@ -254,7 +254,7 @@ class NamespaceManager(BaseManager):
             logger.info('creating regex namespace: %s:%s', keyword, pattern)
             namespace = Namespace(
                 keyword=keyword,
-                pattern=pattern
+                pattern=pattern,
             )
             self.session.add(namespace)
             self.session.commit()
@@ -274,8 +274,10 @@ class NamespaceManager(BaseManager):
             return
 
         if 1 < len(result):
-            logger.warning('result for get_namespace_entry is too long. Returning first of %s',
-                           [str(r) for r in result])
+            logger.warning(
+                'result for get_namespace_entry is too long. Returning first of %s',
+                [str(r) for r in result],
+            )
 
         return result[0]
 
@@ -302,7 +304,7 @@ class NamespaceManager(BaseManager):
         if name_model is None:
             name_model = NamespaceEntry(
                 namespace=namespace,
-                name=name
+                name=name,
             )
             self.session.add(name_model)
 
@@ -337,7 +339,7 @@ class NamespaceManager(BaseManager):
         result = Namespace(
             url=url,
             is_annotation=True,
-            **_get_annotation_insert_values(bel_resource)
+            **_get_annotation_insert_values(bel_resource),
         )
         result.entries = [
             NamespaceEntry(name=name, identifier=label)
@@ -348,8 +350,10 @@ class NamespaceManager(BaseManager):
         self.session.add(result)
         self.session.commit()
 
-        logger.info('inserted annotation: %s (%d terms in %.2f seconds)', url, len(bel_resource['Values']),
-                    time.time() - t)
+        logger.info(
+            'inserted annotation: %s (%d terms in %.2f seconds)', url, len(bel_resource['Values']),
+            time.time() - t,
+        )
 
         return result
 
@@ -366,8 +370,11 @@ class NamespaceManager(BaseManager):
 
     def get_namespace_encoding(self, url: str) -> Mapping[str, str]:
         annotation = self.get_or_create_annotation(url)
-        return dict(self.session.query(NamespaceEntry.name, NamespaceEntry.encoding).filter(
-            NamespaceEntry.namespace == annotation))
+        return dict(
+            self.session.query(NamespaceEntry.name, NamespaceEntry.encoding).filter(
+            NamespaceEntry.namespace == annotation,
+            ),
+        )
 
     def get_annotation_entries_by_names(self, url: str, names: Iterable[str]) -> List[NamespaceEntry]:
         """Get annotation entries by URL and names.
@@ -394,14 +401,14 @@ class NetworkManager(NamespaceManager):
         """List the most recently created version of each network (by name)."""
         most_recent_times = self.session.query(
             Network.name.label('network_name'),
-            func.max(Network.created).label('max_created')
+            func.max(Network.created).label('max_created'),
         )
 
         most_recent_times = most_recent_times.group_by(Network.name).subquery('most_recent_times')
 
         and_condition = and_(
             most_recent_times.c.network_name == Network.name,
-            most_recent_times.c.max_created == Network.created
+            most_recent_times.c.max_created == Network.created,
         )
 
         most_recent_networks = self.session.query(Network).join(most_recent_times, and_condition)
@@ -430,19 +437,23 @@ class NetworkManager(NamespaceManager):
 
         # delete the network-to-node mappings for this network
         self.session.query(network_node).filter(network_node.c.network_id == network.id).delete(
-            synchronize_session=False)
+            synchronize_session=False,
+        )
 
         # delete the edge-to-property mappings for the to-be-orphaned edges
         self.session.query(edge_property).filter(edge_property.c.edge_id.in_(edge_ids)).delete(
-            synchronize_session=False)
+            synchronize_session=False,
+        )
 
         # delete the edge-to-annotation mappings for the to-be-orphaned edges
         self.session.query(edge_annotation).filter(edge_annotation.c.edge_id.in_(edge_ids)).delete(
-            synchronize_session=False)
+            synchronize_session=False,
+        )
 
         # delete the edge-to-network mappings for this network
         self.session.query(network_edge).filter(network_edge.c.network_id == network.id).delete(
-            synchronize_session=False)
+            synchronize_session=False,
+        )
 
         # delete the now-orphaned edges
         self.session.query(Edge).filter(Edge.id.in_(edge_ids)).delete(synchronize_session=False)
@@ -460,14 +471,18 @@ class NetworkManager(NamespaceManager):
         singleton_edge_ids_for_network = (
             self.session
                 .query(ne1.c.edge_id)
-                .outerjoin(ne2, and_(
-                ne1.c.edge_id == ne2.c.edge_id,
-                ne1.c.network_id != ne2.c.network_id
-            ))
-                .filter(and_(
-                ne1.c.network_id == network.id,
-                ne2.c.edge_id == None  # noqa: E711
-            ))
+                .outerjoin(
+                    ne2, and_(
+                        ne1.c.edge_id == ne2.c.edge_id,
+                        ne1.c.network_id != ne2.c.network_id,
+                    ),
+                )
+                .filter(
+                    and_(
+                        ne1.c.network_id == network.id,
+                        ne2.c.edge_id == None,  # noqa: E711
+                    ),
+                )
         )
         return singleton_edge_ids_for_network
 
@@ -605,11 +620,13 @@ class InsertManager(NamespaceManager, LookupManager):
         for annotation_url in annotation_urls:
             self.get_or_create_annotation(annotation_url)
 
-        network = Network(**{
-            key: value
-            for key, value in graph.document.items()
-            if key in METADATA_INSERT_KEYS
-        })
+        network = Network(
+            **{
+                key: value
+                for key, value in graph.document.items()
+                if key in METADATA_INSERT_KEYS
+            },
+        )
 
         network.store_bel(graph)
 
@@ -965,7 +982,7 @@ class InsertManager(NamespaceManager, LookupManager):
         self,
         *,
         db_id: str,
-        db: Optional[str] = None,
+        db: Optional[str] = None
     ) -> Citation:
         """Create a citation if it does not exist, or return it if it does.
 
@@ -1108,7 +1125,7 @@ class InsertManager(NamespaceManager, LookupManager):
                             'type': mod_type,
                             'identifier': mod_entry,
                             'residue': variant[PMOD_CODE].strip() if PMOD_CODE in variant else None,
-                            'position': variant[PMOD_POSITION] if PMOD_POSITION in variant else None
+                            'position': variant[PMOD_POSITION] if PMOD_POSITION in variant else None,
                         })
 
         modifications = []

@@ -75,11 +75,13 @@ def get_triples(graph: BELGraph, use_tqdm: bool = False) -> List[Tuple[str, str,
     )
 
     # clean duplicates and Nones
-    return list(sorted({
-        triple
-        for triple in triples
-        if triple is not None
-    }))
+    return list(
+        sorted({
+            triple
+            for triple in triples
+            if triple is not None
+        }),
+    )
 
 
 def get_triple(

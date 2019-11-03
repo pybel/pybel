@@ -72,7 +72,7 @@ def postpend_location(bel_string: str, location_model) -> str:
     return "{}, loc({}:{}))".format(
         bel_string[:-1],
         location_model[NAMESPACE],
-        ensure_quotes(location_model[NAME])
+        ensure_quotes(location_model[NAME]),
     )
 
 
@@ -137,7 +137,7 @@ def _get_tloc_terminal(side, data):
     return "{}({}:{})".format(
         side,
         data[NAMESPACE],
-        ensure_quotes(data[NAME])
+        ensure_quotes(data[NAME]),
     )
 
 
@@ -222,7 +222,7 @@ def _to_bel_lines_header(graph) -> Iterable[str]:
     :param pybel.BELGraph graph: A BEL graph
     """
     yield '# This document was created by PyBEL v{} and bel-resources v{} on {}\n'.format(
-        VERSION, bel_resources.constants.VERSION, time.asctime()
+        VERSION, bel_resources.constants.VERSION, time.asctime(),
     )
     yield from make_knowledge_header(
         namespace_url=graph.namespace_url,
@@ -230,7 +230,7 @@ def _to_bel_lines_header(graph) -> Iterable[str]:
         annotation_url=graph.annotation_url,
         annotation_patterns=graph.annotation_pattern,
         annotation_list=graph.annotation_list,
-        **graph.document
+        **graph.document,
     )
 
 

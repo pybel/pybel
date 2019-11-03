@@ -88,11 +88,13 @@ def get_pubmed_citation_response(pubmed_identifiers: Iterable[str]):
     :rtype: dict
     """
     pubmed_identifiers = list(pubmed_identifiers)
-    url = EUTILS_URL_FMT.format(','.join(
-        pubmed_identifier
-        for pubmed_identifier in pubmed_identifiers
-        if pubmed_identifier
-    ))
+    url = EUTILS_URL_FMT.format(
+        ','.join(
+            pubmed_identifier
+            for pubmed_identifier in pubmed_identifiers
+            if pubmed_identifier
+        ),
+    )
     response = requests.get(url)
     return response.json()
 
