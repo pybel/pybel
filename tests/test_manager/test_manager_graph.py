@@ -5,14 +5,15 @@
 import time
 import unittest
 from collections import Counter
+from random import randint
 
 from sqlalchemy import not_
 
 from pybel import BELGraph, from_bel_script, from_database, to_database
 from pybel.constants import (
-    ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_REFERENCE,
-    CITATION_TYPE, CITATION_TYPE_OTHER, CITATION_TYPE_PUBMED, DECREASES, HAS_PRODUCT, HAS_REACTANT, INCREASES,
-    METADATA_NAME, METADATA_VERSION, MIRNA, PART_OF, PATHOLOGY, PROTEIN, RELATION,
+    ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CITATION_AUTHORS, CITATION_DATE, CITATION_DB, CITATION_IDENTIFIER,
+    CITATION_JOURNAL, CITATION_TYPE_OTHER, CITATION_TYPE_PUBMED, DECREASES, HAS_PRODUCT, HAS_REACTANT, INCREASES,
+    METADATA_NAME, METADATA_VERSION, MIRNA, PART_OF, PATHOLOGY, PROTEIN, RELATION, CITATION_DB_NAME
 )
 from pybel.dsl import (
     BaseEntity, ComplexAbundance, CompositeAbundance, EnumeratedFusionRange, Fragment, Gene, GeneFusion,
@@ -28,7 +29,6 @@ from pybel.testing.cases import FleetingTemporaryCacheMixin, TemporaryCacheClsMi
 from pybel.testing.constants import test_bel_simple
 from pybel.testing.mocks import mock_bel_resources
 from pybel.testing.utils import make_dummy_annotations, make_dummy_namespaces, n
-from pybel.utils import hash_citation, hash_evidence
 from tests.constants import (
     BelReconstitutionMixin, akt1, casp8, egfr, expected_test_simple_metadata, fadd, test_citation_dict,
     test_evidence_text,
@@ -150,8 +150,7 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
 
 
 class TestTemporaryInsertNetwork(TemporaryCacheMixin):
-    @mock_bel_resources
-    def test_insert_with_list_annotations(self, mock):
+    def test_insert_with_list_annotations(self):
         """This test checks that graphs that contain list annotations, which aren't cached, can be loaded properly
         into the database."""
         graph = BELGraph(name='test', version='0.0.0')
@@ -167,7 +166,8 @@ class TestTemporaryInsertNetwork(TemporaryCacheMixin):
 
         make_dummy_namespaces(self.manager, graph)
 
-        self.manager.insert_graph(graph)
+        with mock_bel_resources:
+            self.manager.insert_graph(graph)
 
         # TODO check that the database doesn't have anything for TEST in it
 
@@ -303,13 +303,13 @@ class TestQuery(TemporaryCacheMixin):
         self.assertEqual(0, len(edges), msg='Wrong number of edges: {}'.format(edges))
 
     def test_query_citation_by_type(self):
-        rv = self.manager.query_citations(type=CITATION_TYPE_PUBMED)
+        rv = self.manager.query_citations(db=CITATION_TYPE_PUBMED)
         self.assertEqual(1, len(rv))
         self.assertTrue(rv[0].is_pubmed)
         self.assertFalse(rv[0].is_enriched)
 
     def test_query_citaiton_by_reference(self):
-        rv = self.manager.query_citations(type=CITATION_TYPE_PUBMED, reference=test_citation_dict[CITATION_REFERENCE])
+        rv = self.manager.query_citations(db=CITATION_TYPE_PUBMED, db_id=test_citation_dict[CITATION_IDENTIFIER])
         self.assertEqual(1, len(rv))
         self.assertTrue(rv[0].is_pubmed)
         self.assertFalse(rv[0].is_enriched)
@@ -323,15 +323,17 @@ class TestQuery(TemporaryCacheMixin):
     @unittest.skip
     def test_query_by_name(self):
         # type, name, data
-        name_dict_list = self.manager.query_citations(type=CITATION_TYPE_PUBMED,
-                                                      name="That other article from last week")
+        name_dict_list = self.manager.query_citations(
+            db=CITATION_TYPE_PUBMED,
+            name="That other article from last week",
+        )
         self.assertEqual(len(name_dict_list), 1)
         # self.assertIn(..., name_dict_list)
 
     @unittest.skip
     def test_query_by_name_wildcard(self):
         # type, name like, data
-        name_dict_list2 = self.manager.query_citations(type=CITATION_TYPE_PUBMED, name="%article from%")
+        name_dict_list2 = self.manager.query_citations(db=CITATION_TYPE_PUBMED, name="%article from%")
         self.assertEqual(len(name_dict_list2), 2)
         # self.assertIn(..., name_dict_list2)
         # self.assertIn(..., name_dict_list2)
@@ -339,15 +341,11 @@ class TestQuery(TemporaryCacheMixin):
 
 class TestEnsure(TemporaryCacheMixin):
     def test_get_or_create_citation(self):
-        reference = '1234AB'
+        reference = str(randint(1, 1000000))
         citation_dict = {
-            CITATION_TYPE: CITATION_TYPE_PUBMED,
-            CITATION_NAME: 'TestCitation_basic',
-            CITATION_REFERENCE: reference,
+            CITATION_DB: CITATION_TYPE_PUBMED,
+            CITATION_IDENTIFIER: reference,
         }
-
-        citation_hash = hash_citation(citation_type=citation_dict[CITATION_TYPE],
-                                      citation_reference=citation_dict[CITATION_REFERENCE])
 
         citation = self.manager.get_or_create_citation(**citation_dict)
         self.manager.session.commit()
@@ -363,63 +361,20 @@ class TestEnsure(TemporaryCacheMixin):
         self.assertIsNotNone(citation_reloaded_from_dict)
         self.assertEqual(citation_dict, citation_reloaded_from_dict.to_json())
 
-        citation_reloaded_from_hash = self.manager.get_citation_by_hash(citation_hash)
-        self.assertIsNotNone(citation_reloaded_from_hash)
-        self.assertEqual(citation_dict, citation_reloaded_from_hash.to_json())
-
-    def test_get_or_create_citation_full(self):
-        reference = 'CD5678'
-        citation_dict = {
-            CITATION_TYPE: CITATION_TYPE_OTHER,
-            CITATION_NAME: 'TestCitation_full',
-            CITATION_REFERENCE: reference,
-            CITATION_DATE: '2017-04-11',
-            CITATION_AUTHORS: sorted(['Jackson M', 'Lajoie J'])
-        }
-
-        citation_hash = hash_citation(citation_type=citation_dict[CITATION_TYPE],
-                                      citation_reference=citation_dict[CITATION_REFERENCE])
-
-        citation = self.manager.get_or_create_citation(**citation_dict)
-        self.manager.session.commit()
-
-        self.assertIsInstance(citation, Citation)
-        self.assertEqual(citation_dict, citation.to_json())
-
-        citation_reloaded_from_reference = self.manager.get_citation_by_reference(CITATION_TYPE_OTHER, reference)
+        citation_reloaded_from_reference = self.manager.get_citation_by_reference(
+            citation_dict[CITATION_DB], citation_dict[CITATION_IDENTIFIER],
+        )
         self.assertIsNotNone(citation_reloaded_from_reference)
         self.assertEqual(citation_dict, citation_reloaded_from_reference.to_json())
 
-        citation_reloaded_from_dict = self.manager.get_or_create_citation(**citation_dict)
-        self.assertIsNotNone(citation_reloaded_from_dict)
-        self.assertEqual(citation_dict, citation_reloaded_from_dict.to_json())
-
-        citation_reloaded_from_hash = self.manager.get_citation_by_hash(citation_hash)
-        self.assertIsNotNone(citation_reloaded_from_hash)
-        self.assertEqual(citation_dict, citation_reloaded_from_hash.to_json())
-
-        full_citation_basic = {
-            CITATION_TYPE: 'Other',
-            CITATION_NAME: 'TestCitation_full',
-            CITATION_REFERENCE: 'CD5678'
-        }
-
-        citation_truncated = self.manager.get_or_create_citation(**full_citation_basic)
-        self.assertIsNotNone(citation_truncated)
-        self.assertEqual(citation_dict, citation_truncated.to_json())
-
     def test_get_or_create_evidence(self):
-        basic_citation = self.manager.get_or_create_citation(**test_citation_dict)
+        citation_db, citation_ref = CITATION_TYPE_PUBMED, str(randint(1, 1000000))
+        basic_citation = self.manager.get_or_create_citation(db=citation_db, db_id=citation_ref)
         utf8_test_evidence = u"Yes, all the information is true! This contains a unicode alpha: α"
-        evidence_hash = hash_evidence(
-            text=utf8_test_evidence,
-            citation_type=CITATION_TYPE_PUBMED,
-            citation_reference=test_citation_dict[CITATION_REFERENCE]
-        )
 
         evidence = self.manager.get_or_create_evidence(basic_citation, utf8_test_evidence)
         self.assertIsInstance(evidence, Evidence)
-        self.assertIn(evidence_hash, self.manager.object_cache_evidence)
+        self.assertIn(evidence, self.manager.object_cache_evidence.values())
 
         # Objects cached?
         reloaded_evidence = self.manager.get_or_create_evidence(basic_citation, utf8_test_evidence)
@@ -456,24 +411,16 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
 
         with mock_bel_resources:
             cls.graph = from_bel_script(test_bel_simple, manager=cls.manager, disallow_nested=False)
-            print(cls.graph.graph)
             cls.network = cls.manager.insert_graph(cls.graph)
 
     def test_citations(self):
         citations = self.manager.session.query(Citation).all()
         self.assertEqual(2, len(citations), msg='Citations: {}'.format(citations))
 
-        citation_references = {'123455', '123456'}
-        self.assertEqual(citation_references, {
-            citation.reference
+        citation_db_ids = {'123455', '123456'}
+        self.assertEqual(citation_db_ids, {
+            citation.db_id
             for citation in citations
-        })
-
-    def test_authors(self):
-        authors = {'Example Author', 'Example Author2'}
-        self.assertEqual(authors, {
-            author.name
-            for author in self.manager.session.query(Author).all()
         })
 
     def test_evidences(self):
@@ -1067,7 +1014,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
          form of Cdc42Hs and weakly activates the JNK family of MAP kinases. PAK4 is a mediator of filopodia
          formation and may play a role in the reorganization of the actin cytoskeleton. Multiple alternatively
          spliced transcript variants encoding distinct isoforms have been found for this gene.""",
-            citation={CITATION_TYPE: "Online Resource", CITATION_REFERENCE: "PAK4 Hs ENTREZ Gene Summary"},
+            citation={CITATION_DB: "Online Resource", CITATION_IDENTIFIER: "PAK4 Hs ENTREZ Gene Summary"},
             annotations={'Species': '9606'},
             subject_modifier=activity('gtp'),
             object_modifier=activity('kin'),

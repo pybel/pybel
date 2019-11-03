@@ -17,7 +17,7 @@ from networkx.utils import open_file
 from pyparsing import ParseException
 
 from ..constants import (
-    ANNOTATIONS, CITATION, CITATION_REFERENCE, CITATION_TYPE, EVIDENCE, METADATA_AUTHORS, METADATA_CONTACT,
+    ANNOTATIONS, CITATION, EVIDENCE, METADATA_AUTHORS, METADATA_CONTACT,
     METADATA_INSERT_KEYS, METADATA_LICENSES, RELATION, UNQUALIFIED_EDGES,
 )
 from ..parser import BELParser
@@ -51,18 +51,6 @@ species_map = {
 placeholder_evidence = "This Network edge has no supporting evidence.  Please add real evidence to this edge prior to deleting."
 
 EXPERIMENT_CONTEXT = 'experiment_context'
-
-
-def reformat_citation(citation):
-    """Reformat a citation dictionary.
-
-    :type citation: dict[str,str]
-    :rtype: dict[str,str]
-    """
-    return {
-        CITATION_TYPE: citation['type'].strip(),
-        CITATION_REFERENCE: citation['id'].strip()
-    }
 
 
 def map_cbn(d):
@@ -286,7 +274,8 @@ def from_jgif(graph_jgif_dict):
                     continue
 
                 parser.control_parser.clear()
-                parser.control_parser.citation = reformat_citation(citation)
+                parser.control_parser.citation_db = citation['type'].strip()
+                parser.control_parser.citation_db_id = citation['id'].strip()
                 parser.control_parser.evidence = summary_text
                 parser.control_parser.annotations.update(evidence[EXPERIMENT_CONTEXT])
 

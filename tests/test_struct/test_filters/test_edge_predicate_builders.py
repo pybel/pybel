@@ -4,10 +4,11 @@
 
 import unittest
 
-from pybel.constants import CITATION, CITATION_AUTHORS, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED
+from pybel.constants import CITATION, CITATION_AUTHORS, CITATION_TYPE_PUBMED
 from pybel.struct.filters.edge_predicate_builders import (
     build_author_inclusion_filter, build_pmid_inclusion_filter,
 )
+from pybel.utils import citation_dict
 
 pmid1 = '1'
 pmid2 = '2'
@@ -26,17 +27,11 @@ class TestEdgePredicateBuilders(unittest.TestCase):
         pmid_inclusion_filter = build_pmid_inclusion_filter(pmid1)
 
         self.assertTrue(pmid_inclusion_filter({
-            CITATION: {
-                CITATION_TYPE: CITATION_TYPE_PUBMED,
-                CITATION_REFERENCE: pmid1,
-            }
+            CITATION: citation_dict(db=CITATION_TYPE_PUBMED, db_id=pmid1),
         }))
 
         self.assertFalse(pmid_inclusion_filter({
-            CITATION: {
-                CITATION_TYPE: CITATION_TYPE_PUBMED,
-                CITATION_REFERENCE: pmid2,
-            }
+            CITATION: citation_dict(db=CITATION_TYPE_PUBMED, db_id=pmid2),
         }))
 
     def test_build_pmid_set_inclusion_filter(self):
@@ -45,24 +40,15 @@ class TestEdgePredicateBuilders(unittest.TestCase):
         pmid_inclusion_filter = build_pmid_inclusion_filter(pmids)
 
         self.assertTrue(pmid_inclusion_filter({
-            CITATION: {
-                CITATION_TYPE: CITATION_TYPE_PUBMED,
-                CITATION_REFERENCE: pmid1,
-            }
+            CITATION: citation_dict(db=CITATION_TYPE_PUBMED, db_id=pmid1),
         }))
 
         self.assertTrue(pmid_inclusion_filter({
-            CITATION: {
-                CITATION_TYPE: CITATION_TYPE_PUBMED,
-                CITATION_REFERENCE: pmid2,
-            }
+            CITATION: citation_dict(db=CITATION_TYPE_PUBMED, db_id=pmid2),
         }))
 
         self.assertFalse(pmid_inclusion_filter({
-            CITATION: {
-                CITATION_TYPE: CITATION_TYPE_PUBMED,
-                CITATION_REFERENCE: pmid3,
-            }
+            CITATION: citation_dict(db=CITATION_TYPE_PUBMED, db_id=pmid3),
         }))
 
     def test_build_author_inclusion_filter(self):
@@ -70,21 +56,15 @@ class TestEdgePredicateBuilders(unittest.TestCase):
         author_inclusion_filter = build_author_inclusion_filter(author1)
 
         self.assertTrue(author_inclusion_filter({
-            CITATION: {
-                CITATION_AUTHORS: [author1]
-            }
+            CITATION: citation_dict(db=CITATION_TYPE_PUBMED, db_id=pmid3, authors=[author1]),
         }))
 
         self.assertTrue(author_inclusion_filter({
-            CITATION: {
-                CITATION_AUTHORS: [author1, author2]
-            }
+            CITATION: citation_dict(db=CITATION_TYPE_PUBMED, db_id=pmid3, authors=[author1, author2]),
         }))
 
         self.assertFalse(author_inclusion_filter({
-            CITATION: {
-                CITATION_AUTHORS: [author3]
-            }
+            CITATION: citation_dict(db=CITATION_TYPE_PUBMED, db_id=pmid3, authors=[author3]),
         }))
 
     def test_build_author_set_inclusion_filter(self):

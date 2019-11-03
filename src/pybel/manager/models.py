@@ -3,7 +3,6 @@
 """This module contains the SQLAlchemy database models that support the definition cache and graph cache."""
 
 import datetime
-import hashlib
 import json
 from collections import defaultdict
 from typing import Any, Iterable, Mapping, Optional, Tuple
@@ -16,9 +15,9 @@ from sqlalchemy.orm import backref, relationship
 
 from .utils import int_or_str
 from ..constants import (
-    CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR, CITATION_LAST_AUTHOR, CITATION_NAME,
-    CITATION_PAGES, CITATION_REFERENCE, CITATION_TITLE, CITATION_TYPE, CITATION_TYPE_PUBMED, CITATION_VOLUME, EFFECT,
-    EVIDENCE, FRAGMENT, FUSION, GMOD, HGVS, IDENTIFIER, LOCATION, METADATA_AUTHORS, METADATA_CONTACT,
+    CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_DB, CITATION_DB_NAME, CITATION_FIRST_AUTHOR,
+    CITATION_IDENTIFIER, CITATION_JOURNAL, CITATION_LAST_AUTHOR, CITATION_PAGES, CITATION_TYPE_PUBMED, CITATION_VOLUME,
+    EFFECT, EVIDENCE, FRAGMENT, FUSION, GMOD, HGVS, IDENTIFIER, LOCATION, METADATA_AUTHORS, METADATA_CONTACT,
     METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION,
     MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PMOD, RANGE_3P, RANGE_5P, SUBJECT,
 )
@@ -493,17 +492,6 @@ class Author(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False, unique=True, index=True)
-    md5 = Column(String(255), nullable=False, index=True, unique=True)
-
-    @classmethod
-    def from_name(cls, name):
-        """Create an author by name, automatically populating the hash."""
-        return Author(name=name, md5=cls.hash_name(name))
-
-    @staticmethod
-    def hash_name(name: str) -> str:
-        """Hash a name."""
-        return hashlib.md5(name.encode('utf-8')).hexdigest()
 
     @classmethod
     def name_contains(cls, name_query: str):
@@ -511,17 +499,9 @@ class Author(Base):
         return cls.name.contains(name_query)
 
     @classmethod
-    def has_name(cls, name: str):
-        """Build a filter for if an author has a name."""
-        return cls.md5 == cls.hash_name(name)
-
-    @classmethod
     def has_name_in(cls, names: Iterable[str]):
         """Build a filter if the author has any of the given names."""
-        return cls.md5.in_({
-            cls.hash_name(name)
-            for name in names
-        })
+        return cls.name.in_(names)
 
     def __str__(self):
         return self.name
@@ -534,12 +514,11 @@ class Citation(Base):
 
     id = Column(Integer, primary_key=True)
 
-    type = Column(String(16), nullable=False, doc='Type of the stored publication e.g. PubMed')
-    reference = Column(String(255), nullable=False, doc='Reference identifier of the publication e.g. PubMed_ID')
-    md5 = Column(String(255), index=True)
+    db = Column(String(16), nullable=False, doc='Type of the stored publication e.g. PubMed')
+    db_id = Column(String(255), nullable=False, doc='Reference identifier of the publication e.g. PubMed_ID')
 
-    name = Column(String(255), nullable=True, doc='Journal name')
     title = Column(Text, nullable=True, doc='Title of the publication')
+    journal = Column(Text, nullable=True, doc='Journal name')
     volume = Column(Text, nullable=True, doc='Volume of the journal')
     issue = Column(Text, nullable=True, doc='Issue within the volume')
     pages = Column(Text, nullable=True, doc='Pages of the publication')
@@ -554,21 +533,21 @@ class Citation(Base):
     authors = relationship(Author, secondary=author_citation, backref='citations')
 
     __table_args__ = (
-        UniqueConstraint(CITATION_TYPE, CITATION_REFERENCE),
+        UniqueConstraint(db, db_id),
     )
 
     def __str__(self):
-        return '{}:{}'.format(self.type, self.reference)
+        return '{}:{}'.format(self.db, self.db_id)
 
     @property
     def is_pubmed(self) -> bool:
         """Return if this is a PubMed citation."""
-        return CITATION_TYPE_PUBMED == self.type
+        return CITATION_TYPE_PUBMED == self.db
 
     @property
     def is_enriched(self) -> bool:
         """Return if this citation has been enriched for name, title, and other metadata."""
-        return self.title is not None and self.name is not None
+        return all(f is not None for f in (self.title, self.journal))
 
     def to_json(self, include_id: bool = False) -> Mapping[str, Any]:
         """Create a citation dictionary that is used to recreate the edge data dictionary of a :class:`BELGraph`.
@@ -577,18 +556,18 @@ class Citation(Base):
         :return: Citation dictionary for the recreation of a :class:`BELGraph`.
         """
         result = {
-            CITATION_REFERENCE: self.reference,
-            CITATION_TYPE: self.type
+            CITATION_DB: self.db,
+            CITATION_IDENTIFIER: self.db_id,
         }
 
         if include_id:
             result['id'] = self.id
 
-        if self.name:
-            result[CITATION_NAME] = self.name
-
         if self.title:
-            result[CITATION_TITLE] = self.title
+            result[CITATION_DB_NAME] = self.title
+
+        if self.journal:
+            result[CITATION_JOURNAL] = self.journal
 
         if self.volume:
             result[CITATION_VOLUME] = self.volume
@@ -625,10 +604,12 @@ class Evidence(Base):
     citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)), nullable=False)
     citation = relationship(Citation, backref=backref('evidences'))
 
-    md5 = Column(String(255), index=True)
+    __table_args__ = (
+        UniqueConstraint(citation_id, text),
+    )
 
     def __str__(self):
-        return '{}:{}'.format(self.citation, self.md5[:8])
+        return '{}:{}:{}'.format(self.citation.db, self.citation.db_id, self.text)
 
     def to_json(self, include_id: bool = False):
         """Create a dictionary that is used to recreate the edge data dictionary for a :class:`BELGraph`.
@@ -639,7 +620,7 @@ class Evidence(Base):
         """
         result = {
             CITATION: self.citation.to_json(include_id=include_id),
-            EVIDENCE: self.text
+            EVIDENCE: self.text,
         }
 
         if include_id:
@@ -679,11 +660,8 @@ class Property(Base):
     effect = relationship(NamespaceEntry)
 
     @property
-    def side(self):
-        """Return either :data:`pybel.constants.SUBJECT` or :data:`pybel.constants.OBJECT`.
-
-        :rtype: str
-        """
+    def side(self) -> str:
+        """Return either :data:`pybel.constants.SUBJECT` or :data:`pybel.constants.OBJECT`."""
         return SUBJECT if self.is_subject else OBJECT
 
     def to_json(self):

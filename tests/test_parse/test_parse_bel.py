@@ -1996,7 +1996,7 @@ class TestTransformation(TestTokenParserBase):
         self.assertEqual(0, self.parser.graph.number_of_nodes())
         self.assertEqual(0, self.parser.graph.number_of_edges())
         self.assertEqual(0, len(self.parser.control_parser.annotations))
-        self.assertEqual(0, len(self.parser.control_parser.citation))
+        self.assertFalse(self.parser.control_parser.citation_is_set)
 
 
 class TestSemantics(unittest.TestCase):

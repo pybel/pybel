@@ -15,7 +15,7 @@ from pkg_resources import iter_entry_points
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
 from ..canonicalize import edge_to_bel
 from ..constants import (
-    ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_REFERENCE, CITATION_TYPE,
+    ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_DB, CITATION_IDENTIFIER,
     CITATION_TYPE_PUBMED, CONCEPT, DECREASES, DESCRIPTION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO,
     EVIDENCE, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_METADATA,
     GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION, HAS_PRODUCT, HAS_REACTANT,
@@ -27,7 +27,7 @@ from ..constants import (
 from ..dsl import BaseEntity, Gene, MicroRna, Protein, Rna, activity
 from ..parser.exc import BELParserWarning
 from ..typing import EdgeData
-from ..utils import hash_edge
+from ..utils import citation_dict, hash_edge
 from ..version import get_version
 
 __all__ = [
@@ -312,7 +312,7 @@ class BELGraph(nx.MultiDiGraph):
     def _iterate_citations(self) -> Iterable[Tuple[str, str]]:
         for _, _, data in self.edges(data=True):
             if CITATION in data:
-                yield data[CITATION][CITATION_TYPE], data[CITATION][CITATION_REFERENCE]
+                yield data[CITATION][CITATION_DB], data[CITATION][CITATION_IDENTIFIER]
 
     def number_of_authors(self) -> int:
         """Return the number of citations contained within the graph."""
@@ -448,10 +448,7 @@ class BELGraph(nx.MultiDiGraph):
         })
 
         if isinstance(citation, str):
-            attr[CITATION] = {
-                CITATION_TYPE: CITATION_TYPE_PUBMED,
-                CITATION_REFERENCE: citation,
-            }
+            attr[CITATION] = citation_dict(db=CITATION_TYPE_PUBMED, db_id=citation)
         elif isinstance(citation, dict):
             attr[CITATION] = citation
         else:

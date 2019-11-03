@@ -725,7 +725,7 @@ class BELParser(BaseParser):
             v,
             relation=relation,
             evidence=self.control_parser.evidence,
-            citation=self.control_parser.citation.copy(),
+            citation=self.control_parser.get_citation(),
             annotations=annotations,
             subject_modifier=subject_modifier,
             object_modifier=object_modifier,
@@ -795,7 +795,7 @@ class BELParser(BaseParser):
         return tokens
 
     def _handle_relation_checked(self, line, position, tokens):
-        if not self.control_parser.citation:
+        if not self.control_parser.citation_is_set:
             raise MissingCitationException(self.get_line_number(), line, position)
 
         if not self.control_parser.evidence:

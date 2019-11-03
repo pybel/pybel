@@ -34,7 +34,7 @@ class TemporaryCacheMixin(unittest.TestCase):
             self.connection = 'sqlite:///' + self.path
             logger.info('Test generated connection string %s', self.connection)
 
-        self.manager = Manager(connection=self.connection)
+        self.manager = Manager(connection=self.connection, autoflush=True)
         self.manager.create_all()
 
     def tearDown(self):
@@ -63,7 +63,7 @@ class TemporaryCacheClsMixin(unittest.TestCase):
             cls.connection = 'sqlite:///' + cls.path
             logger.info('Test generated connection string %s', cls.connection)
 
-        cls.manager = Manager(connection=cls.connection)
+        cls.manager = Manager(connection=cls.connection, autoflush=True)
         cls.manager.create_all()
 
     @classmethod

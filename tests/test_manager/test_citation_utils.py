@@ -8,7 +8,7 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import (
-    CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_TYPE_PUBMED,
+    CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_JOURNAL, CITATION_TYPE_PUBMED,
 )
 from pybel.dsl import Protein
 from pybel.manager.citation_utils import enrich_pubmed_citations, get_citations_by_pmids, sanitize_date
@@ -57,14 +57,13 @@ class TestCitations(TemporaryCacheMixin):
     """Tests for citations."""
 
     def setUp(self):
-        super(TestCitations, self).setUp()
+        super().setUp()
         self.u, self.v = (Protein(n(), n()) for _ in range(2))
         self.pmid = "9611787"
         self.graph = BELGraph()
         self.graph.add_increases(self.u, self.v, citation=self.pmid, evidence=n())
 
     def test_enrich(self):
-        """"""
         self.assertEqual(0, self.manager.count_citations())
         get_citations_by_pmids(manager=self.manager, pmids=[self.pmid])
         self.assertEqual(1, self.manager.count_citations())
@@ -72,8 +71,8 @@ class TestCitations(TemporaryCacheMixin):
         c = self.manager.get_citation_by_pmid(self.pmid)
         self.assertIsNotNone(c)
         self.assertIsInstance(c, Citation)
-        self.assertEqual(CITATION_TYPE_PUBMED, c.type)
-        self.assertEqual(self.pmid, c.reference)
+        self.assertEqual(CITATION_TYPE_PUBMED, c.db)
+        self.assertEqual(self.pmid, c.db_id)
 
     def test_enrich_list(self):
         pmids = [
@@ -85,7 +84,7 @@ class TestCitations(TemporaryCacheMixin):
 
         get_citations_by_pmids(manager=self.manager, pmids=pmids)
 
-        citation = self.manager.get_or_create_citation(type=CITATION_TYPE_PUBMED, reference='25818332')
+        citation = self.manager.get_or_create_citation(db=CITATION_TYPE_PUBMED, db_id='25818332')
         self.assertIsNotNone(citation)
 
     def test_enrich_list_grouped(self):
@@ -102,17 +101,17 @@ class TestCitations(TemporaryCacheMixin):
         self.assertIsNotNone(citation)
 
     def test_enrich_overwrite(self):
-        citation = self.manager.get_or_create_citation(type=CITATION_TYPE_PUBMED, reference=self.pmid)
+        citation = self.manager.get_or_create_citation(db=CITATION_TYPE_PUBMED, db_id=self.pmid)
         self.manager.session.commit()
         self.assertIsNone(citation.date)
-        self.assertIsNone(citation.name)
+        self.assertIsNone(citation.title)
 
         enrich_pubmed_citations(manager=self.manager, graph=self.graph)
 
         _, _, d = list(self.graph.edges(data=True))[0]
         citation_dict = d[CITATION]
 
-        self.assertIn(CITATION_NAME, citation_dict)
+        self.assertIn(CITATION_JOURNAL, citation_dict)
         self.assertIn(CITATION_DATE, citation_dict)
         self.assertEqual('1998-05-01', citation_dict[CITATION_DATE])
 
@@ -128,7 +127,7 @@ class TestCitations(TemporaryCacheMixin):
         _, _, d = list(self.graph.edges(data=True))[0]
         citation_dict = d[CITATION]
 
-        self.assertIn(CITATION_NAME, citation_dict)
+        self.assertIn(CITATION_JOURNAL, citation_dict)
 
         self.assertIn(CITATION_DATE, citation_dict)
         self.assertEqual('1998-05-01', citation_dict[CITATION_DATE])

@@ -11,7 +11,7 @@ from typing import Dict, Iterable, List, Optional, Set, Tuple, Union
 
 import requests
 
-from ..constants import CITATION, CITATION_REFERENCE, CITATION_TYPE_PUBMED
+from ..constants import CITATION, CITATION_IDENTIFIER, CITATION_TYPE_PUBMED
 from ..struct.filters import filter_edges
 from ..struct.filters.edge_predicates import has_pubmed
 from ..struct.summary.provenance import get_pubmed_identifiers
@@ -108,8 +108,8 @@ def enrich_citation_model(manager, citation, p) -> bool:
         logger.warning('Error downloading PubMed')
         return False
 
-    citation.name = p['fulljournalname']
     citation.title = p['title']
+    citation.journal = p['fulljournalname']
     citation.volume = p['volume']
     citation.issue = p['issue']
     citation.pages = p['pages']
@@ -123,7 +123,6 @@ def enrich_citation_model(manager, citation, p) -> bool:
                 citation.authors.append(author_model)
 
     publication_date = p['pubdate']
-
     sanitized_publication_date = sanitize_date(publication_date)
     if sanitized_publication_date:
         citation.date = datetime.strptime(sanitized_publication_date, '%Y-%m-%d')
@@ -133,11 +132,12 @@ def enrich_citation_model(manager, citation, p) -> bool:
     return True
 
 
-def get_citations_by_pmids(manager,
-                           pmids: Iterable[Union[str, int]],
-                           group_size: Optional[int] = None,
-                           sleep_time: Optional[int] = None,
-                           ) -> Tuple[Dict[str, Dict], Set[str]]:
+def get_citations_by_pmids(
+    manager,
+    pmids: Iterable[Union[str, int]],
+    group_size: Optional[int] = None,
+    sleep_time: Optional[int] = None,
+) -> Tuple[Dict[str, Dict], Set[str]]:
     """Get citation information for the given list of PubMed identifiers using the NCBI's eUtils service.
 
     :type manager: pybel.Manager
@@ -157,9 +157,9 @@ def get_citations_by_pmids(manager,
     unenriched_pmids = {}
 
     for pmid in pmids:
-        citation = manager.get_or_create_citation(type=CITATION_TYPE_PUBMED, reference=pmid)
+        citation = manager.get_or_create_citation(db=CITATION_TYPE_PUBMED, db_id=pmid)
 
-        if not citation.date or not citation.name or not citation.authors:
+        if not citation.is_enriched:
             unenriched_pmids[pmid] = citation
             continue
 
@@ -209,11 +209,12 @@ def get_citations_by_pmids(manager,
     return result, errors
 
 
-def enrich_pubmed_citations(manager,
-                            graph,
-                            group_size: Optional[int] = None,
-                            sleep_time: Optional[int] = None,
-                            ) -> Set[str]:
+def enrich_pubmed_citations(
+    manager,
+    graph,
+    group_size: Optional[int] = None,
+    sleep_time: Optional[int] = None,
+) -> Set[str]:
     """Overwrite all PubMed citations with values from NCBI's eUtils lookup service.
 
     Sets authors as list, so probably a good idea to run :func:`pybel_tools.mutation.serialize_authors` before
@@ -229,7 +230,7 @@ def enrich_pubmed_citations(manager,
     pmid_data, errors = get_citations_by_pmids(manager, pmids=pmids, group_size=group_size, sleep_time=sleep_time)
 
     for u, v, k in filter_edges(graph, has_pubmed):
-        pmid = graph[u][v][k][CITATION][CITATION_REFERENCE].strip()
+        pmid = graph[u][v][k][CITATION][CITATION_IDENTIFIER].strip()
 
         if pmid not in pmid_data:
             logger.warning('Missing data for PubMed identifier: %s', pmid)
