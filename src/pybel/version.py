@@ -7,7 +7,7 @@ __all__ = [
     'get_version',
 ]
 
-VERSION = '0.14.1-dev'
+VERSION = '0.14.1'
 
 
 def get_version() -> str:
