@@ -40,7 +40,7 @@ SEMANTIC_VERSION_STRING_RE = re.compile(
 
 MALFORMED_VERSION_STRING_RE = re.compile(r'(?P<major>\d+)(\.(?P<minor>\d+)(\.(?P<patch>\d+))?)?')
 
-NAMESPACE_BLACKLIST = {'SCOMP', 'SFAM'}
+NAMESPACE_BLACKLIST = {}  # TODO: {'SCOMP', 'SFAM'}
 
 
 class MetadataParser(BaseParser):
