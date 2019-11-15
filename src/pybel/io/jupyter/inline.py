@@ -8,7 +8,7 @@ from typing import Mapping, Optional
 from IPython.display import Javascript
 
 from .constants import DEFAULT_COLOR_MAP
-from ..jinja_utils import render_template
+from ..jinja_utils import build_template_renderer
 from ..nodelink import to_nodelink_jsons
 from ...struct import BELGraph
 
@@ -19,6 +19,9 @@ __all__ = [
 
 DEFAULT_WIDTH = 1000
 DEFAULT_HEIGHT = 650
+
+#: Renders templates from pybel.io.jupyter.templates folder
+render_template = build_template_renderer(__file__)
 
 
 def _generate_id() -> str:
