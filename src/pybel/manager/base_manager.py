@@ -53,7 +53,7 @@ def build_engine_session(
     engine = create_engine(connection, echo=echo)
 
     if autoflush is None:
-        autoflush = config.get('PYBEL_MANAGER_AUTOFLUSH', False)
+        autoflush = config.get('PYBEL_MANAGER_AUTOFLUSH', True)
 
     if autocommit is None:
         autocommit = config.get('PYBEL_MANAGER_AUTOCOMMIT', False)
