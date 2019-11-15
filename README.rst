@@ -1,13 +1,9 @@
-.. image:: docs/source/PyBEL-square-100.png
-   :height: 150px
-   :align: center
-
 PyBEL |zenodo| |build| |windows_build| |coverage| |documentation|
 =================================================================
 `PyBEL <http://pybel.readthedocs.io>`_ is a pure Python package for parsing and handling biological networks encoded in
 the `Biological Expression Language <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_
 (BEL). It also facilitates data interchange between common formats and databases such as
-`NetworkX <http://networkx.github.io/>`_, JSON, CSV, SIF, `Cytoscape <http://www.cytoscape.org/>`_,
+`NetworkX <http://networkx.github.io/>`_, JSON, JGIF, CSV, SIF, `Cytoscape <http://www.cytoscape.org/>`_,
 `CX <http://www.home.ndexbio.org/data-model/>`_, `NDEx <https://github.com/pybel/pybel2cx>`_, SQL, and
 `Neo4J <https://neo4j.com>`_.
 
@@ -23,31 +19,6 @@ If you find PyBEL useful for your work, please consider citing:
 
 .. [1] Hoyt, C. T., *et al.* (2017). `PyBEL: a Computational Framework for Biological Expression Language
        <https://doi.org/10.1093/bioinformatics/btx660>`_. *Bioinformatics*, 34(December), 1–2.
-
-Getting Started
----------------
-This example illustrates how the a BEL document from the `Human Brain Pharmacome
-<https://raw.githubusercontent.com/pharmacome/knowledge>`_ project can be loaded from GitHub.
-
-.. code-block:: python
-
-   >>> import pybel
-   >>> url = 'https://raw.githubusercontent.com/pharmacome/knowledge/master/hbp_knowledge/proteostasis/kim2013.bel'
-   >>> graph = pybel.from_url(url)
-
-More examples can be found in the `documentation <http://pybel.readthedocs.io>`_ and in the
-`PyBEL Notebooks <https://github.com/pybel/pybel-notebooks>`_ repository.
-
-PyBEL also installs a command line interface with the command :code:`pybel` for simple utilities such as data
-conversion. In this example, a BEL document is compiled then exported to `GraphML <http://graphml.graphdrawing.org/>`_
-for viewing in Cytoscape.
-
-.. code-block:: sh
-
-    $ pybel compile ~/Desktop/example.bel
-    $ pybel serialize ~/Desktop/example.bel --graphml ~/Desktop/example.graphml
-
-In Cytoscape, open with :code:`Import > Network > From File`.
 
 Installation |pypi_version| |python_versions| |pypi_license|
 ------------------------------------------------------------
@@ -66,6 +37,45 @@ or from the latest code on `GitHub <https://github.com/pybel/pybel>`_ with:
 
 See the `installation documentation <http://pybel.readthedocs.io/en/latest/installation.html>`_ for more advanced
 instructions. Also, check the change log at `CHANGELOG.rst <https://github.com/pybel/pybel/blob/master/CHANGELOG.rst>`_.
+
+Getting Started
+---------------
+More examples can be found in the `documentation <http://pybel.readthedocs.io>`_ and in the
+`PyBEL Notebooks <https://github.com/pybel/pybel-notebooks>`_ repository.
+
+Compiling from the REPL
+~~~~~~~~~~~~~~~~~~~~~~~
+This example illustrates how the a BEL document from the `Human Brain Pharmacome
+<https://raw.githubusercontent.com/pharmacome/knowledge>`_ project can be loaded from GitHub.
+
+.. code-block:: python
+
+   >>> import pybel
+   >>> url = 'https://raw.githubusercontent.com/pharmacome/knowledge/master/hbp_knowledge/proteostasis/kim2013.bel'
+   >>> graph = pybel.from_url(url)
+
+Displaying a BEL Graph in Jupyter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+After installing `jinja2` and `ipython`, BEL graphs can be displayed in Jupyter notebooks.
+
+.. code-block:: python
+
+   >>> from pybel.examples import sialic_acid_graph
+   >>> from pybel.io.jupyter import to_jupyter
+   >>> to_jupyter(sialic_acid_graph)
+
+Using the CLI
+~~~~~~~~~~~~~
+PyBEL also installs a command line interface with the command :code:`pybel` for simple utilities such as data
+conversion. In this example, a BEL document is compiled then exported to `GraphML <http://graphml.graphdrawing.org/>`_
+for viewing in Cytoscape.
+
+.. code-block:: sh
+
+    $ pybel compile ~/Desktop/example.bel
+    $ pybel serialize ~/Desktop/example.bel --graphml ~/Desktop/example.graphml
+
+In Cytoscape, open with :code:`Import > Network > From File`.
 
 Contributing
 ------------
