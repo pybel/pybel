@@ -22,7 +22,7 @@ Citation
 If you find PyBEL useful for your work, please consider citing:
 
 .. [1] Hoyt, C. T., *et al.* (2017). `PyBEL: a Computational Framework for Biological Expression Language
-       <https://doi.org/10.1093/bioinformatics/btx660>`_. Bioinformatics, 34(December), 1–2.
+       <https://doi.org/10.1093/bioinformatics/btx660>`_. *Bioinformatics*, 34(December), 1–2.
 
 Getting Started
 ---------------
@@ -65,13 +65,13 @@ or from the latest code on `GitHub <https://github.com/pybel/pybel>`_ with:
     $ pip install git+https://github.com/pybel/pybel.git
 
 See the `installation documentation <http://pybel.readthedocs.io/en/latest/installation.html>`_ for more advanced
-instructions. Also, check the change log at `CHANGELOG.rst <https://github.com/pybel/pybel/blob/develop/CHANGELOG.rst>`_.
+instructions. Also, check the change log at `CHANGELOG.rst <https://github.com/pybel/pybel/blob/master/CHANGELOG.rst>`_.
 
 Contributing
 ------------
 Contributions, whether filing an issue, making a pull request, or forking, are appreciated. See
-`CONTRIBUTING.rst <https://github.com/pybel/pybel/blob/develop/CONTRIBUTING.rst>`_ for more information on getting
-involved. Please add your name to `AUTHORS.rst <https://github.com/pybel/pybel/blob/develop/AUTHORS.rst>`_!
+`CONTRIBUTING.rst <https://github.com/pybel/pybel/blob/master/CONTRIBUTING.rst>`_ for more information on getting
+involved. Please add your name to `AUTHORS.rst <https://github.com/pybel/pybel/blob/master/AUTHORS.rst>`_!
 
 Acknowledgements
 ----------------
@@ -121,8 +121,8 @@ Links
     :alt: Current version on PyPI
 
 .. |pypi_license| image:: https://img.shields.io/pypi/l/PyBEL.svg
-    :target: https://github.com/pybel/pybel/blob/develop/LICENSE
-    :alt: Apache 2.0 License
+    :target: https://github.com/pybel/pybel/blob/master/LICENSE
+    :alt: MIT License
 
 .. |zenodo| image:: https://zenodo.org/badge/68376693.svg
     :target: https://zenodo.org/badge/latestdoi/68376693
