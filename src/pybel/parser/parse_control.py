@@ -234,9 +234,9 @@ class ControlParser(BaseParser):
 
         else:
             if 3 == len(values):
-                logger.warning('Throwing away JOURNAL entry in position 2')
+                logger.debug('Throwing away JOURNAL entry in position 2')
             else:
-                logger.warning('Throwing away JOURNAL entry in position 2 and everything after position 3')
+                logger.debug('Throwing away JOURNAL entry in position 2 and everything after position 3')
 
             citation_db_id = values[2]
 
