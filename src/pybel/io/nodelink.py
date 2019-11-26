@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-"""Conversion functions for BEL graphs with Node-Link JSON."""
+"""Conversion functions for BEL graphs with node-link JSON."""
 
+import gzip
 import json
 from itertools import chain, count
 from operator import methodcaller
@@ -19,15 +20,17 @@ from ..utils import tokenize_version
 __all__ = [
     'to_nodelink',
     'to_nodelink_file',
+    'to_nodelink_gz',
     'to_nodelink_jsons',
     'from_nodelink',
     'from_nodelink_file',
+    'from_nodelink_gz',
     'from_nodelink_jsons',
 ]
 
 
 def to_nodelink(graph: BELGraph) -> Mapping[str, Any]:
-    """Convert this graph to a Node-Link JSON object."""
+    """Convert this graph to a node-link JSON object."""
     graph_json_dict = _to_nodelink_json_helper(graph)
 
     # Convert annotation list definitions (which are sets) to canonicalized/sorted lists
@@ -41,7 +44,7 @@ def to_nodelink(graph: BELGraph) -> Mapping[str, Any]:
 
 @open_file(1, mode='w')
 def to_nodelink_file(graph: BELGraph, path: Union[str, TextIO], **kwargs) -> None:
-    """Write this graph as Node-Link JSON to a file.
+    """Write this graph as node-link JSON to a file.
 
     :param graph: A BEL graph
     :param path: A path or file-like
@@ -50,14 +53,19 @@ def to_nodelink_file(graph: BELGraph, path: Union[str, TextIO], **kwargs) -> Non
     json.dump(graph_json_dict, path, ensure_ascii=False, **kwargs)
 
 
+def to_nodelink_gz(graph, path: str, **kwargs) -> None:
+    """Write a graph as node-link JSON to a gzip file."""
+    with gzip.open(path, 'wt') as file:
+        json.dump(to_nodelink(graph), file, ensure_ascii=False, **kwargs)
+
+
 def to_nodelink_jsons(graph: BELGraph, **kwargs) -> str:
-    """Dump this graph as a Node-Link JSON object to a string."""
-    graph_json_str = to_nodelink(graph)
-    return json.dumps(graph_json_str, ensure_ascii=False, **kwargs)
+    """Dump this graph as a node-link JSON object to a string."""
+    return json.dumps(to_nodelink(graph), ensure_ascii=False, **kwargs)
 
 
 def from_nodelink(graph_json_dict: Mapping[str, Any], check_version: bool = True) -> BELGraph:
-    """Build a graph from Node-Link JSON Object."""
+    """Build a graph from node-link JSON Object."""
     pybel_version = tokenize_version(graph_json_dict['graph']['pybel_version'])
     if pybel_version[1] < 14:  # if minor version is less than 14
         raise ValueError('Invalid NodeLink JSON from old version of PyBEL (v{}.{}.{})'.format(*pybel_version))
@@ -67,18 +75,22 @@ def from_nodelink(graph_json_dict: Mapping[str, Any], check_version: bool = True
 
 @open_file(0, mode='r')
 def from_nodelink_file(path: Union[str, TextIO], check_version: bool = True) -> BELGraph:
-    """Build a graph from the Node-Link JSON contained in the given file.
+    """Build a graph from the node-link JSON contained in the given file.
 
     :param path: A path or file-like
     """
-    graph_json_dict = json.load(path)
-    return from_nodelink(graph_json_dict, check_version=check_version)
+    return from_nodelink(json.load(path), check_version=check_version)
+
+
+def from_nodelink_gz(path: str) -> BELGraph:
+    """Read a graph as node-link JSON from a gzip file."""
+    with gzip.open(path, 'rt') as file:
+        return from_nodelink(json.load(file))
 
 
 def from_nodelink_jsons(graph_json_str: str, check_version: bool = True) -> BELGraph:
-    """Read a BEL graph from a Node-Link JSON string."""
-    graph_json_dict = json.loads(graph_json_str)
-    return from_nodelink(graph_json_dict, check_version=check_version)
+    """Read a BEL graph from a node-link JSON string."""
+    return from_nodelink(json.loads(graph_json_str), check_version=check_version)
 
 
 def _to_nodelink_json_helper(graph: BELGraph) -> Mapping[str, Any]:

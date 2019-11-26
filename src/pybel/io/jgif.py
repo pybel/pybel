@@ -7,6 +7,8 @@ JSON. Interchange with this format provides compatibilty with other software and
 `Causal Biological Network Database <http://causalbionet.com/>`_.
 """
 
+import gzip
+import json
 import logging
 from collections import defaultdict
 from operator import methodcaller
@@ -28,8 +30,13 @@ from ..version import get_version
 __all__ = [
     'from_cbn_jgif',
     'from_jgif',
+    'from_jgif_file',
+    'from_jgif_gz',
+    'from_jgif_jsons',
     'to_jgif',
     'to_jgif_file',
+    'to_jgif_gz',
+    'to_jgif_jsons',
     'post_jgif',
 ]
 
@@ -287,6 +294,26 @@ def from_jgif(graph_jgif_dict):
     return graph
 
 
+@open_file(0, mode='r')
+def from_jgif_file(path: Union[str, TextIO]) -> BELGraph:
+    """Build a graph from the JGIF JSON contained in the given file.
+
+    :param path: A path or file-like
+    """
+    return from_jgif(json.load(path))
+
+
+def from_jgif_gz(path: str) -> BELGraph:
+    """Read a graph as JGIF JSON from a gzip file."""
+    with gzip.open(path, 'rt') as file:
+        return from_jgif(json.load(file))
+
+
+def from_jgif_jsons(graph_json_str: str) -> BELGraph:
+    """Read a BEL graph from a JGIF JSON string."""
+    return from_jgif(json.loads(graph_json_str))
+
+
 def to_jgif(graph):
     """Build a JGIF dictionary from a BEL graph.
 
@@ -372,18 +399,21 @@ def to_jgif(graph):
 def to_jgif_file(graph: BELGraph, file: Union[str, TextIO], **kwargs) -> None:
     """Write JGIF to a file."""
     jgif = to_jgif(graph)
-    json.dump(jgif, file, **kwargs)
+    json.dump(jgif, file, ensure_ascii=False, **kwargs)
+
+
+def to_jgif_gz(graph, path: str, **kwargs) -> None:
+    """Write a graph as JGIF JSON to a gzip file."""
+    with gzip.open(path, 'wt') as file:
+        json.dump(to_jgif(graph), file, ensure_ascii=False, **kwargs)
+
+
+def to_jgif_jsons(graph: BELGraph, **kwargs) -> str:
+    """Dump this graph as a JGIF JSON object to a string."""
+    return json.dumps(to_jgif(graph), ensure_ascii=False, **kwargs)
 
 
 def post_jgif(graph: BELGraph, url: Optional[str] = None, **kwargs) -> requests.Response:
     """Post the JGIF to a given URL."""
     jgif = to_jgif(graph)
     return requests.post(url, json=jgif, **kwargs)
-
-
-if __name__ == '__main__':
-    import json
-    from pybel.examples import sialic_acid_graph
-
-    with open('/Users/cthoyt/Desktop/example.json', 'w') as file:
-        json.dump(to_jgif(sialic_acid_graph), file, indent=2)

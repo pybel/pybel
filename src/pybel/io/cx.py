@@ -13,6 +13,7 @@ of Cytoscape.
     - CX Support for Cytoscape.js on the Cytoscape `App Store <http://apps.cytoscape.org/apps/cxsupport>`_
 """
 
+import gzip
 import json
 import logging
 import time
@@ -37,8 +38,12 @@ from ..utils import expand_dict, flatten_dict
 __all__ = [
     'to_cx',
     'to_cx_file',
+    'to_cx_gz',
+    'to_cx_jsons',
     'from_cx',
     'from_cx_file',
+    'from_cx_gz',
+    'from_cx_jsons',
     'NDEX_SOURCE_FORMAT',
 ]
 
@@ -335,6 +340,17 @@ def to_cx_file(graph: BELGraph, path: Union[str, TextIO], indent: Optional[int] 
     json.dump(graph_cx_json_dict, path, ensure_ascii=False, indent=indent, **kwargs)
 
 
+def to_cx_gz(graph, path: str, **kwargs) -> None:
+    """Write a graph as CX JSON to a gzip file."""
+    with gzip.open(path, 'wt') as file:
+        json.dump(to_cx(graph), file, ensure_ascii=False, **kwargs)
+
+
+def to_cx_jsons(graph: BELGraph, **kwargs) -> str:
+    """Dump this graph as a CX JSON object to a string."""
+    return json.dumps(to_cx(graph), ensure_ascii=False, **kwargs)
+
+
 def _iterate_list_of_dicts(list_of_dicts: List[Dict]):
     """Iterate over a list of dictionaries.
 
@@ -550,3 +566,14 @@ def from_cx_file(path: Union[str, TextIO]) -> BELGraph:
     :return: A BEL Graph representing the CX graph contained in the file
     """
     return from_cx(json.load(path))
+
+
+def from_cx_gz(path: str) -> BELGraph:
+    """Read a graph as CX JSON from a gzip file."""
+    with gzip.open(path, 'rt') as file:
+        return from_cx(json.load(file))
+
+
+def from_cx_jsons(graph_json_str: str) -> BELGraph:
+    """Read a BEL graph from a CX JSON string."""
+    return from_cx(json.loads(graph_json_str))
