@@ -24,7 +24,7 @@ from ..constants import (
     ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, PRODUCTS, REACTANTS, REGULATES, RELATION, SUBJECT, TRANSCRIBED_TO,
     TRANSLATED_TO, VARIANTS,
 )
-from ..dsl import BaseEntity, Gene, MicroRna, Protein, Rna, activity
+from ..dsl import BaseEntity, Gene, MicroRna, Protein, ProteinModification, Rna, activity
 from ..parser.exc import BELParserWarning
 from ..typing import EdgeData
 from ..utils import citation_dict, hash_edge
@@ -483,11 +483,53 @@ class BELGraph(nx.MultiDiGraph):
     add_negative_correlation = partialmethod(add_qualified_edge, relation=NEGATIVE_CORRELATION)
     add_causes_no_change = partialmethod(add_qualified_edge, relation=CAUSES_NO_CHANGE)
 
-    add_inhibits = partialmethod(add_directly_increases, object_modifier=activity())
+    add_inhibits = partialmethod(add_directly_decreases, object_modifier=activity())
     """Add an "inhibits" relationship.
 
-    A more specific version of :meth:`add_decreases` that automatically populates the object modifier with an
-    activity."""
+    A more specific version of :meth:`add_directly_decreases` that automatically
+    populates the object modifier with an activity."""
+
+    add_activates = partialmethod(add_directly_increases, object_modifier=activity())
+    """Add an "activates" relationship.
+
+    A more specific version of :meth:`add_directly_increases` that automatically
+    populates the object modifier with an activity."""
+
+    def _modify(
+        self,
+        add_edge_fn,
+        u,
+        v,
+        name,
+        code: Optional[str] = None,
+        position: Optional[int] = None,
+        *,
+        evidence: str,
+        citation: Union[str, Mapping[str, str]],
+        annotations: Optional[AnnotationsHint] = None,
+        subject_modifier: Optional[Mapping] = None,
+        object_modifier: Optional[Mapping] = None,
+        **attr
+    ):
+        """Add a simple modification."""
+        return add_edge_fn(
+            u,
+            v.with_variants(ProteinModification(
+                name=name, code=code, position=position,
+            )),
+            evidence=evidence,
+            citation=citation,
+            annotations=annotations,
+            subject_modifier=subject_modifier,
+            object_modifier=object_modifier,
+            **attr
+        )
+
+    add_phosphorylates = partialmethod(_modify, add_edge_fn=add_increases, name='Ph')
+    """Add an increase of modified object with phosphorylation."""
+
+    add_dephosphorylates = partialmethod(_modify, add_edge_fn=add_decreases, name='Ph')
+    """Add a decrease of modified object with phosphorylation."""
 
     def add_node_from_data(self, node: BaseEntity) -> None:
         """Add an entity to the graph."""
@@ -503,7 +545,6 @@ class BELGraph(nx.MultiDiGraph):
 
         elif MEMBERS in node:
             for member in node[MEMBERS]:
-                # FIXME switch to self.add_part_of(member, node)
                 self.add_part_of(member, node)
 
         elif PRODUCTS in node and REACTANTS in node:

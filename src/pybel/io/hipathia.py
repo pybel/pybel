@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-"""Convert a BEL graph to HIPATHIA inputs.
+"""Convert a BEL graph to Hipathia inputs.
 
 Input
 -----
 SIF File
 ~~~~~~~~
-- Text file with three columns separated by tabulars.
+- Text file with three columns separated by tabs.
 - Each row represents an interaction in the pathway. First column is the source node, third column the target node,
   and the second is the type of relation between them.
 - Only activation and inhibition interactions are allowed.
@@ -65,94 +65,90 @@ from pybel.struct import get_children
 
 __all__ = [
     'to_hipathia',
+    'HipathiaConverter',
 ]
 
 logger = logging.getLogger(__name__)
 
 
 def to_hipathia(graph: BELGraph, directory: str):
-    """Export HIPATHIA artifacts for the graph."""
-    converter = HipathiaConverter(graph, directory)
-    bel_node_to_hipathia_node, bel_node_to_hipathia_genes, g = converter.convert()
-    converter.output(bel_node_to_hipathia_node, bel_node_to_hipathia_genes, g)
+    """Export Hipathia artifacts for the graph."""
+    converter = HipathiaConverter(graph)
+    converter.output(directory=directory)
 
 
 class HipathiaConverter:
-    def __init__(self, graph, directory):
-        if not os.path.exists(directory):
-            raise ValueError(f'directory does not exist: {directory}')
+    """A data structure that helps convert a graph to the Hipathia format."""
 
-        self.directory = directory
+    def __init__(self, graph: BELGraph):
         self.graph = graph
         self.name = (self.graph.name or 'pybel-export').lower().replace(' ', '_').replace('-', '_')
 
-    def convert(self):
-        bel_node_to_hipathia_node = {}
-        bel_node_to_hipathia_genes = {}
-        node_counter = 0
-
-        def _get_or_create_node(node: Union[Protein, ComplexAbundance, Abundance]):
-            _node = bel_node_to_hipathia_node.get(node)
-
-            if _node is not None:
-                return _node
-
-            elif isinstance(node, (Abundance, Protein)):
-                nonlocal node_counter
-                node_counter += 1
-                _node = bel_node_to_hipathia_node[node] = f'N-{self.name}-{node_counter}'
-
-                if node.namespace.lower() in {'hgnc', 'entrez', 'ncbigene'}:
-                    bel_node_to_hipathia_genes[node] = [node]
-                elif node.namespace.lower() in {'fplx'}:
-                    bel_node_to_hipathia_genes[node] = get_children(self.graph, node)
-
-                return _node
-
-            elif isinstance(node, ComplexAbundance):
-                pass
-
-            logger.info(f'Unhandled node type: {type(node)} - {node}')
-
-        g = nx.MultiDiGraph()
-
-        def _add(_u, _v, _relation):
-            _u = _get_or_create_node(_u)
-            if _u is None:
-                return
-            _v = _get_or_create_node(_v)
-            if _v is None:
-                return
-            return g.add_edge(_u, _v, relation=_relation)
+        self.bel_node_to_hipathia_node = {}
+        self.bel_node_to_hipathia_genes = {}
+        self.node_counter = 0
+        self.g = nx.MultiDiGraph()
 
         for u, v, d in sorted(self.graph.edges(data=True)):
             relation = d[RELATION]
             if isinstance(u, Protein) and isinstance(v, Protein):
                 if relation == DIRECTLY_INCREASES:
-                    _add(u, v, 'activation')
+                    self._add(u, v, 'activation')
                 elif relation == DIRECTLY_DECREASES:
-                    _add(u, v, 'inhibition')
+                    self._add(u, v, 'inhibition')
             # if isinstance(u, Protein) and isinstance(v, ComplexAbundance):
 
-        return bel_node_to_hipathia_node, bel_node_to_hipathia_genes, g
+    def _add(self, _u, _v, _relation):
+        _u = self._get_or_create_node(_u)
+        if _u is None:
+            return
+        _v = self._get_or_create_node(_v)
+        if _v is None:
+            return
+        return self.g.add_edge(_u, _v, relation=_relation)
 
-    def output(self, bel_node_to_hipathia_node, bel_node_to_hipathia_genes, g):
-        att_path = os.path.join(self.directory, f'{self.name}.att.tsv')
-        sif_path = os.path.join(self.directory, f'{self.name}.sif.tsv')
-        fig_path = os.path.join(self.directory, f'{self.name}.png')
+    def _get_or_create_node(self, node: Union[Protein, ComplexAbundance, Abundance]):
+        _node = self.bel_node_to_hipathia_node.get(node)
+
+        if _node is not None:
+            return _node
+
+        elif isinstance(node, (Abundance, Protein)):
+            self.node_counter += 1
+            _node = self.bel_node_to_hipathia_node[node] = f'N-{self.name}-{self.node_counter}'
+
+            if node.namespace.lower() in {'hgnc', 'entrez', 'ncbigene'}:
+                self.bel_node_to_hipathia_genes[node] = [node]
+            elif node.namespace.lower() in {'fplx'}:
+                self.bel_node_to_hipathia_genes[node] = get_children(self.graph, node)
+
+            return _node
+
+        elif isinstance(node, ComplexAbundance):
+            pass
+
+        logger.info(f'Unhandled node type: {type(node)} - {node}')
+
+    def output(self, directory: str):
+        """Output the results to the given directory."""
+        if not os.path.exists(directory):
+            raise ValueError(f'directory does not exist: {directory}')
+        att_path = os.path.join(directory, f'{self.name}.att.tsv')
+        sif_path = os.path.join(directory, f'{self.name}.sif.tsv')
+        fig_path = os.path.join(directory, f'{self.name}.png')
 
         with open(sif_path, 'w') as file:
-            for u, v, d in g.edges(data=True):
+            for u, v, d in self.g.edges(data=True):
                 print(u, d['relation'], v, sep='\t', file=file)
 
-        pos = nx.spring_layout(g)
+        pos = nx.spring_layout(self.g)
         min_x = min(x for x, y in pos.values())
         min_y = min(y for x, y in pos.values())
 
         def _get_single_gene_list(node: Union[Protein, Abundance]) -> str:
             return ','.join(
                 n.identifier
-                for n in bel_node_to_hipathia_genes[node]
+                for n in self.bel_node_to_hipathia_genes[node]
             )
 
         def _get_genes_list(node) -> str:
@@ -170,7 +166,7 @@ class HipathiaConverter:
         with open(att_path, 'w') as file:
             print('ID', 'label', 'X'', Y', 'color', 'shape', 'type', 'label.cex', 'label.color', 'width', 'height',
                   'genesList', sep='\t', file=file)
-            for bel_node, hipathia_node in bel_node_to_hipathia_node.items():
+            for bel_node, hipathia_node in self.bel_node_to_hipathia_node.items():
                 x, y = pos[hipathia_node]
                 print(
                     hipathia_node,  # ID
@@ -195,7 +191,7 @@ class HipathiaConverter:
             logger.info('could not import matplotlib')
         else:
             fig, ax = plt.subplots()
-            nx.draw(g, pos, ax=ax, with_labels=True)
+            nx.draw(self.g, pos, ax=ax, with_labels=True)
             fig.savefig(fig_path)
 
 
