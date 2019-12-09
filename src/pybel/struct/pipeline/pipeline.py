@@ -40,6 +40,7 @@ class Pipeline:
     >>> example.append(enrich_protein_and_rna_origins)
     >>> example.append(prune_protein_rna_origins)
     >>> result = example.run(graph)
+
     """
 
     def __init__(self, protocol: Optional[Iterable[Dict]] = None):
@@ -149,10 +150,10 @@ class Pipeline:
         :return: This pipeline for fluid query building
 
         Example:
-
         >>> p1 = Pipeline.from_functions(['enrich_protein_and_rna_origins'])
         >>> p2 = Pipeline.from_functions(['remove_pathologies'])
         >>> p1.extend(p2)
+
         """
         for data in protocol:
             name, args, kwargs = _get_protocol_tuple(data)
@@ -234,7 +235,8 @@ class Pipeline:
             """Apply the enclosed function with the universe given as the first argument."""
             if self.universe is None:
                 raise MissingUniverseError(
-                    'Can not run universe function [{}] - No universe is set'.format(func.__name__))
+                    'Can not run universe function [{}] - No universe is set'.format(func.__name__),
+                )
 
             return func(self.universe, graph, *args, **kwargs)
 
@@ -298,15 +300,17 @@ class Pipeline:
         :param meta: either union or intersection
         :param pipelines:
         """
-        return Pipeline(protocol=[
-            {
-                'meta': meta,
-                'pipelines': [
-                    pipeline.protocol
-                    for pipeline in pipelines
-                ]
-            },
-        ])
+        return Pipeline(
+            protocol=[
+                {
+                    'meta': meta,
+                    'pipelines': [
+                        pipeline.protocol
+                        for pipeline in pipelines
+                    ],
+                },
+            ],
+        )
 
     @staticmethod
     def union(pipelines: Iterable['Pipeline']) -> 'Pipeline':

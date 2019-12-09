@@ -7,12 +7,6 @@ This module maintains the strings used throughout the PyBEL codebase to promote 
 
 from .config import connection
 
-OPENBEL_DOMAIN = 'http://resources.openbel.org'
-
-FRAUNHOFER_RESOURCES = 'https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path='
-OPENBEL_NAMESPACE_RESOURCES = OPENBEL_DOMAIN + '/belframework/20150611/namespace/'
-OPENBEL_ANNOTATION_RESOURCES = OPENBEL_DOMAIN + '/belframework/20150611/annotation/'
-
 
 def get_cache_connection() -> str:
     """Get the preferred RFC-1738 database connection string.
@@ -43,14 +37,14 @@ CITATION_TYPE_OTHER = 'Other'
 #: The valid citation types
 #: .. seealso:: https://wiki.openbel.org/display/BELNA/Citation
 CITATION_TYPES = {
-    CITATION_TYPE_BOOK,
-    CITATION_TYPE_PUBMED,
-    CITATION_TYPE_PMC,
-    CITATION_TYPE_JOURNAL,
-    CITATION_TYPE_ONLINE,
-    CITATION_TYPE_URL,
-    CITATION_TYPE_DOI,
-    CITATION_TYPE_OTHER,
+    CITATION_TYPE_BOOK: None,
+    CITATION_TYPE_PUBMED: 'pmid',
+    CITATION_TYPE_PMC: 'pmc',
+    CITATION_TYPE_JOURNAL: None,
+    CITATION_TYPE_ONLINE: None,
+    CITATION_TYPE_URL: None,
+    CITATION_TYPE_DOI: 'doi',
+    CITATION_TYPE_OTHER: None,
 }
 
 NAMESPACE_DOMAIN_BIOPROCESS = 'BiologicalProcess'
@@ -67,20 +61,18 @@ NAMESPACE_DOMAIN_TYPES = {
 }
 
 #: Represents the key for the citation type in a citation dictionary
-CITATION_TYPE = 'type'
-#: Represents the key for the citation name in a citation dictionary
-CITATION_NAME = 'name'
+CITATION_DB = 'db'
 #: Represents the key for the citation reference in a citation dictionary
-CITATION_REFERENCE = 'reference'
+CITATION_IDENTIFIER = 'db_id'
+
+#: Represents the key for the optional PyBEL citation title entry in a citation dictionary
+CITATION_DB_NAME = 'db_name'
 #: Represents the key for the citation date in a citation dictionary
 CITATION_DATE = 'date'
 #: Represents the key for the citation authors in a citation dictionary
 CITATION_AUTHORS = 'authors'
 #: Represents the key for the citation comment in a citation dictionary
-CITATION_COMMENTS = 'comments'
-
-#: Represents the key for the optional PyBEL citation title entry in a citation dictionary
-CITATION_TITLE = 'title'
+CITATION_JOURNAL = 'db_name'
 #: Represents the key for the optional PyBEL citation volume entry in a citation dictionary
 CITATION_VOLUME = 'volume'
 #: Represents the key for the optional PyBEL citation issue entry in a citation dictionary
@@ -91,9 +83,6 @@ CITATION_PAGES = 'pages'
 CITATION_FIRST_AUTHOR = 'first'
 #: Represents the key for the optional PyBEL citation last author entry in a citation dictionary
 CITATION_LAST_AUTHOR = 'last'
-
-#: Represents the ordering of the citation entries in a control statement (SET Citation = ...)
-CITATION_ENTRIES = CITATION_TYPE, CITATION_NAME, CITATION_REFERENCE, CITATION_DATE, CITATION_AUTHORS, CITATION_COMMENTS
 
 # Used during BEL parsing
 
@@ -295,11 +284,7 @@ HAS_REACTANT = 'hasReactant'
 #: A BEL relationship
 HAS_PRODUCT = 'hasProduct'
 #: A BEL relationship
-HAS_COMPONENT = 'hasComponent'
-#: A BEL relationship
 HAS_VARIANT = 'hasVariant'
-#: A BEL relationship
-HAS_MEMBER = 'hasMember'
 #: A BEL relationship
 #: :data:`GENE` to :data:`RNA` is called transcription
 TRANSCRIBED_TO = 'transcribedTo'
@@ -379,11 +364,9 @@ POLAR_RELATIONS = CAUSAL_POLAR_RELATIONS | CORRELATIVE_RELATIONS
 UNQUALIFIED_EDGES = {
     HAS_REACTANT,
     HAS_PRODUCT,
-    HAS_COMPONENT,
     HAS_VARIANT,
     TRANSCRIBED_TO,
     TRANSLATED_TO,
-    HAS_MEMBER,
     IS_A,
     EQUIVALENT_TO,
     PART_OF,

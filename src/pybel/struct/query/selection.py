@@ -77,7 +77,7 @@ def get_subgraph(
         result = get_random_subgraph(
             graph,
             number_edges=seed_data.get('number_edges'),
-            seed=seed_data.get('seed')
+            seed=seed_data.get('seed'),
         )
 
     elif not seed_method:  # Otherwise, don't seed a sub-graph
@@ -112,7 +112,7 @@ def get_subgraph(
         seed_method,
         seed_data,
         result.number_of_nodes(),
-        result.number_of_edges()
+        result.number_of_edges(),
     )
 
     return result

@@ -5,7 +5,7 @@
 from collections import defaultdict
 
 from .utils import cleanup
-from ...constants import CITATION, CITATION_REFERENCE, CITATION_TYPE
+from ...constants import CITATION, CITATION_DB, CITATION_IDENTIFIER
 
 __all__ = [
     'get_subgraphs_by_citation',
@@ -23,7 +23,7 @@ def get_subgraphs_by_citation(graph):
     for u, v, key, data in graph.edges(keys=True, data=True):
         if CITATION not in data:
             continue
-        dk = data[CITATION][CITATION_TYPE], data[CITATION][CITATION_REFERENCE]
+        dk = data[CITATION][CITATION_DB], data[CITATION][CITATION_IDENTIFIER]
 
         rv[dk].add_edge(u, v, key=key, **data)
 

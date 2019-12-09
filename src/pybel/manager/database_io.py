@@ -11,7 +11,7 @@ from .cache_manager import Manager
 
 __all__ = [
     'to_database',
-    'from_database'
+    'from_database',
 ]
 
 logger = logging.getLogger(__name__)
@@ -20,13 +20,11 @@ logger = logging.getLogger(__name__)
 def to_database(
     graph,
     manager: Optional[Manager] = None,
-    store_parts: bool = True,
     use_tqdm: bool = False,
 ):
     """Store a graph in a database.
 
     :param BELGraph graph: A BEL graph
-    :param store_parts: Should the graph be stored in the edge store?
     :return: If successful, returns the network object from the database.
     :rtype: Optional[Network]
     """
@@ -34,7 +32,7 @@ def to_database(
         manager = Manager()
 
     try:
-        return manager.insert_graph(graph, store_parts=store_parts, use_tqdm=use_tqdm)
+        return manager.insert_graph(graph, use_tqdm=use_tqdm)
     except (IntegrityError, OperationalError):
         manager.session.rollback()
         logger.exception('Error storing graph')

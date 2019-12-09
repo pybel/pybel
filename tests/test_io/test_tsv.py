@@ -7,7 +7,7 @@ from typing import Tuple, Type
 
 from pybel import BELGraph
 from pybel.constants import (
-    ASSOCIATION, DECREASES, EQUIVALENT_TO, HAS_COMPONENT, INCREASES, IS_A, NEGATIVE_CORRELATION, OBJECT, PART_OF,
+    ASSOCIATION, DECREASES, EQUIVALENT_TO, INCREASES, IS_A, NEGATIVE_CORRELATION, OBJECT, PART_OF,
     POSITIVE_CORRELATION, REGULATES, RELATION,
 )
 from pybel.dsl import (
@@ -18,9 +18,8 @@ from pybel.io.tsv.api import get_triple
 from pybel.io.tsv.converters import (
     AssociationConverter, Converter, CorrelationConverter, DecreasesAmountConverter, DrugIndicationConverter,
     DrugSideEffectConverter, EquivalenceConverter, IncreasesAmountConverter, IsAConverter,
-    MiRNADecreasesExpressionConverter, NamedComplexHasComponentConverter,
-    PartOfNamedComplexConverter, RegulatesActivityConverter, RegulatesAmountConverter,
-    SubprocessPartOfBiologicalProcess,
+    MiRNADecreasesExpressionConverter, PartOfNamedComplexConverter, RegulatesActivityConverter,
+    RegulatesAmountConverter, SubprocessPartOfBiologicalProcess,
 )
 from pybel.testing.utils import n
 from pybel.typing import EdgeData
@@ -50,7 +49,6 @@ r2 = Rna('HGNC', '2')
 nca1 = NamedComplexAbundance('FPLX', '1')
 
 converters_true_list = [
-    (NamedComplexHasComponentConverter, nca1, p1, _rel(HAS_COMPONENT), ('HGNC:1', 'partOf', 'FPLX:1')),
     (PartOfNamedComplexConverter, p1, nca1, _rel(PART_OF), ('HGNC:1', 'partOf', 'FPLX:1')),
     (SubprocessPartOfBiologicalProcess, b1, b2, _rel(PART_OF), ('GO:1', 'partOf', 'GO:2')),
     (AssociationConverter, r1, r2, _rel(ASSOCIATION), ('HGNC:1', 'association', 'HGNC:2')),
@@ -79,8 +77,7 @@ converters_true_list = [
 ]
 
 converters_false_list = [
-    (NamedComplexHasComponentConverter, nca1, p1, _rel(PART_OF)),
-    (PartOfNamedComplexConverter, nca1, p1, _rel(HAS_COMPONENT)),
+    (PartOfNamedComplexConverter, nca1, p1, _rel(IS_A)),
 ]
 
 
@@ -96,29 +93,29 @@ class TestConverters(unittest.TestCase):
         triple: Tuple[str, str, str],
     ) -> None:
         """Test a converter class."""
-        self.assertTrue(issubclass(converter, Converter), msg=f'Not a Converter: {converter.__name__}')
+        self.assertTrue(issubclass(converter, Converter), msg='Not a Converter: {}'.format(converter.__name__))
         key = n()
         self.assertTrue(
             converter.predicate(u, v, key, edge_data),
-            msg=f'Predicate failed: {converter.__name__}',
+            msg='Predicate failed: {}'.format(converter.__name__),
         )
         self.assertEqual(
             triple,
             converter.convert(u, v, key, edge_data),
-            msg=f'Conversion failed: {converter.__name__}',
+            msg='Conversion failed: {}'.format(converter.__name__),
         )
         graph = BELGraph()
         graph.add_edge(u, v, key=key, **edge_data)
         self.assertEqual(
             triple,
             get_triple(graph, u, v, key),
-            msg=f'get_triple failed: {converter.__name__}',
+            msg='get_triple failed: {}'.format(converter.__name__),
         )
 
     def test_converters_true(self):
         """Test passing converters."""
         for converter, u, v, edge_data, triple in converters_true_list:
-            with self.subTest(msg=f'Converter: {converter.__qualname__}'):
+            with self.subTest(msg='Converter: {}'.format(converter.__qualname__)):
                 self.help_test_convert(converter, u, v, edge_data, triple)
 
     def test_converters_false(self):

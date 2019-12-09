@@ -15,19 +15,19 @@ from pkg_resources import iter_entry_points
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
 from ..canonicalize import edge_to_bel
 from ..constants import (
-    ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_REFERENCE, CITATION_TYPE,
+    ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_DB, CITATION_IDENTIFIER,
     CITATION_TYPE_PUBMED, CONCEPT, DECREASES, DESCRIPTION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO,
     EVIDENCE, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_METADATA,
-    GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION,
-    HAS_COMPONENT, HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A, MEMBERS, METADATA_AUTHORS,
-    METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME,
-    METADATA_VERSION, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, PRODUCTS,
-    REACTANTS, REGULATES, RELATION, SUBJECT, TRANSCRIBED_TO, TRANSLATED_TO, VARIANTS,
+    GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION, HAS_PRODUCT, HAS_REACTANT,
+    HAS_VARIANT, INCREASES, IS_A, MEMBERS, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION,
+    METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAMESPACE, NEGATIVE_CORRELATION, OBJECT,
+    ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, PRODUCTS, REACTANTS, REGULATES, RELATION, SUBJECT, TRANSCRIBED_TO,
+    TRANSLATED_TO, VARIANTS,
 )
 from ..dsl import BaseEntity, Gene, MicroRna, Protein, Rna, activity
 from ..parser.exc import BELParserWarning
 from ..typing import EdgeData
-from ..utils import hash_edge
+from ..utils import citation_dict, hash_edge
 from ..version import get_version
 
 __all__ = [
@@ -312,7 +312,7 @@ class BELGraph(nx.MultiDiGraph):
     def _iterate_citations(self) -> Iterable[Tuple[str, str]]:
         for _, _, data in self.edges(data=True):
             if CITATION in data:
-                yield data[CITATION][CITATION_TYPE], data[CITATION][CITATION_REFERENCE]
+                yield data[CITATION][CITATION_DB], data[CITATION][CITATION_IDENTIFIER]
 
     def number_of_authors(self) -> int:
         """Return the number of citations contained within the graph."""
@@ -403,12 +403,6 @@ class BELGraph(nx.MultiDiGraph):
     add_part_of = partialmethod(add_unqualified_edge, relation=PART_OF)
     """Add a ``partOf`` relationship such that ``u partOf v``."""
 
-    add_has_member = partialmethod(add_unqualified_edge, relation=HAS_MEMBER)
-    """Add a ``hasMember`` relationship such that ``u hasMember v``."""
-
-    add_has_component = partialmethod(add_unqualified_edge, relation=HAS_COMPONENT)
-    """Add an ``hasComponent`` relationship such that u hasComponent v."""
-
     add_has_variant = partialmethod(add_unqualified_edge, relation=HAS_VARIANT)
     """Add a ``hasVariant`` relationship such that ``u hasVariant v``."""
 
@@ -454,10 +448,7 @@ class BELGraph(nx.MultiDiGraph):
         })
 
         if isinstance(citation, str):
-            attr[CITATION] = {
-                CITATION_TYPE: CITATION_TYPE_PUBMED,
-                CITATION_REFERENCE: citation,
-            }
+            attr[CITATION] = citation_dict(db=CITATION_TYPE_PUBMED, db_id=citation)
         elif isinstance(citation, dict):
             attr[CITATION] = citation
         else:
@@ -513,7 +504,7 @@ class BELGraph(nx.MultiDiGraph):
         elif MEMBERS in node:
             for member in node[MEMBERS]:
                 # FIXME switch to self.add_part_of(member, node)
-                self.add_has_component(node, member)
+                self.add_part_of(member, node)
 
         elif PRODUCTS in node and REACTANTS in node:
             for reactant_tokens in node[REACTANTS]:

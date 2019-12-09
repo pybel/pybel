@@ -40,16 +40,16 @@ def collapse_pair(graph, survivor: BaseEntity, victim: BaseEntity) -> None:
     :param victim: The BEL node to collapse into the surviving node
     """
     graph.add_edges_from(
-        (survivor, successor, key, data)
-        for _, successor, key, data in graph.out_edges(victim, keys=True, data=True)
+        (survivor, successor, key, edge_data)
+        for _, successor, key, edge_data in graph.out_edges(victim, keys=True, data=True)
         if successor != survivor
-    )
+    )  # FIXME key should be updated
 
     graph.add_edges_from(
         (predecessor, survivor, key, data)
         for predecessor, _, key, data in graph.in_edges(victim, keys=True, data=True)
         if predecessor != survivor
-    )
+    )  # FIXME key should be updated
 
     graph.remove_node(victim)
 

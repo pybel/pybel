@@ -7,10 +7,11 @@ import unittest
 from json import dumps
 
 from pybel import BELGraph
+from pybel.canonicalize import edge_to_bel
 from pybel.constants import (
-    ANNOTATIONS, ASSOCIATION, CITATION, CITATION_NAME, CITATION_REFERENCE, CITATION_TYPE, DECREASES, DIRECTLY_DECREASES,
-    EVIDENCE, INCREASES, METADATA_AUTHORS, METADATA_DESCRIPTION, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION,
-    OPENBEL_ANNOTATION_RESOURCES, RELATION,
+    ANNOTATIONS, ASSOCIATION, CITATION, CITATION_DB, CITATION_IDENTIFIER, CITATION_TYPE_PUBMED, DECREASES,
+    DIRECTLY_DECREASES, EVIDENCE, INCREASES, METADATA_AUTHORS, METADATA_DESCRIPTION, METADATA_LICENSES, METADATA_NAME,
+    METADATA_VERSION, PART_OF, RELATION,
 )
 from pybel.dsl import BaseEntity, ComplexAbundance, Pathology, Protein
 from pybel.dsl.namespaces import hgnc
@@ -25,20 +26,20 @@ from pybel.parser.exc import (
 from pybel.parser.parse_bel import BELParser
 from pybel.parser.parse_control import ControlParser
 from pybel.testing.constants import test_bel_thorough
-from pybel.utils import subdict_matches
+from pybel.utils import citation_dict, subdict_matches
 from tests.constant_helper import (
     BEL_THOROUGH_EDGES, BEL_THOROUGH_NODES, citation_1, evidence_1, expected_test_simple_metadata,
     expected_test_thorough_metadata,
 )
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
-test_citation_dict = {
-    CITATION_TYPE: 'PubMed',
-    CITATION_NAME: 'TestName',
-    CITATION_REFERENCE: '1235813',
-}
-SET_CITATION_TEST = 'SET Citation = {{"{type}","{name}","{reference}"}}'.format(**test_citation_dict)
+OPENBEL_DOMAIN = 'http://resources.openbel.org'
+OPENBEL_ANNOTATION_RESOURCES = OPENBEL_DOMAIN + '/belframework/20150611/annotation/'
+
+test_citation_dict = citation_dict(db=CITATION_TYPE_PUBMED, db_id='1235813')
+
+SET_CITATION_TEST = 'SET Citation = {{"{db}", "{db_id}"}}'.format(**test_citation_dict)
 test_evidence_text = 'I read it on Twitter'
 test_set_evidence = 'SET Evidence = "{}"'.format(test_evidence_text)
 
@@ -54,7 +55,8 @@ casp8 = hgnc(name='CASP8')
 
 def update_provenance(control_parser: ControlParser) -> None:
     """Put a default evidence and citation in a BEL parser."""
-    control_parser.citation.update(test_citation_dict)
+    control_parser.citation_db = test_citation_dict[CITATION_DB]
+    control_parser.citation_db_id = test_citation_dict[CITATION_IDENTIFIER]
     control_parser.evidence = test_evidence_text
 
 
@@ -80,7 +82,7 @@ def assert_has_node(self: unittest.TestCase, node: BaseEntity, graph: BELGraph, 
                          msg="Wrong values in node data")
 
 
-def any_dict_matches(dict_of_dicts, query_dict):
+def any_dict_matches(dict_of_dicts, query_dict) -> bool:
     """
 
     :param dict_of_dicts:
@@ -93,13 +95,12 @@ def any_dict_matches(dict_of_dicts, query_dict):
     )
 
 
-def any_subdict_matches(dict_of_dicts, query_dict):
+def any_subdict_matches(dict_of_dicts, query_dict) -> bool:
     """Checks if dictionary target_dict matches one of the subdictionaries of a
 
     :param dict[any,dict] dict_of_dicts: dictionary of dictionaries
     :param dict query_dict: dictionary
     :return: if dictionary target_dict matches one of the subdictionaries of a
-    :rtype: bool
     """
     return any(
         subdict_matches(sub_dict, query_dict)
@@ -107,7 +108,14 @@ def any_subdict_matches(dict_of_dicts, query_dict):
     )
 
 
-def assert_has_edge(self: unittest.TestCase, u: BaseEntity, v: BaseEntity, graph: BELGraph, permissive=True, **kwargs):
+def assert_has_edge(
+    self: unittest.TestCase,
+    u: BaseEntity,
+    v: BaseEntity,
+    graph: BELGraph,
+    permissive: bool = True,
+    **kwargs
+):
     """A helper function for checking if an edge with the given properties is contained within a graph."""
     self.assertIsInstance(u, BaseEntity)
     self.assertIsInstance(v, BaseEntity)
@@ -115,9 +123,10 @@ def assert_has_edge(self: unittest.TestCase, u: BaseEntity, v: BaseEntity, graph
     self.assertTrue(
         graph.has_edge(u, v),
         msg='Edge ({}, {}) not in graph. Other edges:\n{}'.format(u, v, '\n'.join(
-            '{} {} {}'.format(u.as_bel(), d[RELATION], v.as_bel())
+            edge_to_bel(u, v, d)
             for u, v, d in graph.edges(data=True)
         ))
+
     )
 
     if not kwargs:
@@ -183,17 +192,17 @@ def help_check_hgnc(test_case: unittest.TestCase, namespace_dict) -> None:
     """Assert that the namespace dictionary is correct."""
     test_case.assertIn(HGNC_KEYWORD, namespace_dict)
 
-    MHS2 = None, 'MHS2'
-    test_case.assertIn(MHS2, namespace_dict[HGNC_KEYWORD])
-    test_case.assertEqual(set('G'), set(namespace_dict[HGNC_KEYWORD][MHS2]))
+    mhs2 = '7071', 'MHS2'
+    test_case.assertIn(mhs2, namespace_dict[HGNC_KEYWORD])
+    test_case.assertEqual(set('G'), set(namespace_dict[HGNC_KEYWORD][mhs2]))
 
-    MIATNB = None, 'MIATNB'
-    test_case.assertIn(MIATNB, namespace_dict[HGNC_KEYWORD])
-    test_case.assertEqual(set('GR'), set(namespace_dict[HGNC_KEYWORD][MIATNB]))
+    miatnb = '50731', 'MIATNB'
+    test_case.assertIn(miatnb, namespace_dict[HGNC_KEYWORD])
+    test_case.assertEqual(set('GR'), set(namespace_dict[HGNC_KEYWORD][miatnb]))
 
-    MIA = None, 'MIA'
-    test_case.assertIn(MIA, namespace_dict[HGNC_KEYWORD])
-    test_case.assertEqual(set('GRP'), set(namespace_dict[HGNC_KEYWORD][MIA]))
+    mia = '7076', 'MIA'
+    test_case.assertIn(mia, namespace_dict[HGNC_KEYWORD])
+    test_case.assertEqual(set('GRP'), set(namespace_dict[HGNC_KEYWORD][mia]))
 
 
 class BelReconstitutionMixin(TestGraphMixin):
@@ -224,15 +233,13 @@ class BelReconstitutionMixin(TestGraphMixin):
         self.assertIn(casp8, graph)
 
         bel_simple_citation_1 = {
-            CITATION_NAME: "That one article from last week",
-            CITATION_REFERENCE: "123455",
-            CITATION_TYPE: "PubMed"
+            CITATION_IDENTIFIER: "123455",
+            CITATION_DB: CITATION_TYPE_PUBMED,
         }
 
         bel_simple_citation_2 = {
-            CITATION_NAME: "That other article from last week",
-            CITATION_REFERENCE: "123456",
-            CITATION_TYPE: "PubMed"
+            CITATION_IDENTIFIER: "123456",
+            CITATION_DB: CITATION_TYPE_PUBMED,
         }
 
         evidence_1_extra = "Evidence 1 w extra notes"
@@ -290,14 +297,15 @@ class BelReconstitutionMixin(TestGraphMixin):
             EVIDENCE: evidence_3,
         })
 
-    def bel_thorough_reconstituted(self,
-                                   graph: BELGraph,
-                                   check_metadata: bool = True,
-                                   check_warnings: bool = True,
-                                   check_provenance: bool = True,
-                                   check_citation_name: bool = True,
-                                   check_path: bool = True,
-                                   ):
+    def bel_thorough_reconstituted(
+        self,
+        graph: BELGraph,
+        check_metadata: bool = True,
+        check_warnings: bool = True,
+        check_provenance: bool = True,
+        check_citation_name: bool = True,
+        check_path: bool = True,
+    ):
         """Check that thorough.bel was loaded properly.
 
         :param graph: A BEL graph
@@ -343,10 +351,6 @@ class BelReconstitutionMixin(TestGraphMixin):
         self.assertLess(0, graph.number_of_edges())
 
         for u, v, data in BEL_THOROUGH_EDGES:
-            if not check_citation_name and CITATION in data and CITATION_NAME in data[CITATION]:
-                data[CITATION] = data[CITATION].copy()
-                del data[CITATION][CITATION_NAME]
-
             assert_has_edge(self, u, v, graph, permissive=True, **data)
 
     def bel_slushy_reconstituted(self, graph: BELGraph, check_metadata: bool = True, check_warnings: bool = True):
@@ -445,5 +449,5 @@ class BelReconstitutionMixin(TestGraphMixin):
         self.assertIn(adgrb_complex, graph)
         self.assertIn(achlorhydria, graph)
 
-        assert_has_edge(self, adgrb_complex, adgrb1, graph)
-        assert_has_edge(self, adgrb_complex, adgrb2, graph)
+        assert_has_edge(self, adgrb1, adgrb_complex, graph, relation=PART_OF)
+        assert_has_edge(self, adgrb2, adgrb_complex, graph, relation=PART_OF)

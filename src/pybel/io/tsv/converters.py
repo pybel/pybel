@@ -7,7 +7,7 @@ from typing import Dict, Tuple
 
 from ...constants import (
     ACTIVITY, ASSOCIATION, CAUSES_NO_CHANGE, CORRELATIVE_RELATIONS, DECREASES, DEGRADATION, DIRECTLY_DECREASES,
-    DIRECTLY_INCREASES, EQUIVALENT_TO, HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A, MODIFIER,
+    DIRECTLY_INCREASES, EQUIVALENT_TO, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A, MODIFIER,
     OBJECT, PART_OF, REGULATES, RELATION,
 )
 from ...dsl import (
@@ -175,32 +175,18 @@ class ReactionHasCatalystConverter(_ReactionTypedPredicate):
         return u.as_bel(), cls.target_relation, v.curie
 
 
-class NamedComplexHasComponentConverter(SimpleTypedPredicate):
-    """Converts BEL statements like ``complex(X) hasComponent p(Y)``."""
-
-    subject_type = NamedComplexAbundance
-    relation = HAS_COMPONENT
-    object_type = Protein
-    target_relation = 'partOf'
-
-    @classmethod
-    def convert(cls, u: NamedComplexAbundance, v: Protein, key: str, data: Dict) -> Tuple[str, str, str]:
-        """Convert a BEL edge."""
-        return v.curie, cls.target_relation, u.curie
-
-
 class ListComplexHasComponentConverter(SimpleTypedPredicate):
     """Converts BEL statements like ``complex(p(X), p(Y), ...) hasComponent p(X)``."""
 
-    subject_type = ComplexAbundance
-    relation = HAS_COMPONENT
-    object_type = BaseAbundance
+    subject_type = BaseAbundance
+    relation = PART_OF
+    object_type = ComplexAbundance
     target_relation = 'partOf'
 
     @classmethod
     def convert(cls, u: ComplexAbundance, v: BaseAbundance, key: str, data: Dict) -> Tuple[str, str, str]:
         """Convert a BEL edge."""
-        return v.curie, cls.target_relation, u.as_bel()
+        return u.curie, cls.target_relation, v.as_bel()
 
 
 class IsAConverter(SimplePredicate, SimpleConverter):

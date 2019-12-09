@@ -31,10 +31,12 @@ def get_subgraph_by_neighborhood(graph, nodes: Iterable[BaseEntity]):
         return
 
     rv = graph.__class__()
-    rv.add_edges_from(itt.chain(
-        graph.in_edges(nodes, keys=True, data=True),
-        graph.out_edges(nodes, keys=True, data=True),
-    ))
+    rv.add_edges_from(
+        itt.chain(
+            graph.in_edges(nodes, keys=True, data=True),
+            graph.out_edges(nodes, keys=True, data=True),
+        ),
+    )
 
     update_node_helper(graph, rv)
     update_metadata(graph, rv)

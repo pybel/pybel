@@ -21,11 +21,12 @@ logger = logging.getLogger(__name__)
 class Query:
     """Represents a query over a network store."""
 
-    def __init__(self,
-                 network_ids: Union[None, int, Iterable[int]] = None,
-                 seeding: Optional[Seeding] = None,
-                 pipeline: Optional[Pipeline] = None,
-                 ) -> None:
+    def __init__(
+        self,
+        network_ids: Union[None, int, Iterable[int]] = None,
+        seeding: Optional[Seeding] = None,
+        pipeline: Optional[Pipeline] = None,
+    ) -> None:
         """Build a query.
 
         :param network_ids: Database network identifiers identifiers

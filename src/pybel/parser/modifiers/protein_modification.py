@@ -114,7 +114,7 @@ def get_protein_modification_language(concept_qualified: ParserElement) -> Parse
     pmod_concept = MatchFirst([
         concept_qualified,
         pmod_default_ns,
-        pmod_legacy_ns
+        pmod_legacy_ns,
     ])
 
     return pmod_tag + nest(
@@ -122,6 +122,6 @@ def get_protein_modification_language(concept_qualified: ParserElement) -> Parse
         + Optional(
             WCW
             + amino_acid(PMOD_CODE)
-            + Optional(WCW + ppc.integer(PMOD_POSITION))
-        )
+            + Optional(WCW + ppc.integer(PMOD_POSITION)),
+        ),
     )

@@ -30,12 +30,12 @@ from .models import (
 from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, update_insert_values
 from ..constants import (
-    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR,
-    CITATION_ISSUE, CITATION_LAST_AUTHOR, CITATION_NAME, CITATION_PAGES, CITATION_REFERENCE, CITATION_TITLE,
-    CITATION_TYPE, CITATION_TYPE_PUBMED, CITATION_VOLUME, CONCEPT, DEGRADATION, EFFECT, EVIDENCE, FRAGMENT,
-    FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP, FUSION, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, HGVS,
-    KIND, LOCATION, METADATA_INSERT_KEYS, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P,
-    PMOD, PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P, RELATION, SUBJECT, TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS,
+    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_DB,
+    CITATION_DB_NAME, CITATION_FIRST_AUTHOR, CITATION_IDENTIFIER, CITATION_ISSUE, CITATION_JOURNAL,
+    CITATION_LAST_AUTHOR, CITATION_PAGES, CITATION_TYPE_PUBMED, CITATION_VOLUME, CONCEPT, DEGRADATION, EFFECT, EVIDENCE,
+    FRAGMENT, FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP, FUSION, FUSION_REFERENCE, FUSION_START, FUSION_STOP,
+    GMOD, HGVS, KIND, LOCATION, METADATA_INSERT_KEYS, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PMOD,
+    PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P, RELATION, SUBJECT, TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS,
     belns_encodings, get_cache_connection,
 )
 from ..dsl import BaseEntity
@@ -46,7 +46,7 @@ from ..language import (
 from ..struct.graph import AnnotationsDict, BELGraph
 from ..struct.operations import union
 from ..typing import EdgeData
-from ..utils import hash_citation, hash_dump, hash_evidence, parse_datetime
+from ..utils import hash_dump, parse_datetime
 
 __all__ = [
     'Manager',
@@ -217,7 +217,7 @@ class NamespaceManager(BaseManager):
 
         namespace = Namespace(
             url=url,
-            **namespace_insert_values
+            **namespace_insert_values,
         )
 
         logger.debug('building NamespaceEntry instances')
@@ -254,7 +254,7 @@ class NamespaceManager(BaseManager):
             logger.info('creating regex namespace: %s:%s', keyword, pattern)
             namespace = Namespace(
                 keyword=keyword,
-                pattern=pattern
+                pattern=pattern,
             )
             self.session.add(namespace)
             self.session.commit()
@@ -274,8 +274,10 @@ class NamespaceManager(BaseManager):
             return
 
         if 1 < len(result):
-            logger.warning('result for get_namespace_entry is too long. Returning first of %s',
-                           [str(r) for r in result])
+            logger.warning(
+                'result for get_namespace_entry is too long. Returning first of %s',
+                [str(r) for r in result],
+            )
 
         return result[0]
 
@@ -302,7 +304,7 @@ class NamespaceManager(BaseManager):
         if name_model is None:
             name_model = NamespaceEntry(
                 namespace=namespace,
-                name=name
+                name=name,
             )
             self.session.add(name_model)
 
@@ -337,7 +339,7 @@ class NamespaceManager(BaseManager):
         result = Namespace(
             url=url,
             is_annotation=True,
-            **_get_annotation_insert_values(bel_resource)
+            **_get_annotation_insert_values(bel_resource),
         )
         result.entries = [
             NamespaceEntry(name=name, identifier=label)
@@ -348,8 +350,10 @@ class NamespaceManager(BaseManager):
         self.session.add(result)
         self.session.commit()
 
-        logger.info('inserted annotation: %s (%d terms in %.2f seconds)', url, len(bel_resource['Values']),
-                    time.time() - t)
+        logger.info(
+            'inserted annotation: %s (%d terms in %.2f seconds)', url, len(bel_resource['Values']),
+            time.time() - t,
+        )
 
         return result
 
@@ -366,8 +370,8 @@ class NamespaceManager(BaseManager):
 
     def get_namespace_encoding(self, url: str) -> Mapping[str, str]:
         annotation = self.get_or_create_annotation(url)
-        return dict(self.session.query(NamespaceEntry.name, NamespaceEntry.encoding).filter(
-            NamespaceEntry.namespace == annotation))
+        namespace_filter = NamespaceEntry.namespace == annotation
+        return dict(self.session.query(NamespaceEntry.name, NamespaceEntry.encoding).filter(namespace_filter))
 
     def get_annotation_entries_by_names(self, url: str, names: Iterable[str]) -> List[NamespaceEntry]:
         """Get annotation entries by URL and names.
@@ -392,19 +396,16 @@ class NetworkManager(NamespaceManager):
 
     def list_recent_networks(self) -> List[Network]:
         """List the most recently created version of each network (by name)."""
-        most_recent_times = (
-            self.session
-            .query(
-                Network.name.label('network_name'),
-                func.max(Network.created).label('max_created'),
-            )
-            .group_by(Network.name)
-            .subquery('most_recent_times')
+        most_recent_times = self.session.query(
+            Network.name.label('network_name'),
+            func.max(Network.created).label('max_created'),
         )
+
+        most_recent_times = most_recent_times.group_by(Network.name).subquery('most_recent_times')
 
         and_condition = and_(
             most_recent_times.c.network_name == Network.name,
-            most_recent_times.c.max_created == Network.created
+            most_recent_times.c.max_created == Network.created,
         )
 
         most_recent_networks = self.session.query(Network).join(most_recent_times, and_condition)
@@ -433,19 +434,23 @@ class NetworkManager(NamespaceManager):
 
         # delete the network-to-node mappings for this network
         self.session.query(network_node).filter(network_node.c.network_id == network.id).delete(
-            synchronize_session=False)
+            synchronize_session=False,
+        )
 
         # delete the edge-to-property mappings for the to-be-orphaned edges
         self.session.query(edge_property).filter(edge_property.c.edge_id.in_(edge_ids)).delete(
-            synchronize_session=False)
+            synchronize_session=False,
+        )
 
         # delete the edge-to-annotation mappings for the to-be-orphaned edges
         self.session.query(edge_annotation).filter(edge_annotation.c.edge_id.in_(edge_ids)).delete(
-            synchronize_session=False)
+            synchronize_session=False,
+        )
 
         # delete the edge-to-network mappings for this network
         self.session.query(network_edge).filter(network_edge.c.network_id == network.id).delete(
-            synchronize_session=False)
+            synchronize_session=False,
+        )
 
         # delete the now-orphaned edges
         self.session.query(Edge).filter(Edge.id.in_(edge_ids)).delete(synchronize_session=False)
@@ -463,14 +468,18 @@ class NetworkManager(NamespaceManager):
         singleton_edge_ids_for_network = (
             self.session
                 .query(ne1.c.edge_id)
-                .outerjoin(ne2, and_(
-                ne1.c.edge_id == ne2.c.edge_id,
-                ne1.c.network_id != ne2.c.network_id
-            ))
-                .filter(and_(
-                ne1.c.network_id == network.id,
-                ne2.c.edge_id == None  # noqa: E711
-            ))
+                .outerjoin(
+                    ne2, and_(
+                        ne1.c.edge_id == ne2.c.edge_id,
+                        ne1.c.network_id != ne2.c.network_id,
+                    ),
+                )
+                .filter(
+                    and_(
+                        ne1.c.network_id == network.id,
+                        ne2.c.edge_id == None,  # noqa: E711
+                    ),
+                )
         )
         return singleton_edge_ids_for_network
 
@@ -566,7 +575,7 @@ class InsertManager(NamespaceManager, LookupManager):
         self.object_cache_node = {}
         self.object_cache_edge = {}
         self.object_cache_evidence = {}
-        self.object_cache_citation = {}
+        self.curie_to_citation = {}
         self.object_cache_author = {}
 
     def insert_graph(
@@ -608,11 +617,13 @@ class InsertManager(NamespaceManager, LookupManager):
         for annotation_url in annotation_urls:
             self.get_or_create_annotation(annotation_url)
 
-        network = Network(**{
-            key: value
-            for key, value in graph.document.items()
-            if key in METADATA_INSERT_KEYS
-        })
+        network = Network(
+            **{
+                key: value
+                for key, value in graph.document.items()
+                if key in METADATA_INSERT_KEYS
+            },
+        )
 
         network.store_bel(graph)
 
@@ -675,15 +686,20 @@ class InsertManager(NamespaceManager, LookupManager):
 
         return node_models, edge_models
 
-    def _get_edge_models(self, graph: BELGraph, tuple_model: Mapping[BaseEntity, Node], edges):
+    def _get_edge_models(
+        self,
+        graph: BELGraph,
+        tuple_model: Mapping[BaseEntity, Node],
+        edges,
+    ) -> Iterable[Edge]:
         for u, v, key, data in edges:
             source = tuple_model.get(u)
-            if source is None or source.sha512 not in self.object_cache_node:
+            if source is None or source.md5 not in self.object_cache_node:
                 logger.warning('skipping uncached source node: %s', u)
                 continue
 
             target = tuple_model.get(v)
-            if target is None or target.sha512 not in self.object_cache_node:
+            if target is None or target.md5 not in self.object_cache_node:
                 logger.warning('skipping uncached target node: %s', v)
                 continue
 
@@ -710,7 +726,7 @@ class InsertManager(NamespaceManager, LookupManager):
             elif EVIDENCE not in data or CITATION not in data:
                 continue
 
-            elif CITATION_TYPE not in data[CITATION] or CITATION_REFERENCE not in data[CITATION]:
+            elif CITATION_DB not in data[CITATION] or CITATION_IDENTIFIER not in data[CITATION]:
                 continue
 
             else:
@@ -734,9 +750,10 @@ class InsertManager(NamespaceManager, LookupManager):
                     yield edge
 
     @staticmethod
-    def _iter_from_annotations_dict(graph: BELGraph,
-                                    annotations_dict: AnnotationsDict,
-                                    ) -> Iterable[Tuple[str, Set[str]]]:
+    def _iter_from_annotations_dict(
+        graph: BELGraph,
+        annotations_dict: AnnotationsDict,
+    ) -> Iterable[Tuple[str, Set[str]]]:
         """Iterate over the key/value pairs in this edge data dictionary normalized to their source URLs."""
         for key, names in annotations_dict.items():
             if key in graph.annotation_url:
@@ -761,24 +778,21 @@ class InsertManager(NamespaceManager, LookupManager):
                 for entry in self.get_annotation_entries_by_names(url, names)
             ]
 
-    def _add_qualified_edge(self, graph: BELGraph, source: Node, target: Node, key: str, bel: str, data: EdgeData):
+    def _add_qualified_edge(
+        self,
+        graph: BELGraph,
+        source: Node,
+        target: Node,
+        key: str,
+        bel: str,
+        data: EdgeData,
+    ) -> Optional[Edge]:
         """Add a qualified edge to the network."""
         citation_dict = data[CITATION]
-
         citation = self.get_or_create_citation(
-            type=citation_dict.get(CITATION_TYPE),
-            reference=citation_dict.get(CITATION_REFERENCE),
-            name=citation_dict.get(CITATION_NAME),
-            title=citation_dict.get(CITATION_TITLE),
-            volume=citation_dict.get(CITATION_VOLUME),
-            issue=citation_dict.get(CITATION_ISSUE),
-            pages=citation_dict.get(CITATION_PAGES),
-            date=citation_dict.get(CITATION_DATE),
-            first=citation_dict.get(CITATION_FIRST_AUTHOR),
-            last=citation_dict.get(CITATION_LAST_AUTHOR),
-            authors=citation_dict.get(CITATION_AUTHORS),
+            db=citation_dict[CITATION_DB],
+            db_id=citation_dict[CITATION_IDENTIFIER],
         )
-
         evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
 
         properties = self.get_or_create_properties(graph, data)
@@ -792,7 +806,7 @@ class InsertManager(NamespaceManager, LookupManager):
             target=target,
             relation=data[RELATION],
             bel=bel,
-            sha512=key,
+            md5=key,
             data=data,
             evidence=evidence,
             properties=properties,
@@ -806,45 +820,40 @@ class InsertManager(NamespaceManager, LookupManager):
             target=target,
             relation=data[RELATION],
             bel=bel,
-            sha512=key,
+            md5=key,
             data=data,
         )
 
     def get_or_create_evidence(self, citation: Citation, text: str) -> Evidence:
         """Create an entry and object for given evidence if it does not exist."""
-        sha512 = hash_evidence(text=text, citation_type=str(citation.type), citation_reference=str(citation.reference))
-
-        if sha512 in self.object_cache_evidence:
-            evidence = self.object_cache_evidence[sha512]
+        evidence_tuple = citation.db, citation.db_id, text
+        if evidence_tuple in self.object_cache_evidence:
+            evidence = self.object_cache_evidence[evidence_tuple]
             self.session.add(evidence)
             return evidence
 
-        evidence = self.get_evidence_by_hash(sha512)
-
+        evidence = self.get_evidence_by_citation_text(citation, text)
         if evidence is not None:
-            self.object_cache_evidence[sha512] = evidence
+            self.object_cache_evidence[evidence_tuple] = evidence
             return evidence
 
-        evidence = Evidence(
-            text=text,
+        self.object_cache_evidence[evidence_tuple] = evidence = Evidence(
             citation=citation,
-            sha512=sha512,
+            text=text,
         )
 
         self.session.add(evidence)
-        self.object_cache_evidence[sha512] = evidence
         return evidence
 
     def get_or_create_node(self, graph: BELGraph, node: BaseEntity) -> Optional[Node]:
         """Create an entry and object for given node if it does not exist."""
-        sha512 = node.sha512
-        if sha512 in self.object_cache_node:
-            return self.object_cache_node[sha512]
+        node_md5 = node.md5
+        if node_md5 in self.object_cache_node:
+            return self.object_cache_node[node_md5]
 
-        node_model = self.get_node_by_hash(sha512)
-
+        node_model = self.get_node_by_hash(node_md5)
         if node_model is not None:
-            self.object_cache_node[sha512] = node_model
+            self.object_cache_node[node_md5] = node_model
             return node_model
 
         node_model = Node._start_from_base_entity(node)
@@ -890,7 +899,7 @@ class InsertManager(NamespaceManager, LookupManager):
             node_model.modifications = modifications
 
         self.session.add(node_model)
-        self.object_cache_node[sha512] = node_model
+        self.object_cache_node[node_md5] = node_model
         return node_model
 
     def drop_nodes(self) -> None:
@@ -917,7 +926,7 @@ class InsertManager(NamespaceManager, LookupManager):
         target: Node,
         relation: str,
         bel: str,
-        sha512: str,
+        md5: str,
         data: EdgeData,
         evidence: Optional[Evidence] = None,
         annotations: Optional[List[NamespaceEntry]] = None,
@@ -929,21 +938,21 @@ class InsertManager(NamespaceManager, LookupManager):
         :param target: Target node of the relation
         :param relation: Type of the relation between source and target node
         :param bel: BEL statement that describes the relation
-        :param sha512: The SHA512 hash of the edge as a string
+        :param md5: The MD5 hash of the edge as a string
         :param data: The PyBEL data dictionary
         :param evidence: Evidence object that proves the given relation
         :param properties: List of all properties that belong to the edge
         :param annotations: List of all annotations that belong to the edge
         """
-        if sha512 in self.object_cache_edge:
-            edge = self.object_cache_edge[sha512]
+        if md5 in self.object_cache_edge:
+            edge = self.object_cache_edge[md5]
             self.session.add(edge)
             return edge
 
-        edge = self.get_edge_by_hash(sha512)
+        edge = self.get_edge_by_hash(md5)
 
         if edge is not None:
-            self.object_cache_edge[sha512] = edge
+            self.object_cache_edge[md5] = edge
             return edge
 
         edge = Edge(
@@ -951,7 +960,7 @@ class InsertManager(NamespaceManager, LookupManager):
             target=target,
             relation=relation,
             bel=bel,
-            sha512=sha512,
+            md5=md5,
             data=json.dumps(data),
         )
 
@@ -963,80 +972,37 @@ class InsertManager(NamespaceManager, LookupManager):
             edge.annotations = annotations
 
         self.session.add(edge)
-        self.object_cache_edge[sha512] = edge
+        self.object_cache_edge[md5] = edge
         return edge
 
     def get_or_create_citation(
         self,
-        reference: str,
-        type: Optional[str] = None,
-        name: Optional[str] = None,
-        title: Optional[str] = None,
-        volume: Optional[str] = None,
-        issue: Optional[str] = None,
-        pages: Optional[str] = None,
-        date: Optional[str] = None,
-        first: Optional[str] = None,
-        last: Optional[str] = None,
-        authors: Union[None, List[str]] = None,
+        *,
+        db_id: str,
+        db: Optional[str] = None
     ) -> Citation:
         """Create a citation if it does not exist, or return it if it does.
 
-        :param type: Citation type (e.g. PubMed)
-        :param reference: Identifier of the given citation (e.g. PubMed id)
-        :param name: Name of the publication
-        :param title: Title of article
-        :param volume: Volume of publication
-        :param issue: Issue of publication
-        :param pages: Pages of issue
-        :param date: Date of publication in ISO 8601 (YYYY-MM-DD) format
-        :param first: Name of first author
-        :param last: Name of last author
-        :param authors: Either a list of authors separated by |, or an actual list of authors
+        :param db_id: Identifier of the given citation (e.g. PubMed id)
+        :param db: Citation type (defaults to PubMed)
         """
-        if type is None:
-            type = CITATION_TYPE_PUBMED
+        if db is None:
+            db = CITATION_TYPE_PUBMED
 
-        sha512 = hash_citation(citation_type=type, citation_reference=reference)
-
-        if sha512 in self.object_cache_citation:
-            citation = self.object_cache_citation[sha512]
+        citation_curie = '{}:{}'.format(db, db_id)
+        if citation_curie in self.curie_to_citation:
+            citation = self.curie_to_citation[citation_curie]
             self.session.add(citation)
             return citation
 
-        citation = self.get_citation_by_hash(sha512)
+        citation = self.get_citation_by_reference(db, db_id)
 
         if citation is not None:
-            self.object_cache_citation[sha512] = citation
+            self.curie_to_citation[citation_curie] = citation
             return citation
 
-        citation = Citation(
-            type=type,
-            reference=reference,
-            sha512=sha512,
-            name=name,
-            title=title,
-            volume=volume,
-            issue=issue,
-            pages=pages
-        )
-        if date is not None:
-            citation.date = parse_datetime(date)
-
-        if first is not None:
-            citation.first = self.get_or_create_author(first)
-
-        if last is not None:
-            citation.last = self.get_or_create_author(last)
-
-        if authors is not None:
-            for author in authors:
-                author_model = self.get_or_create_author(author)
-                if author_model not in citation.authors:
-                    citation.authors.append(author_model)
-
+        self.curie_to_citation[citation_curie] = citation = Citation(db=db, db_id=db_id)
         self.session.add(citation)
-        self.object_cache_citation[sha512] = citation
         return citation
 
     def get_or_create_author(self, name: str) -> Author:
@@ -1053,13 +1019,13 @@ class InsertManager(NamespaceManager, LookupManager):
             self.object_cache_author[name] = author
             return author
 
-        author = self.object_cache_author[name] = Author.from_name(name=name)
+        author = self.object_cache_author[name] = Author(name=name)
         self.session.add(author)
         return author
 
-    def get_modification_by_hash(self, sha512: str) -> Optional[Modification]:
-        """Get a modification by a SHA512 hash."""
-        return self.session.query(Modification).filter(Modification.sha512 == sha512).one_or_none()
+    def get_modification_by_hash(self, md5: str) -> Optional[Modification]:
+        """Get a modification by a MD5 hash."""
+        return self.session.query(Modification).filter(Modification.md5 == md5).one_or_none()
 
     def get_or_create_modification(self, graph: BELGraph, node: BaseEntity) -> Optional[List[Modification]]:
         """Create a list of node modification objects that belong to the node described by node_data.
@@ -1156,7 +1122,7 @@ class InsertManager(NamespaceManager, LookupManager):
                             'type': mod_type,
                             'identifier': mod_entry,
                             'residue': variant[PMOD_CODE].strip() if PMOD_CODE in variant else None,
-                            'position': variant[PMOD_POSITION] if PMOD_POSITION in variant else None
+                            'position': variant[PMOD_POSITION] if PMOD_POSITION in variant else None,
                         })
 
         modifications = []
@@ -1167,7 +1133,7 @@ class InsertManager(NamespaceManager, LookupManager):
             if mod is None:
                 mod = self.get_modification_by_hash(mod_hash)
                 if not mod:
-                    modification['sha512'] = mod_hash
+                    modification['md5'] = mod_hash
                     mod = Modification(**modification)
 
                 self.object_cache_modification[mod_hash] = mod
@@ -1177,7 +1143,7 @@ class InsertManager(NamespaceManager, LookupManager):
 
     def get_property_by_hash(self, property_hash: str) -> Optional[Property]:
         """Get a property by its hash if it exists."""
-        return self.session.query(Property).filter(Property.sha512 == property_hash).one_or_none()
+        return self.session.query(Property).filter(Property.md5 == property_hash).one_or_none()
 
     def _make_property_from_dict(self, property_def: Dict) -> Property:
         """Build an edge property from a dictionary."""
@@ -1188,7 +1154,7 @@ class InsertManager(NamespaceManager, LookupManager):
             edge_property_model = self.get_property_by_hash(property_hash)
 
             if not edge_property_model:
-                property_def['sha512'] = property_hash
+                property_def['md5'] = property_hash
                 edge_property_model = Property(**property_def)
 
             self.object_cache_property[property_hash] = edge_property_model
@@ -1296,7 +1262,13 @@ class _Manager(QueryManager, InsertManager, NetworkManager):
 class Manager(_Manager):
     """A manager for the PyBEL database."""
 
-    def __init__(self, connection=None, engine=None, session=None, **kwargs) -> None:
+    def __init__(
+        self,
+        connection: Optional[str] = None,
+        engine=None,
+        session=None,
+        **kwargs
+    ) -> None:
         """Create a connection to database and a persistent session using SQLAlchemy.
 
         A custom default can be set as an environment variable with the name :data:`pybel.constants.PYBEL_CONNECTION`,
@@ -1312,7 +1284,7 @@ class Manager(_Manager):
         Further options and examples can be found on the SQLAlchemy documentation on
         `engine configuration <http://docs.sqlalchemy.org/en/latest/core/engines.html>`_.
 
-        :param Optional[str] connection: An RFC-1738 database connection string. If ``None``, tries to load from the
+        :param connection: An RFC-1738 database connection string. If ``None``, tries to load from the
          environment variable ``PYBEL_CONNECTION`` then from the config file ``~/.config/pybel/config.json`` whose
          value for ``PYBEL_CONNECTION`` defaults to :data:`pybel.constants.DEFAULT_CACHE_LOCATION`.
         :param engine: Optional engine to use. Must be specified with a session and no connection.

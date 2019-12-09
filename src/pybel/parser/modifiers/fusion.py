@@ -96,7 +96,7 @@ def get_legacy_fusion_langauge(concept: ParserElement, reference: str) -> Parser
         + fusion_tags
         + nest(
             Group(concept(CONCEPT))(PARTNER_3P)
-            + Optional(WCW + Group(break_start)(RANGE_5P) + WCW + Group(break_end)(RANGE_3P))
+            + Optional(WCW + Group(break_start)(RANGE_5P) + WCW + Group(break_end)(RANGE_3P)),
         )
     )
 

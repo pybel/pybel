@@ -14,8 +14,8 @@ from .converters import (
     DecreasesDegradationConverter, DrugIndicationConverter, DrugSideEffectConverter, EquivalenceConverter,
     HasVariantConverter, IncreasesActivityConverter, IncreasesAmountConverter, IncreasesDegradationConverter,
     IsAConverter, ListComplexHasComponentConverter, MiRNADecreasesExpressionConverter,
-    MiRNADirectlyDecreasesExpressionConverter, NamedComplexHasComponentConverter, NoChangeActivityConverter,
-    NoChangeAmountConverter, NoChangeDegradationConverter, PartOfNamedComplexConverter, ProteinPartOfBiologicalProcess,
+    MiRNADirectlyDecreasesExpressionConverter, NoChangeActivityConverter, NoChangeAmountConverter,
+    NoChangeDegradationConverter, PartOfNamedComplexConverter, ProteinPartOfBiologicalProcess,
     ReactionHasCatalystConverter, ReactionHasProductConverter, ReactionHasReactantConverter, RegulatesActivityConverter,
     RegulatesAmountConverter, RegulatesDegradationConverter, SubprocessPartOfBiologicalProcess,
 )
@@ -75,11 +75,13 @@ def get_triples(graph: BELGraph, use_tqdm: bool = False) -> List[Tuple[str, str,
     )
 
     # clean duplicates and Nones
-    return list(sorted({
-        triple
-        for triple in triples
-        if triple is not None
-    }))
+    return list(
+        sorted({
+            triple
+            for triple in triples
+            if triple is not None
+        }),
+    )
 
 
 def get_triple(
@@ -93,7 +95,6 @@ def get_triple(
 
     # order is important
     converters = [
-        NamedComplexHasComponentConverter,
         ListComplexHasComponentConverter,
         PartOfNamedComplexConverter,
         SubprocessPartOfBiologicalProcess,

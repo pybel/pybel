@@ -5,15 +5,15 @@
 import hashlib
 import json
 import logging
+import pickle
 from collections import defaultdict
 from collections.abc import Iterable, MutableMapping
 from datetime import datetime
-from pickle import dumps
 from typing import Any, Mapping, Optional, Tuple
 
 from .constants import (
-    ACTIVITY, CITATION, CITATION_REFERENCE, CITATION_TYPE, DEGRADATION, EFFECT, EVIDENCE, FROM_LOC, IDENTIFIER,
-    LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT, RELATION, SUBJECT, TO_LOC, TRANSLOCATION,
+    ACTIVITY, CITATION, CITATION_DB, CITATION_DB_NAME, CITATION_IDENTIFIER, DEGRADATION, EFFECT, EVIDENCE, FROM_LOC,
+    IDENTIFIER, LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT, RELATION, SUBJECT, TO_LOC, TRANSLOCATION,
 )
 from .typing import EdgeData
 
@@ -134,14 +134,24 @@ def parse_datetime(s: str) -> datetime.date:
     raise ValueError('Incorrect datetime format for {}'.format(s))
 
 
-def _hash_tuple(t):
-    return hashlib.sha512(dumps(t)).hexdigest()
-
-
 def _get_citation_str(data: Mapping) -> Optional[str]:
     citation = data.get(CITATION)
     if citation is not None:
-        return '{type}:{reference}'.format(type=citation[CITATION_TYPE], reference=citation[CITATION_REFERENCE])
+        return '{}:{}'.format(citation[CITATION_DB], citation[CITATION_IDENTIFIER])
+
+
+def hash_edge(source, target, edge_data: EdgeData) -> str:
+    """Convert an edge tuple to a MD5 hash.
+
+    :param BaseEntity source: The source BEL node
+    :param BaseEntity target: The target BEL node
+    :param edge_data: The edge's data dictionary
+    :return: A hashed version of the edge tuple using MD5 hash of the binary pickle dump of u, v, and the json dump
+     of d
+    """
+    edge_tuple = _get_edge_tuple(source, target, edge_data)
+    edge_tuple_bytes = pickle.dumps(edge_tuple)
+    return hashlib.md5(edge_tuple_bytes).hexdigest()  # noqa: S303
 
 
 def _get_edge_tuple(
@@ -163,19 +173,6 @@ def _get_edge_tuple(
         edge_data.get(EVIDENCE),
         canonicalize_edge(edge_data),
     )
-
-
-def hash_edge(source, target, edge_data: EdgeData) -> str:
-    """Convert an edge tuple to a SHA-512 hash.
-
-    :param BaseEntity source: The source BEL node
-    :param BaseEntity target: The target BEL node
-    :param edge_data: The edge's data dictionary
-    :return: A hashed version of the edge tuple using SHA-512 hash of the binary pickle dump of u, v, and the json dump
-     of d
-    """
-    edge_tuple = _get_edge_tuple(source, target, edge_data)
-    return _hash_tuple(edge_tuple)
 
 
 def subdict_matches(target: Mapping, query: Mapping, partial_match: bool = True) -> bool:
@@ -219,35 +216,7 @@ def hash_dump(data) -> str:
     :param data: An arbitrary JSON-serializable object
     :type data: dict or list or tuple
     """
-    return hashlib.sha512(json.dumps(data, sort_keys=True).encode('utf-8')).hexdigest()
-
-
-def hash_citation(citation_type: str, citation_reference: str) -> str:
-    """Create a hash for a type/reference pair of a citation.
-
-    :param citation_type: The corresponding citation type
-    :param citation_reference: The citation reference
-    """
-    s = '{citation_type}:{citation_reference}'.format(
-        citation_type=citation_type,
-        citation_reference=citation_reference,
-    )
-    return hashlib.sha512(s.encode('utf8')).hexdigest()
-
-
-def hash_evidence(text: str, citation_type: str, citation_reference: str) -> str:
-    """Create a hash for an evidence and its citation.
-
-    :param text: The evidence text
-    :param citation_type: The corresponding citation type
-    :param citation_reference: The citation reference
-    """
-    s = '{citation_type}:{citation_reference}:{text}'.format(
-        citation_type=citation_type,
-        citation_reference=citation_reference,
-        text=text,
-    )
-    return hashlib.sha512(s.encode('utf8')).hexdigest()
+    return hashlib.md5(json.dumps(data, sort_keys=True).encode('utf-8')).hexdigest()  # noqa: S303
 
 
 def canonicalize_edge(edge_data: EdgeData) -> CanonicalEdge:
@@ -275,13 +244,11 @@ def _canonicalize_edge_modifications(edge_data: EdgeData) -> Optional[Tuple]:
 
     if modifier == ACTIVITY:
         if effect:
-            effect_name = effect.get(NAME)
-            effect_identifier = effect.get(IDENTIFIER)
-
             t = (
                 ACTIVITY,
                 effect[NAMESPACE],
-                effect_name or effect_identifier,
+                effect.get(IDENTIFIER),
+                effect.get(NAME),
             )
         else:
             t = (ACTIVITY,)
@@ -294,32 +261,27 @@ def _canonicalize_edge_modifications(edge_data: EdgeData) -> Optional[Tuple]:
     elif modifier == TRANSLOCATION:
         if effect:
             from_loc_concept = effect[FROM_LOC]
-            from_loc_name = from_loc_concept.get(NAME)
-            from_loc_identifier = from_loc_concept.get(IDENTIFIER)
-
             to_loc_concept = effect[TO_LOC]
-            to_loc_name = to_loc_concept.get(NAME)
-            to_loc_identifier = to_loc_concept.get(IDENTIFIER)
 
             t = (
                 TRANSLOCATION,
                 from_loc_concept[NAMESPACE],
-                from_loc_name or from_loc_identifier,
+                from_loc_concept.get(IDENTIFIER),
+                from_loc_concept.get(NAME),
                 to_loc_concept[NAMESPACE],
-                to_loc_name or to_loc_identifier,
+                to_loc_concept.get(IDENTIFIER),
+                to_loc_concept.get(NAME),
             )
         else:
             t = (TRANSLOCATION,)
         result.append(t)
 
     if location:
-        location_name = location.get(NAME)
-        location_identifier = location.get(IDENTIFIER)
-
         t = (
             LOCATION,
             location[NAMESPACE],
-            location_name or location_identifier,
+            location.get(IDENTIFIER),
+            location.get(NAME),
         )
         result.append(t)
 
@@ -335,3 +297,15 @@ def get_corresponding_pickle_path(path: str) -> str:
     :param path: A path to a BEL file.
     """
     return '{path}.pickle'.format(path=path)
+
+
+def citation_dict(*, db, db_id, db_name=None, **kwargs):
+    """Make a citation dictionary."""
+    r = {
+        CITATION_DB: db,
+        CITATION_IDENTIFIER: db_id,
+        **kwargs,
+    }
+    if db_name is not None:
+        r[CITATION_DB_NAME] = db_name
+    return r

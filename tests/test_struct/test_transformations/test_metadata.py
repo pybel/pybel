@@ -6,7 +6,7 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import (
-    ANNOTATIONS, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_PUBMED,
+    ANNOTATIONS, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_IDENTIFIER, CITATION_DB, CITATION_TYPE_PUBMED,
 )
 from pybel.dsl import protein
 from pybel.examples import sialic_acid_graph
@@ -100,8 +100,8 @@ class TestMetadata(unittest.TestCase):
             x,
             y,
             citation={
-                CITATION_TYPE: CITATION_TYPE_PUBMED,
-                CITATION_REFERENCE: '12345678',
+                CITATION_DB: CITATION_TYPE_PUBMED,
+                CITATION_IDENTIFIER: '12345678',
                 CITATION_DATE: '2018-12-10',
             },
             evidence='Fake',
@@ -116,7 +116,7 @@ class TestMetadata(unittest.TestCase):
 
         for k in k1, k2:
             self.assertIn(CITATION, graph[x][y][k])
-            self.assertIn(CITATION_TYPE, graph[x][y][k][CITATION])
-            self.assertIn(CITATION_REFERENCE, graph[x][y][k][CITATION])
+            self.assertIn(CITATION_DB, graph[x][y][k][CITATION])
+            self.assertIn(CITATION_IDENTIFIER, graph[x][y][k][CITATION])
             self.assertNotIn(CITATION_DATE, graph[x][y][k][CITATION])
             self.assertNotIn(CITATION_AUTHORS, graph[x][y][k][CITATION])

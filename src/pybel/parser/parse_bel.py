@@ -32,10 +32,10 @@ from .. import language
 from ..constants import (
     ABUNDANCE, ACTIVITY, ASSOCIATION, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE, CELL_SECRETION,
     CELL_SURFACE_EXPRESSION, COMPLEX, COMPOSITE, CONCEPT, DECREASES, DEGRADATION, DIRECTLY_DECREASES,
-    DIRECTLY_INCREASES, DIRTY, EFFECT, EQUIVALENT_TO, FROM_LOC, FUNCTION, FUSION, GENE, HAS_COMPONENT, HAS_MEMBER,
-    INCREASES, IS_A, LINE, LOCATION, MEMBERS, MIRNA, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, PART_OF,
-    PATHOLOGY, POSITIVE_CORRELATION, PRODUCTS, PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, TARGET,
-    TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, TWO_WAY_RELATIONS, VARIANTS, belns_encodings,
+    DIRECTLY_INCREASES, DIRTY, EFFECT, EQUIVALENT_TO, FROM_LOC, FUNCTION, FUSION, GENE, INCREASES, IS_A, LINE, LOCATION,
+    MEMBERS, MIRNA, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, PART_OF, PATHOLOGY, POSITIVE_CORRELATION,
+    PRODUCTS, PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, TARGET, TO_LOC, TRANSCRIBED_TO,
+    TRANSLATED_TO, TRANSLOCATION, TWO_WAY_RELATIONS, VARIANTS, belns_encodings,
 )
 from ..dsl import BaseEntity, cell_surface_expression, secretion
 from ..tokens import parse_result_to_dsl
@@ -232,7 +232,7 @@ class BELParser(BaseParser):
         annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
         annotation_to_local: Optional[Mapping[str, Set[str]]] = None,
         allow_naked_names: bool = False,
-        allow_nested: bool = False,
+        disallow_nested: bool = False,
         disallow_unqualified_translocations: bool = False,
         citation_clearing: bool = True,
         skip_validation: bool = False,
@@ -254,7 +254,7 @@ class BELParser(BaseParser):
          :class:`pybel.parser.ControlParser`
         :param allow_naked_names: If true, turn off naked namespace failures. Delegated to
          :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :param allow_nested: If true, turn off nested statement failures. Delegated to
+        :param disallow_nested: If true, turn on nested statement failures. Delegated to
          :class:`pybel.parser.parse_identifier.IdentifierParser`
         :param disallow_unqualified_translocations: If true, allow translocations without TO and FROM clauses.
         :param citation_clearing: Should :code:`SET Citation` statements clear evidence and all annotations?
@@ -265,7 +265,7 @@ class BELParser(BaseParser):
         self.graph = graph
         self.metagraph = set()
 
-        self.allow_nested = allow_nested
+        self.disallow_nested = disallow_nested
         self.disallow_unqualified_translocations = disallow_unqualified_translocations
 
         if skip_validation:
@@ -320,37 +320,45 @@ class BELParser(BaseParser):
         self.general_abundance = general_abundance_tags + nest(concept + opt_location)
 
         self.gene_modified = concept + pyparsing.Optional(
-            WCW + delimitedList(Group(variant | gsub | self.gmod))(VARIANTS))
+            WCW + delimitedList(Group(variant | gsub | self.gmod))(VARIANTS),
+        )
 
         self.gene_fusion = Group(self.fusion)(FUSION)
         self.gene_fusion_legacy = Group(get_legacy_fusion_langauge(concept, 'c'))(FUSION)
 
         #: `2.1.4 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XgeneA>`_
-        self.gene = gene_tag + nest(MatchFirst([
-            self.gene_fusion,
-            self.gene_fusion_legacy,
-            self.gene_modified
-        ]) + opt_location)
+        self.gene = gene_tag + nest(
+            MatchFirst([
+                self.gene_fusion,
+                self.gene_fusion_legacy,
+                self.gene_modified,
+            ]) + opt_location,
+        )
 
         self.mirna_modified = concept + pyparsing.Optional(
-            WCW + delimitedList(Group(variant))(VARIANTS)) + opt_location
+            WCW + delimitedList(Group(variant))(VARIANTS),
+        ) + opt_location
 
         #: `2.1.5 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XmicroRNAA>`_
         self.mirna = mirna_tag + nest(self.mirna_modified)
 
         self.protein_modified = concept + pyparsing.Optional(
             WCW + delimitedList(Group(MatchFirst([self.pmod, variant, fragment, psub, trunc])))(
-                VARIANTS))
+                VARIANTS,
+            ),
+        )
 
         self.protein_fusion = Group(self.fusion)(FUSION)
         self.protein_fusion_legacy = Group(get_legacy_fusion_langauge(concept, 'p'))(FUSION)
 
         #: `2.1.6 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XproteinA>`_
-        self.protein = protein_tag + nest(MatchFirst([
-            self.protein_fusion,
-            self.protein_fusion_legacy,
-            self.protein_modified,
-        ]) + opt_location)
+        self.protein = protein_tag + nest(
+            MatchFirst([
+                self.protein_fusion,
+                self.protein_fusion_legacy,
+                self.protein_modified,
+            ]) + opt_location,
+        )
 
         self.rna_modified = concept + pyparsing.Optional(WCW + delimitedList(Group(variant))(VARIANTS))
 
@@ -358,25 +366,28 @@ class BELParser(BaseParser):
         self.rna_fusion_legacy = Group(get_legacy_fusion_langauge(concept, 'r'))(FUSION)
 
         #: `2.1.7 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XrnaA>`_
-        self.rna = rna_tag + nest(MatchFirst([
-            self.rna_fusion,
-            self.rna_fusion_legacy,
-            self.rna_modified,
-        ]) + opt_location)
+        self.rna = rna_tag + nest(
+            MatchFirst([
+                self.rna_fusion,
+                self.rna_fusion_legacy,
+                self.rna_modified,
+            ]) + opt_location,
+        )
 
         self.single_abundance = MatchFirst([
             self.general_abundance,
             self.gene,
             self.mirna,
             self.protein,
-            self.rna
+            self.rna,
         ])
 
         #: `2.1.2 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XcomplexA>`_
         self.complex_singleton = complex_tag + nest(concept + opt_location)
 
         self.complex_list = complex_tag + nest(
-            delimitedList(Group(self.single_abundance | self.complex_singleton))(MEMBERS) + opt_location)
+            delimitedList(Group(self.single_abundance | self.complex_singleton))(MEMBERS) + opt_location,
+        )
 
         self.complex_abundances = self.complex_list | self.complex_singleton
 
@@ -386,7 +397,7 @@ class BELParser(BaseParser):
 
         #: `2.1.3 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XcompositeA>`_
         self.composite_abundance = composite_abundance_tag + nest(
-            delimitedList(Group(self.simple_abundance))(MEMBERS) + opt_location
+            delimitedList(Group(self.simple_abundance))(MEMBERS) + opt_location,
         )
 
         self.abundance = self.simple_abundance | self.composite_abundance
@@ -395,11 +406,12 @@ class BELParser(BaseParser):
         # backwards compatibility with BEL v1.0
 
         molecular_activity_default = oneOf(list(language.activity_labels)).setParseAction(
-            handle_molecular_activity_default)
+            handle_molecular_activity_default,
+        )
 
         #: `2.4.1 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XmolecularA>`_
         self.molecular_activity = molecular_activity_tags + nest(
-            molecular_activity_default | self.concept_parser.language
+            molecular_activity_default | self.concept_parser.language,
         )
 
         # 2.3 Process Functions
@@ -414,7 +426,7 @@ class BELParser(BaseParser):
         self.bp_path.setParseAction(self.check_function_semantics)
 
         self.activity_standard = activity_tag + nest(
-            Group(self.simple_abundance)(TARGET) + pyparsing.Optional(WCW + Group(self.molecular_activity)(EFFECT))
+            Group(self.simple_abundance)(TARGET) + pyparsing.Optional(WCW + Group(self.molecular_activity)(EFFECT)),
         )
 
         activity_legacy_tags = oneOf(language.activities)(MODIFIER)
@@ -438,13 +450,13 @@ class BELParser(BaseParser):
         self.translocation_standard = nest(
             Group(self.simple_abundance)(TARGET)
             + WCW
-            + Group(from_loc + WCW + to_loc)(EFFECT)
+            + Group(from_loc + WCW + to_loc)(EFFECT),
         )
 
         self.translocation_legacy = nest(
             Group(self.simple_abundance)(TARGET)
             + WCW
-            + Group(concept(FROM_LOC) + WCW + concept(TO_LOC))(EFFECT)
+            + Group(concept(FROM_LOC) + WCW + concept(TO_LOC))(EFFECT),
         )
 
         self.translocation_legacy.addParseAction(handle_legacy_tloc)
@@ -457,7 +469,7 @@ class BELParser(BaseParser):
         self.translocation = translocation_tag + MatchFirst([
             self.translocation_unqualified,
             self.translocation_standard,
-            self.translocation_legacy
+            self.translocation_legacy,
         ])
 
         #: `2.5.2 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_degradation_deg>`_
@@ -474,7 +486,7 @@ class BELParser(BaseParser):
             self.cell_surface_expression,
             self.translocation,
             self.degradation,
-            self.reaction
+            self.reaction,
         ])
 
         # 3 BEL Relationships
@@ -505,14 +517,14 @@ class BELParser(BaseParser):
         self.rate_limit = triple(
             MatchFirst([self.biological_process, self.activity, self.transformation]),
             rate_limit_tag,
-            self.biological_process
+            self.biological_process,
         )
 
         #: `3.4.6 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_subprocessof>`_
         self.subprocess_of = triple(
             MatchFirst([self.process, self.activity, self.transformation]),
             subprocess_of_tag,
-            self.process
+            self.process,
         )
 
         #: `3.3.2 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_transcribedto>`_
@@ -537,9 +549,9 @@ class BELParser(BaseParser):
 
         # `3.4.3 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_hascomponent>`_
         self.has_component = triple(
-            self.complex_abundances | self.composite_abundance,
+            self.abundance,
             has_component_tag,
-            self.abundance
+            self.abundance,
         )
 
         self.biomarker = triple(self.bel_term, biomarker_tags, self.process)
@@ -559,19 +571,23 @@ class BELParser(BaseParser):
             # self.has_variant_relation,
             # self.part_of_reaction,
         ])
-
         self.relation.setParseAction(self._handle_relation_harness)
 
-        self.unqualified_relation = MatchFirst([
+        self.inverted_unqualified_relation = MatchFirst([
+            self.has_member,
+            self.has_component,
+        ])
+        self.inverted_unqualified_relation.setParseAction(self.handle_inverse_unqualified_relation)
+
+        self.normal_unqualified_relation = MatchFirst([
             self.has_member,
             self.has_component,
             self.has_variant_relation,
             self.part_of_reaction,
         ])
+        self.normal_unqualified_relation.setParseAction(self.handle_unqualified_relation)
 
-        self.unqualified_relation.setParseAction(self.handle_unqualified_relation)
-
-        #: 3.1 Causal Relationships - nested. Not enabled by default.
+        #: 3.1 Causal Relationships - nested.
         causal_relation_tags = MatchFirst([
             increases_tag,
             decreases_tag,
@@ -595,7 +611,8 @@ class BELParser(BaseParser):
             self.has_list,
             self.nested_causal_relationship,
             self.relation,
-            self.unqualified_relation,
+            self.inverted_unqualified_relation,
+            self.normal_unqualified_relation,
             self.label_relationship,
         ])
 
@@ -629,24 +646,28 @@ class BELParser(BaseParser):
     def handle_nested_relation(self, line: str, position: int, tokens: ParseResults):
         """Handle nested statements.
 
-        If :code:`allow_nested` is False, raises a ``NestedRelationWarning``.
+        If :code:`self.disallow_nested` is True, raises a ``NestedRelationWarning``.
 
         :raises: NestedRelationWarning
         """
-        if not self.allow_nested:
+        if self.disallow_nested:
             raise NestedRelationWarning(self.get_line_number(), line, position)
 
-        subject_hash = self._handle_relation_checked(line, position, {
-            SUBJECT: tokens[SUBJECT],
-            RELATION: tokens[RELATION],
-            OBJECT: tokens[OBJECT][SUBJECT],
-        })
+        subject_hash = self._handle_relation_checked(
+            line, position, {
+                SUBJECT: tokens[SUBJECT],
+                RELATION: tokens[RELATION],
+                OBJECT: tokens[OBJECT][SUBJECT],
+            },
+        )
 
-        object_hash = self._handle_relation_checked(line, position, {
-            SUBJECT: tokens[OBJECT][SUBJECT],
-            RELATION: tokens[OBJECT][RELATION],
-            OBJECT: tokens[OBJECT][OBJECT],
-        })
+        object_hash = self._handle_relation_checked(
+            line, position, {
+                SUBJECT: tokens[OBJECT][SUBJECT],
+                RELATION: tokens[OBJECT][RELATION],
+                OBJECT: tokens[OBJECT][OBJECT],
+            },
+        )
         self.metagraph.add((subject_hash, object_hash))
         return tokens
 
@@ -667,10 +688,12 @@ class BELParser(BaseParser):
         if self._allow_naked_names and namespace == DIRTY:  # Don't check dirty names in lenient mode
             return tokens
 
-        valid_functions = set(itt.chain.from_iterable(
-            belns_encodings.get(encoding, set())
-            for encoding in self._namespace_dict[namespace][name]
-        ))
+        valid_functions = set(
+            itt.chain.from_iterable(
+                belns_encodings.get(encoding, set())
+                for encoding in self._namespace_dict[namespace][name]
+            ),
+        )
 
         if not valid_functions:
             raise InvalidEntity(self.get_line_number(), line, position, namespace, name)
@@ -699,17 +722,19 @@ class BELParser(BaseParser):
 
         for child_tokens in tokens[2]:
             child_node_dsl = self.ensure_node(child_tokens)
-            self.graph.add_unqualified_edge(parent_node_dsl, child_node_dsl, relation)
+            # Note that the polarity is switched since this is just for hasMembers
+            # and hasComponents, which are both deprecated as of BEL v2.2
+            self.graph.add_unqualified_edge(child_node_dsl, parent_node_dsl, relation)
 
         return tokens
 
     def handle_has_members(self, _, __, tokens: ParseResults) -> ParseResults:
         """Handle list relations like ``p(X) hasMembers list(p(Y), p(Z), ...)``."""
-        return self._handle_list_helper(tokens, HAS_MEMBER)
+        return self._handle_list_helper(tokens, IS_A)
 
     def handle_has_components(self, _, __, tokens: ParseResults) -> ParseResults:
         """Handle list relations like ``p(X) hasComponents list(p(Y), p(Z), ...)``."""
-        return self._handle_list_helper(tokens, HAS_COMPONENT)
+        return self._handle_list_helper(tokens, PART_OF)
 
     def _add_qualified_edge_helper(self, u, v, relation, annotations, subject_modifier, object_modifier) -> str:
         """Add a qualified edge from the internal aspects of the parser."""
@@ -718,16 +743,16 @@ class BELParser(BaseParser):
             v,
             relation=relation,
             evidence=self.control_parser.evidence,
-            citation=self.control_parser.citation.copy(),
+            citation=self.control_parser.get_citation(),
             annotations=annotations,
             subject_modifier=subject_modifier,
             object_modifier=object_modifier,
-            **{LINE: self.get_line_number()}
+            **{LINE: self.get_line_number()},
         )
 
     def _add_qualified_edge(self, u, v, relation, annotations, subject_modifier, object_modifier) -> str:
         """Add an edge, then adds the opposite direction edge if it should."""
-        sha512 = self._add_qualified_edge_helper(
+        edge_hash = self._add_qualified_edge_helper(
             u,
             v,
             relation=relation,
@@ -746,7 +771,7 @@ class BELParser(BaseParser):
                 subject_modifier=object_modifier,
             )
 
-        return sha512
+        return edge_hash
 
     def _handle_relation(self, tokens: ParseResults) -> str:
         """Handle a relation."""
@@ -788,7 +813,7 @@ class BELParser(BaseParser):
         return tokens
 
     def _handle_relation_checked(self, line, position, tokens):
-        if not self.control_parser.citation:
+        if not self.control_parser.citation_is_set:
             raise MissingCitationException(self.get_line_number(), line, position)
 
         if not self.control_parser.evidence:
@@ -808,6 +833,14 @@ class BELParser(BaseParser):
         self.graph.add_unqualified_edge(subject_node_dsl, object_node_dsl, relation)
         return tokens
 
+    def handle_inverse_unqualified_relation(self, _, __, tokens: ParseResults) -> ParseResults:
+        """Handle unqualified relations that should go reverse."""
+        subject_node_dsl = self.ensure_node(tokens[SUBJECT])
+        object_node_dsl = self.ensure_node(tokens[OBJECT])
+        relation = tokens[RELATION]
+        self.graph.add_unqualified_edge(object_node_dsl, subject_node_dsl, relation)
+        return tokens
+
     def handle_label_relation(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
         """Handle statements like ``p(X) label "Label for X"``.
 
@@ -821,7 +854,7 @@ class BELParser(BaseParser):
                 line_number=self.get_line_number(),
                 line=line,
                 position=position,
-                node=self.graph.node,
+                node=subject_node_dsl,
                 old_label=self.graph.get_node_description(subject_node_dsl),
                 new_label=description,
             )

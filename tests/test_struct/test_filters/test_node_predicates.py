@@ -6,7 +6,7 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import (
-    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_REFERENCE, CITATION_TYPE,
+    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_IDENTIFIER, CITATION_DB,
     CITATION_TYPE_ONLINE, CITATION_TYPE_PUBMED, DECREASES, DEGRADATION, DIRECTLY_DECREASES, DIRECTLY_INCREASES,
     EVIDENCE, GMOD, INCREASES, LOCATION, MODIFIER, OBJECT, POLAR_RELATIONS, POSITIVE_CORRELATION, RELATION, SUBJECT,
     TRANSLOCATION,
@@ -147,7 +147,7 @@ class TestNodePredicates(unittest.TestCase):
             u,
             v,
             citation={
-                CITATION_TYPE: CITATION_TYPE_ONLINE, CITATION_REFERENCE: 'https://www.ncbi.nlm.nih.gov/gene/3290'
+                CITATION_DB: CITATION_TYPE_ONLINE, CITATION_IDENTIFIER: 'https://www.ncbi.nlm.nih.gov/gene/3290'
             },
             evidence="Entrez Gene Summary: Human: The protein encoded by this gene is a microsomal enzyme that "
                      "catalyzes the conversion of the stress hormone cortisol to the inactive metabolite cortisone. "
@@ -417,8 +417,8 @@ class TestEdgePredicate(unittest.TestCase):
         self.assertTrue(has_provenance({CITATION: {}, EVIDENCE: ''}))
 
     def test_has_pubmed(self):
-        self.assertTrue(has_pubmed({CITATION: {CITATION_TYPE: CITATION_TYPE_PUBMED}}))
-        self.assertFalse(has_pubmed({CITATION: {CITATION_TYPE: CITATION_TYPE_ONLINE}}))
+        self.assertTrue(has_pubmed({CITATION: {CITATION_DB: CITATION_TYPE_PUBMED}}))
+        self.assertFalse(has_pubmed({CITATION: {CITATION_DB: CITATION_TYPE_ONLINE}}))
         self.assertFalse(has_pubmed({}))
 
     def test_has_authors(self):

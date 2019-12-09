@@ -12,8 +12,8 @@ from networkx.utils import open_file
 import bel_resources.constants
 from bel_resources import make_knowledge_header
 from .constants import (
-    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CELL_SURFACE, CITATION, CITATION_REFERENCE, CITATION_TYPE,
-    DEGRADATION, EFFECT, EVIDENCE, EXTRACELLULAR, FROM_LOC, INTRACELLULAR, LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT,
+    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CELL_SURFACE, CITATION, CITATION_DB, CITATION_IDENTIFIER, DEGRADATION,
+    EFFECT, EVIDENCE, EXTRACELLULAR, FROM_LOC, INTRACELLULAR, LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT,
     PYBEL_AUTOEVIDENCE, RELATION, SUBJECT, TO_LOC, TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS,
 )
 from .dsl import BaseAbundance, BaseEntity, FusionBase, ListAbundance, Reaction
@@ -25,6 +25,7 @@ __all__ = [
     'to_bel_script',
     'to_bel_script_lines',
     'edge_to_bel',
+    'calculate_canonical_name',
 ]
 
 logger = logging.getLogger(__name__)
@@ -71,7 +72,7 @@ def postpend_location(bel_string: str, location_model) -> str:
     return "{}, loc({}:{}))".format(
         bel_string[:-1],
         location_model[NAMESPACE],
-        ensure_quotes(location_model[NAME])
+        ensure_quotes(location_model[NAME]),
     )
 
 
@@ -136,7 +137,7 @@ def _get_tloc_terminal(side, data):
     return "{}({}:{})".format(
         side,
         data[NAMESPACE],
-        ensure_quotes(data[NAME])
+        ensure_quotes(data[NAME]),
     )
 
 
@@ -166,8 +167,8 @@ def edge_to_bel(u: BaseEntity, v: BaseEntity, data: EdgeData, sep: Optional[str]
 
 def _sort_qualified_edges_helper(t: EdgeTuple) -> Tuple[str, str, str]:
     return (
-        t[3][CITATION][CITATION_TYPE],
-        t[3][CITATION][CITATION_REFERENCE],
+        t[3][CITATION][CITATION_DB],
+        t[3][CITATION][CITATION_IDENTIFIER],
         t[3][EVIDENCE],
     )
 
@@ -187,7 +188,7 @@ def sort_qualified_edges(graph) -> Iterable[EdgeTuple]:
 
 def _citation_sort_key(t: EdgeTuple) -> str:
     """Make a confusing 4 tuple sortable by citation."""
-    return '"{}", "{}"'.format(t[3][CITATION][CITATION_TYPE], t[3][CITATION][CITATION_REFERENCE])
+    return '"{}", "{}"'.format(t[3][CITATION][CITATION_DB], t[3][CITATION][CITATION_IDENTIFIER])
 
 
 def _evidence_sort_key(t: EdgeTuple) -> str:
@@ -221,7 +222,7 @@ def _to_bel_lines_header(graph) -> Iterable[str]:
     :param pybel.BELGraph graph: A BEL graph
     """
     yield '# This document was created by PyBEL v{} and bel-resources v{} on {}\n'.format(
-        VERSION, bel_resources.constants.VERSION, time.asctime()
+        VERSION, bel_resources.constants.VERSION, time.asctime(),
     )
     yield from make_knowledge_header(
         namespace_url=graph.namespace_url,
@@ -229,7 +230,7 @@ def _to_bel_lines_header(graph) -> Iterable[str]:
         annotation_url=graph.annotation_url,
         annotation_patterns=graph.annotation_pattern,
         annotation_list=graph.annotation_list,
-        **graph.document
+        **graph.document,
     )
 
 
@@ -305,7 +306,7 @@ def _to_bel_lines_footer(graph) -> Iterable[str]:
         yield 'UNSET Citation'
 
 
-def calculate_canonical_name(node: BaseEntity) -> str:
+def calculate_canonical_name(node: BaseEntity, use_curie: bool = False) -> str:
     """Calculate the canonical name for a given node.
 
     If it is a simple node, uses the already given name. Otherwise, it uses the BEL string.
@@ -316,6 +317,8 @@ def calculate_canonical_name(node: BaseEntity) -> str:
     elif isinstance(node, BaseAbundance):
         if VARIANTS in node:
             return node.as_bel(use_identifiers=True)
+        elif use_curie:
+            return node.curie
         else:
             return node.obo
 

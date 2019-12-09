@@ -67,8 +67,10 @@ def _from_pickle_callback(ctx, param, file):
     cache_path = get_corresponding_pickle_path(path)
 
     if not os.path.exists(cache_path):
-        click.echo('The BEL script {path} has not yet been compiled. First, try running the following command:\n\n '
-                   'pybel compile {path}\n'.format(path=path))
+        click.echo(
+            'The BEL script {path} has not yet been compiled. First, try running the following command:\n\n '
+            'pybel compile {path}\n'.format(path=path),
+        )
         sys.exit(1)
 
     return from_pickle(cache_path)
@@ -96,7 +98,7 @@ def main(ctx, connection):
 @main.command()
 @click.argument('path')
 @click.option('--allow-naked-names', is_flag=True, help="Enable lenient parsing for naked names")
-@click.option('--allow-nested', is_flag=True, help="Enable lenient parsing for nested statements")
+@click.option('--disallow-nested', is_flag=True, help="Disable lenient parsing for nested statements")
 @click.option('--disallow-unqualified-translocations', is_flag=True, help="Disallow unqualified translocations")
 @click.option('--no-identifier-validation', is_flag=True, help='Turn off identifier validation')
 @click.option('--no-citation-clearing', is_flag=True, help='Turn off citation clearing')
@@ -105,9 +107,11 @@ def main(ctx, connection):
 @click.option('--skip-tqdm', is_flag=True)
 @click.option('-v', '--verbose', is_flag=True)
 @click.pass_obj
-def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified_translocations,
-            no_identifier_validation, no_citation_clearing, required_annotations, upgrade_urls,
-            skip_tqdm, verbose):
+def compile(
+    manager, path, allow_naked_names, disallow_nested, disallow_unqualified_translocations,
+    no_identifier_validation, no_citation_clearing, required_annotations, upgrade_urls,
+    skip_tqdm, verbose,
+):
     """Compile a BEL script to a graph."""
     if verbose:
         logging.basicConfig(level=logging.DEBUG)
@@ -121,7 +125,7 @@ def compile(manager, path, allow_naked_names, allow_nested, disallow_unqualified
         path,
         manager=manager,
         use_tqdm=(not (skip_tqdm or verbose)),
-        allow_nested=allow_nested,
+        disallow_nested=disallow_nested,
         allow_naked_names=allow_naked_names,
         disallow_unqualified_translocations=disallow_unqualified_translocations,
         citation_clearing=(not no_citation_clearing),
@@ -157,7 +161,7 @@ def _print_summary(graph: BELGraph, ticks: bool = False):
         click.secho(
             '\nUnused Namespaces ({}/{})'.format(len(unused_namespaces), len(graph.defined_namespace_keywords)),
             fg='red',
-            bold=True
+            bold=True,
         )
         if ticks:
             click.echo('```')
@@ -171,7 +175,7 @@ def _print_summary(graph: BELGraph, ticks: bool = False):
         click.secho(
             '\nUnused Annotations ({}/{})'.format(len(unused_annotations), len(graph.defined_annotation_keywords)),
             fg='red',
-            bold=True
+            bold=True,
         )
         if ticks:
             click.echo('```')
@@ -364,7 +368,12 @@ def ls(manager: Manager, url: Optional[str], namespace_id: Optional[int]):
     elif namespace_id is not None:
         _ls(manager, Namespace, namespace_id)
     else:
-        click.echo('Missing argument -i or -u')
+        click.echo_via_pager(
+            '\n'.join(
+                "{}\t{}\t{}".format(n.id, n.name, n.url)
+                for n in manager.session.query(Namespace)
+            ),
+        )
 
 
 @namespaces.command()  # noqa:F811
@@ -478,16 +487,20 @@ def echo_warnings_via_pager(warnings: List[WarningTuple], sep: str = '\t') -> No
     def _make_line(path: str, exc: BELParserWarning):
         s = click.style(path, fg='cyan') + sep
         s += click.style(s1.format(exc.line_number), fg='blue', bold=True)
-        s += click.style(s2.format(exc.__class__.__name__),
-                         fg=('red' if exc.__class__.__name__.endswith('Error') else 'yellow'))
+        s += click.style(
+            s2.format(exc.__class__.__name__),
+            fg=('red' if exc.__class__.__name__.endswith('Error') else 'yellow'),
+        )
         s += click.style(exc.line, bold=True) + sep
         s += click.style(str(exc))
         return s
 
-    click.echo_via_pager('\n'.join(
-        _make_line(path, exc)
-        for path, exc, _ in warnings
-    ))
+    click.echo_via_pager(
+        '\n'.join(
+            _make_line(path, exc)
+            for path, exc, _ in warnings
+        ),
+    )
 
 
 if __name__ == '__main__':

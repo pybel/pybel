@@ -5,7 +5,7 @@
 import logging
 
 from ..pipeline import in_place_transformation
-from ...constants import ANNOTATIONS, CITATION, CITATION_REFERENCE, CITATION_TYPE
+from ...constants import ANNOTATIONS, CITATION, CITATION_DB, CITATION_IDENTIFIER
 
 __all__ = [
     'strip_annotations',
@@ -75,7 +75,7 @@ def remove_annotation_value(graph, annotation: str, value: str) -> None:
         del graph[u][v][k][ANNOTATIONS][annotation][value]
 
 
-_CITATION_KEEP_KEYS = {CITATION_REFERENCE, CITATION_TYPE}
+_CITATION_KEEP_KEYS = {CITATION_IDENTIFIER, CITATION_DB}
 
 
 @in_place_transformation

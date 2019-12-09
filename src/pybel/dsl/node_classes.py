@@ -78,7 +78,7 @@ class BaseEntity(dict, metaclass=ABCMeta):
     def __init__(self) -> None:
         """Build a PyBEL node."""
         super().__init__(**{FUNCTION: self.function})
-        self._sha512 = None
+        self._md5 = None
 
     @property
     def _bel_function(self) -> str:
@@ -89,11 +89,11 @@ class BaseEntity(dict, metaclass=ABCMeta):
         """Return this entity as a BEL string."""
 
     @property
-    def sha512(self) -> str:
-        """Get the SHA512 hash of this node."""
-        if self._sha512 is None:
-            self._sha512 = hashlib.sha512(self.as_bel().encode('utf8')).hexdigest()
-        return self._sha512
+    def md5(self) -> str:
+        """Get the MD5 hash of this node."""
+        if self._md5 is None:
+            self._md5 = hashlib.md5(self.as_bel().encode('utf8')).hexdigest()  # noqa: S303
+        return self._md5
 
     def __hash__(self):  # noqa: D105
         return hash(self.as_bel())
@@ -185,8 +185,8 @@ class Abundance(BaseAbundance):
     """Builds an abundance node.
 
     Example:
-
     >>> Abundance(namespace='CHEBI', name='water')
+
     """
 
     function = ABUNDANCE
@@ -196,8 +196,8 @@ class BiologicalProcess(BaseAbundance):
     """Builds a biological process node.
 
     Example:
-
     >>> BiologicalProcess(namespace='GO', name='apoptosis')
+
     """
 
     function = BIOPROCESS
@@ -207,8 +207,8 @@ class Pathology(BaseAbundance):
     """Build a pathology node.
 
     Example:
-
     >>> Pathology(namespace='DO', name='Alzheimer Disease')
+
     """
 
     function = PATHOLOGY
@@ -291,6 +291,7 @@ class CentralDogma(BaseAbundance):
         >>> ab42 = Protein(name='APP', namespace='HGNC', variants=[Fragment(start=672, stop=713)])
         >>> app = ab42.get_parent()
         >>> assert 'p(HGNC:APP)' == app.as_bel()
+
         """
         if VARIANTS not in self:
             return None
@@ -312,6 +313,7 @@ class CentralDogma(BaseAbundance):
         >>> app = Protein(name='APP', namespace='HGNC')
         >>> ab42 = app.with_variants([Fragment(start=672, stop=713)])
         >>> assert 'p(HGNC:APP, frag(672_713))' == ab42.as_bel()
+
         """
         return self.__class__(
             namespace=self.namespace,
@@ -358,6 +360,7 @@ class ProteinModification(Variant):
 
         >>> ProteinModification(name='protein phosphorylation', namespace='GO',
         >>>                     identifier='GO:0006468', code='Thr', position=308)
+
         """
         super().__init__(kind=PMOD)
 
@@ -389,7 +392,7 @@ class ProteinModification(Variant):
 
         return 'pmod({}{})'.format(
             x,
-            ''.join(', {}'.format(self[x]) for x in PMOD_ORDER[2:] if x in self)
+            ''.join(', {}'.format(self[x]) for x in PMOD_ORDER[2:] if x in self),
         )
 
 
@@ -454,8 +457,8 @@ class Hgvs(Variant):
         :param variant: The HGVS variant string
 
         Example:
-
         >>> Protein(namespace='HGNC', name='AKT1', variants=[Hgvs('p.Ala127Tyr')])
+
         """
         super().__init__(kind=HGVS)
         self[HGVS] = variant
@@ -495,8 +498,8 @@ class ProteinSubstitution(Hgvs):
         :param to_aa: The 3-letter amino acid code of the new residue
 
         Example:
-
         >>> Protein(namespace='HGNC', name='AKT1', variants=[ProteinSubstitution('Ala', 127, 'Tyr')])
+
         """
         super().__init__('p.{}{}{}'.format(from_aa, position, to_aa))
 
@@ -523,6 +526,7 @@ class Fragment(Variant):
         Example of unspecified fragment:
 
         >>> Protein(name='APP', namespace='HGNC', variants=[Fragment()])
+
         """
         super().__init__(kind=FRAGMENT)
 
@@ -673,8 +677,8 @@ class Reaction(BaseEntity):
         :param products: A list of PyBEL node data dictionaries representing the products
 
         Example:
-
         >>> Reaction([Protein(namespace='HGNC', name='KNG1')], [Abundance(namespace='CHEBI', name='bradykinin')])
+
         """
         super().__init__()
 
@@ -745,7 +749,7 @@ class ListAbundance(BaseEntity):
         """Return this list abundance as a BEL string."""
         return '{}({})'.format(
             self._bel_function,
-            _entity_list_as_bel(self.members, use_identifiers=use_identifiers)
+            _entity_list_as_bel(self.members, use_identifiers=use_identifiers),
         )
 
 
@@ -795,8 +799,8 @@ class NamedComplexAbundance(BaseAbundance):
     """Build a named complex abundance node.
 
     Example:
-
     >>> NamedComplexAbundance(namespace='FPLX', name='Calcineurin Complex')
+
     """
 
     function = COMPLEX
@@ -951,6 +955,7 @@ class RnaFusion(FusionBase):
     >>> ... partner_5p=Rna(namespace='HGNC', name='TMPRSS2'),
     >>> ... partner_3p=Rna(namespace='HGNC', name='ERG'),
     >>> )
+
     """
 
     function = RNA
@@ -974,6 +979,7 @@ class GeneFusion(FusionBase):
     >>> ... partner_5p=Gene(namespace='HGNC', name='TMPRSS2'),
     >>> ... partner_3p=Gene(namespace='HGNC', name='ERG'),
     >>> )
+
     """
 
     function = GENE

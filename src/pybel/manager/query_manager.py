@@ -173,8 +173,8 @@ class QueryManager(LookupManager):
 
     def query_citations(
         self,
-        type: Optional[str] = None,
-        reference: Optional[str] = None,
+        db: Optional[str] = None,
+        db_id: Optional[str] = None,
         name: Optional[str] = None,
         author: Union[None, str, List[str]] = None,
         date: Union[None, str, datetime.date] = None,
@@ -182,8 +182,8 @@ class QueryManager(LookupManager):
     ) -> List[Citation]:
         """Query citations in the database.
 
-        :param type: Type of the citation. e.g. PubMed
-        :param reference: The identifier used for the citation. e.g. PubMed_ID
+        :param db: Type of the citation. e.g. PubMed
+        :param db_id: The identifier used for the citation. e.g. PubMed_ID
         :param name: Title of the citation.
         :param author: The name or a list of names of authors participated in the citation.
         :param date: Publishing date of the citation.
@@ -200,11 +200,11 @@ class QueryManager(LookupManager):
             else:
                 raise TypeError
 
-        if type and not reference:
-            query = query.filter(Citation.type.like(type))
-        elif reference and type:
-            query = query.filter(Citation.reference == reference)
-        elif reference and not type:
+        if db and not db_id:
+            query = query.filter(Citation.db.like(db))
+        elif db_id and db:
+            query = query.filter(Citation.db_id == db_id)
+        elif db_id and not db:
             raise ValueError('reference specified without type')
 
         if name:
@@ -223,7 +223,7 @@ class QueryManager(LookupManager):
 
     def query_edges_by_pubmed_identifiers(self, pubmed_identifiers: List[str]) -> List[Edge]:
         """Get all edges annotated to the documents identified by the given PubMed identifiers."""
-        fi = and_(Citation.type == CITATION_TYPE_PUBMED, Citation.reference.in_(pubmed_identifiers))
+        fi = and_(Citation.db == CITATION_TYPE_PUBMED, Citation.db_id.in_(pubmed_identifiers))
         return self.session.query(Edge).join(Evidence).join(Citation).filter(fi).all()
 
     @staticmethod

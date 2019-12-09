@@ -9,7 +9,7 @@ import unittest
 
 from pybel import from_cbn_jgif, to_jgif
 from pybel.constants import (
-    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_REFERENCE, CITATION_TYPE, CITATION_TYPE_OTHER,
+    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_IDENTIFIER, CITATION_DB, CITATION_TYPE_OTHER,
     CITATION_TYPE_PUBMED, DECREASES, DIRECTLY_INCREASES, EFFECT, EVIDENCE, MODIFIER, NAME, NAMESPACE, OBJECT, RELATION,
 )
 from pybel.dsl import Abundance, BiologicalProcess, ComplexAbundance, NamedComplexAbundance, Pathology, Protein, ProteinModification
@@ -80,8 +80,8 @@ jgif_expected_edges = [
         RELATION: DIRECTLY_INCREASES,
         EVIDENCE: 'NMDA-mediated influx of calcium led to activated of the calcium-dependent phosphatase calcineurin and the subsequent dephosphorylation and activation of the protein-tyrosine phosphatase STEP',
         CITATION: {
-            CITATION_TYPE: CITATION_TYPE_PUBMED,
-            CITATION_REFERENCE: '12483215'
+            CITATION_DB: CITATION_TYPE_PUBMED,
+            CITATION_IDENTIFIER: '12483215'
         },
         OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'phos'}},
         ANNOTATIONS: {
@@ -93,8 +93,8 @@ jgif_expected_edges = [
         RELATION: DECREASES,
         EVIDENCE: "\"These data suggested that FOXO3 downregulates the accumulation of CD8 T cells in tissue specific fashion during an acute LCMV [lymphocytic choriomeningitis virus] infection.\" (p. 3)",
         CITATION: {
-            CITATION_TYPE: CITATION_TYPE_OTHER,
-            CITATION_REFERENCE: "22359505"
+            CITATION_DB: CITATION_TYPE_OTHER,
+            CITATION_IDENTIFIER: "22359505"
         },
         ANNOTATIONS: {
             'Species': {'10090': True},
@@ -105,8 +105,8 @@ jgif_expected_edges = [
         RELATION: DIRECTLY_INCREASES,
         EVIDENCE: "IL-15 utilizes ... the common cytokine receptor γ-chain (CD132) for signal transduction in lymphocytes",
         CITATION: {
-            CITATION_TYPE: CITATION_TYPE_OTHER,
-            CITATION_REFERENCE: "20335267"
+            CITATION_DB: CITATION_TYPE_OTHER,
+            CITATION_IDENTIFIER: "20335267"
         },
         OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'cat'}},
         ANNOTATIONS: {
@@ -117,7 +117,7 @@ jgif_expected_edges = [
 
 
 class TestJgif(TestGraphMixin):
-    """Tests data interchange of """
+    """Tests data interchange of JGIF."""
 
     @unittest.skipIf(sys.platform.startswith("win"), "does not work on Windows")
     def test_jgif_interchange(self):

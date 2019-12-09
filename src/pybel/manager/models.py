@@ -3,7 +3,6 @@
 """This module contains the SQLAlchemy database models that support the definition cache and graph cache."""
 
 import datetime
-import hashlib
 import json
 from collections import defaultdict
 from typing import Any, Iterable, Mapping, Optional, Tuple
@@ -16,9 +15,9 @@ from sqlalchemy.orm import backref, relationship
 
 from .utils import int_or_str
 from ..constants import (
-    CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR, CITATION_LAST_AUTHOR, CITATION_NAME,
-    CITATION_PAGES, CITATION_REFERENCE, CITATION_TITLE, CITATION_TYPE, CITATION_TYPE_PUBMED, CITATION_VOLUME, EFFECT,
-    EVIDENCE, FRAGMENT, FUSION, GMOD, HGVS, IDENTIFIER, LOCATION, METADATA_AUTHORS, METADATA_CONTACT,
+    CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_DB, CITATION_DB_NAME, CITATION_FIRST_AUTHOR,
+    CITATION_IDENTIFIER, CITATION_JOURNAL, CITATION_LAST_AUTHOR, CITATION_PAGES, CITATION_TYPE_PUBMED, CITATION_VOLUME,
+    EFFECT, EVIDENCE, FRAGMENT, FUSION, GMOD, HGVS, IDENTIFIER, LOCATION, METADATA_AUTHORS, METADATA_CONTACT,
     METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION,
     MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PMOD, RANGE_3P, RANGE_5P, SUBJECT,
 )
@@ -83,15 +82,21 @@ class Namespace(Base):
     uploaded = Column(DateTime, nullable=False, default=datetime.datetime.utcnow, doc='The date of upload')
 
     # logically the "namespace"
-    keyword = Column(String(255), nullable=True, index=True,
-                     doc='Keyword that is used in a BEL file to identify a specific namespace')
+    keyword = Column(
+        String(255), nullable=True, index=True,
+        doc='Keyword that is used in a BEL file to identify a specific namespace',
+    )
 
     # A namespace either needs a URL or a pattern
-    pattern = Column(String(255), nullable=True, index=True,
-                     doc="Contains regex pattern for value identification.")
+    pattern = Column(
+        String(255), nullable=True, index=True,
+        doc="Contains regex pattern for value identification.",
+    )
 
-    miriam_id = Column(String(16), nullable=True,
-                       doc=r'MIRIAM resource identifier matching the regular expression ``^MIR:001\d{5}$``')
+    miriam_id = Column(
+        String(16), nullable=True,
+        doc=r'MIRIAM resource identifier matching the regular expression ``^MIR:001\d{5}$``',
+    )
     miriam_name = Column(String(255), nullable=True)
     miriam_namespace = Column(String(255), nullable=True)
     miriam_uri = Column(String(255), nullable=True)
@@ -159,8 +164,10 @@ class NamespaceEntry(Base):
     __tablename__ = NAME_TABLE_NAME
     id = Column(Integer, primary_key=True)
 
-    name = Column(String(1023), index=True, nullable=False,
-                  doc='Name that is defined in the corresponding namespace definition file')
+    name = Column(
+        String(1023), index=True, nullable=False,
+        doc='Name that is defined in the corresponding namespace definition file',
+    )
     identifier = Column(String(255), index=True, nullable=True, doc='The database accession number')
     encoding = Column(String(8), nullable=True, doc='The biological entity types for which this name is valid')
 
@@ -207,13 +214,13 @@ class NamespaceEntry(Base):
 network_edge = Table(
     NETWORK_EDGE_TABLE_NAME, Base.metadata,
     Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
-    Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True)
+    Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True),
 )
 
 network_node = Table(
     NETWORK_NODE_TABLE_NAME, Base.metadata,
     Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
-    Column('node_id', Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), primary_key=True)
+    Column('node_id', Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), primary_key=True),
 )
 
 
@@ -314,7 +321,7 @@ class Network(Base):
 node_modification = Table(
     NODE_MODIFICATION_TABLE_NAME, Base.metadata,
     Column('node_id', Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), primary_key=True),
-    Column('modification_id', Integer, ForeignKey('{}.id'.format(MODIFICATION_TABLE_NAME)), primary_key=True)
+    Column('modification_id', Integer, ForeignKey('{}.id'.format(MODIFICATION_TABLE_NAME)), primary_key=True),
 )
 
 
@@ -348,7 +355,7 @@ class Modification(Base):
     residue = Column(String(3), nullable=True, doc='Three letter amino acid code if PMOD')
     position = Column(Integer, nullable=True, doc='Position of PMOD or GMOD')
 
-    sha512 = Column(String(255), index=True)
+    md5 = Column(String(255), index=True)
 
     def _fusion_to_json(self) -> Mapping[str, Any]:
         """Convert this modification to a FUSION data dictionary.
@@ -411,7 +418,7 @@ class Modification(Base):
                 name=self.identifier.name,
                 identifier=self.identifier.identifier,
                 code=self.residue,
-                position=self.position
+                position=self.position,
             )
 
         raise TypeError('unhandled type ({}) for modification {}'.format(self.type, self))
@@ -427,13 +434,15 @@ class Node(Base):
     is_variant = Column(Boolean, default=False, doc='Identifies weather or not the given node is a variant')
     has_fusion = Column(Boolean, default=False, doc='Identifies weather or not the given node is a fusion')
     bel = Column(String(255), nullable=False, doc='Canonical BEL term that represents the given node')
-    sha512 = Column(String(255), nullable=True, index=True)
+    md5 = Column(String(255), nullable=True, index=True)
 
     namespace_entry_id = Column(Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), nullable=True)
     namespace_entry = relationship(NamespaceEntry, foreign_keys=[namespace_entry_id])
 
-    modifications = relationship(Modification, secondary=node_modification, lazy='dynamic',
-                                 backref=backref('nodes', lazy='dynamic'))
+    modifications = relationship(
+        Modification, secondary=node_modification, lazy='dynamic',
+        backref=backref('nodes', lazy='dynamic'),
+    )
 
     data = Column(Text, nullable=False, doc='PyBEL BaseEntity as JSON')
 
@@ -446,7 +455,7 @@ class Node(Base):
         return Node(
             type=base_entity.function,
             bel=base_entity.as_bel(),
-            sha512=base_entity.sha512,
+            md5=base_entity.md5,
             data=json.dumps(base_entity),
         )
 
@@ -459,7 +468,7 @@ class Node(Base):
         return self.bel
 
     def __repr__(self):
-        return '<Node {}: {}>'.format(self.sha512[:10], self.bel)
+        return '<Node {}: {}>'.format(self.md5[:10], self.bel)
 
     def _get_list_by_relation(self, relation):
         return [
@@ -482,7 +491,7 @@ class Node(Base):
 author_citation = Table(
     AUTHOR_CITATION_TABLE_NAME, Base.metadata,
     Column('author_id', Integer, ForeignKey('{}.id'.format(AUTHOR_TABLE_NAME)), primary_key=True),
-    Column('citation_id', Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)), primary_key=True)
+    Column('citation_id', Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)), primary_key=True),
 )
 
 
@@ -493,17 +502,6 @@ class Author(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(255), nullable=False, unique=True, index=True)
-    sha512 = Column(String(255), nullable=False, index=True, unique=True)
-
-    @classmethod
-    def from_name(cls, name):
-        """Create an author by name, automatically populating the hash."""
-        return Author(name=name, sha512=cls.hash_name(name))
-
-    @staticmethod
-    def hash_name(name: str) -> str:
-        """Hash a name."""
-        return hashlib.sha512(name.encode('utf-8')).hexdigest()
 
     @classmethod
     def name_contains(cls, name_query: str):
@@ -511,17 +509,9 @@ class Author(Base):
         return cls.name.contains(name_query)
 
     @classmethod
-    def has_name(cls, name: str):
-        """Build a filter for if an author has a name."""
-        return cls.sha512 == cls.hash_name(name)
-
-    @classmethod
     def has_name_in(cls, names: Iterable[str]):
         """Build a filter if the author has any of the given names."""
-        return cls.sha512.in_({
-            cls.hash_name(name)
-            for name in names
-        })
+        return cls.name.in_(names)
 
     def __str__(self):
         return self.name
@@ -534,12 +524,11 @@ class Citation(Base):
 
     id = Column(Integer, primary_key=True)
 
-    type = Column(String(16), nullable=False, doc='Type of the stored publication e.g. PubMed')
-    reference = Column(String(255), nullable=False, doc='Reference identifier of the publication e.g. PubMed_ID')
-    sha512 = Column(String(255), index=True)
+    db = Column(String(16), nullable=False, doc='Type of the stored publication e.g. PubMed')
+    db_id = Column(String(255), nullable=False, doc='Reference identifier of the publication e.g. PubMed_ID')
 
-    name = Column(String(255), nullable=True, doc='Journal name')
     title = Column(Text, nullable=True, doc='Title of the publication')
+    journal = Column(Text, nullable=True, doc='Journal name')
     volume = Column(Text, nullable=True, doc='Volume of the journal')
     issue = Column(Text, nullable=True, doc='Issue within the volume')
     pages = Column(Text, nullable=True, doc='Pages of the publication')
@@ -554,21 +543,21 @@ class Citation(Base):
     authors = relationship(Author, secondary=author_citation, backref='citations')
 
     __table_args__ = (
-        UniqueConstraint(CITATION_TYPE, CITATION_REFERENCE),
+        UniqueConstraint(db, db_id),
     )
 
     def __str__(self):
-        return '{}:{}'.format(self.type, self.reference)
+        return '{}:{}'.format(self.db, self.db_id)
 
     @property
     def is_pubmed(self) -> bool:
         """Return if this is a PubMed citation."""
-        return CITATION_TYPE_PUBMED == self.type
+        return CITATION_TYPE_PUBMED == self.db
 
     @property
     def is_enriched(self) -> bool:
         """Return if this citation has been enriched for name, title, and other metadata."""
-        return self.title is not None and self.name is not None
+        return all(f is not None for f in (self.title, self.journal))
 
     def to_json(self, include_id: bool = False) -> Mapping[str, Any]:
         """Create a citation dictionary that is used to recreate the edge data dictionary of a :class:`BELGraph`.
@@ -577,18 +566,18 @@ class Citation(Base):
         :return: Citation dictionary for the recreation of a :class:`BELGraph`.
         """
         result = {
-            CITATION_REFERENCE: self.reference,
-            CITATION_TYPE: self.type
+            CITATION_DB: self.db,
+            CITATION_IDENTIFIER: self.db_id,
         }
 
         if include_id:
             result['id'] = self.id
 
-        if self.name:
-            result[CITATION_NAME] = self.name
-
         if self.title:
-            result[CITATION_TITLE] = self.title
+            result[CITATION_DB_NAME] = self.title
+
+        if self.journal:
+            result[CITATION_JOURNAL] = self.journal
 
         if self.volume:
             result[CITATION_VOLUME] = self.volume
@@ -625,10 +614,12 @@ class Evidence(Base):
     citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)), nullable=False)
     citation = relationship(Citation, backref=backref('evidences'))
 
-    sha512 = Column(String(255), index=True)
+    __table_args__ = (
+        UniqueConstraint(citation_id, text),
+    )
 
     def __str__(self):
-        return '{}:{}'.format(self.citation, self.sha512[:8])
+        return '{}:{}:{}'.format(self.citation.db, self.citation.db_id, self.text)
 
     def to_json(self, include_id: bool = False):
         """Create a dictionary that is used to recreate the edge data dictionary for a :class:`BELGraph`.
@@ -639,7 +630,7 @@ class Evidence(Base):
         """
         result = {
             CITATION: self.citation.to_json(include_id=include_id),
-            EVIDENCE: self.text
+            EVIDENCE: self.text,
         }
 
         if include_id:
@@ -651,13 +642,13 @@ class Evidence(Base):
 edge_annotation = Table(
     EDGE_ANNOTATION_TABLE_NAME, Base.metadata,
     Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True),
-    Column('name_id', Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), primary_key=True)
+    Column('name_id', Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), primary_key=True),
 )
 
 edge_property = Table(
     EDGE_PROPERTY_TABLE_NAME, Base.metadata,
     Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True),
-    Column('property_id', Integer, ForeignKey('{}.id'.format(PROPERTY_TABLE_NAME)), primary_key=True)
+    Column('property_id', Integer, ForeignKey('{}.id'.format(PROPERTY_TABLE_NAME)), primary_key=True),
 )
 
 
@@ -673,17 +664,14 @@ class Property(Base):
 
     relative_key = Column(String(255), nullable=True, doc='Relative key of effect e.g. to_tloc or from_tloc')
 
-    sha512 = Column(String(255), index=True)
+    md5 = Column(String(255), index=True)
 
     effect_id = Column(Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), nullable=True)
     effect = relationship(NamespaceEntry)
 
     @property
-    def side(self):
-        """Return either :data:`pybel.constants.SUBJECT` or :data:`pybel.constants.OBJECT`.
-
-        :rtype: str
-        """
+    def side(self) -> str:
+        """Return either :data:`pybel.constants.SUBJECT` or :data:`pybel.constants.OBJECT`."""
         return SUBJECT if self.is_subject else OBJECT
 
     def to_json(self):
@@ -696,17 +684,17 @@ class Property(Base):
 
         prop_dict = {
             participant: {
-                MODIFIER: self.modifier  # FIXME this is probably wrong for location
-            }
+                MODIFIER: self.modifier,  # FIXME this is probably wrong for location
+            },
         }
 
         if self.modifier == LOCATION:
             prop_dict[participant] = {
-                LOCATION: self.effect.to_json()
+                LOCATION: self.effect.to_json(),
             }
         if self.relative_key:  # for translocations
             prop_dict[participant][EFFECT] = {
-                self.relative_key: self.effect.to_json()
+                self.relative_key: self.effect.to_json(),
             }
         elif self.effect:  # for activities
             prop_dict[participant][EFFECT] = self.effect.to_json()
@@ -727,21 +715,27 @@ class Edge(Base):
     relation = Column(String(255), nullable=False)
 
     source_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), nullable=False)
-    source = relationship(Node, foreign_keys=[source_id],
-                          backref=backref('out_edges', lazy='dynamic', cascade='all, delete-orphan'))
+    source = relationship(
+        Node, foreign_keys=[source_id],
+        backref=backref('out_edges', lazy='dynamic', cascade='all, delete-orphan'),
+    )
 
     target_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), nullable=False)
-    target = relationship(Node, foreign_keys=[target_id],
-                          backref=backref('in_edges', lazy='dynamic', cascade='all, delete-orphan'))
+    target = relationship(
+        Node, foreign_keys=[target_id],
+        backref=backref('in_edges', lazy='dynamic', cascade='all, delete-orphan'),
+    )
 
     evidence_id = Column(Integer, ForeignKey('{}.id'.format(EVIDENCE_TABLE_NAME)), nullable=True)
     evidence = relationship(Evidence, backref=backref('edges', lazy='dynamic'))
 
-    annotations = relationship(NamespaceEntry, secondary=edge_annotation, lazy="dynamic",
-                               backref=backref('edges', lazy='dynamic'))
+    annotations = relationship(
+        NamespaceEntry, secondary=edge_annotation, lazy="dynamic",
+        backref=backref('edges', lazy='dynamic'),
+    )
     properties = relationship(Property, secondary=edge_property, lazy="dynamic")  # , cascade='all, delete-orphan')
 
-    sha512 = Column(String(255), index=True, doc='The hash of the source, target, and associated metadata')
+    md5 = Column(String(255), index=True, doc='The hash of the source, target, and associated metadata')
 
     data = Column(Text, nullable=False, doc='The stringified JSON representing this edge')
 
@@ -749,7 +743,7 @@ class Edge(Base):
         return self.bel
 
     def __repr__(self):
-        return '<Edge {}: {}>'.format(self.sha512[:10], self.bel)
+        return '<Edge {}: {}>'.format(self.md5, self.bel)
 
     def get_annotations_json(self):
         """Format the annotations properly.
@@ -771,14 +765,14 @@ class Edge(Base):
                  and edge data information.
         """
         source_dict = self.source.to_json()
-        source_dict['sha512'] = source_dict.sha512
+        source_dict['md5'] = source_dict.md5
         target_dict = self.target.to_json()
-        target_dict['sha512'] = target_dict.sha512
+        target_dict['md5'] = target_dict.md5
 
         result = {
             'source': source_dict,
             'target': target_dict,
-            'key': self.sha512,
+            'key': self.md5,
             'data': json.loads(self.data),
         }
 

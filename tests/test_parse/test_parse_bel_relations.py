@@ -12,10 +12,10 @@ from pybel.canonicalize import edge_to_bel
 from pybel.constants import (
     ABUNDANCE, ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE, CITATION, COMPLEX, COMPOSITE,
     CONCEPT, DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE, FROM_LOC, FUNCTION,
-    GENE, GMOD, HAS_COMPONENT, HAS_MEMBER, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, INCREASES, IS_A,
-    KIND, LOCATION, MEMBERS, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, PATHOLOGY,
-    POSITIVE_CORRELATION, PRODUCTS, PROTEIN, RATE_LIMITING_STEP_OF, REACTANTS, REACTION, REGULATES, RELATION, RNA,
-    SUBJECT, SUBPROCESS_OF, TARGET, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, VARIANTS,
+    GENE, GMOD, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, INCREASES, IS_A, KIND, LOCATION, MEMBERS, MODIFIER, NAME,
+    NAMESPACE, NEGATIVE_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, PATHOLOGY, POSITIVE_CORRELATION, PRODUCTS, PROTEIN,
+    RATE_LIMITING_STEP_OF, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, SUBPROCESS_OF, TARGET, TO_LOC,
+    TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, VARIANTS,
 )
 from pybel.dsl import (
     Pathology, abundance, activity, bioprocess, complex_abundance, composite_abundance, gene, gmod, hgvs,
@@ -29,7 +29,7 @@ from pybel.parser.exc import (
 )
 from tests.constants import TestTokenParserBase, test_citation_dict, test_evidence_text
 
-log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class TestRelations(TestTokenParserBase):
@@ -90,8 +90,8 @@ class TestRelations(TestTokenParserBase):
         sub = composite_abundance([sub_member_1, sub_member_2, sub_member_3])
         self.assert_has_node(sub)
 
-        self.assert_has_edge(sub, sub_member_1, relation=HAS_COMPONENT)
-        self.assert_has_edge(sub, sub_member_2, relation=HAS_COMPONENT)
+        self.assert_has_edge(sub_member_1, sub, relation=PART_OF)
+        self.assert_has_edge(sub_member_2, sub, relation=PART_OF)
 
     def test_predicate_failure(self):
         """Checks that if there's a problem with the relation/object, that an error gets thrown"""
@@ -127,9 +127,9 @@ class TestRelations(TestTokenParserBase):
         sub = composite_abundance([sub_member_1, sub_member_2, sub_member_3])
         self.assert_has_node(sub)
 
-        self.assert_has_edge(sub, sub_member_1, relation=HAS_COMPONENT)
-        self.assert_has_edge(sub, sub_member_2, relation=HAS_COMPONENT)
-        self.assert_has_edge(sub, sub_member_3, relation=HAS_COMPONENT)
+        self.assert_has_edge(sub_member_1, sub, relation=PART_OF)
+        self.assert_has_edge(sub_member_2, sub, relation=PART_OF)
+        self.assert_has_edge(sub_member_3, sub, relation=PART_OF)
 
         obj = bioprocess('GO', 'neuron apoptotic process')
         self.assert_has_node(obj)
@@ -549,8 +549,8 @@ class TestRelations(TestTokenParserBase):
         sub = complex_abundance([sub_member_1, sub_member_2])
         self.assert_has_node(sub)
 
-        self.assert_has_edge(sub, sub_member_1)
-        self.assert_has_edge(sub, sub_member_2)
+        self.assert_has_edge(sub_member_1, sub, relation=PART_OF)
+        self.assert_has_edge(sub_member_2, sub, relation=PART_OF)
 
         obj = protein('HGNC', 'F9')
         self.assert_has_node(obj)
@@ -560,14 +560,15 @@ class TestRelations(TestTokenParserBase):
     def test_nested_failure(self):
         """Test nested statement (3.1)."""
         statement = 'p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process"))'
+        self.parser.disallow_nested = True
         with self.assertRaises(NestedRelationWarning):
             self.parser.relation.parseString(statement)
+        self.parser.disallow_nested = False
 
     def test_nested_lenient(self):
         """Test nested statement (3.1)."""
+        self.parser.disallow_nested = False
         statement = 'p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process"))'
-        self.parser.allow_nested = True
-
         self.parser.relation.parseString(statement)
 
         cat = protein('HGNC', 'CAT')
@@ -577,8 +578,6 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_edge(cat, h2o2)
         self.assert_has_edge(h2o2, apoptosis)
         self.assertEqual(1, len(self.parser.metagraph))
-
-        self.parser.lenient = False
 
     def test_negativeCorrelation_withObjectVariant(self):
         """
@@ -778,10 +777,10 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_node(sub)
         child_1 = hgnc('C1QB')
         self.assert_has_node(child_1)
-        self.assert_has_edge(sub, child_1, **{RELATION: HAS_COMPONENT})
+        self.assert_has_edge(child_1, sub, **{RELATION: PART_OF})
         child_2 = hgnc('C1S')
         self.assert_has_node(child_2)
-        self.assert_has_edge(sub, child_2, **{RELATION: HAS_COMPONENT})
+        self.assert_has_edge(child_2, sub, **{RELATION: PART_OF})
 
     def test_member_list(self):
         """
@@ -802,24 +801,24 @@ class TestRelations(TestTokenParserBase):
         self.assertEqual(expected_result, result.asList())
 
         sub = protein('PKC', 'a')
-        obj1 = protein('HGNC', 'PRKCA')
-        obj2 = protein('HGNC', 'PRKCB')
-        obj3 = protein('HGNC', 'PRKCD')
-        obj4 = protein('HGNC', 'PRKCE')
+        obj_1 = protein('HGNC', 'PRKCA')
+        obj_2 = protein('HGNC', 'PRKCB')
+        obj_3 = protein('HGNC', 'PRKCD')
+        obj_4 = protein('HGNC', 'PRKCE')
 
         self.assert_has_node(sub)
 
-        self.assert_has_node(obj1)
-        self.assert_has_edge(sub, obj1, relation=HAS_MEMBER)
+        self.assert_has_node(obj_1)
+        self.assert_has_edge(obj_1, sub, relation=IS_A)
 
-        self.assert_has_node(obj2)
-        self.assert_has_edge(sub, obj2, relation=HAS_MEMBER)
+        self.assert_has_node(obj_2)
+        self.assert_has_edge(obj_2, sub, relation=IS_A)
 
-        self.assert_has_node(obj3)
-        self.assert_has_edge(sub, obj3, relation=HAS_MEMBER)
+        self.assert_has_node(obj_3)
+        self.assert_has_edge(obj_3, sub, relation=IS_A)
 
-        self.assert_has_node(obj4)
-        self.assert_has_edge(sub, obj4, relation=HAS_MEMBER)
+        self.assert_has_node(obj_4)
+        self.assert_has_edge(obj_4, sub, relation=IS_A)
 
     def test_is_a(self):
         """

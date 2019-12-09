@@ -5,15 +5,15 @@
 import time
 import unittest
 from collections import Counter
+from random import randint
 
-import sqlalchemy.exc
 from sqlalchemy import not_
 
 from pybel import BELGraph, from_bel_script, from_database, to_database
 from pybel.constants import (
-    ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CITATION_AUTHORS, CITATION_DATE, CITATION_NAME, CITATION_REFERENCE,
-    CITATION_TYPE, CITATION_TYPE_OTHER, CITATION_TYPE_PUBMED, DECREASES, HAS_COMPONENT, HAS_PRODUCT, HAS_REACTANT,
-    INCREASES, METADATA_NAME, METADATA_VERSION, MIRNA, PATHOLOGY, PROTEIN, RELATION,
+    ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CITATION_AUTHORS, CITATION_DATE, CITATION_DB, CITATION_IDENTIFIER,
+    CITATION_JOURNAL, CITATION_TYPE_OTHER, CITATION_TYPE_PUBMED, DECREASES, HAS_PRODUCT, HAS_REACTANT, INCREASES,
+    METADATA_NAME, METADATA_VERSION, MIRNA, PART_OF, PATHOLOGY, PROTEIN, RELATION, CITATION_DB_NAME
 )
 from pybel.dsl import (
     BaseEntity, ComplexAbundance, CompositeAbundance, EnumeratedFusionRange, Fragment, Gene, GeneFusion,
@@ -29,7 +29,6 @@ from pybel.testing.cases import FleetingTemporaryCacheMixin, TemporaryCacheClsMi
 from pybel.testing.constants import test_bel_simple
 from pybel.testing.mocks import mock_bel_resources
 from pybel.testing.utils import make_dummy_annotations, make_dummy_namespaces, n
-from pybel.utils import hash_citation, hash_evidence
 from tests.constants import (
     BelReconstitutionMixin, akt1, casp8, egfr, expected_test_simple_metadata, fadd, test_citation_dict,
     test_evidence_text,
@@ -76,11 +75,11 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
 
     @mock_bel_resources
     def test_reload(self, mock_get):
-        """Tests that a graph with the same name and version can't be added twice"""
+        """Test that a graph with the same name and version can't be added twice."""
         graph = sialic_acid_graph.copy()
         self.assertEqual('1.0.0', graph.version)
 
-        to_database(graph, manager=self.manager, store_parts=False)
+        to_database(graph, manager=self.manager)
         time.sleep(1)
 
         self.assertEqual(1, self.manager.count_networks())
@@ -99,18 +98,11 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         self.assertEqual(graph.nodes(data=True), reconstituted.nodes(data=True))
         # self.bel_thorough_reconstituted(reconstituted)
 
-        # Test that the graph can't be added a second time
-        with self.assertRaises(sqlalchemy.exc.IntegrityError):
-            self.manager.insert_graph(graph, store_parts=False)
-
-        self.manager.session.rollback()
-        time.sleep(1)
-
         self.assertEqual(1, self.manager.count_networks())
 
         graph_copy = graph.copy()
         graph_copy.version = '1.0.1'
-        network_copy = self.manager.insert_graph(graph_copy, store_parts=False)
+        network_copy = self.manager.insert_graph(graph_copy)
 
         time.sleep(1)  # Sleep so the first graph always definitely goes in first
 
@@ -158,8 +150,7 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
 
 
 class TestTemporaryInsertNetwork(TemporaryCacheMixin):
-    @mock_bel_resources
-    def test_insert_with_list_annotations(self, mock):
+    def test_insert_with_list_annotations(self):
         """This test checks that graphs that contain list annotations, which aren't cached, can be loaded properly
         into the database."""
         graph = BELGraph(name='test', version='0.0.0')
@@ -175,7 +166,8 @@ class TestTemporaryInsertNetwork(TemporaryCacheMixin):
 
         make_dummy_namespaces(self.manager, graph)
 
-        self.manager.insert_graph(graph, store_parts=True)
+        with mock_bel_resources:
+            self.manager.insert_graph(graph)
 
         # TODO check that the database doesn't have anything for TEST in it
 
@@ -205,7 +197,7 @@ class TestTypedQuery(TemporaryCacheMixin):
         make_dummy_annotations(self.manager, graph)
 
         with mock_bel_resources:
-            self.manager.insert_graph(graph, store_parts=True)
+            self.manager.insert_graph(graph)
 
     def test_query_edge_source_type(self):
         rv = self.manager.query_edges(source_function=MIRNA).all()
@@ -236,7 +228,7 @@ class TestQuery(TemporaryCacheMixin):
         make_dummy_annotations(self.manager, graph)
 
         with mock_bel_resources:
-            self.manager.insert_graph(graph, store_parts=True)
+            self.manager.insert_graph(graph)
 
     def test_query_node_bel_1(self):
         rv = self.manager.query_nodes(bel='p(HGNC:FOS)').all()
@@ -311,13 +303,13 @@ class TestQuery(TemporaryCacheMixin):
         self.assertEqual(0, len(edges), msg='Wrong number of edges: {}'.format(edges))
 
     def test_query_citation_by_type(self):
-        rv = self.manager.query_citations(type=CITATION_TYPE_PUBMED)
+        rv = self.manager.query_citations(db=CITATION_TYPE_PUBMED)
         self.assertEqual(1, len(rv))
         self.assertTrue(rv[0].is_pubmed)
         self.assertFalse(rv[0].is_enriched)
 
     def test_query_citaiton_by_reference(self):
-        rv = self.manager.query_citations(type=CITATION_TYPE_PUBMED, reference=test_citation_dict[CITATION_REFERENCE])
+        rv = self.manager.query_citations(db=CITATION_TYPE_PUBMED, db_id=test_citation_dict[CITATION_IDENTIFIER])
         self.assertEqual(1, len(rv))
         self.assertTrue(rv[0].is_pubmed)
         self.assertFalse(rv[0].is_enriched)
@@ -331,15 +323,17 @@ class TestQuery(TemporaryCacheMixin):
     @unittest.skip
     def test_query_by_name(self):
         # type, name, data
-        name_dict_list = self.manager.query_citations(type=CITATION_TYPE_PUBMED,
-                                                      name="That other article from last week")
+        name_dict_list = self.manager.query_citations(
+            db=CITATION_TYPE_PUBMED,
+            name="That other article from last week",
+        )
         self.assertEqual(len(name_dict_list), 1)
         # self.assertIn(..., name_dict_list)
 
     @unittest.skip
     def test_query_by_name_wildcard(self):
         # type, name like, data
-        name_dict_list2 = self.manager.query_citations(type=CITATION_TYPE_PUBMED, name="%article from%")
+        name_dict_list2 = self.manager.query_citations(db=CITATION_TYPE_PUBMED, name="%article from%")
         self.assertEqual(len(name_dict_list2), 2)
         # self.assertIn(..., name_dict_list2)
         # self.assertIn(..., name_dict_list2)
@@ -347,15 +341,11 @@ class TestQuery(TemporaryCacheMixin):
 
 class TestEnsure(TemporaryCacheMixin):
     def test_get_or_create_citation(self):
-        reference = '1234AB'
+        reference = str(randint(1, 1000000))
         citation_dict = {
-            CITATION_TYPE: CITATION_TYPE_PUBMED,
-            CITATION_NAME: 'TestCitation_basic',
-            CITATION_REFERENCE: reference,
+            CITATION_DB: CITATION_TYPE_PUBMED,
+            CITATION_IDENTIFIER: reference,
         }
-
-        citation_hash = hash_citation(citation_type=citation_dict[CITATION_TYPE],
-                                      citation_reference=citation_dict[CITATION_REFERENCE])
 
         citation = self.manager.get_or_create_citation(**citation_dict)
         self.manager.session.commit()
@@ -371,63 +361,20 @@ class TestEnsure(TemporaryCacheMixin):
         self.assertIsNotNone(citation_reloaded_from_dict)
         self.assertEqual(citation_dict, citation_reloaded_from_dict.to_json())
 
-        citation_reloaded_from_hash = self.manager.get_citation_by_hash(citation_hash)
-        self.assertIsNotNone(citation_reloaded_from_hash)
-        self.assertEqual(citation_dict, citation_reloaded_from_hash.to_json())
-
-    def test_get_or_create_citation_full(self):
-        reference = 'CD5678'
-        citation_dict = {
-            CITATION_TYPE: CITATION_TYPE_OTHER,
-            CITATION_NAME: 'TestCitation_full',
-            CITATION_REFERENCE: reference,
-            CITATION_DATE: '2017-04-11',
-            CITATION_AUTHORS: sorted(['Jackson M', 'Lajoie J'])
-        }
-
-        citation_hash = hash_citation(citation_type=citation_dict[CITATION_TYPE],
-                                      citation_reference=citation_dict[CITATION_REFERENCE])
-
-        citation = self.manager.get_or_create_citation(**citation_dict)
-        self.manager.session.commit()
-
-        self.assertIsInstance(citation, Citation)
-        self.assertEqual(citation_dict, citation.to_json())
-
-        citation_reloaded_from_reference = self.manager.get_citation_by_reference(CITATION_TYPE_OTHER, reference)
+        citation_reloaded_from_reference = self.manager.get_citation_by_reference(
+            citation_dict[CITATION_DB], citation_dict[CITATION_IDENTIFIER],
+        )
         self.assertIsNotNone(citation_reloaded_from_reference)
         self.assertEqual(citation_dict, citation_reloaded_from_reference.to_json())
 
-        citation_reloaded_from_dict = self.manager.get_or_create_citation(**citation_dict)
-        self.assertIsNotNone(citation_reloaded_from_dict)
-        self.assertEqual(citation_dict, citation_reloaded_from_dict.to_json())
-
-        citation_reloaded_from_hash = self.manager.get_citation_by_hash(citation_hash)
-        self.assertIsNotNone(citation_reloaded_from_hash)
-        self.assertEqual(citation_dict, citation_reloaded_from_hash.to_json())
-
-        full_citation_basic = {
-            CITATION_TYPE: 'Other',
-            CITATION_NAME: 'TestCitation_full',
-            CITATION_REFERENCE: 'CD5678'
-        }
-
-        citation_truncated = self.manager.get_or_create_citation(**full_citation_basic)
-        self.assertIsNotNone(citation_truncated)
-        self.assertEqual(citation_dict, citation_truncated.to_json())
-
     def test_get_or_create_evidence(self):
-        basic_citation = self.manager.get_or_create_citation(**test_citation_dict)
+        citation_db, citation_ref = CITATION_TYPE_PUBMED, str(randint(1, 1000000))
+        basic_citation = self.manager.get_or_create_citation(db=citation_db, db_id=citation_ref)
         utf8_test_evidence = u"Yes, all the information is true! This contains a unicode alpha: α"
-        evidence_hash = hash_evidence(
-            text=utf8_test_evidence,
-            citation_type=CITATION_TYPE_PUBMED,
-            citation_reference=test_citation_dict[CITATION_REFERENCE]
-        )
 
         evidence = self.manager.get_or_create_evidence(basic_citation, utf8_test_evidence)
         self.assertIsInstance(evidence, Evidence)
-        self.assertIn(evidence_hash, self.manager.object_cache_evidence)
+        self.assertIn(evidence, self.manager.object_cache_evidence.values())
 
         # Objects cached?
         reloaded_evidence = self.manager.get_or_create_evidence(basic_citation, utf8_test_evidence)
@@ -463,25 +410,17 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         super().setUpClass()
 
         with mock_bel_resources:
-            cls.graph = from_bel_script(test_bel_simple, manager=cls.manager, allow_nested=True)
-            print(cls.graph.graph)
-            cls.network = cls.manager.insert_graph(cls.graph, store_parts=True)
+            cls.graph = from_bel_script(test_bel_simple, manager=cls.manager, disallow_nested=False)
+            cls.network = cls.manager.insert_graph(cls.graph)
 
     def test_citations(self):
         citations = self.manager.session.query(Citation).all()
         self.assertEqual(2, len(citations), msg='Citations: {}'.format(citations))
 
-        citation_references = {'123455', '123456'}
-        self.assertEqual(citation_references, {
-            citation.reference
+        citation_db_ids = {'123455', '123456'}
+        self.assertEqual(citation_db_ids, {
+            citation.db_id
             for citation in citations
-        })
-
-    def test_authors(self):
-        authors = {'Example Author', 'Example Author2'}
-        self.assertEqual(authors, {
-            author.name
-            for author in self.manager.session.query(Author).all()
         })
 
     def test_evidences(self):
@@ -588,17 +527,17 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertIn(il23, self.graph)
         self.assertEqual(2, self.graph.number_of_edges())
 
-        self.assertIn(il6, self.graph[node_data])
-        edges = list(self.graph[node_data][il6].values())
+        self.assertIn(node_data, self.graph[il6])
+        edges = list(self.graph[il6][node_data].values())
         self.assertEqual(1, len(edges))
         data = edges[0]
-        self.assertEqual(HAS_COMPONENT, data[RELATION])
+        self.assertEqual(PART_OF, data[RELATION])
 
-        self.assertIn(il23, self.graph[node_data])
-        edges = list(self.graph[node_data][il23].values())
+        self.assertIn(node_data, self.graph[il23])
+        edges = list(self.graph[il23][node_data].values())
         self.assertEqual(1, len(edges))
         data = edges[0]
-        self.assertEqual(HAS_COMPONENT, data[RELATION])
+        self.assertEqual(PART_OF, data[RELATION])
 
     def test_reaction(self):
         self.graph.add_node_from_data(superoxide_decomposition)
@@ -618,8 +557,8 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertEqual(3, self.graph.number_of_nodes())
         self.assertEqual(2, self.graph.number_of_edges())
 
-        assert_unqualified_edge(self, node, fos, HAS_COMPONENT)
-        assert_unqualified_edge(self, node, jun, HAS_COMPONENT)
+        assert_unqualified_edge(self, fos, node, PART_OF)
+        assert_unqualified_edge(self, jun, node, PART_OF)
 
     def test_dimer_complex(self):
         """Tests what happens if a BEL statement complex(p(X), p(X)) is added"""
@@ -630,7 +569,7 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertEqual(2, self.graph.number_of_nodes())
         self.assertEqual(1, self.graph.number_of_edges())
 
-        assert_unqualified_edge(self, egfr_dimer, egfr, HAS_COMPONENT)
+        assert_unqualified_edge(self, egfr, egfr_dimer, PART_OF)
 
     def test_nested_complex(self):
         """Checks what happens if a theoretical BEL statement `complex(p(X), complex(p(Y), p(Z)))` is added"""
@@ -643,10 +582,10 @@ class TestAddNodeFromData(unittest.TestCase):
         self.assertIn(ap1_complex, self.graph)
         self.assertEqual(4, self.graph.number_of_edges())
 
-        assert_unqualified_edge(self, ap1_complex, fos, HAS_COMPONENT)
-        assert_unqualified_edge(self, ap1_complex, jun, HAS_COMPONENT)
-        assert_unqualified_edge(self, bound_ap1_e2f4, ap1_complex, HAS_COMPONENT)
-        assert_unqualified_edge(self, bound_ap1_e2f4, e2f4_data, HAS_COMPONENT)
+        assert_unqualified_edge(self, fos, ap1_complex, PART_OF)
+        assert_unqualified_edge(self, jun, ap1_complex, PART_OF)
+        assert_unqualified_edge(self, ap1_complex, bound_ap1_e2f4, PART_OF)
+        assert_unqualified_edge(self, e2f4_data, bound_ap1_e2f4, PART_OF)
 
 
 class TestReconstituteNodeTuples(TemporaryCacheMixin):
@@ -661,16 +600,16 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
         make_dummy_namespaces(self.manager, graph)
 
-        self.manager.insert_graph(graph, store_parts=True)
+        self.manager.insert_graph(graph)
         self.assertEqual(number_nodes, self.manager.count_nodes())
         self.assertEqual(number_edges, self.manager.count_edges())
 
         node_model = self.manager.get_or_create_node(graph, node)
-        self.assertEqual(node.sha512, node_model.sha512)
+        self.assertEqual(node.md5, node_model.md5)
         self.manager.session.commit()
 
         self.assertEqual(node, node_model.to_json())
-        self.assertEqual(node, self.manager.get_dsl_by_hash(node.sha512))
+        self.assertEqual(node, self.manager.get_dsl_by_hash(node.md5))
 
     @mock_bel_resources
     def test_simple(self, mock):
@@ -864,7 +803,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
         make_dummy_namespaces(self.manager, self.graph)
 
-        network = self.manager.insert_graph(self.graph, store_parts=True)
+        network = self.manager.insert_graph(self.graph)
         self.assertEqual(2, network.nodes.count(), msg='Missing one or both of the nodes.')
         self.assertEqual(1, network.edges.count(), msg='Missing the edge')
 
@@ -886,7 +825,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
         make_dummy_namespaces(self.manager, self.graph)
 
-        network = self.manager.insert_graph(self.graph, store_parts=True)
+        network = self.manager.insert_graph(self.graph)
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
@@ -908,7 +847,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
         make_dummy_namespaces(self.manager, self.graph)
 
-        network = self.manager.insert_graph(self.graph, store_parts=True)
+        network = self.manager.insert_graph(self.graph)
         self.assertEqual(2, network.nodes.count(), msg='number of nodes')
         self.assertEqual(1, network.edges.count(), msg='number of edges')
 
@@ -938,7 +877,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
         make_dummy_namespaces(self.manager, self.graph)
 
-        network = self.manager.insert_graph(self.graph, store_parts=True)
+        network = self.manager.insert_graph(self.graph)
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
@@ -966,7 +905,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
         make_dummy_namespaces(self.manager, self.graph)
 
-        network = self.manager.insert_graph(self.graph, store_parts=True)
+        network = self.manager.insert_graph(self.graph)
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
@@ -996,7 +935,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
         make_dummy_namespaces(self.manager, self.graph)
 
-        network = self.manager.insert_graph(self.graph, store_parts=True)
+        network = self.manager.insert_graph(self.graph)
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
@@ -1019,7 +958,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         )
         make_dummy_namespaces(self.manager, self.graph)
 
-        network = self.manager.insert_graph(self.graph, store_parts=True)
+        network = self.manager.insert_graph(self.graph)
 
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
@@ -1037,7 +976,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         )
         make_dummy_namespaces(self.manager, self.graph)
 
-        network = self.manager.insert_graph(self.graph, store_parts=True)
+        network = self.manager.insert_graph(self.graph)
 
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
@@ -1055,7 +994,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         )
         make_dummy_namespaces(self.manager, self.graph)
 
-        network = self.manager.insert_graph(self.graph, store_parts=True)
+        network = self.manager.insert_graph(self.graph)
 
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
@@ -1075,7 +1014,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
          form of Cdc42Hs and weakly activates the JNK family of MAP kinases. PAK4 is a mediator of filopodia
          formation and may play a role in the reorganization of the actin cytoskeleton. Multiple alternatively
          spliced transcript variants encoding distinct isoforms have been found for this gene.""",
-            citation={CITATION_TYPE: "Online Resource", CITATION_REFERENCE: "PAK4 Hs ENTREZ Gene Summary"},
+            citation={CITATION_DB: "Online Resource", CITATION_IDENTIFIER: "PAK4 Hs ENTREZ Gene Summary"},
             annotations={'Species': '9606'},
             subject_modifier=activity('gtp'),
             object_modifier=activity('kin'),
@@ -1084,7 +1023,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         make_dummy_namespaces(self.manager, self.graph)
         make_dummy_annotations(self.manager, self.graph)
 
-        network = self.manager.insert_graph(self.graph, store_parts=True)
+        network = self.manager.insert_graph(self.graph)
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
@@ -1120,7 +1059,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         make_dummy_namespaces(self.manager, self.graph)
         make_dummy_annotations(self.manager, self.graph)
 
-        network = self.manager.insert_graph(self.graph, store_parts=True)
+        network = self.manager.insert_graph(self.graph)
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
@@ -1152,16 +1091,16 @@ class TestNoAddNode(TemporaryCacheMixin):
         graph.add_node_from_data(rs1234)
         graph.add_node_from_data(rs1235)
 
-        rs1234_hash = rs1234.sha512
-        rs1235_hash = rs1235.sha512
+        rs1234_hash = rs1234.md5
+        rs1235_hash = rs1235.md5
 
-        self.manager.insert_graph(graph, store_parts=True)
+        self.manager.insert_graph(graph)
 
         rs1234_lookup = self.manager.get_node_by_hash(rs1234_hash)
         self.assertIsNotNone(rs1234_lookup)
         self.assertEqual('Gene', rs1234_lookup.type)
         self.assertEqual('g(dbSNP:rs1234)', rs1234_lookup.bel)
-        self.assertEqual(rs1234_hash, rs1234_lookup.sha512)
+        self.assertEqual(rs1234_hash, rs1234_lookup.md5)
         self.assertIsNotNone(rs1234_lookup.namespace_entry)
         self.assertEqual('rs1234', rs1234_lookup.namespace_entry.name)
         self.assertEqual('dbSNP', rs1234_lookup.namespace_entry.namespace.keyword)
@@ -1171,7 +1110,7 @@ class TestNoAddNode(TemporaryCacheMixin):
         self.assertIsNotNone(rs1235_lookup)
         self.assertEqual('Gene', rs1235_lookup.type)
         self.assertEqual('g(dbSNP:rs1235)', rs1235_lookup.bel)
-        self.assertEqual(rs1235_hash, rs1235_lookup.sha512)
+        self.assertEqual(rs1235_hash, rs1235_lookup.md5)
         self.assertIsNotNone(rs1235_lookup.namespace_entry)
         self.assertEqual('rs1235', rs1235_lookup.namespace_entry.name)
         self.assertEqual('dbSNP', rs1235_lookup.namespace_entry.namespace.keyword)

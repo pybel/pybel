@@ -3,11 +3,9 @@
 import logging
 import re
 import unittest
+from random import randint
 
-from pybel.constants import (
-    ANNOTATIONS, CITATION, CITATION_AUTHORS, CITATION_COMMENTS, CITATION_DATE, CITATION_NAME,
-    CITATION_REFERENCE, CITATION_TYPE, EVIDENCE,
-)
+from pybel.constants import (ANNOTATIONS, CITATION, CITATION_DB, CITATION_IDENTIFIER, CITATION_TYPE_PUBMED, EVIDENCE)
 from pybel.parser import ControlParser
 from pybel.parser.exc import (
     CitationTooLongException, CitationTooShortException, IllegalAnnotationValueWarning, InvalidCitationType,
@@ -15,6 +13,7 @@ from pybel.parser.exc import (
     UndefinedAnnotationWarning,
 )
 from pybel.parser.parse_control import set_citation_stub
+from pybel.testing.utils import n
 from tests.constants import SET_CITATION_TEST, test_citation_dict
 
 logging.getLogger("requests").setLevel(logging.WARNING)
@@ -107,10 +106,10 @@ class TestSetCitation(unittest.TestCase):
         set_citation_stub.parseString('Citation = {"PubMed", "12928037"}')
 
     def test_parser_triple(self):
-        set_citation_stub.parseString('Citation = {"PubMedCentral","Trends in molecular medicine","12928037"}')
+        set_citation_stub.parseString('Citation = {"PubMed Central","Trends in molecular medicine","12928037"}')
 
     def test_parser_triple_spaced(self):
-        set_citation_stub.parseString('Citation = {"PubMedCentral", "Trends in molecular medicine", "12928037"}')
+        set_citation_stub.parseString('Citation = {"PubMed Central", "Trends in molecular medicine", "12928037"}')
 
 
 class TestParseControlSetStatementErrors(TestParseControl):
@@ -177,59 +176,51 @@ class TestParseControl2(TestParseControl):
 
     def test_citation_short(self):
         self.parser.parseString(SET_CITATION_TEST)
-        self.assertEqual(test_citation_dict, self.parser.citation)
+        self.assertEqual(test_citation_dict[CITATION_IDENTIFIER], self.parser.citation_db_id)
+        self.assertEqual(test_citation_dict[CITATION_DB], self.parser.citation_db)
 
         expected_annotations = {
             EVIDENCE: None,
             ANNOTATIONS: {},
-            CITATION: test_citation_dict
+            CITATION: test_citation_dict,
         }
         self.assertEqual(expected_annotations, self.parser.get_annotations())
 
         self.parser.parseString('UNSET Citation')
-        self.assertEqual(0, len(self.parser.citation))
+        self.assertFalse(self.parser.citation_is_set)
 
     def test_citation_invalid_date(self):
         s = 'SET Citation = {"PubMed","Trends in molecular medicine","12928037","01-12-1999","de Nigris"}'
 
         self.parser.parseString(s)
-
-        expected_citation = {
-            CITATION_TYPE: 'PubMed',
-            CITATION_NAME: 'Trends in molecular medicine',
-            CITATION_REFERENCE: '12928037',
-        }
-
-        self.assertEqual(expected_citation, self.parser.citation)
+        self.assertEqual(CITATION_TYPE_PUBMED, self.parser.citation_db)
+        self.assertEqual('12928037', self.parser.citation_db_id)
 
         expected_dict = {
             EVIDENCE: None,
             ANNOTATIONS: {},
-            CITATION: expected_citation
+            CITATION: {
+                CITATION_DB: CITATION_TYPE_PUBMED,
+                CITATION_IDENTIFIER: '12928037',
+            },
         }
 
         self.assertEqual(expected_dict, self.parser.get_annotations())
 
     def test_citation_with_empty_comment(self):
         s = 'SET Citation = {"PubMed","Test Name","12928037","1999-01-01","de Nigris|Lerman A|Ignarro LJ",""}'
-
         self.parser.parseString(s)
 
-        expected_citation = {
-            CITATION_TYPE: 'PubMed',
-            CITATION_NAME: 'Test Name',
-            CITATION_REFERENCE: '12928037',
-            CITATION_DATE: '1999-01-01',
-            CITATION_AUTHORS: ['de Nigris', 'Lerman A', 'Ignarro LJ'],
-            CITATION_COMMENTS: ''
-        }
-
-        self.assertEqual(expected_citation, self.parser.citation)
+        self.assertEqual(CITATION_TYPE_PUBMED, self.parser.citation_db)
+        self.assertEqual('12928037', self.parser.citation_db_id)
 
         expected_dict = {
             EVIDENCE: None,
             ANNOTATIONS: {},
-            CITATION: expected_citation
+            CITATION: {
+                CITATION_DB: CITATION_TYPE_PUBMED,
+                CITATION_IDENTIFIER: '12928037',
+            },
         }
 
         self.assertEqual(expected_dict, self.parser.get_annotations())
@@ -237,23 +228,15 @@ class TestParseControl2(TestParseControl):
     def test_double(self):
         s = 'SET Citation = {"PubMed","12928037"}'
         self.parser.parseString(s)
-
-        expected_citation = {
-            CITATION_TYPE: 'PubMed',
-            CITATION_REFERENCE: '12928037',
-        }
-        self.assertEqual(expected_citation, self.parser.citation)
+        self.assertEqual(CITATION_TYPE_PUBMED, self.parser.citation_db)
+        self.assertEqual('12928037', self.parser.citation_db_id)
 
     def test_double_with_space(self):
         """Same as test_double, but has a space between the comma and next entry"""
         s = 'SET Citation = {"PubMed", "12928037"}'
         self.parser.parseString(s)
-
-        expected_citation = {
-            CITATION_TYPE: 'PubMed',
-            CITATION_REFERENCE: '12928037',
-        }
-        self.assertEqual(expected_citation, self.parser.citation)
+        self.assertEqual(CITATION_TYPE_PUBMED, self.parser.citation_db)
+        self.assertEqual('12928037', self.parser.citation_db_id)
 
     def test_citation_too_short(self):
         s = 'SET Citation = {"PubMed"}'
@@ -266,13 +249,14 @@ class TestParseControl2(TestParseControl):
             self.parser.parseString(s)
 
     def test_evidence(self):
+        self.parser.parseString(SET_CITATION_TEST)
         s = 'SET Evidence = "For instance, during 7-ketocholesterol-induced apoptosis of U937 cells"'
         self.parser.parseString(s)
 
         self.assertIsNotNone(self.parser.evidence)
 
         expected_annotation = {
-            CITATION: {},
+            CITATION: test_citation_dict,
             ANNOTATIONS: {},
             EVIDENCE: 'For instance, during 7-ketocholesterol-induced apoptosis of U937 cells'
         }
@@ -343,11 +327,14 @@ class TestParseControl2(TestParseControl):
         self.assertEqual({}, self.parser.annotations)
 
     def test_reset_citation(self):
-        s1 = 'SET Citation = {"PubMed","Test Reference 1","11111"}'
+        s1_identifier = str(randint(0, 1e7))
+        s1 = 'SET Citation = {{"PubMed","Test Reference 1","{}"}}'.format(s1_identifier)
         s2 = 'SET Evidence = "d"'
 
-        s3 = 'SET Citation = {"PubMed","Test Reference 2","22222"}'
-        s4 = 'SET Evidence = "h"'
+        s3_identifier = str(randint(0, 1e7))
+        s3 = 'SET Citation = {{"PubMed","Test Reference 2","{}"}}'.format(s3_identifier)
+        _test_evidence = n()
+        s4 = 'SET Evidence = "{}"'.format(_test_evidence)
         s5 = 'SET Custom1 = "Custom1_A"'
         s6 = 'SET Custom2 = "Custom2_A"'
 
@@ -355,26 +342,26 @@ class TestParseControl2(TestParseControl):
 
         self.parser.parse_lines(statements)
 
-        self.assertEqual('h', self.parser.evidence)
-        self.assertEqual('PubMed', self.parser.citation[CITATION_TYPE])
-        self.assertEqual('Test Reference 2', self.parser.citation[CITATION_NAME])
-        self.assertEqual('22222', self.parser.citation[CITATION_REFERENCE])
+        self.assertEqual(_test_evidence, self.parser.evidence)
+        self.assertEqual(CITATION_TYPE_PUBMED, self.parser.citation_db)
+        self.assertEqual(s3_identifier, self.parser.citation_db_id)
 
         self.parser.parseString('UNSET {Custom1,Evidence}')
         self.assertNotIn('Custom1', self.parser.annotations)
         self.assertIsNone(self.parser.evidence)
         self.assertIn('Custom2', self.parser.annotations)
-        self.assertNotEqual(0, len(self.parser.citation))
+        self.assertTrue(self.parser.citation_is_set)
 
         self.parser.parseString('UNSET ALL')
         self.assertEqual(0, len(self.parser.annotations))
-        self.assertEqual(0, len(self.parser.citation))
+        self.assertFalse(self.parser.citation_is_set)
 
     def test_set_regex(self):
+        v = str(randint(0, 1e5))
         s = [
             SET_CITATION_TEST,
-            'SET CustomRegex = "1234"'
+            'SET CustomRegex = "{}"'.format(v)
         ]
         self.parser.parse_lines(s)
 
-        self.assertEqual('1234', self.parser.annotations['CustomRegex'])
+        self.assertEqual(v, self.parser.annotations['CustomRegex'])

@@ -58,7 +58,7 @@ author = 'Charles Tapley Hoyt'
 #
 
 # The full version, including alpha/beta/rc tags.
-release = '0.14.0-dev'
+release = '0.14.3-dev'
 
 # The short X.Y version.
 parsed_version = re.match(
@@ -356,7 +356,7 @@ intersphinx_mapping = {
     'sqlalchemy': ('https://docs.sqlalchemy.org/en/latest', None),
     'indra': ('https://indra.readthedocs.io/en/latest/', None),
     'bio2bel': ('https://bio2bel.readthedocs.io/en/latest/', None),
-    'requests': ('http://docs.python-requests.org/en/master/', None),
+    'requests': ('https://requests.kennethreitz.org/en/master/', None),
     'setuptools': ('https://setuptools.readthedocs.io/en/latest/', None),
 }
 

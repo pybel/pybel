@@ -5,7 +5,7 @@
 from typing import Iterable, Set
 
 from ..filters.edge_predicates import has_pubmed
-from ...constants import CITATION, CITATION_REFERENCE
+from ...constants import CITATION, CITATION_IDENTIFIER
 
 __all__ = [
     'iterate_pubmed_identifiers',
@@ -20,7 +20,7 @@ def iterate_pubmed_identifiers(graph) -> Iterable[str]:
     :return: An iterator over the PubMed identifiers in the graph
     """
     return (
-        data[CITATION][CITATION_REFERENCE].strip()
+        data[CITATION][CITATION_IDENTIFIER].strip()
         for _, _, data in graph.edges(data=True)
         if has_pubmed(data)
     )

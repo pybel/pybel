@@ -23,10 +23,10 @@ from .exc import (
 from .utils import delimited_quoted_list, delimited_unquoted_list, is_int, qid, quote
 from ..constants import (
     ANNOTATIONS, BEL_KEYWORD_ALL, BEL_KEYWORD_CITATION, BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SET,
-    BEL_KEYWORD_STATEMENT_GROUP, BEL_KEYWORD_SUPPORT, BEL_KEYWORD_UNSET, CITATION, CITATION_ENTRIES, CITATION_REFERENCE,
-    CITATION_TYPE, CITATION_TYPES, CITATION_TYPE_PUBMED, EVIDENCE,
+    BEL_KEYWORD_STATEMENT_GROUP, BEL_KEYWORD_SUPPORT, BEL_KEYWORD_UNSET, CITATION, CITATION_TYPES, CITATION_TYPE_PUBMED,
+    EVIDENCE,
 )
-from ..utils import valid_date
+from ..utils import citation_dict
 
 __all__ = ['ControlParser']
 
@@ -58,7 +58,7 @@ class ControlParser(BaseParser):
         annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
         annotation_to_local: Optional[Mapping[str, Set[str]]] = None,
         citation_clearing: bool = True,
-        required_annotations: Optional[List[str]] = None
+        required_annotations: Optional[List[str]] = None,
     ) -> None:
         """Initialize the control statement parser.
 
@@ -75,7 +75,8 @@ class ControlParser(BaseParser):
         self.annotation_to_local = annotation_to_local or {}
 
         self.statement_group = None
-        self.citation = {}
+        self.citation_db = None
+        self.citation_db_id = None
         self.evidence = None
         self.annotations = {}
         self.required_annotations = required_annotations or []
@@ -83,8 +84,8 @@ class ControlParser(BaseParser):
         annotation_key = ppc.identifier('key').setParseAction(self.handle_annotation_key)
 
         self.set_statement_group = set_statement_group_stub().setParseAction(self.handle_set_statement_group)
-        self.set_citation = set_citation_stub().setParseAction(self.handle_set_citation)
-        self.set_evidence = set_evidence_stub().setParseAction(self.handle_set_evidence)
+        self.set_citation = set_citation_stub.setParseAction(self.handle_set_citation)
+        self.set_evidence = set_evidence_stub.setParseAction(self.handle_set_evidence)
 
         set_command_prefix = And([annotation_key('key'), Suppress('=')])
         self.set_command = set_command_prefix + qid('value')
@@ -124,7 +125,7 @@ class ControlParser(BaseParser):
             self.unset_evidence,
             self.unset_statement_group,
             self.unset_command,
-            self.unset_list
+            self.unset_list,
         ])
 
         self.language = self.set_statements | self.unset_statements
@@ -134,6 +135,11 @@ class ControlParser(BaseParser):
     @property
     def _in_debug_mode(self) -> bool:
         return not self.annotation_to_term and not self.annotation_to_pattern
+
+    @property
+    def citation_is_set(self) -> bool:
+        """Check if the citation is set."""
+        return self.citation_db is not None and self.citation_db_id is not None
 
     def has_enumerated_annotation(self, annotation: str) -> bool:
         """Check if the annotation is defined as an enumeration."""
@@ -188,7 +194,7 @@ class ControlParser(BaseParser):
 
         :raises: MissingCitationException
         """
-        if self.citation_clearing and not self.citation:
+        if self.citation_clearing and not self.citation_is_set:
             raise MissingCitationException(self.get_line_number(), line, position)
 
     def handle_annotation_key(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
@@ -215,42 +221,30 @@ class ControlParser(BaseParser):
         if len(values) < 2:
             raise CitationTooShortException(self.get_line_number(), line, position)
 
-        citation_type = values[0]
+        citation_db = values[0]
 
-        if citation_type not in CITATION_TYPES:
-            raise InvalidCitationType(self.get_line_number(), line, position, citation_type)
+        if citation_db not in CITATION_TYPES:
+            raise InvalidCitationType(self.get_line_number(), line, position, citation_db)
 
         if 2 == len(values):
-            return self.handle_set_citation_double(line, position, tokens)
+            citation_db_id = values[1]
 
-        citation_reference = values[2]
-
-        if citation_type == CITATION_TYPE_PUBMED and not is_int(citation_reference):
-            raise InvalidPubMedIdentifierWarning(self.get_line_number(), line, position, citation_reference)
-
-        if 4 <= len(values) and not valid_date(values[3]):
-            logger.debug('Invalid date: %s. Truncating entry.', values[3])
-            self.citation = dict(zip(CITATION_ENTRIES, values[:3]))
-            return tokens
-
-        if 5 <= len(values):
-            values[4] = [value.strip() for value in values[4].split('|')]
-
-        if 6 < len(values):
+        elif 6 < len(values):
             raise CitationTooLongException(self.get_line_number(), line, position)
 
-        self.citation = dict(zip(CITATION_ENTRIES, values))
+        else:
+            if 3 == len(values):
+                logger.debug('Throwing away JOURNAL entry in position 2')
+            else:
+                logger.debug('Throwing away JOURNAL entry in position 2 and everything after position 3')
 
-        return tokens
+            citation_db_id = values[2]
 
-    def handle_set_citation_double(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
-        """Handle a ``SET Citation = {"X", "Y"}`` statement."""
-        values = tokens['values']
+        if citation_db == CITATION_TYPE_PUBMED and not is_int(citation_db_id):
+            raise InvalidPubMedIdentifierWarning(self.get_line_number(), line, position, citation_db_id)
 
-        if values[0] == CITATION_TYPE_PUBMED and not is_int(values[1]):
-            raise InvalidPubMedIdentifierWarning(self.get_line_number(), line, position, values[1])
-
-        self.citation = dict(zip((CITATION_TYPE, CITATION_REFERENCE), values))
+        self.citation_db = citation_db
+        self.citation_db_id = citation_db_id
         return tokens
 
     def handle_set_evidence(self, _, __, tokens: ParseResults) -> ParseResults:
@@ -288,7 +282,7 @@ class ControlParser(BaseParser):
 
         :raises: MissingAnnotationKeyWarning
         """
-        if not self.citation:
+        if not self.citation_is_set:
             raise MissingAnnotationKeyWarning(self.get_line_number(), line, position, BEL_KEYWORD_CITATION)
 
         self.clear_citation()
@@ -350,9 +344,13 @@ class ControlParser(BaseParser):
         """Get the current annotations."""
         return {
             EVIDENCE: self.evidence,
-            CITATION: self.citation.copy(),
+            CITATION: self.get_citation(),
             ANNOTATIONS: self.annotations.copy(),
         }
+
+    def get_citation(self) -> Mapping[str, str]:
+        """Get the citation dictionary."""
+        return citation_dict(db=self.citation_db, db_id=self.citation_db_id)
 
     def get_missing_required_annotations(self) -> List[str]:
         """Return missing required annotations."""
@@ -364,7 +362,8 @@ class ControlParser(BaseParser):
 
     def clear_citation(self) -> None:
         """Clear the citation and if citation clearing is enabled, clear the evidence and annotations."""
-        self.citation.clear()
+        self.citation_db = None
+        self.citation_db_id = None
 
         if self.citation_clearing:
             self.evidence = None
@@ -373,6 +372,7 @@ class ControlParser(BaseParser):
     def clear(self) -> None:
         """Clear the statement_group, citation, evidence, and annotations."""
         self.statement_group = None
-        self.citation.clear()
+        self.citation_db = None
+        self.citation_db_id = None
         self.evidence = None
         self.annotations.clear()

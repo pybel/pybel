@@ -390,8 +390,7 @@ class InvalidFunctionSemantic(BELParserWarning):
     """
 
     def __init__(self, line_number, line, position, func, namespace, name, allowed_functions):
-        super(InvalidFunctionSemantic, self).__init__(line_number, line, position, func, namespace, name,
-                                                      allowed_functions)
+        super().__init__(line_number, line, position, func, namespace, name, allowed_functions)
         self.func = func
         self.namespace = namespace
         self.name = name
@@ -410,7 +409,7 @@ class RelabelWarning(BELParserWarning):
     """Raised when a node is relabeled."""
 
     def __init__(self, line_number, line, position, node, old_label, new_label):
-        super(RelabelWarning, self).__init__(line_number, line, position, node, old_label, new_label)
+        super().__init__(line_number, line, position, node, old_label, new_label)
         self.node = node
         self.old_label = old_label
         self.new_label = new_label

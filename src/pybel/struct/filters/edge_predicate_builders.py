@@ -7,7 +7,7 @@ from typing import Iterable, Mapping
 from .edge_predicates import edge_predicate, has_authors, has_pubmed, keep_edge_permissive
 from .typing import EdgePredicate
 from ..graph import BELGraph
-from ...constants import ANNOTATIONS, CAUSAL_RELATIONS, CITATION, CITATION_AUTHORS, CITATION_REFERENCE, RELATION
+from ...constants import ANNOTATIONS, CAUSAL_RELATIONS, CITATION, CITATION_AUTHORS, CITATION_IDENTIFIER, RELATION
 from ...dsl import BaseEntity
 from ...typing import EdgeData, Strings
 
@@ -151,7 +151,7 @@ def build_pmid_inclusion_filter(pmids: Strings) -> EdgePredicate:
         @edge_predicate
         def pmid_inclusion_filter(edge_data: EdgeData) -> bool:
             """Pass for edges with PubMed citations matching the contained PubMed identifier."""
-            return has_pubmed(edge_data) and edge_data[CITATION][CITATION_REFERENCE] == pmids
+            return has_pubmed(edge_data) and edge_data[CITATION][CITATION_IDENTIFIER] == pmids
 
     elif isinstance(pmids, Iterable):
         pmids = set(pmids)
@@ -159,7 +159,7 @@ def build_pmid_inclusion_filter(pmids: Strings) -> EdgePredicate:
         @edge_predicate
         def pmid_inclusion_filter(edge_data: EdgeData) -> bool:
             """Pass for edges with PubMed citations matching one of the contained PubMed identifiers."""
-            return has_pubmed(edge_data) and edge_data[CITATION][CITATION_REFERENCE] in pmids
+            return has_pubmed(edge_data) and edge_data[CITATION][CITATION_IDENTIFIER] in pmids
 
     else:
         raise TypeError

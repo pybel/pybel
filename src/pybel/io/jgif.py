@@ -7,6 +7,8 @@ JSON. Interchange with this format provides compatibilty with other software and
 `Causal Biological Network Database <http://causalbionet.com/>`_.
 """
 
+import gzip
+import json
 import logging
 from collections import defaultdict
 from operator import methodcaller
@@ -17,7 +19,7 @@ from networkx.utils import open_file
 from pyparsing import ParseException
 
 from ..constants import (
-    ANNOTATIONS, CITATION, CITATION_REFERENCE, CITATION_TYPE, EVIDENCE, METADATA_AUTHORS, METADATA_CONTACT,
+    ANNOTATIONS, CITATION, EVIDENCE, METADATA_AUTHORS, METADATA_CONTACT,
     METADATA_INSERT_KEYS, METADATA_LICENSES, RELATION, UNQUALIFIED_EDGES,
 )
 from ..parser import BELParser
@@ -28,8 +30,13 @@ from ..version import get_version
 __all__ = [
     'from_cbn_jgif',
     'from_jgif',
+    'from_jgif_file',
+    'from_jgif_gz',
+    'from_jgif_jsons',
     'to_jgif',
     'to_jgif_file',
+    'to_jgif_gz',
+    'to_jgif_jsons',
     'post_jgif',
 ]
 
@@ -51,18 +58,6 @@ species_map = {
 placeholder_evidence = "This Network edge has no supporting evidence.  Please add real evidence to this edge prior to deleting."
 
 EXPERIMENT_CONTEXT = 'experiment_context'
-
-
-def reformat_citation(citation):
-    """Reformat a citation dictionary.
-
-    :type citation: dict[str,str]
-    :rtype: dict[str,str]
-    """
-    return {
-        CITATION_TYPE: citation['type'].strip(),
-        CITATION_REFERENCE: citation['id'].strip()
-    }
 
 
 def map_cbn(d):
@@ -141,7 +136,6 @@ def from_cbn_jgif(graph_jgif_dict):
     :rtype: BELGraph
 
     Example:
-
     >>> import requests
     >>> from pybel import from_cbn_jgif
     >>> apoptosis_url = 'http://causalbionet.com/Networks/GetJSONGraphFile?networkId=810385422'
@@ -153,6 +147,7 @@ def from_cbn_jgif(graph_jgif_dict):
         Handling the annotations is not yet supported, since the CBN documents do not refer to the resources used
         to create them. This may be added in the future, but the annotations must be stripped from the graph
         before uploading to the network store using :func:`pybel.struct.mutation.strip_annotations`.
+
     """
     graph_jgif_dict = map_cbn(graph_jgif_dict)
 
@@ -286,7 +281,8 @@ def from_jgif(graph_jgif_dict):
                     continue
 
                 parser.control_parser.clear()
-                parser.control_parser.citation = reformat_citation(citation)
+                parser.control_parser.citation_db = citation['type'].strip()
+                parser.control_parser.citation_db_id = citation['id'].strip()
                 parser.control_parser.evidence = summary_text
                 parser.control_parser.annotations.update(evidence[EXPERIMENT_CONTEXT])
 
@@ -296,6 +292,26 @@ def from_jgif(graph_jgif_dict):
                     logger.warning('JGIF relation parse error: %s for %s', e, bel_statement)
 
     return graph
+
+
+@open_file(0, mode='r')
+def from_jgif_file(path: Union[str, TextIO]) -> BELGraph:
+    """Build a graph from the JGIF JSON contained in the given file.
+
+    :param path: A path or file-like
+    """
+    return from_jgif(json.load(path))
+
+
+def from_jgif_gz(path: str) -> BELGraph:
+    """Read a graph as JGIF JSON from a gzip file."""
+    with gzip.open(path, 'rt') as file:
+        return from_jgif(json.load(file))
+
+
+def from_jgif_jsons(graph_json_str: str) -> BELGraph:
+    """Read a BEL graph from a JGIF JSON string."""
+    return from_jgif(json.loads(graph_json_str))
 
 
 def to_jgif(graph):
@@ -311,13 +327,13 @@ def to_jgif(graph):
         use Cytoscape.js, we suggest using :func:`pybel.to_cx` instead.
 
     Example:
-
     >>> import pybel, os, json
     >>> graph_url = 'https://arty.scai.fraunhofer.de/artifactory/bel/knowledge/selventa-small-corpus/selventa-small-corpus-20150611.bel'
     >>> graph = pybel.from_bel_script_url(graph_url)
     >>> graph_jgif_json = pybel.to_jgif(graph)
     >>> with open(os.path.expanduser('~/Desktop/small_corpus.json'), 'w') as f:
     ...     json.dump(graph_jgif_json, f)
+
     """
     u_v_r_bel = {}
 
@@ -326,7 +342,7 @@ def to_jgif(graph):
 
     for node in sorted(graph, key=methodcaller('as_bel')):
         nodes_entry.append({
-            'id': node.sha512[:12],
+            'id': node.md5,
             'label': node.as_bel(),
             'bel_function_type': node.function,
         })
@@ -342,7 +358,7 @@ def to_jgif(graph):
 
             evidence_dict = {
                 'bel_statement': bel,
-                'key': key[:12],
+                'key': key,
             }
 
             if ANNOTATIONS in data:
@@ -358,24 +374,24 @@ def to_jgif(graph):
 
         for relation, evidences in relation_evidences.items():
             edges_entry.append({
-                'source': u.sha512[:12],
-                'target': v.sha512[:12],
+                'source': u.md5,
+                'target': v.md5,
                 'relation': relation,
                 'label': u_v_r_bel[u, v, relation],
                 'metadata': {
                     'evidences': evidences,
-                }
+                },
             })
 
     return {
         'graph': {
             'metadata': dict(
                 origin=dict(name='pybel', version=get_version()),
-                **graph.document
+                **graph.document,
             ),
             'nodes': nodes_entry,
             'edges': edges_entry,
-        }
+        },
     }
 
 
@@ -383,18 +399,21 @@ def to_jgif(graph):
 def to_jgif_file(graph: BELGraph, file: Union[str, TextIO], **kwargs) -> None:
     """Write JGIF to a file."""
     jgif = to_jgif(graph)
-    json.dump(jgif, file, **kwargs)
+    json.dump(jgif, file, ensure_ascii=False, **kwargs)
+
+
+def to_jgif_gz(graph, path: str, **kwargs) -> None:
+    """Write a graph as JGIF JSON to a gzip file."""
+    with gzip.open(path, 'wt') as file:
+        json.dump(to_jgif(graph), file, ensure_ascii=False, **kwargs)
+
+
+def to_jgif_jsons(graph: BELGraph, **kwargs) -> str:
+    """Dump this graph as a JGIF JSON object to a string."""
+    return json.dumps(to_jgif(graph), ensure_ascii=False, **kwargs)
 
 
 def post_jgif(graph: BELGraph, url: Optional[str] = None, **kwargs) -> requests.Response:
     """Post the JGIF to a given URL."""
     jgif = to_jgif(graph)
     return requests.post(url, json=jgif, **kwargs)
-
-
-if __name__ == '__main__':
-    import json
-    from pybel.examples import sialic_acid_graph
-
-    with open('/Users/cthoyt/Desktop/example.json', 'w') as file:
-        json.dump(to_jgif(sialic_acid_graph), file, indent=2)
