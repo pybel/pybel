@@ -35,7 +35,7 @@ or from the latest code on `GitHub <https://github.com/pybel/pybel>`_ with:
 
     $ pip install git+https://github.com/pybel/pybel.git
 
-See the `installation documentation <http://pybel.readthedocs.io/en/latest/installation.html>`_ for more advanced
+See the `installation documentation <https://pybel.readthedocs.io/en/latest/introduction/installation.html>`_ for more advanced
 instructions. Also, check the change log at `CHANGELOG.rst <https://github.com/pybel/pybel/blob/master/CHANGELOG.rst>`_.
 
 Getting Started
