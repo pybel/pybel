@@ -11,7 +11,8 @@ from typing import Any, Mapping, TextIO, Union
 from networkx.utils import open_file
 
 from .utils import ensure_version
-from ..constants import GRAPH_ANNOTATION_LIST, MEMBERS, PRODUCTS, REACTANTS
+from ..canonicalize import edge_to_tuple, _decanonicalize_edge_node
+from ..constants import GRAPH_ANNOTATION_LIST, MEMBERS, OBJECT, PRODUCTS, REACTANTS, SUBJECT
 from ..dsl import BaseEntity
 from ..struct import BELGraph
 from ..tokens import parse_result_to_dsl
@@ -29,9 +30,13 @@ __all__ = [
 ]
 
 
-def to_nodelink(graph: BELGraph) -> Mapping[str, Any]:
-    """Convert this graph to a node-link JSON object."""
-    graph_json_dict = _to_nodelink_json_helper(graph)
+def to_nodelink(graph: BELGraph, canonize: bool = False) -> Mapping[str, Any]:
+    """Convert this graph to a node-link JSON object.
+
+    :param graph: BEL Graph
+    :param canonize: Customize export with canonicalized nodes
+    """
+    graph_json_dict = _to_nodelink_json_helper(graph, canonize)
 
     # Convert annotation list definitions (which are sets) to canonicalized/sorted lists
     graph_json_dict['graph'][GRAPH_ANNOTATION_LIST] = {
@@ -93,11 +98,49 @@ def from_nodelink_jsons(graph_json_str: str, check_version: bool = True) -> BELG
     return from_nodelink(json.loads(graph_json_str), check_version=check_version)
 
 
-def _to_nodelink_json_helper(graph: BELGraph) -> Mapping[str, Any]:
+def _to_nodelink_json_helper(graph: BELGraph, canonize: bool = False) -> Mapping[str, Any]:
     """Convert a BEL graph to a node-link format.
+
+    :param graph: BEL Graph
+    :param canonize: Customize export with canonicalized nodes
 
     Adapted from :func:`networkx.readwrite.json_graph.node_link_data`
     """
+    if canonize:  # Customize export by canonalizing nodes
+
+        canonical_nodes = set()
+
+        for u, v, data in graph.edges(data=True):
+            canonical_u, _, canonical_v = edge_to_tuple(u, v, data)
+            canonical_nodes.add(canonical_u)
+            canonical_nodes.add(canonical_v)
+
+        nodes = sorted(list(canonical_nodes))
+        mapping = dict(zip(nodes, count()))
+
+        return {
+            'directed': True,
+            'multigraph': True,
+            'graph': graph.graph.copy(),
+            'nodes': [
+                node
+                for node in nodes
+            ],
+            'links': [
+                dict(
+                    chain(
+                        data.copy().items(),
+                        [
+                            ('source', mapping[_decanonicalize_edge_node(u, data, node_position=SUBJECT)]),
+                            ('target', mapping[_decanonicalize_edge_node(v, data, node_position=OBJECT)]),
+                            ('key', key)],
+                    ),
+                )
+                for u, v, key, data in graph.edges(keys=True, data=True)
+            ],
+        }
+
+    # Default export
     nodes = sorted(graph, key=methodcaller('as_bel'))
 
     mapping = dict(zip(nodes, count()))
