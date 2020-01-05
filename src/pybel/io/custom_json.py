@@ -49,11 +49,10 @@ def to_canonicalized_json_file(graph: BELGraph, path: Union[str, TextIO], **kwar
 
 
 def _canonicalize_helper(graph: BELGraph) -> Mapping[str, Any]:
-    """Helper to canonicalize nodes.
+    """Convert a customized node-link format prior canonicalization.
 
     :param graph: BEL Graph
     """
-
     canonical_nodes = set()
 
     for u, v, data in graph.edges(data=True):
