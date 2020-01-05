@@ -12,6 +12,18 @@ Added
 - Custom node-link JSON exporter with canonicalization (https://github.com/pybel/pybel/pull/400)
 - GraphML exporter with canonicalization (https://github.com/pybel/pybel/pull/400)
 
+`0.14.2 <https://github.com/pybel/pybel/compare/v0.14.1...v0.14.2>`_ - 2019-11-26
+---------------------------------------------------------------------------------
+Added
+~~~~~
+- Added several IO functions and convenience functions (gzipped wrappers, etc.)
+
+`0.14.1 <https://github.com/pybel/pybel/compare/v0.14.0...v0.14.1>`_ - 2019-11-26
+---------------------------------------------------------------------------------
+Fixed
+~~~~~
+- Fixed autoflushing in manager
+
 `0.14.0 <https://github.com/pybel/pybel/compare/v0.13.2...v0.14.0>`_ - 2019-11-15
 ---------------------------------------------------------------------------------
 Added
