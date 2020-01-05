@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Conversion functions for BEL graphs with GraphML. More information at https://en.wikipedia.org/wiki/GraphML.
-"""
+"""Conversion functions for BEL graphs with GraphML. More information at https://en.wikipedia.org/wiki/GraphML."""
 from typing import BinaryIO, Optional, Union
 
 import networkx as nx
