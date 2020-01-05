@@ -11,7 +11,7 @@ from typing import Any, Mapping, TextIO, Union
 from networkx.utils import open_file
 
 from .utils import ensure_version
-from ..canonicalize import edge_to_tuple, _decanonicalize_edge_node
+from ..canonicalize import _decanonicalize_edge_node, edge_to_tuple
 from ..constants import GRAPH_ANNOTATION_LIST, MEMBERS, OBJECT, PRODUCTS, REACTANTS, SUBJECT
 from ..dsl import BaseEntity
 from ..struct import BELGraph
