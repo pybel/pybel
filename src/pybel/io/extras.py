@@ -8,6 +8,7 @@ from typing import BinaryIO, Optional, TextIO, Union
 import networkx as nx
 from networkx.utils import open_file
 
+from ..canonicalize import edge_to_tuple
 from ..constants import RELATION
 from ..dsl import CentralDogma
 from ..struct import BELGraph
@@ -20,24 +21,45 @@ __all__ = [
 ]
 
 
-def to_graphml(graph: BELGraph, path: Union[str, BinaryIO]) -> None:
+def to_graphml(graph: BELGraph, path: Union[str, BinaryIO], canonize: bool = False) -> None:
     """Write this graph to GraphML XML file using :func:`networkx.write_graphml`.
+
+    :param graph: BEL Graph
+    :param path: Path to the new exported file
+    :param canonize: Customize export with canonicalized nodes
 
     The .graphml file extension is suggested so Cytoscape can recognize it.
     """
     rv = nx.MultiDiGraph()
 
-    for node in graph:
-        rv.add_node(node.as_bel(), function=node.function)
+    if canonize:  # Customize export by canonalizing nodes
 
-    for u, v, key, edge_data in graph.edges(data=True, keys=True):
-        rv.add_edge(
-            u.as_bel(),
-            v.as_bel(),
-            interaction=edge_data[RELATION],
-            bel=graph.edge_to_bel(u, v, edge_data),
-            key=key,
-        )
+        for u, v, key, data in graph.edges(data=True, keys=True):
+            canonical_u, _, canonical_v = edge_to_tuple(u, v, data)
+
+            rv.add_edge(
+                canonical_u,
+                canonical_v,
+                key=key,
+                **{
+                    'relation': data[RELATION],
+                    'bel': graph.edge_to_bel(u, v, data)
+                }
+            )
+
+    else:  # Default export
+
+        for node in graph:
+            rv.add_node(node.as_bel(), function=node.function)
+
+        for u, v, key, edge_data in graph.edges(data=True, keys=True):
+            rv.add_edge(
+                u.as_bel(),
+                v.as_bel(),
+                interaction=edge_data[RELATION],
+                bel=graph.edge_to_bel(u, v, edge_data),
+                key=key,
+            )
 
     nx.write_graphml(rv, path)
 
