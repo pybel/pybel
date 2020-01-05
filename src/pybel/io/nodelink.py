@@ -29,13 +29,12 @@ __all__ = [
 ]
 
 
-def to_nodelink(graph: BELGraph, canonize: bool = False) -> Mapping[str, Any]:
+def to_nodelink(graph: BELGraph) -> Mapping[str, Any]:
     """Convert this graph to a node-link JSON object.
 
     :param graph: BEL Graph
-    :param canonize: Customize export with canonicalized nodes
     """
-    graph_json_dict = _to_nodelink_json_helper(graph, canonize)
+    graph_json_dict = _to_nodelink_json_helper(graph)
 
     # Convert annotation list definitions (which are sets) to canonicalized/sorted lists
     graph_json_dict['graph'][GRAPH_ANNOTATION_LIST] = {
