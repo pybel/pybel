@@ -5,12 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-`0.14.3 <https://github.com/pybel/pybel/compare/v0.14.0...v0.14.3>`_ - 2020-01-05
----------------------------------------------------------------------------------
+`Unreleased <https://github.com/pybel/pybel/compare/v0.14.2...HEAD>`_
+---------------------------------------------------------------------
 Added
 ~~~~~
-- Custom node-link JSON exporter with canonicalization
-- GraphML exporter with canonicalization
+- Custom node-link JSON exporter with canonicalization (https://github.com/pybel/pybel/pull/400)
+- GraphML exporter with canonicalization (https://github.com/pybel/pybel/pull/400)
 
 `0.14.0 <https://github.com/pybel/pybel/compare/v0.13.2...v0.14.0>`_ - 2019-11-15
 ---------------------------------------------------------------------------------
