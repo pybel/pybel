@@ -67,10 +67,7 @@ def _canonicalize_helper(graph: BELGraph) -> Mapping[str, Any]:
         'directed': True,
         'multigraph': True,
         'graph': graph.graph.copy(),
-        'nodes': [
-            node
-            for node in nodes
-        ],
+        'nodes': nodes,
         'links': [
             dict(
                 chain(
