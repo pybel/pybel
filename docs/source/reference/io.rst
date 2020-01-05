@@ -59,6 +59,18 @@ Node-Link JSON
 .. autofunction:: pybel.from_nodelink_file
 .. autofunction:: pybel.to_nodelink_file
 
+Alternative
+-----------
+As an alternative to previous JSON export functions, PyBEL also provides a customized JSON exporter prior node
+canonicalization. This enables to incorporate information such as modifiers directly in the node instead of having this
+information stored in the edges.
+
+.. automodule:: pybel.io.custom_json
+
+.. autofunction:: pybel.to_canonicalized_json
+.. autofunction:: pybel.to_canonicalized_json_file
+
+
 JSON Graph Interchange Format
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. automodule:: pybel.io.jgif
@@ -68,11 +80,16 @@ JSON Graph Interchange Format
 
 .. autofunction:: pybel.from_cbn_jgif
 
+GraphML
+~~~~~~~
+.. automodule:: pybel.io.graphml
+
+.. autofunction:: pybel.to_graphml
+
 Export
 ------
 .. automodule:: pybel.io.extras
 
-.. autofunction:: pybel.to_graphml
 .. autofunction:: pybel.to_csv
 .. autofunction:: pybel.to_sif
 .. autofunction:: pybel.to_gsea
