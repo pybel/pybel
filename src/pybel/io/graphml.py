@@ -32,8 +32,9 @@ def to_graphml(graph: BELGraph, path: Union[str, BinaryIO], schema: Optional[str
         rv = _to_graphml_umbrella(graph)
     else:
         raise ValueError('Unhandled schema: {}'.format(schema))
-    
+
     nx.write_graphml(rv, path)
+
 
 def _to_graphml_simple(graph: BELGraph) -> nx.MultiDiGraph:
     """Convert a BEL graph to GraphML XML file using the PyBEL schema.
@@ -75,5 +76,5 @@ def _to_graphml_umbrella(graph: BELGraph) -> nx.MultiDiGraph:
             relation=edge_data[RELATION],
             bel=graph.edge_to_bel(u, v, edge_data),
         )
-    
+
     return rv

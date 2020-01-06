@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
-"""Conversion functions for customized node-link JSON format prior canonicalization. As an alternative to previous JSON
+"""Conversion functions for customized node-link JSON format prior canonicalization.
+
+As an alternative to previous JSON
 export functions, PyBEL also provides a customized JSON exporter prior node canonicalization. This module uses the
 'mod:`pybel.canonicalize`' module prior exporting to the node-link JSON format. This allows the inclusion of modifiers
 in the nodes instead of the edges, the default schema in PyBEL.
@@ -50,8 +52,10 @@ def to_umbrella_nodelink_file(graph: BELGraph, path: Union[str, TextIO], **kwarg
 
 
 def _umbrella_helper(graph: BELGraph) -> Mapping[str, Any]:
-    """Convert a customized node-link format prior canonicalization. The canonicalization enables to incorporate
-    additional information in the nodes such as modifiers that is present in the edges in PyBEL.
+    """Convert a customized node-link format prior canonicalization.
+
+    The canonicalization enables to incorporate additional information in the nodes such as modifiers that is present in
+    the edges in PyBEL.
 
     :param graph: BEL Graph
     """
