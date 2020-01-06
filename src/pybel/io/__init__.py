@@ -7,7 +7,6 @@ export to other programs. Notably, a *de facto* interchange using Resource Descr
 ability of other existing software is excluded due the immaturity of the BEL to RDF mapping.
 """
 
-from .umbrella_nodelink_json import to_umbrella_nodelink_json, to_umbrella_nodelink_json_file
 from .cx import from_cx, from_cx_file, from_cx_gz, from_cx_jsons, to_cx, to_cx_file, to_cx_gz, to_cx_jsons
 from .extras import to_csv, to_gsea, to_sif
 from .gpickle import from_bytes, from_pickle, to_bytes, to_pickle
@@ -24,4 +23,5 @@ from .nodelink import (
     to_nodelink_file, to_nodelink_gz, to_nodelink_jsons,
 )
 from .tsv import to_edgelist, to_tsv
+from .umbrella_nodelink_json import to_umbrella_nodelink_json, to_umbrella_nodelink_json_file
 from .web import from_web, to_web
