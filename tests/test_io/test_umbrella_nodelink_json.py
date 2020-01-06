@@ -4,7 +4,7 @@
 
 import unittest
 from tests.test_io.test_cx.examples import example_graph
-from pybel import to_canonicalized_json
+from pybel import to_umbrella_nodelink_json
 
 
 class TestExporter(unittest.TestCase):
@@ -18,7 +18,7 @@ class TestExporter(unittest.TestCase):
         self.assertEqual(29, graph.number_of_nodes())
         self.assertEqual(29, graph.number_of_edges())
 
-        custom_json_dict = to_canonicalized_json(graph)
+        custom_json_dict = to_umbrella_nodelink_json(graph)
 
         # 3 new nodes are created:
         # act(p(hgnc:MAPK1)
