@@ -59,8 +59,8 @@ Node-Link JSON
 .. autofunction:: pybel.from_nodelink_file
 .. autofunction:: pybel.to_nodelink_file
 
-Alternative
------------
+Umbrella Node-Link JSON
+-----------------------
 .. automodule:: pybel.io.umbrella_nodelink
 
 .. autofunction:: pybel.to_umbrella_nodelink
