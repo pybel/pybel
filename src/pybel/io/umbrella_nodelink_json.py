@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
-"""
-Conversion functions for customized node-link JSON format prior canonicalization. As an alternative to previous JSON
+"""Conversion functions for customized node-link JSON format prior canonicalization. As an alternative to previous JSON
 export functions, PyBEL also provides a customized JSON exporter prior node canonicalization. This module uses the
-'pybel.canonicalize' module prior exporting to the node-link JSON format. This allows the inclusion of modifiers in the
-nodes instead of the edges, the default schema in PyBEL.
+'mod:`pybel.canonicalize`' module prior exporting to the node-link JSON format. This allows the inclusion of modifiers
+in the nodes instead of the edges, the default schema in PyBEL.
 """
 
 import json
@@ -46,7 +45,7 @@ def to_umbrella_nodelink_json_file(graph: BELGraph, path: Union[str, TextIO], **
     :param graph: A BEL graph
     :param path: A path or file-like
     """
-    graph_json_dict = _umbrella_helper(graph)
+    graph_json_dict = to_umbrella_nodelink_json(graph)
     json.dump(graph_json_dict, path, ensure_ascii=False, **kwargs)
 
 
