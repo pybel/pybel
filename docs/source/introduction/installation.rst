@@ -55,7 +55,7 @@ jupyter
 ~~~~~~~
 This extra installs support for visualizing BEL graphs in Jupyter notebooks.
 
-.. seealso:: 
+.. seealso::
 
     - :func:`pybel.io.jupyter.to_html`
     - :func:`pybel.io.jupyter.to_jupyter`
