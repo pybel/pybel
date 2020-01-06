@@ -61,10 +61,10 @@ Node-Link JSON
 
 Alternative
 -----------
-.. automodule:: pybel.io.umbrella_nodelink_json
+.. automodule:: pybel.io.umbrella_nodelink
 
-.. autofunction:: pybel.to_umbrella_nodelink_json
-.. autofunction:: pybel.to_umbrella_nodelink_json_file
+.. autofunction:: pybel.to_umbrella_nodelink
+.. autofunction:: pybel.to_umbrella_nodelink_file
 
 
 JSON Graph Interchange Format

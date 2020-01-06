@@ -23,5 +23,5 @@ from .nodelink import (
     to_nodelink_file, to_nodelink_gz, to_nodelink_jsons,
 )
 from .tsv import to_edgelist, to_tsv
-from .umbrella_nodelink_json import to_umbrella_nodelink_json, to_umbrella_nodelink_json_file
+from .umbrella_nodelink import to_umbrella_nodelink, to_umbrella_nodelink_file
 from .web import from_web, to_web

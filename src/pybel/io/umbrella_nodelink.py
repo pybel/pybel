@@ -17,12 +17,12 @@ from ..constants import GRAPH_ANNOTATION_LIST, OBJECT, SUBJECT
 from ..struct import BELGraph
 
 __all__ = [
-    'umbrella_nodelink_json',
-    'to_umbrella_nodelink_json_file',
+    'to_umbrella_nodelink',
+    'to_umbrella_nodelink_file',
 ]
 
 
-def to_umbrella_nodelink_json(graph: BELGraph) -> Mapping[str, Any]:
+def to_umbrella_nodelink(graph: BELGraph) -> Mapping[str, Any]:
     """Convert this graph to a node-link JSON object by previously canonicalizing the nodes.
 
     :param graph: BEL Graph
@@ -39,18 +39,19 @@ def to_umbrella_nodelink_json(graph: BELGraph) -> Mapping[str, Any]:
 
 
 @open_file(1, mode='w')
-def to_umbrella_nodelink_json_file(graph: BELGraph, path: Union[str, TextIO], **kwargs) -> None:
+def to_umbrella_nodelink_file(graph: BELGraph, path: Union[str, TextIO], **kwargs) -> None:
     """Write this graph as node-link JSON to a file.
 
     :param graph: A BEL graph
     :param path: A path or file-like
     """
-    graph_json_dict = to_umbrella_nodelink_json(graph)
+    graph_json_dict = to_umbrella_nodelink(graph)
     json.dump(graph_json_dict, path, ensure_ascii=False, **kwargs)
 
 
 def _umbrella_helper(graph: BELGraph) -> Mapping[str, Any]:
-    """Convert a customized node-link format prior canonicalization.
+    """Convert a customized node-link format prior canonicalization. The canonicalization enables to incorporate
+    additional information in the nodes such as modifiers that is present in the edges in PyBEL.
 
     :param graph: BEL Graph
     """
