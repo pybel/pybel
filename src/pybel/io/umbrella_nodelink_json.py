@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
-"""Conversion functions for customized node-link JSON format prior canonicalization.
-
-This module uses the 'pybel.canonicalize' module prior exporting to the node-link JSON format. This allows the inclusion
-of modifiers in the nodes instead of the edges, the default schema in PyBEL.
+"""
+Conversion functions for customized node-link JSON format prior canonicalization. As an alternative to previous JSON
+export functions, PyBEL also provides a customized JSON exporter prior node canonicalization. This module uses the
+'pybel.canonicalize' module prior exporting to the node-link JSON format. This allows the inclusion of modifiers in the
+nodes instead of the edges, the default schema in PyBEL.
 """
 
 import json
@@ -17,16 +18,17 @@ from ..constants import GRAPH_ANNOTATION_LIST, OBJECT, SUBJECT
 from ..struct import BELGraph
 
 __all__ = [
-    'to_canonicalized_json',
+    'umbrella_nodelink_json',
+    'to_umbrella_nodelink_json_file',
 ]
 
 
-def to_canonicalized_json(graph: BELGraph) -> Mapping[str, Any]:
+def to_umbrella_nodelink_json(graph: BELGraph) -> Mapping[str, Any]:
     """Convert this graph to a node-link JSON object by previously canonicalizing the nodes.
 
     :param graph: BEL Graph
     """
-    graph_json_dict = _canonicalize_helper(graph)
+    graph_json_dict = _umbrella_helper(graph)
 
     # Convert annotation list definitions (which are sets) to canonicalized/sorted lists
     graph_json_dict['graph'][GRAPH_ANNOTATION_LIST] = {
@@ -38,17 +40,17 @@ def to_canonicalized_json(graph: BELGraph) -> Mapping[str, Any]:
 
 
 @open_file(1, mode='w')
-def to_canonicalized_json_file(graph: BELGraph, path: Union[str, TextIO], **kwargs) -> None:
+def to_umbrella_nodelink_json_file(graph: BELGraph, path: Union[str, TextIO], **kwargs) -> None:
     """Write this graph as node-link JSON to a file.
 
     :param graph: A BEL graph
     :param path: A path or file-like
     """
-    graph_json_dict = _canonicalize_helper(graph)
+    graph_json_dict = _umbrella_helper(graph)
     json.dump(graph_json_dict, path, ensure_ascii=False, **kwargs)
 
 
-def _canonicalize_helper(graph: BELGraph) -> Mapping[str, Any]:
+def _umbrella_helper(graph: BELGraph) -> Mapping[str, Any]:
     """Convert a customized node-link format prior canonicalization.
 
     :param graph: BEL Graph

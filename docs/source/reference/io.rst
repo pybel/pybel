@@ -61,14 +61,10 @@ Node-Link JSON
 
 Alternative
 -----------
-As an alternative to previous JSON export functions, PyBEL also provides a customized JSON exporter prior node
-canonicalization. This enables to incorporate information such as modifiers directly in the node instead of having this
-information stored in the edges.
+.. automodule:: pybel.io.umbrella_nodelink_json
 
-.. automodule:: pybel.io.custom_json
-
-.. autofunction:: pybel.to_canonicalized_json
-.. autofunction:: pybel.to_canonicalized_json_file
+.. autofunction:: pybel.to_umbrella_nodelink_json
+.. autofunction:: pybel.to_umbrella_nodelink_json_file
 
 
 JSON Graph Interchange Format
