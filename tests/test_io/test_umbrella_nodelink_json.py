@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Tests for the customized node-link JSON exporter (canonicalization)."""
+"""Tests for the umbrella node-link JSON exporter."""
 
 import unittest
 from tests.test_io.test_cx.examples import example_graph
