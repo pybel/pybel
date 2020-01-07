@@ -60,7 +60,7 @@ def _to_graphml_simple(graph: BELGraph) -> nx.MultiDiGraph:
 
 
 def _to_graphml_umbrella(graph: BELGraph) -> nx.MultiDiGraph:
-    """Convert a BEL graph to GraphML XML file by previously canonicalizing the nodes.
+    """Convert a BEL graph to GraphML XML file by using :mod:`pybel.canonicalize` in the nodes.
 
     :param graph: A BEL graph
     """

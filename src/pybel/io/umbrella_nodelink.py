@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
-"""Conversion functions for customized node-link JSON format prior canonicalization.
+"""Conversion functions for node-link JSON format with canonical BEL strings as node identifiers.
 
-As an alternative to previous JSON
-export functions, PyBEL also provides a customized JSON exporter prior node canonicalization. This module uses the
-:mod:`pybel.canonicalize` module prior exporting to the node-link JSON format. This allows the inclusion of modifiers
-in the nodes instead of the edges, the default schema in PyBEL.
+This alternative to the standard node-link exporter of PyBEL represents nodes as canonical BEL entities including
+nodes' modifiers by using the :mod:`pybel.canonicalize` module. Instead of including this information directly in the
+edges (links) as the default node-link JSON exporter, this implementation incorporates it in the nodes themselves. Note
+that this might generate additional nodes in the network for each of the "modified" versions of the node. For example,
+"act(protein(HGNC:X))" will be represented as individual node instead of "protein(HGNC:X)", as the standard node-link
+JSON exporter.
 """
 
 import json
@@ -29,13 +31,6 @@ def to_umbrella_nodelink(graph: BELGraph) -> Mapping[str, Any]:
 
     :param graph: A BEL graph
     """
-    """Convert a customized node-link format prior canonicalization.
-
-        The canonicalization enables to incorporate additional information in the nodes such as modifiers that is present in
-        the edges in PyBEL.
-
-        :param graph: BEL Graph
-        """
     nodes = set()
 
     for u, v, data in graph.edges(data=True):
