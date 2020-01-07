@@ -14,7 +14,6 @@ A user would want to use this exporter in the following scenarios:
 
 - Visualize BEL networks using `PyBEL Jupyter<https://github.com/pybel/pybel-jupyter>`_ mimicking the original
   `Cytoscape plugin<https://apps.cytoscape.org/apps/belnavigator>`_.
-
 """
 
 import json
