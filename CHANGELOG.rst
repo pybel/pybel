@@ -535,7 +535,8 @@ Fixed
 ------------------------------------------------------------------------------
 Changed
 ~~~~~~~
-- Made new minimum unpickle version 0.8.0. From now on, all unpickle changes (before a 1.0.0 release) will be accompanied by a minor version bump.
+- Made new minimum unpickle version 0.8.0. From now on, all unpickle changes (before a 1.0.0 release) will be
+  accompanied by a minor version bump.
 - Overall better handling of citation insertion
 - Updated data models. Added to Citation model and renamed namespaceEntry in Node model.
 - Better init function for BELGraph
