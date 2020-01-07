@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
-"""Conversion functions for node-link JSON format with canonical BEL strings as node identifiers.
+"""Conversion functions for node-link JSON format with original BEL term strings as node identifiers.
 
-This alternative to the standard node-link exporter of PyBEL represents nodes as canonical BEL entities including
-nodes' modifiers by using the :mod:`pybel.canonicalize` module. Instead of including this information directly in the
-edges (links) as the default node-link JSON exporter, this implementation incorporates it in the nodes themselves. Note
-that this might generate additional nodes in the network for each of the "modified" versions of the node. For example,
-"act(protein(HGNC:X))" will be represented as individual node instead of "protein(HGNC:X)", as the standard node-link
-JSON exporter.
+This alternative to the standard node-link exporter of PyBEL represents nodes as original BEL terms (strings). This
+allows to include nodes' modifiers with the help of the :mod:`pybel.canonicalize` module, instead of including this
+information directly in the edges (links) as the default node-link JSON exporter. Note that this might generate
+additional nodes in the network for each of the "modified" versions of the node. For example, "act(protein(HGNC:X))"
+will be represented as individual node instead of "protein(HGNC:X)", as the standard node-link JSON exporter.
 """
 
 import json
