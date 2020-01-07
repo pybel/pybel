@@ -12,7 +12,9 @@ the node. For example, ``act(p(HGNC:X))`` will be represented as individual node
 
 A user would want to use this exporter in the following scenarios:
 
-- TODO @ddomingof
+- Visualize BEL networks using `PyBEL Jupyter<https://github.com/pybel/pybel-jupyter>`_ mimicking the original
+  `Cytoscape plugin<https://apps.cytoscape.org/apps/belnavigator>`_.
+
 """
 
 import json
