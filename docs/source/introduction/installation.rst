@@ -25,8 +25,8 @@ Extras
 ------
 The ``setup.py`` makes use of the ``extras_require`` argument of :func:`setuptools.setup` in order to make some heavy
 packages that support special features of PyBEL optional to install, in order to make the installation more lean by
-default. A single extra can be installed from PyPI like :code:`python3 -m pip install -e pybel[neo4j]` or multiple can
-be installed using a list like :code:`python3 -m pip install -e pybel[neo4j,inra]`. Likewise, for developer
+default. A single extra can be installed from PyPI like :code:`python3 -m pip install pybel[neo4j]` or multiple can
+be installed using a list like :code:`python3 -m pip install pybel[neo4j,indra]`. Likewise, for developer
 installation, extras can be installed in editable mode with :code:`python3 -m pip install -e .[neo4j]` or multiple can
 be installed using a list like :code:`python3 -m pip install -e .[neo4j,indra]`. The available extras are:
 
@@ -50,6 +50,15 @@ package also enables the import of BioPAX, SBML, and SBGN into BEL.
     - :func:`pybel.from_indra_statements`
     - :func:`pybel.from_indra_pickle`
     - :func:`pybel.to_indra`
+
+jupyter
+~~~~~~~
+This extra installs support for visualizing BEL graphs in Jupyter notebooks.
+
+.. seealso::
+
+    - :func:`pybel.io.jupyter.to_html`
+    - :func:`pybel.io.jupyter.to_jupyter`
 
 Caveats
 -------
