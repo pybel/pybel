@@ -1,12 +1,18 @@
 # -*- coding: utf-8 -*-
 
-"""Conversion functions for node-link JSON format with original BEL term strings as node identifiers.
+"""The Umbrella Node-Link JSON format is similar to node-link but uses full BEL terms as nodes.
 
-This alternative to the standard node-link exporter of PyBEL represents nodes as original BEL terms (strings). This
-allows to include nodes' modifiers with the help of the :mod:`pybel.canonicalize` module, instead of including this
-information directly in the edges (links) as the default node-link JSON exporter. Note that this might generate
-additional nodes in the network for each of the "modified" versions of the node. For example, "act(protein(HGNC:X))"
-will be represented as individual node instead of "protein(HGNC:X)", as the standard node-link JSON exporter.
+Given a BEL statement describing that ``X`` phosphorylates ``Y`` like ``act(p(X)) -> p(Y, pmod(Ph))`,
+PyBEL usually stores the `act()` information about `X` as part of the relationship. In Umbrella mode,
+this stays as part of the node.
+
+Note that this generates additional nodes in the network for each of the "modified" versions of
+the node. For example, ``act(p(HGNC:X))`` will be represented as individual node instead of
+``p(HGNC:X)``, as inthe standard node-link JSON exporter.
+
+A user would want to use this exporter in the following scenarios:
+
+- TODO @ddomingof
 """
 
 import json
