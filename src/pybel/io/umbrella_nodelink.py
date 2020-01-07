@@ -2,18 +2,21 @@
 
 """The Umbrella Node-Link JSON format is similar to node-link but uses full BEL terms as nodes.
 
-Given a BEL statement describing that ``X`` phosphorylates ``Y`` like ``act(p(X)) -> p(Y, pmod(Ph))`,
-PyBEL usually stores the `act()` information about `X` as part of the relationship. In Umbrella mode,
+Given a BEL statement describing that ``X`` phosphorylates ``Y`` like ``act(p(X)) -> p(Y, pmod(Ph))``,
+PyBEL usually stores the ``act()`` information about ``X`` as part of the relationship. In Umbrella mode,
 this stays as part of the node.
 
 Note that this generates additional nodes in the network for each of the "modified" versions of
-the node. For example, ``act(p(HGNC:X))`` will be represented as individual node instead of
-``p(HGNC:X)``, as inthe standard node-link JSON exporter.
+the node. For example, ``act(p(X))`` will be represented as individual node instead of
+``p(X)``, as in the standard node-link JSON exporter.
 
-A user would want to use this exporter in the following scenarios:
+A user might want to use this exporter in the following scenarios:
 
-- Visualize BEL networks using `PyBEL Jupyter<https://github.com/pybel/pybel-jupyter>`_ mimicking the original
-  `Cytoscape plugin<https://apps.cytoscape.org/apps/belnavigator>`_.
+- Represent transitivity in activities like in ``p(X, pmod(Ph)) -> act(p(X)) -> p(Y, pmod(Ph)) -> act(p(Y))``
+  with four nodes that are more ammenable to simulatons (e.g., boolean networks, petri nets).
+- Visualizing networks that in similar way to the legacy BEL
+  `Cytoscape plugin <https://apps.cytoscape.org/apps/belnavigator>`_ from the BEL Framework (warning: now defunct)
+  using tools like Cytoscape.
 """
 
 import json
@@ -33,7 +36,7 @@ __all__ = [
 
 
 def to_umbrella_nodelink(graph: BELGraph) -> Mapping[str, Any]:
-    """Convert this graph to a node-link JSON object by previously canonicalizing the nodes.
+    """Convert this graph to an umbrella node-link JSON object.
 
     :param graph: A BEL graph
     """
@@ -78,7 +81,7 @@ def to_umbrella_nodelink(graph: BELGraph) -> Mapping[str, Any]:
 
 @open_file(1, mode='w')
 def to_umbrella_nodelink_file(graph: BELGraph, path: Union[str, TextIO], **kwargs) -> None:
-    """Write this graph as node-link JSON to a file.
+    """Write this graph as an umbrella node-link JSON to a file.
 
     :param graph: A BEL graph
     :param path: A path or file-like
