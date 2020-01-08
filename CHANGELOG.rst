@@ -6,7 +6,11 @@ The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
 `Unreleased <https://github.com/pybel/pybel/compare/v0.14.2...HEAD>`_
-----------------------------------------------------------------------
+---------------------------------------------------------------------
+Added
+~~~~~
+- Umbrella node-link JSON exporter(https://github.com/pybel/pybel/pull/400)
+- GraphML exporter with umbrella nodes (https://github.com/pybel/pybel/pull/400)
 
 `0.14.2 <https://github.com/pybel/pybel/compare/v0.14.1...v0.14.2>`_ - 2019-11-26
 ---------------------------------------------------------------------------------

@@ -59,6 +59,15 @@ Node-Link JSON
 .. autofunction:: pybel.from_nodelink_file
 .. autofunction:: pybel.to_nodelink_file
 
+Export
+------
+Umbrella Node-Link JSON
+~~~~~~~~~~~~~~~~~~~~~~~
+.. automodule:: pybel.io.umbrella_nodelink
+
+.. autofunction:: pybel.to_umbrella_nodelink
+.. autofunction:: pybel.to_umbrella_nodelink_file
+
 JSON Graph Interchange Format
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. automodule:: pybel.io.jgif
@@ -68,18 +77,25 @@ JSON Graph Interchange Format
 
 .. autofunction:: pybel.from_cbn_jgif
 
-Export
-------
-.. automodule:: pybel.io.extras
+GraphML
+~~~~~~~
+.. automodule:: pybel.io.graphml
 
 .. autofunction:: pybel.to_graphml
+
+Miscellaneous
+~~~~~~~~~~~~~
+.. automodule:: pybel.io.extras
+
 .. autofunction:: pybel.to_csv
 .. autofunction:: pybel.to_sif
 .. autofunction:: pybel.to_gsea
 .. autofunction:: pybel.to_tsv
 
-Database
---------
+Databases
+---------
+SQL Databases
+~~~~~~~~~~~~~
 .. automodule:: pybel.manager.database_io
 
 .. autofunction:: pybel.from_database

@@ -25,6 +25,7 @@ __all__ = [
     'to_bel_script',
     'to_bel_script_lines',
     'edge_to_bel',
+    'edge_to_tuple',
     'calculate_canonical_name',
 ]
 
