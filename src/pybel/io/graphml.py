@@ -37,7 +37,7 @@ def to_graphml(graph: BELGraph, path: Union[str, BinaryIO], schema: Optional[str
 
 
 def _to_graphml_simple(graph: BELGraph) -> nx.MultiDiGraph:
-    """Convert a BEL graph to GraphML XML file using the PyBEL schema.
+    """Convert a BEL graph to a simple graph.
 
     :param graph: A BEL graph
     """
@@ -60,10 +60,7 @@ def _to_graphml_simple(graph: BELGraph) -> nx.MultiDiGraph:
 
 
 def _to_graphml_umbrella(graph: BELGraph) -> nx.MultiDiGraph:
-    """Convert a BEL graph to GraphML XML file representing the nodes as original BEL terms strings.
-
-    This function mimics the behaviour of the first BEL parser in the
-    `Cytoscape plugin<https://apps.cytoscape.org/apps/belnavigator>`_
+    """Convert a BEL graph to a new graph the nodes as original BEL terms strings.
 
     :param graph: A BEL graph
     """
