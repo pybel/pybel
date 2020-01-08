@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""This module wraps conversion between :class:`pybel.BELGraph` and CX JSON.
+"""This module wraps conversion between :class:`pybel.BELGraph` and the Cyberinfrastructure Exchange (CX) JSON.
 
 CX is an aspect-oriented network interchange format encoded in JSON with a format inspired by the JSON-LD encoding of
 Resource Description Framework (RDF). It is primarily used by the Network Data Exchange (NDEx) and more recent versions

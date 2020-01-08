@@ -56,8 +56,50 @@ Node-Link JSON
 .. autofunction:: pybel.from_nodelink
 .. autofunction:: pybel.to_nodelink
 
+.. autofunction:: pybel.from_nodelink_jsons
+.. autofunction:: pybel.to_nodelink_jsons
+
 .. autofunction:: pybel.from_nodelink_file
 .. autofunction:: pybel.to_nodelink_file
+
+.. autofunction:: pybel.from_nodelink_gz
+.. autofunction:: pybel.to_nodelink_gz
+
+Cyberinfrastructure Exchange
+----------------------------
+.. automodule:: pybel.io.cx
+
+.. autofunction:: pybel.from_cx
+.. autofunction:: pybel.to_cx
+
+.. autofunction:: pybel.from_cx_jsons
+.. autofunction:: pybel.to_cx_jsons
+
+.. autofunction:: pybel.from_cx_file
+.. autofunction:: pybel.to_cx_file
+
+.. autofunction:: pybel.from_cx_gz
+.. autofunction:: pybel.to_cx_gz
+
+JSON Graph Interchange Format
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. automodule:: pybel.io.jgif
+
+.. autofunction:: pybel.from_jgif
+.. autofunction:: pybel.to_jgif
+
+.. autofunction:: pybel.from_jgif_jsons
+.. autofunction:: pybel.to_jgif_jsons
+
+.. autofunction:: pybel.from_jgif_file
+.. autofunction:: pybel.to_jgif_file
+
+.. autofunction:: pybel.from_jgif_gz
+.. autofunction:: pybel.to_jgif_gz
+
+.. autofunction:: pybel.post_jgif
+
+.. autofunction:: pybel.from_cbn_jgif
 
 Export
 ------
@@ -67,15 +109,6 @@ Umbrella Node-Link JSON
 
 .. autofunction:: pybel.to_umbrella_nodelink
 .. autofunction:: pybel.to_umbrella_nodelink_file
-
-JSON Graph Interchange Format
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-.. automodule:: pybel.io.jgif
-
-.. autofunction:: pybel.from_jgif
-.. autofunction:: pybel.to_jgif
-
-.. autofunction:: pybel.from_cbn_jgif
 
 GraphML
 ~~~~~~~
