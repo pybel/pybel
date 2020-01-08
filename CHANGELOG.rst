@@ -5,8 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-`Unreleased <https://github.com/pybel/pybel/compare/v0.14.2...HEAD>`_
----------------------------------------------------------------------
+`0.14.3 <https://github.com/pybel/pybel/compare/v0.14.2...v0.14.3>`_
+--------------------------------------------------------------------
 Added
 ~~~~~
 - Umbrella node-link JSON exporter(https://github.com/pybel/pybel/pull/400)
