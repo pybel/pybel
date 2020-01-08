@@ -9,8 +9,8 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_
 ---------------------------------------------------------------------
 Added
 ~~~~~
-- Custom node-link JSON exporter with canonicalization (https://github.com/pybel/pybel/pull/400)
-- GraphML exporter with canonicalization (https://github.com/pybel/pybel/pull/400)
+- Umbrella node-link JSON exporter(https://github.com/pybel/pybel/pull/400)
+- GraphML exporter with umbrella nodes (https://github.com/pybel/pybel/pull/400)
 
 `0.14.2 <https://github.com/pybel/pybel/compare/v0.14.1...v0.14.2>`_ - 2019-11-26
 ---------------------------------------------------------------------------------
