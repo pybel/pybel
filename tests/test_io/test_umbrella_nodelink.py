@@ -26,22 +26,13 @@ class TestUmbrellaNodeLinkExporter(unittest.TestCase):
         self.assertIn("act(p(hgnc:PTK2, pmod(Ph, Tyr, 925)), ma(kin))", custom_json_dict['nodes'])
         self.assertIn('act(p(fus(hgnc:BCR, "?", hgnc:ABL1, "?")), ma(kin))', custom_json_dict['nodes'])
 
+    def test_exporter_edges(self):
+        """Test no new edges created."""
+        # Check original number of nodes and edges in the example BEL Graph
+        self.assertEqual(29, example_graph.number_of_nodes())
+        self.assertEqual(29, example_graph.number_of_edges())
+
+        custom_json_dict = to_umbrella_nodelink(example_graph)
+
         # Number of edges is maintained
         self.assertEqual(29, len(custom_json_dict['links']))
-
-        # Check that a particular edge is maintained
-        links_without_keys = [
-            {key: value
-             for link in custom_json_dict['links']
-             for key, value in link.items()
-             if key not in {'evidence', 'key'}
-             }
-        ]
-
-        self.assertIn(
-            {'relation': 'hasVariant', 'citation': {'db': 'PubMed', 'db_id': '10866298'},
-             'object': {'modifier': 'Activity', 'effect': {'namespace': 'bel', 'name': 'cat'}}, 'source': 18,
-             'target': 19, 'subject': {'modifier': 'Activity', 'effect': {'namespace': 'bel', 'name': 'kin'}},
-             'annotations': {'Species': {'9606': True}}},
-            links_without_keys
-        )
