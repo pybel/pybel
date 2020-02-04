@@ -70,7 +70,7 @@ import networkx as nx
 
 from pybel import BELGraph
 from pybel.constants import DIRECTLY_DECREASES, DIRECTLY_INCREASES, RELATION
-from pybel.dsl import Abundance, ComplexAbundance, Protein
+from pybel.dsl import Abundance, ComplexAbundance, Protein, hgnc
 from pybel.struct import get_children
 
 __all__ = [
@@ -118,33 +118,29 @@ class HipathiaConverter:
         return self.g.add_edge(_u, _v, relation=_relation)
 
     def _get_or_create_node(self, node: Union[Protein, ComplexAbundance, Abundance]):
-        _node = self.bel_node_to_hipathia_node.get(node)
+        if node in self.bel_node_to_hipathia_node:
+            return self.bel_node_to_hipathia_node[node]
 
-        if _node is not None:
-            return _node
-
-        elif isinstance(node, (Abundance, Protein)):
+        if isinstance(node, (Abundance, Protein)):
             self.node_counter += 1
-            _node = self.bel_node_to_hipathia_node[node] = f'N-{self.name}-{self.node_counter}'
 
             if node.namespace.lower() in {'hgnc', 'entrez', 'ncbigene'}:
                 self.bel_node_to_hipathia_genes[node] = [node]
             elif node.namespace.lower() in {'fplx'}:
                 self.bel_node_to_hipathia_genes[node] = get_children(self.graph, node)
 
-            return _node
+            self.bel_node_to_hipathia_node[node] = f'N-{self.name}-{self.node_counter}'
+            return self.bel_node_to_hipathia_node[node]
 
-        elif isinstance(node, ComplexAbundance):
-            # TODO: Implement
-            pass
-
-        logger.info(f'Unhandled node type: {type(node)} - {node}')
+        # elif isinstance(node, ComplexAbundance):
+        #     # TODO: Implement
+        #     pass
+        raise TypeError(f'Unhandled node type: {type(node)} - {node}')
 
     def output(self, directory: str):
         """Output the results to the given directory."""
         if not self.g:
             raise RuntimeError('Graph has no nodes')
-
         if not os.path.exists(directory):
             raise ValueError(f'directory does not exist: {directory}')
         att_path = os.path.join(directory, f'{self.name}.att.tsv')
@@ -160,8 +156,6 @@ class HipathiaConverter:
         min_y = min(y for x, y in pos.values())
 
         def _get_single_gene_list(node: Union[Protein, Abundance]) -> str:
-            if node is None:
-                raise RuntimeError("Why is node None")
             return ','.join(
                 n.identifier
                 for n in self.bel_node_to_hipathia_genes[node]
@@ -209,14 +203,89 @@ class HipathiaConverter:
         else:
             fig, ax = plt.subplots()
             nx.draw(self.g, pos, ax=ax, with_labels=True)
+            plt.tight_layout()
             fig.savefig(fig_path)
 
 
+def make_hsa047370() -> BELGraph:
+    """"""
+    graph = BELGraph(name='hsa04370')
+
+    node_1 = hgnc('CDC42')
+    node_9 = hgnc('KDR')
+    node_11 = hgnc('SPHK2')
+    node_17 = hgnc('MAPKAPK3')
+    node_18 = hgnc('PPP3CA')
+    node_19 = hgnc('AKT3')
+    node_20 = hgnc('PIK3R5')
+    node_21 = hgnc('NFATC2')
+    node_22 = hgnc('PRKCA')
+    node_24 = hgnc('MAPK14')
+    node_27 = hgnc('SRC')
+    node_29 = hgnc('VEGFA')
+    node_32 = hgnc('MAPK1')
+    node_33 = hgnc('MAP2K1')
+    node_34 = hgnc('RAF1')
+    node_35 = hgnc('HRAS')
+
+    node_10 = ComplexAbundance[hgnc('PLCG1'), hgnc('SH2D2A')])
+
+    node_28 = hgnc('SHC2')
+    node_23 = hgnc('PTK2')
+    node_25 = hgnc('PXN')
+    node_16 = hgnc('HSPB1')
+    node_36 = hgnc('NOS3')
+    node_37 = hgnc('CASP9')
+    node_38 = hgnc('BAD')
+    node_39 = hgnc('RAC1')
+    node_14 = hgnc('PTGS2')
+    node_15 = hgnc('PLA2G4B')
+
+    def _add_increases(a, b):
+        graph.add_directly_increases(a, b, citation='', evidence='')
+
+    def _add_decreases(a, b):
+        graph.add_directly_decreases(a, b, citation='', evidence='')
+
+    _add_increases(node_1, node_24)
+    _add_increases(node_9, node_28)
+
+    _add_increases(node_9, node_23)
+    _add_increases(node_9, node_25)
+    _add_increases(node_9, node_20)
+    _add_increases(node_9, node_27)
+    _add_increases(node_9, node_10)
+
+    _add_increases(node_11, node_35)
+    _add_increases(node_17, node_16)
+    _add_increases(node_18, node_21)
+    _add_increases(node_19, node_36)
+    _add_decreases(node_19, node_37)
+    _add_decreases(node_19, node_38)
+    _add_increases(node_20, node_39)
+    _add_increases(node_20, node_19)
+    _add_increases(node_21, node_14)
+    _add_increases(node_22, node_34)
+    _add_increases(node_22, node_11)
+    _add_increases(node_24, node_17)
+    _add_increases(node_27, node_20)
+    _add_increases(node_29, node_9)
+    _add_increases(node_32, node_15)
+    _add_increases(node_33, node_32)
+    _add_increases(node_34, node_33)
+    _add_increases(node_35, node_34)
+    _add_increases(node_10, node_18)
+    _add_increases(node_10, node_22)
+    _add_increases(node_10, node_15)
+    _add_increases(node_10, node_36)
+
+    return graph
+
+
 def _main():
-    from pybel.examples import sialic_acid_graph
     desktop = os.path.join(os.path.expanduser('~'), 'Desktop')
     to_hipathia(
-        graph=sialic_acid_graph,
+        make_hsa047370(),
         directory=desktop,
     )
 
