@@ -7,19 +7,29 @@ Input
 SIF File
 ~~~~~~~~
 - Text file with three columns separated by tabs.
-- Each row represents an interaction in the pathway. First column is the source node, third column the target node,
-  and the second is the type of relation between them.
+- Each row represents an interaction in the pathway. First column is the source
+  node, third column the target node, and the second is the type of relation
+  between them.
 - Only activation and inhibition interactions are allowed.
 - The name of the nodes in this file will be stored as the IDs of the nodes.
-- The nodes IDs should have the following structure: N (dash) pathway ID (dash) node ID.
+- The nodes IDs should have the following structure: N (dash) pathway ID (dash)
+  node ID.
 - Hipathia distinguish between two types of nodes: simple and complex.
-- Simple nodes may include many genes, but only one is needed to perform the function of the node.
-- Complex nodes include different simple nodes and represent protein complexes. Each simple node within the complex
-  represents one protein in the complex. This node requires the presence of all their simple nodes to perform its
-  function.
+
+Simple nodes:
+- Simple nodes may include many genes, but only one is needed to perform the
+  function of the node. This could correspond to a protein family of enzymes
+  that all have the same function - only one of them needs to be present for
+  the action to take place. Simple nodes are defined within
 - Node IDs from simple nodes do not include any space, i.e. N-hsa04370-11.
-- Node IDs from complex nodes are the juxtaposition of the included simple node IDs, separated by spaces,
-  i.e. N-hsa04370-10 26.
+
+Complex nodes:
+- Complex nodes include different simple nodes and represent protein complexes.
+  Each simple node within the complex represents one protein in the complex.
+  This node requires the presence of all their simple nodes to perform its
+  function.
+- Node IDs from complex nodes are the juxtaposition of the included simple node
+  IDs, separated by spaces, i.e. N-hsa04370-10 26.
 
 ATT File
 ~~~~~~~~
@@ -89,7 +99,7 @@ class HipathiaConverter:
         self.node_counter = 0
         self.g = nx.MultiDiGraph()
 
-        for u, v, d in sorted(self.graph.edges(data=True)):
+        for u, v, d in self.graph.edges(data=True):
             relation = d[RELATION]
             if isinstance(u, Protein) and isinstance(v, Protein):
                 if relation == DIRECTLY_INCREASES:
@@ -125,12 +135,16 @@ class HipathiaConverter:
             return _node
 
         elif isinstance(node, ComplexAbundance):
+            # TODO: Implement
             pass
 
         logger.info(f'Unhandled node type: {type(node)} - {node}')
 
     def output(self, directory: str):
         """Output the results to the given directory."""
+        if not self.g:
+            raise RuntimeError('Graph has no nodes')
+
         if not os.path.exists(directory):
             raise ValueError(f'directory does not exist: {directory}')
         att_path = os.path.join(directory, f'{self.name}.att.tsv')
@@ -146,6 +160,8 @@ class HipathiaConverter:
         min_y = min(y for x, y in pos.values())
 
         def _get_single_gene_list(node: Union[Protein, Abundance]) -> str:
+            if node is None:
+                raise RuntimeError("Why is node None")
             return ','.join(
                 n.identifier
                 for n in self.bel_node_to_hipathia_genes[node]
@@ -175,6 +191,7 @@ class HipathiaConverter:
                     int(100 * (y - min_y)),  # Y
                     'white',  # color
                     'rectangle',  # shape
+                    # FIXME should also be able to give list of types
                     'gene' if isinstance(bel_node, (Protein, ComplexAbundance)) else 'metabolite',
                     0.5,  # label.cex
                     'black',  # label.color
