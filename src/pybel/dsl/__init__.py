@@ -10,7 +10,7 @@ from .node_classes import (
     Abundance, BaseAbundance, BaseEntity, BiologicalProcess, CentralDogma, ComplexAbundance, CompositeAbundance, Entity,
     EnumeratedFusionRange, Fragment, FusionBase, FusionRangeBase, Gene, GeneFusion, GeneModification, Hgvs,
     HgvsReference, HgvsUnspecified, ListAbundance, MicroRna, MissingFusionRange, NamedComplexAbundance, Pathology,
-    Protein, ProteinFusion, ProteinModification, ProteinSubstitution, Reaction, Rna, RnaFusion, Variant,
+    Population, Protein, ProteinFusion, ProteinModification, ProteinSubstitution, Reaction, Rna, RnaFusion, Variant,
 )
 
 entity = Entity
