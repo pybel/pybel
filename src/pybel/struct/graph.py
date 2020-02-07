@@ -24,7 +24,7 @@ from ..constants import (
     ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, PRODUCTS, REACTANTS, REGULATES, RELATION, SUBJECT, TRANSCRIBED_TO,
     TRANSLATED_TO, VARIANTS,
 )
-from ..dsl import BaseEntity, Gene, MicroRna, Protein, Rna, activity
+from ..dsl import BaseEntity, ComplexAbundance, Gene, MicroRna, Protein, Rna, activity
 from ..parser.exc import BELParserWarning
 from ..typing import EdgeData
 from ..utils import citation_dict, hash_edge
@@ -494,6 +494,26 @@ class BELGraph(nx.MultiDiGraph):
 
     A more specific version of :meth:`add_directly_increases` that automatically populates the object modifier with an
     activity."""
+
+    def add_binds(
+        self,
+        u,
+        v,
+        *,
+        evidence: str,
+        citation: Union[str, Mapping[str, str]],
+        annotations: Optional[AnnotationsHint] = None,
+        **attr
+    ) -> str:
+        """Add a "binding" relationship between the two entities such that ``u => complex(u, v)``."""
+        return self.add_directly_increases(
+            u,
+            ComplexAbundance([u, v]),
+            citation=citation,
+            evidence=evidence,
+            annotations=annotations,
+            **attr
+        )
 
     def add_node_from_data(self, node: BaseEntity) -> None:
         """Add an entity to the graph."""
