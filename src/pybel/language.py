@@ -72,7 +72,7 @@ class Entity(dict):
     @property
     def obo(self) -> str:
         """Return this entity as an OBO-style CURIE."""
-        return '{}:{}!{}'.format(
+        return '{}:{} ! {}'.format(
             self.namespace,
             ensure_quotes(self.identifier) if self.identifier else '',
             ensure_quotes(self.name),
