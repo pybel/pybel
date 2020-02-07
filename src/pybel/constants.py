@@ -205,6 +205,9 @@ BIOPROCESS = 'BiologicalProcess'
 #: Represents the BEL function, pathology()
 PATHOLOGY = 'Pathology'
 
+#: Represents the BEL function, populationAbundance()
+POPULATION = 'Population'
+
 #: Represents the BEL abundance, compositeAbundance()
 COMPOSITE = 'Composite'
 
