@@ -483,10 +483,10 @@ class BELGraph(nx.MultiDiGraph):
     add_negative_correlation = partialmethod(add_qualified_edge, relation=NEGATIVE_CORRELATION)
     add_causes_no_change = partialmethod(add_qualified_edge, relation=CAUSES_NO_CHANGE)
 
-    add_inhibits = partialmethod(add_directly_increases, object_modifier=activity())
+    add_inhibits = partialmethod(add_directly_decreases, object_modifier=activity())
     """Add an "inhibits" relationship.
 
-    A more specific version of :meth:`add_decreases` that automatically populates the object modifier with an
+    A more specific version of :meth:`add_directly_decreases` that automatically populates the object modifier with an
     activity."""
 
     def add_node_from_data(self, node: BaseEntity) -> None:
