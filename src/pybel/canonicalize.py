@@ -77,14 +77,21 @@ def postpend_location(bel_string: str, location_model) -> str:
     )
 
 
-def _decanonicalize_edge_node(node: BaseEntity, edge_data: EdgeData, node_position: str) -> str:
+def _decanonicalize_edge_node(
+    node: BaseEntity,
+    edge_data: EdgeData,
+    node_position: str,
+    *,
+    use_identifiers: bool = False,
+) -> str:
     """Canonicalize a node with its modifiers stored in the given edge to a BEL string.
 
     :param node: A PyBEL node data dictionary
     :param edge_data: A PyBEL edge data dictionary
     :param node_position: Either :data:`pybel.constants.SUBJECT` or :data:`pybel.constants.OBJECT`
+    :param use_identifiers: Enables extended `BEP-0008 <http://bep.bel.bio/published/BEP-0008.html>`_ syntax
     """
-    node_str = node.as_bel()
+    node_str = node.as_bel(use_identifiers=use_identifiers)
 
     if node_position not in edge_data:
         return node_str
@@ -142,28 +149,41 @@ def _get_tloc_terminal(side, data):
     )
 
 
-def edge_to_tuple(u: BaseEntity, v: BaseEntity, data: EdgeData) -> Tuple[str, str, str]:
+def edge_to_tuple(
+    u: BaseEntity,
+    v: BaseEntity,
+    data: EdgeData,
+    use_identifiers: bool = False,
+) -> Tuple[str, str, str]:
     """Take two nodes and gives back a BEL string representing the statement.
 
     :param u: The edge's source's PyBEL node data dictionary
     :param v: The edge's target's PyBEL node data dictionary
     :param data: The edge's data dictionary
+    :param use_identifiers: Enables extended `BEP-0008 <http://bep.bel.bio/published/BEP-0008.html>`_ syntax
     """
-    u_str = _decanonicalize_edge_node(u, data, node_position=SUBJECT)
-    v_str = _decanonicalize_edge_node(v, data, node_position=OBJECT)
+    u_str = _decanonicalize_edge_node(u, data, node_position=SUBJECT, use_identifiers=use_identifiers)
+    v_str = _decanonicalize_edge_node(v, data, node_position=OBJECT, use_identifiers=use_identifiers)
     return u_str, data[RELATION], v_str
 
 
-def edge_to_bel(u: BaseEntity, v: BaseEntity, data: EdgeData, sep: Optional[str] = None) -> str:
+def edge_to_bel(
+    u: BaseEntity,
+    v: BaseEntity,
+    data: EdgeData,
+    sep: Optional[str] = None,
+    use_identifiers: bool = True,
+) -> str:
     """Take two nodes and gives back a BEL string representing the statement.
 
     :param u: The edge's source's PyBEL node data dictionary
     :param v: The edge's target's PyBEL node data dictionary
     :param data: The edge's data dictionary
     :param sep: The separator between the source, relation, and target. Defaults to ' '
+    :param use_identifiers: Enables extended `BEP-0008 <http://bep.bel.bio/published/BEP-0008.html>`_ syntax
     """
     sep = sep or ' '
-    return sep.join(edge_to_tuple(u=u, v=v, data=data))
+    return sep.join(edge_to_tuple(u=u, v=v, data=data, use_identifiers=use_identifiers))
 
 
 def _sort_qualified_edges_helper(t: EdgeTuple) -> Tuple[str, str, str]:
@@ -294,14 +314,14 @@ def _to_bel_lines_footer(graph) -> Iterable[str]:
 
     if unqualified_edges_to_serialize or isolated_nodes_to_serialize:
         yield '###############################################\n'
-        yield 'SET Citation = {"PubMed","Added by PyBEL","29048466"}'
+        yield 'SET Citation = {"PubMed", "29048466"}'
         yield 'SET SupportingText = "{}"'.format(PYBEL_AUTOEVIDENCE)
 
         for u, v, data in unqualified_edges_to_serialize:
-            yield '{} {} {}'.format(u.as_bel(), data[RELATION], v.as_bel())
+            yield '{} {} {}'.format(u.as_bel(use_identifiers=True), data[RELATION], v.as_bel(use_identifiers=True))
 
         for node in isolated_nodes_to_serialize:
-            yield node.as_bel()
+            yield node.as_bel(use_identifiers=True)
 
         yield 'UNSET SupportingText'
         yield 'UNSET Citation'
