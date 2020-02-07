@@ -489,6 +489,12 @@ class BELGraph(nx.MultiDiGraph):
     A more specific version of :meth:`add_directly_decreases` that automatically populates the object modifier with an
     activity."""
 
+    add_activates = partialmethod(add_directly_increases, object_modifier=activity())
+    """Add an "inhibits" relationship.
+
+    A more specific version of :meth:`add_directly_increases` that automatically populates the object modifier with an
+    activity."""
+
     def add_node_from_data(self, node: BaseEntity) -> None:
         """Add an entity to the graph."""
         assert isinstance(node, BaseEntity)
