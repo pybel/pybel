@@ -84,7 +84,7 @@ def _decanonicalize_edge_node(
     edge_data: EdgeData,
     node_position: str,
     *,
-    use_identifiers: bool = False,
+    use_identifiers: bool = False
 ) -> str:
     """Canonicalize a node with its modifiers stored in the given edge to a BEL string.
 
