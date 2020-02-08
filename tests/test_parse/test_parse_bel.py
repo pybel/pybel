@@ -10,12 +10,12 @@ from pybel.constants import (
     ABUNDANCE, ACTIVITY, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, CONCEPT, DEGRADATION,
     DIRECTLY_INCREASES, DIRTY, EFFECT, FRAGMENT, FROM_LOC, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE,
     FUSION_START, FUSION_STOP, GENE, HAS_VARIANT, HGVS, IDENTIFIER, KIND, LOCATION, MEMBERS, MIRNA, MODIFIER, NAME,
-    NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PART_OF, PATHOLOGY, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P, REACTANTS,
-    REACTION, RELATION, RNA, SUBJECT, TARGET, TO_LOC, TRANSLOCATION, VARIANTS,
+    NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PART_OF, PATHOLOGY, POPULATION, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P,
+    REACTANTS, REACTION, RELATION, RNA, SUBJECT, TARGET, TO_LOC, TRANSLOCATION, VARIANTS,
 )
 from pybel.dsl import (
-    Fragment, abundance, bioprocess, cell_surface_expression, complex_abundance, composite_abundance, fragment,
-    fusion_range, gene, gene_fusion, gmod, hgvs, mirna, named_complex_abundance, pathology, pmod, protein,
+    Fragment, Population, abundance, bioprocess, cell_surface_expression, complex_abundance, composite_abundance,
+    fragment, fusion_range, gene, gene_fusion, gmod, hgvs, mirna, named_complex_abundance, pathology, pmod, protein,
     protein_fusion, reaction, rna, rna_fusion, secretion, translocation,
 )
 from pybel.dsl.namespaces import hgnc
@@ -1497,6 +1497,32 @@ class TestPathology(TestTokenParserBase):
         self.assert_has_node(expected_node)
 
         self.assertEqual('path(MESH:adenocarcinoma)', self.graph.node_to_bel(expected_node))
+
+
+class TestPopulation(TestTokenParserBase):
+    def setUp(self):
+        self.parser.clear()
+        self.parser.population.setParseAction(self.parser.handle_term)
+
+    def test_parse_population(self):
+        statement = 'pop(uberon:blood)'
+        result = self.parser.population.parseString(statement)
+
+        expected_dict = {
+            FUNCTION: POPULATION,
+            CONCEPT: {
+                NAMESPACE: 'uberon',
+                NAME: 'blood',
+            },
+        }
+        self.assertEqual(expected_dict, result.asDict())
+
+        expected_node = Population('uberon', 'blood')
+        self.assert_has_node(expected_node)
+
+        self.assertEqual('pop(uberon:blood)',
+                         self.graph.node_to_bel(expected_node),
+                         msg='Nodes: {}'.format(list(self.graph)))
 
 
 class TestActivity(TestTokenParserBase):

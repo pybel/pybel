@@ -205,6 +205,9 @@ BIOPROCESS = 'BiologicalProcess'
 #: Represents the BEL function, pathology()
 PATHOLOGY = 'Pathology'
 
+#: Represents the BEL function, populationAbundance()
+POPULATION = 'Population'
+
 #: Represents the BEL abundance, compositeAbundance()
 COMPOSITE = 'Composite'
 
@@ -226,6 +229,7 @@ PYBEL_NODE_FUNCTIONS = {
     COMPOSITE,
     COMPLEX,
     REACTION,
+    POPULATION,
 }
 
 #: The mapping from PyBEL node functions to BEL strings
@@ -239,6 +243,7 @@ rev_abundance_labels = {
     PATHOLOGY: 'path',
     COMPLEX: 'complex',
     COMPOSITE: 'composite',
+    POPULATION: 'pop',
 }
 
 # Internal edge data keys

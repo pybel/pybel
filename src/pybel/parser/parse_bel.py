@@ -33,9 +33,9 @@ from ..constants import (
     ABUNDANCE, ACTIVITY, ASSOCIATION, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE, CELL_SECRETION,
     CELL_SURFACE_EXPRESSION, COMPLEX, COMPOSITE, CONCEPT, DECREASES, DEGRADATION, DIRECTLY_DECREASES,
     DIRECTLY_INCREASES, DIRTY, EFFECT, EQUIVALENT_TO, FROM_LOC, FUNCTION, FUSION, GENE, INCREASES, IS_A, LINE, LOCATION,
-    MEMBERS, MIRNA, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, PART_OF, PATHOLOGY, POSITIVE_CORRELATION,
-    PRODUCTS, PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, TARGET, TO_LOC, TRANSCRIBED_TO,
-    TRANSLATED_TO, TRANSLOCATION, TWO_WAY_RELATIONS, VARIANTS, belns_encodings,
+    MEMBERS, MIRNA, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, PART_OF, PATHOLOGY, POPULATION,
+    POSITIVE_CORRELATION, PRODUCTS, PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, TARGET, TO_LOC,
+    TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, TWO_WAY_RELATIONS, VARIANTS, belns_encodings,
 )
 from ..dsl import BaseEntity, cell_surface_expression, secretion
 from ..tokens import parse_result_to_dsl
@@ -109,6 +109,8 @@ biological_process_tag = one_of_tags(['bp', 'biologicalProcess'], BIOPROCESS, FU
 
 #: 2.3.2 http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_pathology_path
 pathology_tag = one_of_tags(['o', 'path', 'pathology'], PATHOLOGY, FUNCTION)
+
+population_tag = one_of_tags(['pop', 'populationAbundance'], POPULATION, FUNCTION)
 
 #: 2.3.3 http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#Xactivity
 activity_tag = one_of_tags(['act', 'activity'], ACTIVITY, MODIFIER)
@@ -422,7 +424,9 @@ class BELParser(BaseParser):
         #: `2.3.2 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_pathology_path>`_
         self.pathology = pathology_tag + nest(concept)
 
-        self.bp_path = self.biological_process | self.pathology
+        self.population = population_tag + nest(concept)
+
+        self.bp_path = self.biological_process | self.pathology | self.population
         self.bp_path.setParseAction(self.check_function_semantics)
 
         self.activity_standard = activity_tag + nest(

@@ -12,7 +12,7 @@ from ..constants import (
     ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, CONCEPT, FRAGMENT, FRAGMENT_DESCRIPTION,
     FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE, FUSION_START,
     FUSION_STOP, GENE, GMOD, HGVS, KIND, MEMBERS, MIRNA, PARTNER_3P, PARTNER_5P, PATHOLOGY, PMOD, PMOD_CODE, PMOD_ORDER,
-    PMOD_POSITION, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P, REACTANTS, REACTION, RNA, VARIANTS, XREFS,
+    PMOD_POSITION, POPULATION, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P, REACTANTS, REACTION, RNA, VARIANTS, XREFS,
     rev_abundance_labels,
 )
 from ..language import Entity
@@ -40,6 +40,7 @@ __all__ = [
     'CompositeAbundance',
     'BiologicalProcess',
     'Pathology',
+    'Population',
     'NamedComplexAbundance',
     'Reaction',
 
@@ -212,6 +213,17 @@ class Pathology(BaseAbundance):
     """
 
     function = PATHOLOGY
+
+
+class Population(BaseAbundance):
+    """Builds a popuation node.
+
+    Example:
+    >>> Population(namespace='uberon', name='blood')
+
+    """
+
+    function = POPULATION
 
 
 class Variant(dict, metaclass=ABCMeta):
