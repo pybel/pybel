@@ -114,6 +114,7 @@ def assert_has_edge(
     v: BaseEntity,
     graph: BELGraph,
     permissive: bool = True,
+    use_identifiers: bool = False,
     **kwargs
 ):
     """A helper function for checking if an edge with the given properties is contained within a graph."""
@@ -123,7 +124,7 @@ def assert_has_edge(
     self.assertTrue(
         graph.has_edge(u, v),
         msg='Edge ({}, {}) not in graph. Other edges:\n{}'.format(u, v, '\n'.join(
-            edge_to_bel(u, v, d)
+            edge_to_bel(u, v, d, use_identifiers=use_identifiers)
             for u, v, d in graph.edges(data=True)
         ))
 

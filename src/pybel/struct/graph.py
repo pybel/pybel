@@ -694,9 +694,15 @@ class BELGraph(nx.MultiDiGraph):
         return n.as_bel()
 
     @staticmethod
-    def edge_to_bel(u: BaseEntity, v: BaseEntity, edge_data: EdgeData, sep: Optional[str] = None) -> str:
+    def edge_to_bel(
+        u: BaseEntity,
+        v: BaseEntity,
+        edge_data: EdgeData,
+        sep: Optional[str] = None,
+        use_identifiers: bool = False,
+    ) -> str:
         """Serialize a pair of nodes and related edge data as a BEL relation."""
-        return edge_to_bel(u, v, data=edge_data, sep=sep)
+        return edge_to_bel(u, v, data=edge_data, sep=sep, use_identifiers=use_identifiers)
 
     def _has_no_equivalent_edge(self, u: BaseEntity, v: BaseEntity) -> bool:
         return not any(

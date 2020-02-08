@@ -35,25 +35,27 @@ EdgeTuple = Tuple[BaseEntity, BaseEntity, str, EdgeData]
 
 
 @open_file(1, mode='w')
-def to_bel_script(graph, path: Union[str, TextIO]) -> None:
+def to_bel_script(graph, path: Union[str, TextIO], use_identifiers: bool = False) -> None:
     """Write the BELGraph as a canonical BEL script.
 
     :param BELGraph graph: the BEL Graph to output as a BEL Script
     :param path: A path or file-like.
+    :param use_identifiers: Enables extended `BEP-0008 <http://bep.bel.bio/published/BEP-0008.html>`_ syntax
     """
-    for line in to_bel_script_lines(graph):
+    for line in to_bel_script_lines(graph, use_identifiers=use_identifiers):
         print(line, file=path)
 
 
-def to_bel_script_lines(graph) -> Iterable[str]:
+def to_bel_script_lines(graph, use_identifiers: bool = False) -> Iterable[str]:
     """Iterate over the lines of the BEL graph as a canonical BEL script.
 
     :param pybel.BELGraph graph: A BEL Graph
+    :param use_identifiers: Enables extended `BEP-0008 <http://bep.bel.bio/published/BEP-0008.html>`_ syntax
     """
     return itt.chain(
         _to_bel_lines_header(graph),
-        _to_bel_lines_body(graph),
-        _to_bel_lines_footer(graph),
+        _to_bel_lines_body(graph, use_identifiers=use_identifiers),
+        _to_bel_lines_footer(graph, use_identifiers=use_identifiers),
     )
 
 
@@ -172,7 +174,7 @@ def edge_to_bel(
     v: BaseEntity,
     data: EdgeData,
     sep: Optional[str] = None,
-    use_identifiers: bool = True,
+    use_identifiers: bool = False,
 ) -> str:
     """Take two nodes and gives back a BEL string representing the statement.
 
@@ -265,10 +267,11 @@ def group_evidence_edges(edges: Iterable[EdgeTuple]) -> Iterable[Tuple[str, Iter
     return itt.groupby(edges, key=_evidence_sort_key)
 
 
-def _to_bel_lines_body(graph) -> Iterable[str]:
+def _to_bel_lines_body(graph, use_identifiers: bool = False) -> Iterable[str]:
     """Iterate the lines of a BEL graph's corresponding BEL script's body.
 
     :param pybel.BELGraph graph: A BEL graph
+    :param use_identifiers: Enables extended `BEP-0008 <http://bep.bel.bio/published/BEP-0008.html>`_ syntax
     """
     qualified_edges = sort_qualified_edges(graph)
 
@@ -285,7 +288,7 @@ def _to_bel_lines_body(graph) -> Iterable[str]:
                 for key in keys:
                     yield _set_annotation_to_str(annotations_data, key)
 
-                yield graph.edge_to_bel(u, v, data)
+                yield graph.edge_to_bel(u, v, data, use_identifiers=use_identifiers)
 
                 if keys:
                     yield _unset_annotation_to_str(keys)
@@ -295,10 +298,11 @@ def _to_bel_lines_body(graph) -> Iterable[str]:
         yield '#' * 80
 
 
-def _to_bel_lines_footer(graph) -> Iterable[str]:
+def _to_bel_lines_footer(graph, use_identifiers: bool = False) -> Iterable[str]:
     """Iterate the lines of a BEL graph's corresponding BEL script's footer.
 
     :param pybel.BELGraph graph: A BEL graph
+    :param use_identifiers: Enables extended `BEP-0008 <http://bep.bel.bio/published/BEP-0008.html>`_ syntax
     """
     unqualified_edges_to_serialize = [
         (u, v, d)
@@ -318,10 +322,14 @@ def _to_bel_lines_footer(graph) -> Iterable[str]:
         yield 'SET SupportingText = "{}"'.format(PYBEL_AUTOEVIDENCE)
 
         for u, v, data in unqualified_edges_to_serialize:
-            yield '{} {} {}'.format(u.as_bel(use_identifiers=True), data[RELATION], v.as_bel(use_identifiers=True))
+            yield '{} {} {}'.format(
+                u.as_bel(use_identifiers=use_identifiers),
+                data[RELATION],
+                v.as_bel(use_identifiers=use_identifiers),
+            )
 
         for node in isolated_nodes_to_serialize:
-            yield node.as_bel(use_identifiers=True)
+            yield node.as_bel(use_identifiers=use_identifiers)
 
         yield 'UNSET SupportingText'
         yield 'UNSET Citation'
