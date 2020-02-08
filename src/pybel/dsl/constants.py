@@ -4,7 +4,7 @@
 
 from .node_classes import (
     Abundance, BiologicalProcess, ComplexAbundance, CompositeAbundance, Gene, GeneFusion, MicroRna,
-    NamedComplexAbundance, Pathology, Protein, ProteinFusion, Rna, RnaFusion,
+    NamedComplexAbundance, Pathology, Population, Protein, ProteinFusion, Rna, RnaFusion,
 )
 from ..constants import ABUNDANCE, BIOPROCESS, COMPLEX, COMPOSITE, GENE, MIRNA, PATHOLOGY, POPULATION, PROTEIN, RNA
 
@@ -23,7 +23,7 @@ FUNC_TO_DSL = {
     BIOPROCESS: BiologicalProcess,
     COMPLEX: NamedComplexAbundance,
     ABUNDANCE: Abundance,
-    POPULATION: POPULATION,
+    POPULATION: Population,
 }
 
 FUNC_TO_FUSION_DSL = {
