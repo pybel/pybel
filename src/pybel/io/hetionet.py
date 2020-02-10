@@ -159,7 +159,10 @@ def _add_edge(
         if k in {'actions', 'pubmed_ids', 'urls', 'subtypes'}:
             continue  # handled explicitly later
         if not isinstance(v, (str, int, bool, float)):
-            it_logger(f'Unhandled: {source_identifier}-{kind}-{target_identifier} {k}: {v}')
+            it_logger('Unhandled: {source_identifier}-{kind}-{target_identifier} {k}: {v}'.format(
+                source_identifier=source_identifier, kind=kind, target_identifier=target_identifier,
+                k=k, v=v,
+            ))
             continue
         annotations[k] = {v: True}
 
@@ -204,7 +207,9 @@ def _add_edge(
                             'desensitize the target', 'other', 'unknown', 'antibody', 'binding', 'adduct'}:
                 return
             else:
-                it_logger(f'Unhandled action for {source_identifier}-{kind}-{target_identifier}: {action}')
+                it_logger('Unhandled action for {source_identifier}-{kind}-{target_identifier}: {action}'.format(
+                    source_identifier=source_identifier, kind=kind, target_identifier=target_identifier, action=action
+                ))
                 return
         else:
             actions = tuple(sorted(actions))
@@ -215,7 +220,9 @@ def _add_edge(
             elif actions in {}:
                 return g.add_regulates(drug, protein, citation='', evidence='', annotations=annotations)
             else:
-                it_logger(f'Unhandled actions for {source_identifier}-{kind}-{target_identifier}: {actions}')
+                it_logger('Unhandled actions for {source_identifier}-{kind}-{target_identifier}: {actions}'.format(
+                    source_identifier=source_identifier, kind=kind, target_identifier=target_identifier, actions=actions
+                ))
                 return
 
     if _check(PHARMACOLOGICAL_CLASS, 'includes', COMPOUND):
@@ -225,4 +232,4 @@ def _add_edge(
             # FIXME namespace
         )
 
-    it_logger(f'missed: {edge}')
+    it_logger('missed: {edge}'.format(edge=edge))
