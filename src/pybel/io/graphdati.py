@@ -4,8 +4,10 @@
 
 import gzip
 import json
+from io import BytesIO
 from typing import Any, List, Mapping, TextIO, Union
 
+import requests
 from networkx.utils import open_file
 
 from pybel import BELGraph
@@ -22,6 +24,65 @@ __all__ = [
 NanopubMapping = Mapping[str, Mapping[str, Any]]
 
 SCHEMA_URI = 'https://github.com/belbio/schemas/blob/master/schemas/nanopub_bel-1.0.0.yaml'
+
+
+class GraphDatiConnection:
+    """A connection to the GraphDati API."""
+
+    def __init__(self, username, password, base_url):
+        self.base_url = base_url.rstrip('/')
+        self.username = username
+        res = requests.post(
+            '{}/token'.format(base_url),
+            data=dict(username=username, password=password),
+        )
+        token_dict = res.json()
+        self.token_type = token_dict['token_type']
+        self.id_token = token_dict['id_token']
+        self.access_token = token_dict['access_token']
+
+    def post(self, endpoint, data=None, json=None, **kwargs):
+        """Send a post request to GraphDati."""
+        url = '{}/{}'.format(self.base_url, endpoint)
+        headers = {'Authorization': '{} {}'.format(self.token_type, self.id_token)}
+        return requests.post(
+            url,
+            data=data,
+            json=json,
+            headers=headers,
+            **kwargs,
+        )
+
+    def post_graph(
+        self,
+        graph: BELGraph,
+        overwrite: bool = False,
+        validate=True,
+        email: bool = True,
+    ) -> requests.Response:
+        """Post the graph to GraphDati."""
+        graph_json = to_graphdati(graph)
+        graph_json_bytes = json.dumps(graph_json).encode('utf-8')
+
+        file = BytesIO()
+        file.write(graph_json_bytes)
+        file.seek(0)
+
+        params = dict(overwrite=overwrite, validate=validate)
+        if email:
+            params['email'] = self.username
+
+        return self.post(
+            'nanopubs/import/file',
+            files=dict(file=file),
+            params=params,
+        )
+
+
+def post_to_graphdati(graph: BELGraph, username: str, password: str, base_url: str) -> requests.Response:
+    """Post this graph to GraphDati."""
+    connection = GraphDatiConnection(username, password, base_url)
+    return connection.post_graph(graph)
 
 
 @open_file(1, mode='w')
@@ -45,22 +106,22 @@ def to_graphdati_jsons(graph: BELGraph, **kwargs) -> str:
     return json.dumps(to_graphdati(graph), ensure_ascii=False, **kwargs)
 
 
-def to_graphdati(graph: BELGraph) -> List[NanopubMapping]:
-    """Export a GraphDati list using the nanopub """
+def to_graphdati(graph: BELGraph, use_identifiers: bool = True) -> List[NanopubMapping]:
+    """Export a GraphDati list using the nanopub."""
     return [
-        _make_nanopub(graph, u, v, k, d)
+        _make_nanopub(graph, u, v, k, d, use_identifiers)
         for u, v, k, d in graph.edges(keys=True, data=True)
     ]
 
 
-def _make_nanopub(graph, u, v, k, d) -> NanopubMapping:
+def _make_nanopub(graph, u, v, k, d, use_identifiers) -> NanopubMapping:
     return dict(
         nanopub=dict(
-            schema_url=SCHEMA_URI,
+            schema_uri=SCHEMA_URI,
             type=dict(name='BEL', version='2.1.0'),
             annotations=_get_annotations(d),
             citation=_get_citation(d),
-            assertions=_get_assertions(u, v, d),
+            assertions=_get_assertions(u, v, d, use_identifiers),
             evidence=_get_evidence(d),
             metadata=_get_metadata(graph, d),
             id='pybel_{}'.format(k),
@@ -68,11 +129,11 @@ def _make_nanopub(graph, u, v, k, d) -> NanopubMapping:
     )
 
 
-def _get_assertions(u, v, d):
+def _get_assertions(u, v, d, use_identifiers):
     return [
         dict(zip(
             ('subject', 'relation', 'object'),
-            edge_to_tuple(u, v, d, use_identifiers=True),
+            edge_to_tuple(u, v, d, use_identifiers=use_identifiers),
         )),
     ]
 
@@ -83,16 +144,17 @@ def _get_evidence(d):
 
 def _get_citation(d):
     citation = d.get(CITATION)
+    rv = {}
     if citation is None:
-        reference = 'Not Available'
+        rv['reference'] = 'Not Available'
     else:
-        reference = '{}:{}'.format(citation[CITATION_DB], citation[CITATION_IDENTIFIER])
-    return dict(reference=reference)
+        rv['database'] = dict(name=citation[CITATION_DB], id=citation[CITATION_IDENTIFIER])
+    return rv
 
 
 def _get_metadata(graph: BELGraph, d):
     return dict(
-        author=graph.authors,
+        gc_creator=graph.authors,
         version=graph.version,
     )  # TODO later
 
