@@ -111,7 +111,7 @@ def _get_annotations(d):
     return []  # TODO later
 
 
-def post_graphdati(
+def post_graphdati(  # noqa: S107
     graph: BELGraph,
     username: str = 'demo@biodati.com',
     password: str = 'demo',
@@ -191,7 +191,7 @@ class GraphDatiConnection:
 
 
 def _main():
-    """Run with python -m pybel.io.graphdati"""
+    """Run with python -m pybel.io.graphdati."""
     import pybel.examples
     import os
 
