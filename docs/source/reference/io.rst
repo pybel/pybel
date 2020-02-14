@@ -66,7 +66,7 @@ Node-Link JSON
 .. autofunction:: pybel.to_nodelink_gz
 
 Cyberinfrastructure Exchange
-----------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. automodule:: pybel.io.cx
 
 .. autofunction:: pybel.from_cx
@@ -109,6 +109,20 @@ Umbrella Node-Link JSON
 
 .. autofunction:: pybel.to_umbrella_nodelink
 .. autofunction:: pybel.to_umbrella_nodelink_file
+
+GraphDati
+~~~~~~~~~
+.. automodule:: pybel.io.graphdati
+
+.. autofunction:: pybel.to_graphdati
+
+.. autofunction:: pybel.to_graphdati_jsons
+
+.. autofunction:: pybel.to_graphdati_file
+
+.. autofunction:: pybel.to_graphdati_gz
+
+.. autofunction:: pybel.post_graphdati
 
 GraphML
 ~~~~~~~
