@@ -5,7 +5,7 @@
 import unittest
 
 from pybel import dsl
-from pybel.io.hetionet import ANATOMY, GENE, from_hetionet_dict
+from pybel.io.hetionet import ANATOMY, GENE, from_hetionet_json
 
 
 class TestHetionet(unittest.TestCase):
@@ -42,7 +42,7 @@ class TestHetionet(unittest.TestCase):
             data={},
         )
 
-        graph = from_hetionet_dict(dict(nodes=[source, target], edges=[edge]))
+        graph = from_hetionet_json(dict(nodes=[source, target], edges=[edge]))
         source_node = h_dsl(namespace=h_namespace, identifier=h_id, name=h_name)
         self.assertIn(source_node, graph, msg='Nodes: {}'.format(list(graph)))
         target_node = t_dsl(namespace=t_namespace, identifier=t_id, name=t_name)

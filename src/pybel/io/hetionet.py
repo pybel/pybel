@@ -9,16 +9,17 @@ import os
 from typing import Any, Mapping, Optional
 from urllib.request import urlretrieve
 
-from tqdm.notebook import tqdm
+from tqdm import tqdm
 
 from ..config import CACHE_DIRECTORY
 from ..dsl import Abundance, BiologicalProcess, Pathology, Population, Protein, Rna
 from ..struct import BELGraph
 
 __all__ = [
-    'from_hetionet',
-    'get_hetionet_dict',
-    'from_hetionet_dict',
+    'get_hetionet',
+    'from_hetionet_json',
+    'from_hetionet_gz',
+    'from_hetnetio_file',
 ]
 
 logger = logging.getLogger(__name__)
@@ -49,26 +50,35 @@ DSL_MAP = {
 }
 
 
-def from_hetionet() -> BELGraph:
-    """Get Hetionet from GitHub."""
-    hetionet_dict = get_hetionet_dict()
-    return from_hetionet_dict(hetionet_dict)
-
-
-def get_hetionet_dict() -> Mapping[str, Any]:
-    """Get the Hetionet dictionary."""
+def get_hetionet() -> BELGraph:
+    """Get Hetionet from GitHub, cache, and convert to BEL."""
     if not os.path.exists(PATH):
+        logger.warning('downloading hetionet from %s to %s', JSON_BZ2_URL, PATH)
         urlretrieve(JSON_BZ2_URL, PATH)  # noqa: S310
-    with bz2.open(PATH) as file:
-        return json.load(file)
+    return from_hetionet_gz(PATH)
 
 
-def from_hetionet_dict(
+def from_hetionet_gz(path: str) -> BELGraph:
+    """Get Hetionet from its JSON GZ file."""
+    logger.info('opening %s', path)
+    with bz2.open(path) as file:
+        return from_hetnetio_file(file)
+
+
+def from_hetnetio_file(file) -> BELGraph:
+    """Get Hetnetio from a JSON file."""
+    logger.info('parsing json from %s', file)
+    j = json.load(file)
+    logger.info('converting hetionet dict to BEL')
+    return from_hetionet_json(j)
+
+
+def from_hetionet_json(
     hetionet_dict: Mapping[str, Any],
-    use_tqdm: bool = False,
+    use_tqdm: bool = True,
 ) -> BELGraph:
     """Convert a Hetionet dictionary to a BEL graph."""
-    g = BELGraph(name='Hetionet', version='1.0')
+    graph = BELGraph(name='Hetionet', version='1.0', authors='Daniel Himmelstein')
 
     kind_identifier_to_name = {
         (x['kind'], x['identifier']): x['name']
@@ -76,29 +86,29 @@ def from_hetionet_dict(
     }
 
     qualified_mapping = {
-        (ANATOMY, Population, 'upregulates', GENE, Rna, g.add_positive_correlation),
-        (ANATOMY, Population, 'downregulates', GENE, Rna, g.add_negative_correlation),
-        (ANATOMY, Population, 'expresses', GENE, Rna, g.add_association),  # FIXME add "correlates" relationship
-        (COMPOUND, Abundance, 'resembles', COMPOUND, Abundance, g.add_association),
-        (COMPOUND, Abundance, 'upregulates', GENE, Protein, g.add_activates),
-        (COMPOUND, Abundance, 'downregulates', GENE, Protein, g.add_inhibits),
-        (COMPOUND, Abundance, 'treats', DISEASE, Pathology, g.add_decreases),
-        (COMPOUND, Abundance, 'palliates', DISEASE, Pathology, g.add_decreases),
-        (COMPOUND, Abundance, 'causes', SIDE_EFFECT, Pathology, g.add_increases),
-        (GENE, Protein, 'interacts', GENE, Protein, g.add_binds),
-        (GENE, Protein, 'regulates', GENE, Protein, g.add_regulates),
-        (GENE, Rna, 'covaries', GENE, Rna, g.add_association),
-        (DISEASE, Pathology, 'localizes', ANATOMY, Population, g.add_association),
-        (DISEASE, Pathology, 'associates', GENE, Protein, g.add_association),
-        (DISEASE, Pathology, 'upregulates', GENE, Rna, g.add_positive_correlation),
-        (DISEASE, Pathology, 'downregulates', GENE, Rna, g.add_negative_correlation),
-        (DISEASE, Pathology, 'presents', SYMPTOM, Pathology, g.add_association),
-        (DISEASE, Pathology, 'resembles', DISEASE, Pathology, g.add_association),
+        (ANATOMY, Population, 'upregulates', GENE, Rna, graph.add_positive_correlation),
+        (ANATOMY, Population, 'downregulates', GENE, Rna, graph.add_negative_correlation),
+        (ANATOMY, Population, 'expresses', GENE, Rna, graph.add_association),  # FIXME add "correlates" relationship
+        (COMPOUND, Abundance, 'resembles', COMPOUND, Abundance, graph.add_association),
+        (COMPOUND, Abundance, 'upregulates', GENE, Protein, graph.add_activates),
+        (COMPOUND, Abundance, 'downregulates', GENE, Protein, graph.add_inhibits),
+        (COMPOUND, Abundance, 'treats', DISEASE, Pathology, graph.add_decreases),
+        (COMPOUND, Abundance, 'palliates', DISEASE, Pathology, graph.add_decreases),
+        (COMPOUND, Abundance, 'causes', SIDE_EFFECT, Pathology, graph.add_increases),
+        (GENE, Protein, 'interacts', GENE, Protein, graph.add_binds),
+        (GENE, Protein, 'regulates', GENE, Protein, graph.add_regulates),
+        (GENE, Rna, 'covaries', GENE, Rna, graph.add_association),
+        (DISEASE, Pathology, 'localizes', ANATOMY, Population, graph.add_association),
+        (DISEASE, Pathology, 'associates', GENE, Protein, graph.add_association),
+        (DISEASE, Pathology, 'upregulates', GENE, Rna, graph.add_positive_correlation),
+        (DISEASE, Pathology, 'downregulates', GENE, Rna, graph.add_negative_correlation),
+        (DISEASE, Pathology, 'presents', SYMPTOM, Pathology, graph.add_association),
+        (DISEASE, Pathology, 'resembles', DISEASE, Pathology, graph.add_association),
     }
 
     unqualified_mapping = {
-        (GENE, Protein, 'participates', PATHWAY, BiologicalProcess, g.add_part_of),
-        (GENE, Protein, 'participates', BIOPROCESS, BiologicalProcess, g.add_part_of),
+        (GENE, Protein, 'participates', PATHWAY, BiologicalProcess, graph.add_part_of),
+        (GENE, Protein, 'participates', BIOPROCESS, BiologicalProcess, graph.add_part_of),
     }
 
     edges = hetionet_dict['edges']
@@ -110,13 +120,13 @@ def from_hetionet_dict(
         it_logger = logger.info
 
     for edge in edges:
-        _add_edge(g, edge, kind_identifier_to_name, it_logger, qualified_mapping, unqualified_mapping)
+        _add_edge(graph, edge, kind_identifier_to_name, it_logger, qualified_mapping, unqualified_mapping)
 
-    return g
+    return graph
 
 
 def _add_edge(
-    g,
+    graph,
     edge,
     kind_identifier_to_name,
     it_logger,
@@ -186,23 +196,23 @@ def _add_edge(
         return kind == _kind and source_type == _source_type and target_type == _target_type
 
     if _check(COMPOUND, 'binds', GENE):
-        actions = data.get('actions', [])
         drug = Abundance(namespace='drugbank', name=source_name, identifier=source_identifier)
         protein = Protein(namespace='ncbigene', name=target_name, identifier=target_identifier)
-        g.add_binds(drug, protein, citation='', evidence='', annotations=annotations)
+        graph.add_binds(drug, protein, citation='', evidence='', annotations=annotations)
 
+        actions = data.get('actions', [])
         if len(actions) == 0:
             return
         if len(actions) == 1:
             action = actions[0].lower()
             if action in {'agonist', 'potentiator', 'inducer', 'positive modulator', 'partial agonist',
                           'positive allosteric modulator', 'activator', 'stimulator'}:
-                return g.add_activates(drug, protein, citation='', evidence='', annotations=annotations)
+                return graph.add_activates(drug, protein, citation='', evidence='', annotations=annotations)
             elif action in {'inhibitor', 'antagonist', 'blocker', 'partial antagonist',
                             'inhibitor, competitive', 'negative modulator', 'negative allosteric modulator'}:
-                return g.add_inhibits(drug, protein, citation='', evidence='', annotations=annotations)
+                return graph.add_inhibits(drug, protein, citation='', evidence='', annotations=annotations)
             elif action in {'modulator', 'allosteric modulator'}:
-                return g.add_regulates(drug, protein, citation='', evidence='', annotations=annotations)
+                return graph.add_regulates(drug, protein, citation='', evidence='', annotations=annotations)
             elif action in {'substrate', 'binder', 'other/unknown', 'ligand', 'cofactor', 'product of', 'opener',
                             'desensitize the target', 'other', 'unknown', 'antibody', 'binding', 'adduct'}:
                 return
@@ -213,12 +223,44 @@ def _add_edge(
                 return
         else:
             actions = tuple(sorted(actions))
-            if actions in {}:
-                return g.add_activates(drug, protein, citation='', evidence='', annotations=annotations)
-            if actions in {('inhibitor', 'substrate'), ('inhibitor', 'blocker')}:
-                return g.add_inhibits(drug, protein, citation='', evidence='', annotations=annotations)
-            elif actions in {}:
-                return g.add_regulates(drug, protein, citation='', evidence='', annotations=annotations)
+            if actions in {
+                ('activator', 'substrate'),
+                ('agonist', 'binder'),
+                ('agonist', 'partial agonist'), ('inducer', 'substrate'),
+                ('agonist', 'positive allosteric modulator'),
+                ('positive allosteric modulator', 'potentiator'),
+            }:
+                return graph.add_activates(drug, protein, citation='', evidence='', annotations=annotations)
+            if actions in {
+                ('agonist', 'positive modulator'),
+                ('allosteric antagonist', 'antagonist'),
+                ('antagonist', 'blocker'),
+                ('antagonist', 'inhibitor'),
+                ('antagonist', 'multitarget'),
+                ('antagonist', 'substrate'),
+                ('blocker', 'inhibitor'),
+                ('blocker', 'modulator'),
+                ('inhibitor', 'modulator'),
+                ('inhibitor', 'multitarget'),
+                ('inhibitor', 'negative modulator'),
+                ('inhibitor', 'other'),
+                ('inhibitor', 'substrate'),
+                ('negative modulator', 'releasing agent'),
+            }:
+                return graph.add_inhibits(drug, protein, citation='', evidence='', annotations=annotations)
+            elif actions in {
+                ('inducer', 'inhibitor', 'substrate'),
+                ('inducer', 'inhibitor'),
+                ('agonist', 'antagonist'),
+                ('antagonist', 'partial agonist'),
+                ('adduct', 'inhibitor'),
+                ('agonist', 'antagonist', 'modulator'),
+            }:
+                return graph.add_regulates(drug, protein, citation='', evidence='', annotations=annotations)
+            elif actions in {
+                ('binder', 'opener'),
+            }:
+                pass
             else:
                 it_logger('Unhandled actions for {source_identifier}-{kind}-{target_identifier}: {actions}'.format(
                     source_identifier=source_identifier, kind=kind, target_identifier=target_identifier, actions=actions
@@ -226,7 +268,7 @@ def _add_edge(
                 return
 
     if _check(PHARMACOLOGICAL_CLASS, 'includes', COMPOUND):
-        return g.add_is_a(
+        return graph.add_is_a(
             Abundance(namespace='drugbank', name=target_name, identifier=target_identifier),
             Abundance(namespace='drucentralclass', name=source_name, identifier=source_identifier),
             # FIXME namespace
