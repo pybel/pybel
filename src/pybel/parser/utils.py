@@ -6,12 +6,13 @@ import itertools as itt
 import logging
 from typing import Any, List, Optional
 
+import pyparsing
 from pyparsing import (
     And, Group, Literal, ParserElement, Suppress, White, Word, ZeroOrMore, alphanums, dblQuotedString, delimitedList,
     oneOf, removeQuotes, replaceWith,
 )
 
-from ..constants import NEGATIVE, OBJECT, RELATION, SUBJECT
+from ..constants import NEGATIVE, NEGATIVE_TAG, OBJECT, RELATION, SUBJECT
 
 logger = logging.getLogger('pybel')
 
@@ -78,6 +79,11 @@ def one_of_tags(
 def triple(subject, relation, obj, add_negative_tag: bool = False) -> ParserElement:
     """Build a simple triple in PyParsing that has a ``subject relation object`` format."""
     if add_negative_tag:
-        return And([Group(subject)(SUBJECT), Literal('~')(NEGATIVE), relation(RELATION), Group(obj)(OBJECT)])
+        return And([
+            Group(subject)(SUBJECT),
+            pyparsing.Optional(Literal(NEGATIVE_TAG))(NEGATIVE),
+            relation(RELATION),
+            Group(obj)(OBJECT),
+        ])
     else:
         return And([Group(subject)(SUBJECT), relation(RELATION), Group(obj)(OBJECT)])

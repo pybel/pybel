@@ -224,7 +224,7 @@ def hash_dump(data) -> str:
 
 def canonicalize_edge(edge_data: EdgeData) -> CanonicalEdge:
     """Canonicalize the edge to a tuple based on the relation, subject modifications, and object modifications."""
-    if edge_data[NEGATIVE]:
+    if edge_data.get(NEGATIVE):
         return (
             edge_data[RELATION],
             edge_data[NEGATIVE],
