@@ -24,9 +24,7 @@ from pybel.dsl import (
 from pybel.dsl.namespaces import hgnc
 from pybel.language import Entity
 from pybel.parser import BELParser
-from pybel.parser.exc import (
-    MissingNamespaceNameWarning, NestedRelationWarning, RelabelWarning, UndefinedNamespaceWarning,
-)
+from pybel.parser.exc import MissingNamespaceNameWarning, NestedRelationWarning, UndefinedNamespaceWarning
 from tests.constants import TestTokenParserBase, test_citation_dict, test_evidence_text
 
 logger = logging.getLogger(__name__)
@@ -841,44 +839,6 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_node(obj)
 
         self.assert_has_edge(sub, obj, relation=IS_A)
-
-    def test_label_1(self):
-        statement = 'g(HGNC:APOE, var(c.526C>T), var(c.388T>C)) labeled "APOE E2"'
-        result = self.parser.relation.parseString(statement)
-
-        expected_dict = {
-            SUBJECT: {
-                FUNCTION: GENE,
-                CONCEPT: {
-                    NAMESPACE: 'HGNC',
-                    NAME: 'APOE',
-                },
-                VARIANTS: [
-                    {
-                        KIND: HGVS,
-                        HGVS: 'c.526C>T',
-                    }, {
-                        KIND: HGVS,
-                        HGVS: 'c.388T>C',
-                    },
-                ],
-            },
-            OBJECT: 'APOE E2'
-        }
-        self.assertEqual(expected_dict, result.asDict())
-
-        expected_node = gene('HGNC', 'APOE', variants=[hgvs('c.526C>T'), hgvs('c.388T>C')])
-        self.assert_has_node(expected_node)
-
-        self.assertTrue(self.parser.graph.has_node_description(expected_node))
-        self.assertEqual('APOE E2', self.parser.graph.get_node_description(expected_node))
-
-    def test_raise_on_relabel(self):
-        s1 = 'g(HGNC:APOE, var(c.526C>T), var(c.388T>C)) labeled "APOE E2"'
-        s2 = 'g(HGNC:APOE, var(c.526C>T), var(c.388T>C)) labeled "APOE E2 Variant"'
-        self.parser.relation.parseString(s1)
-        with self.assertRaises(RelabelWarning):
-            self.parser.relation.parseString(s2)
 
     def test_equivalentTo(self):
         statement = 'g(dbSNP:"rs123456") eq g(HGNC:YFG, var(c.123G>A))'

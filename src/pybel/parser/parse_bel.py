@@ -11,14 +11,14 @@ from typing import Dict, List, Mapping, Optional, Pattern, Set, Union
 
 import pyparsing
 from pyparsing import (
-    And, Group, Keyword, MatchFirst, ParseResults, StringEnd, Suppress, delimitedList, oneOf, replaceWith,
+    Group, Keyword, MatchFirst, ParseResults, StringEnd, Suppress, delimitedList, oneOf, replaceWith,
 )
 
 from .baseparser import BaseParser
 from .constants import NamespaceTermEncodingMapping
 from .exc import (
     InvalidEntity, InvalidFunctionSemantic, MalformedTranslocationWarning, MissingAnnotationWarning,
-    MissingCitationException, MissingSupportWarning, NestedRelationWarning, RelabelWarning,
+    MissingCitationException, MissingSupportWarning, NestedRelationWarning,
 )
 from .modifiers import (
     get_fragment_language, get_fusion_language, get_gene_modification_language, get_gene_substitution_language,
@@ -27,7 +27,7 @@ from .modifiers import (
 )
 from .parse_concept import ConceptParser
 from .parse_control import ControlParser
-from .utils import WCW, nest, one_of_tags, quote, triple
+from .utils import WCW, nest, one_of_tags, triple
 from .. import language
 from ..constants import (
     ABUNDANCE, ACTIVITY, ASSOCIATION, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE, CELL_SECRETION,
@@ -607,9 +607,6 @@ class BELParser(BaseParser):
 
         self.nested_causal_relationship.setParseAction(self.handle_nested_relation)
 
-        self.label_relationship = And([Group(self.bel_term)(SUBJECT), Suppress('labeled'), quote(OBJECT)])
-        self.label_relationship.setParseAction(self.handle_label_relation)
-
         # has_members is handled differently from all other relations becuase it gets distrinbuted
         self.relation = MatchFirst([
             self.has_list,
@@ -617,7 +614,6 @@ class BELParser(BaseParser):
             self.relation,
             self.inverted_unqualified_relation,
             self.normal_unqualified_relation,
-            self.label_relationship,
         ])
 
         self.singleton_term = (self.bel_term + StringEnd()).setParseAction(self.handle_term)
@@ -740,11 +736,11 @@ class BELParser(BaseParser):
         """Handle list relations like ``p(X) hasComponents list(p(Y), p(Z), ...)``."""
         return self._handle_list_helper(tokens, PART_OF)
 
-    def _add_qualified_edge_helper(self, u, v, relation, annotations, subject_modifier, object_modifier) -> str:
+    def _add_qualified_edge_helper(self, *, u, v, relation, annotations, subject_modifier, object_modifier) -> str:
         """Add a qualified edge from the internal aspects of the parser."""
         return self.graph.add_qualified_edge(
-            u,
-            v,
+            u=u,
+            v=v,
             relation=relation,
             evidence=self.control_parser.evidence,
             citation=self.control_parser.get_citation(),
@@ -754,28 +750,26 @@ class BELParser(BaseParser):
             **{LINE: self.get_line_number()},
         )
 
-    def _add_qualified_edge(self, u, v, relation, annotations, subject_modifier, object_modifier) -> str:
+    def _add_qualified_edge(self, *, u, v, relation, annotations, subject_modifier, object_modifier) -> str:
         """Add an edge, then adds the opposite direction edge if it should."""
-        edge_hash = self._add_qualified_edge_helper(
-            u,
-            v,
-            relation=relation,
-            annotations=annotations,
-            subject_modifier=subject_modifier,
-            object_modifier=object_modifier,
-        )
-
         if relation in TWO_WAY_RELATIONS:
             self._add_qualified_edge_helper(
-                v,
-                u,
+                u=v,
+                v=u,
                 relation=relation,
                 annotations=annotations,
                 object_modifier=subject_modifier,
                 subject_modifier=object_modifier,
             )
 
-        return edge_hash
+        return self._add_qualified_edge_helper(
+            u=u,
+            v=v,
+            relation=relation,
+            annotations=annotations,
+            subject_modifier=subject_modifier,
+            object_modifier=object_modifier,
+        )
 
     def _handle_relation(self, tokens: ParseResults) -> str:
         """Handle a relation."""
@@ -800,8 +794,8 @@ class BELParser(BaseParser):
         }
 
         return self._add_qualified_edge(
-            u,
-            v,
+            u=u,
+            v=v,
             relation=tokens[RELATION],
             annotations=annotations,
             subject_modifier=subject_modifier,
@@ -843,27 +837,6 @@ class BELParser(BaseParser):
         object_node_dsl = self.ensure_node(tokens[OBJECT])
         relation = tokens[RELATION]
         self.graph.add_unqualified_edge(object_node_dsl, subject_node_dsl, relation)
-        return tokens
-
-    def handle_label_relation(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
-        """Handle statements like ``p(X) label "Label for X"``.
-
-        :raises: RelabelWarning
-        """
-        subject_node_dsl = self.ensure_node(tokens[SUBJECT])
-        description = tokens[OBJECT]
-
-        if self.graph.has_node_description(subject_node_dsl):
-            raise RelabelWarning(
-                line_number=self.get_line_number(),
-                line=line,
-                position=position,
-                node=subject_node_dsl,
-                old_label=self.graph.get_node_description(subject_node_dsl),
-                new_label=description,
-            )
-
-        self.graph.set_node_description(subject_node_dsl, description)
         return tokens
 
     def ensure_node(self, tokens: ParseResults) -> BaseEntity:
