@@ -9,7 +9,7 @@ import pickle
 from collections import defaultdict
 from collections.abc import Iterable, MutableMapping
 from datetime import datetime
-from typing import Any, Mapping, Optional, Tuple
+from typing import Any, Mapping, Optional, Tuple, Union
 
 from .constants import (
     ACTIVITY, CITATION, CITATION_DB, CITATION_DB_NAME, CITATION_IDENTIFIER, DEGRADATION, EFFECT, EVIDENCE, FROM_LOC,
@@ -18,6 +18,11 @@ from .constants import (
 from .typing import EdgeData
 
 logger = logging.getLogger(__name__)
+
+CanonicalEdge = Union[
+    Tuple[str, Optional[Tuple], Optional[Tuple]],
+    Tuple[str, bool, Optional[Tuple], Optional[Tuple]]
+]
 
 
 def expand_dict(flat_dict, sep: str = '_'):
@@ -156,7 +161,7 @@ def _get_edge_tuple(
     source,
     target,
     edge_data: EdgeData,
-) -> Tuple[str, str, Optional[str], Optional[str], Tuple]:
+) -> Tuple[str, str, Optional[str], Optional[str], CanonicalEdge]:
     """Convert an edge to a consistent tuple.
 
     :param BaseEntity source: The source BEL node
@@ -217,7 +222,7 @@ def hash_dump(data) -> str:
     return hashlib.md5(json.dumps(data, sort_keys=True).encode('utf-8')).hexdigest()  # noqa: S303
 
 
-def canonicalize_edge(edge_data: EdgeData):
+def canonicalize_edge(edge_data: EdgeData) -> CanonicalEdge:
     """Canonicalize the edge to a tuple based on the relation, subject modifications, and object modifications."""
     if edge_data[NEGATIVE]:
         return (

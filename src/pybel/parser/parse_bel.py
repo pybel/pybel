@@ -749,12 +749,12 @@ class BELParser(BaseParser):
             u=u,
             v=v,
             relation=relation,
+            negative=negative,
             evidence=self.control_parser.evidence,
             citation=self.control_parser.get_citation(),
             annotations=annotations,
             subject_modifier=subject_modifier,
             object_modifier=object_modifier,
-            negative=negative,
             **{LINE: self.get_line_number()},
         )
 
