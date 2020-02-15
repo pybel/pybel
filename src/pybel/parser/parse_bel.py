@@ -742,7 +742,7 @@ class BELParser(BaseParser):
         return self._handle_list_helper(tokens, PART_OF)
 
     def _add_qualified_edge_helper(
-        self, *, u, v, negative, relation, annotations, subject_modifier, object_modifier,
+        self, *, u, v, negative, relation, annotations, subject_modifier, object_modifier
     ) -> str:
         """Add a qualified edge from the internal aspects of the parser."""
         return self.graph.add_qualified_edge(
