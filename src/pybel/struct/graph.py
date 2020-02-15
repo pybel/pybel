@@ -16,13 +16,13 @@ from .operations import left_full_join, left_node_intersection_join, left_outer_
 from ..canonicalize import edge_to_bel
 from ..constants import (
     ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_DB, CITATION_IDENTIFIER,
-    CITATION_TYPE_PUBMED, CONCEPT, DECREASES, DESCRIPTION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO,
-    EVIDENCE, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_METADATA,
-    GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION, HAS_PRODUCT, HAS_REACTANT,
-    HAS_VARIANT, INCREASES, IS_A, MEMBERS, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION,
-    METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAMESPACE, NEGATIVE_CORRELATION, OBJECT,
-    ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, PRODUCTS, REACTANTS, REGULATES, RELATION, SUBJECT, TRANSCRIBED_TO,
-    TRANSLATED_TO, VARIANTS,
+    CITATION_TYPE_PUBMED, CONCEPT, DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO, EVIDENCE,
+    GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN,
+    GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A,
+    MEMBERS, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER,
+    METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAMESPACE, NEGATIVE, NEGATIVE_CORRELATION, OBJECT, ORTHOLOGOUS,
+    PART_OF, POSITIVE_CORRELATION, PRODUCTS, REACTANTS, REGULATES, RELATION, SUBJECT, TRANSCRIBED_TO, TRANSLATED_TO,
+    VARIANTS,
 )
 from ..dsl import BaseEntity, ComplexAbundance, Gene, MicroRna, Protein, Rna, activity
 from ..parser.exc import BELParserWarning
@@ -423,6 +423,7 @@ class BELGraph(nx.MultiDiGraph):
         annotations: Optional[AnnotationsHint] = None,
         subject_modifier: Optional[Mapping] = None,
         object_modifier: Optional[Mapping] = None,
+        negative: bool = False,
         **attr
     ) -> str:
         """Add a qualified edge.
@@ -462,6 +463,9 @@ class BELGraph(nx.MultiDiGraph):
 
         if object_modifier:
             attr[OBJECT] = object_modifier
+
+        if negative:
+            attr[NEGATIVE] = True
 
         return self._help_add_edge(u, v, attr)
 
@@ -529,7 +533,6 @@ class BELGraph(nx.MultiDiGraph):
 
         elif MEMBERS in node:
             for member in node[MEMBERS]:
-                # FIXME switch to self.add_part_of(member, node)
                 self.add_part_of(member, node)
 
         elif PRODUCTS in node and REACTANTS in node:
@@ -566,30 +569,6 @@ class BELGraph(nx.MultiDiGraph):
         """Get the annotations for a given edge."""
         return self._get_edge_attr(u, v, key, ANNOTATIONS)
 
-    def _get_node_attr(self, node: BaseEntity, attr: str) -> Any:
-        assert isinstance(node, BaseEntity)
-        return self.nodes[node].get(attr)
-
-    def _has_node_attr(self, node: BaseEntity, attr: str) -> Any:
-        assert isinstance(node, BaseEntity)
-        return attr in self.nodes[node]
-
-    def _set_node_attr(self, node: BaseEntity, attr: str, value: Any) -> None:
-        assert isinstance(node, BaseEntity)
-        self.nodes[node][attr] = value
-
-    def get_node_description(self, node: BaseEntity) -> Optional[str]:
-        """Get the description for a given node."""
-        return self._get_node_attr(node, DESCRIPTION)
-
-    def has_node_description(self, node: BaseEntity) -> bool:
-        """Check if a node description is already present."""
-        return self._has_node_attr(node, DESCRIPTION)
-
-    def set_node_description(self, node: BaseEntity, description: str) -> None:
-        """Set the description for a given node."""
-        self._set_node_attr(node, DESCRIPTION, description)
-
     def __add__(self, other: 'BELGraph') -> 'BELGraph':
         """Copy this graph and join it with another graph with it using :func:`pybel.struct.left_full_join`.
 
@@ -599,8 +578,8 @@ class BELGraph(nx.MultiDiGraph):
         Example usage:
 
         >>> import pybel
-        >>> g = pybel.from_path('...')
-        >>> h = pybel.from_path('...')
+        >>> g = pybel.from_bel_script('...')
+        >>> h = pybel.from_bel_script('...')
         >>> k = g + h
         """
         if not isinstance(other, BELGraph):
@@ -619,8 +598,8 @@ class BELGraph(nx.MultiDiGraph):
         Example usage:
 
         >>> import pybel
-        >>> g = pybel.from_path('...')
-        >>> h = pybel.from_path('...')
+        >>> g = pybel.from_bel_script('...')
+        >>> h = pybel.from_bel_script('...')
         >>> g += h
         """
         if not isinstance(other, BELGraph):
@@ -640,8 +619,8 @@ class BELGraph(nx.MultiDiGraph):
         Example usage:
 
         >>> import pybel
-        >>> g = pybel.from_path('...')
-        >>> h = pybel.from_path('...')
+        >>> g = pybel.from_bel_script('...')
+        >>> h = pybel.from_bel_script('...')
         >>> k = g & h
         """
         if not isinstance(other, BELGraph):
@@ -660,8 +639,8 @@ class BELGraph(nx.MultiDiGraph):
         Example usage:
 
         >>> import pybel
-        >>> g = pybel.from_path('...')
-        >>> h = pybel.from_path('...')
+        >>> g = pybel.from_bel_script('...')
+        >>> h = pybel.from_bel_script('...')
         >>> g &= h
         """
         if not isinstance(other, BELGraph):
@@ -679,8 +658,8 @@ class BELGraph(nx.MultiDiGraph):
         Example usage:
 
         >>> import pybel
-        >>> g = pybel.from_path('...')
-        >>> h = pybel.from_path('...')
+        >>> g = pybel.from_bel_script('...')
+        >>> h = pybel.from_bel_script('...')
         >>> k = g ^ h
         """
         if not isinstance(other, BELGraph):

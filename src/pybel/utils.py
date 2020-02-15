@@ -13,13 +13,11 @@ from typing import Any, Mapping, Optional, Tuple
 
 from .constants import (
     ACTIVITY, CITATION, CITATION_DB, CITATION_DB_NAME, CITATION_IDENTIFIER, DEGRADATION, EFFECT, EVIDENCE, FROM_LOC,
-    IDENTIFIER, LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT, RELATION, SUBJECT, TO_LOC, TRANSLOCATION,
+    IDENTIFIER, LOCATION, MODIFIER, NAME, NAMESPACE, NEGATIVE, OBJECT, RELATION, SUBJECT, TO_LOC, TRANSLOCATION,
 )
 from .typing import EdgeData
 
 logger = logging.getLogger(__name__)
-
-CanonicalEdge = Tuple[str, Optional[Tuple], Optional[Tuple]]
 
 
 def expand_dict(flat_dict, sep: str = '_'):
@@ -158,7 +156,7 @@ def _get_edge_tuple(
     source,
     target,
     edge_data: EdgeData,
-) -> Tuple[str, str, Optional[str], Optional[str], CanonicalEdge]:
+) -> Tuple[str, str, Optional[str], Optional[str], Tuple]:
     """Convert an edge to a consistent tuple.
 
     :param BaseEntity source: The source BEL node
@@ -219,8 +217,15 @@ def hash_dump(data) -> str:
     return hashlib.md5(json.dumps(data, sort_keys=True).encode('utf-8')).hexdigest()  # noqa: S303
 
 
-def canonicalize_edge(edge_data: EdgeData) -> CanonicalEdge:
+def canonicalize_edge(edge_data: EdgeData):
     """Canonicalize the edge to a tuple based on the relation, subject modifications, and object modifications."""
+    if edge_data[NEGATIVE]:
+        return (
+            edge_data[RELATION],
+            edge_data[NEGATIVE],
+            _canonicalize_edge_modifications(edge_data.get(SUBJECT)),
+            _canonicalize_edge_modifications(edge_data.get(OBJECT)),
+        )
     return (
         edge_data[RELATION],
         _canonicalize_edge_modifications(edge_data.get(SUBJECT)),

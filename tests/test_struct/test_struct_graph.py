@@ -180,20 +180,6 @@ class TestGetGraphProperties(unittest.TestCase):
         annotations = self.graph.get_edge_annotations(test_source, test_target, key)
         self.assertIsNone(annotations)
 
-    def test_get_node_properties(self):
-        """Test looking up node properties."""
-        test_name = n()
-        test_identifier = n()
-
-        node = protein(namespace='TEST', name=test_name, identifier=test_identifier)
-        self.graph.add_node_from_data(node)
-
-        self.assertIsNone(self.graph.get_node_description(node))
-
-        test_description = n()
-        self.graph.set_node_description(node, test_description)
-        self.assertEqual(test_description, self.graph.get_node_description(node))
-
     def test_add_node_with_variant(self):
         """Test that the identifier is carried through to the child."""
         graph = BELGraph()
