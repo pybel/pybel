@@ -529,7 +529,6 @@ class BELGraph(nx.MultiDiGraph):
 
         elif MEMBERS in node:
             for member in node[MEMBERS]:
-                # FIXME switch to self.add_part_of(member, node)
                 self.add_part_of(member, node)
 
         elif PRODUCTS in node and REACTANTS in node:
@@ -565,14 +564,6 @@ class BELGraph(nx.MultiDiGraph):
     def get_edge_annotations(self, u, v, key: str) -> Optional[AnnotationsDict]:
         """Get the annotations for a given edge."""
         return self._get_edge_attr(u, v, key, ANNOTATIONS)
-
-    def _get_node_attr(self, node: BaseEntity, attr: str) -> Any:
-        assert isinstance(node, BaseEntity)
-        return self.nodes[node].get(attr)
-
-    def _has_node_attr(self, node: BaseEntity, attr: str) -> Any:
-        assert isinstance(node, BaseEntity)
-        return attr in self.nodes[node]
 
     def __add__(self, other: 'BELGraph') -> 'BELGraph':
         """Copy this graph and join it with another graph with it using :func:`pybel.struct.left_full_join`.
