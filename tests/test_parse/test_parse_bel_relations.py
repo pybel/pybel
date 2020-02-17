@@ -1071,7 +1071,7 @@ class TestNegativeEdges(TestTokenParserBase):
                 },
             },
             RELATION: DECREASES,
-            NEGATIVE: '~',
+            NEGATIVE: True,
             OBJECT: {
                 FUNCTION: ABUNDANCE,
                 CONCEPT: {

@@ -76,12 +76,15 @@ def one_of_tags(
     return element.setResultsName(name)
 
 
+negative_tag = Literal(NEGATIVE_TAG).setParseAction(replaceWith(True))
+
+
 def triple(subject, relation, obj, add_negative_tag: bool = False) -> ParserElement:
     """Build a simple triple in PyParsing that has a ``subject relation object`` format."""
     if add_negative_tag:
         return And([
             Group(subject)(SUBJECT),
-            pyparsing.Optional(Literal(NEGATIVE_TAG))(NEGATIVE),
+            pyparsing.Optional(negative_tag)(NEGATIVE),
             relation(RELATION),
             Group(obj)(OBJECT),
         ])
