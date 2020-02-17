@@ -13,9 +13,9 @@ from pybel.constants import (
     ABUNDANCE, ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE, CITATION, COMPLEX, COMPOSITE,
     CONCEPT, DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE, FROM_LOC, FUNCTION,
     GENE, GMOD, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, INCREASES, IS_A, KIND, LOCATION, MEMBERS, MODIFIER, NAME,
-    NAMESPACE, NEGATIVE_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, PATHOLOGY, POSITIVE_CORRELATION, PRODUCTS, PROTEIN,
-    RATE_LIMITING_STEP_OF, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, SUBPROCESS_OF, TARGET, TO_LOC,
-    TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, VARIANTS,
+    NAMESPACE, NEGATIVE, NEGATIVE_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, PATHOLOGY, POSITIVE_CORRELATION, PRODUCTS,
+    PROTEIN, RATE_LIMITING_STEP_OF, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, SUBPROCESS_OF, TARGET,
+    TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, VARIANTS,
 )
 from pybel.dsl import (
     Pathology, abundance, activity, bioprocess, complex_abundance, composite_abundance, gene, gmod, hgvs,
@@ -1043,3 +1043,53 @@ class TestCustom(unittest.TestCase):
 
         with self.assertRaises(MissingNamespaceNameWarning):
             self.parser.protein.parseString(s)
+
+
+class TestNegativeEdges(TestTokenParserBase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.parser.relation.streamline()
+
+    def setUp(self):
+        super().setUp()
+        self.add_default_provenance()
+
+    def test_not_decreases(self):
+        """Test"""
+        x, y = 'X', 'Y'
+        statement = 'p(HGNC:{}) ~decreases abundance(CHEBI:{})'.format(x, y)
+        result = self.parser.relation.parseString(statement)
+
+        expected_dict = {
+            SUBJECT: {
+                FUNCTION: PROTEIN,
+                CONCEPT: {
+                    NAMESPACE: 'HGNC',
+                    NAME: x,
+                },
+            },
+            RELATION: DECREASES,
+            NEGATIVE: True,
+            OBJECT: {
+                FUNCTION: ABUNDANCE,
+                CONCEPT: {
+                    NAMESPACE: 'CHEBI',
+                    NAME: y,
+                },
+            }
+        }
+        self.assertEqual(expected_dict, result.asDict())
+
+        sub = protein('HGNC', x)
+        self.assert_has_node(sub)
+
+        obj = abundance('CHEBI', y)
+        self.assert_has_node(obj)
+
+        expected_attrs = {
+            RELATION: DECREASES,
+            NEGATIVE: True,
+        }
+        self.assert_has_edge(sub, obj, **expected_attrs)

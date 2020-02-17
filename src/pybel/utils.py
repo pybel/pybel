@@ -9,17 +9,20 @@ import pickle
 from collections import defaultdict
 from collections.abc import Iterable, MutableMapping
 from datetime import datetime
-from typing import Any, Mapping, Optional, Tuple
+from typing import Any, Mapping, Optional, Tuple, Union
 
 from .constants import (
     ACTIVITY, CITATION, CITATION_DB, CITATION_DB_NAME, CITATION_IDENTIFIER, DEGRADATION, EFFECT, EVIDENCE, FROM_LOC,
-    IDENTIFIER, LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT, RELATION, SUBJECT, TO_LOC, TRANSLOCATION,
+    IDENTIFIER, LOCATION, MODIFIER, NAME, NAMESPACE, NEGATIVE, OBJECT, RELATION, SUBJECT, TO_LOC, TRANSLOCATION,
 )
 from .typing import EdgeData
 
 logger = logging.getLogger(__name__)
 
-CanonicalEdge = Tuple[str, Optional[Tuple], Optional[Tuple]]
+CanonicalEdge = Union[
+    Tuple[str, Optional[Tuple], Optional[Tuple]],
+    Tuple[str, bool, Optional[Tuple], Optional[Tuple]]
+]
 
 
 def expand_dict(flat_dict, sep: str = '_'):
@@ -221,6 +224,13 @@ def hash_dump(data) -> str:
 
 def canonicalize_edge(edge_data: EdgeData) -> CanonicalEdge:
     """Canonicalize the edge to a tuple based on the relation, subject modifications, and object modifications."""
+    if edge_data.get(NEGATIVE):
+        return (
+            edge_data[RELATION],
+            edge_data[NEGATIVE],
+            _canonicalize_edge_modifications(edge_data.get(SUBJECT)),
+            _canonicalize_edge_modifications(edge_data.get(OBJECT)),
+        )
     return (
         edge_data[RELATION],
         _canonicalize_edge_modifications(edge_data.get(SUBJECT)),

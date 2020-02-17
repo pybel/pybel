@@ -250,6 +250,10 @@ rev_abundance_labels = {
 
 #: The key for an internal edge data dictionary for the relation string
 RELATION = 'relation'
+#: The key for negative edges
+NEGATIVE = 'negative'
+#: The tag for negative edges
+NEGATIVE_TAG = '~'
 #: The key for an internal edge data dictionary for the citation dictionary
 CITATION = 'citation'
 #: The key for an internal edge data dictionary for the evidence string

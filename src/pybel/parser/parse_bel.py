@@ -33,7 +33,7 @@ from ..constants import (
     ABUNDANCE, ACTIVITY, ASSOCIATION, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE, CELL_SECRETION,
     CELL_SURFACE_EXPRESSION, COMPLEX, COMPOSITE, CONCEPT, DECREASES, DEGRADATION, DIRECTLY_DECREASES,
     DIRECTLY_INCREASES, DIRTY, EFFECT, EQUIVALENT_TO, FROM_LOC, FUNCTION, FUSION, GENE, INCREASES, IS_A, LINE, LOCATION,
-    MEMBERS, MIRNA, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, PART_OF, PATHOLOGY, POPULATION,
+    MEMBERS, MIRNA, MODIFIER, NAME, NAMESPACE, NEGATIVE, NEGATIVE_CORRELATION, OBJECT, PART_OF, PATHOLOGY, POPULATION,
     POSITIVE_CORRELATION, PRODUCTS, PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, TARGET, TO_LOC,
     TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, TWO_WAY_RELATIONS, VARIANTS, belns_encodings,
 )
@@ -513,7 +513,12 @@ class BELParser(BaseParser):
             analogous_tag,
             regulates_tag,
         ]
-        self.bel_to_bel = triple(self.bel_term, MatchFirst(self.bel_to_bel_relations), self.bel_term)
+        self.bel_to_bel = triple(
+            self.bel_term,
+            MatchFirst(self.bel_to_bel_relations),
+            self.bel_term,
+            add_negative_tag=True,
+        )
 
         # Mixed Relationships
 
@@ -558,7 +563,7 @@ class BELParser(BaseParser):
             self.abundance,
         )
 
-        self.biomarker = triple(self.bel_term, biomarker_tags, self.process)
+        self.biomarker = triple(self.bel_term, biomarker_tags, self.process, add_negative_tag=True)
 
         self.has_variant_relation = triple(self.abundance, has_variant_tags, self.abundance)
         self.part_of_reaction = triple(self.reaction, part_of_reaction_tags, self.abundance)
@@ -736,12 +741,15 @@ class BELParser(BaseParser):
         """Handle list relations like ``p(X) hasComponents list(p(Y), p(Z), ...)``."""
         return self._handle_list_helper(tokens, PART_OF)
 
-    def _add_qualified_edge_helper(self, *, u, v, relation, annotations, subject_modifier, object_modifier) -> str:
+    def _add_qualified_edge_helper(
+        self, *, u, v, negative, relation, annotations, subject_modifier, object_modifier
+    ) -> str:
         """Add a qualified edge from the internal aspects of the parser."""
         return self.graph.add_qualified_edge(
             u=u,
             v=v,
             relation=relation,
+            negative=negative,
             evidence=self.control_parser.evidence,
             citation=self.control_parser.get_citation(),
             annotations=annotations,
@@ -750,22 +758,23 @@ class BELParser(BaseParser):
             **{LINE: self.get_line_number()},
         )
 
-    def _add_qualified_edge(self, *, u, v, relation, annotations, subject_modifier, object_modifier) -> str:
+    def _add_qualified_edge(self, *, u, v, relation, negative, annotations, subject_modifier, object_modifier) -> str:
         """Add an edge, then adds the opposite direction edge if it should."""
         if relation in TWO_WAY_RELATIONS:
             self._add_qualified_edge_helper(
                 u=v,
                 v=u,
                 relation=relation,
+                negative=negative,
                 annotations=annotations,
                 object_modifier=subject_modifier,
                 subject_modifier=object_modifier,
             )
-
         return self._add_qualified_edge_helper(
             u=u,
             v=v,
             relation=relation,
+            negative=negative,
             annotations=annotations,
             subject_modifier=subject_modifier,
             object_modifier=object_modifier,
@@ -797,6 +806,7 @@ class BELParser(BaseParser):
             u=u,
             v=v,
             relation=tokens[RELATION],
+            negative=tokens.get(NEGATIVE),
             annotations=annotations,
             subject_modifier=subject_modifier,
             object_modifier=object_modifier,
