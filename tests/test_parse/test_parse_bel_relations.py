@@ -10,15 +10,15 @@ from pyparsing import ParseException
 from pybel import BELGraph
 from pybel.canonicalize import edge_to_bel
 from pybel.constants import (
-    ABUNDANCE, ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE, CITATION, COMPLEX, COMPOSITE,
-    CONCEPT, DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE, FROM_LOC, FUNCTION,
-    GENE, GMOD, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, INCREASES, IS_A, KIND, LOCATION, MEMBERS, MODIFIER, NAME,
-    NAMESPACE, NEGATIVE_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, PATHOLOGY, POSITIVE_CORRELATION, PRODUCTS, PROTEIN,
-    RATE_LIMITING_STEP_OF, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, SUBPROCESS_OF, TARGET, TO_LOC,
-    TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, VARIANTS,
+    ABUNDANCE, ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, BINDS, BIOPROCESS, CAUSES_NO_CHANGE, CITATION, COMPLEX,
+    COMPOSITE, CONCEPT, CORRELATION, DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE,
+    FROM_LOC, FUNCTION, GENE, GMOD, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, INCREASES, IS_A, KIND, LOCATION,
+    MEMBERS, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, NO_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, PATHOLOGY,
+    POSITIVE_CORRELATION, PRODUCTS, PROTEIN, RATE_LIMITING_STEP_OF, REACTANTS, REACTION, REGULATES, RELATION, RNA,
+    SUBJECT, SUBPROCESS_OF, TARGET, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, VARIANTS,
 )
 from pybel.dsl import (
-    Pathology, abundance, activity, bioprocess, complex_abundance, composite_abundance, gene, gmod, hgvs,
+    Pathology, Protein, Rna, abundance, activity, bioprocess, complex_abundance, composite_abundance, gene, gmod, hgvs,
     named_complex_abundance, pmod, protein, reaction, rna,
 )
 from pybel.dsl.namespaces import hgnc
@@ -492,7 +492,7 @@ class TestRelations(TestTokenParserBase):
 
         self.assert_has_edge(sub, obj, relation=expected_dict[RELATION])
 
-    def test_regulates_with_multiple_nnotations(self):
+    def test_regulates_with_multiple_annotations(self):
         """
         3.1.7 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_regulates_reg
         Test nested definitions"""
@@ -1002,6 +1002,47 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_edge(sub, sub_product_1, relation=HAS_PRODUCT)
         self.assert_has_edge(sub, sub_product_2, relation=HAS_PRODUCT)
         self.assert_has_edge(sub, sub_product_3, relation=HAS_PRODUCT)
+
+    def assert_has_two_way_edge(self, source, target, relation):
+        self.assert_has_node(source)
+        self.assert_has_node(target)
+        self.assert_has_edge(source, target, **{RELATION: relation})
+        self.assert_has_edge(target, source, **{RELATION: relation})
+
+    def test_no_correlation(self):
+        """Test the ``noCorrelation`` relation."""
+        statement = 'r(HGNC:X) noCorrelation r(HGNC:Y)'
+        self.parser.relation.parseString(statement)
+        source = Rna('HGNC', 'X')
+        target = Rna('HGNC', 'Y')
+        self.assert_has_two_way_edge(source, target, NO_CORRELATION)
+
+    def test_correlation(self):
+        """Test the ``correlation`` relation."""
+        statement = 'r(HGNC:X) correlation r(HGNC:Y)'
+        self.parser.relation.parseString(statement)
+
+        source = Rna('HGNC', 'X')
+        target = Rna('HGNC', 'Y')
+        self.assert_has_two_way_edge(source, target, CORRELATION)
+
+    def test_binds_via_complex(self):
+        """Test that a ``binds`` relation is inferred from a two-member complex."""
+        statement = 'complex(p(HGNC:X), p(HGNC:Y)) -> act(p(HGNC:Y))'
+        self.parser.relation.parseString(statement)
+
+        source = Protein('HGNC', 'X')
+        target = Protein('HGNC', 'Y')
+        self.assert_has_two_way_edge(source, target, BINDS)
+
+    def test_binds(self):
+        """Test the ``binds`` relation."""
+        statement = 'p(HGNC:X) binds p(HGNC:Y)'
+        self.parser.relation.parseString(statement)
+
+        source = Protein('HGNC', 'X')
+        target = Protein('HGNC', 'Y')
+        self.assert_has_two_way_edge(source, target, BINDS)
 
 
 class TestCustom(unittest.TestCase):

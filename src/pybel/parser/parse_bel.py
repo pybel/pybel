@@ -30,12 +30,12 @@ from .parse_control import ControlParser
 from .utils import WCW, nest, one_of_tags, triple
 from .. import language
 from ..constants import (
-    ABUNDANCE, ACTIVITY, ASSOCIATION, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE, CELL_SECRETION,
-    CELL_SURFACE_EXPRESSION, COMPLEX, COMPOSITE, CONCEPT, DECREASES, DEGRADATION, DIRECTLY_DECREASES,
+    ABUNDANCE, ACTIVITY, ASSOCIATION, BEL_DEFAULT_NAMESPACE, BINDS, BIOPROCESS, CAUSES_NO_CHANGE, CELL_SECRETION,
+    CELL_SURFACE_EXPRESSION, COMPLEX, COMPOSITE, CONCEPT, CORRELATION, DECREASES, DEGRADATION, DIRECTLY_DECREASES,
     DIRECTLY_INCREASES, DIRTY, EFFECT, EQUIVALENT_TO, FROM_LOC, FUNCTION, FUSION, GENE, INCREASES, IS_A, LINE, LOCATION,
-    MEMBERS, MIRNA, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, PART_OF, PATHOLOGY, POPULATION,
-    POSITIVE_CORRELATION, PRODUCTS, PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, TARGET, TO_LOC,
-    TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, TWO_WAY_RELATIONS, VARIANTS, belns_encodings,
+    MEMBERS, MIRNA, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, NO_CORRELATION, OBJECT, PART_OF, PATHOLOGY,
+    POPULATION, POSITIVE_CORRELATION, PRODUCTS, PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, TARGET,
+    TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, TWO_WAY_RELATIONS, VARIANTS, belns_encodings,
 )
 from ..dsl import BaseEntity, cell_surface_expression, secretion
 from ..tokens import parse_result_to_dsl
@@ -161,6 +161,15 @@ causes_no_change_tag = one_of_tags(['cnc', 'causesNoChange'], CAUSES_NO_CHANGE)
 
 #: `3.1.7 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_regulates_reg>`_
 regulates_tag = one_of_tags(['reg', 'regulates'], REGULATES)
+
+#: Binds relation
+binds_tag = Keyword(BINDS)
+
+#: Correlation relation
+correlation_tag = one_of_tags(['cor', 'correlation'], CORRELATION)
+
+#: No Correlation relation
+no_correlation_tag = one_of_tags(['noCor', 'noCorrelation'], NO_CORRELATION)
 
 #: `3.2.1 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XnegCor>`_
 negative_correlation_tag = one_of_tags(['neg', 'negativeCorrelation'], NEGATIVE_CORRELATION)
@@ -503,6 +512,9 @@ class BELParser(BaseParser):
             decreases_tag,
             positive_correlation_tag,
             negative_correlation_tag,
+            correlation_tag,
+            no_correlation_tag,
+            binds_tag,
             causes_no_change_tag,
             orthologous_tag,
             is_a_tag,
