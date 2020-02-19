@@ -554,28 +554,14 @@ class BELGraph(nx.MultiDiGraph):
 
     add_directly_activates = partialmethod(add_directly_increases, object_modifier=activity())
 
-    def _add_citation_to_node(self, node: BaseEntity, citation: CitationDict) -> None:
-        self.nodes[node][CITATION].append(citation)
-
-    def add_node_from_data(
-        self,
-        node: BaseEntity,
-        citation: Union[None, str, Tuple[str, str], CitationDict] = None,
-    ) -> None:
+    def add_node_from_data(self, node: BaseEntity) -> None:
         """Add an entity to the graph."""
         assert isinstance(node, BaseEntity)
 
-        if citation is not None:
-            citation = _handle_citation(citation)
-
         if node in self:
-            if citation is not None:
-                self._add_citation_to_node(node, citation)
             return
 
-        self.add_node(node, **{CITATION: []})
-        if citation is not None:
-            self._add_citation_to_node(node, citation)
+        self.add_node(node)
 
         if VARIANTS in node:
             self.add_has_variant(node.get_parent(), node)
