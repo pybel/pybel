@@ -567,8 +567,7 @@ class BELGraph(nx.MultiDiGraph):
             self.add_has_variant(node.get_parent(), node)
 
         elif MEMBERS in node:
-            members = list(node[MEMBERS])
-            for member in members:
+            for member in node[MEMBERS]:
                 self.add_part_of(member, node)
 
         elif PRODUCTS in node and REACTANTS in node:
