@@ -127,7 +127,6 @@ def assert_has_edge(
             edge_to_bel(u, v, d, use_identifiers=use_identifiers)
             for u, v, d in graph.edges(data=True)
         ))
-
     )
 
     if not kwargs:

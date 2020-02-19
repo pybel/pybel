@@ -10,7 +10,7 @@ from pyparsing import ParseException
 from pybel import BELGraph
 from pybel.canonicalize import edge_to_bel
 from pybel.constants import (
-    ABUNDANCE, ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, BINDS, BIOPROCESS, CAUSES_NO_CHANGE, CITATION, COMPLEX,
+    ABUNDANCE, ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE, CITATION, COMPLEX,
     COMPOSITE, CONCEPT, CORRELATION, DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE,
     FROM_LOC, FUNCTION, GENE, GMOD, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, INCREASES, IS_A, KIND, LOCATION,
     MEMBERS, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, NO_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, PATHOLOGY,
@@ -18,8 +18,8 @@ from pybel.constants import (
     SUBJECT, SUBPROCESS_OF, TARGET, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, VARIANTS,
 )
 from pybel.dsl import (
-    Pathology, Protein, Rna, abundance, activity, bioprocess, complex_abundance, composite_abundance, gene, gmod, hgvs,
-    named_complex_abundance, pmod, protein, reaction, rna,
+    ComplexAbundance, Pathology, Protein, Rna, abundance, activity, bioprocess, complex_abundance, composite_abundance,
+    gene, gmod, hgvs, named_complex_abundance, pmod, protein, reaction, rna,
 )
 from pybel.dsl.namespaces import hgnc
 from pybel.language import Entity
@@ -1026,15 +1026,6 @@ class TestRelations(TestTokenParserBase):
         target = Rna('HGNC', 'Y')
         self.assert_has_two_way_edge(source, target, CORRELATION)
 
-    def test_binds_via_complex(self):
-        """Test that a ``binds`` relation is inferred from a two-member complex."""
-        statement = 'complex(p(HGNC:X), p(HGNC:Y)) -> act(p(HGNC:Y))'
-        self.parser.relation.parseString(statement)
-
-        source = Protein('HGNC', 'X')
-        target = Protein('HGNC', 'Y')
-        self.assert_has_two_way_edge(source, target, BINDS)
-
     def test_binds(self):
         """Test the ``binds`` relation."""
         statement = 'p(HGNC:X) binds p(HGNC:Y)'
@@ -1042,7 +1033,10 @@ class TestRelations(TestTokenParserBase):
 
         source = Protein('HGNC', 'X')
         target = Protein('HGNC', 'Y')
-        self.assert_has_two_way_edge(source, target, BINDS)
+        x_y_complex = ComplexAbundance([source, target])
+        self.assert_has_node(x_y_complex)
+        self.assert_has_edge(source, x_y_complex, relation=PART_OF)
+        self.assert_has_edge(target, x_y_complex, relation=PART_OF)
 
 
 class TestCustom(unittest.TestCase):

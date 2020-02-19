@@ -115,7 +115,8 @@ class TestSummary(unittest.TestCase):
     def test_count_pathologies(self):
         """Test counting pathologies in the graph."""
         graph = BELGraph()
-        a, b, c, d = protein(n(), n()), protein(n(), n()), pathology(n(), n()), pathology(n(), n())
+        a, b = (protein(namespace='HGNC', name=n()) for _ in range(2))
+        c, d = (pathology(namespace='DOID', name=n()) for _ in range(2))
 
         graph.add_association(a, c, citation=n(), evidence=n())
         graph.add_association(a, d, citation=n(), evidence=n())
@@ -145,4 +146,4 @@ class TestSummary(unittest.TestCase):
         self.assertEqual(1, len(top_hubs))
         node, degree = top_hubs[0]
         self.assertEqual(a, node)
-        self.assertEqual(2, degree)
+        self.assertEqual(4, degree)  # higher than expected because association edges

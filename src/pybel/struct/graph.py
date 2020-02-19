@@ -15,19 +15,19 @@ from pkg_resources import iter_entry_points
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
 from ..canonicalize import edge_to_bel
 from ..constants import (
-    ANNOTATIONS, ASSOCIATION, BINDS, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_DB, CITATION_IDENTIFIER,
-    CITATION_TYPE_PUBMED, COMPLEX, CONCEPT, CORRELATION, DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES,
-    EQUIVALENT_TO, EVIDENCE, FUNCTION, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL,
+    ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_DB, CITATION_IDENTIFIER,
+    CITATION_TYPE_PUBMED, CONCEPT, CORRELATION, DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES,
+    EQUIVALENT_TO, EVIDENCE, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL,
     GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION, HAS_PRODUCT,
     HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A, MEMBERS, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT,
     METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAMESPACE,
     NEGATIVE_CORRELATION, NO_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, PRODUCTS, REACTANTS,
     REGULATES, RELATION, SUBJECT, TRANSCRIBED_TO, TRANSLATED_TO, VARIANTS,
 )
-from ..dsl import BaseEntity, Gene, MicroRna, Protein, Rna, activity
+from ..dsl import BaseEntity, ComplexAbundance, Gene, MicroRna, Protein, Rna, activity
 from ..parser.exc import BELParserWarning
 from ..typing import EdgeData
-from ..utils import citation_dict, hash_edge
+from ..utils import CitationDict, citation_dict, hash_edge
 from ..version import get_version
 
 __all__ = [
@@ -36,7 +36,6 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 
-CitationDict = Mapping[str, str]
 AnnotationsDict = Mapping[str, Mapping[str, bool]]
 AnnotationsHint = Union[Mapping[str, str], Mapping[str, Set[str]], AnnotationsDict]
 WarningTuple = Tuple[Optional[str], BELParserWarning, EdgeData]
@@ -424,7 +423,7 @@ class BELGraph(nx.MultiDiGraph):
         *,
         relation: str,
         evidence: str,
-        citation: Union[str, Mapping[str, str]],
+        citation: Union[str, Tuple[str, str], CitationDict],
         annotations: Optional[AnnotationsHint] = None,
         subject_modifier: Optional[Mapping] = None,
         object_modifier: Optional[Mapping] = None,
@@ -447,17 +446,32 @@ class BELGraph(nx.MultiDiGraph):
 
         :return: The hash of the edge
         """
+        attr = self._build_attr(
+            relation=relation,
+            evidence=evidence,
+            citation=citation,
+            annotations=annotations,
+            subject_modifier=subject_modifier,
+            object_modifier=object_modifier,
+            **attr
+        )
+        return self._help_add_edge(u, v, attr)
+
+    @staticmethod
+    def _build_attr(
+        relation: str,
+        evidence: str,
+        citation: Union[str, Tuple[str, str], CitationDict],
+        annotations: Optional[AnnotationsHint] = None,
+        subject_modifier: Optional[Mapping] = None,
+        object_modifier: Optional[Mapping] = None,
+        **attr
+    ):
         attr.update({
             RELATION: relation,
             EVIDENCE: evidence,
+            CITATION: _handle_citation(citation),
         })
-
-        if isinstance(citation, str):
-            attr[CITATION] = citation_dict(db=CITATION_TYPE_PUBMED, db_id=citation)
-        elif isinstance(citation, dict):
-            attr[CITATION] = citation
-        else:
-            raise TypeError
 
         if annotations:  # clean up annotations
             attr[ANNOTATIONS] = _clean_annotations(annotations)
@@ -468,10 +482,28 @@ class BELGraph(nx.MultiDiGraph):
         if object_modifier:
             attr[OBJECT] = object_modifier
 
-        return self._help_add_edge(u, v, attr)
+        return attr
 
-    add_binds = partialmethod(_add_two_way_qualified_edge, relation=BINDS)
-    """Add a :data:`pybel.constants.BINDS` with :meth:`add_qualified_edge`."""
+    def add_binds(
+        self,
+        u,
+        v,
+        *,
+        evidence: str,
+        citation: Union[str, Mapping[str, str]],
+        annotations: Optional[AnnotationsHint] = None,
+        **attr
+    ) -> str:
+        """Add a "binding" relationship between the two entities such that ``u => complex(u, v)``."""
+        complex_abundance = ComplexAbundance([u, v])
+        return self.add_directly_increases(
+            u,
+            complex_abundance,
+            citation=citation,
+            evidence=evidence,
+            annotations=annotations,
+            **attr
+        )
 
     add_increases = partialmethod(add_qualified_edge, relation=INCREASES)
     """Wrap :meth:`add_qualified_edge` for the :data:`pybel.constants.INCREASES` relation."""
@@ -522,14 +554,28 @@ class BELGraph(nx.MultiDiGraph):
 
     add_directly_activates = partialmethod(add_directly_increases, object_modifier=activity())
 
-    def add_node_from_data(self, node: BaseEntity) -> None:
+    def _add_citation_to_node(self, node: BaseEntity, citation: CitationDict) -> None:
+        self.nodes[node][CITATION].append(citation)
+
+    def add_node_from_data(
+        self,
+        node: BaseEntity,
+        citation: Union[None, str, Tuple[str, str], CitationDict] = None,
+    ) -> None:
         """Add an entity to the graph."""
         assert isinstance(node, BaseEntity)
 
+        if citation is not None:
+            citation = _handle_citation(citation)
+
         if node in self:
+            if citation is not None:
+                self._add_citation_to_node(node, citation)
             return
 
-        self.add_node(node)
+        self.add_node(node, **{CITATION: []})
+        if citation is not None:
+            self._add_citation_to_node(node, citation)
 
         if VARIANTS in node:
             self.add_has_variant(node.get_parent(), node)
@@ -538,8 +584,6 @@ class BELGraph(nx.MultiDiGraph):
             members = list(node[MEMBERS])
             for member in members:
                 self.add_part_of(member, node)
-            if node[FUNCTION] == COMPLEX and 2 == len(members):
-                self.add_binds(members[0], members[1], citation='Inferred', evidence='Inferred')
 
         elif PRODUCTS in node and REACTANTS in node:
             for reactant_tokens in node[REACTANTS]:
@@ -807,3 +851,18 @@ def _clean_annotations(annotations_dict: AnnotationsHint) -> AnnotationsDict:
         )
         for key, values in annotations_dict.items()
     }
+
+
+def _handle_citation(citation: Union[str, Tuple[str, str], CitationDict]) -> CitationDict:
+    if isinstance(citation, str):
+        return citation_dict(db=CITATION_TYPE_PUBMED, db_id=citation)
+    elif isinstance(citation, tuple):
+        return citation_dict(db=citation[0], db_id=citation[1])
+    elif isinstance(citation, CitationDict):
+        return citation
+    elif isinstance(citation, dict):
+        return CitationDict(**citation)
+    elif citation is None:
+        raise ValueError('citation was None')
+    else:
+        raise TypeError('citation is the wrong type: {}'.format(citation))

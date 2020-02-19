@@ -220,9 +220,11 @@ def count_pathologies(graph) -> typing.Counter[BaseEntity]:
 
     :param pybel.BELGraph graph: A BEL graph
     """
+    # Don't double count relationships
+    edges = {tuple(sorted([u, v], key=lambda node: node.as_bel())) for u, v in graph.edges()}
     return Counter(
         node
-        for node in itt.chain.from_iterable(graph.edges())
+        for node in itt.chain.from_iterable(edges)
         if isinstance(node, Pathology)
     )
 

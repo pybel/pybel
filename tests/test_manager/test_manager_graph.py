@@ -949,7 +949,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         self.assertEqual(1, effects.count())
 
     def test_subject_degradation(self):
-        self.graph.add_association(
+        self.graph.add_increases(
             Protein(name='YFG', namespace='HGNC'),
             Protein(name='YFG2', namespace='HGNC'),
             evidence=n(),
@@ -967,7 +967,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         self.assertEqual(1, edge.properties.count())
 
     def test_object_degradation(self):
-        self.graph.add_association(
+        self.graph.add_increases(
             Protein(name='YFG', namespace='HGNC'),
             Protein(name='YFG2', namespace='HGNC'),
             evidence=n(),
@@ -985,7 +985,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         self.assertEqual(1, edge.properties.count())
 
     def test_subject_location(self):
-        self.graph.add_association(
+        self.graph.add_increases(
             Protein(name='YFG', namespace='HGNC'),
             Protein(name='YFG2', namespace='HGNC'),
             evidence=n(),
