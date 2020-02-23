@@ -100,8 +100,8 @@ def _add_edge(  # noqa: C901
     kind_identifier_to_name,
     it_logger,
 ) -> Union[None, str, Set[str]]:
-    source_type, source_identifier, source_name = _get_node(edge, kind_identifier_to_name, 'source_id')
-    target_type, target_identifier, target_name = _get_node(edge, kind_identifier_to_name, 'target_id')
+    source_type, source_identifier, source_name = _get_node(edge, 'source_id', kind_identifier_to_name)
+    target_type, target_identifier, target_name = _get_node(edge, 'target_id', kind_identifier_to_name)
     if source_type is None or target_type is None:
         return
 
