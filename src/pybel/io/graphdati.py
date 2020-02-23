@@ -5,10 +5,12 @@
 import gzip
 import json
 from io import BytesIO
-from typing import Any, List, Mapping, TextIO, Union
+from typing import Any, Iterable, List, Mapping, Optional, TextIO, Union
 
 import requests
+from more_itertools import chunked
 from networkx.utils import open_file
+from tqdm import tqdm
 
 from ..canonicalize import edge_to_tuple
 from ..constants import CITATION, CITATION_DB, CITATION_IDENTIFIER, EVIDENCE
@@ -19,6 +21,9 @@ __all__ = [
     'to_graphdati_file',
     'to_graphdati_gz',
     'to_graphdati_jsons',
+    'to_graphdati_jsonl',
+    'to_graphdati_jsonl_gz',
+    'BioDatiClient',
     'post_graphdati',
 ]
 
@@ -40,7 +45,7 @@ def to_graphdati_file(graph: BELGraph, path: Union[str, TextIO], **kwargs) -> No
 def to_graphdati_gz(graph: BELGraph, path: str, **kwargs) -> None:
     """Write a graph as GraphDati JSON to a gzip file."""
     with gzip.open(path, 'wt') as file:
-        json.dump(to_graphdati(graph), file, ensure_ascii=False, **kwargs)
+        to_graphdati_file(graph, file, **kwargs)
 
 
 def to_graphdati_jsons(graph: BELGraph, **kwargs) -> str:
@@ -51,15 +56,32 @@ def to_graphdati_jsons(graph: BELGraph, **kwargs) -> str:
     return json.dumps(to_graphdati(graph), ensure_ascii=False, **kwargs)
 
 
+@open_file(1, mode='w')
+def to_graphdati_jsonl(graph, file, use_identifiers: bool = True):
+    """Write this graph as a GraphDati JSON lines file."""
+    for u, v, k, d in graph.edges(keys=True, data=True):
+        nanopub = _make_nanopub(graph, u, v, k, d, use_identifiers)
+        print(json.dumps(nanopub), file=file)
+
+
+def to_graphdati_jsonl_gz(graph: BELGraph, path: str, **kwargs) -> None:
+    """Write a graph as GraphDati JSONL to a gzip file."""
+    with gzip.open(path, 'wt') as file:
+        to_graphdati_jsonl(graph, file, **kwargs)
+
+
 def to_graphdati(graph, use_identifiers: bool = True) -> List[NanopubMapping]:
     """Export a GraphDati list using the nanopub.
 
     :param graph: A BEL graph
+    :param use_identifiers: use OBO-style identifiers
     """
-    return [
-        _make_nanopub(graph, u, v, k, d, use_identifiers)
-        for u, v, k, d in graph.edges(keys=True, data=True)
-    ]
+    return list(_iter_graphdati(graph, use_identifiers=use_identifiers))
+
+
+def _iter_graphdati(graph, use_identifiers: bool = True) -> Iterable[NanopubMapping]:
+    for u, v, k, d in graph.edges(keys=True, data=True):
+        yield _make_nanopub(graph, u, v, k, d, use_identifiers)
 
 
 def _make_nanopub(graph: BELGraph, u, v, k, d, use_identifiers) -> NanopubMapping:
@@ -100,7 +122,7 @@ def _get_citation(d):
     return rv
 
 
-def _get_metadata(graph: BELGraph, d):
+def _get_metadata(graph: BELGraph, _):
     return dict(
         gd_creator=graph.authors,
         version=graph.version,
@@ -116,6 +138,7 @@ def post_graphdati(  # noqa: S107
     username: str = 'demo@biodati.com',
     password: str = 'demo',
     base_url: str = 'https://nanopubstore.demo.biodati.com',
+    chunksize: Optional[int] = None,
     **kwargs
 ) -> requests.Response:
     """Post this graph to a BioDati server.
@@ -125,18 +148,22 @@ def post_graphdati(  # noqa: S107
     :param password: The password to log in to BioDati. Defaults to "demo" for the demo server
     :param base_url: The BioDati server base url. Defaults to "https://nanopubstore.demo.biodati.com" for the demo
      server
+    :param chunksize: The number of nanopubs to post at a time. By default, does all.
 
     .. warning::
 
         The default public BioDati server has been put here. You should
         switch it to yours.
     """
-    connection = GraphDatiConnection(username, password, base_url)
-    return connection.post_graph(graph, **kwargs)
+    connection = BioDatiClient(username, password, base_url)
+    if chunksize:
+        return connection.post_graph_chunked(graph, chunksize, **kwargs)
+    else:
+        return connection.post_graph(graph, **kwargs)
 
 
-class GraphDatiConnection:
-    """A connection to the GraphDati API."""
+class BioDatiClient:
+    """A connection to the BioDati API."""
 
     def __init__(self, username, password, base_url):
         self.base_url = base_url.rstrip('/')
@@ -150,33 +177,41 @@ class GraphDatiConnection:
         self.id_token = token_dict['id_token']
         self.access_token = token_dict['access_token']
 
-    def post(self, endpoint: str, data=None, json=None, **kwargs):
-        """Send a post request to GraphDati."""
+    def post(self, endpoint: str, **kwargs):
+        """Send a post request to BioDati."""
         url = '{}/{}'.format(self.base_url, endpoint)
         headers = {'Authorization': '{} {}'.format(self.token_type, self.id_token)}
-        return requests.post(
-            url,
-            data=data,
-            json=json,
-            headers=headers,
-            **kwargs,
-        )
+        return requests.post(url, headers=headers, **kwargs)
 
-    def post_graph(
+    def post_graph(self, graph: BELGraph, **kwargs) -> requests.Response:
+        """Post the graph to BioDati."""
+        return self.post_graph_json(to_graphdati(graph), **kwargs)
+
+    def post_graph_chunked(self, graph: BELGraph, chunksize: int, use_tqdm: bool = True, **kwargs):
+        """Post the graph to BioDati in chunks, when the graph is too big for a normal upload."""
+        iterable = _iter_graphdati(graph)
+        if use_tqdm:
+            iterable = tqdm(iterable, total=graph.number_of_edges())
+        res = None
+        for chunk in chunked(iterable, chunksize):
+            res = self.post_graph_json(chunk, **kwargs)
+        return res
+
+    def post_graph_json(self, graph_json, **kwargs) -> requests.Response:
+        """Post the GraphDati object to BioDati."""
+        file = BytesIO()
+        file.write(json.dumps(graph_json).encode('utf-8'))
+        file.seek(0)
+        return self.post_graph_file(file, **kwargs)
+
+    def post_graph_file(
         self,
-        graph: BELGraph,
+        file,
         overwrite: bool = False,
         validate: bool = True,
         email: bool = False,
     ) -> requests.Response:
-        """Post the graph to GraphDati."""
-        graph_json = to_graphdati(graph)
-        graph_json_bytes = json.dumps(graph_json).encode('utf-8')
-
-        file = BytesIO()
-        file.write(graph_json_bytes)
-        file.seek(0)
-
+        """Post a graph to BioDati."""
         params = dict(overwrite=overwrite, validate=validate)
         if isinstance(email, str):
             params['email'] = email
@@ -204,7 +239,7 @@ def _main():
                 os.path.join(os.path.expanduser('~'), 'Desktop', '{}.graphdati.json'.format(name)),
                 indent=2,
             )
-            post_graphdati(graph)
+            post_graphdati(graph, chunksize=2)
 
 
 if __name__ == '__main__':

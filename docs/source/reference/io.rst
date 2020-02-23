@@ -126,11 +126,15 @@ GraphDati
 
 .. autofunction:: pybel.to_graphdati
 
-.. autofunction:: pybel.to_graphdati_jsons
-
 .. autofunction:: pybel.to_graphdati_file
 
 .. autofunction:: pybel.to_graphdati_gz
+
+.. autofunction:: pybel.to_graphdati_jsonl
+
+.. autofunction:: pybel.to_graphdati_jsonl_gz
+
+.. autofunction:: pybel.to_graphdati_jsons
 
 .. autofunction:: pybel.post_graphdati
 
