@@ -36,16 +36,16 @@ TYPE_BLACKLIST = {'Molecular Function', 'Cellular Component'}
 QUALIFIED_MAPPING = {
     (ANATOMY, Population, 'upregulates', GENE, Rna, BELGraph.add_positive_correlation),
     (ANATOMY, Population, 'downregulates', GENE, Rna, BELGraph.add_negative_correlation),
-    (ANATOMY, Population, 'expresses', GENE, Rna, BELGraph.add_association),  # FIXME add "correlates" relationship
+    (ANATOMY, Population, 'expresses', GENE, Rna, BELGraph.add_correlation),
     (COMPOUND, Abundance, 'resembles', COMPOUND, Abundance, BELGraph.add_association),
-    (COMPOUND, Abundance, 'upregulates', GENE, Protein, BELGraph.add_activates),
+    (COMPOUND, Abundance, 'upregulates', GENE, Protein, BELGraph.add_activates),  # FIXME is this about abundance?
     (COMPOUND, Abundance, 'downregulates', GENE, Protein, BELGraph.add_inhibits),
     (COMPOUND, Abundance, 'treats', DISEASE, Pathology, BELGraph.add_decreases),
     (COMPOUND, Abundance, 'palliates', DISEASE, Pathology, BELGraph.add_decreases),
     (COMPOUND, Abundance, 'causes', SIDE_EFFECT, Pathology, BELGraph.add_increases),
     (GENE, Protein, 'interacts', GENE, Protein, BELGraph.add_binds),  # FIXME look into this
     (GENE, Protein, 'regulates', GENE, Protein, BELGraph.add_regulates),
-    (GENE, Rna, 'covaries', GENE, Rna, BELGraph.add_association),  # FIXME add "correlates" relationship
+    (GENE, Rna, 'covaries', GENE, Rna, BELGraph.add_correlation),
     (DISEASE, Pathology, 'localizes', ANATOMY, Population, BELGraph.add_association),
     (DISEASE, Pathology, 'associates', GENE, Protein, BELGraph.add_association),
     (DISEASE, Pathology, 'upregulates', GENE, Rna, BELGraph.add_positive_correlation),

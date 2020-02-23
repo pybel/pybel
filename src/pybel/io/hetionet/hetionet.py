@@ -165,11 +165,9 @@ def _add_edge(  # noqa: C901
         for action in data.get('actions', []):
             action = action.lower()
             if action in ACTIVATES_ACTIONS:
-                # FIXME change to add_directly_activates
-                key = graph.add_activates(drug, protein, citation='', evidence='', annotations=annotations)
+                key = graph.add_directly_activates(drug, protein, citation='', evidence='', annotations=annotations)
             elif action in INHIBITS_ACTIONS:
-                # FIXME change to add_directly_inhibits
-                key = graph.add_inhibits(drug, protein, citation='', evidence='', annotations=annotations)
+                key = graph.add_directly_inhibits(drug, protein, citation='', evidence='', annotations=annotations)
             elif action in REGULATES_ACTIONS:
                 key = graph.add_regulates(drug, protein, citation='', evidence='', annotations=annotations)
             elif action in BINDS_ACTIONS:
