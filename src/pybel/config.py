@@ -12,6 +12,7 @@ __all__ = [
     'config',
     'connection',
     'PYBEL_MINIMUM_IMPORT_VERSION',
+    'CACHE_DIRECTORY',
 ]
 
 logger = logging.getLogger(__name__)
