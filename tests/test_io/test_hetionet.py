@@ -4,23 +4,21 @@
 
 import unittest
 
+import pybel.io.hetionet.constants as hioc
 from pybel import dsl
-from pybel.io.hetionet import ANATOMY, GENE, from_hetionet_json
+from pybel.io.hetionet import from_hetionet_json
 
 
 class TestHetionet(unittest.TestCase):
-    """"""
-
     def test_import(self):
-        """"""
         self._help(
-            h_type=ANATOMY,
+            h_type=hioc.ANATOMY,
             h_dsl=dsl.Population,
             h_namespace='uberon',
             h_id='UBERON:1',
             h_name='anatomy1',
             kind='upregulates',
-            t_type=GENE,
+            t_type=hioc.GENE,
             t_dsl=dsl.Rna,
             t_namespace='ncbigene',
             t_id='1',
