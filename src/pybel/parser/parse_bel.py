@@ -30,12 +30,12 @@ from .parse_control import ControlParser
 from .utils import WCW, nest, one_of_tags, triple
 from .. import language
 from ..constants import (
-    ABUNDANCE, ACTIVITY, ASSOCIATION, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE, CELL_SECRETION,
-    CELL_SURFACE_EXPRESSION, COMPLEX, COMPOSITE, CONCEPT, DECREASES, DEGRADATION, DIRECTLY_DECREASES,
+    ABUNDANCE, ACTIVITY, ASSOCIATION, BEL_DEFAULT_NAMESPACE, BINDS, BIOPROCESS, CAUSES_NO_CHANGE, CELL_SECRETION,
+    CELL_SURFACE_EXPRESSION, COMPLEX, COMPOSITE, CONCEPT, CORRELATION, DECREASES, DEGRADATION, DIRECTLY_DECREASES,
     DIRECTLY_INCREASES, DIRTY, EFFECT, EQUIVALENT_TO, FROM_LOC, FUNCTION, FUSION, GENE, INCREASES, IS_A, LINE, LOCATION,
-    MEMBERS, MIRNA, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, OBJECT, PART_OF, PATHOLOGY, POPULATION,
-    POSITIVE_CORRELATION, PRODUCTS, PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, TARGET, TO_LOC,
-    TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, TWO_WAY_RELATIONS, VARIANTS, belns_encodings,
+    MEMBERS, MIRNA, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, NO_CORRELATION, OBJECT, PART_OF, PATHOLOGY,
+    POPULATION, POSITIVE_CORRELATION, PRODUCTS, PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, TARGET,
+    TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, TWO_WAY_RELATIONS, VARIANTS, belns_encodings,
 )
 from ..dsl import BaseEntity, cell_surface_expression, secretion
 from ..tokens import parse_result_to_dsl
@@ -161,6 +161,15 @@ causes_no_change_tag = one_of_tags(['cnc', 'causesNoChange'], CAUSES_NO_CHANGE)
 
 #: `3.1.7 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_regulates_reg>`_
 regulates_tag = one_of_tags(['reg', 'regulates'], REGULATES)
+
+#: Binds relation
+binds_tag = Keyword(BINDS)
+
+#: Correlation relation
+correlation_tag = one_of_tags(['cor', 'correlation'], CORRELATION)
+
+#: No Correlation relation
+no_correlation_tag = one_of_tags(['noCor', 'noCorrelation'], NO_CORRELATION)
 
 #: `3.2.1 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XnegCor>`_
 negative_correlation_tag = one_of_tags(['neg', 'negativeCorrelation'], NEGATIVE_CORRELATION)
@@ -503,6 +512,9 @@ class BELParser(BaseParser):
             decreases_tag,
             positive_correlation_tag,
             negative_correlation_tag,
+            correlation_tag,
+            no_correlation_tag,
+            binds_tag,
             causes_no_change_tag,
             orthologous_tag,
             is_a_tag,
@@ -736,50 +748,54 @@ class BELParser(BaseParser):
         """Handle list relations like ``p(X) hasComponents list(p(Y), p(Z), ...)``."""
         return self._handle_list_helper(tokens, PART_OF)
 
-    def _add_qualified_edge_helper(self, *, u, v, relation, annotations, subject_modifier, object_modifier) -> str:
+    def _add_qualified_edge_helper(self, *, u, u_modifier, relation, v, v_modifier, annotations) -> str:
         """Add a qualified edge from the internal aspects of the parser."""
-        return self.graph.add_qualified_edge(
-            u=u,
-            v=v,
-            relation=relation,
+        m = {
+            BINDS: self.graph.add_binds,
+        }
+        adder = m.get(relation)
+        d = dict(
             evidence=self.control_parser.evidence,
             citation=self.control_parser.get_citation(),
             annotations=annotations,
-            subject_modifier=subject_modifier,
-            object_modifier=object_modifier,
+            subject_modifier=u_modifier,
+            object_modifier=v_modifier,
             **{LINE: self.get_line_number()},
         )
+        if adder is not None:
+            return adder(u=u, v=v, **d)
+        else:
+            return self.graph.add_qualified_edge(u=u, v=v, relation=relation, **d)
 
-    def _add_qualified_edge(self, *, u, v, relation, annotations, subject_modifier, object_modifier) -> str:
+    def _add_qualified_edge(self, *, u, u_modifier, relation, v, v_modifier, annotations) -> str:
         """Add an edge, then adds the opposite direction edge if it should."""
-        if relation in TWO_WAY_RELATIONS:
-            self._add_qualified_edge_helper(
-                u=v,
-                v=u,
-                relation=relation,
-                annotations=annotations,
-                object_modifier=subject_modifier,
-                subject_modifier=object_modifier,
-            )
-
-        return self._add_qualified_edge_helper(
-            u=u,
-            v=v,
+        d = dict(
             relation=relation,
             annotations=annotations,
-            subject_modifier=subject_modifier,
-            object_modifier=object_modifier,
         )
+        if relation in TWO_WAY_RELATIONS:
+            self._add_qualified_edge_helper(u=v, u_modifier=v_modifier, v=u, v_modifier=u_modifier, **d)
+        return self._add_qualified_edge_helper(u=u, u_modifier=u_modifier, v=v, v_modifier=v_modifier, **d)
 
     def _handle_relation(self, tokens: ParseResults) -> str:
         """Handle a relation."""
         u = self.ensure_node(tokens[SUBJECT])
+        u_modifier = modifier_po_to_dict(tokens[SUBJECT])
+        relation = tokens[RELATION]
         v = self.ensure_node(tokens[OBJECT])
+        v_modifier = modifier_po_to_dict(tokens[OBJECT])
 
-        subject_modifier = modifier_po_to_dict(tokens[SUBJECT])
-        object_modifier = modifier_po_to_dict(tokens[OBJECT])
+        annotations = self._get_prepared_annotations()
 
-        annotations = {
+        return self._add_qualified_edge(
+            u=u, u_modifier=u_modifier,
+            relation=relation,
+            v=v, v_modifier=v_modifier,
+            annotations=annotations,
+        )
+
+    def _get_prepared_annotations(self):
+        return {
             annotation_name: (
                 {
                     ae: True
@@ -792,15 +808,6 @@ class BELParser(BaseParser):
             )
             for annotation_name, annotation_entry in self.control_parser.annotations.items()
         }
-
-        return self._add_qualified_edge(
-            u=u,
-            v=v,
-            relation=tokens[RELATION],
-            annotations=annotations,
-            subject_modifier=subject_modifier,
-            object_modifier=object_modifier,
-        )
 
     def _handle_relation_harness(self, line: str, position: int, tokens: Union[ParseResults, Dict]) -> ParseResults:
         """Handle BEL relations based on the policy specified on instantiation.
@@ -833,10 +840,10 @@ class BELParser(BaseParser):
 
     def handle_inverse_unqualified_relation(self, _, __, tokens: ParseResults) -> ParseResults:
         """Handle unqualified relations that should go reverse."""
-        subject_node_dsl = self.ensure_node(tokens[SUBJECT])
-        object_node_dsl = self.ensure_node(tokens[OBJECT])
+        u = self.ensure_node(tokens[SUBJECT])
+        v = self.ensure_node(tokens[OBJECT])
         relation = tokens[RELATION]
-        self.graph.add_unqualified_edge(object_node_dsl, subject_node_dsl, relation)
+        self.graph.add_unqualified_edge(v, u, relation)
         return tokens
 
     def ensure_node(self, tokens: ParseResults) -> BaseEntity:

@@ -299,13 +299,21 @@ def get_corresponding_pickle_path(path: str) -> str:
     return '{path}.pickle'.format(path=path)
 
 
-def citation_dict(*, db, db_id, db_name=None, **kwargs):
+def citation_dict(*, db: str, db_id: str, db_name: Optional[str] = None, **kwargs):
     """Make a citation dictionary."""
-    r = {
-        CITATION_DB: db,
-        CITATION_IDENTIFIER: db_id,
-        **kwargs,
-    }
-    if db_name is not None:
-        r[CITATION_DB_NAME] = db_name
-    return r
+    return CitationDict(db=db, db_id=db_id, db_name=db_name, **kwargs)
+
+
+class CitationDict(dict):
+    """A dictionary describing a citation."""
+
+    def __init__(self, db: str, db_id: str, *, db_name: Optional[str] = None, **kwargs):
+        super().__init__()
+        self[CITATION_DB] = db
+        self[CITATION_IDENTIFIER] = db_id
+        if db_name is not None:
+            self[CITATION_DB_NAME] = db_name
+        self.update(kwargs)
+
+    def __hash__(self):
+        return hash((self[CITATION_DB], self[CITATION_IDENTIFIER]))

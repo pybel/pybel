@@ -12,9 +12,10 @@ from networkx.utils import open_file
 import bel_resources.constants
 from bel_resources import make_knowledge_header
 from .constants import (
-    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CELL_SURFACE, CITATION, CITATION_DB, CITATION_IDENTIFIER, DEGRADATION,
-    EFFECT, EVIDENCE, EXTRACELLULAR, FROM_LOC, INTRACELLULAR, LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT,
-    PYBEL_AUTOEVIDENCE, RELATION, SUBJECT, TO_LOC, TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS,
+    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CELL_SURFACE, CITATION, CITATION_DB, CITATION_IDENTIFIER,
+    CITATION_TYPE_PUBMED, DEGRADATION, EFFECT, EVIDENCE, EXTRACELLULAR, FROM_LOC, INTRACELLULAR, LOCATION, MODIFIER,
+    NAME, NAMESPACE, OBJECT, PYBEL_AUTOEVIDENCE, PYBEL_PUBMED, RELATION, SET_CITATION_FMT, SUBJECT, TO_LOC,
+    TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS,
 )
 from .dsl import BaseAbundance, BaseEntity, FusionBase, ListAbundance, Reaction
 from .typing import EdgeData
@@ -209,9 +210,9 @@ def sort_qualified_edges(graph) -> Iterable[EdgeTuple]:
     return sorted(qualified_edges, key=_sort_qualified_edges_helper)
 
 
-def _citation_sort_key(t: EdgeTuple) -> str:
+def _citation_sort_key(t: EdgeTuple) -> Tuple[str, str]:
     """Make a confusing 4 tuple sortable by citation."""
-    return '"{}", "{}"'.format(t[3][CITATION][CITATION_DB], t[3][CITATION][CITATION_IDENTIFIER])
+    return t[3][CITATION][CITATION_DB], t[3][CITATION][CITATION_IDENTIFIER]
 
 
 def _evidence_sort_key(t: EdgeTuple) -> str:
@@ -257,7 +258,7 @@ def _to_bel_lines_header(graph) -> Iterable[str]:
     )
 
 
-def group_citation_edges(edges: Iterable[EdgeTuple]) -> Iterable[Tuple[str, Iterable[EdgeTuple]]]:
+def group_citation_edges(edges: Iterable[EdgeTuple]) -> Iterable[Tuple[Tuple[str, str], Iterable[EdgeTuple]]]:
     """Return an iterator over pairs of citation values and their corresponding edge iterators."""
     return itt.groupby(edges, key=_citation_sort_key)
 
@@ -275,8 +276,8 @@ def _to_bel_lines_body(graph, use_identifiers: bool = False) -> Iterable[str]:
     """
     qualified_edges = sort_qualified_edges(graph)
 
-    for citation, citation_edges in group_citation_edges(qualified_edges):
-        yield 'SET Citation = {{{}}}\n'.format(citation)
+    for (citation_db, citation_id), citation_edges in group_citation_edges(qualified_edges):
+        yield SET_CITATION_FMT.format(citation_db, citation_id) + '\n'
 
         for evidence, evidence_edges in group_evidence_edges(citation_edges):
             yield 'SET SupportingText = "{}"'.format(evidence)
@@ -318,7 +319,7 @@ def _to_bel_lines_footer(graph, use_identifiers: bool = False) -> Iterable[str]:
 
     if unqualified_edges_to_serialize or isolated_nodes_to_serialize:
         yield '###############################################\n'
-        yield 'SET Citation = {"PubMed", "29048466"}'
+        yield SET_CITATION_FMT.format(CITATION_TYPE_PUBMED, PYBEL_PUBMED)
         yield 'SET SupportingText = "{}"'.format(PYBEL_AUTOEVIDENCE)
 
         for u, v, data in unqualified_edges_to_serialize:
