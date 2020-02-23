@@ -125,7 +125,7 @@ def from_hetionet_json(
     return graph
 
 
-def _add_edge(
+def _add_edge(  # noqa: C901
     graph,
     edge,
     kind_identifier_to_name,
