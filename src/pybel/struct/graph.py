@@ -16,18 +16,18 @@ from .operations import left_full_join, left_node_intersection_join, left_outer_
 from ..canonicalize import edge_to_bel
 from ..constants import (
     ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_DB, CITATION_IDENTIFIER,
-    CITATION_TYPE_PUBMED, CONCEPT, DECREASES, DESCRIPTION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO,
-    EVIDENCE, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_METADATA,
-    GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION, HAS_PRODUCT, HAS_REACTANT,
-    HAS_VARIANT, INCREASES, IS_A, MEMBERS, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION,
-    METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAMESPACE, NEGATIVE_CORRELATION, OBJECT,
-    ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, PRODUCTS, REACTANTS, REGULATES, RELATION, SUBJECT, TRANSCRIBED_TO,
-    TRANSLATED_TO, VARIANTS,
+    CITATION_TYPE_PUBMED, CONCEPT, CORRELATION, DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES,
+    EQUIVALENT_TO, EVIDENCE, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL,
+    GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION, HAS_PRODUCT,
+    HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A, MEMBERS, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT,
+    METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAMESPACE,
+    NEGATIVE_CORRELATION, NO_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, PRODUCTS, REACTANTS,
+    REGULATES, RELATION, SUBJECT, TRANSCRIBED_TO, TRANSLATED_TO, VARIANTS,
 )
 from ..dsl import BaseEntity, ComplexAbundance, Gene, MicroRna, Protein, Rna, activity
 from ..parser.exc import BELParserWarning
 from ..typing import EdgeData
-from ..utils import citation_dict, hash_edge
+from ..utils import CitationDict, citation_dict, hash_edge
 from ..version import get_version
 
 __all__ = [
@@ -36,7 +36,6 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 
-CitationDict = Mapping[str, str]
 AnnotationsDict = Mapping[str, Mapping[str, bool]]
 AnnotationsHint = Union[Mapping[str, str], Mapping[str, Set[str]], AnnotationsDict]
 WarningTuple = Tuple[Optional[str], BELParserWarning, EdgeData]
@@ -386,10 +385,15 @@ class BELGraph(nx.MultiDiGraph):
         """
         return self.add_unqualified_edge(rna, protein, TRANSLATED_TO)
 
-    def _add_two_way_unqualified_edge(self, u: BaseEntity, v: BaseEntity, relation: str) -> str:
+    def _add_two_way_qualified_edge(self, u: BaseEntity, v: BaseEntity, *args, **kwargs) -> str:
+        """Add an qualified edge both ways."""
+        self.add_qualified_edge(u=v, v=u, *args, **kwargs)
+        return self.add_qualified_edge(u=u, v=v, *args, **kwargs)
+
+    def _add_two_way_unqualified_edge(self, u: BaseEntity, v: BaseEntity, *args, **kwargs) -> str:
         """Add an unqualified edge both ways."""
-        self.add_unqualified_edge(v, u, relation)
-        return self.add_unqualified_edge(u, v, relation)
+        self.add_unqualified_edge(v, u, *args, **kwargs)
+        return self.add_unqualified_edge(u, v, *args, **kwargs)
 
     add_equivalence = partialmethod(_add_two_way_unqualified_edge, relation=EQUIVALENT_TO)
     """Add two equivalence relations for the nodes."""
@@ -419,7 +423,7 @@ class BELGraph(nx.MultiDiGraph):
         *,
         relation: str,
         evidence: str,
-        citation: Union[str, Mapping[str, str]],
+        citation: Union[str, Tuple[str, str], CitationDict],
         annotations: Optional[AnnotationsHint] = None,
         subject_modifier: Optional[Mapping] = None,
         object_modifier: Optional[Mapping] = None,
@@ -442,17 +446,32 @@ class BELGraph(nx.MultiDiGraph):
 
         :return: The hash of the edge
         """
+        attr = self._build_attr(
+            relation=relation,
+            evidence=evidence,
+            citation=citation,
+            annotations=annotations,
+            subject_modifier=subject_modifier,
+            object_modifier=object_modifier,
+            **attr
+        )
+        return self._help_add_edge(u, v, attr)
+
+    @staticmethod
+    def _build_attr(
+        relation: str,
+        evidence: str,
+        citation: Union[str, Tuple[str, str], CitationDict],
+        annotations: Optional[AnnotationsHint] = None,
+        subject_modifier: Optional[Mapping] = None,
+        object_modifier: Optional[Mapping] = None,
+        **attr
+    ):
         attr.update({
             RELATION: relation,
             EVIDENCE: evidence,
+            CITATION: _handle_citation(citation),
         })
-
-        if isinstance(citation, str):
-            attr[CITATION] = citation_dict(db=CITATION_TYPE_PUBMED, db_id=citation)
-        elif isinstance(citation, dict):
-            attr[CITATION] = citation
-        else:
-            raise TypeError
 
         if annotations:  # clean up annotations
             attr[ANNOTATIONS] = _clean_annotations(annotations)
@@ -463,7 +482,28 @@ class BELGraph(nx.MultiDiGraph):
         if object_modifier:
             attr[OBJECT] = object_modifier
 
-        return self._help_add_edge(u, v, attr)
+        return attr
+
+    def add_binds(
+        self,
+        u,
+        v,
+        *,
+        evidence: str,
+        citation: Union[str, Mapping[str, str]],
+        annotations: Optional[AnnotationsHint] = None,
+        **attr
+    ) -> str:
+        """Add a "binding" relationship between the two entities such that ``u => complex(u, v)``."""
+        complex_abundance = ComplexAbundance([u, v])
+        return self.add_directly_increases(
+            u,
+            complex_abundance,
+            citation=citation,
+            evidence=evidence,
+            annotations=annotations,
+            **attr
+        )
 
     add_increases = partialmethod(add_qualified_edge, relation=INCREASES)
     """Wrap :meth:`add_qualified_edge` for the :data:`pybel.constants.INCREASES` relation."""
@@ -477,43 +517,42 @@ class BELGraph(nx.MultiDiGraph):
     add_directly_decreases = partialmethod(add_qualified_edge, relation=DIRECTLY_DECREASES)
     """Add a :data:`pybel.constants.DIRECTLY_DECREASES` relationship with :meth:`add_qualified_edge`."""
 
-    add_association = partialmethod(add_qualified_edge, relation=ASSOCIATION)
+    add_association = partialmethod(_add_two_way_qualified_edge, relation=ASSOCIATION)
+    """Add a :data:`pybel.constants.ASSOCIATION` relationship with :meth:`add_qualified_edge`."""
+
     add_regulates = partialmethod(add_qualified_edge, relation=REGULATES)
-    add_positive_correlation = partialmethod(add_qualified_edge, relation=POSITIVE_CORRELATION)
-    add_negative_correlation = partialmethod(add_qualified_edge, relation=NEGATIVE_CORRELATION)
+    """Add a :data:`pybel.constants.REGULATES` relationship with :meth:`add_qualified_edge`."""
+
+    add_correlation = partialmethod(_add_two_way_qualified_edge, relation=CORRELATION)
+    """Add a :data:`pybel.constants.CORRELATION` relationship with :meth:`add_qualified_edge`."""
+
+    add_no_correlation = partialmethod(_add_two_way_qualified_edge, relation=NO_CORRELATION)
+    """Add a :data:`pybel.constants.NO_CORRELATION` relationship with :meth:`add_qualified_edge`."""
+
+    add_positive_correlation = partialmethod(_add_two_way_qualified_edge, relation=POSITIVE_CORRELATION)
+    """Add a :data:`pybel.constants.POSITIVE_CORRELATION` relationship with :meth:`add_qualified_edge`."""
+
+    add_negative_correlation = partialmethod(_add_two_way_qualified_edge, relation=NEGATIVE_CORRELATION)
+    """Add a :data:`pybel.constants.NEGATIVE_CORRELATION` relationship with :meth:`add_qualified_edge`."""
+
     add_causes_no_change = partialmethod(add_qualified_edge, relation=CAUSES_NO_CHANGE)
+    """Add a :data:`pybel.constants.CAUSES_NO_CHANGE` relationship with :meth:`add_qualified_edge`."""
 
-    add_inhibits = partialmethod(add_directly_decreases, object_modifier=activity())
+    add_inhibits = partialmethod(add_decreases, object_modifier=activity())
     """Add an "inhibits" relationship.
 
-    A more specific version of :meth:`add_directly_decreases` that automatically populates the object modifier with an
+    A more specific version of :meth:`add_decreases` that automatically populates the object modifier with an
     activity."""
 
-    add_activates = partialmethod(add_directly_increases, object_modifier=activity())
+    add_directly_inhibits = partialmethod(add_directly_decreases, object_modifier=activity())
+
+    add_activates = partialmethod(add_increases, object_modifier=activity())
     """Add an "inhibits" relationship.
 
-    A more specific version of :meth:`add_directly_increases` that automatically populates the object modifier with an
+    A more specific version of :meth:`add_increases` that automatically populates the object modifier with an
     activity."""
 
-    def add_binds(
-        self,
-        u,
-        v,
-        *,
-        evidence: str,
-        citation: Union[str, Mapping[str, str]],
-        annotations: Optional[AnnotationsHint] = None,
-        **attr
-    ) -> str:
-        """Add a "binding" relationship between the two entities such that ``u => complex(u, v)``."""
-        return self.add_directly_increases(
-            u,
-            ComplexAbundance([u, v]),
-            citation=citation,
-            evidence=evidence,
-            annotations=annotations,
-            **attr
-        )
+    add_directly_activates = partialmethod(add_directly_increases, object_modifier=activity())
 
     def add_node_from_data(self, node: BaseEntity) -> None:
         """Add an entity to the graph."""
@@ -529,7 +568,6 @@ class BELGraph(nx.MultiDiGraph):
 
         elif MEMBERS in node:
             for member in node[MEMBERS]:
-                # FIXME switch to self.add_part_of(member, node)
                 self.add_part_of(member, node)
 
         elif PRODUCTS in node and REACTANTS in node:
@@ -566,30 +604,6 @@ class BELGraph(nx.MultiDiGraph):
         """Get the annotations for a given edge."""
         return self._get_edge_attr(u, v, key, ANNOTATIONS)
 
-    def _get_node_attr(self, node: BaseEntity, attr: str) -> Any:
-        assert isinstance(node, BaseEntity)
-        return self.nodes[node].get(attr)
-
-    def _has_node_attr(self, node: BaseEntity, attr: str) -> Any:
-        assert isinstance(node, BaseEntity)
-        return attr in self.nodes[node]
-
-    def _set_node_attr(self, node: BaseEntity, attr: str, value: Any) -> None:
-        assert isinstance(node, BaseEntity)
-        self.nodes[node][attr] = value
-
-    def get_node_description(self, node: BaseEntity) -> Optional[str]:
-        """Get the description for a given node."""
-        return self._get_node_attr(node, DESCRIPTION)
-
-    def has_node_description(self, node: BaseEntity) -> bool:
-        """Check if a node description is already present."""
-        return self._has_node_attr(node, DESCRIPTION)
-
-    def set_node_description(self, node: BaseEntity, description: str) -> None:
-        """Set the description for a given node."""
-        self._set_node_attr(node, DESCRIPTION, description)
-
     def __add__(self, other: 'BELGraph') -> 'BELGraph':
         """Copy this graph and join it with another graph with it using :func:`pybel.struct.left_full_join`.
 
@@ -599,8 +613,8 @@ class BELGraph(nx.MultiDiGraph):
         Example usage:
 
         >>> import pybel
-        >>> g = pybel.from_path('...')
-        >>> h = pybel.from_path('...')
+        >>> g = pybel.from_bel_script('...')
+        >>> h = pybel.from_bel_script('...')
         >>> k = g + h
         """
         if not isinstance(other, BELGraph):
@@ -619,8 +633,8 @@ class BELGraph(nx.MultiDiGraph):
         Example usage:
 
         >>> import pybel
-        >>> g = pybel.from_path('...')
-        >>> h = pybel.from_path('...')
+        >>> g = pybel.from_bel_script('...')
+        >>> h = pybel.from_bel_script('...')
         >>> g += h
         """
         if not isinstance(other, BELGraph):
@@ -640,8 +654,8 @@ class BELGraph(nx.MultiDiGraph):
         Example usage:
 
         >>> import pybel
-        >>> g = pybel.from_path('...')
-        >>> h = pybel.from_path('...')
+        >>> g = pybel.from_bel_script('...')
+        >>> h = pybel.from_bel_script('...')
         >>> k = g & h
         """
         if not isinstance(other, BELGraph):
@@ -660,8 +674,8 @@ class BELGraph(nx.MultiDiGraph):
         Example usage:
 
         >>> import pybel
-        >>> g = pybel.from_path('...')
-        >>> h = pybel.from_path('...')
+        >>> g = pybel.from_bel_script('...')
+        >>> h = pybel.from_bel_script('...')
         >>> g &= h
         """
         if not isinstance(other, BELGraph):
@@ -679,8 +693,8 @@ class BELGraph(nx.MultiDiGraph):
         Example usage:
 
         >>> import pybel
-        >>> g = pybel.from_path('...')
-        >>> h = pybel.from_path('...')
+        >>> g = pybel.from_bel_script('...')
+        >>> h = pybel.from_bel_script('...')
         >>> k = g ^ h
         """
         if not isinstance(other, BELGraph):
@@ -822,3 +836,18 @@ def _clean_annotations(annotations_dict: AnnotationsHint) -> AnnotationsDict:
         )
         for key, values in annotations_dict.items()
     }
+
+
+def _handle_citation(citation: Union[str, Tuple[str, str], CitationDict]) -> CitationDict:
+    if isinstance(citation, str):
+        return citation_dict(db=CITATION_TYPE_PUBMED, db_id=citation)
+    elif isinstance(citation, tuple):
+        return citation_dict(db=citation[0], db_id=citation[1])
+    elif isinstance(citation, CitationDict):
+        return citation
+    elif isinstance(citation, dict):
+        return CitationDict(**citation)
+    elif citation is None:
+        raise ValueError('citation was None')
+    else:
+        raise TypeError('citation is the wrong type: {}'.format(citation))

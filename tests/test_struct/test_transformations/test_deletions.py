@@ -38,7 +38,7 @@ class TestDeletions(unittest.TestCase):
         g.add_positive_correlation(d1, d2, citation=n(), evidence=n())
 
         self.assertEqual(5, g.number_of_nodes())
-        self.assertEqual(7, g.number_of_edges())
+        self.assertEqual(12, g.number_of_edges())
         self.assertEqual(2, len(g[p2][d1]))
 
         remove_associations(g)
@@ -48,7 +48,7 @@ class TestDeletions(unittest.TestCase):
         self.assertEqual(POSITIVE_CORRELATION, relations[0][RELATION])
 
         self.assertEqual(5, g.number_of_nodes())
-        self.assertEqual(6, g.number_of_edges())
+        self.assertEqual(10, g.number_of_edges())
         self.assertEqual(5, g.number_of_nodes())
 
         remove_pathologies(g)

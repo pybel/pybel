@@ -117,30 +117,6 @@ Previous versions of PyBEL until 0.11.2 had an alternative namespace definition.
 generate namespace files with reproducible build scripts following the Bio2BEL framework, or to directly add them to
 the database with the Bio2BEL :class:`bio2bel.manager.namespace_manager.NamespaceManagerMixin` extension.
 
-Explicit Node Labels
-~~~~~~~~~~~~~~~~~~~~
-While the BEL 2.0 specification made it possible to represent new terms, such as the APOE gene with two variants
-resulting in the E2 allele, it came at the price of encoding terms in a technical and less readable way. An explicit
-statement for labeling nodes has been added, such that the resulting data structure will have a label for the node:
-
-``g(HGNC:APOE, var(c.388T>C), var(c.526C>T)) labeled "APOE E2"``
-
-When InChI is used, these strings are very hard to visualize. Using a label is helpful for later visualization:
-
-.. code-block::none
-
-    a(INCHI:"InChI=1S/C20H28N2O5/c1-3-27-20(26)16(12-11-15-8-5-4-6-9-15)21-14(2)18(23)22-13-7-10-17(22)19(24)25/h4-6,
-    8-9,14,16-17,21H,3,7,10-13H2,1-2H3,(H,24,25)/t14-,16-,17-/m0/s1") labeled "Enalapril"``
-
-Below is the same molecule again, but represented with an InChIKey:
-
-``a(INCHIKEY:"GBXSMTUPTTWBMN-XIRDDKMYSA-N") labeled "Enalapril"``
-
-It's also easy to use the universe of RESTFul API services from UniChem, ChEMBL, or WikiData to download and annotate
-these automatically. For futher information on Enalapril can be found `WikiData <https://www.wikidata.org/wiki/Q422185>`_,
-`UniChem <https://www.ebi.ac.uk/unichem/frontpage/results?queryText=GBXSMTUPTTWBMN-XIRDDKMYSA-N&kind=InChIKey&sources=&incl=exclude>`_,
-and `ChEMBL <https://www.ebi.ac.uk/chembldb/compound/inspect/CHEMBL578>`_.
-
 Things to Consider
 ------------------
 Do All Statements Need Supporting Text?
