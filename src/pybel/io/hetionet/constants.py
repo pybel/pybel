@@ -66,12 +66,21 @@ ACTIVATES_ACTIONS = {
     'agonist', 'potentiator', 'inducer', 'positive modulator', 'partial agonist',
     'positive allosteric modulator', 'activator', 'stimulator',
 }
-INHIBITS_ACTIONS = {'inhibitor', 'antagonist', 'blocker', 'partial antagonist',
-                    'inhibitor, competitive', 'negative modulator', 'negative allosteric modulator'}
-REGULATES_ACTIONS = {'modulator', 'allosteric modulator'}
-BINDS_ACTIONS = {'substrate', 'binder', 'other/unknown', 'ligand', 'cofactor', 'product of', 'opener',
-                 'desensitize the target', 'other', 'unknown', 'antibody', 'binding', 'adduct'}
+INHIBITS_ACTIONS = {
+    'inhibitor', 'antagonist', 'blocker', 'partial antagonist',
+    'inhibitor, competitive', 'negative modulator', 'negative allosteric modulator',
+    'allosteric antagonist', 'suppressor',
+}
+REGULATES_ACTIONS = {
+    'modulator', 'allosteric modulator',
+}
+BINDS_ACTIONS = {
+    'substrate', 'binder', 'other/unknown', 'ligand', 'cofactor', 'product of', 'opener',
+    'desensitize the target', 'other', 'unknown', 'antibody', 'binding', 'adduct', 'multitarget',
+    'releasing agent',
+}
 TBH_ACTIONS = {}
+
 ACTIVATES_ACTION_PAIRS = {
     ('activator', 'substrate'),
     ('agonist', 'binder'),
