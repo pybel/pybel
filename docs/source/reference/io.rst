@@ -35,6 +35,16 @@ Reference
 .. autofunction:: pybel.from_bel_script_url
 .. autofunction:: pybel.to_bel_script
 
+Hetionet
+~~~~~~~~
+.. automodule:: pybel.io.hetionet
+
+.. autofunction:: pybel.from_hetionet_json
+.. autofunction:: pybel.from_hetionet_file
+.. autofunction:: pybel.from_hetionet_gz
+
+.. autofunction:: pybel.get_hetionet
+
 Transport
 ---------
 All transport pairs are reflective and data-preserving.
@@ -116,11 +126,15 @@ GraphDati
 
 .. autofunction:: pybel.to_graphdati
 
-.. autofunction:: pybel.to_graphdati_jsons
-
 .. autofunction:: pybel.to_graphdati_file
 
 .. autofunction:: pybel.to_graphdati_gz
+
+.. autofunction:: pybel.to_graphdati_jsonl
+
+.. autofunction:: pybel.to_graphdati_jsonl_gz
+
+.. autofunction:: pybel.to_graphdati_jsons
 
 .. autofunction:: pybel.post_graphdati
 
