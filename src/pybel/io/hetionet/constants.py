@@ -5,6 +5,8 @@
 from ...dsl import Abundance, BiologicalProcess, Pathology, Population, Protein, Rna
 from ...struct import BELGraph
 
+HETIONET_PUBMED = '28936969'
+
 ##################
 # Hetionet types #
 ##################
@@ -38,8 +40,8 @@ QUALIFIED_MAPPING = {
     (ANATOMY, Population, 'downregulates', GENE, Rna, BELGraph.add_negative_correlation),
     (ANATOMY, Population, 'expresses', GENE, Rna, BELGraph.add_correlation),
     (COMPOUND, Abundance, 'resembles', COMPOUND, Abundance, BELGraph.add_association),
-    (COMPOUND, Abundance, 'upregulates', GENE, Protein, BELGraph.add_activates),  # FIXME is this about abundance?
-    (COMPOUND, Abundance, 'downregulates', GENE, Protein, BELGraph.add_inhibits),
+    (COMPOUND, Abundance, 'upregulates', GENE, Protein, BELGraph.add_increases),
+    (COMPOUND, Abundance, 'downregulates', GENE, Protein, BELGraph.add_decreases),
     (COMPOUND, Abundance, 'treats', DISEASE, Pathology, BELGraph.add_decreases),
     (COMPOUND, Abundance, 'palliates', DISEASE, Pathology, BELGraph.add_decreases),
     (COMPOUND, Abundance, 'causes', SIDE_EFFECT, Pathology, BELGraph.add_increases),
@@ -63,21 +65,20 @@ UNQUALIFIED_MAPPING = {
 ####################
 
 ACTIVATES_ACTIONS = {
-    'agonist', 'potentiator', 'inducer', 'positive modulator', 'partial agonist',
-    'positive allosteric modulator', 'activator', 'stimulator',
+    'agonist', 'potentiator', 'inducer', 'positive modulator', 'partial agonist', 'positive allosteric modulator',
+    'activator', 'stimulator',
 }
 INHIBITS_ACTIONS = {
-    'inhibitor', 'antagonist', 'blocker', 'partial antagonist',
-    'inhibitor, competitive', 'negative modulator', 'negative allosteric modulator',
-    'allosteric antagonist', 'suppressor',
+    'inhibitor', 'antagonist', 'blocker', 'partial antagonist', 'inhibitor, competitive', 'negative modulator',
+    'negative allosteric modulator', 'allosteric antagonist', 'suppressor', 'inhibitory allosteric modulator',
+    'conversion inhibitor',
 }
 REGULATES_ACTIONS = {
     'modulator', 'allosteric modulator',
 }
 BINDS_ACTIONS = {
-    'substrate', 'binder', 'other/unknown', 'ligand', 'cofactor', 'product of', 'opener',
-    'desensitize the target', 'other', 'unknown', 'antibody', 'binding', 'adduct', 'multitarget',
-    'releasing agent',
+    'substrate', 'binder', 'other/unknown', 'ligand', 'cofactor', 'product of', 'opener', 'desensitize the target',
+    'other', 'unknown', 'antibody', 'binding', 'adduct', 'multitarget', 'releasing agent',
 }
 TBH_ACTIONS = {}
 

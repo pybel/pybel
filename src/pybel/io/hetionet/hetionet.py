@@ -12,7 +12,7 @@ from urllib.request import urlretrieve
 from tqdm import tqdm
 
 from .constants import (
-    ACTIVATES_ACTIONS, BINDS_ACTIONS, COMPOUND, DSL_MAP, GENE, INHIBITS_ACTIONS, PHARMACOLOGICAL_CLASS,
+    ACTIVATES_ACTIONS, BINDS_ACTIONS, COMPOUND, DSL_MAP, GENE, HETIONET_PUBMED, INHIBITS_ACTIONS, PHARMACOLOGICAL_CLASS,
     QUALIFIED_MAPPING, REGULATES_ACTIONS, UNQUALIFIED_MAPPING,
 )
 from ...config import CACHE_DIRECTORY
@@ -65,6 +65,8 @@ def from_hetionet_json(
         version='1.0',
         authors='Daniel Himmelstein',
     )
+    # FIXME add namespaces
+    # graph.namespace_pattern.update({})
 
     kind_identifier_to_name = {
         (x['kind'], x['identifier']): x['name']
@@ -74,7 +76,7 @@ def from_hetionet_json(
     edges = hetionet_dict['edges']
 
     if use_tqdm:
-        edges = tqdm(edges)
+        edges = tqdm(edges, desc='Converting Hetionet')
         it_logger = edges.write
     else:
         it_logger = logger.info
@@ -125,8 +127,13 @@ def _add_edge(  # noqa: C901
         pass
         # it_logger(f'Missing source for {source_identifier}-{kind}-{target_identifier}\n{e}')
 
+    if 'pubmed_ids' in data:
+        citations = list(data.pop('pubmed_ids'))
+    else:
+        citations = [HETIONET_PUBMED]
+
     for k, v in data.items():
-        if k in {'actions', 'pubmed_ids', 'urls', 'subtypes'}:
+        if k in {'actions', 'urls', 'subtypes'}:
             continue  # handled explicitly later
         if not isinstance(v, (str, int, bool, float)):
             it_logger('Unhandled: {source_identifier}-{kind}-{target_identifier} {k}: {v}'.format(
@@ -137,13 +144,18 @@ def _add_edge(  # noqa: C901
         annotations[k] = {v: True}
 
     for _h_type, h_dsl, _r, _t_type, t_dsl, f in QUALIFIED_MAPPING:
-        if source_type == _h_type and kind == _r and target_type == _t_type:
-            return f(
+        if source_type != _h_type or kind != _r or target_type != _t_type:
+            continue
+        rv = set()
+        for citation in citations:
+            key = f(
                 graph,
                 h_dsl(namespace=DSL_MAP[_h_type], identifier=source_identifier, name=source_name),
                 t_dsl(namespace=DSL_MAP[_t_type], identifier=target_identifier, name=target_name),
-                citation='', evidence='', annotations=annotations,
+                citation=citation, evidence='', annotations=annotations,
             )
+            rv.add(key)
+        return rv
 
     for _h_type, h_dsl, _r, _t_type, t_dsl, f in UNQUALIFIED_MAPPING:
         if source_type == _h_type and kind == _r and target_type == _t_type:
@@ -165,20 +177,23 @@ def _add_edge(  # noqa: C901
         for action in data.get('actions', []):
             action = action.lower()
             if action in ACTIVATES_ACTIONS:
-                key = graph.add_directly_activates(drug, protein, citation='', evidence='', annotations=annotations)
+                key = graph.add_directly_activates(
+                    drug, protein, citation=HETIONET_PUBMED, evidence='', annotations=annotations,
+                )
             elif action in INHIBITS_ACTIONS:
-                key = graph.add_directly_inhibits(drug, protein, citation='', evidence='', annotations=annotations)
+                key = graph.add_directly_inhibits(
+                    drug, protein, citation=HETIONET_PUBMED, evidence='', annotations=annotations,
+                )
             elif action in REGULATES_ACTIONS:
-                key = graph.add_regulates(drug, protein, citation='', evidence='', annotations=annotations)
+                key = graph.add_regulates(drug, protein, citation=HETIONET_PUBMED, evidence='', annotations=annotations)
             elif action in BINDS_ACTIONS:
-                key = graph.add_binds(drug, protein, citation='', evidence='', annotations=annotations)
+                key = graph.add_binds(drug, protein, citation=HETIONET_PUBMED, evidence='', annotations=annotations)
             else:
+                key = graph.add_binds(drug, protein, citation=HETIONET_PUBMED, evidence='', annotations=annotations)
                 it_logger('Unhandled action for {source_identifier}-{kind}-{target_identifier}: {action}'.format(
                     source_identifier=source_identifier, kind=kind, target_identifier=target_identifier, action=action,
                 ))
-                continue
             rv.add(key)
-
         return rv
 
     if _check(PHARMACOLOGICAL_CLASS, 'includes', COMPOUND):

@@ -2,6 +2,7 @@
 
 """This module contains output functions to BEL scripts."""
 
+import gzip
 import itertools as itt
 import logging
 import time
@@ -24,6 +25,7 @@ from .version import VERSION
 
 __all__ = [
     'to_bel_script',
+    'to_bel_script_gz',
     'to_bel_script_lines',
     'edge_to_bel',
     'edge_to_tuple',
@@ -45,6 +47,12 @@ def to_bel_script(graph, path: Union[str, TextIO], use_identifiers: bool = False
     """
     for line in to_bel_script_lines(graph, use_identifiers=use_identifiers):
         print(line, file=path)
+
+
+def to_bel_script_gz(graph, path, **kwargs) -> None:
+    """Write the graph as a BEL Script a gzip file."""
+    with gzip.open(path, 'wt') as file:
+        to_bel_script(graph, file, **kwargs)
 
 
 def to_bel_script_lines(graph, use_identifiers: bool = False) -> Iterable[str]:

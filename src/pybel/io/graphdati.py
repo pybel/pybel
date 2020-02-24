@@ -33,13 +33,13 @@ SCHEMA_URI = 'https://github.com/belbio/schemas/blob/master/schemas/nanopub_bel-
 
 
 @open_file(1, mode='w')
-def to_graphdati_file(graph: BELGraph, path: Union[str, TextIO], **kwargs) -> None:
+def to_graphdati_file(graph: BELGraph, path: Union[str, TextIO], use_identifiers: bool = True, **kwargs) -> None:
     """Write this graph as GraphDati JSON to a file.
 
     :param graph: A BEL graph
     :param path: A path or file-like
     """
-    json.dump(to_graphdati(graph), path, ensure_ascii=False, **kwargs)
+    json.dump(to_graphdati(graph, use_identifiers=use_identifiers), path, ensure_ascii=False, **kwargs)
 
 
 def to_graphdati_gz(graph: BELGraph, path: str, **kwargs) -> None:
@@ -57,9 +57,12 @@ def to_graphdati_jsons(graph: BELGraph, **kwargs) -> str:
 
 
 @open_file(1, mode='w')
-def to_graphdati_jsonl(graph, file, use_identifiers: bool = True):
+def to_graphdati_jsonl(graph, file, use_identifiers: bool = True, use_tqdm: bool = True):
     """Write this graph as a GraphDati JSON lines file."""
-    for u, v, k, d in graph.edges(keys=True, data=True):
+    it = graph.edges(keys=True, data=True)
+    if use_tqdm:
+        it = tqdm(it, desc='Outputting GraphDati JSONL', total=graph.number_of_edges())
+    for u, v, k, d in it:
         nanopub = _make_nanopub(graph, u, v, k, d, use_identifiers)
         print(json.dumps(nanopub), file=file)
 
