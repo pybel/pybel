@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.14.4 <https://github.com/pybel/pybel/compare/v0.14.3...v0.14.4>`_
+--------------------------------------------------------------------
+Added
+~~~~~
+- Added support for BEP-0005
+- Added BEP-0001 support (population abundance; https://github.com/pybel/pybel/issues/402)
+- Added BEP-0003 support (noCorrelation relation; https://github.com/pybel/pybel/issues/403)
+- Added BEP-0012 support (correlation relation; https://github.com/pybel/pybel/issues/403)
+- Added BEP-0011 support (binds relation; https://github.com/pybel/pybel/issues/403)
+- Add GraphDati exporter and BioDati uploader (https://github.com/pybel/pybel/issues/407)
+- Add Hetionet importer (https://github.com/pybel/pybel/issues/406)
+- Add several more I/O functions (``pybel.to_bel_script_gz``, etc.)
+
+Removed
+~~~~~~~
+- Removed support for ``label`` relation
+- Removed support for node attributes and description
+
+Updated
+~~~~~~~
+- Updated programmatic citation handling. Now a tuple of strings (database, identifier) can
+  be passed anywhere a citation is needed.
+
+Fixed
+~~~~~
+- Fixed output of BEP-0008 (OBO-style identifiers)
+- Fixed convenience functions for ``BELGraph.add_inhibits`` and ``BELGraph.add_activates`` (there was a typo
+  and it was adding the opposite relation in both)
+- Fixed that graph edge adder functions don't add two-way edges (https://github.com/pybel/pybel/issues/409)
+
 `0.14.3 <https://github.com/pybel/pybel/compare/v0.14.2...v0.14.3>`_
 --------------------------------------------------------------------
 Added
