@@ -75,7 +75,7 @@ def main(directory: str):
 
         sample_graphdati_path = os.path.join(directory, 'hetionet_sample.bel.graphdati.json')
         click.echo('outputting sample hetionet in BEL to {}'.format(sample_bel_path))
-        to_graphdati_file(graph, sample_graphdati_path, use_identifiers=True)
+        to_graphdati_file(graph, sample_graphdati_path, use_identifiers=True, indent=2)
 
 
 if __name__ == '__main__':
