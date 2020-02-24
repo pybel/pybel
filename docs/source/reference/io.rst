@@ -35,15 +35,15 @@ Reference
 .. autofunction:: pybel.from_bel_script_url
 .. autofunction:: pybel.to_bel_script
 
-Hetnetio
+Hetionet
 ~~~~~~~~
-.. automodule:: pybel.io.hetnetio
+.. automodule:: pybel.io.hetionet
 
-.. autofunction:: pybel.from_hetnetio_json
-.. autofunction:: pybel.from_hetnetio_file
-.. autofunction:: pybel.from_hetnetio_gz
+.. autofunction:: pybel.from_hetionet_json
+.. autofunction:: pybel.from_hetionet_file
+.. autofunction:: pybel.from_hetionet_gz
 
-.. autofunction:: pybel.get_hetnetio
+.. autofunction:: pybel.get_hetionet
 
 Transport
 ---------

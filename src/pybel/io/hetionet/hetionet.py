@@ -23,7 +23,7 @@ __all__ = [
     'get_hetionet',
     'from_hetionet_json',
     'from_hetionet_gz',
-    'from_hetnetio_file',
+    'from_hetionet_file',
 ]
 
 logger = logging.getLogger(__name__)
@@ -44,11 +44,11 @@ def from_hetionet_gz(path: str) -> BELGraph:
     """Get Hetionet from its JSON GZ file."""
     logger.info('opening %s', path)
     with bz2.open(path) as file:
-        return from_hetnetio_file(file)
+        return from_hetionet_file(file)
 
 
-def from_hetnetio_file(file) -> BELGraph:
-    """Get Hetnetio from a JSON file."""
+def from_hetionet_file(file) -> BELGraph:
+    """Get Hetionet from a JSON file."""
     logger.info('parsing json from %s', file)
     j = json.load(file)
     logger.info('converting hetionet dict to BEL')
