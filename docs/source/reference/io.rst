@@ -119,6 +119,7 @@ Umbrella Node-Link JSON
 
 .. autofunction:: pybel.to_umbrella_nodelink
 .. autofunction:: pybel.to_umbrella_nodelink_file
+.. autofunction:: pybel.to_umbrella_nodelink_gz
 
 GraphDati
 ~~~~~~~~~

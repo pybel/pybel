@@ -19,6 +19,7 @@ A user might want to use this exporter in the following scenarios:
   using tools like Cytoscape.
 """
 
+import gzip
 import json
 from itertools import chain, count
 from typing import Any, Mapping, TextIO, Union
@@ -32,6 +33,7 @@ from ..struct import BELGraph
 __all__ = [
     'to_umbrella_nodelink',
     'to_umbrella_nodelink_file',
+    'to_umbrella_nodelink_gz',
 ]
 
 
@@ -88,3 +90,9 @@ def to_umbrella_nodelink_file(graph: BELGraph, path: Union[str, TextIO], **kwarg
     """
     graph_json_dict = to_umbrella_nodelink(graph)
     json.dump(graph_json_dict, path, ensure_ascii=False, **kwargs)
+
+
+def to_umbrella_nodelink_gz(graph, path: str, **kwargs) -> None:
+    """Write this graph as an umbrella node-link JSON to a gzipped file."""
+    with gzip.open(path, 'wt') as file:
+        to_umbrella_nodelink_file(graph, file, **kwargs)
