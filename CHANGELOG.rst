@@ -5,8 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-`0.14.4 <https://github.com/pybel/pybel/compare/v0.14.3...v0.14.4>`_
---------------------------------------------------------------------
+`Unreleased <https://github.com/pybel/pybel/compare/v0.14.5...HEAD>`_
+------------------------------------------------------------------------
+
+`0.14.5 <https://github.com/pybel/pybel/compare/v0.14.4...v0.14.5>`_ - 2020-02-26
+---------------------------------------------------------------------------------
+Added
+~~~~~
+- Gzip variant of umbrella nodelink exporter
+- More entry points for exporting
+
+Fixed
+~~~~~
+- OBO-style export was broken if name and identifier weren't available. This works with whatever is available now
+- If CURIE is requested and both identifier and name are available, defaults to identifier.
+
+`0.14.4 <https://github.com/pybel/pybel/compare/v0.14.3...v0.14.4>`_ - 2020-02-25
+---------------------------------------------------------------------------------
 Added
 ~~~~~
 - Added support for BEP-0005
@@ -35,8 +50,8 @@ Fixed
   and it was adding the opposite relation in both)
 - Fixed that graph edge adder functions don't add two-way edges (https://github.com/pybel/pybel/issues/409)
 
-`0.14.3 <https://github.com/pybel/pybel/compare/v0.14.2...v0.14.3>`_
---------------------------------------------------------------------
+`0.14.3 <https://github.com/pybel/pybel/compare/v0.14.2...v0.14.3>`_ - 2020-01-08
+---------------------------------------------------------------------------------
 Added
 ~~~~~
 - Umbrella node-link JSON exporter(https://github.com/pybel/pybel/pull/400)
