@@ -59,11 +59,10 @@ def to_graphdati_jsons(graph: BELGraph, **kwargs) -> str:
 @open_file(1, mode='w')
 def to_graphdati_jsonl(graph, file, use_identifiers: bool = True, use_tqdm: bool = True):
     """Write this graph as a GraphDati JSON lines file."""
-    it = graph.edges(keys=True, data=True)
+    nanopubs = _iter_graphdati(graph, use_identifiers=use_identifiers)
     if use_tqdm:
-        it = tqdm(it, desc='Outputting GraphDati JSONL', total=graph.number_of_edges())
-    for u, v, k, d in it:
-        nanopub = _make_nanopub(graph, u, v, k, d, use_identifiers)
+        nanopubs = tqdm(nanopubs, desc='Outputting GraphDati JSONL', total=graph.number_of_edges())
+    for nanopub in nanopubs:
         print(json.dumps(nanopub), file=file)
 
 
