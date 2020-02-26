@@ -38,15 +38,15 @@ class TestAbundance(TestTokenParserBase):
         self.parser.clear()
         self.parser.general_abundance.setParseAction(self.parser.handle_term)
 
-        self.expected_node_data = abundance(namespace='CHEBI', name='oxygen atom')
+        self.expected_node = abundance(namespace='CHEBI', name='oxygen atom')
         self.expected_canonical_bel = 'a(CHEBI:"oxygen atom")'
 
     def _test_abundance_helper(self, statement):
         result = self.parser.general_abundance.parseString(statement)
-        self.assertEqual(dict(self.expected_node_data), result.asDict())
+        self.assertEqual(dict(self.expected_node), result.asDict())
 
-        self.assertIn(self.expected_node_data, self.graph)
-        self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node_data))
+        self.assertIn(self.expected_node, self.graph)
+        self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node))
 
         self.assertEqual({}, modifier_po_to_dict(result), msg='The modifier dictionary should be empty')
 
@@ -72,8 +72,8 @@ class TestAbundance(TestTokenParserBase):
 
         self.assertEqual(expected_result, result.asDict())
 
-        self.assertIn(self.expected_node_data, self.graph)
-        self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node_data))
+        self.assertIn(self.expected_node, self.graph)
+        self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node))
 
         modifier = modifier_po_to_dict(result)
         expected_modifier = {
@@ -96,23 +96,25 @@ class TestAbundanceLabeled(TestTokenParserBase):
         self.parser.clear()
         self.parser.general_abundance.setParseAction(self.parser.handle_term)
 
-        self.expected_node_data = abundance(namespace='chebi', name='oxygen atom', identifier='CHEBI:25805')
-        self.expected_canonical_bel = 'a(chebi:"oxygen atom")'
+        self.expected_node = abundance(namespace='chebi', name='oxygen atom', identifier='CHEBI:25805')
+        self.expected_canonical_bel = 'a(chebi:"CHEBI:25805" ! "oxygen atom")'
 
     def _test_abundance_helper(self, statement):
         result = self.parser.general_abundance.parseString(statement)
-        self.assertEqual(dict(self.expected_node_data), result.asDict())
+        self.assertEqual(dict(self.expected_node), result.asDict())
 
-        self.assertIn(self.expected_node_data, self.graph)
-        self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node_data))
+        self.assertIn(self.expected_node, self.graph)
+        node = list(self.graph)[0]
+        self.assertEqual(self.expected_canonical_bel, node.as_bel())
 
         self.assertEqual({}, modifier_po_to_dict(result), msg='The modifier dictionary should be empty')
 
     def test_abundance(self):
         """Test short/long abundance name."""
-        self._test_abundance_helper('a(chebi:"CHEBI:25805"!"oxygen atom")')
-        self._test_abundance_helper('abundance(chebi:"CHEBI:25805"!"oxygen atom")')
-        self._test_abundance_helper('abundance(chebi:"CHEBI:25805" ! "oxygen atom")')
+        for s in ('a(chebi:"CHEBI:25805"!"oxygen atom")', 'abundance(chebi:"CHEBI:25805"!"oxygen atom")',
+                  'abundance(chebi:"CHEBI:25805" ! "oxygen atom")'):
+            with self.subTest(s=s):
+                self._test_abundance_helper(s)
 
     def _test_abundance_with_location_helper(self, statement):
         result = self.parser.general_abundance.parseString(statement)
@@ -132,8 +134,8 @@ class TestAbundanceLabeled(TestTokenParserBase):
 
         self.assertEqual(expected_result, result.asDict())
 
-        self.assertIn(self.expected_node_data, self.graph)
-        self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node_data))
+        self.assertIn(self.expected_node, self.graph)
+        self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node))
 
         modifier = modifier_po_to_dict(result)
         expected_modifier = {
@@ -2035,5 +2037,5 @@ class TestSemantics(unittest.TestCase):
         parser.bel_term.addParseAction(parser.handle_term)
         parser.bel_term.parseString('bp(ABASD)')
 
-        node_data = bioprocess(namespace=DIRTY, name='ABASD')
-        self.assertIn(node_data, graph)
+        node = bioprocess(namespace=DIRTY, name='ABASD')
+        self.assertIn(node, graph)

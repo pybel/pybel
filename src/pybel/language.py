@@ -66,7 +66,7 @@ class Entity(dict):
 
         return '{}:{}'.format(
             self.namespace,
-            ensure_quotes(self.name) if self.name else self.identifier,
+            ensure_quotes(self.identifier if self.identifier else self.name),
         )
 
     @property
@@ -74,7 +74,7 @@ class Entity(dict):
         """Return this entity as an OBO-style CURIE."""
         return '{}:{} ! {}'.format(
             self.namespace,
-            ensure_quotes(self.identifier) if self.identifier else '',
+            ensure_quotes(self.identifier),
             ensure_quotes(self.name),
         )
 

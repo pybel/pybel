@@ -8,10 +8,10 @@ import logging
 import time
 from typing import Iterable, List, Mapping, Optional, TextIO, Tuple, Union
 
-from networkx.utils import open_file
-
 import bel_resources.constants
 from bel_resources import make_knowledge_header
+from networkx.utils import open_file
+
 from .constants import (
     ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CELL_SURFACE, CITATION, CITATION_DB, CITATION_IDENTIFIER,
     CITATION_TYPE_PUBMED, DEGRADATION, EFFECT, EVIDENCE, EXTRACELLULAR, FROM_LOC, INTRACELLULAR, LOCATION, MODIFIER,
@@ -38,7 +38,7 @@ EdgeTuple = Tuple[BaseEntity, BaseEntity, str, EdgeData]
 
 
 @open_file(1, mode='w')
-def to_bel_script(graph, path: Union[str, TextIO], use_identifiers: bool = False) -> None:
+def to_bel_script(graph, path: Union[str, TextIO], use_identifiers: bool = True) -> None:
     """Write the BELGraph as a canonical BEL script.
 
     :param BELGraph graph: the BEL Graph to output as a BEL Script
@@ -344,7 +344,7 @@ def _to_bel_lines_footer(graph, use_identifiers: bool = False) -> Iterable[str]:
         yield 'UNSET Citation'
 
 
-def calculate_canonical_name(node: BaseEntity, use_curie: bool = False) -> str:
+def calculate_canonical_name(node: BaseEntity, use_identifiers: bool = True) -> str:
     """Calculate the canonical name for a given node.
 
     If it is a simple node, uses the already given name. Otherwise, it uses the BEL string.
@@ -355,10 +355,10 @@ def calculate_canonical_name(node: BaseEntity, use_curie: bool = False) -> str:
     elif isinstance(node, BaseAbundance):
         if VARIANTS in node:
             return node.as_bel(use_identifiers=True)
-        elif use_curie:
-            return node.curie
-        else:
+        elif use_identifiers and node.entity.identifier and node.entity.name:
             return node.obo
+        else:
+            return node.curie
 
     else:
         raise TypeError('Unhandled node: {}'.format(node))

@@ -86,7 +86,7 @@ class BaseEntity(dict, metaclass=ABCMeta):
         return rev_abundance_labels[self.function]
 
     @abstractmethod
-    def as_bel(self, use_identifiers: bool = False) -> str:
+    def as_bel(self, use_identifiers: bool = True) -> str:
         """Return this entity as a BEL string."""
 
     @property
@@ -174,11 +174,11 @@ class BaseAbundance(BaseEntity):
         """The OBO-style identifier for this node."""
         return self.entity.obo
 
-    def as_bel(self, use_identifiers: bool = False) -> str:
+    def as_bel(self, use_identifiers: bool = True) -> str:
         """Return this node as a BEL string."""
         return "{}({})".format(
             self._bel_function,
-            self.obo if use_identifiers else self.curie,
+            self.obo if use_identifiers and self.entity.identifier and self.entity.name else self.curie,
         )
 
 
@@ -237,7 +237,7 @@ class Variant(dict, metaclass=ABCMeta):
         super().__init__({KIND: kind})
 
     @abstractmethod
-    def as_bel(self, use_identifiers: bool = False) -> str:
+    def as_bel(self, use_identifiers: bool = True) -> str:
         """Return this variant as a BEL string."""
 
     def as_ibel(self) -> str:
@@ -279,7 +279,7 @@ class CentralDogma(BaseAbundance):
         """Return this entity's variants, if they exist."""
         return self.get(VARIANTS)
 
-    def as_bel(self, use_identifiers: bool = False) -> str:
+    def as_bel(self, use_identifiers: bool = True) -> str:
         """Return this node as a BEL string."""
         if not self.variants:
             return super().as_bel(use_identifiers=use_identifiers)
@@ -291,7 +291,7 @@ class CentralDogma(BaseAbundance):
 
         return "{}({}, {})".format(
             self._bel_function,
-            self.obo if use_identifiers else self.curie,
+            self.obo if use_identifiers and self.entity.identifier and self.entity.name else self.curie,
             ', '.join(variants_canon),
         )
 
@@ -395,9 +395,9 @@ class ProteinModification(Variant):
         """The concept for this protein modification."""
         return self[CONCEPT]
 
-    def as_bel(self, use_identifiers: bool = False) -> str:
+    def as_bel(self, use_identifiers: bool = True) -> str:
         """Return this protein modification variant as a BEL string."""
-        if use_identifiers:
+        if use_identifiers and self.entity.identifier and self.entity.name:
             x = self.entity.obo
         else:
             x = self.entity.curie
@@ -450,9 +450,9 @@ class GeneModification(Variant):
         """Represent the entity in this gene modification."""
         return self[CONCEPT]
 
-    def as_bel(self, use_identifiers: bool = False) -> str:
+    def as_bel(self, use_identifiers: bool = True) -> str:
         """Return this gene modification variant as a BEL string."""
-        if use_identifiers:
+        if use_identifiers and self.entity.identifier and self.entity.name:
             x = self.entity.obo
         else:
             x = self.entity.curie
@@ -480,7 +480,7 @@ class Hgvs(Variant):
         """The HGVS variant string."""
         return self[HGVS]
 
-    def as_bel(self, use_identifiers: bool = False) -> str:
+    def as_bel(self, use_identifiers: bool = True) -> str:
         """Return this HGVS variant as a BEL string."""
         return 'var("{}")'.format(self.variant)
 
@@ -665,7 +665,7 @@ class Protein(CentralDogma):
         )
 
 
-def _entity_list_as_bel(entities: Iterable[BaseEntity], use_identifiers: bool = False) -> str:
+def _entity_list_as_bel(entities: Iterable[BaseEntity], use_identifiers: bool = True) -> str:
     """Stringify a list of BEL entities."""
     return ', '.join(
         e.as_bel(use_identifiers=use_identifiers)
@@ -726,7 +726,7 @@ class Reaction(BaseEntity):
         """Get entities appearing in both the reactants and products."""
         return set(self.reactants).intersection(self.products)
 
-    def as_bel(self, use_identifiers: bool = False) -> str:
+    def as_bel(self, use_identifiers: bool = True) -> str:
         """Return this reaction as a BEL string."""
         return 'rxn(reactants({}), products({}))'.format(
             _entity_list_as_bel(self.reactants, use_identifiers=use_identifiers),
@@ -757,7 +757,7 @@ class ListAbundance(BaseEntity):
         """Return the list of members in this list abundance."""
         return self[MEMBERS]
 
-    def as_bel(self, use_identifiers: bool = False) -> str:
+    def as_bel(self, use_identifiers: bool = True) -> str:
         """Return this list abundance as a BEL string."""
         return '{}({})'.format(
             self._bel_function,
@@ -924,14 +924,17 @@ class FusionBase(BaseEntity):
         """Get the 3' partner's range."""
         return self[FUSION][RANGE_3P]
 
-    def as_bel(self, use_identifiers: bool = False) -> str:
+    def as_bel(self, use_identifiers: bool = True) -> str:
         """Return this fusion as a BEL string."""
-        if use_identifiers:
-            p5p = self.partner_5p.obo
+        if use_identifiers and self.partner_3p.entity.identifier and self.partner_3p.entity.name:
             p3p = self.partner_3p.obo
         else:
-            p5p = self.partner_5p.curie
             p3p = self.partner_3p.curie
+
+        if use_identifiers and self.partner_5p.entity.identifier and self.partner_5p.entity.name:
+            p5p = self.partner_5p.obo
+        else:
+            p5p = self.partner_5p.curie
 
         return '{}(fus({}, "{}", {}, "{}"))'.format(
             self._bel_function,
