@@ -1,6 +1,21 @@
 # -*- coding: utf-8 -*-
 
-"""Entry points for PyKEEN."""
+"""Entry points for PyKEEN.
+
+This example shows how you can parse/load the triples from a BEL document with the `*.bel` extension.
+
+.. code-block:: python
+
+    from urllib.request import urlretrieve
+    url = 'https://raw.githubusercontent.com/cthoyt/selventa-knowledge/master/selventa_knowledge/small_corpus.bel'
+    urlretrieve(url, 'small_corpus.bel')
+
+    from pykeen.triples import TriplesFactory
+    tf = TriplesFactory(path='small_corpus.bel')
+
+The same is true for precompiled BEL documents in the node-link format with the `*.bel.nodelink.json` extension and
+the pickle format with the `*.bel.pickle` extension.
+"""
 
 import numpy as np
 
