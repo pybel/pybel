@@ -15,6 +15,15 @@ This example shows how you can parse/load the triples from a BEL document with t
 
 The same is true for precompiled BEL documents in the node-link format with the `*.bel.nodelink.json` extension and
 the pickle format with the `*.bel.pickle` extension.
+
+This example shows how you can load/parse the triples from a BEL document stored in BEL Commons using the
+``bel-commons`` prefix in combination with the network's identifier.
+
+.. code-block:: python
+
+    from pykeen.triples import TriplesFactory
+    # the network's identifier is 528
+    tf = TriplesFactory(path='bel-commons:528')
 """
 
 import numpy as np
