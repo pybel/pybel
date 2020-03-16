@@ -8,10 +8,10 @@ import logging
 import time
 from typing import Iterable, List, Mapping, Optional, TextIO, Tuple, Union
 
-import bel_resources.constants
-from bel_resources import make_knowledge_header
 from networkx.utils import open_file
 
+import bel_resources.constants
+from bel_resources import make_knowledge_header
 from .constants import (
     ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CELL_SURFACE, CITATION, CITATION_DB, CITATION_IDENTIFIER,
     CITATION_TYPE_PUBMED, DEGRADATION, EFFECT, EVIDENCE, EXTRACELLULAR, FROM_LOC, INTRACELLULAR, LOCATION, MODIFIER,
