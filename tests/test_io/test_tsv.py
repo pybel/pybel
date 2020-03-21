@@ -7,19 +7,20 @@ from typing import Tuple, Type
 
 from pybel import BELGraph
 from pybel.constants import (
-    ASSOCIATION, DECREASES, EQUIVALENT_TO, INCREASES, IS_A, NEGATIVE_CORRELATION, OBJECT, PART_OF,
-    POSITIVE_CORRELATION, REGULATES, RELATION,
+    ASSOCIATION, DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO, INCREASES, IS_A,
+    NEGATIVE_CORRELATION, OBJECT, PART_OF, POSITIVE_CORRELATION, REGULATES, RELATION,
 )
 from pybel.dsl import (
-    Abundance, BaseEntity, BiologicalProcess, MicroRna, NamedComplexAbundance, Pathology, Protein,
-    Rna, activity,
+    Abundance, BaseEntity, BiologicalProcess, MicroRna, NamedComplexAbundance, Pathology, Population, Protein, Rna,
+    activity,
 )
 from pybel.io.tsv.api import get_triple
 from pybel.io.tsv.converters import (
-    AssociationConverter, Converter, CorrelationConverter, DecreasesAmountConverter, DrugIndicationConverter,
-    DrugSideEffectConverter, EquivalenceConverter, IncreasesAmountConverter, IsAConverter,
+    AbundanceDirectlyDecreasesProteinActivityConverter, AbundanceDirectlyIncreasesProteinActivityConverter,
+    AbundancePartOfPopulationConverter, AssociationConverter, Converter, CorrelationConverter, DecreasesAmountConverter,
+    DrugIndicationConverter, DrugSideEffectConverter, EquivalenceConverter, IncreasesAmountConverter, IsAConverter,
     MiRNADecreasesExpressionConverter, PartOfNamedComplexConverter, RegulatesActivityConverter,
-    RegulatesAmountConverter, SubprocessPartOfBiologicalProcess,
+    RegulatesAmountConverter, SubprocessPartOfBiologicalProcessConverter,
 )
 from pybel.testing.utils import n
 from pybel.typing import EdgeData
@@ -47,10 +48,11 @@ m1 = MicroRna('MIRBASE', '1')
 r1 = Rna('HGNC', '1')
 r2 = Rna('HGNC', '2')
 nca1 = NamedComplexAbundance('FPLX', '1')
+pop1 = Population('taxonomy', '1')
 
 converters_true_list = [
     (PartOfNamedComplexConverter, p1, nca1, _rel(PART_OF), ('HGNC:1', 'partOf', 'FPLX:1')),
-    (SubprocessPartOfBiologicalProcess, b1, b2, _rel(PART_OF), ('GO:1', 'partOf', 'GO:2')),
+    (SubprocessPartOfBiologicalProcessConverter, b1, b2, _rel(PART_OF), ('GO:1', 'partOf', 'GO:2')),
     (AssociationConverter, r1, r2, _rel(ASSOCIATION), ('HGNC:1', 'association', 'HGNC:2')),
     (AssociationConverter, r1, r2, _assoc('similarity'), ('HGNC:1', 'similarity', 'HGNC:2')),
     (CorrelationConverter, r1, r2, _rel(POSITIVE_CORRELATION), ('HGNC:1', 'positiveCorrelation', 'HGNC:2')),
@@ -67,13 +69,24 @@ converters_true_list = [
     (DrugIndicationConverter, a1, d1, _rel(DECREASES), ('CHEBI:1', 'decreases', 'MESH:1')),
     # Found in miRTarBase
     (MiRNADecreasesExpressionConverter, m1, r1, _rel(DECREASES), ('MIRBASE:1', 'repressesExpressionOf', 'HGNC:1')),
-    # Found in DrugBank
-    (RegulatesActivityConverter, a1, p1, _rela(REGULATES), ('CHEBI:1', 'activityDirectlyRegulatesActivityOf',
-                                                            'HGNC:1')),
+    # Found in chemogenomics databases (e.g., DrugBank)
+    (
+        RegulatesActivityConverter, a1, p1, _rela(REGULATES),
+        ('CHEBI:1', 'activityDirectlyRegulatesActivityOf', 'HGNC:1'),
+    ),
+    (
+        AbundanceDirectlyDecreasesProteinActivityConverter, a1, p1, _rela(DIRECTLY_DECREASES),
+        ('CHEBI:1', 'activityDirectlyNegativelyRegulatesActivityOf', 'HGNC:1'),
+    ),
+    (
+        AbundanceDirectlyIncreasesProteinActivityConverter, a1, p1, _rela(DIRECTLY_INCREASES),
+        ('CHEBI:1', 'activityDirectlyPositivelyRegulatesActivityOf', 'HGNC:1'),
+    ),
     # Found in ComPath
     (EquivalenceConverter, b1, b2, _rel(EQUIVALENT_TO), ('GO:1', 'equivalentTo', 'GO:2')),
-    (SubprocessPartOfBiologicalProcess, b1, b2, _rel(PART_OF), ('GO:1', 'partOf', 'GO:2')),
-    # Found in HSDN
+    (SubprocessPartOfBiologicalProcessConverter, b1, b2, _rel(PART_OF), ('GO:1', 'partOf', 'GO:2')),
+    # Misc
+    (AbundancePartOfPopulationConverter, a1, pop1, _rel(PART_OF), ('CHEBI:1', 'partOf', 'taxonomy:1')),
 ]
 
 converters_false_list = [

@@ -9,16 +9,7 @@ from typing import List, Optional, TextIO, Tuple, Union
 from networkx.utils import open_file
 from tqdm import tqdm
 
-from .converters import (
-    AssociationConverter, CorrelationConverter, DecreasesActivityConverter, DecreasesAmountConverter,
-    DecreasesDegradationConverter, DrugIndicationConverter, DrugSideEffectConverter, EquivalenceConverter,
-    HasVariantConverter, IncreasesActivityConverter, IncreasesAmountConverter, IncreasesDegradationConverter,
-    IsAConverter, ListComplexHasComponentConverter, MiRNADecreasesExpressionConverter,
-    MiRNADirectlyDecreasesExpressionConverter, NoChangeActivityConverter, NoChangeAmountConverter,
-    NoChangeDegradationConverter, PartOfNamedComplexConverter, ProteinPartOfBiologicalProcess,
-    ReactionHasCatalystConverter, ReactionHasProductConverter, ReactionHasReactantConverter, RegulatesActivityConverter,
-    RegulatesAmountConverter, RegulatesDegradationConverter, SubprocessPartOfBiologicalProcess,
-)
+from . import converters
 from ...dsl import BaseEntity
 from ...struct import BELGraph
 
@@ -94,38 +85,42 @@ def get_triple(
     data = graph[u][v][key]
 
     # order is important
-    converters = [
-        ListComplexHasComponentConverter,
-        PartOfNamedComplexConverter,
-        SubprocessPartOfBiologicalProcess,
-        ProteinPartOfBiologicalProcess,
-        RegulatesActivityConverter,
-        MiRNADecreasesExpressionConverter,
-        MiRNADirectlyDecreasesExpressionConverter,
-        IsAConverter,
-        EquivalenceConverter,
-        CorrelationConverter,
-        AssociationConverter,
-        DrugIndicationConverter,
-        DrugSideEffectConverter,
-        RegulatesAmountConverter,
-        IncreasesAmountConverter,
-        DecreasesAmountConverter,
-        NoChangeAmountConverter,
-        IncreasesActivityConverter,
-        DecreasesActivityConverter,
-        NoChangeActivityConverter,
-        ReactionHasProductConverter,
-        ReactionHasReactantConverter,
-        ReactionHasCatalystConverter,
-        HasVariantConverter,
-        IncreasesDegradationConverter,
-        DecreasesDegradationConverter,
-        RegulatesDegradationConverter,
-        NoChangeDegradationConverter,
+    _converters = [
+        converters.ListComplexHasComponentConverter,
+        converters.PartOfNamedComplexConverter,
+        converters.SubprocessPartOfBiologicalProcessConverter,
+        converters.ProteinPartOfBiologicalProcessConverter,
+        converters.AbundancePartOfPopulationConverter,
+        converters.PopulationPartOfAbundanceConverter,
+        converters.RegulatesActivityConverter,
+        converters.MiRNADecreasesExpressionConverter,
+        converters.MiRNADirectlyDecreasesExpressionConverter,
+        converters.AbundanceDirectlyDecreasesProteinActivityConverter,
+        converters.AbundanceDirectlyIncreasesProteinActivityConverter,
+        converters.IsAConverter,
+        converters.EquivalenceConverter,
+        converters.CorrelationConverter,
+        converters.AssociationConverter,
+        converters.DrugIndicationConverter,
+        converters.DrugSideEffectConverter,
+        converters.RegulatesAmountConverter,
+        converters.IncreasesAmountConverter,
+        converters.DecreasesAmountConverter,
+        converters.NoChangeAmountConverter,
+        converters.IncreasesActivityConverter,
+        converters.DecreasesActivityConverter,
+        converters.NoChangeActivityConverter,
+        converters.ReactionHasProductConverter,
+        converters.ReactionHasReactantConverter,
+        converters.ReactionHasCatalystConverter,
+        converters.HasVariantConverter,
+        converters.IncreasesDegradationConverter,
+        converters.DecreasesDegradationConverter,
+        converters.RegulatesDegradationConverter,
+        converters.NoChangeDegradationConverter,
     ]
 
-    for converter in converters:
+    for converter in _converters:
         if converter.predicate(u, v, key, data):
             return converter.convert(u, v, key, data)
 
