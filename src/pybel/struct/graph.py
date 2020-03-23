@@ -24,7 +24,7 @@ from ..constants import (
     NEGATIVE_CORRELATION, NO_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, PRODUCTS, REACTANTS,
     REGULATES, RELATION, SUBJECT, TRANSCRIBED_TO, TRANSLATED_TO, VARIANTS,
 )
-from ..dsl import BaseEntity, ComplexAbundance, Gene, MicroRna, Protein, Rna, activity
+from ..dsl import BaseAbundance, BaseEntity, ComplexAbundance, Gene, MicroRna, Protein, Reaction, Rna, activity
 from ..parser.exc import BELParserWarning
 from ..typing import EdgeData
 from ..utils import CitationDict, citation_dict, hash_edge
@@ -575,6 +575,14 @@ class BELGraph(nx.MultiDiGraph):
                 self.add_has_reactant(node, reactant_tokens)
             for product_tokens in node[PRODUCTS]:
                 self.add_has_product(node, product_tokens)
+
+    def add_reaction(
+        self,
+        reactants: Union[BaseAbundance, Iterable[BaseAbundance]],
+        products: Union[BaseAbundance, Iterable[BaseAbundance]],
+    ):
+        """Add a reaction directly to the graph."""
+        return self.add_node_from_data(Reaction(reactants=reactants, products=products))
 
     def _has_edge_attr(self, u: BaseEntity, v: BaseEntity, key: str, attr: Hashable) -> bool:
         assert isinstance(u, BaseEntity)
