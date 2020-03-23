@@ -490,7 +490,7 @@ class BELGraph(nx.MultiDiGraph):
         v,
         *,
         evidence: str,
-        citation: Union[str, Mapping[str, str]],
+        citation: Union[str, Tuple[str, str], CitationDict],
         annotations: Optional[AnnotationsHint] = None,
         **attr
     ) -> str:
