@@ -574,6 +574,17 @@ class Gene(CentralDogma):
 
     function = GENE
 
+    def get_rna(self) -> 'Rna':
+        """Get the corresponding RNA."""
+        if self.variants:
+            raise InferCentralDogmaException('can not get gene for variant')
+        return Rna(
+            namespace=self.namespace,
+            name=self.name,
+            identifier=self.identifier,
+            xrefs=self.xrefs,
+        )
+
 
 class _Transcribable(CentralDogma):
     """A base class for RNA and micro-RNA to share getting of their corresponding genes."""
