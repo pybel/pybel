@@ -12,7 +12,7 @@ from ...constants import (
 )
 from ...dsl import (
     Abundance, BaseAbundance, BaseEntity, BiologicalProcess, CentralDogma, ComplexAbundance, MicroRna,
-    NamedComplexAbundance, Pathology, Protein, Reaction, Rna,
+    NamedComplexAbundance, Pathology, Population, Protein, Reaction, Rna,
 )
 from ...typing import EdgeData
 
@@ -110,18 +110,32 @@ class PartOfNamedComplexConverter(_PartOfConverter):
     object_type = NamedComplexAbundance
 
 
-class SubprocessPartOfBiologicalProcess(_PartOfConverter):
+class SubprocessPartOfBiologicalProcessConverter(_PartOfConverter):
     """Converts BEL statements like ``bp(X) partOf bp(Y)``."""
 
     subject_type = BiologicalProcess
     object_type = BiologicalProcess
 
 
-class ProteinPartOfBiologicalProcess(_PartOfConverter):
+class ProteinPartOfBiologicalProcessConverter(_PartOfConverter):
     """Converts BEL statements like ``p(X) partOf bp(Y)``."""
 
     subject_type = Protein
     object_type = BiologicalProcess
+
+
+class AbundancePartOfPopulationConverter(_PartOfConverter):
+    """Converts BEL statements like ``a(X) partOf pop(Y)``."""
+
+    subject_type = Abundance
+    object_type = Population
+
+
+class PopulationPartOfAbundanceConverter(_PartOfConverter):
+    """Converts BEL statements like ``pop(X) partOf a(Y)``."""
+
+    subject_type = Population
+    object_type = Abundance
 
 
 class _ReactionTypedPredicate(SimpleTypedPredicate):
@@ -340,6 +354,13 @@ class IncreasesActivityConverter(RegulatesActivityConverter):
     """Converts BEL statements like ``A(B) -> act(C(D) [, ma(E)])``."""
 
     relation = INCREASES
+    target_relation = 'activityPositivelyRegulatesActivityOf'
+
+
+class DirectlyIncreasesActivityConverter(RegulatesActivityConverter):
+    """Converts BEL statements like ``A(B) => act(C(D) [, ma(E)])``."""
+
+    relation = DIRECTLY_INCREASES
     target_relation = 'activityDirectlyPositivelyRegulatesActivityOf'
 
 
@@ -347,6 +368,13 @@ class DecreasesActivityConverter(RegulatesActivityConverter):
     """Converts BEL statements like ``A(B) -| act(C(D) [, ma(E)])``."""
 
     relation = DECREASES
+    target_relation = 'activityNegativelyRegulatesActivityOf'
+
+
+class DirectlyDecreasesActivityConverter(RegulatesActivityConverter):
+    """Converts BEL statements like ``A(B) =| act(C(D) [, ma(E)])``."""
+
+    relation = DIRECTLY_DECREASES
     target_relation = 'activityDirectlyNegativelyRegulatesActivityOf'
 
 
@@ -355,6 +383,20 @@ class NoChangeActivityConverter(RegulatesActivityConverter):
 
     relation = CAUSES_NO_CHANGE
     target_relation = 'notActivityDirectlyRegulatesActivityOf'
+
+
+class AbundanceDirectlyDecreasesProteinActivityConverter(DirectlyDecreasesActivityConverter):
+    """Converts BEL statements like ``a(X) =| act(p(Y))``."""
+
+    subject_type = Abundance
+    object_type = Protein
+
+
+class AbundanceDirectlyIncreasesProteinActivityConverter(DirectlyIncreasesActivityConverter):
+    """Converts BEL statements like ``a(X) => act(p(Y))``."""
+
+    subject_type = Abundance
+    object_type = Protein
 
 
 class MiRNARegulatesExpressionConverter(TypedConverter, SimpleTypedPredicate):

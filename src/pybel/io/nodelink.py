@@ -30,7 +30,10 @@ __all__ = [
 
 
 def to_nodelink(graph: BELGraph) -> Mapping[str, Any]:
-    """Convert this graph to a node-link JSON object."""
+    """Convert this graph to a node-link JSON object.
+
+    :param graph: BEL Graph
+    """
     graph_json_dict = _to_nodelink_json_helper(graph)
 
     # Convert annotation list definitions (which are sets) to canonicalized/sorted lists
@@ -95,6 +98,8 @@ def from_nodelink_jsons(graph_json_str: str, check_version: bool = True) -> BELG
 
 def _to_nodelink_json_helper(graph: BELGraph) -> Mapping[str, Any]:
     """Convert a BEL graph to a node-link format.
+
+    :param graph: BEL Graph
 
     Adapted from :func:`networkx.readwrite.json_graph.node_link_data`
     """

@@ -3,10 +3,14 @@
 """Summary functions for edges in BEL graphs."""
 
 from collections import Counter, defaultdict
+from random import choice
 from typing import Iterable, Mapping, Set, Tuple
 
 from ..filters.edge_predicates import edge_has_annotation
+from ...canonicalize import edge_to_bel
 from ...constants import ANNOTATIONS, RELATION
+from ...dsl import BaseEntity
+from ...utils import CanonicalEdge, canonicalize_edge
 
 __all__ = [
     'iter_annotation_value_pairs',
@@ -18,6 +22,7 @@ __all__ = [
     'count_annotations',
     'get_unused_annotations',
     'get_unused_list_annotation_values',
+    'get_metaedge_to_key',
 ]
 
 
@@ -145,3 +150,21 @@ def get_unused_list_annotation_values(graph) -> Mapping[str, Set[str]]:
             continue
         result[annotation] = set(values) - used_values
     return result
+
+
+def get_metaedge_to_key(graph) -> Mapping[CanonicalEdge, Set[Tuple[BaseEntity, BaseEntity, str]]]:
+    """Get all edge types."""
+    rv = defaultdict(set)
+    for u, v, k, d in graph.edges(keys=True, data=True):
+        rel, u_mod, v_mod = canonicalize_edge(d)
+        rv[u.__class__.__name__, u_mod, rel, v.__class__.__name__, v_mod].add((u, v, k))
+    return dict(rv)
+
+
+def iter_sample_metaedges(graph):
+    """Iterate sampled metaedges."""
+    for k, value in get_metaedge_to_key(graph).items():
+        u, v, key = choice(list(value))
+        d = graph[u][v][key]
+        bel = edge_to_bel(u, v, d, use_identifiers=True)
+        yield (u, v, key, d, *k, bel)

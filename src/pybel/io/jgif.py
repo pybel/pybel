@@ -12,7 +12,7 @@ import json
 import logging
 from collections import defaultdict
 from operator import methodcaller
-from typing import Optional, TextIO, Union
+from typing import TextIO, Union
 
 import requests
 from networkx.utils import open_file
@@ -398,8 +398,7 @@ def to_jgif(graph):
 @open_file(1, mode='w')
 def to_jgif_file(graph: BELGraph, file: Union[str, TextIO], **kwargs) -> None:
     """Write JGIF to a file."""
-    jgif = to_jgif(graph)
-    json.dump(jgif, file, ensure_ascii=False, **kwargs)
+    json.dump(to_jgif(graph), file, ensure_ascii=False, **kwargs)
 
 
 def to_jgif_gz(graph, path: str, **kwargs) -> None:
@@ -413,7 +412,6 @@ def to_jgif_jsons(graph: BELGraph, **kwargs) -> str:
     return json.dumps(to_jgif(graph), ensure_ascii=False, **kwargs)
 
 
-def post_jgif(graph: BELGraph, url: Optional[str] = None, **kwargs) -> requests.Response:
+def post_jgif(graph: BELGraph, url: str, **kwargs) -> requests.Response:
     """Post the JGIF to a given URL."""
-    jgif = to_jgif(graph)
-    return requests.post(url, json=jgif, **kwargs)
+    return requests.post(url, json=to_jgif(graph), **kwargs)

@@ -10,12 +10,12 @@ from pybel.constants import (
     ABUNDANCE, ACTIVITY, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, CONCEPT, DEGRADATION,
     DIRECTLY_INCREASES, DIRTY, EFFECT, FRAGMENT, FROM_LOC, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE,
     FUSION_START, FUSION_STOP, GENE, HAS_VARIANT, HGVS, IDENTIFIER, KIND, LOCATION, MEMBERS, MIRNA, MODIFIER, NAME,
-    NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PART_OF, PATHOLOGY, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P, REACTANTS,
-    REACTION, RELATION, RNA, SUBJECT, TARGET, TO_LOC, TRANSLOCATION, VARIANTS,
+    NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PART_OF, PATHOLOGY, POPULATION, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P,
+    REACTANTS, REACTION, RELATION, RNA, SUBJECT, TARGET, TO_LOC, TRANSLOCATION, VARIANTS,
 )
 from pybel.dsl import (
-    Fragment, abundance, bioprocess, cell_surface_expression, complex_abundance, composite_abundance, fragment,
-    fusion_range, gene, gene_fusion, gmod, hgvs, mirna, named_complex_abundance, pathology, pmod, protein,
+    Fragment, Population, abundance, bioprocess, cell_surface_expression, complex_abundance, composite_abundance,
+    fragment, fusion_range, gene, gene_fusion, gmod, hgvs, mirna, named_complex_abundance, pathology, pmod, protein,
     protein_fusion, reaction, rna, rna_fusion, secretion, translocation,
 )
 from pybel.dsl.namespaces import hgnc
@@ -38,15 +38,15 @@ class TestAbundance(TestTokenParserBase):
         self.parser.clear()
         self.parser.general_abundance.setParseAction(self.parser.handle_term)
 
-        self.expected_node_data = abundance(namespace='CHEBI', name='oxygen atom')
+        self.expected_node = abundance(namespace='CHEBI', name='oxygen atom')
         self.expected_canonical_bel = 'a(CHEBI:"oxygen atom")'
 
     def _test_abundance_helper(self, statement):
         result = self.parser.general_abundance.parseString(statement)
-        self.assertEqual(dict(self.expected_node_data), result.asDict())
+        self.assertEqual(dict(self.expected_node), result.asDict())
 
-        self.assertIn(self.expected_node_data, self.graph)
-        self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node_data))
+        self.assertIn(self.expected_node, self.graph)
+        self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node))
 
         self.assertEqual({}, modifier_po_to_dict(result), msg='The modifier dictionary should be empty')
 
@@ -72,8 +72,8 @@ class TestAbundance(TestTokenParserBase):
 
         self.assertEqual(expected_result, result.asDict())
 
-        self.assertIn(self.expected_node_data, self.graph)
-        self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node_data))
+        self.assertIn(self.expected_node, self.graph)
+        self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node))
 
         modifier = modifier_po_to_dict(result)
         expected_modifier = {
@@ -96,23 +96,25 @@ class TestAbundanceLabeled(TestTokenParserBase):
         self.parser.clear()
         self.parser.general_abundance.setParseAction(self.parser.handle_term)
 
-        self.expected_node_data = abundance(namespace='chebi', name='oxygen atom', identifier='CHEBI:25805')
-        self.expected_canonical_bel = 'a(chebi:"oxygen atom")'
+        self.expected_node = abundance(namespace='chebi', name='oxygen atom', identifier='CHEBI:25805')
+        self.expected_canonical_bel = 'a(chebi:"CHEBI:25805" ! "oxygen atom")'
 
     def _test_abundance_helper(self, statement):
         result = self.parser.general_abundance.parseString(statement)
-        self.assertEqual(dict(self.expected_node_data), result.asDict())
+        self.assertEqual(dict(self.expected_node), result.asDict())
 
-        self.assertIn(self.expected_node_data, self.graph)
-        self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node_data))
+        self.assertIn(self.expected_node, self.graph)
+        node = list(self.graph)[0]
+        self.assertEqual(self.expected_canonical_bel, node.as_bel())
 
         self.assertEqual({}, modifier_po_to_dict(result), msg='The modifier dictionary should be empty')
 
     def test_abundance(self):
         """Test short/long abundance name."""
-        self._test_abundance_helper('a(chebi:"CHEBI:25805"!"oxygen atom")')
-        self._test_abundance_helper('abundance(chebi:"CHEBI:25805"!"oxygen atom")')
-        self._test_abundance_helper('abundance(chebi:"CHEBI:25805" ! "oxygen atom")')
+        for s in ('a(chebi:"CHEBI:25805"!"oxygen atom")', 'abundance(chebi:"CHEBI:25805"!"oxygen atom")',
+                  'abundance(chebi:"CHEBI:25805" ! "oxygen atom")'):
+            with self.subTest(s=s):
+                self._test_abundance_helper(s)
 
     def _test_abundance_with_location_helper(self, statement):
         result = self.parser.general_abundance.parseString(statement)
@@ -132,8 +134,8 @@ class TestAbundanceLabeled(TestTokenParserBase):
 
         self.assertEqual(expected_result, result.asDict())
 
-        self.assertIn(self.expected_node_data, self.graph)
-        self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node_data))
+        self.assertIn(self.expected_node, self.graph)
+        self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node))
 
         modifier = modifier_po_to_dict(result)
         expected_modifier = {
@@ -1499,6 +1501,32 @@ class TestPathology(TestTokenParserBase):
         self.assertEqual('path(MESH:adenocarcinoma)', self.graph.node_to_bel(expected_node))
 
 
+class TestPopulation(TestTokenParserBase):
+    def setUp(self):
+        self.parser.clear()
+        self.parser.population.setParseAction(self.parser.handle_term)
+
+    def test_parse_population(self):
+        statement = 'pop(uberon:blood)'
+        result = self.parser.population.parseString(statement)
+
+        expected_dict = {
+            FUNCTION: POPULATION,
+            CONCEPT: {
+                NAMESPACE: 'uberon',
+                NAME: 'blood',
+            },
+        }
+        self.assertEqual(expected_dict, result.asDict())
+
+        expected_node = Population('uberon', 'blood')
+        self.assert_has_node(expected_node)
+
+        self.assertEqual('pop(uberon:blood)',
+                         self.graph.node_to_bel(expected_node),
+                         msg='Nodes: {}'.format(list(self.graph)))
+
+
 class TestActivity(TestTokenParserBase):
     """Tests for molecular activity terms."""
 
@@ -2009,5 +2037,5 @@ class TestSemantics(unittest.TestCase):
         parser.bel_term.addParseAction(parser.handle_term)
         parser.bel_term.parseString('bp(ABASD)')
 
-        node_data = bioprocess(namespace=DIRTY, name='ABASD')
-        self.assertIn(node_data, graph)
+        node = bioprocess(namespace=DIRTY, name='ABASD')
+        self.assertIn(node, graph)

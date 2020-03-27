@@ -2,6 +2,7 @@
 
 """This module contains output functions to BEL scripts."""
 
+import gzip
 import itertools as itt
 import logging
 import time
@@ -12,9 +13,10 @@ from networkx.utils import open_file
 import bel_resources.constants
 from bel_resources import make_knowledge_header
 from .constants import (
-    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CELL_SURFACE, CITATION, CITATION_DB, CITATION_IDENTIFIER, DEGRADATION,
-    EFFECT, EVIDENCE, EXTRACELLULAR, FROM_LOC, INTRACELLULAR, LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT,
-    PYBEL_AUTOEVIDENCE, RELATION, SUBJECT, TO_LOC, TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS,
+    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CELL_SURFACE, CITATION, CITATION_DB, CITATION_IDENTIFIER,
+    CITATION_TYPE_PUBMED, DEGRADATION, EFFECT, EVIDENCE, EXTRACELLULAR, FROM_LOC, INTRACELLULAR, LOCATION, MODIFIER,
+    NAME, NAMESPACE, OBJECT, PYBEL_AUTOEVIDENCE, PYBEL_PUBMED, RELATION, SET_CITATION_FMT, SUBJECT, TO_LOC,
+    TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS,
 )
 from .dsl import BaseAbundance, BaseEntity, FusionBase, ListAbundance, Reaction
 from .typing import EdgeData
@@ -23,8 +25,10 @@ from .version import VERSION
 
 __all__ = [
     'to_bel_script',
+    'to_bel_script_gz',
     'to_bel_script_lines',
     'edge_to_bel',
+    'edge_to_tuple',
     'calculate_canonical_name',
 ]
 
@@ -34,25 +38,33 @@ EdgeTuple = Tuple[BaseEntity, BaseEntity, str, EdgeData]
 
 
 @open_file(1, mode='w')
-def to_bel_script(graph, path: Union[str, TextIO]) -> None:
+def to_bel_script(graph, path: Union[str, TextIO], use_identifiers: bool = True) -> None:
     """Write the BELGraph as a canonical BEL script.
 
     :param BELGraph graph: the BEL Graph to output as a BEL Script
     :param path: A path or file-like.
+    :param use_identifiers: Enables extended `BEP-0008 <http://bep.bel.bio/published/BEP-0008.html>`_ syntax
     """
-    for line in to_bel_script_lines(graph):
+    for line in to_bel_script_lines(graph, use_identifiers=use_identifiers):
         print(line, file=path)
 
 
-def to_bel_script_lines(graph) -> Iterable[str]:
+def to_bel_script_gz(graph, path, **kwargs) -> None:
+    """Write the graph as a BEL Script a gzip file."""
+    with gzip.open(path, 'wt') as file:
+        to_bel_script(graph, file, **kwargs)
+
+
+def to_bel_script_lines(graph, use_identifiers: bool = False) -> Iterable[str]:
     """Iterate over the lines of the BEL graph as a canonical BEL script.
 
     :param pybel.BELGraph graph: A BEL Graph
+    :param use_identifiers: Enables extended `BEP-0008 <http://bep.bel.bio/published/BEP-0008.html>`_ syntax
     """
     return itt.chain(
         _to_bel_lines_header(graph),
-        _to_bel_lines_body(graph),
-        _to_bel_lines_footer(graph),
+        _to_bel_lines_body(graph, use_identifiers=use_identifiers),
+        _to_bel_lines_footer(graph, use_identifiers=use_identifiers),
     )
 
 
@@ -76,14 +88,21 @@ def postpend_location(bel_string: str, location_model) -> str:
     )
 
 
-def _decanonicalize_edge_node(node: BaseEntity, edge_data: EdgeData, node_position: str) -> str:
+def _decanonicalize_edge_node(
+    node: BaseEntity,
+    edge_data: EdgeData,
+    node_position: str,
+    *,
+    use_identifiers: bool = False
+) -> str:
     """Canonicalize a node with its modifiers stored in the given edge to a BEL string.
 
     :param node: A PyBEL node data dictionary
     :param edge_data: A PyBEL edge data dictionary
     :param node_position: Either :data:`pybel.constants.SUBJECT` or :data:`pybel.constants.OBJECT`
+    :param use_identifiers: Enables extended `BEP-0008 <http://bep.bel.bio/published/BEP-0008.html>`_ syntax
     """
-    node_str = node.as_bel()
+    node_str = node.as_bel(use_identifiers=use_identifiers)
 
     if node_position not in edge_data:
         return node_str
@@ -141,28 +160,41 @@ def _get_tloc_terminal(side, data):
     )
 
 
-def edge_to_tuple(u: BaseEntity, v: BaseEntity, data: EdgeData) -> Tuple[str, str, str]:
+def edge_to_tuple(
+    u: BaseEntity,
+    v: BaseEntity,
+    data: EdgeData,
+    use_identifiers: bool = False,
+) -> Tuple[str, str, str]:
     """Take two nodes and gives back a BEL string representing the statement.
 
     :param u: The edge's source's PyBEL node data dictionary
     :param v: The edge's target's PyBEL node data dictionary
     :param data: The edge's data dictionary
+    :param use_identifiers: Enables extended `BEP-0008 <http://bep.bel.bio/published/BEP-0008.html>`_ syntax
     """
-    u_str = _decanonicalize_edge_node(u, data, node_position=SUBJECT)
-    v_str = _decanonicalize_edge_node(v, data, node_position=OBJECT)
+    u_str = _decanonicalize_edge_node(u, data, node_position=SUBJECT, use_identifiers=use_identifiers)
+    v_str = _decanonicalize_edge_node(v, data, node_position=OBJECT, use_identifiers=use_identifiers)
     return u_str, data[RELATION], v_str
 
 
-def edge_to_bel(u: BaseEntity, v: BaseEntity, data: EdgeData, sep: Optional[str] = None) -> str:
+def edge_to_bel(
+    u: BaseEntity,
+    v: BaseEntity,
+    data: EdgeData,
+    sep: Optional[str] = None,
+    use_identifiers: bool = False,
+) -> str:
     """Take two nodes and gives back a BEL string representing the statement.
 
     :param u: The edge's source's PyBEL node data dictionary
     :param v: The edge's target's PyBEL node data dictionary
     :param data: The edge's data dictionary
     :param sep: The separator between the source, relation, and target. Defaults to ' '
+    :param use_identifiers: Enables extended `BEP-0008 <http://bep.bel.bio/published/BEP-0008.html>`_ syntax
     """
     sep = sep or ' '
-    return sep.join(edge_to_tuple(u=u, v=v, data=data))
+    return sep.join(edge_to_tuple(u=u, v=v, data=data, use_identifiers=use_identifiers))
 
 
 def _sort_qualified_edges_helper(t: EdgeTuple) -> Tuple[str, str, str]:
@@ -186,9 +218,9 @@ def sort_qualified_edges(graph) -> Iterable[EdgeTuple]:
     return sorted(qualified_edges, key=_sort_qualified_edges_helper)
 
 
-def _citation_sort_key(t: EdgeTuple) -> str:
+def _citation_sort_key(t: EdgeTuple) -> Tuple[str, str]:
     """Make a confusing 4 tuple sortable by citation."""
-    return '"{}", "{}"'.format(t[3][CITATION][CITATION_DB], t[3][CITATION][CITATION_IDENTIFIER])
+    return t[3][CITATION][CITATION_DB], t[3][CITATION][CITATION_IDENTIFIER]
 
 
 def _evidence_sort_key(t: EdgeTuple) -> str:
@@ -234,7 +266,7 @@ def _to_bel_lines_header(graph) -> Iterable[str]:
     )
 
 
-def group_citation_edges(edges: Iterable[EdgeTuple]) -> Iterable[Tuple[str, Iterable[EdgeTuple]]]:
+def group_citation_edges(edges: Iterable[EdgeTuple]) -> Iterable[Tuple[Tuple[str, str], Iterable[EdgeTuple]]]:
     """Return an iterator over pairs of citation values and their corresponding edge iterators."""
     return itt.groupby(edges, key=_citation_sort_key)
 
@@ -244,15 +276,16 @@ def group_evidence_edges(edges: Iterable[EdgeTuple]) -> Iterable[Tuple[str, Iter
     return itt.groupby(edges, key=_evidence_sort_key)
 
 
-def _to_bel_lines_body(graph) -> Iterable[str]:
+def _to_bel_lines_body(graph, use_identifiers: bool = False) -> Iterable[str]:
     """Iterate the lines of a BEL graph's corresponding BEL script's body.
 
     :param pybel.BELGraph graph: A BEL graph
+    :param use_identifiers: Enables extended `BEP-0008 <http://bep.bel.bio/published/BEP-0008.html>`_ syntax
     """
     qualified_edges = sort_qualified_edges(graph)
 
-    for citation, citation_edges in group_citation_edges(qualified_edges):
-        yield 'SET Citation = {{{}}}\n'.format(citation)
+    for (citation_db, citation_id), citation_edges in group_citation_edges(qualified_edges):
+        yield SET_CITATION_FMT.format(citation_db, citation_id) + '\n'
 
         for evidence, evidence_edges in group_evidence_edges(citation_edges):
             yield 'SET SupportingText = "{}"'.format(evidence)
@@ -264,7 +297,7 @@ def _to_bel_lines_body(graph) -> Iterable[str]:
                 for key in keys:
                     yield _set_annotation_to_str(annotations_data, key)
 
-                yield graph.edge_to_bel(u, v, data)
+                yield graph.edge_to_bel(u, v, data, use_identifiers=use_identifiers)
 
                 if keys:
                     yield _unset_annotation_to_str(keys)
@@ -274,10 +307,11 @@ def _to_bel_lines_body(graph) -> Iterable[str]:
         yield '#' * 80
 
 
-def _to_bel_lines_footer(graph) -> Iterable[str]:
+def _to_bel_lines_footer(graph, use_identifiers: bool = False) -> Iterable[str]:
     """Iterate the lines of a BEL graph's corresponding BEL script's footer.
 
     :param pybel.BELGraph graph: A BEL graph
+    :param use_identifiers: Enables extended `BEP-0008 <http://bep.bel.bio/published/BEP-0008.html>`_ syntax
     """
     unqualified_edges_to_serialize = [
         (u, v, d)
@@ -293,20 +327,24 @@ def _to_bel_lines_footer(graph) -> Iterable[str]:
 
     if unqualified_edges_to_serialize or isolated_nodes_to_serialize:
         yield '###############################################\n'
-        yield 'SET Citation = {"PubMed","Added by PyBEL","29048466"}'
+        yield SET_CITATION_FMT.format(CITATION_TYPE_PUBMED, PYBEL_PUBMED)
         yield 'SET SupportingText = "{}"'.format(PYBEL_AUTOEVIDENCE)
 
         for u, v, data in unqualified_edges_to_serialize:
-            yield '{} {} {}'.format(u.as_bel(), data[RELATION], v.as_bel())
+            yield '{} {} {}'.format(
+                u.as_bel(use_identifiers=use_identifiers),
+                data[RELATION],
+                v.as_bel(use_identifiers=use_identifiers),
+            )
 
         for node in isolated_nodes_to_serialize:
-            yield node.as_bel()
+            yield node.as_bel(use_identifiers=use_identifiers)
 
         yield 'UNSET SupportingText'
         yield 'UNSET Citation'
 
 
-def calculate_canonical_name(node: BaseEntity, use_curie: bool = False) -> str:
+def calculate_canonical_name(node: BaseEntity, use_identifiers: bool = True) -> str:
     """Calculate the canonical name for a given node.
 
     If it is a simple node, uses the already given name. Otherwise, it uses the BEL string.
@@ -317,10 +355,10 @@ def calculate_canonical_name(node: BaseEntity, use_curie: bool = False) -> str:
     elif isinstance(node, BaseAbundance):
         if VARIANTS in node:
             return node.as_bel(use_identifiers=True)
-        elif use_curie:
-            return node.curie
-        else:
+        elif use_identifiers and node.entity.identifier and node.entity.name:
             return node.obo
+        else:
+            return node.curie
 
     else:
         raise TypeError('Unhandled node: {}'.format(node))

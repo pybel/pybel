@@ -3,43 +3,18 @@
 """This module contains IO functions for outputting BEL graphs to lossy formats, such as GraphML and CSV."""
 
 import json
-from typing import BinaryIO, Optional, TextIO, Union
+from typing import Optional, TextIO, Union
 
-import networkx as nx
 from networkx.utils import open_file
 
-from ..constants import RELATION
 from ..dsl import CentralDogma
 from ..struct import BELGraph
 
 __all__ = [
-    'to_graphml',
     'to_csv',
     'to_sif',
     'to_gsea',
 ]
-
-
-def to_graphml(graph: BELGraph, path: Union[str, BinaryIO]) -> None:
-    """Write this graph to GraphML XML file using :func:`networkx.write_graphml`.
-
-    The .graphml file extension is suggested so Cytoscape can recognize it.
-    """
-    rv = nx.MultiDiGraph()
-
-    for node in graph:
-        rv.add_node(node.as_bel(), function=node.function)
-
-    for u, v, key, edge_data in graph.edges(data=True, keys=True):
-        rv.add_edge(
-            u.as_bel(),
-            v.as_bel(),
-            interaction=edge_data[RELATION],
-            bel=graph.edge_to_bel(u, v, edge_data),
-            key=key,
-        )
-
-    nx.write_graphml(rv, path)
 
 
 @open_file(1, mode='w')

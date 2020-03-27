@@ -10,7 +10,7 @@ the `Biological Expression Language <http://openbel.org/language/version_2.0/bel
 Its companion package, `PyBEL Tools <http://pybel-tools.readthedocs.io/>`_, contains a
 suite of functions and pipelines for analyzing the resulting biological networks.
 
-We realize there we have a name conflict with the python wrapper for the cheminformatics package, OpenBabel. If you're
+We realize that we have a name conflict with the python wrapper for the cheminformatics package, OpenBabel. If you're
 looking for their python wrapper, see `here <https://github.com/openbabel/openbabel/tree/master/scripts/python>`_.
 
 Citation
@@ -23,7 +23,7 @@ If you find PyBEL useful for your work, please consider citing:
 Installation |pypi_version| |python_versions| |pypi_license|
 ------------------------------------------------------------
 PyBEL can be installed easily from `PyPI <https://pypi.python.org/pypi/pybel>`_ with the following code in
-your favorite terminal:
+your favorite shell:
 
 .. code-block:: sh
 
@@ -35,16 +35,19 @@ or from the latest code on `GitHub <https://github.com/pybel/pybel>`_ with:
 
     $ pip install git+https://github.com/pybel/pybel.git
 
-See the `installation documentation <http://pybel.readthedocs.io/en/latest/installation.html>`_ for more advanced
+See the `installation documentation <https://pybel.readthedocs.io/en/latest/introduction/installation.html>`_ for more advanced
 instructions. Also, check the change log at `CHANGELOG.rst <https://github.com/pybel/pybel/blob/master/CHANGELOG.rst>`_.
+
+Note: while PyBEL works on the most recent versions of Python 3.5, it does not work on 3.5.3 or below due to changes
+in the ``typing`` module.
 
 Getting Started
 ---------------
 More examples can be found in the `documentation <http://pybel.readthedocs.io>`_ and in the
 `PyBEL Notebooks <https://github.com/pybel/pybel-notebooks>`_ repository.
 
-Compiling from the REPL
-~~~~~~~~~~~~~~~~~~~~~~~
+Compiling a BEL Graph
+~~~~~~~~~~~~~~~~~~~~~
 This example illustrates how the a BEL document from the `Human Brain Pharmacome
 <https://raw.githubusercontent.com/pharmacome/knowledge>`_ project can be loaded from GitHub.
 
@@ -54,9 +57,12 @@ This example illustrates how the a BEL document from the `Human Brain Pharmacome
    >>> url = 'https://raw.githubusercontent.com/pharmacome/knowledge/master/hbp_knowledge/proteostasis/kim2013.bel'
    >>> graph = pybel.from_url(url)
 
+PyBEL can handle `BEL 1.0 <http://openbel.org/language/version_1.0/bel_specification_version_1.0.html>`_
+and `BEL 2.0+ <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_ simultaneously.
+
 Displaying a BEL Graph in Jupyter
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-After installing `jinja2` and `ipython`, BEL graphs can be displayed in Jupyter notebooks.
+After installing ``jinja2`` and ``ipython``, BEL graphs can be displayed in Jupyter notebooks.
 
 .. code-block:: python
 
@@ -81,26 +87,23 @@ Contributing
 ------------
 Contributions, whether filing an issue, making a pull request, or forking, are appreciated. See
 `CONTRIBUTING.rst <https://github.com/pybel/pybel/blob/master/CONTRIBUTING.rst>`_ for more information on getting
-involved. Please add your name to `AUTHORS.rst <https://github.com/pybel/pybel/blob/master/AUTHORS.rst>`_!
+involved.
 
 Acknowledgements
 ----------------
-- This package was originally developed as part of the master's work of
-  `Charles Tapley Hoyt <https://github.com/cthoyt>`_ at `Fraunhofer SCAI <https://www.scai.fraunhofer.de/>`_.
-- This software is proudly built with Paul McGuire's `PyParsing <http://pyparsing.wikispaces.com/>`_ package.
-- `Scott Colby <https://github.com/scolby33>`_ designed our `logo <https://github.com/pybel/pybel-art>`_ and provided
-  sage advice
-- `Christian Ebeling <https://github.com/cebel>`_ for supervision and consultation
+Supporters
+~~~~~~~~~~
+This project has been supported by several organizations:
 
-Links
------
-- Specified by `BEL 1.0 <http://openbel.org/language/version_1.0/bel_specification_version_1.0.html>`_ and
-  `BEL 2.0 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_
-- Documented on `Read the Docs <http://pybel.readthedocs.io/>`_
-- Versioned on `GitHub <https://github.com/pybel/pybel>`_
-- Tested on `Travis CI <https://travis-ci.org/pybel/pybel>`_
-- Distributed by `PyPI <https://pypi.python.org/pypi/pybel>`_
-- Chat on `Gitter <https://gitter.im/pybel/Lobby>`_
+- `University of Bonn <https://www.uni-bonn.de>`_
+- `Bonn Aachen International Center for IT <http://www.b-it-center.de>`_
+- `Fraunhofer Institute for Algorithms and Scientific Computing <https://www.scai.fraunhofer.de>`_
+- `Fraunhofer Center for Machine Learning <https://www.cit.fraunhofer.de/de/zentren/maschinelles-lernen.html>`_
+- `The Cytoscape Consortium <https://cytoscape.org/>`_
+
+Logo
+~~~~
+The PyBEL `logo <https://github.com/pybel/pybel-art>`_ was designed by `Scott Colby <https://github.com/scolby33>`_.
 
 .. |build| image:: https://travis-ci.org/pybel/pybel.svg?branch=develop
     :target: https://travis-ci.org/pybel/pybel

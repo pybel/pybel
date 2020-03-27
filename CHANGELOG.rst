@@ -5,6 +5,70 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`Unreleased <https://github.com/pybel/pybel/compare/v0.14.5...HEAD>`_
+------------------------------------------------------------------------
+
+`0.14.5 <https://github.com/pybel/pybel/compare/v0.14.4...v0.14.5>`_ - 2020-02-26
+---------------------------------------------------------------------------------
+Added
+~~~~~
+- Gzip variant of umbrella nodelink exporter
+- More entry points for exporting
+
+Fixed
+~~~~~
+- OBO-style export was broken if name and identifier weren't available. This works with whatever is available now
+- If CURIE is requested and both identifier and name are available, defaults to identifier.
+
+`0.14.4 <https://github.com/pybel/pybel/compare/v0.14.3...v0.14.4>`_ - 2020-02-25
+---------------------------------------------------------------------------------
+Added
+~~~~~
+- Added support for BEP-0005
+- Added BEP-0001 support (population abundance; https://github.com/pybel/pybel/issues/402)
+- Added BEP-0003 support (noCorrelation relation; https://github.com/pybel/pybel/issues/403)
+- Added BEP-0012 support (correlation relation; https://github.com/pybel/pybel/issues/403)
+- Added BEP-0011 support (binds relation; https://github.com/pybel/pybel/issues/403)
+- Add GraphDati exporter and BioDati uploader (https://github.com/pybel/pybel/issues/407)
+- Add Hetionet importer (https://github.com/pybel/pybel/issues/406)
+- Add several more I/O functions (``pybel.to_bel_script_gz``, etc.)
+
+Removed
+~~~~~~~
+- Removed support for ``label`` relation
+- Removed support for node attributes and description
+
+Updated
+~~~~~~~
+- Updated programmatic citation handling. Now a tuple of strings (database, identifier) can
+  be passed anywhere a citation is needed.
+
+Fixed
+~~~~~
+- Fixed output of BEP-0008 (OBO-style identifiers)
+- Fixed convenience functions for ``BELGraph.add_inhibits`` and ``BELGraph.add_activates`` (there was a typo
+  and it was adding the opposite relation in both)
+- Fixed that graph edge adder functions don't add two-way edges (https://github.com/pybel/pybel/issues/409)
+
+`0.14.3 <https://github.com/pybel/pybel/compare/v0.14.2...v0.14.3>`_ - 2020-01-08
+---------------------------------------------------------------------------------
+Added
+~~~~~
+- Umbrella node-link JSON exporter(https://github.com/pybel/pybel/pull/400)
+- GraphML exporter with umbrella nodes (https://github.com/pybel/pybel/pull/400)
+
+`0.14.2 <https://github.com/pybel/pybel/compare/v0.14.1...v0.14.2>`_ - 2019-11-26
+---------------------------------------------------------------------------------
+Added
+~~~~~
+- Added several IO functions and convenience functions (gzipped wrappers, etc.)
+
+`0.14.1 <https://github.com/pybel/pybel/compare/v0.14.0...v0.14.1>`_ - 2019-11-26
+---------------------------------------------------------------------------------
+Fixed
+~~~~~
+- Fixed autoflushing in manager
+
 `0.14.0 <https://github.com/pybel/pybel/compare/v0.13.2...v0.14.0>`_ - 2019-11-15
 ---------------------------------------------------------------------------------
 Added
@@ -520,7 +584,8 @@ Fixed
 ------------------------------------------------------------------------------
 Changed
 ~~~~~~~
-- Made new minimum unpickle version 0.8.0. From now on, all unpickle changes (before a 1.0.0 release) will be accompanied by a minor version bump.
+- Made new minimum unpickle version 0.8.0. From now on, all unpickle changes (before a 1.0.0 release) will be
+  accompanied by a minor version bump.
 - Overall better handling of citation insertion
 - Updated data models. Added to Citation model and renamed namespaceEntry in Node model.
 - Better init function for BELGraph

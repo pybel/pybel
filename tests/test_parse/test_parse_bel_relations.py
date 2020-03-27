@@ -10,23 +10,21 @@ from pyparsing import ParseException
 from pybel import BELGraph
 from pybel.canonicalize import edge_to_bel
 from pybel.constants import (
-    ABUNDANCE, ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE, CITATION, COMPLEX, COMPOSITE,
-    CONCEPT, DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE, FROM_LOC, FUNCTION,
-    GENE, GMOD, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, INCREASES, IS_A, KIND, LOCATION, MEMBERS, MODIFIER, NAME,
-    NAMESPACE, NEGATIVE_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, PATHOLOGY, POSITIVE_CORRELATION, PRODUCTS, PROTEIN,
-    RATE_LIMITING_STEP_OF, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, SUBPROCESS_OF, TARGET, TO_LOC,
-    TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, VARIANTS,
+    ABUNDANCE, ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE, CITATION, COMPLEX,
+    COMPOSITE, CONCEPT, CORRELATION, DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE,
+    FROM_LOC, FUNCTION, GENE, GMOD, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, INCREASES, IS_A, KIND, LOCATION,
+    MEMBERS, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, NO_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, PATHOLOGY,
+    POSITIVE_CORRELATION, PRODUCTS, PROTEIN, RATE_LIMITING_STEP_OF, REACTANTS, REACTION, REGULATES, RELATION, RNA,
+    SUBJECT, SUBPROCESS_OF, TARGET, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, VARIANTS,
 )
 from pybel.dsl import (
-    Pathology, abundance, activity, bioprocess, complex_abundance, composite_abundance, gene, gmod, hgvs,
-    named_complex_abundance, pmod, protein, reaction, rna,
+    ComplexAbundance, Pathology, Protein, Rna, abundance, activity, bioprocess, complex_abundance, composite_abundance,
+    gene, gmod, hgvs, named_complex_abundance, pmod, protein, reaction, rna,
 )
 from pybel.dsl.namespaces import hgnc
 from pybel.language import Entity
 from pybel.parser import BELParser
-from pybel.parser.exc import (
-    MissingNamespaceNameWarning, NestedRelationWarning, RelabelWarning, UndefinedNamespaceWarning,
-)
+from pybel.parser.exc import MissingNamespaceNameWarning, NestedRelationWarning, UndefinedNamespaceWarning
 from tests.constants import TestTokenParserBase, test_citation_dict, test_evidence_text
 
 logger = logging.getLogger(__name__)
@@ -494,7 +492,7 @@ class TestRelations(TestTokenParserBase):
 
         self.assert_has_edge(sub, obj, relation=expected_dict[RELATION])
 
-    def test_regulates_with_multiple_nnotations(self):
+    def test_regulates_with_multiple_annotations(self):
         """
         3.1.7 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_regulates_reg
         Test nested definitions"""
@@ -842,44 +840,6 @@ class TestRelations(TestTokenParserBase):
 
         self.assert_has_edge(sub, obj, relation=IS_A)
 
-    def test_label_1(self):
-        statement = 'g(HGNC:APOE, var(c.526C>T), var(c.388T>C)) labeled "APOE E2"'
-        result = self.parser.relation.parseString(statement)
-
-        expected_dict = {
-            SUBJECT: {
-                FUNCTION: GENE,
-                CONCEPT: {
-                    NAMESPACE: 'HGNC',
-                    NAME: 'APOE',
-                },
-                VARIANTS: [
-                    {
-                        KIND: HGVS,
-                        HGVS: 'c.526C>T',
-                    }, {
-                        KIND: HGVS,
-                        HGVS: 'c.388T>C',
-                    },
-                ],
-            },
-            OBJECT: 'APOE E2'
-        }
-        self.assertEqual(expected_dict, result.asDict())
-
-        expected_node = gene('HGNC', 'APOE', variants=[hgvs('c.526C>T'), hgvs('c.388T>C')])
-        self.assert_has_node(expected_node)
-
-        self.assertTrue(self.parser.graph.has_node_description(expected_node))
-        self.assertEqual('APOE E2', self.parser.graph.get_node_description(expected_node))
-
-    def test_raise_on_relabel(self):
-        s1 = 'g(HGNC:APOE, var(c.526C>T), var(c.388T>C)) labeled "APOE E2"'
-        s2 = 'g(HGNC:APOE, var(c.526C>T), var(c.388T>C)) labeled "APOE E2 Variant"'
-        self.parser.relation.parseString(s1)
-        with self.assertRaises(RelabelWarning):
-            self.parser.relation.parseString(s2)
-
     def test_equivalentTo(self):
         statement = 'g(dbSNP:"rs123456") eq g(HGNC:YFG, var(c.123G>A))'
         result = self.parser.relation.parseString(statement)
@@ -1042,6 +1002,41 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_edge(sub, sub_product_1, relation=HAS_PRODUCT)
         self.assert_has_edge(sub, sub_product_2, relation=HAS_PRODUCT)
         self.assert_has_edge(sub, sub_product_3, relation=HAS_PRODUCT)
+
+    def assert_has_two_way_edge(self, source, target, relation):
+        self.assert_has_node(source)
+        self.assert_has_node(target)
+        self.assert_has_edge(source, target, **{RELATION: relation})
+        self.assert_has_edge(target, source, **{RELATION: relation})
+
+    def test_no_correlation(self):
+        """Test the ``noCorrelation`` relation."""
+        statement = 'r(HGNC:X) noCorrelation r(HGNC:Y)'
+        self.parser.relation.parseString(statement)
+        source = Rna('HGNC', 'X')
+        target = Rna('HGNC', 'Y')
+        self.assert_has_two_way_edge(source, target, NO_CORRELATION)
+
+    def test_correlation(self):
+        """Test the ``correlation`` relation."""
+        statement = 'r(HGNC:X) correlation r(HGNC:Y)'
+        self.parser.relation.parseString(statement)
+
+        source = Rna('HGNC', 'X')
+        target = Rna('HGNC', 'Y')
+        self.assert_has_two_way_edge(source, target, CORRELATION)
+
+    def test_binds(self):
+        """Test the ``binds`` relation."""
+        statement = 'p(HGNC:X) binds p(HGNC:Y)'
+        self.parser.relation.parseString(statement)
+
+        source = Protein('HGNC', 'X')
+        target = Protein('HGNC', 'Y')
+        x_y_complex = ComplexAbundance([source, target])
+        self.assert_has_node(x_y_complex)
+        self.assert_has_edge(source, x_y_complex, relation=PART_OF)
+        self.assert_has_edge(target, x_y_complex, relation=PART_OF)
 
 
 class TestCustom(unittest.TestCase):

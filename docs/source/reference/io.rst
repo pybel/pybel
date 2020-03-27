@@ -35,6 +35,16 @@ Reference
 .. autofunction:: pybel.from_bel_script_url
 .. autofunction:: pybel.to_bel_script
 
+Hetionet
+~~~~~~~~
+.. automodule:: pybel.io.hetionet
+
+.. autofunction:: pybel.from_hetionet_json
+.. autofunction:: pybel.from_hetionet_file
+.. autofunction:: pybel.from_hetionet_gz
+
+.. autofunction:: pybel.get_hetionet
+
 Transport
 ---------
 All transport pairs are reflective and data-preserving.
@@ -56,8 +66,30 @@ Node-Link JSON
 .. autofunction:: pybel.from_nodelink
 .. autofunction:: pybel.to_nodelink
 
+.. autofunction:: pybel.from_nodelink_jsons
+.. autofunction:: pybel.to_nodelink_jsons
+
 .. autofunction:: pybel.from_nodelink_file
 .. autofunction:: pybel.to_nodelink_file
+
+.. autofunction:: pybel.from_nodelink_gz
+.. autofunction:: pybel.to_nodelink_gz
+
+Cyberinfrastructure Exchange
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. automodule:: pybel.io.cx
+
+.. autofunction:: pybel.from_cx
+.. autofunction:: pybel.to_cx
+
+.. autofunction:: pybel.from_cx_jsons
+.. autofunction:: pybel.to_cx_jsons
+
+.. autofunction:: pybel.from_cx_file
+.. autofunction:: pybel.to_cx_file
+
+.. autofunction:: pybel.from_cx_gz
+.. autofunction:: pybel.to_cx_gz
 
 JSON Graph Interchange Format
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -66,20 +98,66 @@ JSON Graph Interchange Format
 .. autofunction:: pybel.from_jgif
 .. autofunction:: pybel.to_jgif
 
+.. autofunction:: pybel.from_jgif_jsons
+.. autofunction:: pybel.to_jgif_jsons
+
+.. autofunction:: pybel.from_jgif_file
+.. autofunction:: pybel.to_jgif_file
+
+.. autofunction:: pybel.from_jgif_gz
+.. autofunction:: pybel.to_jgif_gz
+
+.. autofunction:: pybel.post_jgif
+
 .. autofunction:: pybel.from_cbn_jgif
 
 Export
 ------
-.. automodule:: pybel.io.extras
+Umbrella Node-Link JSON
+~~~~~~~~~~~~~~~~~~~~~~~
+.. automodule:: pybel.io.umbrella_nodelink
+
+.. autofunction:: pybel.to_umbrella_nodelink
+.. autofunction:: pybel.to_umbrella_nodelink_file
+.. autofunction:: pybel.to_umbrella_nodelink_gz
+
+GraphDati
+~~~~~~~~~
+.. automodule:: pybel.io.graphdati
+
+.. autofunction:: pybel.to_graphdati
+
+.. autofunction:: pybel.to_graphdati_file
+
+.. autofunction:: pybel.to_graphdati_gz
+
+.. autofunction:: pybel.to_graphdati_jsonl
+
+.. autofunction:: pybel.to_graphdati_jsonl_gz
+
+.. autofunction:: pybel.to_graphdati_jsons
+
+.. autofunction:: pybel.post_graphdati
+
+GraphML
+~~~~~~~
+.. automodule:: pybel.io.graphml
 
 .. autofunction:: pybel.to_graphml
+
+Miscellaneous
+~~~~~~~~~~~~~
+.. automodule:: pybel.io.extras
+
 .. autofunction:: pybel.to_csv
 .. autofunction:: pybel.to_sif
 .. autofunction:: pybel.to_gsea
 .. autofunction:: pybel.to_tsv
 
-Database
---------
+Databases
+---------
+SQL Databases
+~~~~~~~~~~~~~
 .. automodule:: pybel.manager.database_io
 
 .. autofunction:: pybel.from_database
@@ -103,6 +181,11 @@ INDRA
 .. automodule:: pybel.io.indra
 
 .. autofunction:: pybel.from_indra_statements
+.. autofunction:: pybel.from_indra_statements_json
+.. autofunction:: pybel.from_indra_statements_json_file
+
 .. autofunction:: pybel.to_indra_statements
+.. autofunction:: pybel.to_indra_statements_json
+.. autofunction:: pybel.to_indra_statements_json_file
 
 .. autofunction:: pybel.from_biopax

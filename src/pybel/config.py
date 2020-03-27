@@ -12,6 +12,7 @@ __all__ = [
     'config',
     'connection',
     'PYBEL_MINIMUM_IMPORT_VERSION',
+    'CACHE_DIRECTORY',
 ]
 
 logger = logging.getLogger(__name__)
@@ -31,12 +32,14 @@ DEFAULT_CACHE_PATH = os.path.join(CACHE_DIRECTORY, DEFAULT_CACHE_NAME)
 #: The default cache connection string uses sqlite.
 DEFAULT_CACHE_CONNECTION = 'sqlite:///' + DEFAULT_CACHE_PATH
 
+
+_CONFIG_DIRECTORY = os.path.join(os.path.expanduser('~'), '.pybel')
 CONFIG_FILE_PATHS = [
-    os.path.join(os.path.expanduser('~'), '.config', 'pybel.ini'),
-    os.path.join(os.path.expanduser('~'), '.config', 'pybel.cfg'),
-    os.path.join(os.path.expanduser('~'), '.config', 'pybel', 'pybel.ini'),
-    os.path.join(os.path.expanduser('~'), '.config', 'pybel', 'pybel.cfg'),
-    os.path.join(os.path.expanduser('~'), '.config', 'pybel', 'config.ini'),
+    os.path.join(_CONFIG_DIRECTORY, 'pybel.ini'),
+    os.path.join(_CONFIG_DIRECTORY, 'pybel.cfg'),
+    os.path.join(_CONFIG_DIRECTORY, 'pybel', 'pybel.ini'),
+    os.path.join(_CONFIG_DIRECTORY, 'pybel', 'pybel.cfg'),
+    os.path.join(_CONFIG_DIRECTORY, 'pybel', 'config.ini'),
 ]
 config_parser = configparser.ConfigParser()
 config_parser.read(CONFIG_FILE_PATHS)

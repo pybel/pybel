@@ -26,7 +26,7 @@ from ..constants import (
     BEL_KEYWORD_STATEMENT_GROUP, BEL_KEYWORD_SUPPORT, BEL_KEYWORD_UNSET, CITATION, CITATION_TYPES, CITATION_TYPE_PUBMED,
     EVIDENCE,
 )
-from ..utils import citation_dict
+from ..utils import CitationDict, citation_dict
 
 __all__ = ['ControlParser']
 
@@ -348,7 +348,7 @@ class ControlParser(BaseParser):
             ANNOTATIONS: self.annotations.copy(),
         }
 
-    def get_citation(self) -> Mapping[str, str]:
+    def get_citation(self) -> CitationDict:
         """Get the citation dictionary."""
         return citation_dict(db=self.citation_db, db_id=self.citation_db_id)
 

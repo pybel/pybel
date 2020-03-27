@@ -205,6 +205,9 @@ BIOPROCESS = 'BiologicalProcess'
 #: Represents the BEL function, pathology()
 PATHOLOGY = 'Pathology'
 
+#: Represents the BEL function, populationAbundance()
+POPULATION = 'Population'
+
 #: Represents the BEL abundance, compositeAbundance()
 COMPOSITE = 'Composite'
 
@@ -226,6 +229,7 @@ PYBEL_NODE_FUNCTIONS = {
     COMPOSITE,
     COMPLEX,
     REACTION,
+    POPULATION,
 }
 
 #: The mapping from PyBEL node functions to BEL strings
@@ -239,6 +243,7 @@ rev_abundance_labels = {
     PATHOLOGY: 'path',
     COMPLEX: 'complex',
     COMPOSITE: 'composite',
+    POPULATION: 'pop',
 }
 
 # Internal edge data keys
@@ -304,6 +309,12 @@ CAUSES_NO_CHANGE = 'causesNoChange'
 #: A BEL relationship
 REGULATES = 'regulates'
 #: A BEL relationship
+BINDS = 'binds'
+#: A BEL relationship
+CORRELATION = 'correlation'
+#: A BEL relationship
+NO_CORRELATION = 'noCorrelation'
+#: A BEL relationship
 NEGATIVE_CORRELATION = 'negativeCorrelation'
 #: A BEL relationship
 POSITIVE_CORRELATION = 'positiveCorrelation'
@@ -341,24 +352,30 @@ CAUSAL_POLAR_RELATIONS = CAUSAL_INCREASE_RELATIONS | CAUSAL_DECREASE_RELATIONS
 #: A set of all causal relationships
 CAUSAL_RELATIONS = CAUSAL_INCREASE_RELATIONS | CAUSAL_DECREASE_RELATIONS | {REGULATES}
 
-#: A set of all relationships that are inherently directionless, and are therefore added to the graph twice
-TWO_WAY_RELATIONS = {
-    NEGATIVE_CORRELATION,
+APOLAR_CORRELATIVE_RELATIONS = {
+    CORRELATION,
+    NO_CORRELATION,
+}
+
+POLAR_CORRELATIVE_RELATIONS = {
     POSITIVE_CORRELATION,
+    NEGATIVE_CORRELATION,
+}
+
+#: A set of all correlative relationships
+CORRELATIVE_RELATIONS = APOLAR_CORRELATIVE_RELATIONS | POLAR_CORRELATIVE_RELATIONS
+
+#: A set of polar relations
+POLAR_RELATIONS = CAUSAL_POLAR_RELATIONS | POLAR_CORRELATIVE_RELATIONS
+
+#: A set of all relationships that are inherently directionless, and are therefore added to the graph twice
+TWO_WAY_RELATIONS = CORRELATIVE_RELATIONS | {
     ASSOCIATION,
     ORTHOLOGOUS,
     ANALOGOUS_TO,
     EQUIVALENT_TO,
+    BINDS,
 }
-
-#: A set of all correlative relationships
-CORRELATIVE_RELATIONS = {
-    POSITIVE_CORRELATION,
-    NEGATIVE_CORRELATION,
-}
-
-#: A set of polar relations
-POLAR_RELATIONS = CAUSAL_POLAR_RELATIONS | CORRELATIVE_RELATIONS
 
 #: A list of relationship types that don't require annotations or evidence
 UNQUALIFIED_EDGES = {
@@ -537,3 +554,6 @@ PYBEL_REMOTE_PASSWORD = 'PYBEL_REMOTE_PASSWORD'  # noqa: S105
 
 #: The default location of PyBEL Web
 DEFAULT_SERVICE_URL = 'https://bel-commons.scai.fraunhofer.de'
+
+PYBEL_PUBMED = '29048466'
+SET_CITATION_FMT = 'SET Citation = {{"{}", "{}"}}'

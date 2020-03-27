@@ -12,6 +12,7 @@ from pybel.dsl import (
 )
 from pybel.language import Entity
 from pybel.testing.utils import n
+from pybel.utils import ensure_quotes
 
 
 class TestDSL(unittest.TestCase):
@@ -69,15 +70,17 @@ class TestDSL(unittest.TestCase):
         namespace, identifier = n(), n()
         node = Abundance(namespace=namespace, identifier=identifier)
         self.assertEqual(
-            'a({namespace}:{identifier})'.format(namespace=namespace, identifier=identifier),
-            node.as_bel())
+            'a({namespace}:{identifier})'.format(namespace=namespace, identifier=ensure_quotes(identifier)),
+            node.as_bel(),
+        )
 
     def test_str_has_both(self):
         namespace, identifier = n(), n()
         node = Abundance(namespace=namespace, identifier=identifier)
         self.assertEqual(
-            'a({namespace}:{identifier})'.format(namespace=namespace, identifier=identifier),
-            node.as_bel())
+            'a({namespace}:{identifier})'.format(namespace=namespace, identifier=ensure_quotes(identifier)),
+            node.as_bel(),
+        )
 
     def test_as_tuple(self):
         namespace, name = n(), n()
