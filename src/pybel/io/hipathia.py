@@ -61,27 +61,28 @@ The columns included are:
 
 """
 
-import itertools as itt
 import logging
 import os
+from collections import defaultdict
 from itertools import groupby
-from typing import Dict, List, Union
+from typing import List, Optional, Set, Tuple, Union
 
 import networkx as nx
 import pandas as pd
 
 import pybel.dsl
 from pybel import BELGraph
-from pybel.constants import DIRECTLY_DECREASES, DIRECTLY_INCREASES, RELATION
-from pybel.dsl import Abundance, BaseAbundance, ComplexAbundance, Protein, hgnc
-from pybel.struct import get_children
+from pybel.constants import (CAUSAL_INCREASE_RELATIONS, CAUSAL_POLAR_RELATIONS, IS_A, RELATION)
+from pybel.dsl import ComplexAbundance, Protein, hgnc
 
 __all__ = [
+    'from_hipathia_paths',
     'to_hipathia',
-    'HipathiaConverter',
 ]
 
 logger = logging.getLogger(__name__)
+
+ATT_COLS = ['ID', 'label', 'genesList']
 
 
 def from_hipathia_paths(name: str, att_path: str, sif_path: str) -> BELGraph:
@@ -188,156 +189,137 @@ def from_hipathia_dfs(name: str, att_df: pd.DataFrame, sif_df: pd.DataFrame) -> 
             graph.add_decreases(source, target, citation='', evidence='')
         else:
             raise ValueError(f'unknown relation: {relation}')
+
     return graph
 
 
-def to_hipathia(graph: BELGraph, directory: str):
+def to_hipathia(graph: BELGraph, directory: str) -> None:
     """Export Hipathia artifacts for the graph."""
-    converter = HipathiaConverter(graph)
-    converter.output(directory=directory)
+    att_df, sif_df = get_hipathia_dfs(graph)
+    att_df.to_csv(os.path.join(directory, '{}.att'.format(graph.name)))
+    sif_df.to_csv(os.path.join(directory, '{}.sif'.format(graph.name)))
 
 
-class HipathiaConverter:
-    """A data structure that helps convert a graph to the Hipathia format."""
+def _is_node_family(graph: BELGraph, node: Protein) -> Optional[Set[Protein]]:
+    """Get the children of the protein node, if some exist."""
+    children = set()
+    for child, _, data in graph.in_edges(node, data=True):
+        if data[RELATION] == IS_A:
+            children.add(child)
 
-    bel_node_to_hipathia_node: Dict[BaseAbundance, BaseAbundance]
-    bel_node_to_hipathia_genes: Dict[BaseAbundance, List[BaseAbundance]]
+    if children and not all(isinstance(child, Protein) for child in children):
+        raise ValueError('not all children are proteins?')
 
-    def __init__(self, graph: BELGraph):
-        self.graph = graph
-        self.name = (self.graph.name or 'pybel-export').lower().replace(' ', '_').replace('-', '_')
+    return children
 
-        self.bel_node_to_hipathia_node = {}
-        self.bel_node_to_hipathia_genes = {}
-        self.node_counter = 0
-        self.g = nx.MultiDiGraph()
 
-        for u, v, d in self.graph.edges(data=True):
-            relation = d[RELATION]
-            if isinstance(u, Protein) and isinstance(v, Protein):
-                if relation == DIRECTLY_INCREASES:
-                    self._add(u, v, 'activation')
-                elif relation == DIRECTLY_DECREASES:
-                    self._add(u, v, 'inhibition')
-            # if isinstance(u, Protein) and isinstance(v, ComplexAbundance):
+def get_hipathia_dfs(graph: BELGraph) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """Get the ATT and SIF dataframes.
 
-    def get_att_df(self) -> pd.DataFrame:
-        """Get the ATT file dataframe."""
-
-    def get_sif_df(self) -> pd.DataFrame:
-        """Get the SIF file dataframe."""
-
-    def _add(self, _u, _v, _relation):
-        _u = self._get_or_create_node(_u)
-        if _u is None:
-            return
-        _v = self._get_or_create_node(_v)
-        if _v is None:
-            return
-        return self.g.add_edge(_u, _v, relation=_relation)
-
-    def _get_or_create_node(self, node: Union[Protein, ComplexAbundance, Abundance]):
-        if node in self.bel_node_to_hipathia_node:
-            return self.bel_node_to_hipathia_node[node]
-
-        if isinstance(node, (Abundance, Protein)):
-            self.node_counter += 1
-            hipathia_name = f'N-{self.name}-{self.node_counter}'
-            self.bel_node_to_hipathia_node[node] = hipathia_name
-            if node.namespace.lower() in {'hgnc', 'entrez', 'ncbigene'}:
-                self.bel_node_to_hipathia_genes[hipathia_name] = [node]
-            elif node.namespace.lower() in {'fplx'}:
-                self.bel_node_to_hipathia_genes[hipathia_name] = get_children(self.graph, node)
-            return hipathia_name
-
-        # elif isinstance(node, ComplexAbundance):
-        #     # TODO: Implement
-        #     pass
-        raise TypeError(f'Unhandled node type: {type(node)} - {node}')
-
-    def output(self, directory: str):
-        """Output the results to the given directory."""
-        if not self.g:
-            raise RuntimeError('Graph has no nodes')
-        if not os.path.exists(directory):
-            raise ValueError(f'directory does not exist: {directory}')
-        att_path = os.path.join(directory, f'{self.name}.att.tsv')
-        sif_path = os.path.join(directory, f'{self.name}.sif.tsv')
-        fig_path = os.path.join(directory, f'{self.name}.png')
-
-        with open(sif_path, 'w') as file:
-            for u, v, d in self.g.edges(data=True):
-                print(u, d['relation'], v, sep='\t', file=file)
-
-        pos = nx.spring_layout(self.g)
-        min_x = min(x for x, y in pos.values())
-        min_y = min(y for x, y in pos.values())
-
-        def _get_single_gene_list(node: Union[Protein, Abundance]) -> str:
-            if node is None:
-                raise ValueError('node is none! fuck!')
-
-            try:
-                hipathia_genes = self.bel_node_to_hipathia_genes[node]
-            except Exception:
-                from pprint import pprint
-                pprint(self.bel_node_to_hipathia_node)
-                pprint(self.bel_node_to_hipathia_genes)
-                print(node)
-                raise
-
-            if hipathia_genes is None:
-                raise ValueError(f'hipathia genes are none for {node}')
-
-            return ','.join(
-                n.identifier
-                for n in hipathia_genes
-            )
-
-        def _get_genes_list(node) -> str:
-            if isinstance(node, (Protein, Abundance)):
-                return _get_single_gene_list(node)
-            elif isinstance(node, ComplexAbundance):
-                return ','.join(itt.chain.from_iterable(
-                    (_get_single_gene_list(member), '/')
-                    for member in node.members
-                    if isinstance(member, (Protein, Abundance))
-                ))
+    1. Identify nodes:
+       1. Identify all proteins
+       2. Identify all protein families
+       3. Identify all complexes with just a protein or a protein family in them
+    2. Identify interactions between any of those things that are causal
+    3. Profit!
+    """
+    proteins = set()
+    families = defaultdict(set)
+    complexes = set()
+    for node in graph:
+        if isinstance(node, Protein):
+            children = _is_node_family(graph, node)
+            if children:
+                families[node] = children
             else:
-                raise TypeError
+                proteins.add(node)
+        elif isinstance(node, ComplexAbundance) and all(isinstance(m, Protein) for m in node.members):
+            complexes.add(node)
 
-        with open(att_path, 'w') as file:
-            print('ID', 'label', 'X'', Y', 'color', 'shape', 'type', 'label.cex', 'label.color', 'width', 'height',
-                  'genesList', sep='\t', file=file)
-            for bel_node, hipathia_node in self.bel_node_to_hipathia_node.items():
-                x, y = pos[hipathia_node]
-                print(
-                    hipathia_node,  # ID
-                    bel_node.name,  # label
-                    int(100 * (x - min_x)),  # X
-                    int(100 * (y - min_y)),  # Y
-                    'white',  # color
-                    'rectangle',  # shape
-                    # FIXME should also be able to give list of types
-                    'gene' if isinstance(bel_node, (Protein, ComplexAbundance)) else 'metabolite',
-                    0.5,  # label.cex
-                    'black',  # label.color
-                    46,  # width
-                    17,  # height
-                    _get_genes_list(bel_node),
-                    sep='\t',
-                    file=file,
-                )
+    families = {k: sorted(values, key=str) for k, values in families.items()}
 
-        try:
-            import matplotlib.pyplot as plt
-        except ImportError:
-            logger.info('could not import matplotlib')
+    nodes: Set[Union[Protein, ComplexAbundance]] = proteins.union(families).union(complexes)
+    new_nodes = set()
+    edges = []
+    for u, v, d in graph.out_edges(nodes, data=True):
+        relation = d[RELATION]
+        if relation not in CAUSAL_POLAR_RELATIONS:
+            continue
+        new_nodes.add(u)
+        new_nodes.add(v)
+        edges.append((u, 'activation' if relation in CAUSAL_INCREASE_RELATIONS else 'inhibition', v))
+
+    att = {}
+    dsl_to_k = {}
+    i = 0
+    for node in sorted(new_nodes, key=str):
+        if node in families:
+            i += 1
+            k = (i,)
+            a, b = [node.name], [[child.identifier for child in families[node]]]
+        elif isinstance(node, Protein):
+            i += 1
+            k = (i,)
+            a, b = [node.name], [[node.identifier]]
+        elif isinstance(node, ComplexAbundance):
+            k, a, b = [], [], []
+            for member in node.members:
+                i += 1
+                k.append(i)
+                a.append(member.name)
+                if member in families:
+                    b.append([child.identifier for child in families[member]])
+                else:
+                    b.append([member.identifier])
+            k = tuple(k)
         else:
-            fig, ax = plt.subplots()
-            nx.draw(self.g, pos, ax=ax, with_labels=True)
-            plt.tight_layout()
-            fig.savefig(fig_path)
+            raise ValueError
+
+        k = 'N-{}-{}'.format(graph.name, ' '.join(map(str, k)))
+        att[k] = a, b
+        dsl_to_k[node] = k
+
+    edges = [
+        (dsl_to_k[source], relation, dsl_to_k[target])
+        for source, relation, target in edges
+    ]
+    sif_df = pd.DataFrame(edges)  # DONE
+
+    composite_graph = nx.Graph([(k_source, k_target) for k_source, _, k_target in edges])
+    pos = nx.spring_layout(composite_graph)
+    min_x = min(x for x, y in pos.values())
+    min_y = min(y for x, y in pos.values())
+
+    att_rows = []
+    for k, (labels, genes_lists) in sorted(att.items()):
+        label = ' '.join(labels)
+        types = ','.join(['gene'] * len(labels))
+        gene_list = ',/,'.join(
+            ','.join(gene_list)
+            for gene_list in genes_lists
+        )
+        x, y = pos[k]
+        att_rows.append((
+            k,  # 1. ID
+            label,  # 2. label
+            int(100 * (x - min_x)),  # 3. X
+            int(100 * (y - min_y)),  # 4. Y
+            'white',  # 5. color
+            'rectangle',  # 6. shape
+            types,  # 7.
+            0.5,  # 8. label.cex
+            'black',  # 9. label.color
+            46,  # 10. width
+            17,  # 11. height
+            gene_list,  # 12. gene list
+        ))
+
+    att_df = pd.DataFrame(att_rows, columns=[
+        'ID', 'label', 'X', 'Y', 'color', 'shape', 'type', 'label.cex', 'label.color', 'width', 'height',
+        'genesList'
+    ])
+
+    return att_df, sif_df
 
 
 def make_hsa047370() -> BELGraph:
