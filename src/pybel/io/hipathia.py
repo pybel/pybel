@@ -221,6 +221,12 @@ class HipathiaConverter:
                     self._add(u, v, 'inhibition')
             # if isinstance(u, Protein) and isinstance(v, ComplexAbundance):
 
+    def get_att_df(self) -> pd.DataFrame:
+        """Get the ATT file dataframe."""
+
+    def get_sif_df(self) -> pd.DataFrame:
+        """Get the SIF file dataframe."""
+
     def _add(self, _u, _v, _relation):
         _u = self._get_or_create_node(_u)
         if _u is None:

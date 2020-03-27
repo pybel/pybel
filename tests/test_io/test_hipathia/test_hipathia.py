@@ -3,12 +3,12 @@
 """Tests for Hipathia."""
 
 import os
-import tempfile
 import unittest
 
+from pybel import BELGraph
 from pybel.constants import INCREASES, RELATION
 from pybel.dsl import ComplexAbundance, Protein
-from pybel.io.hipathia import HipathiaConverter, from_hipathia_paths, group_delimited_list, make_hsa047370
+from pybel.io.hipathia import HipathiaConverter, from_hipathia_paths, group_delimited_list
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -19,10 +19,6 @@ TEST_ATT_PATH = os.path.join(HERE, 'hsa04370.att')
 TEST_SIF_PATH = os.path.join(HERE, 'hsa04370.sif')
 
 
-# from pybel.examples.ampk_example import ampk_graph
-# from pybel.examples.sialic_acid_example import sialic_acid_graph
-# from pybel.examples.vegf_graph import vegf_graph
-
 class TestUtils(unittest.TestCase):
     def test_group_delimited(self):
         self.assertEqual([[5335, 5336], [9047]], group_delimited_list([5335, 5336, '/', 9047], '/'))
@@ -32,6 +28,7 @@ class TestImportHipathia(unittest.TestCase):
     """Test Hipathia import."""
 
     def test_import(self):
+        """Test importing a hipathia network as a BEL graph."""
         graph = from_hipathia_paths(
             name='test1',
             att_path=TEST_1_ATT_PATH,
@@ -58,35 +55,64 @@ class TestImportHipathia(unittest.TestCase):
         self.assertEqual(INCREASES, list(graph[a][b_family].values())[0][RELATION])
 
 
+ATT_COLS = ['ID', 'label', 'genesList']
+
+
 class TestExportHipathia(unittest.TestCase):
     """Test Hipathia."""
 
-    def test_complex(self):
-        """Test that proteins in complex are all required (AND gate)."""
-        # HipathiaConverter(sialic_acid_graph)
+    def test_protein_activates_protein(self):
+        """Test conversion of ``p(X) -> p(Y)``."""
+        name = 'test'
+        graph = BELGraph(name=name)
+        x = Protein(namespace='ncbigene', identifier='100001', name='X')
+        y = Protein(namespace='ncbigene', identifier='100002', name='Y')
+        graph.add_increases(x, y, citation='', evidence='')
 
-    def test_family(self):
-        """Test that one or more proteins from a family are required (OR gate)."""
-        # HipathiaConverter(vegf_graph)
+        converter = HipathiaConverter(graph)
+        att_df = converter.get_att_df()
+        att_df = att_df[ATT_COLS]
+        self.assertEqual(2, len(att_df.index))
 
-    def test_famplex(self):
-        """Test the cartesian product on a family of proteins in a complex are required."""
-        # HipathiaConverter(ampk_graph)
+        c = [
+            [f'N-{name}-1', 'X', '100001'],
+            [f'N-{name}-2', 'Y', '100002'],
+        ]
+        self.assertEqual(c, att_df.values)
 
-    def test_example(self):
-        """Test the stuff works for real
+        sif_df = converter.get_sif_df()
+        self.assertEqual(1, len(sif_df))
+        expected_sif_df = [
+            [f'N-{name}-1', 'activation', f'N-{name}-2'],
+        ]
+        self.assertEqual(expected_sif_df, sif_df.values)
 
-        1. Load example graph
-        2. Export for hipathia (use temprary directory)
-        3. load up correct one
-        4. check the nodes are right in the ATT and SIF files (do some preprocesing to fix the names)
-        """
-        test_graph = make_hsa047370()
-        hipathia_object = HipathiaConverter(test_graph)
+    def test_protein_activates_family(self):
+        """Test conversion of ``p(X) -> p(Y); p(Y1) isA p(Y); p(Y2) isA p(Y)``."""
+        name = 'test'
+        graph = BELGraph(name=name)
+        x = Protein(namespace='ncbigene', identifier='100001', name='x')
+        y = Protein(namespace='fplx', identifier='y_family', name='y_family')
+        y1 = Protein(namespace='ncbigene', identifier='100002', name='y1')
+        y2 = Protein(namespace='ncbigene', identifier='100003', name='y2')
+        graph.add_increases(x, y, citation='', evidence='')
+        graph.add_is_a(y1, y)
+        graph.add_is_a(y2, y)
 
-        d = tempfile.TemporaryDirectory()
+        converter = HipathiaConverter(graph)
+        att_df = converter.get_att_df()
+        att_df = att_df[ATT_COLS]
+        self.assertEqual(2, len(att_df.index))
 
-        # TODO: replace with d.name
-        hipathia_object.output('/Users/danieldomingo/PycharmProjects/pybel/tests')
+        c = [
+            [f'N-{name}-1', 'x', '100001'],
+            [f'N-{name}-2', 'y', '100002,10003'],
+        ]
+        self.assertEqual(c, att_df.values)
 
-        d.cleanup()
+        sif_df = converter.get_sif_df()
+        self.assertEqual(1, len(sif_df))
+        expected_sif_df = [
+            [f'N-{name}-1', 'activation', f'N-{name}-2'],
+        ]
+        self.assertEqual(expected_sif_df, sif_df.values)
