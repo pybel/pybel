@@ -181,6 +181,11 @@ INDRA
 .. automodule:: pybel.io.indra
 
 .. autofunction:: pybel.from_indra_statements
+.. autofunction:: pybel.from_indra_statements_json
+.. autofunction:: pybel.from_indra_statements_json_file
+
 .. autofunction:: pybel.to_indra_statements
+.. autofunction:: pybel.to_indra_statements_json
+.. autofunction:: pybel.to_indra_statements_json_file
 
 .. autofunction:: pybel.from_biopax
