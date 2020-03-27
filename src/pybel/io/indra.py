@@ -32,13 +32,20 @@ After assembling a model with `INDRA <https://github.com/sorgerlab/indra>`_, a l
     not be for a while.
 """
 
+import json
 from pickle import load
 from typing import Optional
 
+from networkx.utils import open_file
+
 __all__ = [
     'from_indra_statements',
+    'from_indra_statements_json',
+    'from_indra_statements_json_file',
     'from_indra_pickle',
     'to_indra_statements',
+    'to_indra_statements_json',
+    'to_indra_statements_json_file',
     'from_biopax',
 ]
 
@@ -84,6 +91,25 @@ def from_indra_statements(
 
     graph = pba.make_model()
     return graph
+
+
+def from_indra_statements_json(stmts_json, **kwargs):
+    """Get a BEL graph from INDRA statements JSON.
+
+    :rtype: BELGraph
+    """
+    from indra.statements import stmts_from_json
+    statements = stmts_from_json(stmts_json)
+    return from_indra_statements(statements, **kwargs)
+
+
+@open_file(0, mode='r')
+def from_indra_statements_json_file(file, **kwargs):
+    """Get a BEL graph from INDRA statements JSON file.
+
+    :rtype: BELGraph
+    """
+    return from_indra_statements_json(json.load(file), **kwargs)
 
 
 def from_indra_pickle(
@@ -136,6 +162,21 @@ def to_indra_statements(graph):
 
     pbp = process_pybel_graph(graph)
     return pbp.statements
+
+
+@open_file(1, mode='w')
+def to_indra_statements_json(graph):
+    """Export this graph as INDRA JSON list."""
+    return [
+        statement.to_json()
+        for statement in to_indra_statements(graph)
+    ]
+
+
+@open_file(1, mode='w')
+def to_indra_statements_json_file(graph, file, **kwargs):
+    """Export this graph as INDRA statement JSON."""
+    json.dump(to_indra_statements_json(graph), file, **kwargs)
 
 
 def from_biopax(
