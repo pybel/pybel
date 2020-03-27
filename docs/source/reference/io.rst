@@ -145,6 +145,13 @@ GraphML
 
 .. autofunction:: pybel.to_graphml
 
+PyNPA
+~~~~~
+.. automodule:: pybel.io.pynpa
+
+.. autofunction:: pybel.to_npa_directory
+.. autofunction:: pybel.to_npa_dfs
+
 Miscellaneous
 ~~~~~~~~~~~~~
 .. automodule:: pybel.io.extras

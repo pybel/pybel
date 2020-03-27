@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
-"""Exporter for PyNPA."""
+"""Exporter for PyNPA.
+
+.. seealso:: https://github.com/pynpa
+"""
 
 import os
 from typing import List, Mapping, Tuple
@@ -14,8 +17,8 @@ from ..struct.getters import get_tf_pairs
 
 __all__ = [
     'to_npa_directory',
-    'get_npa_layer_dfs',
-    'get_npa_layers',
+    'to_npa_dfs',
+    'to_npa_layers',
 ]
 
 Layer = Mapping[Tuple[Gene, Gene], int]
@@ -23,12 +26,12 @@ Layer = Mapping[Tuple[Gene, Gene], int]
 
 def to_npa_directory(graph: BELGraph, directory: str) -> None:
     """Write the BEL file to two files in the directory for :mod:`pynpa`."""
-    ppi_df, transcription_df = get_npa_layer_dfs(graph)
+    ppi_df, transcription_df = to_npa_dfs(graph)
     ppi_df.to_csv(os.path.join(directory, 'ppi_layer.tsv'), sep='\t', index=False)
     transcription_df.to_csv(os.path.join(directory, 'transcriptional_layer.tsv'), sep='\t', index=False)
 
 
-def get_npa_layer_dfs(graph: BELGraph) -> Tuple[pd.DataFrame, pd.DataFrame]:
+def to_npa_dfs(graph: BELGraph) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Export the BEL graph as two lists of triples for the :mod:`pynpa`.
 
     1. Pick out all transcription factor relationships. Protein X is a transcription
@@ -36,7 +39,7 @@ def get_npa_layer_dfs(graph: BELGraph) -> Tuple[pd.DataFrame, pd.DataFrame]:
     2. Get all other interactions between any gene/rna/protein that are directed causal
        for the PPI layer
     """
-    ppi_layer, transcription_layer = get_npa_layers(graph)
+    ppi_layer, transcription_layer = to_npa_layers(graph)
     return _get_df(ppi_layer), _get_df(transcription_layer)
 
 
@@ -52,7 +55,7 @@ def _normalize_layer(layer: Layer) -> List[Tuple[str, str, int]]:
     ]
 
 
-def get_npa_layers(graph: BELGraph) -> Tuple[Layer, Layer]:
+def to_npa_layers(graph: BELGraph) -> Tuple[Layer, Layer]:
     """Get the two layers for the network."""
     transcription_layer = {
         (u.get_rna().get_gene(), v.get_gene()): r
