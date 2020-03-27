@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-"""Tests for PyNPA exporter."""
+"""Tests for getters."""
 
 import unittest
 
 from pybel import BELGraph
 from pybel.dsl import ComplexAbundance, Protein, Rna
-from pybel.io.pynpa import get_tf_pairs
+from pybel.struct.getters import get_tf_pairs
 from pybel.testing.utils import n
+
 
 def _tf_up(graph, protein, rna):
     graph.add_directly_increases(
@@ -31,10 +32,11 @@ def _bel_pair_key(k):
     return tuple(map(str, k))
 
 
-class TestPyNPA(unittest.TestCase):
-    """Tests for PyNPA."""
+class TestGetters(unittest.TestCase):
+    """Tests for getters."""
 
     def test_get_tf_pairs(self):
+        """Test iterating over transcription factor pairs."""
         graph = BELGraph()
         p1, p2, p3 = (Protein('test', str(i)) for i in range(1, 4))
         r4, r5, r6 = (Rna('test', str(j)) for j in range(4, 7))

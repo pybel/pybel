@@ -3,16 +3,14 @@
 """Exporter for PyNPA."""
 
 import os
-from typing import Iterable, List, Mapping, Tuple
+from typing import List, Mapping, Tuple
 
 import pandas as pd
 
-from ..constants import (
-    CAUSAL_DECREASE_RELATIONS, CAUSAL_INCREASE_RELATIONS, DIRECTLY_DECREASES, DIRECTLY_INCREASES,
-    RELATION,
-)
-from ..dsl import ComplexAbundance, Gene, MicroRna, Protein, Rna
+from ..constants import CAUSAL_DECREASE_RELATIONS, CAUSAL_INCREASE_RELATIONS, RELATION
+from ..dsl import Gene, MicroRna, Protein, Rna
 from ..struct import BELGraph
+from ..struct.getters import get_tf_pairs
 
 __all__ = [
     'to_npa_directory',
@@ -91,38 +89,3 @@ def _normalize(n):
         if n.variants:
             n = n.get_parent()
         return n
-
-
-def get_tf_pairs(graph: BELGraph) -> Iterable[Tuple[Protein, Rna, int]]:
-    """Iterate over pairs of transcription factors and their targets."""
-    for tf in _iterate_proteins(graph):
-        for tf_gene in graph[tf]:
-            if not isinstance(tf_gene, ComplexAbundance):
-                continue
-            if tf not in tf_gene.members:
-                continue
-            other_members = [m for m in tf_gene.members if m != tf]
-            if 1 != len(other_members):
-                continue
-            target_gene = other_members[0]
-            if not isinstance(target_gene, Gene):
-                continue
-            if target_gene.variants:
-                target_gene = target_gene.get_parent()
-            target_rna = target_gene.get_rna()
-            if target_rna not in graph:
-                continue
-            for edge in graph[tf_gene][target_rna].values():
-                relation = edge[RELATION]
-                if relation == DIRECTLY_INCREASES:
-                    yield tf, target_rna, +1
-                elif relation == DIRECTLY_DECREASES:
-                    yield tf, target_rna, -1
-
-
-def _iterate_proteins(graph: BELGraph) -> Iterable[Protein]:
-    return (
-        node
-        for node in graph
-        if isinstance(node, Protein)
-    )
