@@ -100,18 +100,29 @@ def group_delimited_list(entries: List[str], sep: str = '/') -> List[List[str]]:
     ]
 
 
-def _p(entrez_id: str):
-    return pybel.dsl.Protein(namespace='ncbigene', identifier=entrez_id, name=entrez_id)
+def _p(identifier: str):
+    return pybel.dsl.Protein(
+        namespace='ncbigene',
+        identifier=identifier,
+        # name=name,
+    )
 
 
-def _f(component: str):
-    return pybel.dsl.Protein(namespace='hipathia.family', identifier=component, name=component)
+def _f(identifier: str):
+    return pybel.dsl.Protein(
+        namespace='hipathia.family',
+        identifier=identifier,
+        # name=name,
+    )
 
 
 def from_hipathia_dfs(name: str, att_df: pd.DataFrame, sif_df: pd.DataFrame) -> BELGraph:
     """Get a BEL graph from Hipathia dataframes."""
 
     def _clean_name(s):
+        prefix = f'N-{name}-'
+        if prefix not in s:
+            raise ValueError('wrong name for pathway')
         return tuple(sorted(s[len(f'N-{name}-'):].split(' ')))
 
     att_df['ID'] = att_df['ID'].map(_clean_name)
@@ -124,44 +135,49 @@ def from_hipathia_dfs(name: str, att_df: pd.DataFrame, sif_df: pd.DataFrame) -> 
 
     graph = BELGraph(name=name)
 
-    for i, (components, component_labels, component_gene_lists) in enumerate(
-        att_df[['ID', 'label', 'genesList']].values):
+    for components, component_label_lists, component_gene_lists in att_df[['ID', 'label', 'genesList']].values:
+        if not components:
+            print(att_df[['ID', 'label', 'genesList']])
+            raise ValueError('missing components in row')
+
         if len(components) == 1:  # This is a simple node, representing a protein or protein family
-            component, component_label, genes = components[0], component_labels[0], component_gene_lists[0]
-            if len(genes) == 1:  # just a protein
-                simple_node_to_dsl[component] = _p(genes[0])
+            component, label, entrez_ids = components[0], component_label_lists[0], component_gene_lists[0]
+            if len(entrez_ids) == 1:  # just a protein
+                simple_node_to_dsl[component] = _p(identifier=entrez_ids[0])
             else:  # a protein family
-                family_dsl = _f(component)
-                for gene in genes:
-                    child_dsl = _p(gene)
+                family_dsl = _f(identifier=label)
+                for entrez_id in entrez_ids:
+                    child_dsl = _p(entrez_id)
                     graph.add_is_a(child_dsl, family_dsl)
                 family_node_to_dsl[component] = family_dsl
 
         else:  # This is a complex node, representing a protein complex of simple nodes
             component_dsls = []
             components = tuple(sorted(components))
-            for component, label, genes in zip(components, component_labels, component_gene_lists):
-                if len(genes) == 1:
-                    simple_dsl = _p(genes[0])
+            for component, label, entrez_ids in zip(components, component_label_lists, component_gene_lists):
+                if len(entrez_ids) == 1:
+                    simple_dsl = _p(identifier=entrez_ids[0])
                     simple_node_to_dsl[component] = simple_dsl
                     component_dsls.append(simple_dsl)
                 else:
-                    family_dsl = _f(component)
-                    for gene in genes:
-                        child_dsl = _p(gene)
+                    family_dsl = _f(identifier=label)
+                    for entrez_id in entrez_ids:
+                        child_dsl = _p(identifier=entrez_id)
                         graph.add_is_a(child_dsl, family_dsl)
                     family_node_to_dsl[component] = family_dsl
                     component_dsls.append(family_dsl)
 
             component_dsl = pybel.dsl.ComplexAbundance(component_dsls)
+            graph.add_node_from_data(component_dsl)
             complex_node_to_dsl[components] = component_dsl
 
+    # Remap all of the dictionaries
     x = {}
     x.update(complex_node_to_dsl)
     for k, v in simple_node_to_dsl.items():
-        x[k,] = v
+        x[(k,)] = v
     for k, v in family_node_to_dsl.items():
-        x[k,] = v
+        x[(k,)] = v
 
     sif_df['source'] = sif_df['source'].map(_clean_name).map(x.get)
     sif_df['target'] = sif_df['target'].map(_clean_name).map(x.get)
@@ -319,7 +335,7 @@ class HipathiaConverter:
 
 
 def make_hsa047370() -> BELGraph:
-    """Make an example BEL graph corresponding to """
+    """Make an example BEL graph corresponding to the example data from Marina."""
     graph = BELGraph(name='hsa04370')
 
     node_1 = hgnc('CDC42')

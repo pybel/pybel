@@ -6,7 +6,8 @@ import os
 import tempfile
 import unittest
 
-from pybel.dsl import Protein
+from pybel.constants import INCREASES, RELATION
+from pybel.dsl import ComplexAbundance, Protein
 from pybel.io.hipathia import HipathiaConverter, from_hipathia_paths, group_delimited_list, make_hsa047370
 
 HERE = os.path.abspath(os.path.dirname(__file__))
@@ -32,11 +33,11 @@ class TestImportHipathia(unittest.TestCase):
 
     def test_import(self):
         graph = from_hipathia_paths(
-            name='test_1',
+            name='test1',
             att_path=TEST_1_ATT_PATH,
             sif_path=TEST_1_SIF_PATH,
         )
-        a = Protein(namespace='ncbigene', identifier='A')
+        a = Protein(namespace='ncbigene', identifier='1')
         b_family = Protein(namespace='hipathia.family', identifier='B_Family')
         b_2 = Protein(namespace='ncbigene', identifier='2')
         b_3 = Protein(namespace='ncbigene', identifier='3')
@@ -44,8 +45,17 @@ class TestImportHipathia(unittest.TestCase):
         c_4 = Protein(namespace='ncbigene', identifier='4')
         c_5 = Protein(namespace='ncbigene', identifier='5')
         d = Protein(namespace='ncbigene', identifier='6')
+        c_d = ComplexAbundance([c_family, d])
 
-        self.assertEqual({a, b_family, b_2, b_3, c_family, c_4, c_5, d}, set(graph))
+        self.assertEqual(
+            sorted({a, b_family, b_2, b_3, c_family, c_4, c_5, d, c_d}, key=str),
+            sorted(graph, key=str),
+        )
+
+        self.assertIn(a, graph[c_d])  # c/d -> a
+        self.assertEqual(INCREASES, list(graph[c_d][a].values())[0][RELATION])
+        self.assertIn(b_family, graph[a])  # a-> b_family
+        self.assertEqual(INCREASES, list(graph[a][b_family].values())[0][RELATION])
 
 
 class TestExportHipathia(unittest.TestCase):

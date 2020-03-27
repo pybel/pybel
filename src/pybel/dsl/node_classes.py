@@ -240,10 +240,6 @@ class Variant(dict, metaclass=ABCMeta):
     def as_bel(self, use_identifiers: bool = True) -> str:
         """Return this variant as a BEL string."""
 
-    def as_ibel(self) -> str:
-        """Return this variant as an identified BEL string."""
-        return self.as_bel(use_identifiers=True)
-
     def __str__(self):  # noqa: D105
         return self.as_bel()
 
@@ -559,7 +555,7 @@ class Fragment(Variant):
 
         return '{}_{}'.format(self[FRAGMENT_START], self[FRAGMENT_STOP])
 
-    def as_bel(self, use_identifiers=False) -> str:
+    def as_bel(self) -> str:
         """Return this fragment variant as a BEL string."""
         res = '"{}"'.format(self.range)
 
