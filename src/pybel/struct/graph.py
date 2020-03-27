@@ -543,8 +543,8 @@ class BELGraph(nx.MultiDiGraph):
     add_inhibits = partialmethod(add_decreases, object_modifier=activity())
     """Add an "inhibits" relationship.
 
-    A more specific version of :meth:`add_directly_decreases` that automatically
-    populates the object modifier with an activity."""
+    A more specific version of :meth:`add_decreases` that automatically populates the object modifier with an
+    activity."""
 
     def _modify(
         self,
