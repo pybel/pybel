@@ -64,13 +64,16 @@ The columns included are:
 import itertools as itt
 import logging
 import os
-from typing import Union
+from itertools import groupby
+from typing import Dict, List, Union
 
 import networkx as nx
+import pandas as pd
 
+import pybel.dsl
 from pybel import BELGraph
 from pybel.constants import DIRECTLY_DECREASES, DIRECTLY_INCREASES, RELATION
-from pybel.dsl import Abundance, ComplexAbundance, Protein, hgnc
+from pybel.dsl import Abundance, BaseAbundance, ComplexAbundance, Protein, hgnc
 from pybel.struct import get_children
 
 __all__ = [
@@ -81,6 +84,97 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
+def from_hipathia_paths(name: str, att_path: str, sif_path: str) -> BELGraph:
+    """Get a BEL graph from Hipathia files."""
+    att_df = pd.read_csv(att_path, sep='\t')
+    sif_df = pd.read_csv(sif_path, sep='\t', header=None, names=['source', 'relation', 'target'])
+    return from_hipathia_dfs(name=name, att_df=att_df, sif_df=sif_df)
+
+
+def group_delimited_list(entries: List[str], sep: str = '/') -> List[List[str]]:
+    """Group delimited things in a list."""
+    return [
+        list(b)
+        for a, b in groupby(entries, lambda z: z == sep)
+        if not a
+    ]
+
+
+def _p(entrez_id: str):
+    return pybel.dsl.Protein(namespace='ncbigene', identifier=entrez_id, name=entrez_id)
+
+
+def _f(component: str):
+    return pybel.dsl.Protein(namespace='hipathia.family', identifier=component, name=component)
+
+
+def from_hipathia_dfs(name: str, att_df: pd.DataFrame, sif_df: pd.DataFrame) -> BELGraph:
+    """Get a BEL graph from Hipathia dataframes."""
+
+    def _clean_name(s):
+        return tuple(sorted(s[len(f'N-{name}-'):].split(' ')))
+
+    att_df['ID'] = att_df['ID'].map(_clean_name)
+    att_df['label'] = att_df['label'].str.split(' ')
+    att_df['genesList'] = att_df['genesList'].str.split(',').map(group_delimited_list)
+
+    simple_node_to_dsl = {}
+    family_node_to_dsl = {}
+    complex_node_to_dsl = {}
+
+    graph = BELGraph(name=name)
+
+    for i, (components, component_labels, component_gene_lists) in enumerate(
+        att_df[['ID', 'label', 'genesList']].values):
+        if len(components) == 1:  # This is a simple node, representing a protein or protein family
+            component, component_label, genes = components[0], component_labels[0], component_gene_lists[0]
+            if len(genes) == 1:  # just a protein
+                simple_node_to_dsl[component] = _p(genes[0])
+            else:  # a protein family
+                family_dsl = _f(component)
+                for gene in genes:
+                    child_dsl = _p(gene)
+                    graph.add_is_a(child_dsl, family_dsl)
+                family_node_to_dsl[component] = family_dsl
+
+        else:  # This is a complex node, representing a protein complex of simple nodes
+            component_dsls = []
+            components = tuple(sorted(components))
+            for component, label, genes in zip(components, component_labels, component_gene_lists):
+                if len(genes) == 1:
+                    simple_dsl = _p(genes[0])
+                    simple_node_to_dsl[component] = simple_dsl
+                    component_dsls.append(simple_dsl)
+                else:
+                    family_dsl = _f(component)
+                    for gene in genes:
+                        child_dsl = _p(gene)
+                        graph.add_is_a(child_dsl, family_dsl)
+                    family_node_to_dsl[component] = family_dsl
+                    component_dsls.append(family_dsl)
+
+            component_dsl = pybel.dsl.ComplexAbundance(component_dsls)
+            complex_node_to_dsl[components] = component_dsl
+
+    x = {}
+    x.update(complex_node_to_dsl)
+    for k, v in simple_node_to_dsl.items():
+        x[k,] = v
+    for k, v in family_node_to_dsl.items():
+        x[k,] = v
+
+    sif_df['source'] = sif_df['source'].map(_clean_name).map(x.get)
+    sif_df['target'] = sif_df['target'].map(_clean_name).map(x.get)
+    for source, relation, target in sif_df.values:
+        if relation == 'activation':
+            graph.add_increases(source, target, citation='', evidence='')
+        elif relation == 'inhibition':
+            graph.add_decreases(source, target, citation='', evidence='')
+        else:
+            raise ValueError(f'unknown relation: {relation}')
+    return graph
+
+
 def to_hipathia(graph: BELGraph, directory: str):
     """Export Hipathia artifacts for the graph."""
     converter = HipathiaConverter(graph)
@@ -89,6 +183,9 @@ def to_hipathia(graph: BELGraph, directory: str):
 
 class HipathiaConverter:
     """A data structure that helps convert a graph to the Hipathia format."""
+
+    bel_node_to_hipathia_node: Dict[BaseAbundance, BaseAbundance]
+    bel_node_to_hipathia_genes: Dict[BaseAbundance, List[BaseAbundance]]
 
     def __init__(self, graph: BELGraph):
         self.graph = graph
@@ -123,14 +220,13 @@ class HipathiaConverter:
 
         if isinstance(node, (Abundance, Protein)):
             self.node_counter += 1
-
+            hipathia_name = f'N-{self.name}-{self.node_counter}'
+            self.bel_node_to_hipathia_node[node] = hipathia_name
             if node.namespace.lower() in {'hgnc', 'entrez', 'ncbigene'}:
-                self.bel_node_to_hipathia_genes[node] = [node]
+                self.bel_node_to_hipathia_genes[hipathia_name] = [node]
             elif node.namespace.lower() in {'fplx'}:
-                self.bel_node_to_hipathia_genes[node] = get_children(self.graph, node)
-
-            self.bel_node_to_hipathia_node[node] = f'N-{self.name}-{self.node_counter}'
-            return self.bel_node_to_hipathia_node[node]
+                self.bel_node_to_hipathia_genes[hipathia_name] = get_children(self.graph, node)
+            return hipathia_name
 
         # elif isinstance(node, ComplexAbundance):
         #     # TODO: Implement
@@ -156,9 +252,24 @@ class HipathiaConverter:
         min_y = min(y for x, y in pos.values())
 
         def _get_single_gene_list(node: Union[Protein, Abundance]) -> str:
+            if node is None:
+                raise ValueError('node is none! fuck!')
+
+            try:
+                hipathia_genes = self.bel_node_to_hipathia_genes[node]
+            except Exception:
+                from pprint import pprint
+                pprint(self.bel_node_to_hipathia_node)
+                pprint(self.bel_node_to_hipathia_genes)
+                print(node)
+                raise
+
+            if hipathia_genes is None:
+                raise ValueError(f'hipathia genes are none for {node}')
+
             return ','.join(
                 n.identifier
-                for n in self.bel_node_to_hipathia_genes[node]
+                for n in hipathia_genes
             )
 
         def _get_genes_list(node) -> str:
@@ -208,7 +319,7 @@ class HipathiaConverter:
 
 
 def make_hsa047370() -> BELGraph:
-    """"""
+    """Make an example BEL graph corresponding to """
     graph = BELGraph(name='hsa04370')
 
     node_1 = hgnc('CDC42')
@@ -228,7 +339,7 @@ def make_hsa047370() -> BELGraph:
     node_34 = hgnc('RAF1')
     node_35 = hgnc('HRAS')
 
-    node_10 = ComplexAbundance[hgnc('PLCG1'), hgnc('SH2D2A')])
+    node_10 = ComplexAbundance([hgnc('PLCG1'), hgnc('SH2D2A')])
 
     node_28 = hgnc('SHC2')
     node_23 = hgnc('PTK2')
@@ -283,11 +394,18 @@ def make_hsa047370() -> BELGraph:
 
 
 def _main():
-    desktop = os.path.join(os.path.expanduser('~'), 'Desktop')
-    to_hipathia(
-        make_hsa047370(),
-        directory=desktop,
+    graph = from_hipathia_paths(
+        name='hsa04370',
+        att_path='/Users/cthoyt/dev/bel/pybel/tests/test_io/test_hipathia/hsa04370.att',
+        sif_path='/Users/cthoyt/dev/bel/pybel/tests/test_io/test_hipathia/hsa04370.sif',
     )
+    pybel.to_bel_script(graph, '/Users/cthoyt/dev/bel/pybel/tests/test_io/test_hipathia/hsa04370.bel')
+
+    # desktop = os.path.join(os.path.expanduser('~'), 'Desktop')
+    # to_hipathia(
+    #     make_hsa047370(),
+    #     directory=desktop,
+    # )
 
 
 if __name__ == '__main__':

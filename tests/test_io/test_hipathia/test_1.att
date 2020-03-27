@@ -1,0 +1,4 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-test1-1	A	301	201	white	rectangle	gene	0.5	black	46	17	1
+N-test1-2	B_Family	506	433	white	rectangle	gene	0.5	black	46	17	2,3
+N-test1-3 4	C_Family D	270	320	white	rectangle	gene,gene	0.5	black	46	17	4,5,/,6

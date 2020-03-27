@@ -2,16 +2,53 @@
 
 """Tests for Hipathia."""
 
+import os
 import tempfile
 import unittest
+
+from pybel.dsl import Protein
+from pybel.io.hipathia import HipathiaConverter, from_hipathia_paths, group_delimited_list, make_hsa047370
+
+HERE = os.path.abspath(os.path.dirname(__file__))
+
+TEST_1_ATT_PATH = os.path.join(HERE, 'test_1.att')
+TEST_1_SIF_PATH = os.path.join(HERE, 'test_1.sif')
+
+TEST_ATT_PATH = os.path.join(HERE, 'hsa04370.att')
+TEST_SIF_PATH = os.path.join(HERE, 'hsa04370.sif')
+
 
 # from pybel.examples.ampk_example import ampk_graph
 # from pybel.examples.sialic_acid_example import sialic_acid_graph
 # from pybel.examples.vegf_graph import vegf_graph
-from pybel.io.hipathia import HipathiaConverter, make_hsa047370
+
+class TestUtils(unittest.TestCase):
+    def test_group_delimited(self):
+        self.assertEqual([[5335, 5336], [9047]], group_delimited_list([5335, 5336, '/', 9047], '/'))
 
 
-class TestHipathia(unittest.TestCase):
+class TestImportHipathia(unittest.TestCase):
+    """Test Hipathia import."""
+
+    def test_import(self):
+        graph = from_hipathia_paths(
+            name='test_1',
+            att_path=TEST_1_ATT_PATH,
+            sif_path=TEST_1_SIF_PATH,
+        )
+        a = Protein(namespace='ncbigene', identifier='A')
+        b_family = Protein(namespace='hipathia.family', identifier='B_Family')
+        b_2 = Protein(namespace='ncbigene', identifier='2')
+        b_3 = Protein(namespace='ncbigene', identifier='3')
+        c_family = Protein(namespace='hipathia.family', identifier='C_Family')
+        c_4 = Protein(namespace='ncbigene', identifier='4')
+        c_5 = Protein(namespace='ncbigene', identifier='5')
+        d = Protein(namespace='ncbigene', identifier='6')
+
+        self.assertEqual({a, b_family, b_2, b_3, c_family, c_4, c_5, d}, set(graph))
+
+
+class TestExportHipathia(unittest.TestCase):
     """Test Hipathia."""
 
     def test_complex(self):
