@@ -64,5 +64,5 @@ class TestGetters(unittest.TestCase):
         self.assertEqual(sorted_expected_edges, sorted_actual_edges)
 
         pairs = set(get_tf_pairs(graph))
-        expected_pairs = {(p1, r4), (p2, r5)}
+        expected_pairs = {(p1, r4, +1), (p2, r5, -1)}
         self.assertEqual(expected_pairs, pairs)
