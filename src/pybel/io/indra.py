@@ -34,7 +34,7 @@ After assembling a model with `INDRA <https://github.com/sorgerlab/indra>`_, a l
 
 import json
 from pickle import load
-from typing import Optional
+from typing import Any, List, Mapping, Optional, TextIO, Union
 
 from networkx.utils import open_file
 
@@ -93,10 +93,12 @@ def from_indra_statements(
     return graph
 
 
-def from_indra_statements_json(stmts_json, **kwargs):
+def from_indra_statements_json(stmts_json: List[Mapping[str, Any]], **kwargs):
     """Get a BEL graph from INDRA statements JSON.
 
     :rtype: BELGraph
+
+    Other kwargs are passed to :func:`from_indra_statements`.
     """
     from indra.statements import stmts_from_json
     statements = stmts_from_json(stmts_json)
@@ -108,48 +110,24 @@ def from_indra_statements_json_file(file, **kwargs):
     """Get a BEL graph from INDRA statements JSON file.
 
     :rtype: BELGraph
+
+    Other kwargs are passed to :func:`from_indra_statements`.
     """
     return from_indra_statements_json(json.load(file), **kwargs)
 
 
-def from_indra_pickle(
-    path: str,
-    name: Optional[str] = None,
-    version: Optional[str] = None,
-    description: Optional[str] = None,
-    authors: Optional[str] = None,
-    contact: Optional[str] = None,
-    license: Optional[str] = None,
-    copyright: Optional[str] = None,
-    disclaimer: Optional[str] = None,
-):
+def from_indra_pickle(path: str, **kwargs):
     """Import a model from :mod:`indra`.
 
     :param path: Path to pickled list of :class:`indra.statements.Statement`
-    :param name: The name for the BEL graph
-    :param version: The version of the BEL graph
-    :param description: The description of the graph
-    :param authors: The authors of this graph
-    :param contact: The contact email for this graph
-    :param license: The license for this graph
-    :param copyright: The copyright for this graph
-    :param disclaimer: The disclaimer for this graph
     :rtype: pybel.BELGraph
+
+    Other kwargs are passed to :func:`from_indra_statements`.
     """
     with open(path, 'rb') as f:
         statements = load(f)
 
-    return from_indra_statements(
-        stmts=statements,
-        name=name,
-        version=version,
-        description=description,
-        authors=authors,
-        contact=contact,
-        license=license,
-        copyright=copyright,
-        disclaimer=disclaimer,
-    )
+    return from_indra_statements(stmts=statements, **kwargs)
 
 
 def to_indra_statements(graph):
@@ -164,9 +142,11 @@ def to_indra_statements(graph):
     return pbp.statements
 
 
-@open_file(1, mode='w')
-def to_indra_statements_json(graph):
-    """Export this graph as INDRA JSON list."""
+def to_indra_statements_json(graph) -> List[Mapping[str, Any]]:
+    """Export this graph as INDRA JSON list.
+
+    :param pybel.BELGraph graph: A BEL graph
+    """
     return [
         statement.to_json()
         for statement in to_indra_statements(graph)
@@ -174,49 +154,28 @@ def to_indra_statements_json(graph):
 
 
 @open_file(1, mode='w')
-def to_indra_statements_json_file(graph, file, **kwargs):
-    """Export this graph as INDRA statement JSON."""
-    json.dump(to_indra_statements_json(graph), file, **kwargs)
+def to_indra_statements_json_file(graph, path: Union[str, TextIO], indent: Optional[int] = 2, **kwargs):
+    """Export this graph as INDRA statement JSON.
+
+    :param pybel.BELGraph graph: A BEL graph
+    :param path: A writable file or file-like
+
+    Other kwargs are passed to :func:`json.dump`.
+    """
+    json.dump(to_indra_statements_json(graph), path, indent=indent, **kwargs)
 
 
-def from_biopax(
-    path: str,
-    name: Optional[str] = None,
-    version: Optional[str] = None,
-    description: Optional[str] = None,
-    authors: Optional[str] = None,
-    contact: Optional[str] = None,
-    license: Optional[str] = None,
-    copyright: Optional[str] = None,
-    disclaimer: Optional[str] = None,
-):
+def from_biopax(path: str, **kwargs):
     """Import a model encoded in Pathway Commons `BioPAX <http://www.biopax.org/>`_ via :mod:`indra`.
 
     :param path: Path to a BioPAX OWL file
-    :param name: The name for the BEL graph
-    :param version: The version of the BEL graph
-    :param description: The description of the graph
-    :param authors: The authors of this graph
-    :param contact: The contact email for this graph
-    :param license: The license for this graph
-    :param copyright: The copyright for this graph
-    :param disclaimer: The disclaimer for this graph
     :rtype: pybel.BELGraph
+
+    Other kwargs are passed to :func:`from_indra_statements`.
 
     .. warning:: Not compatible with all BioPAX! See INDRA documentation.
     """
     from indra.sources.biopax import process_owl
 
     model = process_owl(path)
-
-    return from_indra_statements(
-        stmts=model.statements,
-        name=name,
-        version=version,
-        description=description,
-        authors=authors,
-        contact=contact,
-        license=license,
-        copyright=copyright,
-        disclaimer=disclaimer,
-    )
+    return from_indra_statements(stmts=model.statements, **kwargs)
