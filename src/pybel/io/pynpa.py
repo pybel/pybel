@@ -14,6 +14,7 @@ from ..constants import CAUSAL_DECREASE_RELATIONS, CAUSAL_INCREASE_RELATIONS, RE
 from ..dsl import Gene, MicroRna, Protein, Rna
 from ..struct import BELGraph
 from ..struct.getters import get_tf_pairs
+from ..struct.node_utils import list_abundance_cartesian_expansion, reaction_cartesian_expansion
 
 __all__ = [
     'to_npa_directory',
@@ -31,15 +32,20 @@ def to_npa_directory(graph: BELGraph, directory: str) -> None:
     transcription_df.to_csv(os.path.join(directory, 'transcriptional_layer.tsv'), sep='\t', index=False)
 
 
-def to_npa_dfs(graph: BELGraph) -> Tuple[pd.DataFrame, pd.DataFrame]:
+def to_npa_dfs(graph: BELGraph, cartesian_expansion: bool = False) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Export the BEL graph as two lists of triples for the :mod:`pynpa`.
+
+    :param graph: A BEL graph
+    :param cartesian_expansion: If true, applies cartesian expansion on both reactions (reactants x products)
+     as well as list abundances using :func:`list_abundance_cartesian_expansion` and
+     :func:`reaction_cartesian_expansion`
 
     1. Pick out all transcription factor relationships. Protein X is a transcription
        factor for gene Y IFF ``complex(p(X), g(Y)) -> r(Y)``
     2. Get all other interactions between any gene/rna/protein that are directed causal
        for the PPI layer
     """
-    ppi_layer, transcription_layer = to_npa_layers(graph)
+    ppi_layer, transcription_layer = to_npa_layers(graph, cartesian_expansion=cartesian_expansion)
     return _get_df(ppi_layer), _get_df(transcription_layer)
 
 
@@ -55,8 +61,18 @@ def _normalize_layer(layer: Layer) -> List[Tuple[str, str, int]]:
     ]
 
 
-def to_npa_layers(graph: BELGraph) -> Tuple[Layer, Layer]:
-    """Get the two layers for the network."""
+def to_npa_layers(graph: BELGraph, cartesian_expansion: bool = False) -> Tuple[Layer, Layer]:
+    """Get the two layers for the network.
+
+    :param graph: A BEL graph
+    :param cartesian_expansion: If true, applies cartesian expansion on both reactions (reactants x products)
+     as well as list abundances using :func:`list_abundance_cartesian_expansion` and
+     :func:`reaction_cartesian_expansion`
+    """
+    if cartesian_expansion:
+        list_abundance_cartesian_expansion(graph)
+        reaction_cartesian_expansion(graph)
+
     transcription_layer = {
         (u.get_rna().get_gene(), v.get_gene()): r
         for u, v, r in get_tf_pairs(graph)
