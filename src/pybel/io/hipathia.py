@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Convert a BEL graph to Hipathia inputs.
+"""Convert a BEL graph to HiPathia inputs.
 
 Input
 -----
@@ -14,7 +14,7 @@ SIF File
 - The name of the nodes in this file will be stored as the IDs of the nodes.
 - The nodes IDs should have the following structure: N (dash) pathway ID (dash)
   node ID.
-- Hipathia distinguish between two types of nodes: simple and complex.
+- HiPathia distinguish between two types of nodes: simple and complex.
 
 Simple nodes:
 - Simple nodes may include many genes, but only one is needed to perform the
@@ -70,14 +70,15 @@ from typing import List, Optional, Set, Tuple, Union
 import networkx as nx
 import pandas as pd
 
-import pybel.dsl
-from pybel import BELGraph
-from pybel.constants import (CAUSAL_INCREASE_RELATIONS, CAUSAL_POLAR_RELATIONS, IS_A, RELATION)
-from pybel.dsl import ComplexAbundance, Protein, hgnc
+from ..constants import CAUSAL_INCREASE_RELATIONS, CAUSAL_POLAR_RELATIONS, IS_A, RELATION
+from ..dsl import ComplexAbundance, Protein, hgnc
+from ..struct import BELGraph
 
 __all__ = [
     'from_hipathia_paths',
+    'from_hipathia_dfs',
     'to_hipathia',
+    'to_hipathia_dfs',
 ]
 
 logger = logging.getLogger(__name__)
@@ -86,7 +87,7 @@ ATT_COLS = ['ID', 'label', 'genesList']
 
 
 def from_hipathia_paths(name: str, att_path: str, sif_path: str) -> BELGraph:
-    """Get a BEL graph from Hipathia files."""
+    """Get a BEL graph from HiPathia files."""
     att_df = pd.read_csv(att_path, sep='\t')
     sif_df = pd.read_csv(sif_path, sep='\t', header=None, names=['source', 'relation', 'target'])
     return from_hipathia_dfs(name=name, att_df=att_df, sif_df=sif_df)
@@ -102,7 +103,7 @@ def group_delimited_list(entries: List[str], sep: str = '/') -> List[List[str]]:
 
 
 def _p(identifier: str):
-    return pybel.dsl.Protein(
+    return Protein(
         namespace='ncbigene',
         identifier=identifier,
         # name=name,
@@ -110,7 +111,7 @@ def _p(identifier: str):
 
 
 def _f(identifier: str):
-    return pybel.dsl.Protein(
+    return Protein(
         namespace='hipathia.family',
         identifier=identifier,
         # name=name,
@@ -118,7 +119,7 @@ def _f(identifier: str):
 
 
 def from_hipathia_dfs(name: str, att_df: pd.DataFrame, sif_df: pd.DataFrame) -> BELGraph:
-    """Get a BEL graph from Hipathia dataframes."""
+    """Get a BEL graph from HiPathia dataframes."""
 
     def _clean_name(s):
         prefix = f'N-{name}-'
@@ -168,7 +169,7 @@ def from_hipathia_dfs(name: str, att_df: pd.DataFrame, sif_df: pd.DataFrame) -> 
                     family_node_to_dsl[component] = family_dsl
                     component_dsls.append(family_dsl)
 
-            component_dsl = pybel.dsl.ComplexAbundance(component_dsls)
+            component_dsl = ComplexAbundance(component_dsls)
             graph.add_node_from_data(component_dsl)
             complex_node_to_dsl[components] = component_dsl
 
@@ -194,8 +195,8 @@ def from_hipathia_dfs(name: str, att_df: pd.DataFrame, sif_df: pd.DataFrame) -> 
 
 
 def to_hipathia(graph: BELGraph, directory: str) -> None:
-    """Export Hipathia artifacts for the graph."""
-    att_df, sif_df = get_hipathia_dfs(graph)
+    """Export HiPathia artifacts for the graph."""
+    att_df, sif_df = to_hipathia_dfs(graph)
     att_df.to_csv(os.path.join(directory, '{}.att'.format(graph.name)))
     sif_df.to_csv(os.path.join(directory, '{}.sif'.format(graph.name)))
 
@@ -213,7 +214,7 @@ def _is_node_family(graph: BELGraph, node: Protein) -> Optional[Set[Protein]]:
     return children
 
 
-def get_hipathia_dfs(graph: BELGraph) -> Tuple[pd.DataFrame, pd.DataFrame]:
+def to_hipathia_dfs(graph: BELGraph) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Get the ATT and SIF dataframes.
 
     1. Identify nodes:
@@ -395,22 +396,3 @@ def make_hsa047370() -> BELGraph:
     _add_increases(node_10, node_36)
 
     return graph
-
-
-def _main():
-    graph = from_hipathia_paths(
-        name='hsa04370',
-        att_path='/Users/cthoyt/dev/bel/pybel/tests/test_io/test_hipathia/hsa04370.att',
-        sif_path='/Users/cthoyt/dev/bel/pybel/tests/test_io/test_hipathia/hsa04370.sif',
-    )
-    pybel.to_bel_script(graph, '/Users/cthoyt/dev/bel/pybel/tests/test_io/test_hipathia/hsa04370.bel')
-
-    # desktop = os.path.join(os.path.expanduser('~'), 'Desktop')
-    # to_hipathia(
-    #     make_hsa047370(),
-    #     directory=desktop,
-    # )
-
-
-if __name__ == '__main__':
-    _main()

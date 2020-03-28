@@ -9,7 +9,7 @@ import pandas as pd
 
 from pybel import BELGraph
 from pybel.dsl import ComplexAbundance, Protein
-from pybel.io.hipathia import ATT_COLS, get_hipathia_dfs
+from pybel.io.hipathia import ATT_COLS, to_hipathia_dfs
 
 PROTEIN_NAMESPACE = 'ncbigene'
 FAMILY_NAMESPACE = 'hipathia.family'
@@ -36,7 +36,7 @@ class TestExportHipathia(unittest.TestCase):
         self.graph = BELGraph(name=TEST_NAME)
 
     def _get_dfs(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
-        return get_hipathia_dfs(self.graph)
+        return to_hipathia_dfs(self.graph)
 
     def test_protein_activates_protein(self):
         """Test conversion of ``p(A) -> p(D)``."""
