@@ -2,19 +2,17 @@
 
 """Functions for getting iterables of nodes."""
 
-from typing import List, Set
+from typing import Set
 
 from .node_filters import get_nodes
 from .node_predicate_builders import function_inclusion_filter_builder, namespace_inclusion_builder
 from ..graph import BELGraph
-from ...constants import IS_A, RELATION
 from ...dsl import BaseEntity
 from ...typing import Strings
 
 __all__ = [
     'get_nodes_by_function',
     'get_nodes_by_namespace',
-    'get_children',
 ]
 
 
@@ -26,12 +24,3 @@ def get_nodes_by_function(graph: BELGraph, func: Strings) -> Set[BaseEntity]:
 def get_nodes_by_namespace(graph: BELGraph, namespaces: Strings) -> Set[BaseEntity]:
     """Get all nodes identified by the given namespace(s)."""
     return get_nodes(graph, namespace_inclusion_builder(namespaces))
-
-
-def get_children(graph, node: BaseEntity) -> List[BaseEntity]:
-    """Get all nodes that are children of the given node."""
-    return [
-        u
-        for u, _, d in graph.in_edges(node, data=True)
-        if d[RELATION] == IS_A
-    ]
