@@ -122,10 +122,10 @@ def from_hipathia_dfs(name: str, att_df: pd.DataFrame, sif_df: pd.DataFrame) -> 
     """Get a BEL graph from HiPathia dataframes."""
 
     def _clean_name(s):
-        prefix = f'N-{name}-'
+        prefix = 'N-{name}-'.format(name=name)
         if prefix not in s:
             raise ValueError('wrong name for pathway')
-        return tuple(sorted(s[len(f'N-{name}-'):].split(' ')))
+        return tuple(sorted(s[len(prefix):].split(' ')))
 
     att_df['ID'] = att_df['ID'].map(_clean_name)
     att_df['label'] = att_df['label'].str.split(' ')
@@ -189,7 +189,7 @@ def from_hipathia_dfs(name: str, att_df: pd.DataFrame, sif_df: pd.DataFrame) -> 
         elif relation == 'inhibition':
             graph.add_decreases(source, target, citation='', evidence='')
         else:
-            raise ValueError(f'unknown relation: {relation}')
+            raise ValueError('unknown relation: {relation}'.format(relation=relation))
 
     return graph
 
