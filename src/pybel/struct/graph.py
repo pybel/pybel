@@ -558,10 +558,10 @@ class BELGraph(nx.MultiDiGraph):
 
     def _modify(
         self,
-        add_edge_fn,
+        add_edge_fn: str,
+        name: str,
         u,
         v,
-        name,
         code: Optional[str] = None,
         position: Optional[int] = None,
         *,
@@ -573,7 +573,8 @@ class BELGraph(nx.MultiDiGraph):
         **attr
     ):
         """Add a simple modification."""
-        return add_edge_fn(
+        adder = getattr(self, add_edge_fn)
+        return adder(
             u,
             v.with_variants(ProteinModification(
                 name=name, code=code, position=position,
@@ -586,16 +587,16 @@ class BELGraph(nx.MultiDiGraph):
             **attr
         )
 
-    add_phosphorylates = partialmethod(_modify, add_edge_fn=add_increases, name='Ph')
+    add_phosphorylates = partialmethod(_modify, 'add_increases', 'Ph')
     """Add an increase of modified object with phosphorylation."""
 
-    add_directly_phosphorylates = partialmethod(_modify, add_edge_fn=add_directly_increases, name='Ph')
+    add_directly_phosphorylates = partialmethod(_modify, 'add_directly_increases', 'Ph')
     """Add a direct increase of modified object with phosphorylation."""
 
-    add_dephosphorylates = partialmethod(_modify, add_edge_fn=add_decreases, name='Ph')
+    add_dephosphorylates = partialmethod(_modify, 'add_decreases', 'Ph')
     """Add a decrease of modified object with phosphorylation."""
 
-    add_directly_dephosphorylates = partialmethod(_modify, add_edge_fn=add_directly_decreases, name='Ph')
+    add_directly_dephosphorylates = partialmethod(_modify, 'add_directly_decreases', 'Ph')
     """Add a direct decrease of modified object with phosphorylation."""
 
     def add_node_from_data(self, node: BaseEntity) -> None:
