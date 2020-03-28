@@ -555,7 +555,7 @@ class Fragment(Variant):
 
         return '{}_{}'.format(self[FRAGMENT_START], self[FRAGMENT_STOP])
 
-    def as_bel(self, use_identifiers: bool = True) -> str:
+    def as_bel(self, use_identifiers=False) -> str:
         """Return this fragment variant as a BEL string."""
         res = '"{}"'.format(self.range)
 
