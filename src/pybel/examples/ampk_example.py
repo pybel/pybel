@@ -2,7 +2,7 @@
 
 """An example graph in which a famplex (complex of families) activates something."""
 
-from ..dsl import NamedComplexAbundance, Protein
+from ..dsl import ComplexAbundance, NamedComplexAbundance, Protein, ProteinModification
 from ..struct import BELGraph
 
 ampk_graph = BELGraph()
@@ -43,15 +43,27 @@ rptor = Protein(namespace='hgnc', identifier='30287', name='RPTOR')
 ampk_graph.add_part_of(mtor, mtorc1)
 ampk_graph.add_part_of(rptor, mtorc1)
 
+# FamPlex says this is a family but I thought it was a complex
+p14_3_3 = Protein(namespace='fplx', name='p14_3_3')
+
 ev = "We report here that AMPK directly phosphorylates the" \
      " mTOR binding partner raptor on two well conserved serine" \
      " residues, and this phosphorylation induces 14-3-3" \
      " binding to raptor."
 
-ampk_graph.add_phosphorylates(
+ampk_graph.add_directly_phosphorylates(
     ampk,
     rptor,
     'Ser',  # on Ser722 and Ser792
+    evidence=ev,
+    citation='18439900',
+)
+ampk_graph.add_binds(
+    ComplexAbundance([
+        rptor.with_variants(ProteinModification('Ser')),
+        mtor,
+    ]),
+    p14_3_3,
     evidence=ev,
     citation='18439900',
 )

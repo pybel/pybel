@@ -19,5 +19,6 @@ __all__ = [
     'braf_graph',
     'homology_graph',
     'ras_tloc_graph',
+    'ampk_graph',
     'vegf_graph',
 ]
