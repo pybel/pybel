@@ -26,14 +26,14 @@ e = Protein(namespace='ncbigene', identifier='P007', name='E')
 f = Protein(namespace='ncbigene', identifier='P008', name='F')
 e_f = ComplexAbundance([e, f])
 
-TEST_NAME = 'test'
+name = 'test'
 
 
 class TestExportHipathia(unittest.TestCase):
     """Test Hipathia."""
 
     def setUp(self) -> None:
-        self.graph = BELGraph(name=TEST_NAME)
+        self.graph = BELGraph(name=name)
 
     def _get_dfs(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
         return to_hipathia_dfs(self.graph)
@@ -48,8 +48,8 @@ class TestExportHipathia(unittest.TestCase):
         self.assertEqual(2, len(att_df.index))
         self.assertEqual(
             [
-                [f'N-{TEST_NAME}-1', a.name, a.identifier],
-                [f'N-{TEST_NAME}-2', d.name, d.identifier],
+                ['N-{name}-1'.format(name=name), a.name, a.identifier],
+                ['N-{name}-2'.format(name=name), d.name, d.identifier],
             ],
             att_df.values.tolist(),
         )
@@ -57,7 +57,7 @@ class TestExportHipathia(unittest.TestCase):
         self.assertEqual(1, len(sif_df))
         self.assertEqual(
             [
-                [f'N-{TEST_NAME}-1', 'activation', f'N-{TEST_NAME}-2'],
+                ['N-{name}-1'.format(name=name), 'activation', 'N-{name}-2'.format(name=name)],
             ],
             sif_df.values.tolist(),
         )
@@ -74,8 +74,8 @@ class TestExportHipathia(unittest.TestCase):
         self.assertEqual(2, len(att_df.index))
         self.assertEqual(
             [
-                [f'N-{TEST_NAME}-1', b_family.name, ','.join((b1.identifier, b2.identifier))],
-                [f'N-{TEST_NAME}-2', a.name, a.identifier],
+                ['N-{name}-1'.format(name=name), b_family.name, ','.join((b1.identifier, b2.identifier))],
+                ['N-{name}-2'.format(name=name), a.name, a.identifier],
             ],
             att_df.values.tolist(),
         )
@@ -83,7 +83,7 @@ class TestExportHipathia(unittest.TestCase):
         self.assertEqual(1, len(sif_df))
         self.assertEqual(
             [
-                [f'N-{TEST_NAME}-2', 'activation', f'N-{TEST_NAME}-1'],
+                ['N-{name}-2'.format(name=name), 'activation', 'N-{name}-1'.format(name=name)],
             ],
             sif_df.values.tolist(),
         )
@@ -98,8 +98,9 @@ class TestExportHipathia(unittest.TestCase):
         self.assertEqual(2, len(att_df.index))
         self.assertEqual(
             [
-                [f'N-{TEST_NAME}-1 2', ' '.join((e.name, f.name)), '{},/,{}'.format(e.identifier, f.identifier)],
-                [f'N-{TEST_NAME}-3', a.name, a.identifier],
+                ['N-{name}-1 2'.format(name=name), ' '.join((e.name, f.name)),
+                 '{},/,{}'.format(e.identifier, f.identifier)],
+                ['N-{name}-3'.format(name=name), a.name, a.identifier],
             ],
             att_df.values.tolist(),
         )
@@ -107,7 +108,7 @@ class TestExportHipathia(unittest.TestCase):
         self.assertEqual(1, len(sif_df))
         self.assertEqual(
             [
-                [f'N-{TEST_NAME}-3', 'activation', f'N-{TEST_NAME}-1 2'],
+                ['N-{name}-3'.format(name=name), 'activation', 'N-{name}-1 2'.format(name=name)],
             ],
             sif_df.values.tolist(),
         )
@@ -122,8 +123,10 @@ class TestExportHipathia(unittest.TestCase):
         self.assertEqual(2, len(att_df.index))
         self.assertEqual(
             [
-                [f'N-{TEST_NAME}-1 2', ' '.join((e.name, f.name)), '{},/,{}'.format(e.identifier, f.identifier)],
-                [f'N-{TEST_NAME}-3', a.name, a.identifier],
+                ['N-{name}-1 2'.format(name=name),
+                 ' '.join((e.name, f.name)),
+                 '{},/,{}'.format(e.identifier, f.identifier)],
+                ['N-{name}-3'.format(name=name), a.name, a.identifier],
             ],
             att_df.values.tolist(),
         )
@@ -131,7 +134,7 @@ class TestExportHipathia(unittest.TestCase):
         self.assertEqual(1, len(sif_df))
         self.assertEqual(
             [
-                [f'N-{TEST_NAME}-3', 'activation', f'N-{TEST_NAME}-1 2'],
+                ['N-{name}-3'.format(name=name), 'activation', 'N-{name}-1 2'.format(name=name)],
             ],
             sif_df.values.tolist(),
         )
