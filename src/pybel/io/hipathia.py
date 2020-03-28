@@ -65,7 +65,7 @@ import logging
 import os
 from collections import defaultdict
 from itertools import groupby
-from typing import List, Optional, Set, Tuple, Union
+from typing import List, Optional, Set, Tuple
 
 import networkx as nx
 import pandas as pd
@@ -239,7 +239,7 @@ def to_hipathia_dfs(graph: BELGraph) -> Tuple[pd.DataFrame, pd.DataFrame]:
 
     families = {k: sorted(values, key=str) for k, values in families.items()}
 
-    nodes: Set[Union[Protein, ComplexAbundance]] = proteins.union(families).union(complexes)
+    nodes = proteins.union(families).union(complexes)
     new_nodes = set()
     edges = []
     for u, v, d in graph.out_edges(nodes, data=True):
