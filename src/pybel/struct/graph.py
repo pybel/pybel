@@ -546,42 +546,6 @@ class BELGraph(nx.MultiDiGraph):
     A more specific version of :meth:`add_decreases` that automatically populates the object modifier with an
     activity."""
 
-    def _modify(
-        self,
-        add_edge_fn,
-        u,
-        v,
-        name,
-        code: Optional[str] = None,
-        position: Optional[int] = None,
-        *,
-        evidence: str,
-        citation: Union[str, Mapping[str, str]],
-        annotations: Optional[AnnotationsHint] = None,
-        subject_modifier: Optional[Mapping] = None,
-        object_modifier: Optional[Mapping] = None,
-        **attr
-    ):
-        """Add a simple modification."""
-        return add_edge_fn(
-            u,
-            v.with_variants(ProteinModification(
-                name=name, code=code, position=position,
-            )),
-            evidence=evidence,
-            citation=citation,
-            annotations=annotations,
-            subject_modifier=subject_modifier,
-            object_modifier=object_modifier,
-            **attr
-        )
-
-    add_phosphorylates = partialmethod(_modify, add_edge_fn=add_increases, name='Ph')
-    """Add an increase of modified object with phosphorylation."""
-
-    add_dephosphorylates = partialmethod(_modify, add_edge_fn=add_decreases, name='Ph')
-    """Add a decrease of modified object with phosphorylation."""
-
     add_directly_inhibits = partialmethod(add_directly_decreases, object_modifier=activity())
 
     add_activates = partialmethod(add_increases, object_modifier=activity())
