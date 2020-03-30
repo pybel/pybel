@@ -34,7 +34,7 @@ def to_tsv(
     *,
     use_tqdm: bool = False,
     sep='\t',
-    raise_on_none: bool = False,
+    raise_on_none: bool = False
 ) -> None:
     """Write the graph as a TSV.
 
@@ -42,6 +42,7 @@ def to_tsv(
     :param path: A path or file-like
     :param use_tqdm: Should a progress bar be shown?
     :param sep: The separator to use
+    :param raise_on_none: Should an exception be raised if no triples are returned?
     :raises: NoTriplesValueError
     """
     for h, r, t in get_triples(graph, use_tqdm=use_tqdm, raise_on_none=raise_on_none):
@@ -55,7 +56,7 @@ def to_edgelist(
     *,
     use_tqdm: bool = False,
     sep='\t',
-    raise_on_none: bool = False,
+    raise_on_none: bool = False
 ) -> None:
     """Write the graph as an edgelist.
 
@@ -63,6 +64,7 @@ def to_edgelist(
     :param path: A path or file-like
     :param use_tqdm: Should a progress bar be shown?
     :param sep: The separator to use
+    :param raise_on_none: Should an exception be raised if no triples are returned?
     :raises: NoTriplesValueError
     """
     for h, r, t in get_triples(graph, use_tqdm=use_tqdm, raise_on_none=raise_on_none):
@@ -74,6 +76,7 @@ def get_triples(graph: BELGraph, use_tqdm: bool = False, raise_on_none: bool = F
 
     :param graph: A BEL graph
     :param use_tqdm: Should a progress bar be shown?
+    :param raise_on_none: Should an exception be raised if no triples are returned?
     :raises: NoTriplesValueError
     """
     it = graph.edges(keys=True)

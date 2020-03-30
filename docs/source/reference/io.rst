@@ -111,6 +111,16 @@ JSON Graph Interchange Format
 
 .. autofunction:: pybel.from_cbn_jgif
 
+HiPathia
+~~~~~~~~
+.. automodule:: pybel.io.hipathia
+
+.. autofunction:: pybel.to_hipathia
+.. autofunction:: pybel.to_hipathia_dfs
+
+.. autofunction:: pybel.from_hipathia_paths
+.. autofunction:: pybel.from_hipathia_dfs
+
 Export
 ------
 Umbrella Node-Link JSON
