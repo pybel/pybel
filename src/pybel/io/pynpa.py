@@ -6,7 +6,7 @@
 """
 
 import os
-from typing import List, Mapping, Tuple
+from typing import List, Mapping, Optional, Tuple
 
 import pandas as pd
 
@@ -32,13 +32,18 @@ def to_npa_directory(graph: BELGraph, directory: str) -> None:
     transcription_df.to_csv(os.path.join(directory, 'transcriptional_layer.tsv'), sep='\t', index=False)
 
 
-def to_npa_dfs(graph: BELGraph, cartesian_expansion: bool = False) -> Tuple[pd.DataFrame, pd.DataFrame]:
+def to_npa_dfs(
+    graph: BELGraph,
+    cartesian_expansion: bool = False,
+    nomenclature_method: Optional[str] = None,
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Export the BEL graph as two lists of triples for the :mod:`pynpa`.
 
     :param graph: A BEL graph
     :param cartesian_expansion: If true, applies cartesian expansion on both reactions (reactants x products)
      as well as list abundances using :func:`list_abundance_cartesian_expansion` and
      :func:`reaction_cartesian_expansion`
+    :param nomenclature_method: Either "curie" or "name". Defaults to "curie".
 
     1. Pick out all transcription factor relationships. Protein X is a transcription
        factor for gene Y IFF ``complex(p(X), g(Y)) -> r(Y)``
@@ -46,19 +51,30 @@ def to_npa_dfs(graph: BELGraph, cartesian_expansion: bool = False) -> Tuple[pd.D
        for the PPI layer
     """
     ppi_layer, transcription_layer = to_npa_layers(graph, cartesian_expansion=cartesian_expansion)
-    return _get_df(ppi_layer), _get_df(transcription_layer)
+    return (
+        _get_df(ppi_layer, method=nomenclature_method),
+        _get_df(transcription_layer, method=nomenclature_method),
+    )
 
 
-def _get_df(layer: Layer) -> pd.DataFrame:
+def _get_df(layer: Layer, method: Optional[str] = None) -> pd.DataFrame:
     rows = _normalize_layer(layer)
     return pd.DataFrame(rows, columns=['source', 'target', 'relation']).sort_values(['source', 'target'])
 
 
-def _normalize_layer(layer: Layer) -> List[Tuple[str, str, int]]:
-    return [
-        (source.curie, target.curie, direction)
-        for (source, target), direction in layer.items()
-    ]
+def _normalize_layer(layer: Layer, method: Optional[str] = None) -> List[Tuple[str, str, int]]:
+    if method == 'curie':
+        return [
+            (source.curie, target.curie, direction)
+            for (source, target), direction in layer.items()
+        ]
+    elif method == 'name':
+        return [
+            (source.name, target.name, direction)
+            for (source, target), direction in layer.items()
+        ]
+    else:
+        raise ValueError('Invalid export method: {method}'.format(method=method))
 
 
 def to_npa_layers(graph: BELGraph, cartesian_expansion: bool = False) -> Tuple[Layer, Layer]:
