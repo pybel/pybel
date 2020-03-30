@@ -58,12 +58,12 @@ def to_npa_dfs(
 
 
 def _get_df(layer: Layer, method: Optional[str] = None) -> pd.DataFrame:
-    rows = _normalize_layer(layer)
+    rows = _normalize_layer(layer, method=method)
     return pd.DataFrame(rows, columns=['source', 'target', 'relation']).sort_values(['source', 'target'])
 
 
 def _normalize_layer(layer: Layer, method: Optional[str] = None) -> List[Tuple[str, str, int]]:
-    if method == 'curie':
+    if method == 'curie' or None:
         return [
             (source.curie, target.curie, direction)
             for (source, target), direction in layer.items()
