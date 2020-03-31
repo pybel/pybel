@@ -24,6 +24,9 @@ __all__ = [
 
 Layer = Mapping[Tuple[Gene, Gene], int]
 
+#: Code to distinguish between between iNodes when nodes have been debelized
+DEBELIZED_CODE_FOR_INODES = "*"
+
 
 def to_npa_directory(graph: BELGraph, directory: str) -> None:
     """Write the BEL file to two files in the directory for :mod:`pynpa`."""
@@ -35,7 +38,8 @@ def to_npa_directory(graph: BELGraph, directory: str) -> None:
 def to_npa_dfs(
     graph: BELGraph,
     cartesian_expansion: bool = False,
-    nomenclature_method: Optional[str] = None,
+    nomenclature_method_first_layer: Optional[str] = None,
+    nomenclature_method_second_layer: Optional[str] = None,
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Export the BEL graph as two lists of triples for the :mod:`pynpa`.
 
@@ -43,7 +47,8 @@ def to_npa_dfs(
     :param cartesian_expansion: If true, applies cartesian expansion on both reactions (reactants x products)
      as well as list abundances using :func:`list_abundance_cartesian_expansion` and
      :func:`reaction_cartesian_expansion`
-    :param nomenclature_method: Either "curie" or "name". Defaults to "curie".
+    :param nomenclature_method_first_layer: Either "curie", "name" or "inodes. Defaults to "curie".
+    :param nomenclature_method_second_layer: Either "curie", "name" or "inodes. Defaults to "curie".
 
     1. Pick out all transcription factor relationships. Protein X is a transcription
        factor for gene Y IFF ``complex(p(X), g(Y)) -> r(Y)``
@@ -52,8 +57,8 @@ def to_npa_dfs(
     """
     ppi_layer, transcription_layer = to_npa_layers(graph, cartesian_expansion=cartesian_expansion)
     return (
-        _get_df(ppi_layer, method=nomenclature_method),
-        _get_df(transcription_layer, method=nomenclature_method),
+        _get_df(ppi_layer, method=nomenclature_method_first_layer),
+        _get_df(transcription_layer, method=nomenclature_method_second_layer),
     )
 
 
@@ -71,6 +76,11 @@ def _normalize_layer(layer: Layer, method: Optional[str] = None) -> List[Tuple[s
     elif method == 'name':
         return [
             (source.name, target.name, direction)
+            for (source, target), direction in layer.items()
+        ]
+    elif method == 'inodes':
+        return [
+            (f"{DEBELIZED_CODE_FOR_INODES}{source.name}", f"{DEBELIZED_CODE_FOR_INODES}{target.name}", direction)
             for (source, target), direction in layer.items()
         ]
     else:
@@ -102,6 +112,7 @@ def to_npa_layers(graph: BELGraph, cartesian_expansion: bool = False) -> Tuple[L
         if (u, v) in transcription_layer:
             continue
         relation = d[RELATION]
+
         if relation in CAUSAL_INCREASE_RELATIONS:
             ppi_layer[u, v] = +1
         elif relation in CAUSAL_DECREASE_RELATIONS:
