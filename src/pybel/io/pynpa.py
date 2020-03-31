@@ -28,9 +28,9 @@ Layer = Mapping[Tuple[Gene, Gene], int]
 DEBELIZED_CODE_FOR_INODES = "*"
 
 
-def to_npa_directory(graph: BELGraph, directory: str) -> None:
+def to_npa_directory(graph: BELGraph, directory: str, **kwargs) -> None:
     """Write the BEL file to two files in the directory for :mod:`pynpa`."""
-    ppi_df, transcription_df = to_npa_dfs(graph)
+    ppi_df, transcription_df = to_npa_dfs(graph, **kwargs)
     ppi_df.to_csv(os.path.join(directory, 'ppi_layer.tsv'), sep='\t', index=False)
     transcription_df.to_csv(os.path.join(directory, 'transcriptional_layer.tsv'), sep='\t', index=False)
 
@@ -40,6 +40,7 @@ def to_npa_dfs(
     cartesian_expansion: bool = False,
     nomenclature_method_first_layer: Optional[str] = None,
     nomenclature_method_second_layer: Optional[str] = None,
+    direct_tf_only: bool = False,
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Export the BEL graph as two lists of triples for the :mod:`pynpa`.
 
@@ -55,7 +56,11 @@ def to_npa_dfs(
     2. Get all other interactions between any gene/rna/protein that are directed causal
        for the PPI layer
     """
-    ppi_layer, transcription_layer = to_npa_layers(graph, cartesian_expansion=cartesian_expansion)
+    ppi_layer, transcription_layer = to_npa_layers(
+        graph,
+        cartesian_expansion=cartesian_expansion,
+        direct_tf_only=direct_tf_only,
+    )
     return (
         _get_df(ppi_layer, method=nomenclature_method_first_layer),
         _get_df(transcription_layer, method=nomenclature_method_second_layer),
@@ -68,7 +73,7 @@ def _get_df(layer: Layer, method: Optional[str] = None) -> pd.DataFrame:
 
 
 def _normalize_layer(layer: Layer, method: Optional[str] = None) -> List[Tuple[str, str, int]]:
-    if method == 'curie' or None:
+    if method == 'curie' or method is None:
         return [
             (source.curie, target.curie, direction)
             for (source, target), direction in layer.items()
@@ -87,13 +92,19 @@ def _normalize_layer(layer: Layer, method: Optional[str] = None) -> List[Tuple[s
         raise ValueError('Invalid export method: {method}'.format(method=method))
 
 
-def to_npa_layers(graph: BELGraph, cartesian_expansion: bool = False) -> Tuple[Layer, Layer]:
+def to_npa_layers(
+    graph: BELGraph,
+    cartesian_expansion: bool = False,
+    direct_tf_only: bool = False,
+) -> Tuple[Layer, Layer]:
     """Get the two layers for the network.
 
     :param graph: A BEL graph
     :param cartesian_expansion: If true, applies cartesian expansion on both reactions (reactants x products)
      as well as list abundances using :func:`list_abundance_cartesian_expansion` and
      :func:`reaction_cartesian_expansion`
+    :param direct_tf_only: If true, only uses directlyIncreases and directlyDecreases relations for TF relations
+     ``complex(p(X), g(Y)) =>/=| r(Y)``. If false, also allows indirect relations ``complex(p(X), g(Y)) ->/-| r(Y)``.
     """
     if cartesian_expansion:
         list_abundance_cartesian_expansion(graph)
@@ -101,7 +112,7 @@ def to_npa_layers(graph: BELGraph, cartesian_expansion: bool = False) -> Tuple[L
 
     transcription_layer = {
         (u.get_rna().get_gene(), v.get_gene()): r
-        for u, v, r in get_tf_pairs(graph)
+        for u, v, r in get_tf_pairs(graph, direct_only=direct_tf_only)
     }
 
     ppi_layer = {}
