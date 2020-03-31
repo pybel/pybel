@@ -5,6 +5,7 @@
 .. seealso:: https://github.com/pynpa
 """
 
+import logging
 import os
 from typing import List, Mapping, Optional, Tuple
 
@@ -21,6 +22,8 @@ __all__ = [
     'to_npa_dfs',
     'to_npa_layers',
 ]
+
+logger = logging.getLogger(__name__)
 
 Layer = Mapping[Tuple[Gene, Gene], int]
 
@@ -114,6 +117,7 @@ def to_npa_layers(
         (u.get_rna().get_gene(), v.get_gene()): r
         for u, v, r in get_tf_pairs(graph, direct_only=direct_tf_only)
     }
+    logger.info('extraxted %d pairs for the transcription layer', len(transcription_layer))
 
     ppi_layer = {}
     for u, v, d in graph.edges(data=True):
@@ -130,6 +134,7 @@ def to_npa_layers(
             ppi_layer[u, v] = -1
         # TODO what about contradictions
 
+    logger.info('extracted %d pairs for the ppi layer', len(ppi_layer))
     return ppi_layer, transcription_layer
 
 
