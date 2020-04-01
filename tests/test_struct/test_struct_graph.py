@@ -2,12 +2,17 @@
 
 """Tests for data structures in PyBEL."""
 
+import os
+import tempfile
 import unittest
 from io import StringIO
 
+import pybel
+import pybel.examples
 from pybel import BELGraph
-from pybel.constants import CITATION_IDENTIFIER, CITATION_DB, CITATION_TYPE_PUBMED
+from pybel.constants import CITATION_DB, CITATION_IDENTIFIER, CITATION_TYPE_PUBMED
 from pybel.dsl import hgvs, protein
+from pybel.io.api import InvalidExtensionError
 from pybel.testing.utils import n
 
 
@@ -190,3 +195,20 @@ class TestGetGraphProperties(unittest.TestCase):
         graph.add_node_from_data(node)
 
         self.assertEqual(2, graph.number_of_nodes())
+
+
+class TestExtensionIO(unittest.TestCase):
+    def test_io(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, 'ampk.bel.nodelink.json')
+            pybel.dump(pybel.examples.ampk_graph, path)
+            self.assertTrue(os.path.exists(path))
+            new_graph = pybel.load(path)
+            self.assertIsNotNone(new_graph)
+
+    def test_invalid_io(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, 'ampk.bel.invalid.json')
+            with self.assertRaises(InvalidExtensionError):
+                pybel.dump(pybel.examples.ampk_graph, path)
+            self.assertFalse(os.path.exists(path))

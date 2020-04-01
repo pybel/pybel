@@ -17,6 +17,7 @@ SIF File
 - HiPathia distinguish between two types of nodes: simple and complex.
 
 Simple nodes:
+
 - Simple nodes may include many genes, but only one is needed to perform the
   function of the node. This could correspond to a protein family of enzymes
   that all have the same function - only one of them needs to be present for
@@ -24,6 +25,7 @@ Simple nodes:
 - Node IDs from simple nodes do not include any space, i.e. N-hsa04370-11.
 
 Complex nodes:
+
 - Complex nodes include different simple nodes and represent protein complexes.
   Each simple node within the complex represents one protein in the complex.
   This node requires the presence of all their simple nodes to perform its
@@ -52,6 +54,7 @@ The columns included are:
 10. ``width``: Default width of the node.
 11. ``height``: Default height of the node.
 12. ``genesList``: List of genes included in each node, with EntrezID:
+
   - Simple nodes: EntrezIDs of the genes included, separated by commas (",") and no spaces, i.e. 56848,8877 for
     node N-hsa04370-11.
   - Complex nodes: GenesList of the simple nodes included, separated by a slash ("/") and no spaces, and in the
