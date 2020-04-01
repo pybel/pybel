@@ -13,6 +13,7 @@ from ..struct import BELGraph
 __all__ = [
     'load',
     'dump',
+    'InvalidExtensionError',
 ]
 
 #: Mapping from extension to importer function
@@ -53,4 +54,7 @@ def dump(graph: BELGraph, file: Union[str, TextIO], **kwargs) -> None:
     for extension, exporter in EXPORTERS.items():
         if name.endswith(extension):
             return exporter(graph, file, **kwargs)
+
+    file.close()
+    os.remove(file.name)
     raise InvalidExtensionError(name=name)
