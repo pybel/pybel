@@ -117,7 +117,7 @@ def to_npa_layers(
         (u.get_rna().get_gene(), v.get_gene()): r
         for u, v, r in get_tf_pairs(graph, direct_only=direct_tf_only)
     }
-    logger.info('extraxted %d pairs for the transcription layer', len(transcription_layer))
+    logger.info('extracted %d pairs for the transcription layer', len(transcription_layer))
 
     ppi_layer = {}
     for u, v, d in graph.edges(data=True):
