@@ -12,11 +12,6 @@ python:
   - 3.7
   - 3.5
 
-stages:
-  - lint
-  - docs
-  - test
-
 env:
   - TOXENV=py DB=mysql PYBEL_TEST_CONNECTOR=mysqlclient
     PYBEL_TEST_CONNECTION=mysql+mysqldb://travis@localhost/test?charset=utf8
@@ -39,11 +34,6 @@ jobs:
       env: TOXENV=doc8
     - env: TOXENV=readme
     - env: TOXENV=docs
-    - stage: test
-      env: TOXENV=py
-      python: "3.7"
-    - env: TOXENV=py
-      python: "3.5"
 
 matrix:
   allow_failures:
