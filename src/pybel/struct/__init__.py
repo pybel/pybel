@@ -18,11 +18,12 @@ code. Because the data structure is the same in Neo4J, the data can be directly 
 Neo4J supports the Cypher querying language so that the same queries can be written in an elegant and simple way.
 """
 
-from . import filters, graph, grouping, mutation, operations, summary
+from . import filters, graph, grouping, mutation, node_utils, operations, summary
 from .filters import *
 from .graph import *
 from .grouping import *
 from .mutation import *
+from .node_utils import *
 from .operations import *
 from .pipeline import Pipeline
 from .query import Query
@@ -35,6 +36,7 @@ __all__ = (
     + filters.__all__
     + summary.__all__
     + mutation.__all__
+    + node_utils.__all__
     + [
         'Pipeline',
         'Query',

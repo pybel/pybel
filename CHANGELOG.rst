@@ -13,6 +13,7 @@ Added
   `PyKEEN <https://pykeen.readthedocs.io>`_.
 - Update TSV exporter for better ML-ready triples for PyKEEN
 - More INDRA I/O options
+- Add PyNPA Exporter (https://github.com/pybel/pybel/pull/413)
 
 `0.14.5 <https://github.com/pybel/pybel/compare/v0.14.4...v0.14.5>`_ - 2020-02-26
 ---------------------------------------------------------------------------------
