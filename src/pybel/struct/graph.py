@@ -10,7 +10,6 @@ from itertools import chain
 from typing import Any, Dict, Hashable, Iterable, List, Mapping, Optional, Set, TextIO, Tuple, Union
 
 import networkx as nx
-from pkg_resources import iter_entry_points
 
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
 from ..canonicalize import edge_to_bel
@@ -847,36 +846,6 @@ class BELGraph(nx.MultiDiGraph):
     def summarize(self, file: Optional[TextIO] = None) -> None:
         """Print a summary of the graph."""
         print(self.summary_str(), file=file)
-
-    def serialize(self, *, fmt: str = 'nodelink', file: Union[None, str, TextIO] = None, **kwargs):
-        """Serialize the graph to an object or file if given.
-
-        For additional I/O, see the :mod:`pybel.io` module.
-        """
-        if file is None:
-            return self._serialize_object(fmt=fmt, **kwargs)
-        elif isinstance(file, str):
-            with open(file, 'w') as file_obj:
-                self._serialize_file(fmt=fmt, file=file_obj, **kwargs)
-        else:
-            self._serialize_file(fmt=fmt, file=file, **kwargs)
-
-    def _serialize_object(self, *, fmt: str, **kwargs):
-        object_exporter = self._get_serialize_entry_point('pybel.object_exporter', fmt)
-        return object_exporter(self, **kwargs)
-
-    def _serialize_file(self, *, fmt: str, file: TextIO, **kwargs):
-        file_exporter = self._get_serialize_entry_point('pybel.file_exporter', fmt)
-        return file_exporter(self, file, **kwargs)
-
-    @staticmethod
-    def _get_serialize_entry_point(group: str, name: str):
-        entry_points = list(iter_entry_points(group=group, name=name))
-
-        if 0 == len(entry_points):
-            raise ValueError('no format {}'.format(name))
-
-        return entry_points[0].load()
 
 
 def _clean_annotations(annotations_dict: AnnotationsHint) -> AnnotationsDict:

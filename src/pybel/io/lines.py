@@ -2,6 +2,7 @@
 
 """This module contains IO functions for BEL scripts."""
 
+import gzip
 import logging
 from typing import TextIO, Union
 
@@ -13,6 +14,7 @@ from ..struct import BELGraph
 
 __all__ = [
     'from_bel_script',
+    'from_bel_script_gz',
     'from_bel_script_url',
 ]
 
@@ -32,6 +34,12 @@ def from_bel_script(path: Union[str, TextIO], **kwargs) -> BELGraph:
     graph = BELGraph(path=path.name)
     parse_lines(graph=graph, lines=path, **kwargs)
     return graph
+
+
+def from_bel_script_gz(path, **kwargs) -> BELGraph:
+    """Parse a BEL graph from a gzipped BEL Script."""
+    with gzip.open(path, 'rt') as file:
+        return from_bel_script(file, **kwargs)
 
 
 def from_bel_script_url(url: str, **kwargs) -> BELGraph:
