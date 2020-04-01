@@ -5,15 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-`0.14.6 <https://github.com/pybel/pybel/compare/v0.14.5...v0.14.6>`_ - 2020-03-27
+`0.14.6 <https://github.com/pybel/pybel/compare/v0.14.5...v0.14.6>`_ - 2020-04-01
 ---------------------------------------------------------------------------------
 Added
 ~~~~~
-- PyKEEN import hooks, so you can automatically load up a BEL file for machine learning with
+- Add PyKEEN import hooks, so you can automatically load up a BEL file for machine learning with
   `PyKEEN <https://pykeen.readthedocs.io>`_.
 - Update TSV exporter for better ML-ready triples for PyKEEN
-- More INDRA I/O options
+- Added INDRA I/O options and `pybel.from_bel_script_gz` option
+- Add HiPathia Exporter (https://github.com/pybel/pybel/pull/414)
 - Add PyNPA Exporter (https://github.com/pybel/pybel/pull/413)
+- Add universal I/O functions `pybel.load` and `pybel.dump` (https://github.com/pybel/pybel/pull/417)
 
 `0.14.5 <https://github.com/pybel/pybel/compare/v0.14.4...v0.14.5>`_ - 2020-02-26
 ---------------------------------------------------------------------------------
