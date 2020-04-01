@@ -32,29 +32,69 @@ EXPORTERS = {
 class InvalidExtensionError(ValueError):
     """Raised when an invalid extension is used."""
 
-    def __init__(self, name):
-        fname = os.path.basename(name)
+    def __init__(self, path):
+        fname = os.path.basename(path)
         super().__init__('Invalid extension for file: {}'.format(fname))
 
 
-@open_file(0, mode='r')
-def load(file: Union[str, TextIO], **kwargs) -> BELGraph:
-    """Read a BEL graph."""
-    name = file.name
+def load(path: str, **kwargs) -> BELGraph:
+    """Read a BEL graph.
+
+    :param path: The path to a BEL graph in any of the formats
+     with extensions described below
+    :param kwargs: The keyword arguments are passed to the importer
+     function
+    :return: A BEL graph.
+
+    This is the universal loader, which means any file
+    path can be given and PyBEL will look up the appropriate
+    load function. Allowed extensions are:
+
+    - bel
+    - bel.nodelink.json
+    - bel.cx.json
+    - bel.jgif.json
+
+    The previous extensions also support gzipping.
+    Other allowed extensions that don't support gzip are:
+
+    - bel.pickle / bel.gpickle / bel.pkl
+    - indra.json
+    """
     for extension, importer in IMPORTERS.items():
-        if name.endswith(extension):
-            return importer(file, **kwargs)
-    raise InvalidExtensionError(name=name)
+        if path.endswith(extension):
+            return importer(path, **kwargs)
+    raise InvalidExtensionError(path=path)
 
 
-@open_file(1, mode='w')
-def dump(graph: BELGraph, file: Union[str, TextIO], **kwargs) -> None:
-    """Write a BEL graph."""
-    name = file.name
+def dump(graph: BELGraph, path: str, **kwargs) -> None:
+    """Write a BEL graph.
+
+    :param graph: A BEL graph
+    :param path: The path to which the BEL graph is written.
+    :param kwargs: The keyword arguments are passed to the exporter
+     function
+
+    This is the universal loader, which means any file
+    path can be given and PyBEL will look up the appropriate
+    writer function. Allowed extensions are:
+
+    - bel
+    - bel.nodelink.json
+    - bel.unodelink.json
+    - bel.cx.json
+    - bel.jgif.json
+    - bel.graphdati.json
+
+    The previous extensions also support gzipping.
+    Other allowed extensions that don't support gzip are:
+
+    - bel.pickle / bel.gpickle / bel.pkl
+    - indra.json
+    - tsv
+    - gsea
+    """
     for extension, exporter in EXPORTERS.items():
-        if name.endswith(extension):
-            return exporter(graph, file, **kwargs)
-
-    file.close()
-    os.remove(file.name)
-    raise InvalidExtensionError(name=name)
+        if path.endswith(extension):
+            return exporter(graph, path, **kwargs)
+    raise InvalidExtensionError(path=path)
