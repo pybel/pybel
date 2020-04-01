@@ -2,6 +2,9 @@ Input and Output
 ================
 .. automodule:: pybel.io
 
+.. autofunction:: pybel.load
+.. autofunction:: pybel.dump
+
 Import
 ------
 Parsing Modes

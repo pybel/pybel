@@ -18,8 +18,8 @@ from .graphml import to_graphml
 from .hetionet import from_hetionet_file, from_hetionet_gz, from_hetionet_json, get_hetionet
 from .hipathia import from_hipathia_dfs, from_hipathia_paths, to_hipathia, to_hipathia_dfs
 from .indra import (
-    from_biopax, from_indra_pickle, from_indra_statements, to_indra_statements,
-    to_indra_statements_json_file,
+    from_biopax, from_indra_pickle, from_indra_statements, from_indra_statements_json, from_indra_statements_json_file,
+    to_indra_statements, to_indra_statements_json, to_indra_statements_json_file,
 )
 from .jgif import (
     from_cbn_jgif, from_jgif, from_jgif_file, from_jgif_gz, from_jgif_jsons, post_jgif, to_jgif,

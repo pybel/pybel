@@ -56,7 +56,6 @@ PyBEL is tested on Python 3.5+ on Mac OS and Linux using
    :name: conversion
 
    reference/io
-   reference/hipathia
 
 .. toctree::
    :caption: Database
