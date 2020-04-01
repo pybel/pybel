@@ -12,6 +12,11 @@ python:
   - 3.7
   - 3.5
 
+stages:
+  - lint
+  - docs
+  - test
+
 env:
   - TOXENV=py DB=mysql PYBEL_TEST_CONNECTOR=mysqlclient
     PYBEL_TEST_CONNECTION=mysql+mysqldb://travis@localhost/test?charset=utf8
@@ -26,9 +31,13 @@ jobs:
     # lint stage
     - stage: lint
       env: TOXENV=manifest
+      name: Check manifest
     - env: TOXENV=flake8
+      name: Check code quality
     - env: TOXENV=pyroma
+      name: Check package metadata
     - env: TOXENV=mypy
+      name: Check typing
     # docs stage
     - stage: docs
       env: TOXENV=doc8
