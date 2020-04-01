@@ -88,7 +88,11 @@ def _normalize_layer(layer: Layer, method: Optional[str] = None) -> List[Tuple[s
         ]
     elif method == 'inodes':
         return [
-            (f"{DEBELIZED_CODE_FOR_INODES}{source.name}", f"{DEBELIZED_CODE_FOR_INODES}{target.name}", direction)
+            (
+                "{}{}".format(DEBELIZED_CODE_FOR_INODES, source.name),
+                "{}{}".format(DEBELIZED_CODE_FOR_INODES, target.name),
+                direction,
+            )
             for (source, target), direction in layer.items()
         ]
     else:
