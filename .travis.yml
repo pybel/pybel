@@ -39,6 +39,11 @@ jobs:
       env: TOXENV=doc8
     - env: TOXENV=readme
     - env: TOXENV=docs
+    - stage: test
+      env: TOXENV=py
+      python: "3.7"
+    - env: TOXENV=py
+      python: "3.5"
 
 matrix:
   allow_failures:
