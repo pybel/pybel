@@ -15,7 +15,7 @@ from ..constants import GRAPH_ANNOTATION_LIST, MEMBERS, PRODUCTS, REACTANTS
 from ..dsl import BaseEntity
 from ..struct import BELGraph
 from ..tokens import parse_result_to_dsl
-from ..utils import tokenize_version
+from ..utils import hash_edge, tokenize_version
 
 __all__ = [
     'to_nodelink',
@@ -165,6 +165,6 @@ def _from_nodelink_json_helper(data: Mapping[str, Any]) -> BELGraph:
             for k, v in data.items()
             if k not in {'source', 'target', 'key'}
         }
-        graph.add_edge(u, v, key=data['key'], **edge_data)
+        graph.add_edge(u, v, key=hash_edge(u, v, edge_data), **edge_data)
 
     return graph
