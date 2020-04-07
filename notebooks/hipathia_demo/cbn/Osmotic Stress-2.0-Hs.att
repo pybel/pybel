@@ -1,0 +1,16 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Osmotic Stress-2.0-Hs-1	SLC6A12	173	100	white	rectangle	gene	0.5	black	46	17	11045
+N-Osmotic Stress-2.0-Hs-11	AQP5	71	0	white	rectangle	gene	0.5	black	46	17	638
+N-Osmotic Stress-2.0-Hs-12	MAPK14	157	67	white	rectangle	gene	0.5	black	46	17	6876
+N-Osmotic Stress-2.0-Hs-13	NFAT5	152	81	white	rectangle	gene	0.5	black	46	17	7774
+N-Osmotic Stress-2.0-Hs-14	NFKBIA	19	175	white	rectangle	gene	0.5	black	46	17	7797
+N-Osmotic Stress-2.0-Hs-15	ATM	163	91	white	rectangle	gene	0.5	black	46	17	795
+N-Osmotic Stress-2.0-Hs-16	NRG1	113	189	white	rectangle	gene	0.5	black	46	17	7997
+N-Osmotic Stress-2.0-Hs-17	PLCG1	20	59	white	rectangle	gene	0.5	black	46	17	9065
+N-Osmotic Stress-2.0-Hs-3	CFTR	20	161	white	rectangle	gene	0.5	black	46	17	1884
+N-Osmotic Stress-2.0-Hs-4	CFTR	6	162	white	rectangle	gene	0.5	black	46	17	1884
+N-Osmotic Stress-2.0-Hs-5	EGF	15	71	white	rectangle	gene	0.5	black	46	17	3229
+N-Osmotic Stress-2.0-Hs-6	EGFR	0	69	white	rectangle	gene	0.5	black	46	17	3236
+N-Osmotic Stress-2.0-Hs-7	EGFR	26	82	white	rectangle	gene	0.5	black	46	17	3236
+N-Osmotic Stress-2.0-Hs-8	ERBB3	123	185	white	rectangle	gene	0.5	black	46	17	3431
+N-Osmotic Stress-2.0-Hs-9	HIF1A	82	1	white	rectangle	gene	0.5	black	46	17	4910

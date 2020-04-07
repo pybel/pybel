@@ -1,0 +1,13 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-PGE2-2.0-Hs-10	RAPGEF3	153	48	white	rectangle	gene	0.5	black	46	17	16629
+N-PGE2-2.0-Hs-12	CREB1	78	165	white	rectangle	gene	0.5	black	46	17	2345
+N-PGE2-2.0-Hs-13	CREB1	81	153	white	rectangle	gene	0.5	black	46	17	2345
+N-PGE2-2.0-Hs-15	HRAS	42	0	white	rectangle	gene	0.5	black	46	17	5173
+N-PGE2-2.0-Hs-17	NPPA	154	34	white	rectangle	gene	0.5	black	46	17	7939
+N-PGE2-2.0-Hs-22	PTGS2	42	10	white	rectangle	gene	0.5	black	46	17	9605
+N-PGE2-2.0-Hs-23	RAC1	163	86	white	rectangle	gene	0.5	black	46	17	9801
+N-PGE2-2.0-Hs-24	RAP1A	156	64	white	rectangle	gene	0.5	black	46	17	9855
+N-PGE2-2.0-Hs-4	TIAM1	153	78	white	rectangle	gene	0.5	black	46	17	11805
+N-PGE2-2.0-Hs-5	VAV2	166	74	white	rectangle	gene	0.5	black	46	17	12658
+N-PGE2-2.0-Hs-7	VIP	0	89	white	rectangle	gene	0.5	black	46	17	12693
+N-PGE2-2.0-Hs-8	VIPR1	6	97	white	rectangle	gene	0.5	black	46	17	12694

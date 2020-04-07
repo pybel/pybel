@@ -1,0 +1,15 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Hox-2.0-Hs-1 2	ITGAV ITGB3	91	26	white	rectangle	gene,gene	0.5	black	46	17	6150,/,6156
+N-Hox-2.0-Hs-10	ITGB3	26	144	white	rectangle	gene	0.5	black	46	17	6156
+N-Hox-2.0-Hs-11	MEOX2	107	85	white	rectangle	gene	0.5	black	46	17	7014
+N-Hox-2.0-Hs-12	MMP14	101	24	white	rectangle	gene	0.5	black	46	17	7160
+N-Hox-2.0-Hs-13	PDGFRB	62	157	white	rectangle	gene	0.5	black	46	17	8804
+N-Hox-2.0-Hs-14	PLAU	52	148	white	rectangle	gene	0.5	black	46	17	9052
+N-Hox-2.0-Hs-15	PLAUR	52	11	white	rectangle	gene	0.5	black	46	17	9053
+N-Hox-2.0-Hs-16	PTGS2	0	177	white	rectangle	gene	0.5	black	46	17	9605
+N-Hox-2.0-Hs-3	CDKN1A	122	86	white	rectangle	gene	0.5	black	46	17	1784
+N-Hox-2.0-Hs-4	HOXA3	46	0	white	rectangle	gene	0.5	black	46	17	5104
+N-Hox-2.0-Hs-5	HOXA5	7	184	white	rectangle	gene	0.5	black	46	17	5106
+N-Hox-2.0-Hs-7	HOXB4	135	87	white	rectangle	gene	0.5	black	46	17	5115
+N-Hox-2.0-Hs-8	HOXD3	38	139	white	rectangle	gene	0.5	black	46	17	5137
+N-Hox-2.0-Hs-9	ITGAV	32	127	white	rectangle	gene	0.5	black	46	17	6150

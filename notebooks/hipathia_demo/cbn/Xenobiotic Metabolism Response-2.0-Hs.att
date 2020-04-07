@@ -1,0 +1,21 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Xenobiotic Metabolism Response-2.0-Hs-1 2	AHR ARNT	146	76	white	rectangle	gene,gene	0.5	black	46	17	348,/,700
+N-Xenobiotic Metabolism Response-2.0-Hs-11	CYP1A1	168	81	white	rectangle	gene	0.5	black	46	17	2595
+N-Xenobiotic Metabolism Response-2.0-Hs-12	CYP1A2	144	91	white	rectangle	gene	0.5	black	46	17	2596
+N-Xenobiotic Metabolism Response-2.0-Hs-13	CYP1B1	136	72	white	rectangle	gene	0.5	black	46	17	2597
+N-Xenobiotic Metabolism Response-2.0-Hs-15	CYP3A5	0	0	white	rectangle	gene	0.5	black	46	17	2638
+N-Xenobiotic Metabolism Response-2.0-Hs-16	NQO1	75	102	white	rectangle	gene	0.5	black	46	17	2874
+N-Xenobiotic Metabolism Response-2.0-Hs-17	AHRR	100	63	white	rectangle	gene	0.5	black	46	17	346
+N-Xenobiotic Metabolism Response-2.0-Hs-18	ESR1	83	64	white	rectangle	gene	0.5	black	46	17	3467
+N-Xenobiotic Metabolism Response-2.0-Hs-19	AHR	117	78	white	rectangle	gene	0.5	black	46	17	348
+N-Xenobiotic Metabolism Response-2.0-Hs-20	ALDH3A1	105	93	white	rectangle	gene	0.5	black	46	17	405
+N-Xenobiotic Metabolism Response-2.0-Hs-21	GSTA2	130	59	white	rectangle	gene	0.5	black	46	17	4627
+N-Xenobiotic Metabolism Response-2.0-Hs-22	GSTP1	61	119	white	rectangle	gene	0.5	black	46	17	4638
+N-Xenobiotic Metabolism Response-2.0-Hs-23	ABCC1	65	95	white	rectangle	gene	0.5	black	46	17	51
+N-Xenobiotic Metabolism Response-2.0-Hs-24	ARNT	89	81	white	rectangle	gene	0.5	black	46	17	700
+N-Xenobiotic Metabolism Response-2.0-Hs-25	NFE2L2	88	91	white	rectangle	gene	0.5	black	46	17	7782
+N-Xenobiotic Metabolism Response-2.0-Hs-26	NR1I2	165	95	white	rectangle	gene	0.5	black	46	17	7968
+N-Xenobiotic Metabolism Response-2.0-Hs-27	NR3C1	0	12	white	rectangle	gene	0.5	black	46	17	7978
+N-Xenobiotic Metabolism Response-2.0-Hs-3	BRCA1	76	77	white	rectangle	gene	0.5	black	46	17	1100
+N-Xenobiotic Metabolism Response-2.0-Hs-5	UGT1A1	118	56	white	rectangle	gene	0.5	black	46	17	12530
+N-Xenobiotic Metabolism Response-2.0-Hs-8	UGT1A6	125	98	white	rectangle	gene	0.5	black	46	17	12538

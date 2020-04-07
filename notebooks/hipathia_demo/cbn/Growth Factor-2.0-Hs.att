@@ -1,0 +1,128 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Growth Factor-2.0-Hs-1 2 3 4 5	TFDP1 E2F4 SMAD3 SMAD4 RBL1	61	40	white	rectangle	gene,gene,gene,gene,gene	0.5	black	46	17	11749,/,3118,/,6769,/,6770,/,9893
+N-Growth Factor-2.0-Hs-100	IGF1	16	125	white	rectangle	gene	0.5	black	46	17	5464
+N-Growth Factor-2.0-Hs-101	IGF1R	6	126	white	rectangle	gene	0.5	black	46	17	5465
+N-Growth Factor-2.0-Hs-102	IGF1R	0	129	white	rectangle	gene	0.5	black	46	17	5465
+N-Growth Factor-2.0-Hs-103	IGF2	8	123	white	rectangle	gene	0.5	black	46	17	5466
+N-Growth Factor-2.0-Hs-105	IRS2	0	126	white	rectangle	gene	0.5	black	46	17	6126
+N-Growth Factor-2.0-Hs-106	JUN	30	177	white	rectangle	gene	0.5	black	46	17	6204
+N-Growth Factor-2.0-Hs-107	JUN	34	171	white	rectangle	gene	0.5	black	46	17	6204
+N-Growth Factor-2.0-Hs-108	KDR	87	50	white	rectangle	gene	0.5	black	46	17	6307
+N-Growth Factor-2.0-Hs-109	KRAS	85	11	white	rectangle	gene	0.5	black	46	17	6407
+N-Growth Factor-2.0-Hs-11 12	TGFB1 TGFBR2	0	71	white	rectangle	gene,gene	0.5	black	46	17	11766,/,11773
+N-Growth Factor-2.0-Hs-110	AREG	100	113	white	rectangle	gene	0.5	black	46	17	651
+N-Growth Factor-2.0-Hs-111	SMAD1	65	41	white	rectangle	gene	0.5	black	46	17	6767
+N-Growth Factor-2.0-Hs-112	SMAD2	56	59	white	rectangle	gene	0.5	black	46	17	6768
+N-Growth Factor-2.0-Hs-113	SMAD2	38	70	white	rectangle	gene	0.5	black	46	17	6768
+N-Growth Factor-2.0-Hs-114	SMAD3	47	76	white	rectangle	gene	0.5	black	46	17	6769
+N-Growth Factor-2.0-Hs-115	SMAD3	39	72	white	rectangle	gene	0.5	black	46	17	6769
+N-Growth Factor-2.0-Hs-116	SMAD4	49	67	white	rectangle	gene	0.5	black	46	17	6770
+N-Growth Factor-2.0-Hs-117	SMAD5	68	47	white	rectangle	gene	0.5	black	46	17	6771
+N-Growth Factor-2.0-Hs-118	SMAD7	40	70	white	rectangle	gene	0.5	black	46	17	6773
+N-Growth Factor-2.0-Hs-119	MAP2K1	28	151	white	rectangle	gene	0.5	black	46	17	6840
+N-Growth Factor-2.0-Hs-120	MAPK1	37	147	white	rectangle	gene	0.5	black	46	17	6871
+N-Growth Factor-2.0-Hs-121	MAPK1	33	152	white	rectangle	gene	0.5	black	46	17	6871
+N-Growth Factor-2.0-Hs-122	MAPK1	41	147	white	rectangle	gene	0.5	black	46	17	6871
+N-Growth Factor-2.0-Hs-123	MAPK3	27	143	white	rectangle	gene	0.5	black	46	17	6877
+N-Growth Factor-2.0-Hs-124	MAPK3	102	153	white	rectangle	gene	0.5	black	46	17	6877
+N-Growth Factor-2.0-Hs-125	MAPK3	21	147	white	rectangle	gene	0.5	black	46	17	6877
+N-Growth Factor-2.0-Hs-126	MAPK3	106	153	white	rectangle	gene	0.5	black	46	17	6877
+N-Growth Factor-2.0-Hs-127	MAPK3	21	142	white	rectangle	gene	0.5	black	46	17	6877
+N-Growth Factor-2.0-Hs-128	MET	104	136	white	rectangle	gene	0.5	black	46	17	7029
+N-Growth Factor-2.0-Hs-129	MET	101	127	white	rectangle	gene	0.5	black	46	17	7029
+N-Growth Factor-2.0-Hs-13 14 15	TGFB1 TGFBR2 TGFBR3	3	77	white	rectangle	gene,gene,gene	0.5	black	46	17	11766,/,11773,/,11774
+N-Growth Factor-2.0-Hs-130	MET	107	142	white	rectangle	gene	0.5	black	46	17	7029
+N-Growth Factor-2.0-Hs-131	MYCN	105	199	white	rectangle	gene	0.5	black	46	17	7559
+N-Growth Factor-2.0-Hs-132	MYCN	101	198	white	rectangle	gene	0.5	black	46	17	7559
+N-Growth Factor-2.0-Hs-133	NRG1	108	89	white	rectangle	gene	0.5	black	46	17	7997
+N-Growth Factor-2.0-Hs-134	NRG2	105	90	white	rectangle	gene	0.5	black	46	17	7998
+N-Growth Factor-2.0-Hs-135	NRG3	100	91	white	rectangle	gene	0.5	black	46	17	7999
+N-Growth Factor-2.0-Hs-137	PDGFRA	32	148	white	rectangle	gene	0.5	black	46	17	8803
+N-Growth Factor-2.0-Hs-138	PDGFRB	40	156	white	rectangle	gene	0.5	black	46	17	8804
+N-Growth Factor-2.0-Hs-139	PDPK1	96	1	white	rectangle	gene	0.5	black	46	17	8816
+N-Growth Factor-2.0-Hs-140	PDPK1	93	0	white	rectangle	gene	0.5	black	46	17	8816
+N-Growth Factor-2.0-Hs-141	PIGF	182	87	white	rectangle	gene	0.5	black	46	17	8962
+N-Growth Factor-2.0-Hs-142	PLAU	39	170	white	rectangle	gene	0.5	black	46	17	9052
+N-Growth Factor-2.0-Hs-143	PRKCA	93	124	white	rectangle	gene	0.5	black	46	17	9393
+N-Growth Factor-2.0-Hs-144	PTEN	168	140	white	rectangle	gene	0.5	black	46	17	9588
+N-Growth Factor-2.0-Hs-145	PTEN	169	144	white	rectangle	gene	0.5	black	46	17	9588
+N-Growth Factor-2.0-Hs-146	PTEN	173	140	white	rectangle	gene	0.5	black	46	17	9588
+N-Growth Factor-2.0-Hs-147	PTEN	162	136	white	rectangle	gene	0.5	black	46	17	9588
+N-Growth Factor-2.0-Hs-148	PTGS2	35	152	white	rectangle	gene	0.5	black	46	17	9605
+N-Growth Factor-2.0-Hs-149	PTN	121	14	white	rectangle	gene	0.5	black	46	17	9630
+N-Growth Factor-2.0-Hs-150	PTPN11	103	133	white	rectangle	gene	0.5	black	46	17	9644
+N-Growth Factor-2.0-Hs-151	RAF1	86	18	white	rectangle	gene	0.5	black	46	17	9829
+N-Growth Factor-2.0-Hs-152	RAF1	88	14	white	rectangle	gene	0.5	black	46	17	9829
+N-Growth Factor-2.0-Hs-153	RAF1	91	18	white	rectangle	gene	0.5	black	46	17	9829
+N-Growth Factor-2.0-Hs-154	RAF1	85	23	white	rectangle	gene	0.5	black	46	17	9829
+N-Growth Factor-2.0-Hs-155	RB1	54	48	white	rectangle	gene	0.5	black	46	17	9884
+N-Growth Factor-2.0-Hs-156	RB1	58	48	white	rectangle	gene	0.5	black	46	17	9884
+N-Growth Factor-2.0-Hs-157	RB1	57	46	white	rectangle	gene	0.5	black	46	17	9884
+N-Growth Factor-2.0-Hs-158	RB1	58	50	white	rectangle	gene	0.5	black	46	17	9884
+N-Growth Factor-2.0-Hs-16 17	TGFBR1 TGFBR2	6	73	white	rectangle	gene,gene	0.5	black	46	17	11772,/,11773
+N-Growth Factor-2.0-Hs-18 19	ADRB1 ARRB1	110	116	white	rectangle	gene,gene	0.5	black	46	17	285,/,711
+N-Growth Factor-2.0-Hs-20 21	ADRB1 ARRB2	111	112	white	rectangle	gene,gene	0.5	black	46	17	285,/,712
+N-Growth Factor-2.0-Hs-22 23	EGFR EGFR	105	117	white	rectangle	gene,gene	0.5	black	46	17	3236,/,3236
+N-Growth Factor-2.0-Hs-24 25	EGFR ERBB2	103	109	white	rectangle	gene,gene	0.5	black	46	17	3236,/,3430
+N-Growth Factor-2.0-Hs-26 27	EGFR ERBB3	99	108	white	rectangle	gene,gene	0.5	black	46	17	3236,/,3431
+N-Growth Factor-2.0-Hs-28 29	EIF4E EIF4EBP1	141	29	white	rectangle	gene,gene	0.5	black	46	17	3287,/,3288
+N-Growth Factor-2.0-Hs-30 31	ERBB2 ERBB3	109	93	white	rectangle	gene,gene	0.5	black	46	17	3430,/,3431
+N-Growth Factor-2.0-Hs-32 33	ERBB2 ERBB4	103	96	white	rectangle	gene,gene	0.5	black	46	17	3430,/,3432
+N-Growth Factor-2.0-Hs-34 35	ERBB3 PIK3R2	58	10	white	rectangle	gene,gene	0.5	black	46	17	3431,/,8980
+N-Growth Factor-2.0-Hs-36 37	ERBB4 ERBB4	95	97	white	rectangle	gene,gene	0.5	black	46	17	3432,/,3432
+N-Growth Factor-2.0-Hs-38 39	ITGA5 ITGB1	111	108	white	rectangle	gene,gene	0.5	black	46	17	6141,/,6153
+N-Growth Factor-2.0-Hs-40 41 42	SMAD2 SMAD3 SMAD4	47	69	white	rectangle	gene,gene,gene	0.5	black	46	17	6768,/,6769,/,6770
+N-Growth Factor-2.0-Hs-43 44	PDGFRB PLAUR	40	164	white	rectangle	gene,gene	0.5	black	46	17	8804,/,9053
+N-Growth Factor-2.0-Hs-46	RPS6KB1	98	181	white	rectangle	gene	0.5	black	46	17	10436
+N-Growth Factor-2.0-Hs-47	SGK1	102	180	white	rectangle	gene	0.5	black	46	17	10810
+N-Growth Factor-2.0-Hs-48	BTC	100	101	white	rectangle	gene	0.5	black	46	17	1121
+N-Growth Factor-2.0-Hs-49	SRC	98	119	white	rectangle	gene	0.5	black	46	17	11283
+N-Growth Factor-2.0-Hs-50	STAT3	112	117	white	rectangle	gene	0.5	black	46	17	11364
+N-Growth Factor-2.0-Hs-51	TGFA	103	115	white	rectangle	gene	0.5	black	46	17	11765
+N-Growth Factor-2.0-Hs-52	TGFB1	64	48	white	rectangle	gene	0.5	black	46	17	11766
+N-Growth Factor-2.0-Hs-53	TGFBR1	31	72	white	rectangle	gene	0.5	black	46	17	11772
+N-Growth Factor-2.0-Hs-54	TGFBR1	22	72	white	rectangle	gene	0.5	black	46	17	11772
+N-Growth Factor-2.0-Hs-55	TGFBR2	13	73	white	rectangle	gene	0.5	black	46	17	11773
+N-Growth Factor-2.0-Hs-56	VEGFA	76	49	white	rectangle	gene	0.5	black	46	17	12680
+N-Growth Factor-2.0-Hs-57	VEGFC	96	50	white	rectangle	gene	0.5	black	46	17	12682
+N-Growth Factor-2.0-Hs-58	ADAM17	102	120	white	rectangle	gene	0.5	black	46	17	195
+N-Growth Factor-2.0-Hs-59	CTNNB1	117	11	white	rectangle	gene	0.5	black	46	17	2514
+N-Growth Factor-2.0-Hs-6 7 8 9 10	TFDP1 E2F5 SMAD3 SMAD4 RBL1	67	43	white	rectangle	gene,gene,gene,gene,gene	0.5	black	46	17	11749,/,3119,/,6769,/,6770,/,9893
+N-Growth Factor-2.0-Hs-60	CTNNB1	121	10	white	rectangle	gene	0.5	black	46	17	2514
+N-Growth Factor-2.0-Hs-61	ADRB1	111	114	white	rectangle	gene	0.5	black	46	17	285
+N-Growth Factor-2.0-Hs-62	NRG4	97	88	white	rectangle	gene	0.5	black	46	17	29862
+N-Growth Factor-2.0-Hs-63	HBEGF	101	103	white	rectangle	gene	0.5	black	46	17	3059
+N-Growth Factor-2.0-Hs-64	DUOX1	107	125	white	rectangle	gene	0.5	black	46	17	3062
+N-Growth Factor-2.0-Hs-65	EGF	101	116	white	rectangle	gene	0.5	black	46	17	3229
+N-Growth Factor-2.0-Hs-66	EGFR	104	112	white	rectangle	gene	0.5	black	46	17	3236
+N-Growth Factor-2.0-Hs-67	EGR1	31	135	white	rectangle	gene	0.5	black	46	17	3238
+N-Growth Factor-2.0-Hs-68	EIF4E	138	29	white	rectangle	gene	0.5	black	46	17	3287
+N-Growth Factor-2.0-Hs-69	EIF4EBP1	63	43	white	rectangle	gene	0.5	black	46	17	3288
+N-Growth Factor-2.0-Hs-70	EIF4EBP1	59	43	white	rectangle	gene	0.5	black	46	17	3288
+N-Growth Factor-2.0-Hs-71	ELANE	177	88	white	rectangle	gene	0.5	black	46	17	3309
+N-Growth Factor-2.0-Hs-72	ELK1	33	140	white	rectangle	gene	0.5	black	46	17	3321
+N-Growth Factor-2.0-Hs-73	ELK1	28	137	white	rectangle	gene	0.5	black	46	17	3321
+N-Growth Factor-2.0-Hs-74	EP300	46	81	white	rectangle	gene	0.5	black	46	17	3373
+N-Growth Factor-2.0-Hs-75	ERBB2	106	100	white	rectangle	gene	0.5	black	46	17	3430
+N-Growth Factor-2.0-Hs-77	ERBB2	108	105	white	rectangle	gene	0.5	black	46	17	3430
+N-Growth Factor-2.0-Hs-78	ERBB3	109	85	white	rectangle	gene	0.5	black	46	17	3431
+N-Growth Factor-2.0-Hs-79	ERBB3	60	15	white	rectangle	gene	0.5	black	46	17	3431
+N-Growth Factor-2.0-Hs-80	ERBB4	99	95	white	rectangle	gene	0.5	black	46	17	3432
+N-Growth Factor-2.0-Hs-81	ERBB4	94	90	white	rectangle	gene	0.5	black	46	17	3432
+N-Growth Factor-2.0-Hs-82	EREG	102	102	white	rectangle	gene	0.5	black	46	17	3443
+N-Growth Factor-2.0-Hs-83	FGF1	167	99	white	rectangle	gene	0.5	black	46	17	3665
+N-Growth Factor-2.0-Hs-84	FGF10	173	106	white	rectangle	gene	0.5	black	46	17	3666
+N-Growth Factor-2.0-Hs-85	FGF2	171	97	white	rectangle	gene	0.5	black	46	17	3676
+N-Growth Factor-2.0-Hs-86	FGF7	174	103	white	rectangle	gene	0.5	black	46	17	3685
+N-Growth Factor-2.0-Hs-87	FGFR1	167	95	white	rectangle	gene	0.5	black	46	17	3688
+N-Growth Factor-2.0-Hs-88	FGFR2	170	102	white	rectangle	gene	0.5	black	46	17	3689
+N-Growth Factor-2.0-Hs-89	FLT4	103	49	white	rectangle	gene	0.5	black	46	17	3767
+N-Growth Factor-2.0-Hs-91	FZD1	113	111	white	rectangle	gene	0.5	black	46	17	4038
+N-Growth Factor-2.0-Hs-92	GAB1	105	127	white	rectangle	gene	0.5	black	46	17	4066
+N-Growth Factor-2.0-Hs-93	GRB2	110	132	white	rectangle	gene	0.5	black	46	17	4566
+N-Growth Factor-2.0-Hs-94	GRP	89	119	white	rectangle	gene	0.5	black	46	17	4605
+N-Growth Factor-2.0-Hs-95	GRPR	95	116	white	rectangle	gene	0.5	black	46	17	4609
+N-Growth Factor-2.0-Hs-96	GSK3B	99	192	white	rectangle	gene	0.5	black	46	17	4617
+N-Growth Factor-2.0-Hs-97	GSK3B	100	185	white	rectangle	gene	0.5	black	46	17	4617
+N-Growth Factor-2.0-Hs-98	GSK3B	96	195	white	rectangle	gene	0.5	black	46	17	4617
+N-Growth Factor-2.0-Hs-99	HGF	104	147	white	rectangle	gene	0.5	black	46	17	4893

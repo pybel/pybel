@@ -1,0 +1,16 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Cytotoxic T-cell Signaling-2.0-Hs-1	CCL3	177	67	white	rectangle	gene	0.5	black	46	17	10627
+N-Cytotoxic T-cell Signaling-2.0-Hs-10	IL15RA	55	43	white	rectangle	gene	0.5	black	46	17	5978
+N-Cytotoxic T-cell Signaling-2.0-Hs-11	IL2RB	36	22	white	rectangle	gene	0.5	black	46	17	6009
+N-Cytotoxic T-cell Signaling-2.0-Hs-13	LCK	161	3	white	rectangle	gene	0.5	black	46	17	6524
+N-Cytotoxic T-cell Signaling-2.0-Hs-14	CXCL9	0	77	white	rectangle	gene	0.5	black	46	17	7098
+N-Cytotoxic T-cell Signaling-2.0-Hs-15	PLCG1	73	154	white	rectangle	gene	0.5	black	46	17	9065
+N-Cytotoxic T-cell Signaling-2.0-Hs-16	PLCG1	68	167	white	rectangle	gene	0.5	black	46	17	9065
+N-Cytotoxic T-cell Signaling-2.0-Hs-18	Il2rg	53	16	white	rectangle	gene	0.5	black	46	17	96551
+N-Cytotoxic T-cell Signaling-2.0-Hs-2	ZAP70	63	179	white	rectangle	gene	0.5	black	46	17	12858
+N-Cytotoxic T-cell Signaling-2.0-Hs-3	CCR5	164	68	white	rectangle	gene	0.5	black	46	17	1606
+N-Cytotoxic T-cell Signaling-2.0-Hs-4	CXCL16	161	143	white	rectangle	gene	0.5	black	46	17	16642
+N-Cytotoxic T-cell Signaling-2.0-Hs-5	CXCR6	172	146	white	rectangle	gene	0.5	black	46	17	16647
+N-Cytotoxic T-cell Signaling-2.0-Hs-7	FYN	151	0	white	rectangle	gene	0.5	black	46	17	4037
+N-Cytotoxic T-cell Signaling-2.0-Hs-8	CXCR3	13	74	white	rectangle	gene	0.5	black	46	17	4540
+N-Cytotoxic T-cell Signaling-2.0-Hs-9	IL15	49	30	white	rectangle	gene	0.5	black	46	17	5977

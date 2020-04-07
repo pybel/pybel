@@ -1,0 +1,26 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-NK Signaling-2.0-Hs-10	ICAM1	174	74	white	rectangle	gene	0.5	black	46	17	5344
+N-NK Signaling-2.0-Hs-12	IFNB1	117	20	white	rectangle	gene	0.5	black	46	17	5434
+N-NK Signaling-2.0-Hs-13	IFNG	83	83	white	rectangle	gene	0.5	black	46	17	5438
+N-NK Signaling-2.0-Hs-15	BIRC3	8	84	white	rectangle	gene	0.5	black	46	17	591
+N-NK Signaling-2.0-Hs-16	IL15	9	14	white	rectangle	gene	0.5	black	46	17	5977
+N-NK Signaling-2.0-Hs-17	IL18	77	75	white	rectangle	gene	0.5	black	46	17	5986
+N-NK Signaling-2.0-Hs-18	IL2	102	45	white	rectangle	gene	0.5	black	46	17	6001
+N-NK Signaling-2.0-Hs-2	STAT1	82	96	white	rectangle	gene	0.5	black	46	17	11362
+N-NK Signaling-2.0-Hs-20	IRF1	111	31	white	rectangle	gene	0.5	black	46	17	6116
+N-NK Signaling-2.0-Hs-21	ITGB2	175	63	white	rectangle	gene	0.5	black	46	17	6155
+N-NK Signaling-2.0-Hs-22	JAK2	61	47	white	rectangle	gene	0.5	black	46	17	6192
+N-NK Signaling-2.0-Hs-23	MAP2K1	92	60	white	rectangle	gene	0.5	black	46	17	6840
+N-NK Signaling-2.0-Hs-24	MAPK1	88	73	white	rectangle	gene	0.5	black	46	17	6871
+N-NK Signaling-2.0-Hs-25	MAPK3	79	67	white	rectangle	gene	0.5	black	46	17	6877
+N-NK Signaling-2.0-Hs-26	MICA	29	9	white	rectangle	gene	0.5	black	46	17	7090
+N-NK Signaling-2.0-Hs-27	MICB	14	0	white	rectangle	gene	0.5	black	46	17	7091
+N-NK Signaling-2.0-Hs-28	PAK1	188	115	white	rectangle	gene	0.5	black	46	17	8590
+N-NK Signaling-2.0-Hs-29	AXL	73	166	white	rectangle	gene	0.5	black	46	17	905
+N-NK Signaling-2.0-Hs-3	STAT3	68	57	white	rectangle	gene	0.5	black	46	17	11364
+N-NK Signaling-2.0-Hs-30	RAC1	191	123	white	rectangle	gene	0.5	black	46	17	9801
+N-NK Signaling-2.0-Hs-4	VAV1	186	57	white	rectangle	gene	0.5	black	46	17	12657
+N-NK Signaling-2.0-Hs-5	C3	177	84	white	rectangle	gene	0.5	black	46	17	1318
+N-NK Signaling-2.0-Hs-6	CASP3	0	88	white	rectangle	gene	0.5	black	46	17	1504
+N-NK Signaling-2.0-Hs-7	KLRK1	17	8	white	rectangle	gene	0.5	black	46	17	18788
+N-NK Signaling-2.0-Hs-9	GAS6	81	165	white	rectangle	gene	0.5	black	46	17	4168
