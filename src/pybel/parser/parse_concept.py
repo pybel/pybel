@@ -36,7 +36,6 @@ class ConceptParser(BaseParser):
         namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
         default_namespace: Optional[Set[str]] = None,
         allow_naked_names: bool = False,
-        validate: bool = True,
     ) -> None:
         """Initialize the concept parser.
 
@@ -68,21 +67,19 @@ class ConceptParser(BaseParser):
             self.namespace_to_name_to_encoding = {}
             self.namespace_to_identifier_to_encoding = {}
 
-        self.namespace_to_pattern = namespace_to_pattern or {}
+        self.identifier_fqualified.setParseAction(self.handle_identifier_fqualified)
+        self.identifier_qualified.setParseAction(self.handle_identifier_qualified)
 
+        self.namespace_to_pattern = namespace_to_pattern or {}
         self.default_namespace = set(default_namespace) if default_namespace is not None else None
         self.allow_naked_names = allow_naked_names
 
         self.identifier_bare = (word | quote)(NAME)
-
-        if validate:
-            self.identifier_fqualified.setParseAction(self.handle_identifier_fqualified)
-            self.identifier_qualified.setParseAction(self.handle_identifier_qualified)
-            self.identifier_bare.setParseAction(
-                self.handle_namespace_default if self.default_namespace else
-                self.handle_namespace_lenient if self.allow_naked_names else
-                self.handle_namespace_invalid,
-            )
+        self.identifier_bare.setParseAction(
+            self.handle_namespace_default if self.default_namespace else
+            self.handle_namespace_lenient if self.allow_naked_names else
+            self.handle_namespace_invalid,
+        )
 
         super().__init__(
             self.identifier_fqualified | self.identifier_qualified | self.identifier_bare,
