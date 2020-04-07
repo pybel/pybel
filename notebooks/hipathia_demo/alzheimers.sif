@@ -1,0 +1,1843 @@
+0	1	2
+N-alzheimers-558	inhibition	N-alzheimers-1125
+N-alzheimers-1156	activation	N-alzheimers-1075
+N-alzheimers-1101	activation	N-alzheimers-1066
+N-alzheimers-1208	activation	N-alzheimers-479 480
+N-alzheimers-1208	inhibition	N-alzheimers-590
+N-alzheimers-1208	activation	N-alzheimers-1226
+N-alzheimers-1208	activation	N-alzheimers-1066
+N-alzheimers-1208	activation	N-alzheimers-1210
+N-alzheimers-1208	activation	N-alzheimers-1210
+N-alzheimers-1208	activation	N-alzheimers-1087
+N-alzheimers-1208	activation	N-alzheimers-430 431
+N-alzheimers-638	activation	N-alzheimers-838
+N-alzheimers-852	inhibition	N-alzheimers-426 427
+N-alzheimers-364 365	activation	N-alzheimers-1066
+N-alzheimers-739	inhibition	N-alzheimers-1141
+N-alzheimers-739	activation	N-alzheimers-748
+N-alzheimers-739	activation	N-alzheimers-924
+N-alzheimers-739	inhibition	N-alzheimers-537
+N-alzheimers-1242	activation	N-alzheimers-1066
+N-alzheimers-527	activation	N-alzheimers-590
+N-alzheimers-1164	activation	N-alzheimers-1075
+N-alzheimers-967	activation	N-alzheimers-1245
+N-alzheimers-967	activation	N-alzheimers-987
+N-alzheimers-967	activation	N-alzheimers-985
+N-alzheimers-967	activation	N-alzheimers-541
+N-alzheimers-302 303	activation	N-alzheimers-545
+N-alzheimers-629	activation	N-alzheimers-620
+N-alzheimers-801	activation	N-alzheimers-1105
+N-alzheimers-801	activation	N-alzheimers-653
+N-alzheimers-801	activation	N-alzheimers-1117
+N-alzheimers-485 486	activation	N-alzheimers-529
+N-alzheimers-485 486	activation	N-alzheimers-529
+N-alzheimers-1303	inhibition	N-alzheimers-223 224
+N-alzheimers-1303	inhibition	N-alzheimers-223 224
+N-alzheimers-966	activation	N-alzheimers-600
+N-alzheimers-966	activation	N-alzheimers-600
+N-alzheimers-291 292	activation	N-alzheimers-1328
+N-alzheimers-291 292	activation	N-alzheimers-1323
+N-alzheimers-291 292	activation	N-alzheimers-708
+N-alzheimers-591	activation	N-alzheimers-968
+N-alzheimers-1267	inhibition	N-alzheimers-1266
+N-alzheimers-495 496	activation	N-alzheimers-1350
+N-alzheimers-1426	activation	N-alzheimers-1400
+N-alzheimers-1329	activation	N-alzheimers-709
+N-alzheimers-1249	activation	N-alzheimers-1247
+N-alzheimers-1249	activation	N-alzheimers-1248
+N-alzheimers-1249	activation	N-alzheimers-614
+N-alzheimers-1061	activation	N-alzheimers-1180
+N-alzheimers-1229	inhibition	N-alzheimers-635
+N-alzheimers-819	inhibition	N-alzheimers-1201
+N-alzheimers-819	inhibition	N-alzheimers-1185
+N-alzheimers-1146	inhibition	N-alzheimers-13 14
+N-alzheimers-1146	activation	N-alzheimers-1075
+N-alzheimers-1146	activation	N-alzheimers-1074
+N-alzheimers-1146	activation	N-alzheimers-691
+N-alzheimers-1146	activation	N-alzheimers-987
+N-alzheimers-1146	inhibition	N-alzheimers-832
+N-alzheimers-1146	inhibition	N-alzheimers-909
+N-alzheimers-1146	inhibition	N-alzheimers-43 44
+N-alzheimers-1273	inhibition	N-alzheimers-1153
+N-alzheimers-1074	activation	N-alzheimers-1334
+N-alzheimers-1074	activation	N-alzheimers-1205
+N-alzheimers-1074	activation	N-alzheimers-1134
+N-alzheimers-1074	activation	N-alzheimers-1215
+N-alzheimers-1074	activation	N-alzheimers-635
+N-alzheimers-1074	activation	N-alzheimers-1209
+N-alzheimers-133 134	inhibition	N-alzheimers-1275
+N-alzheimers-1046	inhibition	N-alzheimers-1044
+N-alzheimers-26 27	activation	N-alzheimers-75 76 77
+N-alzheimers-1230	inhibition	N-alzheimers-1229
+N-alzheimers-576	activation	N-alzheimers-716
+N-alzheimers-780	activation	N-alzheimers-1066
+N-alzheimers-780	activation	N-alzheimers-769
+N-alzheimers-780	activation	N-alzheimers-769
+N-alzheimers-780	activation	N-alzheimers-742
+N-alzheimers-780	activation	N-alzheimers-741
+N-alzheimers-1366	activation	N-alzheimers-1370
+N-alzheimers-909	activation	N-alzheimers-889
+N-alzheimers-909	activation	N-alzheimers-889
+N-alzheimers-909	activation	N-alzheimers-1141
+N-alzheimers-909	activation	N-alzheimers-631
+N-alzheimers-47 48	inhibition	N-alzheimers-1 2
+N-alzheimers-1209	inhibition	N-alzheimers-1025
+N-alzheimers-1209	activation	N-alzheimers-1215
+N-alzheimers-1209	activation	N-alzheimers-1205
+N-alzheimers-1209	activation	N-alzheimers-1205
+N-alzheimers-1189	inhibition	N-alzheimers-1188
+N-alzheimers-88 89	activation	N-alzheimers-619
+N-alzheimers-1446	activation	N-alzheimers-1447
+N-alzheimers-513	inhibition	N-alzheimers-1125
+N-alzheimers-1116	inhibition	N-alzheimers-1338
+N-alzheimers-384 385	inhibition	N-alzheimers-831
+N-alzheimers-151 152 153	activation	N-alzheimers-700
+N-alzheimers-1345	inhibition	N-alzheimers-1075
+N-alzheimers-1345	inhibition	N-alzheimers-1422
+N-alzheimers-930	inhibition	N-alzheimers-9 10
+N-alzheimers-1464	inhibition	N-alzheimers-1451
+N-alzheimers-1024	inhibition	N-alzheimers-1075
+N-alzheimers-1016	activation	N-alzheimers-320 321
+N-alzheimers-1016	activation	N-alzheimers-1075
+N-alzheimers-1016	activation	N-alzheimers-1075
+N-alzheimers-1016	activation	N-alzheimers-1075
+N-alzheimers-1016	activation	N-alzheimers-1075
+N-alzheimers-1016	inhibition	N-alzheimers-1075
+N-alzheimers-1016	activation	N-alzheimers-1042
+N-alzheimers-1016	activation	N-alzheimers-1042
+N-alzheimers-249 250	activation	N-alzheimers-606
+N-alzheimers-249 250	activation	N-alzheimers-607
+N-alzheimers-249 250	activation	N-alzheimers-554
+N-alzheimers-249 250	activation	N-alzheimers-553
+N-alzheimers-249 250	activation	N-alzheimers-545
+N-alzheimers-1035	inhibition	N-alzheimers-1034
+N-alzheimers-544	inhibition	N-alzheimers-543
+N-alzheimers-1313	activation	N-alzheimers-1075
+N-alzheimers-1313	inhibition	N-alzheimers-907
+N-alzheimers-1313	inhibition	N-alzheimers-898
+N-alzheimers-1313	inhibition	N-alzheimers-1220
+N-alzheimers-840	activation	N-alzheimers-696
+N-alzheimers-999	activation	N-alzheimers-1275
+N-alzheimers-1391	activation	N-alzheimers-1066
+N-alzheimers-1386	activation	N-alzheimers-1372
+N-alzheimers-978	inhibition	N-alzheimers-803
+N-alzheimers-978	inhibition	N-alzheimers-774
+N-alzheimers-978	inhibition	N-alzheimers-780
+N-alzheimers-860	activation	N-alzheimers-1034
+N-alzheimers-666	activation	N-alzheimers-1088
+N-alzheimers-280 281	inhibition	N-alzheimers-1075
+N-alzheimers-1062	activation	N-alzheimers-773
+N-alzheimers-838	activation	N-alzheimers-572
+N-alzheimers-838	activation	N-alzheimers-1066
+N-alzheimers-838	activation	N-alzheimers-1066
+N-alzheimers-838	activation	N-alzheimers-1066
+N-alzheimers-838	activation	N-alzheimers-1066
+N-alzheimers-838	activation	N-alzheimers-1066
+N-alzheimers-838	activation	N-alzheimers-1066
+N-alzheimers-278 279	activation	N-alzheimers-75 76 77
+N-alzheimers-631	inhibition	N-alzheimers-774
+N-alzheimers-1206	activation	N-alzheimers-1033
+N-alzheimers-1206	activation	N-alzheimers-1034
+N-alzheimers-1206	activation	N-alzheimers-635
+N-alzheimers-1206	activation	N-alzheimers-1039
+N-alzheimers-1206	activation	N-alzheimers-1275
+N-alzheimers-1206	activation	N-alzheimers-1066
+N-alzheimers-1206	activation	N-alzheimers-1300
+N-alzheimers-1206	activation	N-alzheimers-1310
+N-alzheimers-1206	activation	N-alzheimers-1337
+N-alzheimers-835	activation	N-alzheimers-831
+N-alzheimers-236 237 238	activation	N-alzheimers-529
+N-alzheimers-1125	activation	N-alzheimers-561
+N-alzheimers-1125	activation	N-alzheimers-542
+N-alzheimers-546	activation	N-alzheimers-1075
+N-alzheimers-546	activation	N-alzheimers-583
+N-alzheimers-293 294 295	activation	N-alzheimers-529
+N-alzheimers-691	inhibition	N-alzheimers-515
+N-alzheimers-718	inhibition	N-alzheimers-716
+N-alzheimers-518	activation	N-alzheimers-19 20 21 22 23
+N-alzheimers-518	activation	N-alzheimers-19 20 21 22 23
+N-alzheimers-518	inhibition	N-alzheimers-831
+N-alzheimers-518	activation	N-alzheimers-221 222
+N-alzheimers-518	activation	N-alzheimers-987
+N-alzheimers-1198	activation	N-alzheimers-111 112
+N-alzheimers-1198	activation	N-alzheimers-1171
+N-alzheimers-1198	activation	N-alzheimers-643
+N-alzheimers-1198	activation	N-alzheimers-526
+N-alzheimers-420 421	activation	N-alzheimers-1066
+N-alzheimers-420 421	activation	N-alzheimers-1275
+N-alzheimers-420 421	activation	N-alzheimers-1279
+N-alzheimers-420 421	activation	N-alzheimers-1116
+N-alzheimers-1285	activation	N-alzheimers-525
+N-alzheimers-1285	activation	N-alzheimers-525
+N-alzheimers-1285	inhibition	N-alzheimers-813
+N-alzheimers-1285	activation	N-alzheimers-1146
+N-alzheimers-1285	activation	N-alzheimers-1146
+N-alzheimers-1285	activation	N-alzheimers-1146
+N-alzheimers-1285	activation	N-alzheimers-524
+N-alzheimers-1285	activation	N-alzheimers-811
+N-alzheimers-1173	activation	N-alzheimers-964
+N-alzheimers-883	activation	N-alzheimers-1075
+N-alzheimers-272 273	activation	N-alzheimers-893
+N-alzheimers-606	activation	N-alzheimers-529
+N-alzheimers-606	activation	N-alzheimers-529
+N-alzheimers-606	activation	N-alzheimers-1126
+N-alzheimers-606	activation	N-alzheimers-1133
+N-alzheimers-737	activation	N-alzheimers-1066
+N-alzheimers-1169	inhibition	N-alzheimers-125 126
+N-alzheimers-1048	activation	N-alzheimers-1245
+N-alzheimers-1048	activation	N-alzheimers-985
+N-alzheimers-1048	activation	N-alzheimers-541
+N-alzheimers-687	activation	N-alzheimers-1251
+N-alzheimers-687	activation	N-alzheimers-747
+N-alzheimers-687	activation	N-alzheimers-816
+N-alzheimers-524	activation	N-alzheimers-523
+N-alzheimers-438 439	activation	N-alzheimers-1066
+N-alzheimers-1114	activation	N-alzheimers-800
+N-alzheimers-1090	activation	N-alzheimers-1075
+N-alzheimers-564	activation	N-alzheimers-525
+N-alzheimers-564	activation	N-alzheimers-525
+N-alzheimers-564	activation	N-alzheimers-811
+N-alzheimers-465 466	activation	N-alzheimers-1085
+N-alzheimers-386 387	activation	N-alzheimers-1205
+N-alzheimers-386 387	activation	N-alzheimers-1205
+N-alzheimers-688	activation	N-alzheimers-1146
+N-alzheimers-688	activation	N-alzheimers-614
+N-alzheimers-688	activation	N-alzheimers-524
+N-alzheimers-1226	activation	N-alzheimers-514
+N-alzheimers-1226	inhibition	N-alzheimers-590
+N-alzheimers-912	activation	N-alzheimers-913
+N-alzheimers-1389	activation	N-alzheimers-1422
+N-alzheimers-1389	activation	N-alzheimers-1422
+N-alzheimers-1389	activation	N-alzheimers-1423
+N-alzheimers-1389	activation	N-alzheimers-1340
+N-alzheimers-276 277	activation	N-alzheimers-1190
+N-alzheimers-318 319	activation	N-alzheimers-1326
+N-alzheimers-1086	activation	N-alzheimers-247 248
+N-alzheimers-1086	activation	N-alzheimers-60 61
+N-alzheimers-1086	activation	N-alzheimers-60 61
+N-alzheimers-1086	activation	N-alzheimers-241 242 243
+N-alzheimers-568	activation	N-alzheimers-1152
+N-alzheimers-568	activation	N-alzheimers-1150
+N-alzheimers-568	activation	N-alzheimers-1162
+N-alzheimers-568	activation	N-alzheimers-1146
+N-alzheimers-924	activation	N-alzheimers-921
+N-alzheimers-924	activation	N-alzheimers-647
+N-alzheimers-924	activation	N-alzheimers-989
+N-alzheimers-924	activation	N-alzheimers-1146
+N-alzheimers-924	activation	N-alzheimers-1146
+N-alzheimers-626	activation	N-alzheimers-1075
+N-alzheimers-1344	inhibition	N-alzheimers-1075
+N-alzheimers-1344	inhibition	N-alzheimers-1422
+N-alzheimers-339 340	inhibition	N-alzheimers-1075
+N-alzheimers-1017	inhibition	N-alzheimers-1016
+N-alzheimers-241 242 243	activation	N-alzheimers-606
+N-alzheimers-241 242 243	activation	N-alzheimers-607
+N-alzheimers-1033	activation	N-alzheimers-800
+N-alzheimers-1033	activation	N-alzheimers-1066
+N-alzheimers-1033	activation	N-alzheimers-1205
+N-alzheimers-1033	activation	N-alzheimers-1205
+N-alzheimers-1033	activation	N-alzheimers-1206
+N-alzheimers-1033	activation	N-alzheimers-1206
+N-alzheimers-1379	inhibition	N-alzheimers-1434
+N-alzheimers-1379	inhibition	N-alzheimers-1397
+N-alzheimers-1379	inhibition	N-alzheimers-1354
+N-alzheimers-1379	inhibition	N-alzheimers-1404
+N-alzheimers-1000	activation	N-alzheimers-891
+N-alzheimers-756	activation	N-alzheimers-1275
+N-alzheimers-756	activation	N-alzheimers-1275
+N-alzheimers-346 347	inhibition	N-alzheimers-1075
+N-alzheimers-1124	activation	N-alzheimers-524
+N-alzheimers-532	activation	N-alzheimers-529
+N-alzheimers-561	activation	N-alzheimers-560
+N-alzheimers-1039	inhibition	N-alzheimers-962
+N-alzheimers-1039	inhibition	N-alzheimers-1038
+N-alzheimers-1039	activation	N-alzheimers-1040
+N-alzheimers-1039	activation	N-alzheimers-1065
+N-alzheimers-1039	activation	N-alzheimers-615
+N-alzheimers-1039	activation	N-alzheimers-84 85
+N-alzheimers-1039	activation	N-alzheimers-779
+N-alzheimers-1060	activation	N-alzheimers-1180
+N-alzheimers-1431	inhibition	N-alzheimers-1425
+N-alzheimers-1297	activation	N-alzheimers-642
+N-alzheimers-1297	activation	N-alzheimers-899
+N-alzheimers-1297	activation	N-alzheimers-700
+N-alzheimers-1297	activation	N-alzheimers-1152
+N-alzheimers-1297	activation	N-alzheimers-1154
+N-alzheimers-884	activation	N-alzheimers-1275
+N-alzheimers-219 220	inhibition	N-alzheimers-825
+N-alzheimers-1137	inhibition	N-alzheimers-1075
+N-alzheimers-1066	inhibition	N-alzheimers-1075
+N-alzheimers-1066	activation	N-alzheimers-1075
+N-alzheimers-1066	activation	N-alzheimers-1075
+N-alzheimers-1066	activation	N-alzheimers-1075
+N-alzheimers-1066	activation	N-alzheimers-1075
+N-alzheimers-1066	activation	N-alzheimers-1075
+N-alzheimers-1066	activation	N-alzheimers-1074
+N-alzheimers-1066	inhibition	N-alzheimers-368 369 370
+N-alzheimers-1066	activation	N-alzheimers-193 194
+N-alzheimers-1066	activation	N-alzheimers-1034
+N-alzheimers-1066	activation	N-alzheimers-1013
+N-alzheimers-1066	activation	N-alzheimers-976
+N-alzheimers-1066	inhibition	N-alzheimers-917
+N-alzheimers-1066	inhibition	N-alzheimers-917
+N-alzheimers-1066	activation	N-alzheimers-1275
+N-alzheimers-1066	activation	N-alzheimers-676
+N-alzheimers-1066	activation	N-alzheimers-696
+N-alzheimers-1066	activation	N-alzheimers-696
+N-alzheimers-1066	activation	N-alzheimers-692
+N-alzheimers-1066	activation	N-alzheimers-1100
+N-alzheimers-1066	activation	N-alzheimers-1338
+N-alzheimers-1066	activation	N-alzheimers-818
+N-alzheimers-1066	activation	N-alzheimers-1127
+N-alzheimers-1066	inhibition	N-alzheimers-749
+N-alzheimers-1066	activation	N-alzheimers-969
+N-alzheimers-1066	activation	N-alzheimers-975
+N-alzheimers-1066	activation	N-alzheimers-977
+N-alzheimers-1066	activation	N-alzheimers-961
+N-alzheimers-1066	activation	N-alzheimers-571
+N-alzheimers-1066	inhibition	N-alzheimers-895
+N-alzheimers-1066	inhibition	N-alzheimers-895
+N-alzheimers-1066	inhibition	N-alzheimers-563
+N-alzheimers-1066	inhibition	N-alzheimers-563
+N-alzheimers-1066	inhibition	N-alzheimers-1103
+N-alzheimers-1066	inhibition	N-alzheimers-1103
+N-alzheimers-1066	activation	N-alzheimers-759
+N-alzheimers-1066	activation	N-alzheimers-758
+N-alzheimers-1066	inhibition	N-alzheimers-523
+N-alzheimers-761	activation	N-alzheimers-1275
+N-alzheimers-311 312 313	activation	N-alzheimers-1339
+N-alzheimers-374 375 376	activation	N-alzheimers-1066
+N-alzheimers-881	inhibition	N-alzheimers-105 106
+N-alzheimers-879	activation	N-alzheimers-266 267
+N-alzheimers-741	activation	N-alzheimers-1066
+N-alzheimers-741	activation	N-alzheimers-774
+N-alzheimers-741	inhibition	N-alzheimers-1275
+N-alzheimers-1009	activation	N-alzheimers-1041
+N-alzheimers-1009	activation	N-alzheimers-716
+N-alzheimers-1009	inhibition	N-alzheimers-628
+N-alzheimers-1234	activation	N-alzheimers-1275
+N-alzheimers-839	activation	N-alzheimers-1066
+N-alzheimers-618	inhibition	N-alzheimers-831
+N-alzheimers-618	inhibition	N-alzheimers-831
+N-alzheimers-618	activation	N-alzheimers-734
+N-alzheimers-618	inhibition	N-alzheimers-734
+N-alzheimers-1175	inhibition	N-alzheimers-1075
+N-alzheimers-1246	inhibition	N-alzheimers-1257
+N-alzheimers-1246	inhibition	N-alzheimers-1261
+N-alzheimers-1404	activation	N-alzheimers-1363
+N-alzheimers-1404	activation	N-alzheimers-1383
+N-alzheimers-15 16	activation	N-alzheimers-1146
+N-alzheimers-15 16	inhibition	N-alzheimers-13 14
+N-alzheimers-471 472	inhibition	N-alzheimers-1146
+N-alzheimers-187 188	activation	N-alzheimers-752
+N-alzheimers-316 317	activation	N-alzheimers-1014
+N-alzheimers-746	activation	N-alzheimers-1146
+N-alzheimers-990	activation	N-alzheimers-1066
+N-alzheimers-167 168	activation	N-alzheimers-1066
+N-alzheimers-167 168	activation	N-alzheimers-1102
+N-alzheimers-1429	activation	N-alzheimers-1404
+N-alzheimers-1429	inhibition	N-alzheimers-1352
+N-alzheimers-1429	activation	N-alzheimers-1372
+N-alzheimers-1429	activation	N-alzheimers-1372
+N-alzheimers-1429	activation	N-alzheimers-1372
+N-alzheimers-1429	activation	N-alzheimers-1372
+N-alzheimers-1429	activation	N-alzheimers-560
+N-alzheimers-1429	activation	N-alzheimers-560
+N-alzheimers-1429	activation	N-alzheimers-487 488
+N-alzheimers-1429	activation	N-alzheimers-1386
+N-alzheimers-1429	inhibition	N-alzheimers-1397
+N-alzheimers-1429	inhibition	N-alzheimers-1398
+N-alzheimers-1429	activation	N-alzheimers-1434
+N-alzheimers-1429	activation	N-alzheimers-1357
+N-alzheimers-590	activation	N-alzheimers-55 56
+N-alzheimers-590	activation	N-alzheimers-1075
+N-alzheimers-590	activation	N-alzheimers-1299
+N-alzheimers-1372	activation	N-alzheimers-560
+N-alzheimers-867	inhibition	N-alzheimers-1075
+N-alzheimers-867	inhibition	N-alzheimers-1075
+N-alzheimers-102 103 104	activation	N-alzheimers-700
+N-alzheimers-1443	inhibition	N-alzheimers-1075
+N-alzheimers-794	inhibition	N-alzheimers-1201
+N-alzheimers-794	inhibition	N-alzheimers-1185
+N-alzheimers-525	activation	N-alzheimers-523
+N-alzheimers-525	activation	N-alzheimers-523
+N-alzheimers-525	activation	N-alzheimers-523
+N-alzheimers-1113	activation	N-alzheimers-414 415
+N-alzheimers-1212	activation	N-alzheimers-1300
+N-alzheimers-834	activation	N-alzheimers-831
+N-alzheimers-888	activation	N-alzheimers-1075
+N-alzheimers-888	activation	N-alzheimers-889
+N-alzheimers-888	activation	N-alzheimers-889
+N-alzheimers-542	activation	N-alzheimers-541
+N-alzheimers-765	inhibition	N-alzheimers-1201
+N-alzheimers-765	inhibition	N-alzheimers-1185
+N-alzheimers-1077	activation	N-alzheimers-696
+N-alzheimers-1077	activation	N-alzheimers-1075
+N-alzheimers-1283	activation	N-alzheimers-1156
+N-alzheimers-708	activation	N-alzheimers-1126
+N-alzheimers-708	activation	N-alzheimers-1133
+N-alzheimers-446 447	activation	N-alzheimers-1146
+N-alzheimers-1338	activation	N-alzheimers-973
+N-alzheimers-1338	activation	N-alzheimers-976
+N-alzheimers-1338	activation	N-alzheimers-853
+N-alzheimers-1338	activation	N-alzheimers-853
+N-alzheimers-1338	activation	N-alzheimers-974
+N-alzheimers-1338	activation	N-alzheimers-970
+N-alzheimers-645	activation	N-alzheimers-1125
+N-alzheimers-70 71 72	activation	N-alzheimers-1146
+N-alzheimers-70 71 72	activation	N-alzheimers-987
+N-alzheimers-800	inhibition	N-alzheimers-1075
+N-alzheimers-800	inhibition	N-alzheimers-1075
+N-alzheimers-800	inhibition	N-alzheimers-865
+N-alzheimers-800	activation	N-alzheimers-641
+N-alzheimers-697	activation	N-alzheimers-1143
+N-alzheimers-162 163	activation	N-alzheimers-1066
+N-alzheimers-162 163	activation	N-alzheimers-1217
+N-alzheimers-562	activation	N-alzheimers-605
+N-alzheimers-740	activation	N-alzheimers-1146
+N-alzheimers-740	activation	N-alzheimers-1146
+N-alzheimers-740	activation	N-alzheimers-1243
+N-alzheimers-567	activation	N-alzheimers-811
+N-alzheimers-989	inhibition	N-alzheimers-987
+N-alzheimers-989	inhibition	N-alzheimers-987
+N-alzheimers-989	inhibition	N-alzheimers-987
+N-alzheimers-989	inhibition	N-alzheimers-987
+N-alzheimers-989	inhibition	N-alzheimers-987
+N-alzheimers-989	inhibition	N-alzheimers-1146
+N-alzheimers-1311	inhibition	N-alzheimers-434 435
+N-alzheimers-520	activation	N-alzheimers-617
+N-alzheimers-520	activation	N-alzheimers-525
+N-alzheimers-520	activation	N-alzheimers-525
+N-alzheimers-520	activation	N-alzheimers-1146
+N-alzheimers-520	activation	N-alzheimers-811
+N-alzheimers-520	activation	N-alzheimers-1083
+N-alzheimers-520	activation	N-alzheimers-1085
+N-alzheimers-520	activation	N-alzheimers-1084
+N-alzheimers-193 194	inhibition	N-alzheimers-1075
+N-alzheimers-1341	inhibition	N-alzheimers-1075
+N-alzheimers-648	inhibition	N-alzheimers-1075
+N-alzheimers-199 200	activation	N-alzheimers-798
+N-alzheimers-1257	activation	N-alzheimers-1075
+N-alzheimers-1257	activation	N-alzheimers-1075
+N-alzheimers-1257	activation	N-alzheimers-1261
+N-alzheimers-1257	activation	N-alzheimers-1074
+N-alzheimers-937	activation	N-alzheimers-1165
+N-alzheimers-646	activation	N-alzheimers-1208
+N-alzheimers-646	activation	N-alzheimers-1208
+N-alzheimers-646	activation	N-alzheimers-1210
+N-alzheimers-646	activation	N-alzheimers-1210
+N-alzheimers-646	activation	N-alzheimers-1125
+N-alzheimers-1180	activation	N-alzheimers-1208
+N-alzheimers-1180	activation	N-alzheimers-1075
+N-alzheimers-995	inhibition	N-alzheimers-1204
+N-alzheimers-1055	activation	N-alzheimers-1054
+N-alzheimers-1207	activation	N-alzheimers-1317
+N-alzheimers-1022	inhibition	N-alzheimers-1075
+N-alzheimers-1022	inhibition	N-alzheimers-1075
+N-alzheimers-1130	inhibition	N-alzheimers-1128
+N-alzheimers-1130	inhibition	N-alzheimers-1139
+N-alzheimers-171 172	inhibition	N-alzheimers-169 170
+N-alzheimers-895	activation	N-alzheimers-1310
+N-alzheimers-895	activation	N-alzheimers-1146
+N-alzheimers-895	activation	N-alzheimers-1146
+N-alzheimers-895	activation	N-alzheimers-1146
+N-alzheimers-895	activation	N-alzheimers-748
+N-alzheimers-895	activation	N-alzheimers-1155
+N-alzheimers-895	activation	N-alzheimers-1156
+N-alzheimers-895	activation	N-alzheimers-1152
+N-alzheimers-244 245 246	activation	N-alzheimers-606
+N-alzheimers-244 245 246	activation	N-alzheimers-607
+N-alzheimers-244 245 246	activation	N-alzheimers-554
+N-alzheimers-244 245 246	activation	N-alzheimers-553
+N-alzheimers-244 245 246	activation	N-alzheimers-545
+N-alzheimers-178 179	activation	N-alzheimers-511
+N-alzheimers-178 179	activation	N-alzheimers-1268
+N-alzheimers-178 179	activation	N-alzheimers-1014
+N-alzheimers-178 179	activation	N-alzheimers-1014
+N-alzheimers-1318	activation	N-alzheimers-687
+N-alzheimers-1318	activation	N-alzheimers-687
+N-alzheimers-1448	activation	N-alzheimers-1436
+N-alzheimers-1112	activation	N-alzheimers-418 419
+N-alzheimers-1112	activation	N-alzheimers-426 427
+N-alzheimers-1112	activation	N-alzheimers-444 445
+N-alzheimers-1112	activation	N-alzheimers-444 445
+N-alzheimers-1112	activation	N-alzheimers-1172
+N-alzheimers-1112	inhibition	N-alzheimers-1075
+N-alzheimers-1112	activation	N-alzheimers-1236
+N-alzheimers-1112	inhibition	N-alzheimers-377 378 379
+N-alzheimers-900	activation	N-alzheimers-598
+N-alzheimers-531	activation	N-alzheimers-529
+N-alzheimers-1252	activation	N-alzheimers-459 460
+N-alzheimers-1252	inhibition	N-alzheimers-987
+N-alzheimers-1252	activation	N-alzheimers-1066
+N-alzheimers-1252	inhibition	N-alzheimers-1147
+N-alzheimers-1252	inhibition	N-alzheimers-748
+N-alzheimers-1252	inhibition	N-alzheimers-1159
+N-alzheimers-1252	activation	N-alzheimers-1270
+N-alzheimers-1252	activation	N-alzheimers-1098
+N-alzheimers-1252	activation	N-alzheimers-1098
+N-alzheimers-1252	activation	N-alzheimers-709
+N-alzheimers-1252	activation	N-alzheimers-1216
+N-alzheimers-1252	inhibition	N-alzheimers-1075
+N-alzheimers-802	inhibition	N-alzheimers-508
+N-alzheimers-1315	activation	N-alzheimers-1314
+N-alzheimers-1176	activation	N-alzheimers-1177
+N-alzheimers-1176	activation	N-alzheimers-1177
+N-alzheimers-833	activation	N-alzheimers-831
+N-alzheimers-1332	activation	N-alzheimers-757
+N-alzheimers-1240	activation	N-alzheimers-696
+N-alzheimers-1240	activation	N-alzheimers-699
+N-alzheimers-1059	activation	N-alzheimers-1075
+N-alzheimers-1172	inhibition	N-alzheimers-1075
+N-alzheimers-1075	activation	N-alzheimers-11 12
+N-alzheimers-1075	activation	N-alzheimers-414 415
+N-alzheimers-1075	inhibition	N-alzheimers-1064
+N-alzheimers-1075	activation	N-alzheimers-1184
+N-alzheimers-1075	activation	N-alzheimers-731
+N-alzheimers-1075	activation	N-alzheimers-724
+N-alzheimers-1075	activation	N-alzheimers-860
+N-alzheimers-1075	inhibition	N-alzheimers-594
+N-alzheimers-1075	inhibition	N-alzheimers-1105
+N-alzheimers-1075	inhibition	N-alzheimers-774
+N-alzheimers-1075	inhibition	N-alzheimers-993
+N-alzheimers-1075	inhibition	N-alzheimers-390 391
+N-alzheimers-1075	activation	N-alzheimers-514
+N-alzheimers-1075	activation	N-alzheimers-917
+N-alzheimers-1075	activation	N-alzheimers-743
+N-alzheimers-1075	activation	N-alzheimers-703
+N-alzheimers-1075	activation	N-alzheimers-652
+N-alzheimers-1075	activation	N-alzheimers-1177
+N-alzheimers-1075	inhibition	N-alzheimers-1216
+N-alzheimers-1075	inhibition	N-alzheimers-1216
+N-alzheimers-1075	activation	N-alzheimers-1257
+N-alzheimers-1075	activation	N-alzheimers-1257
+N-alzheimers-1075	activation	N-alzheimers-1331
+N-alzheimers-1075	inhibition	N-alzheimers-629
+N-alzheimers-1075	inhibition	N-alzheimers-629
+N-alzheimers-1075	inhibition	N-alzheimers-620
+N-alzheimers-1075	activation	N-alzheimers-888
+N-alzheimers-1075	activation	N-alzheimers-889
+N-alzheimers-1075	activation	N-alzheimers-889
+N-alzheimers-1075	activation	N-alzheimers-889
+N-alzheimers-1075	activation	N-alzheimers-661
+N-alzheimers-1075	activation	N-alzheimers-656
+N-alzheimers-1075	activation	N-alzheimers-1259
+N-alzheimers-1075	activation	N-alzheimers-1290
+N-alzheimers-1075	activation	N-alzheimers-1292
+N-alzheimers-1075	activation	N-alzheimers-1119
+N-alzheimers-1075	activation	N-alzheimers-1120
+N-alzheimers-1075	activation	N-alzheimers-1384
+N-alzheimers-1075	inhibition	N-alzheimers-1397
+N-alzheimers-1075	activation	N-alzheimers-1354
+N-alzheimers-1075	activation	N-alzheimers-1425
+N-alzheimers-1075	activation	N-alzheimers-1019
+N-alzheimers-1075	activation	N-alzheimers-891
+N-alzheimers-1075	inhibition	N-alzheimers-744
+N-alzheimers-1075	activation	N-alzheimers-1132
+N-alzheimers-1075	activation	N-alzheimers-1146
+N-alzheimers-1075	activation	N-alzheimers-1298
+N-alzheimers-1075	activation	N-alzheimers-911
+N-alzheimers-1075	inhibition	N-alzheimers-615
+N-alzheimers-1075	inhibition	N-alzheimers-650
+N-alzheimers-1075	inhibition	N-alzheimers-1227
+N-alzheimers-1075	inhibition	N-alzheimers-563
+N-alzheimers-1075	inhibition	N-alzheimers-563
+N-alzheimers-1075	inhibition	N-alzheimers-563
+N-alzheimers-1075	inhibition	N-alzheimers-563
+N-alzheimers-1075	activation	N-alzheimers-563
+N-alzheimers-1075	inhibition	N-alzheimers-34 35
+N-alzheimers-1075	inhibition	N-alzheimers-1210
+N-alzheimers-1075	inhibition	N-alzheimers-1205
+N-alzheimers-1075	inhibition	N-alzheimers-386 387
+N-alzheimers-1075	activation	N-alzheimers-987
+N-alzheimers-1075	activation	N-alzheimers-1075
+N-alzheimers-1075	activation	N-alzheimers-1048
+N-alzheimers-1075	activation	N-alzheimers-1052
+N-alzheimers-1075	activation	N-alzheimers-592
+N-alzheimers-1075	activation	N-alzheimers-875
+N-alzheimers-1075	activation	N-alzheimers-764
+N-alzheimers-1075	activation	N-alzheimers-726
+N-alzheimers-1075	activation	N-alzheimers-989
+N-alzheimers-1075	activation	N-alzheimers-524
+N-alzheimers-1075	activation	N-alzheimers-783
+N-alzheimers-1075	activation	N-alzheimers-1002
+N-alzheimers-1075	activation	N-alzheimers-1029
+N-alzheimers-1075	activation	N-alzheimers-705
+N-alzheimers-1075	activation	N-alzheimers-722
+N-alzheimers-1075	activation	N-alzheimers-1192
+N-alzheimers-1075	activation	N-alzheimers-633
+N-alzheimers-1075	activation	N-alzheimers-1034
+N-alzheimers-1075	activation	N-alzheimers-1427
+N-alzheimers-1075	activation	N-alzheimers-1427
+N-alzheimers-1075	activation	N-alzheimers-1415
+N-alzheimers-1075	activation	N-alzheimers-1417
+N-alzheimers-1075	activation	N-alzheimers-1406
+N-alzheimers-1075	inhibition	N-alzheimers-1426
+N-alzheimers-1075	activation	N-alzheimers-1424
+N-alzheimers-1075	activation	N-alzheimers-1424
+N-alzheimers-1075	inhibition	N-alzheimers-1402
+N-alzheimers-1075	activation	N-alzheimers-1410
+N-alzheimers-1075	activation	N-alzheimers-1346
+N-alzheimers-1075	activation	N-alzheimers-1407
+N-alzheimers-1075	activation	N-alzheimers-1447
+N-alzheimers-1075	activation	N-alzheimers-815
+N-alzheimers-1075	activation	N-alzheimers-865
+N-alzheimers-1075	activation	N-alzheimers-865
+N-alzheimers-1075	activation	N-alzheimers-865
+N-alzheimers-1075	activation	N-alzheimers-865
+N-alzheimers-1075	activation	N-alzheimers-800
+N-alzheimers-1075	inhibition	N-alzheimers-800
+N-alzheimers-1075	activation	N-alzheimers-800
+N-alzheimers-1075	inhibition	N-alzheimers-800
+N-alzheimers-1177	activation	N-alzheimers-1075
+N-alzheimers-1177	activation	N-alzheimers-1074
+N-alzheimers-859	inhibition	N-alzheimers-1075
+N-alzheimers-1296	activation	N-alzheimers-1083
+N-alzheimers-1296	activation	N-alzheimers-1085
+N-alzheimers-1296	activation	N-alzheimers-1082
+N-alzheimers-1184	activation	N-alzheimers-1034
+N-alzheimers-491 492	activation	N-alzheimers-1419
+N-alzheimers-491 492	activation	N-alzheimers-1419
+N-alzheimers-1371	activation	N-alzheimers-1075
+N-alzheimers-551	activation	N-alzheimers-1146
+N-alzheimers-551	activation	N-alzheimers-1146
+N-alzheimers-551	activation	N-alzheimers-1152
+N-alzheimers-551	activation	N-alzheimers-1164
+N-alzheimers-551	activation	N-alzheimers-1155
+N-alzheimers-195 196	activation	N-alzheimers-701
+N-alzheimers-689	activation	N-alzheimers-1146
+N-alzheimers-652	activation	N-alzheimers-1289
+N-alzheimers-652	activation	N-alzheimers-1289
+N-alzheimers-1136	activation	N-alzheimers-1081
+N-alzheimers-1221	activation	N-alzheimers-641
+N-alzheimers-1377	activation	N-alzheimers-1075
+N-alzheimers-1364	activation	N-alzheimers-495 496
+N-alzheimers-1367	activation	N-alzheimers-1370
+N-alzheimers-1275	activation	N-alzheimers-1066
+N-alzheimers-1275	activation	N-alzheimers-1066
+N-alzheimers-1275	activation	N-alzheimers-1066
+N-alzheimers-1275	activation	N-alzheimers-1066
+N-alzheimers-1275	activation	N-alzheimers-1066
+N-alzheimers-1275	activation	N-alzheimers-1066
+N-alzheimers-1275	activation	N-alzheimers-1066
+N-alzheimers-1275	activation	N-alzheimers-1066
+N-alzheimers-1275	activation	N-alzheimers-1066
+N-alzheimers-1275	activation	N-alzheimers-1066
+N-alzheimers-1275	activation	N-alzheimers-1066
+N-alzheimers-1275	activation	N-alzheimers-1066
+N-alzheimers-1275	activation	N-alzheimers-1066
+N-alzheimers-1275	activation	N-alzheimers-1066
+N-alzheimers-1275	activation	N-alzheimers-1066
+N-alzheimers-1275	activation	N-alzheimers-1066
+N-alzheimers-1275	activation	N-alzheimers-1066
+N-alzheimers-1275	activation	N-alzheimers-1066
+N-alzheimers-1275	activation	N-alzheimers-1075
+N-alzheimers-1275	inhibition	N-alzheimers-1075
+N-alzheimers-1275	activation	N-alzheimers-1075
+N-alzheimers-1275	activation	N-alzheimers-1075
+N-alzheimers-1275	activation	N-alzheimers-1075
+N-alzheimers-1275	activation	N-alzheimers-1075
+N-alzheimers-1275	activation	N-alzheimers-1075
+N-alzheimers-1275	activation	N-alzheimers-1075
+N-alzheimers-1275	activation	N-alzheimers-1075
+N-alzheimers-1275	activation	N-alzheimers-1075
+N-alzheimers-1275	activation	N-alzheimers-1075
+N-alzheimers-1275	activation	N-alzheimers-1075
+N-alzheimers-1275	activation	N-alzheimers-1075
+N-alzheimers-1275	activation	N-alzheimers-1075
+N-alzheimers-1275	activation	N-alzheimers-1075
+N-alzheimers-1275	activation	N-alzheimers-1074
+N-alzheimers-1275	activation	N-alzheimers-1076
+N-alzheimers-1275	activation	N-alzheimers-1076
+N-alzheimers-1275	activation	N-alzheimers-754
+N-alzheimers-1275	activation	N-alzheimers-593
+N-alzheimers-1275	activation	N-alzheimers-593
+N-alzheimers-1102	activation	N-alzheimers-1066
+N-alzheimers-1102	activation	N-alzheimers-1141
+N-alzheimers-1102	activation	N-alzheimers-1141
+N-alzheimers-1340	activation	N-alzheimers-1393
+N-alzheimers-1340	inhibition	N-alzheimers-493 494
+N-alzheimers-582	activation	N-alzheimers-1030
+N-alzheimers-582	activation	N-alzheimers-1 2
+N-alzheimers-565	activation	N-alzheimers-811
+N-alzheimers-814	activation	N-alzheimers-1075
+N-alzheimers-499 500	activation	N-alzheimers-792
+N-alzheimers-781	activation	N-alzheimers-1066
+N-alzheimers-1286	activation	N-alzheimers-811
+N-alzheimers-361 362 363	activation	N-alzheimers-420 421
+N-alzheimers-723	activation	N-alzheimers-1034
+N-alzheimers-724	activation	N-alzheimers-1034
+N-alzheimers-1277	activation	N-alzheimers-736
+N-alzheimers-1277	activation	N-alzheimers-1275
+N-alzheimers-1053	activation	N-alzheimers-287 288
+N-alzheimers-1053	activation	N-alzheimers-400 401
+N-alzheimers-1053	activation	N-alzheimers-402 403
+N-alzheimers-1053	activation	N-alzheimers-404 405
+N-alzheimers-1028	activation	N-alzheimers-1033
+N-alzheimers-1028	activation	N-alzheimers-1034
+N-alzheimers-1028	activation	N-alzheimers-1039
+N-alzheimers-1028	activation	N-alzheimers-635
+N-alzheimers-1028	activation	N-alzheimers-576
+N-alzheimers-251 252 253	activation	N-alzheimers-1300
+N-alzheimers-251 252 253	activation	N-alzheimers-1310
+N-alzheimers-442 443	activation	N-alzheimers-1075
+N-alzheimers-1281	inhibition	N-alzheimers-1280
+N-alzheimers-830	inhibition	N-alzheimers-829
+N-alzheimers-1294	activation	N-alzheimers-1146
+N-alzheimers-1337	activation	N-alzheimers-477 478
+N-alzheimers-463 464	activation	N-alzheimers-556
+N-alzheimers-1450	activation	N-alzheimers-505 506
+N-alzheimers-1450	activation	N-alzheimers-1075
+N-alzheimers-1359	inhibition	N-alzheimers-1425
+N-alzheimers-1359	inhibition	N-alzheimers-1427
+N-alzheimers-1012	activation	N-alzheimers-759
+N-alzheimers-1012	activation	N-alzheimers-758
+N-alzheimers-344 345	activation	N-alzheimers-1066
+N-alzheimers-560	activation	N-alzheimers-1330
+N-alzheimers-560	activation	N-alzheimers-1363
+N-alzheimers-560	activation	N-alzheimers-1354
+N-alzheimers-855	activation	N-alzheimers-1075
+N-alzheimers-855	activation	N-alzheimers-1075
+N-alzheimers-855	activation	N-alzheimers-1074
+N-alzheimers-1385	inhibition	N-alzheimers-1382
+N-alzheimers-1385	inhibition	N-alzheimers-1403
+N-alzheimers-1385	inhibition	N-alzheimers-1361
+N-alzheimers-1385	inhibition	N-alzheimers-1381
+N-alzheimers-727	inhibition	N-alzheimers-803
+N-alzheimers-727	inhibition	N-alzheimers-774
+N-alzheimers-727	inhibition	N-alzheimers-780
+N-alzheimers-635	activation	N-alzheimers-730
+N-alzheimers-635	activation	N-alzheimers-629
+N-alzheimers-635	activation	N-alzheimers-843
+N-alzheimers-635	activation	N-alzheimers-968
+N-alzheimers-635	activation	N-alzheimers-975
+N-alzheimers-635	inhibition	N-alzheimers-939
+N-alzheimers-635	inhibition	N-alzheimers-940
+N-alzheimers-635	inhibition	N-alzheimers-941
+N-alzheimers-635	inhibition	N-alzheimers-942
+N-alzheimers-635	inhibition	N-alzheimers-943
+N-alzheimers-635	inhibition	N-alzheimers-944
+N-alzheimers-635	inhibition	N-alzheimers-945
+N-alzheimers-635	inhibition	N-alzheimers-946
+N-alzheimers-635	inhibition	N-alzheimers-947
+N-alzheimers-635	inhibition	N-alzheimers-950
+N-alzheimers-635	inhibition	N-alzheimers-951
+N-alzheimers-635	inhibition	N-alzheimers-952
+N-alzheimers-635	inhibition	N-alzheimers-948
+N-alzheimers-635	inhibition	N-alzheimers-949
+N-alzheimers-635	inhibition	N-alzheimers-953
+N-alzheimers-635	inhibition	N-alzheimers-685
+N-alzheimers-635	inhibition	N-alzheimers-938
+N-alzheimers-635	inhibition	N-alzheimers-1019
+N-alzheimers-635	inhibition	N-alzheimers-1019
+N-alzheimers-635	inhibition	N-alzheimers-962
+N-alzheimers-635	activation	N-alzheimers-1205
+N-alzheimers-635	activation	N-alzheimers-1206
+N-alzheimers-1244	activation	N-alzheimers-924
+N-alzheimers-1244	activation	N-alzheimers-927
+N-alzheimers-1244	activation	N-alzheimers-514
+N-alzheimers-1244	activation	N-alzheimers-925
+N-alzheimers-514	activation	N-alzheimers-590
+N-alzheimers-514	inhibition	N-alzheimers-590
+N-alzheimers-514	activation	N-alzheimers-989
+N-alzheimers-514	activation	N-alzheimers-989
+N-alzheimers-514	activation	N-alzheimers-986
+N-alzheimers-514	activation	N-alzheimers-986
+N-alzheimers-514	inhibition	N-alzheimers-1280
+N-alzheimers-514	inhibition	N-alzheimers-1280
+N-alzheimers-514	inhibition	N-alzheimers-1280
+N-alzheimers-514	inhibition	N-alzheimers-987
+N-alzheimers-514	inhibition	N-alzheimers-987
+N-alzheimers-514	inhibition	N-alzheimers-1314
+N-alzheimers-514	activation	N-alzheimers-524
+N-alzheimers-514	activation	N-alzheimers-1281
+N-alzheimers-514	activation	N-alzheimers-702
+N-alzheimers-514	activation	N-alzheimers-514
+N-alzheimers-514	inhibition	N-alzheimers-533
+N-alzheimers-514	inhibition	N-alzheimers-985
+N-alzheimers-987	activation	N-alzheimers-19 20 21 22 23
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-1146
+N-alzheimers-987	activation	N-alzheimers-832
+N-alzheimers-987	activation	N-alzheimers-832
+N-alzheimers-987	activation	N-alzheimers-832
+N-alzheimers-987	activation	N-alzheimers-832
+N-alzheimers-987	activation	N-alzheimers-832
+N-alzheimers-987	activation	N-alzheimers-832
+N-alzheimers-987	activation	N-alzheimers-832
+N-alzheimers-987	activation	N-alzheimers-832
+N-alzheimers-987	activation	N-alzheimers-832
+N-alzheimers-987	activation	N-alzheimers-832
+N-alzheimers-987	activation	N-alzheimers-580
+N-alzheimers-987	activation	N-alzheimers-576
+N-alzheimers-987	activation	N-alzheimers-1041
+N-alzheimers-987	activation	N-alzheimers-579
+N-alzheimers-987	activation	N-alzheimers-983
+N-alzheimers-987	activation	N-alzheimers-325 326
+N-alzheimers-987	activation	N-alzheimers-1147
+N-alzheimers-987	activation	N-alzheimers-1159
+N-alzheimers-987	activation	N-alzheimers-1315
+N-alzheimers-987	activation	N-alzheimers-1315
+N-alzheimers-987	activation	N-alzheimers-1302
+N-alzheimers-987	activation	N-alzheimers-1302
+N-alzheimers-987	activation	N-alzheimers-1302
+N-alzheimers-987	activation	N-alzheimers-1302
+N-alzheimers-987	activation	N-alzheimers-1303
+N-alzheimers-987	activation	N-alzheimers-1303
+N-alzheimers-987	activation	N-alzheimers-1303
+N-alzheimers-987	activation	N-alzheimers-1303
+N-alzheimers-987	activation	N-alzheimers-880
+N-alzheimers-987	activation	N-alzheimers-880
+N-alzheimers-987	activation	N-alzheimers-880
+N-alzheimers-987	activation	N-alzheimers-880
+N-alzheimers-987	activation	N-alzheimers-1148
+N-alzheimers-987	activation	N-alzheimers-1164
+N-alzheimers-987	activation	N-alzheimers-1155
+N-alzheimers-987	activation	N-alzheimers-1157
+N-alzheimers-987	activation	N-alzheimers-775
+N-alzheimers-987	activation	N-alzheimers-1006
+N-alzheimers-987	activation	N-alzheimers-1191
+N-alzheimers-987	activation	N-alzheimers-1203
+N-alzheimers-987	activation	N-alzheimers-766
+N-alzheimers-987	inhibition	N-alzheimers-831
+N-alzheimers-987	activation	N-alzheimers-905
+N-alzheimers-987	activation	N-alzheimers-905
+N-alzheimers-987	activation	N-alzheimers-1152
+N-alzheimers-987	activation	N-alzheimers-1152
+N-alzheimers-987	activation	N-alzheimers-1301
+N-alzheimers-987	activation	N-alzheimers-1301
+N-alzheimers-987	inhibition	N-alzheimers-176 177
+N-alzheimers-987	inhibition	N-alzheimers-1300
+N-alzheimers-987	activation	N-alzheimers-1081
+N-alzheimers-987	activation	N-alzheimers-735
+N-alzheimers-1216	inhibition	N-alzheimers-1075
+N-alzheimers-1216	inhibition	N-alzheimers-1075
+N-alzheimers-1037	activation	N-alzheimers-414 415
+N-alzheimers-1168	inhibition	N-alzheimers-125 126
+N-alzheimers-650	activation	N-alzheimers-563
+N-alzheimers-1350	activation	N-alzheimers-497 498
+N-alzheimers-341 342 343	activation	N-alzheimers-420 421
+N-alzheimers-135 136	activation	N-alzheimers-686
+N-alzheimers-1106	inhibition	N-alzheimers-1146
+N-alzheimers-1106	inhibition	N-alzheimers-1146
+N-alzheimers-1106	inhibition	N-alzheimers-987
+N-alzheimers-1106	inhibition	N-alzheimers-987
+N-alzheimers-1106	inhibition	N-alzheimers-1275
+N-alzheimers-897	activation	N-alzheimers-1275
+N-alzheimers-845	inhibition	N-alzheimers-1201
+N-alzheimers-845	inhibition	N-alzheimers-1185
+N-alzheimers-960	activation	N-alzheimers-523
+N-alzheimers-1353	activation	N-alzheimers-1371
+N-alzheimers-1353	activation	N-alzheimers-1392
+N-alzheimers-574	inhibition	N-alzheimers-1075
+N-alzheimers-239 240	activation	N-alzheimers-1328
+N-alzheimers-239 240	activation	N-alzheimers-1323
+N-alzheimers-239 240	activation	N-alzheimers-708
+N-alzheimers-1310	activation	N-alzheimers-907
+N-alzheimers-1310	activation	N-alzheimers-1220
+N-alzheimers-1310	activation	N-alzheimers-898
+N-alzheimers-1310	activation	N-alzheimers-1066
+N-alzheimers-1310	activation	N-alzheimers-1066
+N-alzheimers-1310	activation	N-alzheimers-1066
+N-alzheimers-1310	inhibition	N-alzheimers-692
+N-alzheimers-1310	activation	N-alzheimers-879
+N-alzheimers-1072	inhibition	N-alzheimers-807
+N-alzheimers-1072	inhibition	N-alzheimers-720
+N-alzheimers-1072	inhibition	N-alzheimers-808
+N-alzheimers-1333	activation	N-alzheimers-797
+N-alzheimers-1292	activation	N-alzheimers-1290
+N-alzheimers-1292	activation	N-alzheimers-1290
+N-alzheimers-368 369 370	activation	N-alzheimers-1134
+N-alzheimers-569	inhibition	N-alzheimers-1275
+N-alzheimers-1103	activation	N-alzheimers-591
+N-alzheimers-1103	activation	N-alzheimers-872
+N-alzheimers-1103	activation	N-alzheimers-873
+N-alzheimers-1103	activation	N-alzheimers-1275
+N-alzheimers-1103	activation	N-alzheimers-1066
+N-alzheimers-1202	activation	N-alzheimers-1275
+N-alzheimers-592	activation	N-alzheimers-541
+N-alzheimers-744	inhibition	N-alzheimers-139 140
+N-alzheimers-1388	activation	N-alzheimers-1422
+N-alzheimers-1183	inhibition	N-alzheimers-1075
+N-alzheimers-1222	inhibition	N-alzheimers-121 122
+N-alzheimers-1222	inhibition	N-alzheimers-853
+N-alzheimers-274 275	activation	N-alzheimers-1310
+N-alzheimers-1131	activation	N-alzheimers-1146
+N-alzheimers-1131	activation	N-alzheimers-1146
+N-alzheimers-1131	activation	N-alzheimers-1146
+N-alzheimers-1131	activation	N-alzheimers-1146
+N-alzheimers-1131	activation	N-alzheimers-1146
+N-alzheimers-1131	inhibition	N-alzheimers-1204
+N-alzheimers-1131	activation	N-alzheimers-1160
+N-alzheimers-1131	activation	N-alzheimers-1161
+N-alzheimers-1131	activation	N-alzheimers-1149
+N-alzheimers-1131	activation	N-alzheimers-1155
+N-alzheimers-1131	activation	N-alzheimers-1158
+N-alzheimers-1131	activation	N-alzheimers-1099
+N-alzheimers-1131	activation	N-alzheimers-1211
+N-alzheimers-1266	inhibition	N-alzheimers-1152
+N-alzheimers-755	inhibition	N-alzheimers-1125
+N-alzheimers-755	inhibition	N-alzheimers-696
+N-alzheimers-755	inhibition	N-alzheimers-638
+N-alzheimers-1219	activation	N-alzheimers-1141
+N-alzheimers-1047	inhibition	N-alzheimers-1044
+N-alzheimers-1302	inhibition	N-alzheimers-176 177
+N-alzheimers-1302	inhibition	N-alzheimers-223 224
+N-alzheimers-1302	inhibition	N-alzheimers-223 224
+N-alzheimers-977	inhibition	N-alzheimers-803
+N-alzheimers-977	inhibition	N-alzheimers-774
+N-alzheimers-977	inhibition	N-alzheimers-780
+N-alzheimers-412 413	inhibition	N-alzheimers-1074
+N-alzheimers-424 425	activation	N-alzheimers-109 110
+N-alzheimers-1155	activation	N-alzheimers-1075
+N-alzheimers-1020	activation	N-alzheimers-1055
+N-alzheimers-555	activation	N-alzheimers-891
+N-alzheimers-1093	activation	N-alzheimers-1275
+N-alzheimers-988	inhibition	N-alzheimers-987
+N-alzheimers-988	activation	N-alzheimers-1146
+N-alzheimers-692	activation	N-alzheimers-1275
+N-alzheimers-1138	activation	N-alzheimers-1146
+N-alzheimers-1138	activation	N-alzheimers-1099
+N-alzheimers-1138	activation	N-alzheimers-1211
+N-alzheimers-1138	activation	N-alzheimers-1158
+N-alzheimers-986	inhibition	N-alzheimers-985
+N-alzheimers-1042	activation	N-alzheimers-1146
+N-alzheimers-1042	activation	N-alzheimers-1146
+N-alzheimers-1042	activation	N-alzheimers-1146
+N-alzheimers-1042	activation	N-alzheimers-1043
+N-alzheimers-1042	activation	N-alzheimers-1043
+N-alzheimers-1042	activation	N-alzheimers-1075
+N-alzheimers-1042	activation	N-alzheimers-1075
+N-alzheimers-1042	activation	N-alzheimers-26 27
+N-alzheimers-1042	activation	N-alzheimers-278 279
+N-alzheimers-1042	activation	N-alzheimers-304 305
+N-alzheimers-1042	inhibition	N-alzheimers-1016
+N-alzheimers-1042	inhibition	N-alzheimers-1016
+N-alzheimers-1042	activation	N-alzheimers-597
+N-alzheimers-1042	activation	N-alzheimers-674
+N-alzheimers-1042	inhibition	N-alzheimers-1066
+N-alzheimers-1042	activation	N-alzheimers-1066
+N-alzheimers-1042	inhibition	N-alzheimers-1038
+N-alzheimers-874	activation	N-alzheimers-608
+N-alzheimers-717	activation	N-alzheimers-987
+N-alzheimers-1339	activation	N-alzheimers-621
+N-alzheimers-1339	activation	N-alzheimers-658
+N-alzheimers-1339	activation	N-alzheimers-641
+N-alzheimers-1339	activation	N-alzheimers-641
+N-alzheimers-1339	activation	N-alzheimers-641
+N-alzheimers-1339	activation	N-alzheimers-987
+N-alzheimers-1339	activation	N-alzheimers-987
+N-alzheimers-1339	activation	N-alzheimers-880
+N-alzheimers-1339	inhibition	N-alzheimers-559
+N-alzheimers-1339	inhibition	N-alzheimers-734
+N-alzheimers-1339	activation	N-alzheimers-19 20 21 22 23
+N-alzheimers-1339	activation	N-alzheimers-1378
+N-alzheimers-1339	activation	N-alzheimers-1373
+N-alzheimers-392 393	inhibition	N-alzheimers-1043
+N-alzheimers-392 393	activation	N-alzheimers-1244
+N-alzheimers-392 393	activation	N-alzheimers-926
+N-alzheimers-507	activation	N-alzheimers-1288
+N-alzheimers-96 97	activation	N-alzheimers-635
+N-alzheimers-325 326	activation	N-alzheimers-1048
+N-alzheimers-325 326	activation	N-alzheimers-1052
+N-alzheimers-325 326	activation	N-alzheimers-592
+N-alzheimers-325 326	activation	N-alzheimers-875
+N-alzheimers-325 326	activation	N-alzheimers-764
+N-alzheimers-325 326	activation	N-alzheimers-726
+N-alzheimers-1352	inhibition	N-alzheimers-1363
+N-alzheimers-1352	inhibition	N-alzheimers-1363
+N-alzheimers-1352	inhibition	N-alzheimers-1363
+N-alzheimers-1352	inhibition	N-alzheimers-1354
+N-alzheimers-1036	inhibition	N-alzheimers-388 389
+N-alzheimers-1036	inhibition	N-alzheimers-1034
+N-alzheimers-538	inhibition	N-alzheimers-1146
+N-alzheimers-538	inhibition	N-alzheimers-598
+N-alzheimers-538	activation	N-alzheimers-1141
+N-alzheimers-538	activation	N-alzheimers-1141
+N-alzheimers-467 468	activation	N-alzheimers-1085
+N-alzheimers-1239	activation	N-alzheimers-885
+N-alzheimers-1427	inhibition	N-alzheimers-732
+N-alzheimers-902	activation	N-alzheimers-901
+N-alzheimers-890	activation	N-alzheimers-1066
+N-alzheimers-890	activation	N-alzheimers-1275
+N-alzheimers-1087	activation	N-alzheimers-60 61
+N-alzheimers-1087	activation	N-alzheimers-291 292
+N-alzheimers-1087	activation	N-alzheimers-430 431
+N-alzheimers-915	activation	N-alzheimers-1152
+N-alzheimers-915	activation	N-alzheimers-1154
+N-alzheimers-625	activation	N-alzheimers-1121
+N-alzheimers-625	activation	N-alzheimers-800
+N-alzheimers-625	activation	N-alzheimers-800
+N-alzheimers-625	activation	N-alzheimers-1075
+N-alzheimers-870	activation	N-alzheimers-1300
+N-alzheimers-870	activation	N-alzheimers-1066
+N-alzheimers-870	activation	N-alzheimers-1217
+N-alzheimers-799	activation	N-alzheimers-1088
+N-alzheimers-799	activation	N-alzheimers-1088
+N-alzheimers-866	activation	N-alzheimers-895
+N-alzheimers-866	activation	N-alzheimers-917
+N-alzheimers-335 336	activation	N-alzheimers-322 323 324
+N-alzheimers-335 336	activation	N-alzheimers-329 330 331
+N-alzheimers-335 336	activation	N-alzheimers-332 333 334
+N-alzheimers-1299	activation	N-alzheimers-1066
+N-alzheimers-1299	inhibition	N-alzheimers-1275
+N-alzheimers-1299	inhibition	N-alzheimers-1275
+N-alzheimers-1299	inhibition	N-alzheimers-1275
+N-alzheimers-1299	inhibition	N-alzheimers-1275
+N-alzheimers-1299	inhibition	N-alzheimers-1275
+N-alzheimers-1299	inhibition	N-alzheimers-1075
+N-alzheimers-1299	inhibition	N-alzheimers-1075
+N-alzheimers-1276	activation	N-alzheimers-756
+N-alzheimers-1276	activation	N-alzheimers-1275
+N-alzheimers-694	activation	N-alzheimers-1034
+N-alzheimers-1011	inhibition	N-alzheimers-701
+N-alzheimers-1309	activation	N-alzheimers-228 229
+N-alzheimers-191 192	activation	N-alzheimers-529
+N-alzheimers-641	activation	N-alzheimers-838
+N-alzheimers-1117	activation	N-alzheimers-1116
+N-alzheimers-1378	activation	N-alzheimers-1393
+N-alzheimers-1378	activation	N-alzheimers-1422
+N-alzheimers-864	activation	N-alzheimers-600
+N-alzheimers-864	activation	N-alzheimers-600
+N-alzheimers-745	activation	N-alzheimers-1028
+N-alzheimers-920	inhibition	N-alzheimers-1019
+N-alzheimers-795	activation	N-alzheimers-928
+N-alzheimers-1434	activation	N-alzheimers-1404
+N-alzheimers-1434	activation	N-alzheimers-1354
+N-alzheimers-1434	activation	N-alzheimers-1426
+N-alzheimers-698	activation	N-alzheimers-1143
+N-alzheimers-698	activation	N-alzheimers-1066
+N-alzheimers-698	activation	N-alzheimers-1066
+N-alzheimers-698	activation	N-alzheimers-127 128
+N-alzheimers-827	activation	N-alzheimers-1312
+N-alzheimers-827	activation	N-alzheimers-1312
+N-alzheimers-1435	activation	N-alzheimers-1458
+N-alzheimers-1435	activation	N-alzheimers-1459
+N-alzheimers-1435	activation	N-alzheimers-1460
+N-alzheimers-1435	activation	N-alzheimers-1461
+N-alzheimers-1435	activation	N-alzheimers-1462
+N-alzheimers-1098	inhibition	N-alzheimers-774
+N-alzheimers-1038	activation	N-alzheimers-1075
+N-alzheimers-1038	activation	N-alzheimers-113 114
+N-alzheimers-1038	activation	N-alzheimers-820
+N-alzheimers-932	activation	N-alzheimers-879
+N-alzheimers-932	activation	N-alzheimers-1300
+N-alzheimers-932	activation	N-alzheimers-1075
+N-alzheimers-19 20 21 22 23	activation	N-alzheimers-987
+N-alzheimers-19 20 21 22 23	activation	N-alzheimers-987
+N-alzheimers-19 20 21 22 23	activation	N-alzheimers-836
+N-alzheimers-1073	inhibition	N-alzheimers-807
+N-alzheimers-1073	inhibition	N-alzheimers-720
+N-alzheimers-1073	inhibition	N-alzheimers-808
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-1146
+N-alzheimers-748	activation	N-alzheimers-832
+N-alzheimers-748	activation	N-alzheimers-832
+N-alzheimers-748	activation	N-alzheimers-1200
+N-alzheimers-748	inhibition	N-alzheimers-1129
+N-alzheimers-748	activation	N-alzheimers-1147
+N-alzheimers-748	activation	N-alzheimers-1159
+N-alzheimers-748	activation	N-alzheimers-1267
+N-alzheimers-748	activation	N-alzheimers-1152
+N-alzheimers-748	activation	N-alzheimers-750
+N-alzheimers-748	activation	N-alzheimers-1214
+N-alzheimers-748	inhibition	N-alzheimers-1213
+N-alzheimers-748	activation	N-alzheimers-881
+N-alzheimers-748	activation	N-alzheimers-881
+N-alzheimers-748	activation	N-alzheimers-882
+N-alzheimers-748	activation	N-alzheimers-880
+N-alzheimers-748	activation	N-alzheimers-880
+N-alzheimers-748	activation	N-alzheimers-880
+N-alzheimers-748	activation	N-alzheimers-963
+N-alzheimers-748	activation	N-alzheimers-1098
+N-alzheimers-748	activation	N-alzheimers-1107
+N-alzheimers-748	activation	N-alzheimers-1108
+N-alzheimers-748	activation	N-alzheimers-1148
+N-alzheimers-748	activation	N-alzheimers-1149
+N-alzheimers-748	activation	N-alzheimers-1150
+N-alzheimers-748	activation	N-alzheimers-1151
+N-alzheimers-748	activation	N-alzheimers-1155
+N-alzheimers-748	activation	N-alzheimers-1155
+N-alzheimers-748	activation	N-alzheimers-1156
+N-alzheimers-748	activation	N-alzheimers-1156
+N-alzheimers-748	activation	N-alzheimers-1160
+N-alzheimers-748	activation	N-alzheimers-1160
+N-alzheimers-748	activation	N-alzheimers-1161
+N-alzheimers-748	activation	N-alzheimers-1161
+N-alzheimers-748	activation	N-alzheimers-1162
+N-alzheimers-748	activation	N-alzheimers-1162
+N-alzheimers-748	activation	N-alzheimers-1163
+N-alzheimers-748	activation	N-alzheimers-1163
+N-alzheimers-748	activation	N-alzheimers-1164
+N-alzheimers-748	activation	N-alzheimers-1268
+N-alzheimers-748	activation	N-alzheimers-1304
+N-alzheimers-748	activation	N-alzheimers-223 224
+N-alzheimers-748	activation	N-alzheimers-1081
+N-alzheimers-1261	activation	N-alzheimers-1074
+N-alzheimers-1261	activation	N-alzheimers-1075
+N-alzheimers-877	activation	N-alzheimers-1244
+N-alzheimers-877	activation	N-alzheimers-514
+N-alzheimers-877	activation	N-alzheimers-1245
+N-alzheimers-877	activation	N-alzheimers-985
+N-alzheimers-877	activation	N-alzheimers-987
+N-alzheimers-877	activation	N-alzheimers-541
+N-alzheimers-877	activation	N-alzheimers-1224
+N-alzheimers-877	activation	N-alzheimers-1323
+N-alzheimers-702	inhibition	N-alzheimers-701
+N-alzheimers-1210	activation	N-alzheimers-386 387
+N-alzheimers-1051	activation	N-alzheimers-1050
+N-alzheimers-1272	inhibition	N-alzheimers-1146
+N-alzheimers-1272	inhibition	N-alzheimers-1146
+N-alzheimers-1272	inhibition	N-alzheimers-696
+N-alzheimers-1272	activation	N-alzheimers-1334
+N-alzheimers-1272	activation	N-alzheimers-1333
+N-alzheimers-521	activation	N-alzheimers-748
+N-alzheimers-1008	activation	N-alzheimers-1075
+N-alzheimers-1008	inhibition	N-alzheimers-701
+N-alzheimers-557	inhibition	N-alzheimers-1075
+N-alzheimers-154 155	inhibition	N-alzheimers-350 351
+N-alzheimers-878	activation	N-alzheimers-1075
+N-alzheimers-878	activation	N-alzheimers-1074
+N-alzheimers-1045	activation	N-alzheimers-1044
+N-alzheimers-660	activation	N-alzheimers-1118
+N-alzheimers-660	activation	N-alzheimers-1109
+N-alzheimers-660	activation	N-alzheimers-1110
+N-alzheimers-660	activation	N-alzheimers-1111
+N-alzheimers-891	activation	N-alzheimers-1205
+N-alzheimers-891	activation	N-alzheimers-1206
+N-alzheimers-891	activation	N-alzheimers-823
+N-alzheimers-891	activation	N-alzheimers-1202
+N-alzheimers-891	activation	N-alzheimers-1275
+N-alzheimers-891	activation	N-alzheimers-1135
+N-alzheimers-34 35	activation	N-alzheimers-1227
+N-alzheimers-34 35	activation	N-alzheimers-1227
+N-alzheimers-617	activation	N-alzheimers-552
+N-alzheimers-617	activation	N-alzheimers-1075
+N-alzheimers-517	activation	N-alzheimers-514
+N-alzheimers-1223	inhibition	N-alzheimers-121 122
+N-alzheimers-1223	inhibition	N-alzheimers-853
+N-alzheimers-1034	activation	N-alzheimers-580
+N-alzheimers-1034	activation	N-alzheimers-983
+N-alzheimers-1034	activation	N-alzheimers-1057
+N-alzheimers-1034	inhibition	N-alzheimers-962
+N-alzheimers-1034	inhibition	N-alzheimers-1038
+N-alzheimers-1034	activation	N-alzheimers-774
+N-alzheimers-1034	inhibition	N-alzheimers-1074
+N-alzheimers-1034	inhibition	N-alzheimers-1075
+N-alzheimers-1034	activation	N-alzheimers-780
+N-alzheimers-1034	activation	N-alzheimers-780
+N-alzheimers-1034	activation	N-alzheimers-800
+N-alzheimers-1034	activation	N-alzheimers-800
+N-alzheimers-1034	activation	N-alzheimers-1066
+N-alzheimers-1034	inhibition	N-alzheimers-563
+N-alzheimers-1034	activation	N-alzheimers-1031
+N-alzheimers-1034	activation	N-alzheimers-1206
+N-alzheimers-1034	activation	N-alzheimers-1205
+N-alzheimers-1034	activation	N-alzheimers-576
+N-alzheimers-1034	activation	N-alzheimers-577
+N-alzheimers-1034	activation	N-alzheimers-984
+N-alzheimers-1204	activation	N-alzheimers-1205
+N-alzheimers-529	activation	N-alzheimers-1275
+N-alzheimers-529	activation	N-alzheimers-1146
+N-alzheimers-529	activation	N-alzheimers-1146
+N-alzheimers-529	activation	N-alzheimers-1146
+N-alzheimers-529	activation	N-alzheimers-1146
+N-alzheimers-529	activation	N-alzheimers-1146
+N-alzheimers-529	activation	N-alzheimers-525
+N-alzheimers-529	activation	N-alzheimers-525
+N-alzheimers-529	activation	N-alzheimers-523
+N-alzheimers-529	activation	N-alzheimers-1191
+N-alzheimers-529	activation	N-alzheimers-918
+N-alzheimers-529	activation	N-alzheimers-1099
+N-alzheimers-529	activation	N-alzheimers-902
+N-alzheimers-529	activation	N-alzheimers-564
+N-alzheimers-529	activation	N-alzheimers-565
+N-alzheimers-529	activation	N-alzheimers-524
+N-alzheimers-529	activation	N-alzheimers-811
+N-alzheimers-1085	activation	N-alzheimers-1075
+N-alzheimers-1085	inhibition	N-alzheimers-366 367
+N-alzheimers-1085	inhibition	N-alzheimers-366 367
+N-alzheimers-1085	activation	N-alzheimers-1275
+N-alzheimers-1085	activation	N-alzheimers-1275
+N-alzheimers-1085	inhibition	N-alzheimers-1066
+N-alzheimers-1085	activation	N-alzheimers-1126
+N-alzheimers-655	inhibition	N-alzheimers-523
+N-alzheimers-607	activation	N-alzheimers-529
+N-alzheimers-607	activation	N-alzheimers-529
+N-alzheimers-607	activation	N-alzheimers-1126
+N-alzheimers-607	activation	N-alzheimers-1133
+N-alzheimers-1092	activation	N-alzheimers-6 7 8
+N-alzheimers-1233	activation	N-alzheimers-779
+N-alzheimers-1105	activation	N-alzheimers-416 417
+N-alzheimers-1105	activation	N-alzheimers-1075
+N-alzheimers-38 39	inhibition	N-alzheimers-1275
+N-alzheimers-469 470	activation	N-alzheimers-1085
+N-alzheimers-549	activation	N-alzheimers-672
+N-alzheimers-549	activation	N-alzheimers-1039
+N-alzheimers-481 482	activation	N-alzheimers-1180
+N-alzheimers-1347	inhibition	N-alzheimers-1401
+N-alzheimers-448 449	inhibition	N-alzheimers-479 480
+N-alzheimers-448 449	inhibition	N-alzheimers-1210
+N-alzheimers-872	activation	N-alzheimers-968
+N-alzheimers-752	activation	N-alzheimers-719
+N-alzheimers-752	activation	N-alzheimers-719
+N-alzheimers-752	inhibition	N-alzheimers-635
+N-alzheimers-752	inhibition	N-alzheimers-1039
+N-alzheimers-752	inhibition	N-alzheimers-1018
+N-alzheimers-92 93	activation	N-alzheimers-700
+N-alzheimers-1141	inhibition	N-alzheimers-483 484
+N-alzheimers-357 358	inhibition	N-alzheimers-1075
+N-alzheimers-232 233	activation	N-alzheimers-1074
+N-alzheimers-232 233	activation	N-alzheimers-1075
+N-alzheimers-371 372 373	activation	N-alzheimers-1066
+N-alzheimers-371 372 373	activation	N-alzheimers-1066
+N-alzheimers-1336	activation	N-alzheimers-1275
+N-alzheimers-1336	activation	N-alzheimers-1275
+N-alzheimers-1052	activation	N-alzheimers-1245
+N-alzheimers-1052	activation	N-alzheimers-987
+N-alzheimers-1052	activation	N-alzheimers-985
+N-alzheimers-1052	activation	N-alzheimers-541
+N-alzheimers-475 476	activation	N-alzheimers-779
+N-alzheimers-86 87	activation	N-alzheimers-862
+N-alzheimers-774	activation	N-alzheimers-1066
+N-alzheimers-774	activation	N-alzheimers-1066
+N-alzheimers-774	activation	N-alzheimers-1066
+N-alzheimers-774	activation	N-alzheimers-549
+N-alzheimers-774	activation	N-alzheimers-549
+N-alzheimers-774	activation	N-alzheimers-769
+N-alzheimers-774	activation	N-alzheimers-769
+N-alzheimers-774	activation	N-alzheimers-742
+N-alzheimers-774	activation	N-alzheimers-742
+N-alzheimers-774	activation	N-alzheimers-741
+N-alzheimers-774	activation	N-alzheimers-741
+N-alzheimers-797	activation	N-alzheimers-195 196
+N-alzheimers-797	activation	N-alzheimers-701
+N-alzheimers-797	activation	N-alzheimers-696
+N-alzheimers-832	activation	N-alzheimers-618
+N-alzheimers-832	activation	N-alzheimers-618
+N-alzheimers-832	activation	N-alzheimers-831
+N-alzheimers-832	inhibition	N-alzheimers-831
+N-alzheimers-832	inhibition	N-alzheimers-831
+N-alzheimers-832	inhibition	N-alzheimers-831
+N-alzheimers-671	activation	N-alzheimers-432 433
+N-alzheimers-671	activation	N-alzheimers-432 433
+N-alzheimers-671	activation	N-alzheimers-426 427
+N-alzheimers-671	inhibition	N-alzheimers-1075
+N-alzheimers-1258	activation	N-alzheimers-1075
+N-alzheimers-1376	inhibition	N-alzheimers-1075
+N-alzheimers-1376	activation	N-alzheimers-1348
+N-alzheimers-1376	activation	N-alzheimers-1416
+N-alzheimers-837	activation	N-alzheimers-694
+N-alzheimers-837	activation	N-alzheimers-589
+N-alzheimers-837	activation	N-alzheimers-572
+N-alzheimers-837	activation	N-alzheimers-572
+N-alzheimers-837	inhibition	N-alzheimers-1075
+N-alzheimers-559	activation	N-alzheimers-734
+N-alzheimers-559	activation	N-alzheimers-1115
+N-alzheimers-1058	activation	N-alzheimers-1075
+N-alzheimers-991	inhibition	N-alzheimers-590
+N-alzheimers-1270	activation	N-alzheimers-325 326
+N-alzheimers-1270	inhibition	N-alzheimers-1146
+N-alzheimers-1270	inhibition	N-alzheimers-1146
+N-alzheimers-1270	inhibition	N-alzheimers-1161
+N-alzheimers-1270	inhibition	N-alzheimers-1149
+N-alzheimers-1270	inhibition	N-alzheimers-1151
+N-alzheimers-1270	inhibition	N-alzheimers-1156
+N-alzheimers-1270	activation	N-alzheimers-987
+N-alzheimers-1270	activation	N-alzheimers-748
+N-alzheimers-1270	activation	N-alzheimers-1126
+N-alzheimers-1270	activation	N-alzheimers-1134
+N-alzheimers-1370	activation	N-alzheimers-457 458
+N-alzheimers-1370	activation	N-alzheimers-1075
+N-alzheimers-975	inhibition	N-alzheimers-803
+N-alzheimers-975	inhibition	N-alzheimers-774
+N-alzheimers-975	inhibition	N-alzheimers-780
+N-alzheimers-588	activation	N-alzheimers-880
+N-alzheimers-180 181 182	activation	N-alzheimers-748
+N-alzheimers-1054	activation	N-alzheimers-967
+N-alzheimers-1274	inhibition	N-alzheimers-1146
+N-alzheimers-137 138	activation	N-alzheimers-686
+N-alzheimers-656	activation	N-alzheimers-774
+N-alzheimers-656	inhibition	N-alzheimers-570
+N-alzheimers-916	inhibition	N-alzheimers-1075
+N-alzheimers-728	inhibition	N-alzheimers-803
+N-alzheimers-728	inhibition	N-alzheimers-774
+N-alzheimers-728	inhibition	N-alzheimers-780
+N-alzheimers-1416	activation	N-alzheimers-1410
+N-alzheimers-1279	activation	N-alzheimers-1066
+N-alzheimers-630	activation	N-alzheimers-1146
+N-alzheimers-630	activation	N-alzheimers-1146
+N-alzheimers-1232	activation	N-alzheimers-1145
+N-alzheimers-337 338	activation	N-alzheimers-1049
+N-alzheimers-337 338	activation	N-alzheimers-1053
+N-alzheimers-337 338	activation	N-alzheimers-1056
+N-alzheimers-1070	inhibition	N-alzheimers-414 415
+N-alzheimers-1260	activation	N-alzheimers-1300
+N-alzheimers-1195	activation	N-alzheimers-1146
+N-alzheimers-1195	activation	N-alzheimers-1146
+N-alzheimers-1421	activation	N-alzheimers-1416
+N-alzheimers-1421	activation	N-alzheimers-557
+N-alzheimers-380 381	activation	N-alzheimers-1066
+N-alzheimers-380 381	activation	N-alzheimers-1066
+N-alzheimers-1170	activation	N-alzheimers-920
+N-alzheimers-53 54	activation	N-alzheimers-1288
+N-alzheimers-300 301	activation	N-alzheimers-606
+N-alzheimers-300 301	activation	N-alzheimers-607
+N-alzheimers-300 301	activation	N-alzheimers-554
+N-alzheimers-300 301	activation	N-alzheimers-553
+N-alzheimers-300 301	activation	N-alzheimers-545
+N-alzheimers-123 124	activation	N-alzheimers-774
+N-alzheimers-661	activation	N-alzheimers-889
+N-alzheimers-661	activation	N-alzheimers-889
+N-alzheimers-661	activation	N-alzheimers-889
+N-alzheimers-1096	activation	N-alzheimers-1275
+N-alzheimers-873	activation	N-alzheimers-968
+N-alzheimers-707	activation	N-alzheimers-979
+N-alzheimers-905	activation	N-alzheimers-904
+N-alzheimers-1218	activation	N-alzheimers-641
+N-alzheimers-1348	activation	N-alzheimers-1371
+N-alzheimers-1348	activation	N-alzheimers-1392
+N-alzheimers-1348	activation	N-alzheimers-1410
+N-alzheimers-1235	inhibition	N-alzheimers-635
+N-alzheimers-109 110	activation	N-alzheimers-1198
+N-alzheimers-501 502	activation	N-alzheimers-1422
+N-alzheimers-1305	activation	N-alzheimers-1075
+N-alzheimers-1305	inhibition	N-alzheimers-907
+N-alzheimers-1305	inhibition	N-alzheimers-898
+N-alzheimers-1305	inhibition	N-alzheimers-1220
+N-alzheimers-764	activation	N-alzheimers-541
+N-alzheimers-1056	activation	N-alzheimers-289 290
+N-alzheimers-1056	activation	N-alzheimers-406 407
+N-alzheimers-1056	activation	N-alzheimers-408 409
+N-alzheimers-1056	activation	N-alzheimers-410 411
+N-alzheimers-1152	activation	N-alzheimers-1075
+N-alzheimers-1134	activation	N-alzheimers-1146
+N-alzheimers-1134	activation	N-alzheimers-1146
+N-alzheimers-1134	activation	N-alzheimers-1146
+N-alzheimers-1134	activation	N-alzheimers-1146
+N-alzheimers-1134	activation	N-alzheimers-1146
+N-alzheimers-1134	activation	N-alzheimers-1099
+N-alzheimers-1134	activation	N-alzheimers-640
+N-alzheimers-1134	activation	N-alzheimers-1081
+N-alzheimers-1134	activation	N-alzheimers-1046
+N-alzheimers-1134	activation	N-alzheimers-1044
+N-alzheimers-1134	activation	N-alzheimers-573
+N-alzheimers-1134	inhibition	N-alzheimers-654
+N-alzheimers-1287	activation	N-alzheimers-1152
+N-alzheimers-1287	activation	N-alzheimers-1154
+N-alzheimers-1282	inhibition	N-alzheimers-1141
+N-alzheimers-1282	inhibition	N-alzheimers-1141
+N-alzheimers-1144	activation	N-alzheimers-1160
+N-alzheimers-1144	activation	N-alzheimers-1149
+N-alzheimers-1144	activation	N-alzheimers-1161
+N-alzheimers-1144	activation	N-alzheimers-1156
+N-alzheimers-1144	activation	N-alzheimers-1163
+N-alzheimers-1144	activation	N-alzheimers-748
+N-alzheimers-1144	activation	N-alzheimers-987
+N-alzheimers-770	activation	N-alzheimers-193 194
+N-alzheimers-770	inhibition	N-alzheimers-1075
+N-alzheimers-770	inhibition	N-alzheimers-1075
+N-alzheimers-750	activation	N-alzheimers-748
+N-alzheimers-750	activation	N-alzheimers-748
+N-alzheimers-750	activation	N-alzheimers-544
+N-alzheimers-750	activation	N-alzheimers-642
+N-alzheimers-750	activation	N-alzheimers-1330
+N-alzheimers-750	activation	N-alzheimers-1146
+N-alzheimers-750	inhibition	N-alzheimers-1354
+N-alzheimers-750	inhibition	N-alzheimers-1354
+N-alzheimers-314 315	activation	N-alzheimers-1014
+N-alzheimers-1425	activation	N-alzheimers-1090
+N-alzheimers-1425	inhibition	N-alzheimers-732
+N-alzheimers-1019	activation	N-alzheimers-327 328
+N-alzheimers-1019	activation	N-alzheimers-1020
+N-alzheimers-1019	activation	N-alzheimers-26 27
+N-alzheimers-1019	activation	N-alzheimers-278 279
+N-alzheimers-1019	activation	N-alzheimers-774
+N-alzheimers-1019	activation	N-alzheimers-1075
+N-alzheimers-1019	activation	N-alzheimers-930
+N-alzheimers-1019	activation	N-alzheimers-648
+N-alzheimers-1019	activation	N-alzheimers-260 261 262
+N-alzheimers-1019	activation	N-alzheimers-263 264 265
+N-alzheimers-1019	activation	N-alzheimers-512
+N-alzheimers-1019	activation	N-alzheimers-1048
+N-alzheimers-1019	activation	N-alzheimers-1052
+N-alzheimers-352 353 354	activation	N-alzheimers-420 421
+N-alzheimers-554	activation	N-alzheimers-529
+N-alzheimers-554	activation	N-alzheimers-529
+N-alzheimers-554	activation	N-alzheimers-1099
+N-alzheimers-639	activation	N-alzheimers-92 93
+N-alzheimers-1097	activation	N-alzheimers-1100
+N-alzheimers-858	activation	N-alzheimers-822
+N-alzheimers-858	inhibition	N-alzheimers-1075
+N-alzheimers-858	activation	N-alzheimers-1016
+N-alzheimers-858	activation	N-alzheimers-1002
+N-alzheimers-858	activation	N-alzheimers-625
+N-alzheimers-858	activation	N-alzheimers-626
+N-alzheimers-858	activation	N-alzheimers-627
+N-alzheimers-858	activation	N-alzheimers-557
+N-alzheimers-696	activation	N-alzheimers-1143
+N-alzheimers-696	activation	N-alzheimers-1143
+N-alzheimers-696	activation	N-alzheimers-1143
+N-alzheimers-696	activation	N-alzheimers-1143
+N-alzheimers-696	activation	N-alzheimers-1066
+N-alzheimers-696	activation	N-alzheimers-1066
+N-alzheimers-512	activation	N-alzheimers-516
+N-alzheimers-512	activation	N-alzheimers-517
+N-alzheimers-566	activation	N-alzheimers-525
+N-alzheimers-566	activation	N-alzheimers-525
+N-alzheimers-566	activation	N-alzheimers-811
+N-alzheimers-1396	inhibition	N-alzheimers-1407
+N-alzheimers-1021	inhibition	N-alzheimers-1075
+N-alzheimers-636	activation	N-alzheimers-763
+N-alzheimers-865	activation	N-alzheimers-895
+N-alzheimers-865	activation	N-alzheimers-917
+N-alzheimers-865	activation	N-alzheimers-1123
+N-alzheimers-865	activation	N-alzheimers-1199
+N-alzheimers-865	activation	N-alzheimers-1146
+N-alzheimers-865	activation	N-alzheimers-1275
+N-alzheimers-865	activation	N-alzheimers-1275
+N-alzheimers-865	activation	N-alzheimers-1075
+N-alzheimers-829	inhibition	N-alzheimers-700
+N-alzheimers-829	inhibition	N-alzheimers-837
+N-alzheimers-829	inhibition	N-alzheimers-1075
+N-alzheimers-282 283 284	activation	N-alzheimers-1100
+N-alzheimers-898	activation	N-alzheimers-897
+N-alzheimers-711	inhibition	N-alzheimers-1201
+N-alzheimers-711	inhibition	N-alzheimers-1185
+N-alzheimers-552	activation	N-alzheimers-1075
+N-alzheimers-955	inhibition	N-alzheimers-1208
+N-alzheimers-955	inhibition	N-alzheimers-1066
+N-alzheimers-955	inhibition	N-alzheimers-1146
+N-alzheimers-892	inhibition	N-alzheimers-824
+N-alzheimers-892	inhibition	N-alzheimers-824
+N-alzheimers-1300	activation	N-alzheimers-173 174 175
+N-alzheimers-1300	activation	N-alzheimers-228 229
+N-alzheimers-1300	activation	N-alzheimers-90 91
+N-alzheimers-1300	activation	N-alzheimers-1063
+N-alzheimers-1300	activation	N-alzheimers-570
+N-alzheimers-1300	activation	N-alzheimers-831
+N-alzheimers-1300	inhibition	N-alzheimers-831
+N-alzheimers-1300	activation	N-alzheimers-987
+N-alzheimers-1300	inhibition	N-alzheimers-1333
+N-alzheimers-1300	activation	N-alzheimers-744
+N-alzheimers-1300	activation	N-alzheimers-729
+N-alzheimers-1300	activation	N-alzheimers-967
+N-alzheimers-1300	activation	N-alzheimers-907
+N-alzheimers-1300	activation	N-alzheimers-1220
+N-alzheimers-1300	activation	N-alzheimers-898
+N-alzheimers-1300	activation	N-alzheimers-1066
+N-alzheimers-1300	activation	N-alzheimers-1066
+N-alzheimers-1300	activation	N-alzheimers-1066
+N-alzheimers-1300	inhibition	N-alzheimers-1217
+N-alzheimers-1300	activation	N-alzheimers-892
+N-alzheimers-1300	activation	N-alzheimers-892
+N-alzheimers-1300	inhibition	N-alzheimers-824
+N-alzheimers-1300	inhibition	N-alzheimers-824
+N-alzheimers-1300	activation	N-alzheimers-1075
+N-alzheimers-1300	activation	N-alzheimers-856
+N-alzheimers-1300	inhibition	N-alzheimers-692
+N-alzheimers-1300	inhibition	N-alzheimers-734
+N-alzheimers-1300	inhibition	N-alzheimers-734
+N-alzheimers-1300	activation	N-alzheimers-887
+N-alzheimers-1300	activation	N-alzheimers-908
+N-alzheimers-1300	activation	N-alzheimers-879
+N-alzheimers-1049	activation	N-alzheimers-285 286
+N-alzheimers-1049	activation	N-alzheimers-394 395
+N-alzheimers-1049	activation	N-alzheimers-396 397
+N-alzheimers-1049	activation	N-alzheimers-398 399
+N-alzheimers-972	inhibition	N-alzheimers-803
+N-alzheimers-972	inhibition	N-alzheimers-774
+N-alzheimers-972	inhibition	N-alzheimers-780
+N-alzheimers-1128	activation	N-alzheimers-1158
+N-alzheimers-1128	activation	N-alzheimers-1158
+N-alzheimers-1128	activation	N-alzheimers-1160
+N-alzheimers-1128	activation	N-alzheimers-1161
+N-alzheimers-1128	activation	N-alzheimers-1149
+N-alzheimers-1128	activation	N-alzheimers-1155
+N-alzheimers-1128	activation	N-alzheimers-1146
+N-alzheimers-731	activation	N-alzheimers-1034
+N-alzheimers-683	inhibition	N-alzheimers-1027
+N-alzheimers-414 415	activation	N-alzheimers-1075
+N-alzheimers-545	activation	N-alzheimers-529
+N-alzheimers-545	activation	N-alzheimers-529
+N-alzheimers-545	activation	N-alzheimers-529
+N-alzheimers-545	activation	N-alzheimers-532
+N-alzheimers-197 198	activation	N-alzheimers-1125
+N-alzheimers-55 56	activation	N-alzheimers-1075
+N-alzheimers-604	inhibition	N-alzheimers-1066
+N-alzheimers-604	inhibition	N-alzheimers-1066
+N-alzheimers-604	inhibition	N-alzheimers-1075
+N-alzheimers-604	inhibition	N-alzheimers-1075
+N-alzheimers-693	activation	N-alzheimers-1327
+N-alzheimers-693	activation	N-alzheimers-1327
+N-alzheimers-693	activation	N-alzheimers-774
+N-alzheimers-1265	inhibition	N-alzheimers-1075
+N-alzheimers-1265	inhibition	N-alzheimers-1075
+N-alzheimers-1265	inhibition	N-alzheimers-1075
+N-alzheimers-1265	activation	N-alzheimers-831
+N-alzheimers-1265	activation	N-alzheimers-1088
+N-alzheimers-1265	activation	N-alzheimers-1088
+N-alzheimers-1265	activation	N-alzheimers-635
+N-alzheimers-1265	inhibition	N-alzheimers-635
+N-alzheimers-1265	activation	N-alzheimers-1039
+N-alzheimers-1265	inhibition	N-alzheimers-1039
+N-alzheimers-1265	inhibition	N-alzheimers-1215
+N-alzheimers-1265	inhibition	N-alzheimers-1275
+N-alzheimers-1265	inhibition	N-alzheimers-1275
+N-alzheimers-1265	inhibition	N-alzheimers-1029
+N-alzheimers-1265	inhibition	N-alzheimers-705
+N-alzheimers-1265	inhibition	N-alzheimers-722
+N-alzheimers-1265	inhibition	N-alzheimers-1192
+N-alzheimers-1265	inhibition	N-alzheimers-633
+N-alzheimers-1325	activation	N-alzheimers-821
+N-alzheimers-1167	inhibition	N-alzheimers-125 126
+N-alzheimers-1167	inhibition	N-alzheimers-125 126
+N-alzheimers-1126	activation	N-alzheimers-1160
+N-alzheimers-1126	activation	N-alzheimers-1161
+N-alzheimers-1126	activation	N-alzheimers-1149
+N-alzheimers-1126	activation	N-alzheimers-1155
+N-alzheimers-1126	activation	N-alzheimers-1158
+N-alzheimers-1126	activation	N-alzheimers-1085
+N-alzheimers-479 480	activation	N-alzheimers-1210
+N-alzheimers-479 480	activation	N-alzheimers-1208
+N-alzheimers-534	activation	N-alzheimers-1146
+N-alzheimers-534	activation	N-alzheimers-1146
+N-alzheimers-534	activation	N-alzheimers-1146
+N-alzheimers-534	activation	N-alzheimers-992
+N-alzheimers-534	activation	N-alzheimers-1067
+N-alzheimers-1132	inhibition	N-alzheimers-744
+N-alzheimers-703	activation	N-alzheimers-652
+N-alzheimers-355 356	activation	N-alzheimers-1066
+N-alzheimers-634	activation	N-alzheimers-1205
+N-alzheimers-547	activation	N-alzheimers-1116
+N-alzheimers-75 76 77	activation	N-alzheimers-554
+N-alzheimers-75 76 77	activation	N-alzheimers-1323
+N-alzheimers-601	activation	N-alzheimers-1075
+N-alzheimers-57 58 59	activation	N-alzheimers-529
+N-alzheimers-57 58 59	activation	N-alzheimers-529
+N-alzheimers-804	inhibition	N-alzheimers-508
+N-alzheimers-1363	activation	N-alzheimers-1354
+N-alzheimers-1004	inhibition	N-alzheimers-1201
+N-alzheimers-1004	inhibition	N-alzheimers-1185
+N-alzheimers-725	inhibition	N-alzheimers-1075
+N-alzheimers-1291	activation	N-alzheimers-535
+N-alzheimers-1291	inhibition	N-alzheimers-534
+N-alzheimers-957	activation	N-alzheimers-1333
+N-alzheimers-957	inhibition	N-alzheimers-1333
+N-alzheimers-957	activation	N-alzheimers-1334
+N-alzheimers-957	inhibition	N-alzheimers-1334
+N-alzheimers-957	activation	N-alzheimers-1334
+N-alzheimers-957	inhibition	N-alzheimers-696
+N-alzheimers-957	activation	N-alzheimers-696
+N-alzheimers-957	inhibition	N-alzheimers-1314
+N-alzheimers-550	activation	N-alzheimers-1120
+N-alzheimers-550	activation	N-alzheimers-584
+N-alzheimers-550	activation	N-alzheimers-3 4 5
+N-alzheimers-985	activation	N-alzheimers-880
+N-alzheimers-985	activation	N-alzheimers-880
+N-alzheimers-985	activation	N-alzheimers-1142
+N-alzheimers-985	activation	N-alzheimers-1151
+N-alzheimers-985	activation	N-alzheimers-1156
+N-alzheimers-1025	activation	N-alzheimers-119 120
+N-alzheimers-1025	activation	N-alzheimers-426 427
+N-alzheimers-1290	activation	N-alzheimers-1290
+N-alzheimers-1290	activation	N-alzheimers-1290
+N-alzheimers-1290	activation	N-alzheimers-1007
+N-alzheimers-1290	activation	N-alzheimers-1007
+N-alzheimers-1319	activation	N-alzheimers-687
+N-alzheimers-1319	activation	N-alzheimers-687
+N-alzheimers-308 309 310	inhibition	N-alzheimers-1141
+N-alzheimers-428 429	inhibition	N-alzheimers-1075
+N-alzheimers-1301	inhibition	N-alzheimers-744
+N-alzheimers-1301	inhibition	N-alzheimers-176 177
+N-alzheimers-854	activation	N-alzheimers-1125
+N-alzheimers-1194	activation	N-alzheimers-1081
+N-alzheimers-1194	activation	N-alzheimers-1026
+N-alzheimers-1194	activation	N-alzheimers-1146
+N-alzheimers-733	activation	N-alzheimers-1075
+N-alzheimers-733	inhibition	N-alzheimers-1075
+N-alzheimers-831	activation	N-alzheimers-225 226 227
+N-alzheimers-573	activation	N-alzheimers-1325
+N-alzheimers-573	activation	N-alzheimers-1325
+N-alzheimers-573	activation	N-alzheimers-891
+N-alzheimers-573	activation	N-alzheimers-988
+N-alzheimers-573	activation	N-alzheimers-865
+N-alzheimers-573	activation	N-alzheimers-831
+N-alzheimers-573	activation	N-alzheimers-1146
+N-alzheimers-836	activation	N-alzheimers-831
+N-alzheimers-664	activation	N-alzheimers-1066
+N-alzheimers-712	inhibition	N-alzheimers-1199
+N-alzheimers-712	inhibition	N-alzheimers-1123
+N-alzheimers-712	inhibition	N-alzheimers-1146
+N-alzheimers-665	activation	N-alzheimers-1278
+N-alzheimers-613	activation	N-alzheimers-1023
+N-alzheimers-613	activation	N-alzheimers-1066
+N-alzheimers-732	inhibition	N-alzheimers-1417
+N-alzheimers-732	inhibition	N-alzheimers-1348
+N-alzheimers-732	inhibition	N-alzheimers-1416
+N-alzheimers-732	activation	N-alzheimers-1412
+N-alzheimers-732	activation	N-alzheimers-1342
+N-alzheimers-732	inhibition	N-alzheimers-1424
+N-alzheimers-1205	inhibition	N-alzheimers-1275
+N-alzheimers-1205	activation	N-alzheimers-1275
+N-alzheimers-1205	inhibition	N-alzheimers-1075
+N-alzheimers-1205	activation	N-alzheimers-1066
+N-alzheimers-1205	activation	N-alzheimers-1300
+N-alzheimers-1205	activation	N-alzheimers-1310
+N-alzheimers-1205	activation	N-alzheimers-1034
+N-alzheimers-1205	activation	N-alzheimers-1036
+N-alzheimers-1205	activation	N-alzheimers-635
+N-alzheimers-1205	activation	N-alzheimers-580
+N-alzheimers-1205	activation	N-alzheimers-578
+N-alzheimers-1205	activation	N-alzheimers-579
+N-alzheimers-1205	activation	N-alzheimers-662
+N-alzheimers-1205	activation	N-alzheimers-1337
+N-alzheimers-176 177	inhibition	N-alzheimers-1300
+N-alzheimers-1043	activation	N-alzheimers-1045
+N-alzheimers-1043	activation	N-alzheimers-1051
+N-alzheimers-1043	activation	N-alzheimers-1055
+N-alzheimers-382 383	inhibition	N-alzheimers-594
+N-alzheimers-862	activation	N-alzheimers-861
+N-alzheimers-473 474	activation	N-alzheimers-1275
+N-alzheimers-473 474	activation	N-alzheimers-1275
+N-alzheimers-1140	activation	N-alzheimers-1132
+N-alzheimers-270 271	inhibition	N-alzheimers-1075
+N-alzheimers-1293	activation	N-alzheimers-803
+N-alzheimers-1293	activation	N-alzheimers-774
+N-alzheimers-1293	activation	N-alzheimers-780
+N-alzheimers-1322	activation	N-alzheimers-1066
+N-alzheimers-1323	activation	N-alzheimers-1126
+N-alzheimers-1323	activation	N-alzheimers-1133
+N-alzheimers-1323	activation	N-alzheimers-529
+N-alzheimers-598	activation	N-alzheimers-1034
+N-alzheimers-598	activation	N-alzheimers-1146
+N-alzheimers-572	activation	N-alzheimers-572
+N-alzheimers-925	inhibition	N-alzheimers-709
+N-alzheimers-856	activation	N-alzheimers-760
+N-alzheimers-856	activation	N-alzheimers-1335
+N-alzheimers-1018	activation	N-alzheimers-1034
+N-alzheimers-1018	activation	N-alzheimers-843
+N-alzheimers-1018	activation	N-alzheimers-635
+N-alzheimers-1018	activation	N-alzheimers-440 441
+N-alzheimers-1018	inhibition	N-alzheimers-563
+N-alzheimers-1018	activation	N-alzheimers-1031
+N-alzheimers-1119	activation	N-alzheimers-1075
+N-alzheimers-60 61	activation	N-alzheimers-529
+N-alzheimers-60 61	activation	N-alzheimers-529
+N-alzheimers-1133	activation	N-alzheimers-1146
+N-alzheimers-1133	activation	N-alzheimers-1275
+N-alzheimers-813	inhibition	N-alzheimers-1275
+N-alzheimers-886	activation	N-alzheimers-1162
+N-alzheimers-886	activation	N-alzheimers-1146
+N-alzheimers-886	activation	N-alzheimers-1146
+N-alzheimers-886	activation	N-alzheimers-1155
+N-alzheimers-886	activation	N-alzheimers-1152
+N-alzheimers-886	activation	N-alzheimers-1154
+N-alzheimers-886	activation	N-alzheimers-548
+N-alzheimers-886	activation	N-alzheimers-524
+N-alzheimers-886	activation	N-alzheimers-1081
+N-alzheimers-886	activation	N-alzheimers-599
+N-alzheimers-585	activation	N-alzheimers-1288
+N-alzheimers-1295	activation	N-alzheimers-1083
+N-alzheimers-1295	activation	N-alzheimers-1085
+N-alzheimers-1295	activation	N-alzheimers-1082
+N-alzheimers-1215	inhibition	N-alzheimers-1016
+N-alzheimers-1215	activation	N-alzheimers-1075
+N-alzheimers-805	activation	N-alzheimers-563
+N-alzheimers-805	activation	N-alzheimers-563
+N-alzheimers-1362	activation	N-alzheimers-1413
+N-alzheimers-1362	activation	N-alzheimers-1414
+N-alzheimers-1362	activation	N-alzheimers-503 504
+N-alzheimers-1071	activation	N-alzheimers-634
+N-alzheimers-1071	activation	N-alzheimers-865
+N-alzheimers-1071	activation	N-alzheimers-1199
+N-alzheimers-1071	activation	N-alzheimers-1123
+N-alzheimers-540	activation	N-alzheimers-529
+N-alzheimers-1369	activation	N-alzheimers-1380
+N-alzheimers-1328	activation	N-alzheimers-1126
+N-alzheimers-1328	activation	N-alzheimers-1133
+N-alzheimers-1010	activation	N-alzheimers-1041
+N-alzheimers-1010	activation	N-alzheimers-716
+N-alzheimers-1010	inhibition	N-alzheimers-628
+N-alzheimers-1444	activation	N-alzheimers-1452
+N-alzheimers-1444	activation	N-alzheimers-1437
+N-alzheimers-1444	activation	N-alzheimers-1438
+N-alzheimers-1444	activation	N-alzheimers-1439
+N-alzheimers-1444	activation	N-alzheimers-1456
+N-alzheimers-1444	activation	N-alzheimers-1440
+N-alzheimers-1444	activation	N-alzheimers-1453
+N-alzheimers-1444	activation	N-alzheimers-1449
+N-alzheimers-1444	activation	N-alzheimers-1441
+N-alzheimers-1444	activation	N-alzheimers-1454
+N-alzheimers-1444	activation	N-alzheimers-1442
+N-alzheimers-1330	inhibition	N-alzheimers-709
+N-alzheimers-851	activation	N-alzheimers-1041
+N-alzheimers-851	activation	N-alzheimers-716
+N-alzheimers-851	inhibition	N-alzheimers-628
+N-alzheimers-757	activation	N-alzheimers-1330
+N-alzheimers-828	activation	N-alzheimers-1312
+N-alzheimers-828	activation	N-alzheimers-1312
+N-alzheimers-553	activation	N-alzheimers-529
+N-alzheimers-553	activation	N-alzheimers-529
+N-alzheimers-700	activation	N-alzheimers-1066
+N-alzheimers-700	activation	N-alzheimers-1066
+N-alzheimers-700	activation	N-alzheimers-1066
+N-alzheimers-700	inhibition	N-alzheimers-1075
+N-alzheimers-510	inhibition	N-alzheimers-529
+N-alzheimers-537	activation	N-alzheimers-1141
+N-alzheimers-537	inhibition	N-alzheimers-1125
+N-alzheimers-1408	inhibition	N-alzheimers-539
+N-alzheimers-1408	inhibition	N-alzheimers-1432
+N-alzheimers-1408	inhibition	N-alzheimers-1428
+N-alzheimers-1178	activation	N-alzheimers-546
+N-alzheimers-779	inhibition	N-alzheimers-1039
+N-alzheimers-779	inhibition	N-alzheimers-1205
+N-alzheimers-779	inhibition	N-alzheimers-1206
+N-alzheimers-779	activation	N-alzheimers-51 52
+N-alzheimers-779	activation	N-alzheimers-49 50
+N-alzheimers-1179	inhibition	N-alzheimers-1075
+N-alzheimers-1399	activation	N-alzheimers-1075
+N-alzheimers-1057	activation	N-alzheimers-414 415
+N-alzheimers-1057	activation	N-alzheimers-853
+N-alzheimers-1057	activation	N-alzheimers-529
+N-alzheimers-1057	inhibition	N-alzheimers-541
+N-alzheimers-1057	inhibition	N-alzheimers-463 464
+N-alzheimers-1057	activation	N-alzheimers-1075
+N-alzheimers-1057	inhibition	N-alzheimers-1075
+N-alzheimers-1057	activation	N-alzheimers-1113
+N-alzheimers-1057	inhibition	N-alzheimers-1066
+N-alzheimers-1057	inhibition	N-alzheimers-1081
+N-alzheimers-1057	inhibition	N-alzheimers-82 83
+N-alzheimers-1057	activation	N-alzheimers-703
+N-alzheimers-657	activation	N-alzheimers-1287
+N-alzheimers-738	activation	N-alzheimers-1083
+N-alzheimers-738	activation	N-alzheimers-1085
+N-alzheimers-738	activation	N-alzheimers-1082
+N-alzheimers-17 18	activation	N-alzheimers-559
+N-alzheimers-612	activation	N-alzheimers-1208
+N-alzheimers-612	activation	N-alzheimers-1208
+N-alzheimers-296 297 298 299	activation	N-alzheimers-529
+N-alzheimers-24 25	activation	N-alzheimers-1141
+N-alzheimers-1030	activation	N-alzheimers-820
+N-alzheimers-803	activation	N-alzheimers-1066
+N-alzheimers-1384	activation	N-alzheimers-1343
+N-alzheimers-1384	activation	N-alzheimers-1348
+N-alzheimers-1384	activation	N-alzheimers-1416
+N-alzheimers-1384	activation	N-alzheimers-1354
+N-alzheimers-1384	inhibition	N-alzheimers-1397
+N-alzheimers-522	activation	N-alzheimers-896
+N-alzheimers-586	activation	N-alzheimers-1207
+N-alzheimers-541	activation	N-alzheimers-1085
+N-alzheimers-541	inhibition	N-alzheimers-380 381
+N-alzheimers-541	activation	N-alzheimers-1075
+N-alzheimers-541	activation	N-alzheimers-902
+N-alzheimers-541	activation	N-alzheimers-524
+N-alzheimers-726	activation	N-alzheimers-541
+N-alzheimers-1271	inhibition	N-alzheimers-1146
+N-alzheimers-736	activation	N-alzheimers-1275
+N-alzheimers-736	inhibition	N-alzheimers-1275
+N-alzheimers-563	activation	N-alzheimers-745
+N-alzheimers-508	activation	N-alzheimers-1205
+N-alzheimers-1088	activation	N-alzheimers-1066
+N-alzheimers-1088	inhibition	N-alzheimers-1075
+N-alzheimers-1088	inhibition	N-alzheimers-1075
+N-alzheimers-584	inhibition	N-alzheimers-1 2
+N-alzheimers-1231	inhibition	N-alzheimers-1229
+N-alzheimers-602	activation	N-alzheimers-797
+N-alzheimers-602	inhibition	N-alzheimers-595
+N-alzheimers-1145	inhibition	N-alzheimers-1146
+N-alzheimers-1447	activation	N-alzheimers-505 506
+N-alzheimers-1447	activation	N-alzheimers-1457
+N-alzheimers-1447	activation	N-alzheimers-1457
+N-alzheimers-1447	activation	N-alzheimers-1457
+N-alzheimers-1447	activation	N-alzheimers-1457
+N-alzheimers-1447	activation	N-alzheimers-1075
+N-alzheimers-1447	activation	N-alzheimers-1465
+N-alzheimers-1447	activation	N-alzheimers-1463
+N-alzheimers-1447	activation	N-alzheimers-1455
+N-alzheimers-1447	activation	N-alzheimers-1451
+N-alzheimers-914	inhibition	N-alzheimers-1075
+N-alzheimers-615	activation	N-alzheimers-84 85
+N-alzheimers-615	activation	N-alzheimers-779
+N-alzheimers-616	activation	N-alzheimers-549
+N-alzheimers-662	activation	N-alzheimers-1034
+N-alzheimers-662	activation	N-alzheimers-1039
+N-alzheimers-68 69	activation	N-alzheimers-598
+N-alzheimers-704	inhibition	N-alzheimers-1146
+N-alzheimers-704	activation	N-alzheimers-810
+N-alzheimers-704	activation	N-alzheimers-1126
+N-alzheimers-704	inhibition	N-alzheimers-1075
+N-alzheimers-704	inhibition	N-alzheimers-1275
+N-alzheimers-704	inhibition	N-alzheimers-1275
+N-alzheimers-704	inhibition	N-alzheimers-691
+N-alzheimers-704	inhibition	N-alzheimers-692
+N-alzheimers-734	activation	N-alzheimers-734
+N-alzheimers-826	activation	N-alzheimers-832
+N-alzheimers-826	activation	N-alzheimers-832
+N-alzheimers-1135	activation	N-alzheimers-1134
+N-alzheimers-436 437	inhibition	N-alzheimers-1066
+N-alzheimers-714	inhibition	N-alzheimers-1201
+N-alzheimers-714	inhibition	N-alzheimers-1185
+N-alzheimers-1288	activation	N-alzheimers-1066
+N-alzheimers-1288	activation	N-alzheimers-1275
+N-alzheimers-1288	activation	N-alzheimers-614
+N-alzheimers-1288	activation	N-alzheimers-605
+N-alzheimers-1288	activation	N-alzheimers-525
+N-alzheimers-1288	activation	N-alzheimers-774
+N-alzheimers-1321	activation	N-alzheimers-1075
+N-alzheimers-1321	activation	N-alzheimers-1074
+N-alzheimers-28 29	activation	N-alzheimers-545
