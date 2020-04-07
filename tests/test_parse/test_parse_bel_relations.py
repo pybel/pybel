@@ -65,14 +65,14 @@ class TestRelations(TestTokenParserBase):
 
     def test_singleton(self):
         """Test singleton composite in subject."""
-        statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(ADO:"Abeta_42"))'
+        statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(CHEBI:"Abeta_42"))'
         result = self.parser.statement.parseString(statement)
 
         expected = [
             COMPOSITE,
             [PROTEIN, ['HGNC', 'CASP8']],
             [PROTEIN, ['HGNC', 'FADD']],
-            [ABUNDANCE, ['ADO', 'Abeta_42']]
+            [ABUNDANCE, ['CHEBI', 'Abeta_42']]
         ]
         self.assertEqual(expected, result.asList())
 
@@ -82,7 +82,7 @@ class TestRelations(TestTokenParserBase):
         sub_member_2 = protein('HGNC', 'FADD')
         self.assert_has_node(sub_member_2)
 
-        sub_member_3 = abundance('ADO', 'Abeta_42')
+        sub_member_3 = abundance('CHEBI', 'Abeta_42')
         self.assert_has_node(sub_member_3)
 
         sub = composite_abundance([sub_member_1, sub_member_2, sub_member_3])
@@ -93,7 +93,7 @@ class TestRelations(TestTokenParserBase):
 
     def test_predicate_failure(self):
         """Checks that if there's a problem with the relation/object, that an error gets thrown"""
-        statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(ADO:"Abeta_42")) -> nope(GO:"neuron apoptotic process")'
+        statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(CHEBI:"Abeta_42")) -> nope(GO:"neuron apoptotic process")'
 
         with self.assertRaises(ParseException):
             self.parser.relation.parseString(statement)
@@ -102,12 +102,12 @@ class TestRelations(TestTokenParserBase):
         """Test composite in subject. See BEL 2.0 specification
         `3.1.1 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xincreases>`_
         """
-        statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(ADO:"Abeta_42")) -> bp(GO:"neuron apoptotic process")'
+        statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(CHEBI:"Abeta_42")) -> bp(GO:"neuron apoptotic process")'
         result = self.parser.relation.parseString(statement)
 
         expected = [
             [COMPOSITE, [PROTEIN, ['HGNC', 'CASP8']], [PROTEIN, ['HGNC', 'FADD']],
-             [ABUNDANCE, ['ADO', 'Abeta_42']]],
+             [ABUNDANCE, ['CHEBI', 'Abeta_42']]],
             INCREASES,
             [BIOPROCESS, ['GO', 'neuron apoptotic process']]
         ]
@@ -119,7 +119,7 @@ class TestRelations(TestTokenParserBase):
         sub_member_2 = protein('HGNC', 'FADD')
         self.assert_has_node(sub_member_2)
 
-        sub_member_3 = abundance('ADO', 'Abeta_42')
+        sub_member_3 = abundance('CHEBI', 'Abeta_42')
         self.assert_has_node(sub_member_3)
 
         sub = composite_abundance([sub_member_1, sub_member_2, sub_member_3])
@@ -175,7 +175,7 @@ class TestRelations(TestTokenParserBase):
         """Test translocation in object. See BEL 2.0 specification
         `3.1.2 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdIncreases>`_
         """
-        statement = 'a(ADO:"Abeta_42") => tloc(a(CHEBI:"calcium(2+)"),fromLoc(MESH:"Cell Membrane"),' \
+        statement = 'a(CHEBI:"Abeta_42") => tloc(a(CHEBI:"calcium(2+)"),fromLoc(MESH:"Cell Membrane"),' \
                     'toLoc(MESH:"Intracellular Space"))'
         result = self.parser.relation.parseString(statement)
 
@@ -183,7 +183,7 @@ class TestRelations(TestTokenParserBase):
             SUBJECT: {
                 FUNCTION: ABUNDANCE,
                 CONCEPT: {
-                    NAMESPACE: 'ADO',
+                    NAMESPACE: 'CHEBI',
                     NAME: 'Abeta_42',
                 },
             },
@@ -205,7 +205,7 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        sub = abundance('ADO', 'Abeta_42')
+        sub = abundance('CHEBI', 'Abeta_42')
         self.assert_has_node(sub)
 
         obj = abundance('CHEBI', 'calcium(2+)')
@@ -229,7 +229,7 @@ class TestRelations(TestTokenParserBase):
 
         3.1.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xdecreases
         """
-        statement = 'pep(p(SFAM:"CAPN Family", location(GO:intracellular))) -| reaction(reactants(p(HGNC:CDK5R1)),products(p(HGNC:CDK5)))'
+        statement = 'pep(p(FPLX:CAPN, location(GO:intracellular))) -| reaction(reactants(p(HGNC:CDK5R1)),products(p(HGNC:CDK5)))'
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
@@ -238,8 +238,8 @@ class TestRelations(TestTokenParserBase):
                 TARGET: {
                     FUNCTION: PROTEIN,
                     CONCEPT: {
-                        NAMESPACE: 'SFAM',
-                        NAME: 'CAPN Family',
+                        NAMESPACE: 'FPLX',
+                        NAME: 'CAPN',
                     },
                     LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}
                 },
@@ -273,7 +273,7 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        sub = protein('SFAM', 'CAPN Family')
+        sub = protein('FPLX', 'CAPN')
         self.assert_has_node(sub)
 
         obj_member_1 = protein('HGNC', 'CDK5R1')
@@ -454,7 +454,7 @@ class TestRelations(TestTokenParserBase):
 
         See also: 3.1.6 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xcnc
         """
-        statement = 'g(HGNC:APP,sub(G,275341,C)) cnc path(MESHD:"Alzheimer Disease")'
+        statement = 'g(HGNC:APP,sub(G,275341,C)) cnc path(MESH:"Alzheimer Disease")'
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
@@ -475,7 +475,7 @@ class TestRelations(TestTokenParserBase):
             OBJECT: {
                 FUNCTION: PATHOLOGY,
                 CONCEPT: {
-                    NAMESPACE: 'MESHD',
+                    NAMESPACE: 'MESH',
                     NAME: 'Alzheimer Disease',
                 },
             },
@@ -487,7 +487,7 @@ class TestRelations(TestTokenParserBase):
         sub = app_gene.with_variants(hgvs('c.275341G>C'))
         self.assert_has_node(sub)
 
-        obj = Pathology('MESHD', 'Alzheimer Disease')
+        obj = Pathology('MESH', 'Alzheimer Disease')
         self.assert_has_node(obj)
 
         self.assert_has_edge(sub, obj, relation=expected_dict[RELATION])
@@ -581,7 +581,7 @@ class TestRelations(TestTokenParserBase):
         """
         3.2.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XnegCor
         Test phosphoralation tag"""
-        statement = 'kin(p(SFAM:"GSK3 Family")) neg p(HGNC:MAPT,pmod(P))'
+        statement = 'kin(p(FPLX:GSK3)) neg p(HGNC:MAPT,pmod(P))'
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
@@ -594,8 +594,8 @@ class TestRelations(TestTokenParserBase):
                 TARGET: {
                     FUNCTION: PROTEIN,
                     CONCEPT: {
-                        NAMESPACE: 'SFAM',
-                        NAME: 'GSK3 Family',
+                        NAMESPACE: 'FPLX',
+                        NAME: 'GSK3',
                     },
                 },
             },
@@ -611,7 +611,7 @@ class TestRelations(TestTokenParserBase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        sub = protein('SFAM', 'GSK3 Family')
+        sub = protein('FPLX', 'GSK3')
         self.assert_has_node(sub)
 
         obj = protein('HGNC', 'MAPT', variants=pmod('Ph'))
@@ -758,11 +758,11 @@ class TestRelations(TestTokenParserBase):
         self.assertEqual('r(HGNC:AKT1, loc(GO:intracellular)) translatedTo p(HGNC:AKT1)', calculated_edge_bel)
 
     def test_component_list(self):
-        s = 'complex(SCOMP:"C1 Complex") hasComponents list(p(HGNC:C1QB), p(HGNC:C1S))'
+        s = 'complex(FPLX:C1) hasComponents list(p(HGNC:C1QB), p(HGNC:C1S))'
         result = self.parser.relation.parseString(s)
 
         expected_result_list = [
-            [COMPLEX, ['SCOMP', 'C1 Complex']],
+            [COMPLEX, ['FPLX', 'C1']],
             'hasComponents',
             [
                 [PROTEIN, ['HGNC', 'C1QB']],
@@ -771,7 +771,7 @@ class TestRelations(TestTokenParserBase):
         ]
         self.assertEqual(expected_result_list, result.asList())
 
-        sub = named_complex_abundance('SCOMP', 'C1 Complex')
+        sub = named_complex_abundance('FPLX', 'C1')
         self.assert_has_node(sub)
         child_1 = hgnc('C1QB')
         self.assert_has_node(child_1)
@@ -784,10 +784,10 @@ class TestRelations(TestTokenParserBase):
         """
         3.4.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_hasmembers
         """
-        statement = 'p(PKC:a) hasMembers list(p(HGNC:PRKCA), p(HGNC:PRKCB), p(HGNC:PRKCD), p(HGNC:PRKCE))'
+        statement = 'p(FPLX:PKC) hasMembers list(p(HGNC:PRKCA), p(HGNC:PRKCB), p(HGNC:PRKCD), p(HGNC:PRKCE))'
         result = self.parser.relation.parseString(statement)
         expected_result = [
-            [PROTEIN, ['PKC', 'a']],
+            [PROTEIN, ['FPLX', 'PKC']],
             'hasMembers',
             [
                 [PROTEIN, ['HGNC', 'PRKCA']],
@@ -798,7 +798,7 @@ class TestRelations(TestTokenParserBase):
         ]
         self.assertEqual(expected_result, result.asList())
 
-        sub = protein('PKC', 'a')
+        sub = protein('FPLX', 'PKC')
         obj_1 = protein('HGNC', 'PRKCA')
         obj_2 = protein('HGNC', 'PRKCB')
         obj_3 = protein('HGNC', 'PRKCD')

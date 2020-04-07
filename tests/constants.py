@@ -3,6 +3,7 @@
 """Constants for PyBEL tests."""
 
 import logging
+import re
 import unittest
 from json import dumps
 
@@ -169,6 +170,20 @@ class TestTokenParserBase(unittest.TestCase):
             cls.graph,
             autostreamline=False,
             disallow_unqualified_translocations=True,
+            namespace_to_pattern={
+                'HGNC': re.compile(r'.*'),
+                'SNP': re.compile(r'.*'),
+                'CHEBI': re.compile(r'.*'),
+                'REF': re.compile(r'.*'),
+                'MOD': re.compile(r'.*'),
+                'EFO': re.compile(r'.*'),
+                'GO': re.compile(r'.*'),
+                'UBERON': re.compile(r'.*'),
+                'FPLX': re.compile(r'.*'),
+                'MESH': re.compile(r'.*'),
+                'MGI': re.compile(r'.*'),
+                'dbSNP': re.compile(r'.*'),
+            }
         )
 
     def setUp(self):
