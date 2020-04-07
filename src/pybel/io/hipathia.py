@@ -200,8 +200,8 @@ def from_hipathia_dfs(name: str, att_df: pd.DataFrame, sif_df: pd.DataFrame) -> 
 def to_hipathia(graph: BELGraph, directory: str) -> None:
     """Export HiPathia artifacts for the graph."""
     att_df, sif_df = to_hipathia_dfs(graph)
-    att_df.to_csv(os.path.join(directory, '{}.att'.format(graph.name)))
-    sif_df.to_csv(os.path.join(directory, '{}.sif'.format(graph.name)))
+    att_df.to_csv(os.path.join(directory, '{}.att'.format(graph.name)), sep='\t', index=False)
+    sif_df.to_csv(os.path.join(directory, '{}.sif'.format(graph.name)), sep='\t', index=False)
 
 
 def _is_node_family(graph: BELGraph, node: Protein) -> Optional[Set[Protein]]:
@@ -212,7 +212,8 @@ def _is_node_family(graph: BELGraph, node: Protein) -> Optional[Set[Protein]]:
             children.add(child)
 
     if children and not all(isinstance(child, Protein) for child in children):
-        raise ValueError('not all children are proteins?')
+        logger.warning('not all children of {} are proteins: {}'.format(node, children))
+        return
 
     return children
 
@@ -260,32 +261,50 @@ def to_hipathia_dfs(graph: BELGraph) -> Tuple[pd.DataFrame, pd.DataFrame]:
         if node in families:
             i += 1
             k = (i,)
-            a, b = [node.name], [[child.identifier for child in families[node]]]
+            children = families[node]
+            child_identifiers = [child.identifier for child in children]
+            if not all(child_identifiers):
+                logger.warning('not all children were grounded: %s', child_identifiers)
+                continue
+            labels, genes_lists = [node.name], [child_identifiers]
         elif isinstance(node, Protein):
+            if not node.identifier or not node.name:
+                logger.warning('node was not grounded: %s', node)
+                continue
             i += 1
             k = (i,)
-            a, b = [node.name], [[node.identifier]]
+            labels, genes_lists = [node.name], [[node.identifier]]
         elif isinstance(node, ComplexAbundance):
-            k, a, b = [], [], []
+            k, labels, genes_lists = [], [], []
             for member in node.members:
                 i += 1
                 k.append(i)
-                a.append(member.name)
+                labels.append(member.name)
                 if member in families:
-                    b.append([child.identifier for child in families[member]])
+                    children = families[member]
+                    child_identifiers = [child.identifier for child in children]
+                    if not all(child_identifiers):
+                        logger.warning('not all children were grounded: %s', child_identifiers)
+                        continue
+                    genes_lists.append(child_identifiers)
                 else:
-                    b.append([member.identifier])
+                    if not member.identifier:
+                        logger.warning('member was not grounded: %s', member)
+                        continue
+                    genes_lists.append([member.identifier])
             k = tuple(k)
         else:
-            raise ValueError
+            logger.debug('skipping node {}'.format(node))
+            continue
 
         k = 'N-{}-{}'.format(graph.name, ' '.join(map(str, k)))
-        att[k] = a, b
+        att[k] = labels, genes_lists
         dsl_to_k[node] = k
 
     edges = [
         (dsl_to_k[source], relation, dsl_to_k[target])
         for source, relation, target in edges
+        if source in dsl_to_k and target in dsl_to_k
     ]
     sif_df = pd.DataFrame(edges)  # DONE
 
@@ -296,6 +315,10 @@ def to_hipathia_dfs(graph: BELGraph) -> Tuple[pd.DataFrame, pd.DataFrame]:
 
     att_rows = []
     for k, (labels, genes_lists) in sorted(att.items()):
+        if k not in pos:
+            logger.warning('node not in graph: %s', k)
+            continue
+
         label = ' '.join(labels)
         types = ','.join(['gene'] * len(labels))
         gene_list = ',/,'.join(
