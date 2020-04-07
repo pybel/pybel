@@ -39,8 +39,8 @@ def _process_concept(node, name_to_ids):
     concept = node.get('concept')
     if concept is None:
         return
-    namespace = concept['namespace'].lower()
 
+    namespace = concept['namespace'] = concept['namespace'].lower()
     if namespace in NO_NAMES:
         concept['identifier'] = concept['name']
     elif namespace in name_to_ids:
