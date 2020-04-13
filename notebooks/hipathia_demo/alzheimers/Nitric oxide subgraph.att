@@ -1,0 +1,16 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Nitric oxide subgraph-10	IDE	18272	25520	white	rectangle	gene	0.5	black	46	17	5381
+N-Nitric oxide subgraph-12	APP	52120	33000	white	rectangle	gene	0.5	black	46	17	620
+N-Nitric oxide subgraph-13	APP	0	26860	white	rectangle	gene	0.5	black	46	17	620
+N-Nitric oxide subgraph-14	APP	22111	18989	white	rectangle	gene	0.5	black	46	17	620
+N-Nitric oxide subgraph-15	APP	28425	14032	white	rectangle	gene	0.5	black	46	17	620
+N-Nitric oxide subgraph-18	NGF	45000	34064	white	rectangle	gene	0.5	black	46	17	7808
+N-Nitric oxide subgraph-19	NGFR	6738	23837	white	rectangle	gene	0.5	black	46	17	7809
+N-Nitric oxide subgraph-20	NOS1	45000	0	white	rectangle	gene	0.5	black	46	17	7872
+N-Nitric oxide subgraph-21	NOS1	51786	12563	white	rectangle	gene	0.5	black	46	17	7872
+N-Nitric oxide subgraph-22	NOS2	13951	20881	white	rectangle	gene	0.5	black	46	17	7873
+N-Nitric oxide subgraph-23	NOS3	26629	26194	white	rectangle	gene	0.5	black	46	17	7876
+N-Nitric oxide subgraph-24	PIN1	29935	21526	white	rectangle	gene	0.5	black	46	17	8988
+N-Nitric oxide subgraph-26	Nos2	20052	10753	white	rectangle	gene	0.5	black	46	17	97361
+N-Nitric oxide subgraph-7	IL32	19703	3000	white	rectangle	gene	0.5	black	46	17	16830
+N-Nitric oxide subgraph-8	CDK5	47395	6820	white	rectangle	gene	0.5	black	46	17	1774

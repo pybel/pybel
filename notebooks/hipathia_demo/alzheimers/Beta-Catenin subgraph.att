@@ -1,0 +1,23 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Beta-Catenin subgraph-1 2 3 4 5	AXIN CSNK1A1 CTNNB1 GSK3B APC	19188	7868	white	rectangle	gene,gene,gene,gene,gene	0.5	black	46	17	AXIN,/,2451,/,2514,/,4617,/,583
+N-Beta-Catenin subgraph-10 11	CDH13 PSEN1	54163	1063	white	rectangle	gene,gene	0.5	black	46	17	1753,/,9508
+N-Beta-Catenin subgraph-12 13 14	CDH2 CTNNB1 PSEN1	700	19610	white	rectangle	gene,gene,gene	0.5	black	46	17	1759,/,2514,/,9508
+N-Beta-Catenin subgraph-15 16	CTNNB1 PSEN1	37499	15938	white	rectangle	gene,gene	0.5	black	46	17	2514,/,9508
+N-Beta-Catenin subgraph-17 18 19	CTNNB1 PSEN1 PSEN2	20590	31402	white	rectangle	gene,gene,gene	0.5	black	46	17	2514,/,9508,/,9509
+N-Beta-Catenin subgraph-20 21	CTNND2 PSEN1	4816	31295	white	rectangle	gene,gene	0.5	black	46	17	2516,/,9508
+N-Beta-Catenin subgraph-22	AXIN	16677	0	white	rectangle	gene	0.5	black	46	17	AXIN
+N-Beta-Catenin subgraph-23	CTNNBIP1	6616	14676	white	rectangle	gene	0.5	black	46	17	16913
+N-Beta-Catenin subgraph-24	CDK5	33988	23190	white	rectangle	gene	0.5	black	46	17	1774
+N-Beta-Catenin subgraph-25	CSNK1A1	29907	30793	white	rectangle	gene	0.5	black	46	17	2451
+N-Beta-Catenin subgraph-26	CTNNB1	17538	23349	white	rectangle	gene	0.5	black	46	17	2514
+N-Beta-Catenin subgraph-27	CTNNB1	25345	23343	white	rectangle	gene	0.5	black	46	17	2514
+N-Beta-Catenin subgraph-28	CTNNB1	23794	771	white	rectangle	gene	0.5	black	46	17	2514
+N-Beta-Catenin subgraph-29	GSK3B	22611	16136	white	rectangle	gene	0.5	black	46	17	4617
+N-Beta-Catenin subgraph-30	PPARG	15913	31044	white	rectangle	gene	0.5	black	46	17	9236
+N-Beta-Catenin subgraph-31	PSEN1	8456	23077	white	rectangle	gene	0.5	black	46	17	9508
+N-Beta-Catenin subgraph-32	PSEN1	30214	11797	white	rectangle	gene	0.5	black	46	17	9508
+N-Beta-Catenin subgraph-33	PSEN1	30382	15799	white	rectangle	gene	0.5	black	46	17	9508
+N-Beta-Catenin subgraph-34	PSEN1	0	37718	white	rectangle	gene	0.5	black	46	17	9508
+N-Beta-Catenin subgraph-35	Amyloidogenic glycoprotein, intracellular domain, conserved site	10788	8113	white	rectangle	gene	0.5	black	46	17	IPR019745
+N-Beta-Catenin subgraph-6 7	TCF4 PSEN1	1066	25343	white	rectangle	gene,gene	0.5	black	46	17	11634,/,9508
+N-Beta-Catenin subgraph-8 9	CDH13 CTNND1	61283	0	white	rectangle	gene,gene	0.5	black	46	17	1753,/,2515

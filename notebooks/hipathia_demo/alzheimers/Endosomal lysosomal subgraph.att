@@ -1,0 +1,23 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Endosomal lysosomal subgraph-13 14	APOE LRP8	11146	14533	white	rectangle	gene,gene	0.5	black	46	17	613,/,6700
+N-Endosomal lysosomal subgraph-15 16	APP LDLR	3773	33509	white	rectangle	gene,gene	0.5	black	46	17	620,/,6547
+N-Endosomal lysosomal subgraph-17	YENPTY endocytosis motif (APP)	4610	37739	white	rectangle	gene	0.5	black	46	17	CONSO00041
+N-Endosomal lysosomal subgraph-19	TGFB1	22444	46103	white	rectangle	gene	0.5	black	46	17	11766
+N-Endosomal lysosomal subgraph-20	TP53	16869	47966	white	rectangle	gene	0.5	black	46	17	11998
+N-Endosomal lysosomal subgraph-21	VPS35	0	25076	white	rectangle	gene	0.5	black	46	17	13487
+N-Endosomal lysosomal subgraph-24	GGA3	13170	381	white	rectangle	gene	0.5	black	46	17	17079
+N-Endosomal lysosomal subgraph-25	GGA1	24508	4061	white	rectangle	gene	0.5	black	46	17	17842
+N-Endosomal lysosomal subgraph-26	CLU	17792	39653	white	rectangle	gene	0.5	black	46	17	2095
+N-Endosomal lysosomal subgraph-27	CTSD	1468	20893	white	rectangle	gene	0.5	black	46	17	2529
+N-Endosomal lysosomal subgraph-28	DKK1	12808	37482	white	rectangle	gene	0.5	black	46	17	2891
+N-Endosomal lysosomal subgraph-29	IL1A	25666	36467	white	rectangle	gene	0.5	black	46	17	5991
+N-Endosomal lysosomal subgraph-30	IL1B	11658	46569	white	rectangle	gene	0.5	black	46	17	5992
+N-Endosomal lysosomal subgraph-31	APP	8987	23323	white	rectangle	gene	0.5	black	46	17	620
+N-Endosomal lysosomal subgraph-32	APP	11753	31914	white	rectangle	gene	0.5	black	46	17	620
+N-Endosomal lysosomal subgraph-33	LDLR	18668	28794	white	rectangle	gene	0.5	black	46	17	6547
+N-Endosomal lysosomal subgraph-34	LRP2	25894	41530	white	rectangle	gene	0.5	black	46	17	6694
+N-Endosomal lysosomal subgraph-35	LRP8	6423	8386	white	rectangle	gene	0.5	black	46	17	6700
+N-Endosomal lysosomal subgraph-36	BACE1	17371	8010	white	rectangle	gene	0.5	black	46	17	933
+N-Endosomal lysosomal subgraph-37	BACE1	25658	9213	white	rectangle	gene	0.5	black	46	17	933
+N-Endosomal lysosomal subgraph-38	BACE1	18599	0	white	rectangle	gene	0.5	black	46	17	933
+N-Endosomal lysosomal subgraph-39	BACE2	2587	11404	white	rectangle	gene	0.5	black	46	17	934

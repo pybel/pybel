@@ -1,0 +1,35 @@
+0	1	2
+N-Wnt signaling subgraph-9	activation	N-Wnt signaling subgraph-13
+N-Wnt signaling subgraph-9	activation	N-Wnt signaling subgraph-30
+N-Wnt signaling subgraph-22	activation	N-Wnt signaling subgraph-20
+N-Wnt signaling subgraph-36	inhibition	N-Wnt signaling subgraph-9
+N-Wnt signaling subgraph-1 2	activation	N-Wnt signaling subgraph-9
+N-Wnt signaling subgraph-10	activation	N-Wnt signaling subgraph-29
+N-Wnt signaling subgraph-10	activation	N-Wnt signaling subgraph-26
+N-Wnt signaling subgraph-10	activation	N-Wnt signaling subgraph-20
+N-Wnt signaling subgraph-15	activation	N-Wnt signaling subgraph-21
+N-Wnt signaling subgraph-13	activation	N-Wnt signaling subgraph-13
+N-Wnt signaling subgraph-29	activation	N-Wnt signaling subgraph-31
+N-Wnt signaling subgraph-23	activation	N-Wnt signaling subgraph-20
+N-Wnt signaling subgraph-25	activation	N-Wnt signaling subgraph-20
+N-Wnt signaling subgraph-21	activation	N-Wnt signaling subgraph-11
+N-Wnt signaling subgraph-21	activation	N-Wnt signaling subgraph-11
+N-Wnt signaling subgraph-8	activation	N-Wnt signaling subgraph-3 4 5 6 7
+N-Wnt signaling subgraph-8	activation	N-Wnt signaling subgraph-3 4 5 6 7
+N-Wnt signaling subgraph-18	activation	N-Wnt signaling subgraph-35
+N-Wnt signaling subgraph-18	activation	N-Wnt signaling subgraph-35
+N-Wnt signaling subgraph-19	activation	N-Wnt signaling subgraph-35
+N-Wnt signaling subgraph-19	activation	N-Wnt signaling subgraph-35
+N-Wnt signaling subgraph-11	inhibition	N-Wnt signaling subgraph-20
+N-Wnt signaling subgraph-11	inhibition	N-Wnt signaling subgraph-20
+N-Wnt signaling subgraph-11	activation	N-Wnt signaling subgraph-13
+N-Wnt signaling subgraph-11	inhibition	N-Wnt signaling subgraph-13
+N-Wnt signaling subgraph-3 4 5 6 7	activation	N-Wnt signaling subgraph-28
+N-Wnt signaling subgraph-3 4 5 6 7	activation	N-Wnt signaling subgraph-28
+N-Wnt signaling subgraph-17	activation	N-Wnt signaling subgraph-21
+N-Wnt signaling subgraph-17	activation	N-Wnt signaling subgraph-21
+N-Wnt signaling subgraph-32	inhibition	N-Wnt signaling subgraph-31
+N-Wnt signaling subgraph-24	activation	N-Wnt signaling subgraph-20
+N-Wnt signaling subgraph-28	activation	N-Wnt signaling subgraph-21
+N-Wnt signaling subgraph-28	activation	N-Wnt signaling subgraph-21
+N-Wnt signaling subgraph-28	activation	N-Wnt signaling subgraph-14

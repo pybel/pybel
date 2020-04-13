@@ -1,0 +1,91 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-GSK3 subgraph-1 2 3 4 5	AXIN CSNK1A1 CTNNB1 GSK3B APC	25031	45338	white	rectangle	gene,gene,gene,gene,gene	0.5	black	46	17	AXIN,/,2451,/,2514,/,4617,/,583
+N-GSK3 subgraph-100	cAMP response element binding (CREB) protein	34028	38742	white	rectangle	gene	0.5	black	46	17	IPR001630
+N-GSK3 subgraph-101	Amyloidogenic glycoprotein, intracellular domain, conserved site	21501	44438	white	rectangle	gene	0.5	black	46	17	IPR019745
+N-GSK3 subgraph-102	Cdk5	18032	69434	white	rectangle	gene	0.5	black	46	17	101765
+N-GSK3 subgraph-103	Gsk3b	18770	53311	white	rectangle	gene	0.5	black	46	17	1861437
+N-GSK3 subgraph-104	App	19748	61878	white	rectangle	gene	0.5	black	46	17	88059
+N-GSK3 subgraph-105	Mapt	11341	57665	white	rectangle	gene	0.5	black	46	17	97180
+N-GSK3 subgraph-12 13	CDH2 PSEN1	33448	32307	white	rectangle	gene,gene	0.5	black	46	17	1759,/,9508
+N-GSK3 subgraph-14 15	CTNNB1 GSK3B	13825	47390	white	rectangle	gene,gene	0.5	black	46	17	2514,/,4617
+N-GSK3 subgraph-16 17	CTNNB1 PSEN1	13573	23875	white	rectangle	gene,gene	0.5	black	46	17	2514,/,9508
+N-GSK3 subgraph-18 19	GSK3B PPP2CA	95892	52196	white	rectangle	gene,gene	0.5	black	46	17	4617,/,9299
+N-GSK3 subgraph-20 21	IGF1 INSR	29351	45370	white	rectangle	gene,gene	0.5	black	46	17	5464,/,6091
+N-GSK3 subgraph-22	AKT	16228	36004	white	rectangle	gene	0.5	black	46	17	AKT
+N-GSK3 subgraph-23	AXIN	22053	40996	white	rectangle	gene	0.5	black	46	17	AXIN
+N-GSK3 subgraph-24	GSK3	32360	16310	white	rectangle	gene	0.5	black	46	17	GSK3
+N-GSK3 subgraph-25	GSK3	30968	0	white	rectangle	gene	0.5	black	46	17	GSK3
+N-GSK3 subgraph-26	HSPA	23994	16807	white	rectangle	gene	0.5	black	46	17	HSPA
+N-GSK3 subgraph-27	S100B	41803	23433	white	rectangle	gene	0.5	black	46	17	10500
+N-GSK3 subgraph-28	CCL2	30416	28832	white	rectangle	gene	0.5	black	46	17	10618
+N-GSK3 subgraph-29	CCL5	29972	38189	white	rectangle	gene	0.5	black	46	17	10632
+N-GSK3 subgraph-30	CXCL10	23049	33365	white	rectangle	gene	0.5	black	46	17	10637
+N-GSK3 subgraph-31	SNCA	20783	17993	white	rectangle	gene	0.5	black	46	17	11138
+N-GSK3 subgraph-32	BTRC	40571	47069	white	rectangle	gene	0.5	black	46	17	1144
+N-GSK3 subgraph-33	FRAT2	30227	43298	white	rectangle	gene	0.5	black	46	17	16048
+N-GSK3 subgraph-34	CDK5	17548	20620	white	rectangle	gene	0.5	black	46	17	1774
+N-GSK3 subgraph-35	CREB3L4	27502	43420	white	rectangle	gene	0.5	black	46	17	18854
+N-GSK3 subgraph-36	CSNK1A1	37861	51311	white	rectangle	gene	0.5	black	46	17	2451
+N-GSK3 subgraph-37	CTNNB1	31182	41134	white	rectangle	gene	0.5	black	46	17	2514
+N-GSK3 subgraph-38	CTNNB1	34401	43128	white	rectangle	gene	0.5	black	46	17	2514
+N-GSK3 subgraph-39	CTNNB1	26172	54028	white	rectangle	gene	0.5	black	46	17	2514
+N-GSK3 subgraph-40	DKK1	49673	20420	white	rectangle	gene	0.5	black	46	17	2891
+N-GSK3 subgraph-41	DPYSL2	17382	31139	white	rectangle	gene	0.5	black	46	17	3014
+N-GSK3 subgraph-42	MARK2	46403	36390	white	rectangle	gene	0.5	black	46	17	3332
+N-GSK3 subgraph-43	MARK2	37503	35492	white	rectangle	gene	0.5	black	46	17	3332
+N-GSK3 subgraph-44	AKT1	12261	24783	white	rectangle	gene	0.5	black	46	17	391
+N-GSK3 subgraph-45	GRB2	61199	66498	white	rectangle	gene	0.5	black	46	17	4566
+N-GSK3 subgraph-46	CXCL1	30040	31733	white	rectangle	gene	0.5	black	46	17	4602
+N-GSK3 subgraph-47	GSK3A	8148	31752	white	rectangle	gene	0.5	black	46	17	4616
+N-GSK3 subgraph-48	GSK3A	8429	36452	white	rectangle	gene	0.5	black	46	17	4616
+N-GSK3 subgraph-49	GSK3B	27205	35415	white	rectangle	gene	0.5	black	46	17	4617
+N-GSK3 subgraph-50	GSK3B	32221	26658	white	rectangle	gene	0.5	black	46	17	4617
+N-GSK3 subgraph-51	GSK3B	20410	28964	white	rectangle	gene	0.5	black	46	17	4617
+N-GSK3 subgraph-52	GSK3B	51461	48453	white	rectangle	gene	0.5	black	46	17	4617
+N-GSK3 subgraph-53	GYS1	39134	11133	white	rectangle	gene	0.5	black	46	17	4706
+N-GSK3 subgraph-54	HSF1	25047	42915	white	rectangle	gene	0.5	black	46	17	5224
+N-GSK3 subgraph-55	IGF1	75208	83913	white	rectangle	gene	0.5	black	46	17	5464
+N-GSK3 subgraph-56	IGF1R	76632	76362	white	rectangle	gene	0.5	black	46	17	5465
+N-GSK3 subgraph-57	CXCL8	34999	30447	white	rectangle	gene	0.5	black	46	17	6025
+N-GSK3 subgraph-58	INS	90032	57366	white	rectangle	gene	0.5	black	46	17	6081
+N-GSK3 subgraph-59	INSR	83735	62607	white	rectangle	gene	0.5	black	46	17	6091
+N-GSK3 subgraph-6 7 8	SNCA GSK3B MAPT	27875	27124	white	rectangle	gene,gene,gene	0.5	black	46	17	11138,/,4617,/,6893
+N-GSK3 subgraph-60	IRS1	97392	71406	white	rectangle	gene	0.5	black	46	17	6125
+N-GSK3 subgraph-61	IRS1	90490	67613	white	rectangle	gene	0.5	black	46	17	6125
+N-GSK3 subgraph-62	IRS2	77468	47600	white	rectangle	gene	0.5	black	46	17	6126
+N-GSK3 subgraph-63	IRS2	80057	55049	white	rectangle	gene	0.5	black	46	17	6126
+N-GSK3 subgraph-64	IRS4	68877	66965	white	rectangle	gene	0.5	black	46	17	6128
+N-GSK3 subgraph-65	IRS4	77032	68138	white	rectangle	gene	0.5	black	46	17	6128
+N-GSK3 subgraph-66	APP	44830	43793	white	rectangle	gene	0.5	black	46	17	620
+N-GSK3 subgraph-67	APP	24703	28324	white	rectangle	gene	0.5	black	46	17	620
+N-GSK3 subgraph-68	APP	33166	29302	white	rectangle	gene	0.5	black	46	17	620
+N-GSK3 subgraph-69	LEP	22799	41596	white	rectangle	gene	0.5	black	46	17	6553
+N-GSK3 subgraph-70	MAPK10	26440	16707	white	rectangle	gene	0.5	black	46	17	6872
+N-GSK3 subgraph-71	MAPK8	29622	17411	white	rectangle	gene	0.5	black	46	17	6881
+N-GSK3 subgraph-73	MAPT	1587	26176	white	rectangle	gene	0.5	black	46	17	6893
+N-GSK3 subgraph-74	MAPT	20803	34334	white	rectangle	gene	0.5	black	46	17	6893
+N-GSK3 subgraph-75	MAPT	26638	24122	white	rectangle	gene	0.5	black	46	17	6893
+N-GSK3 subgraph-76	MAPT	27437	29852	white	rectangle	gene	0.5	black	46	17	6893
+N-GSK3 subgraph-77	MAPT	31749	35123	white	rectangle	gene	0.5	black	46	17	6893
+N-GSK3 subgraph-78	MAPT	0	31244	white	rectangle	gene	0.5	black	46	17	6893
+N-GSK3 subgraph-79	MAPT	34946	34509	white	rectangle	gene	0.5	black	46	17	6893
+N-GSK3 subgraph-80	MAPT	19908	38051	white	rectangle	gene	0.5	black	46	17	6893
+N-GSK3 subgraph-81	MAPT	67	36737	white	rectangle	gene	0.5	black	46	17	6893
+N-GSK3 subgraph-82	MAPT	19637	35959	white	rectangle	gene	0.5	black	46	17	6893
+N-GSK3 subgraph-83	MAPT	26894	40365	white	rectangle	gene	0.5	black	46	17	6893
+N-GSK3 subgraph-84	MAPT	32531	42049	white	rectangle	gene	0.5	black	46	17	6893
+N-GSK3 subgraph-85	MYC	24035	37860	white	rectangle	gene	0.5	black	46	17	7553
+N-GSK3 subgraph-86	NFATC2	35472	37010	white	rectangle	gene	0.5	black	46	17	7776
+N-GSK3 subgraph-88	PIN1	36635	39815	white	rectangle	gene	0.5	black	46	17	8988
+N-GSK3 subgraph-89	PPP1R1B	12570	13251	white	rectangle	gene	0.5	black	46	17	9287
+N-GSK3 subgraph-9 10 11	CDH2 CTNNB1 PSEN1	45965	31291	white	rectangle	gene,gene,gene	0.5	black	46	17	1759,/,2514,/,9508
+N-GSK3 subgraph-90	PPP2CA	32739	53652	white	rectangle	gene	0.5	black	46	17	9299
+N-GSK3 subgraph-91	BAD	10738	44251	white	rectangle	gene	0.5	black	46	17	936
+N-GSK3 subgraph-92	PRKACA	34884	19423	white	rectangle	gene	0.5	black	46	17	9380
+N-GSK3 subgraph-93	PRKCD	30818	7691	white	rectangle	gene	0.5	black	46	17	9399
+N-GSK3 subgraph-94	PSEN1	37022	32362	white	rectangle	gene	0.5	black	46	17	9508
+N-GSK3 subgraph-95	PSEN1	24780	31177	white	rectangle	gene	0.5	black	46	17	9508
+N-GSK3 subgraph-96	PSEN1	19780	31233	white	rectangle	gene	0.5	black	46	17	9508
+N-GSK3 subgraph-97	PSEN1	21994	28330	white	rectangle	gene	0.5	black	46	17	9508
+N-GSK3 subgraph-98	BAX	10068	41147	white	rectangle	gene	0.5	black	46	17	959
+N-GSK3 subgraph-99	BAX	18924	40175	white	rectangle	gene	0.5	black	46	17	959

@@ -1,0 +1,70 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-MAPK-JNK subgraph-1 2	STAT3 GFAP	77021	32714	white	rectangle	gene,gene	0.5	black	46	17	11364,/,4235
+N-MAPK-JNK subgraph-11 12	JUN PIN1	48721	86400	white	rectangle	gene,gene	0.5	black	46	17	6204,/,8988
+N-MAPK-JNK subgraph-13 14	Pin1 Sult4a1	81106	10664	white	rectangle	gene,gene	0.5	black	46	17	1346036,/,1888971
+N-MAPK-JNK subgraph-15	CDK5R1 p25	33176	9880	white	rectangle	gene	0.5	black	46	17	CONSO00172
+N-MAPK-JNK subgraph-16	p14_3_3	42165	69067	white	rectangle	gene	0.5	black	46	17	p14_3_3
+N-MAPK-JNK subgraph-17	GSK3	6400	90664	white	rectangle	gene	0.5	black	46	17	GSK3
+N-MAPK-JNK subgraph-18	HSP90	35285	77533	white	rectangle	gene	0.5	black	46	17	HSP90
+N-MAPK-JNK subgraph-19	JNK	34322	51828	white	rectangle	gene	0.5	black	46	17	JNK
+N-MAPK-JNK subgraph-20	JNK	34569	60544	white	rectangle	gene	0.5	black	46	17	JNK
+N-MAPK-JNK subgraph-21	RAS	28891	10285	white	rectangle	gene	0.5	black	46	17	RAS
+N-MAPK-JNK subgraph-22	TXN	30839	75730	white	rectangle	gene	0.5	black	46	17	TXN
+N-MAPK-JNK subgraph-23	p38	20067	80082	white	rectangle	gene	0.5	black	46	17	p38
+N-MAPK-JNK subgraph-24	p38	25737	74225	white	rectangle	gene	0.5	black	46	17	p38
+N-MAPK-JNK subgraph-25	S100B	48660	24175	white	rectangle	gene	0.5	black	46	17	10500
+N-MAPK-JNK subgraph-26	SRC	56533	39920	white	rectangle	gene	0.5	black	46	17	11283
+N-MAPK-JNK subgraph-27	STAT1	68419	60534	white	rectangle	gene	0.5	black	46	17	11362
+N-MAPK-JNK subgraph-28	STAT3	77990	25600	white	rectangle	gene	0.5	black	46	17	11364
+N-MAPK-JNK subgraph-29	FASLG	42675	12594	white	rectangle	gene	0.5	black	46	17	11936
+N-MAPK-JNK subgraph-3 4 5	CDK5 CDK5R1 CDK5R2	77684	89970	white	rectangle	gene,gene,gene	0.5	black	46	17	1774,/,1775,/,1776
+N-MAPK-JNK subgraph-30	TRAF2	39686	76002	white	rectangle	gene	0.5	black	46	17	12032
+N-MAPK-JNK subgraph-31	TRAF6	26956	69236	white	rectangle	gene	0.5	black	46	17	12036
+N-MAPK-JNK subgraph-32	CAMK2A	73031	54400	white	rectangle	gene	0.5	black	46	17	1460
+N-MAPK-JNK subgraph-33	CASP8	7121	60800	white	rectangle	gene	0.5	black	46	17	1509
+N-MAPK-JNK subgraph-34	CDK5	82473	83971	white	rectangle	gene	0.5	black	46	17	1774
+N-MAPK-JNK subgraph-35	CHST1	88227	9600	white	rectangle	gene	0.5	black	46	17	1969
+N-MAPK-JNK subgraph-36	DAXX	42997	73022	white	rectangle	gene	0.5	black	46	17	2681
+N-MAPK-JNK subgraph-37	AGER	58898	17279	white	rectangle	gene	0.5	black	46	17	320
+N-MAPK-JNK subgraph-39	GSK3B	27800	13355	white	rectangle	gene	0.5	black	46	17	4617
+N-MAPK-JNK subgraph-40	IL6	83774	30019	white	rectangle	gene	0.5	black	46	17	6018
+N-MAPK-JNK subgraph-41	IRS1	40795	15002	white	rectangle	gene	0.5	black	46	17	6125
+N-MAPK-JNK subgraph-42	IRS1	44777	25739	white	rectangle	gene	0.5	black	46	17	6125
+N-MAPK-JNK subgraph-43	JAK3	91063	30861	white	rectangle	gene	0.5	black	46	17	6193
+N-MAPK-JNK subgraph-44	APP	47672	39830	white	rectangle	gene	0.5	black	46	17	620
+N-MAPK-JNK subgraph-45	APP	13521	89600	white	rectangle	gene	0.5	black	46	17	620
+N-MAPK-JNK subgraph-46	APP	47090	18402	white	rectangle	gene	0.5	black	46	17	620
+N-MAPK-JNK subgraph-47	APP	26755	52535	white	rectangle	gene	0.5	black	46	17	620
+N-MAPK-JNK subgraph-48	APP	47122	13522	white	rectangle	gene	0.5	black	46	17	620
+N-MAPK-JNK subgraph-49	APP	26624	46861	white	rectangle	gene	0.5	black	46	17	620
+N-MAPK-JNK subgraph-50	JUN	79734	76800	white	rectangle	gene	0.5	black	46	17	6204
+N-MAPK-JNK subgraph-51	JUN	33323	19039	white	rectangle	gene	0.5	black	46	17	6204
+N-MAPK-JNK subgraph-52	MAP3K5	34426	69462	white	rectangle	gene	0.5	black	46	17	6857
+N-MAPK-JNK subgraph-53	MAPK1	22488	39527	white	rectangle	gene	0.5	black	46	17	6871
+N-MAPK-JNK subgraph-54	MAPK10	22819	26305	white	rectangle	gene	0.5	black	46	17	6872
+N-MAPK-JNK subgraph-55	MAPK10	90063	85149	white	rectangle	gene	0.5	black	46	17	6872
+N-MAPK-JNK subgraph-56	MAPK10	13908	22717	white	rectangle	gene	0.5	black	46	17	6872
+N-MAPK-JNK subgraph-57	MAPK14	26492	26000	white	rectangle	gene	0.5	black	46	17	6876
+N-MAPK-JNK subgraph-58	MAPK14	90323	41600	white	rectangle	gene	0.5	black	46	17	6876
+N-MAPK-JNK subgraph-59	MAPK8	41418	21448	white	rectangle	gene	0.5	black	46	17	6881
+N-MAPK-JNK subgraph-6 7 8	APBB1 APP KLC1	44806	31188	white	rectangle	gene,gene,gene	0.5	black	46	17	581,/,620,/,6387
+N-MAPK-JNK subgraph-60	MAPK8	51082	20140	white	rectangle	gene	0.5	black	46	17	6881
+N-MAPK-JNK subgraph-61	MAPK8IP1	51399	6400	white	rectangle	gene	0.5	black	46	17	6882
+N-MAPK-JNK subgraph-62	MAPK9	26885	21390	white	rectangle	gene	0.5	black	46	17	6886
+N-MAPK-JNK subgraph-63	MAPK9	6400	19786	white	rectangle	gene	0.5	black	46	17	6886
+N-MAPK-JNK subgraph-64	MAPKAPK2	83200	42664	white	rectangle	gene	0.5	black	46	17	6887
+N-MAPK-JNK subgraph-65	MAPT	32476	22607	white	rectangle	gene	0.5	black	46	17	6893
+N-MAPK-JNK subgraph-66	MAPT	18314	31198	white	rectangle	gene	0.5	black	46	17	6893
+N-MAPK-JNK subgraph-67	MAPT	27714	33725	white	rectangle	gene	0.5	black	46	17	6893
+N-MAPK-JNK subgraph-68	MAPT	25538	31189	white	rectangle	gene	0.5	black	46	17	6893
+N-MAPK-JNK subgraph-69	MAPT	22917	33492	white	rectangle	gene	0.5	black	46	17	6893
+N-MAPK-JNK subgraph-70	MAPT	19730	32923	white	rectangle	gene	0.5	black	46	17	6893
+N-MAPK-JNK subgraph-71	ATF2	19581	19508	white	rectangle	gene	0.5	black	46	17	784
+N-MAPK-JNK subgraph-72	PDGFRL	54491	44121	white	rectangle	gene	0.5	black	46	17	8805
+N-MAPK-JNK subgraph-73	PIK3R1	71372	67618	white	rectangle	gene	0.5	black	46	17	8979
+N-MAPK-JNK subgraph-74	PIN1	41600	87464	white	rectangle	gene	0.5	black	46	17	8988
+N-MAPK-JNK subgraph-75	PRKCA	60800	59579	white	rectangle	gene	0.5	black	46	17	9393
+N-MAPK-JNK subgraph-76	EIF2AK2	0	61864	white	rectangle	gene	0.5	black	46	17	9437
+N-MAPK-JNK subgraph-77	Pin1	80000	1063	white	rectangle	gene	0.5	black	46	17	1346036
+N-MAPK-JNK subgraph-78	Sult4a1	87121	0	white	rectangle	gene	0.5	black	46	17	1888971
+N-MAPK-JNK subgraph-9 10	APBB1 KLC1	42347	47323	white	rectangle	gene,gene	0.5	black	46	17	581,/,6387

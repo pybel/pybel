@@ -1,0 +1,22 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-ADAM Metallopeptidase subgraph-1 2	XBP1 INS	14776	0	white	rectangle	gene,gene	0.5	black	46	17	12801,/,6081
+N-ADAM Metallopeptidase subgraph-10	CLSTN2	13815	5687	white	rectangle	gene	0.5	black	46	17	17448
+N-ADAM Metallopeptidase subgraph-11	CLSTN3	10865	10107	white	rectangle	gene	0.5	black	46	17	18371
+N-ADAM Metallopeptidase subgraph-12	ADAM10	16494	9399	white	rectangle	gene	0.5	black	46	17	188
+N-ADAM Metallopeptidase subgraph-13	ADAM17	18630	13407	white	rectangle	gene	0.5	black	46	17	195
+N-ADAM Metallopeptidase subgraph-14	ADAM19	19195	26508	white	rectangle	gene	0.5	black	46	17	197
+N-ADAM Metallopeptidase subgraph-15	ADAM9	33091	11519	white	rectangle	gene	0.5	black	46	17	216
+N-ADAM Metallopeptidase subgraph-16	IGF1	18911	521	white	rectangle	gene	0.5	black	46	17	5464
+N-ADAM Metallopeptidase subgraph-17	IL1B	11736	17627	white	rectangle	gene	0.5	black	46	17	5992
+N-ADAM Metallopeptidase subgraph-18	APP	25195	12974	white	rectangle	gene	0.5	black	46	17	620
+N-ADAM Metallopeptidase subgraph-19	APP	4403	22078	white	rectangle	gene	0.5	black	46	17	620
+N-ADAM Metallopeptidase subgraph-20	APP	8769	13944	white	rectangle	gene	0.5	black	46	17	620
+N-ADAM Metallopeptidase subgraph-21	JUN	10377	1650	white	rectangle	gene	0.5	black	46	17	6204
+N-ADAM Metallopeptidase subgraph-22	BACE1	0	13788	white	rectangle	gene	0.5	black	46	17	933
+N-ADAM Metallopeptidase subgraph-3	sAPP-beta	10739	26161	white	rectangle	gene	0.5	black	46	17	CONSO00042
+N-ADAM Metallopeptidase subgraph-4	sAPP-alpha	15788	18251	white	rectangle	gene	0.5	black	46	17	CONSO00067
+N-ADAM Metallopeptidase subgraph-5	Glutamate ionotropic receptor NMDA type subunits	25378	9533	white	rectangle	gene	0.5	black	46	17	1201
+N-ADAM Metallopeptidase subgraph-6	TIMP1	22770	2275	white	rectangle	gene	0.5	black	46	17	11820
+N-ADAM Metallopeptidase subgraph-7	XBP1	7450	5535	white	rectangle	gene	0.5	black	46	17	12801
+N-ADAM Metallopeptidase subgraph-8	SIRT1	21902	16504	white	rectangle	gene	0.5	black	46	17	14929
+N-ADAM Metallopeptidase subgraph-9	CLSTN1	22339	6752	white	rectangle	gene	0.5	black	46	17	17447

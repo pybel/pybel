@@ -1,0 +1,4 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Renin-angiotensin subgraph-1	ACE	2394	6820	white	rectangle	gene	0.5	black	46	17	2707
+N-Renin-angiotensin subgraph-3	APP	0	0	white	rectangle	gene	0.5	black	46	17	620
+N-Renin-angiotensin subgraph-4	APP	6784	12563	white	rectangle	gene	0.5	black	46	17	620

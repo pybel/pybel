@@ -1,0 +1,13 @@
+0	1	2
+N-TGF-Beta subgraph-2	activation	N-TGF-Beta subgraph-12
+N-TGF-Beta subgraph-2	activation	N-TGF-Beta subgraph-6
+N-TGF-Beta subgraph-10	inhibition	N-TGF-Beta subgraph-5
+N-TGF-Beta subgraph-1	inhibition	N-TGF-Beta subgraph-11
+N-TGF-Beta subgraph-13	activation	N-TGF-Beta subgraph-1
+N-TGF-Beta subgraph-3	activation	N-TGF-Beta subgraph-11
+N-TGF-Beta subgraph-7	inhibition	N-TGF-Beta subgraph-5
+N-TGF-Beta subgraph-8	activation	N-TGF-Beta subgraph-2
+N-TGF-Beta subgraph-8	activation	N-TGF-Beta subgraph-3
+N-TGF-Beta subgraph-8	activation	N-TGF-Beta subgraph-4
+N-TGF-Beta subgraph-8	activation	N-TGF-Beta subgraph-1
+N-TGF-Beta subgraph-9	inhibition	N-TGF-Beta subgraph-5

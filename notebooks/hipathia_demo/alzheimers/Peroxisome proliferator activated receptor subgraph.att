@@ -1,0 +1,19 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Peroxisome proliferator activated receptor subgraph-10	APP	19673	11465	white	rectangle	gene	0.5	black	46	17	620
+N-Peroxisome proliferator activated receptor subgraph-11	MYD88	32800	5719	white	rectangle	gene	0.5	black	46	17	7562
+N-Peroxisome proliferator activated receptor subgraph-12	NOS2	20078	4741	white	rectangle	gene	0.5	black	46	17	7873
+N-Peroxisome proliferator activated receptor subgraph-15	PPARG	25449	9905	white	rectangle	gene	0.5	black	46	17	9236
+N-Peroxisome proliferator activated receptor subgraph-16	BACE1	33058	13699	white	rectangle	gene	0.5	black	46	17	933
+N-Peroxisome proliferator activated receptor subgraph-18	Cdh2	0	9148	white	rectangle	gene	0.5	black	46	17	88355
+N-Peroxisome proliferator activated receptor subgraph-19	Gfap	13751	21413	white	rectangle	gene	0.5	black	46	17	95697
+N-Peroxisome proliferator activated receptor subgraph-2	TLR2	23258	17599	white	rectangle	gene	0.5	black	46	17	11848
+N-Peroxisome proliferator activated receptor subgraph-20	Pparg	7929	7291	white	rectangle	gene	0.5	black	46	17	97747
+N-Peroxisome proliferator activated receptor subgraph-21	Ptgs2	9297	17293	white	rectangle	gene	0.5	black	46	17	97798
+N-Peroxisome proliferator activated receptor subgraph-22	Bax	3941	0	white	rectangle	gene	0.5	black	46	17	99702
+N-Peroxisome proliferator activated receptor subgraph-3	TNF	30127	2698	white	rectangle	gene	0.5	black	46	17	11892
+N-Peroxisome proliferator activated receptor subgraph-4	IL23A	27064	18808	white	rectangle	gene	0.5	black	46	17	15488
+N-Peroxisome proliferator activated receptor subgraph-5	CD14	33812	9686	white	rectangle	gene	0.5	black	46	17	1628
+N-Peroxisome proliferator activated receptor subgraph-6	CTNNB1	22434	1421	white	rectangle	gene	0.5	black	46	17	2514
+N-Peroxisome proliferator activated receptor subgraph-7	IL12B	30612	16889	white	rectangle	gene	0.5	black	46	17	5970
+N-Peroxisome proliferator activated receptor subgraph-8	IL6	26498	1064	white	rectangle	gene	0.5	black	46	17	6018
+N-Peroxisome proliferator activated receptor subgraph-9	APP	15253	12449	white	rectangle	gene	0.5	black	46	17	620

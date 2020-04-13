@@ -1,0 +1,8 @@
+0	1	2
+N-Retinoblastoma subgraph-3	activation	N-Retinoblastoma subgraph-9
+N-Retinoblastoma subgraph-9	inhibition	N-Retinoblastoma subgraph-2
+N-Retinoblastoma subgraph-7	inhibition	N-Retinoblastoma subgraph-6
+N-Retinoblastoma subgraph-4	activation	N-Retinoblastoma subgraph-9
+N-Retinoblastoma subgraph-1	activation	N-Retinoblastoma subgraph-9
+N-Retinoblastoma subgraph-5	activation	N-Retinoblastoma subgraph-10
+N-Retinoblastoma subgraph-8	activation	N-Retinoblastoma subgraph-2

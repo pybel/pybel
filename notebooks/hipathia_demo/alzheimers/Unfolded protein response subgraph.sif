@@ -1,0 +1,25 @@
+0	1	2
+N-Unfolded protein response subgraph-17	inhibition	N-Unfolded protein response subgraph-16
+N-Unfolded protein response subgraph-21	activation	N-Unfolded protein response subgraph-5
+N-Unfolded protein response subgraph-21	activation	N-Unfolded protein response subgraph-14
+N-Unfolded protein response subgraph-25	inhibition	N-Unfolded protein response subgraph-15
+N-Unfolded protein response subgraph-25	inhibition	N-Unfolded protein response subgraph-13
+N-Unfolded protein response subgraph-25	inhibition	N-Unfolded protein response subgraph-19
+N-Unfolded protein response subgraph-6	activation	N-Unfolded protein response subgraph-9
+N-Unfolded protein response subgraph-6	inhibition	N-Unfolded protein response subgraph-3
+N-Unfolded protein response subgraph-12	activation	N-Unfolded protein response subgraph-20
+N-Unfolded protein response subgraph-1 2	activation	N-Unfolded protein response subgraph-9
+N-Unfolded protein response subgraph-18	activation	N-Unfolded protein response subgraph-22
+N-Unfolded protein response subgraph-10	activation	N-Unfolded protein response subgraph-17
+N-Unfolded protein response subgraph-10	activation	N-Unfolded protein response subgraph-17
+N-Unfolded protein response subgraph-13	activation	N-Unfolded protein response subgraph-12
+N-Unfolded protein response subgraph-16	activation	N-Unfolded protein response subgraph-6
+N-Unfolded protein response subgraph-24	activation	N-Unfolded protein response subgraph-15
+N-Unfolded protein response subgraph-24	activation	N-Unfolded protein response subgraph-19
+N-Unfolded protein response subgraph-24	activation	N-Unfolded protein response subgraph-13
+N-Unfolded protein response subgraph-22	activation	N-Unfolded protein response subgraph-15
+N-Unfolded protein response subgraph-22	activation	N-Unfolded protein response subgraph-19
+N-Unfolded protein response subgraph-22	activation	N-Unfolded protein response subgraph-13
+N-Unfolded protein response subgraph-23	inhibition	N-Unfolded protein response subgraph-15
+N-Unfolded protein response subgraph-23	inhibition	N-Unfolded protein response subgraph-13
+N-Unfolded protein response subgraph-23	inhibition	N-Unfolded protein response subgraph-19

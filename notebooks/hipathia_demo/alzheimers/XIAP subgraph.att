@@ -1,0 +1,11 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-XIAP subgraph-10	Xiap	6148	14141	white	rectangle	gene	0.5	black	46	17	107572
+N-XIAP subgraph-11	Casp3	13487	13458	white	rectangle	gene	0.5	black	46	17	107739
+N-XIAP subgraph-12	Casp9	9229	7442	white	rectangle	gene	0.5	black	46	17	1277950
+N-XIAP subgraph-13	Cycs	8521	0	white	rectangle	gene	0.5	black	46	17	88578
+N-XIAP subgraph-14	Sod1	0	18395	white	rectangle	gene	0.5	black	46	17	98351
+N-XIAP subgraph-5	BID	37479	0	white	rectangle	gene	0.5	black	46	17	1050
+N-XIAP subgraph-6	HTRA2	32558	25264	white	rectangle	gene	0.5	black	46	17	14348
+N-XIAP subgraph-7	CDK5R1	20258	16622	white	rectangle	gene	0.5	black	46	17	1775
+N-XIAP subgraph-8	CTSB	30358	1063	white	rectangle	gene	0.5	black	46	17	2527
+N-XIAP subgraph-9	XIAP	39679	24200	white	rectangle	gene	0.5	black	46	17	592

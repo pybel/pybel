@@ -1,0 +1,53 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Phosphatidylinositol 3 subgraph-11 12	IRS1 PIK3R2	48673	0	white	rectangle	gene,gene	0.5	black	46	17	6125,/,8980
+N-Phosphatidylinositol 3 subgraph-13 14	IRS2 PIK3R1	86089	36363	white	rectangle	gene,gene	0.5	black	46	17	6126,/,8979
+N-Phosphatidylinositol 3 subgraph-15 16	IRS2 PIK3R2	79306	23800	white	rectangle	gene,gene	0.5	black	46	17	6126,/,8980
+N-Phosphatidylinositol 3 subgraph-17 18	IRS4 PIK3R1	89488	107759	white	rectangle	gene,gene	0.5	black	46	17	6128,/,8979
+N-Phosphatidylinositol 3 subgraph-19 20	IRS4 PIK3R2	82706	95200	white	rectangle	gene,gene	0.5	black	46	17	6128,/,8980
+N-Phosphatidylinositol 3 subgraph-21	PI3K_p110	25358	55796	white	rectangle	gene	0.5	black	46	17	PI3K_p110
+N-Phosphatidylinositol 3 subgraph-22	AKT	29896	71108	white	rectangle	gene	0.5	black	46	17	AKT
+N-Phosphatidylinositol 3 subgraph-23	AKT	16999	58260	white	rectangle	gene	0.5	black	46	17	AKT
+N-Phosphatidylinositol 3 subgraph-24	AKT	28652	63188	white	rectangle	gene	0.5	black	46	17	AKT
+N-Phosphatidylinositol 3 subgraph-25	GSK3	47600	102000	white	rectangle	gene	0.5	black	46	17	GSK3
+N-Phosphatidylinositol 3 subgraph-26	GSK3	54384	114559	white	rectangle	gene	0.5	black	46	17	GSK3
+N-Phosphatidylinositol 3 subgraph-28	PKC	46978	36897	white	rectangle	gene	0.5	black	46	17	PKC
+N-Phosphatidylinositol 3 subgraph-29	RYR3	105399	119000	white	rectangle	gene	0.5	black	46	17	10485
+N-Phosphatidylinositol 3 subgraph-3 4	GAB2 PTK2	7020	114550	white	rectangle	gene,gene	0.5	black	46	17	14458,/,9611
+N-Phosphatidylinositol 3 subgraph-30	GAB2	11422	108820	white	rectangle	gene	0.5	black	46	17	14458
+N-Phosphatidylinositol 3 subgraph-31	GAB2	71806	54884	white	rectangle	gene	0.5	black	46	17	14458
+N-Phosphatidylinositol 3 subgraph-33	SIT1	79831	56121	white	rectangle	gene	0.5	black	46	17	17710
+N-Phosphatidylinositol 3 subgraph-34	ADAM10	7120	13600	white	rectangle	gene	0.5	black	46	17	188
+N-Phosphatidylinositol 3 subgraph-35	CRK	64600	58650	white	rectangle	gene	0.5	black	46	17	2362
+N-Phosphatidylinositol 3 subgraph-36	PIK3R5	35970	73514	white	rectangle	gene	0.5	black	46	17	30035
+N-Phosphatidylinositol 3 subgraph-37	AKT1	23747	81611	white	rectangle	gene	0.5	black	46	17	391
+N-Phosphatidylinositol 3 subgraph-38	AKT1	40687	79747	white	rectangle	gene	0.5	black	46	17	391
+N-Phosphatidylinositol 3 subgraph-39	AKT2	41292	92345	white	rectangle	gene	0.5	black	46	17	392
+N-Phosphatidylinositol 3 subgraph-40	AKT3	27640	86111	white	rectangle	gene	0.5	black	46	17	393
+N-Phosphatidylinositol 3 subgraph-42	HSPA1A	26490	23800	white	rectangle	gene	0.5	black	46	17	5232
+N-Phosphatidylinositol 3 subgraph-43	IGF1	25453	47193	white	rectangle	gene	0.5	black	46	17	5464
+N-Phosphatidylinositol 3 subgraph-44	IRS1	18020	43097	white	rectangle	gene	0.5	black	46	17	6125
+N-Phosphatidylinositol 3 subgraph-45	IRS1	51068	6820	white	rectangle	gene	0.5	black	46	17	6125
+N-Phosphatidylinositol 3 subgraph-46	IRS2	17117	47938	white	rectangle	gene	0.5	black	46	17	6126
+N-Phosphatidylinositol 3 subgraph-47	IRS2	81701	30620	white	rectangle	gene	0.5	black	46	17	6126
+N-Phosphatidylinositol 3 subgraph-48	IRS4	85101	102020	white	rectangle	gene	0.5	black	46	17	6128
+N-Phosphatidylinositol 3 subgraph-49	ITPR3	112188	131560	white	rectangle	gene	0.5	black	46	17	6182
+N-Phosphatidylinositol 3 subgraph-5 6	GAB2 PTK7	13834	102000	white	rectangle	gene,gene	0.5	black	46	17	14458,/,9618
+N-Phosphatidylinositol 3 subgraph-50	APP	91799	14663	white	rectangle	gene	0.5	black	46	17	620
+N-Phosphatidylinositol 3 subgraph-51	APP	30667	39941	white	rectangle	gene	0.5	black	46	17	620
+N-Phosphatidylinositol 3 subgraph-52	JUN	0	14663	white	rectangle	gene	0.5	black	46	17	6204
+N-Phosphatidylinositol 3 subgraph-53	MARCKS	36004	34899	white	rectangle	gene	0.5	black	46	17	6759
+N-Phosphatidylinositol 3 subgraph-54	MARCKS	39480	40371	white	rectangle	gene	0.5	black	46	17	6759
+N-Phosphatidylinositol 3 subgraph-56	NOS2	98919	13600	white	rectangle	gene	0.5	black	46	17	7873
+N-Phosphatidylinositol 3 subgraph-57	PDK1	31955	79338	white	rectangle	gene	0.5	black	46	17	8809
+N-Phosphatidylinositol 3 subgraph-58	PIK3CA	78184	83963	white	rectangle	gene	0.5	black	46	17	8975
+N-Phosphatidylinositol 3 subgraph-59	PIK3CB	71400	71400	white	rectangle	gene	0.5	black	46	17	8976
+N-Phosphatidylinositol 3 subgraph-60	PIK3R1	73795	78221	white	rectangle	gene	0.5	black	46	17	8979
+N-Phosphatidylinositol 3 subgraph-62	PIK3R2	73095	62908	white	rectangle	gene	0.5	black	46	17	8980
+N-Phosphatidylinositol 3 subgraph-65	PRKCD	28874	31302	white	rectangle	gene	0.5	black	46	17	9399
+N-Phosphatidylinositol 3 subgraph-66	PRKCD	49995	108820	white	rectangle	gene	0.5	black	46	17	9399
+N-Phosphatidylinositol 3 subgraph-67	PRKCD	24616	34842	white	rectangle	gene	0.5	black	46	17	9399
+N-Phosphatidylinositol 3 subgraph-68	PSEN1	107799	125820	white	rectangle	gene	0.5	black	46	17	9508
+N-Phosphatidylinositol 3 subgraph-7 8	INSR APP	36390	86345	white	rectangle	gene,gene	0.5	black	46	17	6091,/,620
+N-Phosphatidylinositol 3 subgraph-71	PTK2	65962	49239	white	rectangle	gene	0.5	black	46	17	9611
+N-Phosphatidylinositol 3 subgraph-72	PTK7	75392	47600	white	rectangle	gene	0.5	black	46	17	9618
+N-Phosphatidylinositol 3 subgraph-9 10	IRS1 PIK3R1	55457	12563	white	rectangle	gene,gene	0.5	black	46	17	6125,/,8979

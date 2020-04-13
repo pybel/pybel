@@ -1,0 +1,21 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Reactive oxygen species subgraph-10	CASP1	42971	45618	white	rectangle	gene	0.5	black	46	17	1499
+N-Reactive oxygen species subgraph-11	COX4I2	48531	0	white	rectangle	gene	0.5	black	46	17	16232
+N-Reactive oxygen species subgraph-12	NLRP3	32400	37580	white	rectangle	gene	0.5	black	46	17	16400
+N-Reactive oxygen species subgraph-13	COX4I1	56413	4939	white	rectangle	gene	0.5	black	46	17	2265
+N-Reactive oxygen species subgraph-14	COX5B	45900	13244	white	rectangle	gene	0.5	black	46	17	2269
+N-Reactive oxygen species subgraph-17	IL1B	40018	38534	white	rectangle	gene	0.5	black	46	17	5992
+N-Reactive oxygen species subgraph-18	APP	51800	8754	white	rectangle	gene	0.5	black	46	17	620
+N-Reactive oxygen species subgraph-19	APP	47023	5865	white	rectangle	gene	0.5	black	46	17	620
+N-Reactive oxygen species subgraph-20	APP	44630	32400	white	rectangle	gene	0.5	black	46	17	620
+N-Reactive oxygen species subgraph-21	NOX4	6812	45900	white	rectangle	gene	0.5	black	46	17	7891
+N-Reactive oxygen species subgraph-22	ATM	0	58448	white	rectangle	gene	0.5	black	46	17	795
+N-Reactive oxygen species subgraph-23	OGG1	7618	22334	white	rectangle	gene	0.5	black	46	17	8125
+N-Reactive oxygen species subgraph-24	OGG1	10571	29418	white	rectangle	gene	0.5	black	46	17	8125
+N-Reactive oxygen species subgraph-25	OGG1	0	21380	white	rectangle	gene	0.5	black	46	17	8125
+N-Reactive oxygen species subgraph-29	Map3k5	9821	5400	white	rectangle	gene	0.5	black	46	17	1346876
+N-Reactive oxygen species subgraph-31	Sod1	2700	6463	white	rectangle	gene	0.5	black	46	17	98351
+N-Reactive oxygen species subgraph-5	Caspases	52578	21600	white	rectangle	gene	0.5	black	46	17	468
+N-Reactive oxygen species subgraph-7	TNF	12229	16200	white	rectangle	gene	0.5	black	46	17	11892
+N-Reactive oxygen species subgraph-8	TP53	4402	52715	white	rectangle	gene	0.5	black	46	17	11998
+N-Reactive oxygen species subgraph-9	SLC25A21	45457	22664	white	rectangle	gene	0.5	black	46	17	14411

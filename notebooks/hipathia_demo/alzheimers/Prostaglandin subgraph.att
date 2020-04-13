@@ -1,0 +1,10 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Prostaglandin subgraph-10	PTGS2	38910	9200	white	rectangle	gene	0.5	black	46	17	9605
+N-Prostaglandin subgraph-11	Gfap	0	21688	white	rectangle	gene	0.5	black	46	17	95697
+N-Prostaglandin subgraph-12	Pparg	13036	21380	white	rectangle	gene	0.5	black	46	17	97747
+N-Prostaglandin subgraph-13	Ptgs2	6194	9620	white	rectangle	gene	0.5	black	46	17	97798
+N-Prostaglandin subgraph-2	IL32	6377	2300	white	rectangle	gene	0.5	black	46	17	16830
+N-Prostaglandin subgraph-3	PTGES2	38910	0	white	rectangle	gene	0.5	black	46	17	17822
+N-Prostaglandin subgraph-4	APP	6416	17296	white	rectangle	gene	0.5	black	46	17	620
+N-Prostaglandin subgraph-6	NFKBIA	31789	10264	white	rectangle	gene	0.5	black	46	17	7797
+N-Prostaglandin subgraph-8	BACE1	31789	1063	white	rectangle	gene	0.5	black	46	17	933

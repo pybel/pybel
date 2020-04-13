@@ -1,0 +1,5 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Innate immune system subgraph-11	APP	12376	8349	white	rectangle	gene	0.5	black	46	17	620
+N-Innate immune system subgraph-12	KLC1	4789	7171	white	rectangle	gene	0.5	black	46	17	6387
+N-Innate immune system subgraph-13	MAPT	2050	0	white	rectangle	gene	0.5	black	46	17	6893
+N-Innate immune system subgraph-4 5	CLSTN1 KLC1	0	13169	white	rectangle	gene,gene	0.5	black	46	17	17447,/,6387

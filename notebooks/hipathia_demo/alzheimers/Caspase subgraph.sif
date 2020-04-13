@@ -1,0 +1,85 @@
+0	1	2
+N-Caspase subgraph-73	activation	N-Caspase subgraph-71
+N-Caspase subgraph-68	activation	N-Caspase subgraph-46
+N-Caspase subgraph-47	inhibition	N-Caspase subgraph-40
+N-Caspase subgraph-47	inhibition	N-Caspase subgraph-48
+N-Caspase subgraph-47	inhibition	N-Caspase subgraph-57
+N-Caspase subgraph-43	activation	N-Caspase subgraph-54
+N-Caspase subgraph-74	inhibition	N-Caspase subgraph-81
+N-Caspase subgraph-74	inhibition	N-Caspase subgraph-77
+N-Caspase subgraph-74	inhibition	N-Caspase subgraph-71
+N-Caspase subgraph-74	inhibition	N-Caspase subgraph-79
+N-Caspase subgraph-17 18	activation	N-Caspase subgraph-41
+N-Caspase subgraph-20	activation	N-Caspase subgraph-27
+N-Caspase subgraph-38	activation	N-Caspase subgraph-60
+N-Caspase subgraph-38	activation	N-Caspase subgraph-55
+N-Caspase subgraph-38	activation	N-Caspase subgraph-55
+N-Caspase subgraph-38	activation	N-Caspase subgraph-8 9
+N-Caspase subgraph-64	inhibition	N-Caspase subgraph-36
+N-Caspase subgraph-1 2	activation	N-Caspase subgraph-40
+N-Caspase subgraph-56	activation	N-Caspase subgraph-61
+N-Caspase subgraph-65	activation	N-Caspase subgraph-22
+N-Caspase subgraph-65	inhibition	N-Caspase subgraph-21
+N-Caspase subgraph-70	inhibition	N-Caspase subgraph-73
+N-Caspase subgraph-70	inhibition	N-Caspase subgraph-73
+N-Caspase subgraph-70	inhibition	N-Caspase subgraph-73
+N-Caspase subgraph-70	inhibition	N-Caspase subgraph-71
+N-Caspase subgraph-51	inhibition	N-Caspase subgraph-41
+N-Caspase subgraph-80	activation	N-Caspase subgraph-79
+N-Caspase subgraph-80	inhibition	N-Caspase subgraph-77
+N-Caspase subgraph-80	inhibition	N-Caspase subgraph-78
+N-Caspase subgraph-80	activation	N-Caspase subgraph-81
+N-Caspase subgraph-80	activation	N-Caspase subgraph-72
+N-Caspase subgraph-59	inhibition	N-Caspase subgraph-55
+N-Caspase subgraph-63	activation	N-Caspase subgraph-36
+N-Caspase subgraph-63	activation	N-Caspase subgraph-39
+N-Caspase subgraph-48	activation	N-Caspase subgraph-34
+N-Caspase subgraph-48	activation	N-Caspase subgraph-26
+N-Caspase subgraph-48	activation	N-Caspase subgraph-25
+N-Caspase subgraph-48	inhibition	N-Caspase subgraph-57
+N-Caspase subgraph-33	activation	N-Caspase subgraph-24
+N-Caspase subgraph-37	activation	N-Caspase subgraph-60
+N-Caspase subgraph-79	activation	N-Caspase subgraph-73
+N-Caspase subgraph-79	activation	N-Caspase subgraph-75
+N-Caspase subgraph-58	activation	N-Caspase subgraph-36
+N-Caspase subgraph-58	activation	N-Caspase subgraph-57
+N-Caspase subgraph-34	activation	N-Caspase subgraph-54
+N-Caspase subgraph-76	activation	N-Caspase subgraph-71
+N-Caspase subgraph-81	activation	N-Caspase subgraph-79
+N-Caspase subgraph-81	activation	N-Caspase subgraph-71
+N-Caspase subgraph-5 6 7	activation	N-Caspase subgraph-40
+N-Caspase subgraph-36	activation	N-Caspase subgraph-60
+N-Caspase subgraph-36	activation	N-Caspase subgraph-60
+N-Caspase subgraph-36	activation	N-Caspase subgraph-60
+N-Caspase subgraph-36	activation	N-Caspase subgraph-60
+N-Caspase subgraph-36	activation	N-Caspase subgraph-55
+N-Caspase subgraph-36	activation	N-Caspase subgraph-55
+N-Caspase subgraph-19	activation	N-Caspase subgraph-42
+N-Caspase subgraph-40	activation	N-Caspase subgraph-55
+N-Caspase subgraph-40	activation	N-Caspase subgraph-55
+N-Caspase subgraph-40	activation	N-Caspase subgraph-55
+N-Caspase subgraph-40	inhibition	N-Caspase subgraph-57
+N-Caspase subgraph-52	inhibition	N-Caspase subgraph-41
+N-Caspase subgraph-66	activation	N-Caspase subgraph-40
+N-Caspase subgraph-29	activation	N-Caspase subgraph-46
+N-Caspase subgraph-32	inhibition	N-Caspase subgraph-53
+N-Caspase subgraph-62	inhibition	N-Caspase subgraph-27
+N-Caspase subgraph-50	inhibition	N-Caspase subgraph-68
+N-Caspase subgraph-50	inhibition	N-Caspase subgraph-69
+N-Caspase subgraph-50	activation	N-Caspase subgraph-69
+N-Caspase subgraph-50	inhibition	N-Caspase subgraph-36
+N-Caspase subgraph-50	activation	N-Caspase subgraph-36
+N-Caspase subgraph-50	inhibition	N-Caspase subgraph-67
+N-Caspase subgraph-14 15 16	activation	N-Caspase subgraph-40
+N-Caspase subgraph-30	activation	N-Caspase subgraph-57
+N-Caspase subgraph-55	activation	N-Caspase subgraph-36
+N-Caspase subgraph-44	inhibition	N-Caspase subgraph-71
+N-Caspase subgraph-44	inhibition	N-Caspase subgraph-71
+N-Caspase subgraph-83	activation	N-Caspase subgraph-82
+N-Caspase subgraph-46	activation	N-Caspase subgraph-17 18
+N-Caspase subgraph-46	activation	N-Caspase subgraph-41
+N-Caspase subgraph-46	activation	N-Caspase subgraph-36
+N-Caspase subgraph-49	activation	N-Caspase subgraph-36
+N-Caspase subgraph-42	inhibition	N-Caspase subgraph-41
+N-Caspase subgraph-28	activation	N-Caspase subgraph-54
+N-Caspase subgraph-45	inhibition	N-Caspase subgraph-36

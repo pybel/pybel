@@ -1,0 +1,5 @@
+0	1	2
+N-Disaccharide metabolism subgraph-2	inhibition	N-Disaccharide metabolism subgraph-3
+N-Disaccharide metabolism subgraph-4	activation	N-Disaccharide metabolism subgraph-2
+N-Disaccharide metabolism subgraph-1	activation	N-Disaccharide metabolism subgraph-3
+N-Disaccharide metabolism subgraph-1	activation	N-Disaccharide metabolism subgraph-5

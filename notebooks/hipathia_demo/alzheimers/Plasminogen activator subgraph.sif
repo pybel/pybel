@@ -1,0 +1,16 @@
+0	1	2
+N-Plasminogen activator subgraph-4	activation	N-Plasminogen activator subgraph-3
+N-Plasminogen activator subgraph-4	activation	N-Plasminogen activator subgraph-3
+N-Plasminogen activator subgraph-4	activation	N-Plasminogen activator subgraph-7
+N-Plasminogen activator subgraph-4	activation	N-Plasminogen activator subgraph-1
+N-Plasminogen activator subgraph-9	inhibition	N-Plasminogen activator subgraph-10
+N-Plasminogen activator subgraph-9	inhibition	N-Plasminogen activator subgraph-13
+N-Plasminogen activator subgraph-8	inhibition	N-Plasminogen activator subgraph-4
+N-Plasminogen activator subgraph-13	activation	N-Plasminogen activator subgraph-5
+N-Plasminogen activator subgraph-13	activation	N-Plasminogen activator subgraph-6
+N-Plasminogen activator subgraph-6	activation	N-Plasminogen activator subgraph-10
+N-Plasminogen activator subgraph-6	activation	N-Plasminogen activator subgraph-12
+N-Plasminogen activator subgraph-10	activation	N-Plasminogen activator subgraph-6
+N-Plasminogen activator subgraph-10	activation	N-Plasminogen activator subgraph-6
+N-Plasminogen activator subgraph-10	activation	N-Plasminogen activator subgraph-13
+N-Plasminogen activator subgraph-10	activation	N-Plasminogen activator subgraph-5

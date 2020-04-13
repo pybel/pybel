@@ -1,0 +1,17 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Toll like receptor subgraph-1 2 3	TRADD CASP8 FADD	49075	25600	white	rectangle	gene,gene,gene	0.5	black	46	17	12030,/,1509,/,3573
+N-Toll like receptor subgraph-10	TLR2	7868	20886	white	rectangle	gene	0.5	black	46	17	11848
+N-Toll like receptor subgraph-11	TLR4	41345	1063	white	rectangle	gene	0.5	black	46	17	11850
+N-Toll like receptor subgraph-12	CASP8	46665	32414	white	rectangle	gene	0.5	black	46	17	1509
+N-Toll like receptor subgraph-13	CD14	12734	21416	white	rectangle	gene	0.5	black	46	17	1628
+N-Toll like receptor subgraph-15	FADD	19945	8795	white	rectangle	gene	0.5	black	46	17	3573
+N-Toll like receptor subgraph-16	APP	14135	14429	white	rectangle	gene	0.5	black	46	17	620
+N-Toll like receptor subgraph-17	MYD88	18389	22105	white	rectangle	gene	0.5	black	46	17	7562
+N-Toll like receptor subgraph-18	NFKB1	48466	0	white	rectangle	gene	0.5	black	46	17	7794
+N-Toll like receptor subgraph-19	PPARG	12529	27981	white	rectangle	gene	0.5	black	46	17	9236
+N-Toll like receptor subgraph-20	EIF2AK2	22798	14512	white	rectangle	gene	0.5	black	46	17	9437
+N-Toll like receptor subgraph-23	Tlr1	3575	1415	white	rectangle	gene	0.5	black	46	17	1341295
+N-Toll like receptor subgraph-24	Tlr6	11832	0	white	rectangle	gene	0.5	black	46	17	1341296
+N-Toll like receptor subgraph-25	Tlr2	8359	7737	white	rectangle	gene	0.5	black	46	17	1346060
+N-Toll like receptor subgraph-4 5 6	CASP8 FADD PTPN13	42263	38148	white	rectangle	gene,gene,gene	0.5	black	46	17	1509,/,3573,/,9646
+N-Toll like receptor subgraph-7 8	APP Tlr2	0	8948	white	rectangle	gene,gene	0.5	black	46	17	620,/,1346060

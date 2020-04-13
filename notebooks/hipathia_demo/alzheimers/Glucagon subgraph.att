@@ -1,0 +1,4 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Glucagon subgraph-1	GCG	2395	6820	white	rectangle	gene	0.5	black	46	17	4191
+N-Glucagon subgraph-2	MAPT	0	0	white	rectangle	gene	0.5	black	46	17	6893
+N-Glucagon subgraph-3	NGF	6785	12563	white	rectangle	gene	0.5	black	46	17	7808

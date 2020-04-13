@@ -1,0 +1,33 @@
+0	1	2
+N-Beta-Catenin subgraph-32	inhibition	N-Beta-Catenin subgraph-15 16
+N-Beta-Catenin subgraph-10 11	inhibition	N-Beta-Catenin subgraph-8 9
+N-Beta-Catenin subgraph-35	inhibition	N-Beta-Catenin subgraph-23
+N-Beta-Catenin subgraph-35	activation	N-Beta-Catenin subgraph-1 2 3 4 5
+N-Beta-Catenin subgraph-33	inhibition	N-Beta-Catenin subgraph-15 16
+N-Beta-Catenin subgraph-24	activation	N-Beta-Catenin subgraph-27
+N-Beta-Catenin subgraph-24	activation	N-Beta-Catenin subgraph-15 16
+N-Beta-Catenin subgraph-34	activation	N-Beta-Catenin subgraph-20 21
+N-Beta-Catenin subgraph-26	activation	N-Beta-Catenin subgraph-17 18 19
+N-Beta-Catenin subgraph-1 2 3 4 5	activation	N-Beta-Catenin subgraph-28
+N-Beta-Catenin subgraph-30	activation	N-Beta-Catenin subgraph-26
+N-Beta-Catenin subgraph-25	activation	N-Beta-Catenin subgraph-27
+N-Beta-Catenin subgraph-31	activation	N-Beta-Catenin subgraph-12 13 14
+N-Beta-Catenin subgraph-31	activation	N-Beta-Catenin subgraph-20 21
+N-Beta-Catenin subgraph-31	activation	N-Beta-Catenin subgraph-6 7
+N-Beta-Catenin subgraph-31	activation	N-Beta-Catenin subgraph-26
+N-Beta-Catenin subgraph-31	inhibition	N-Beta-Catenin subgraph-26
+N-Beta-Catenin subgraph-31	inhibition	N-Beta-Catenin subgraph-23
+N-Beta-Catenin subgraph-31	inhibition	N-Beta-Catenin subgraph-23
+N-Beta-Catenin subgraph-27	activation	N-Beta-Catenin subgraph-26
+N-Beta-Catenin subgraph-27	inhibition	N-Beta-Catenin subgraph-26
+N-Beta-Catenin subgraph-27	inhibition	N-Beta-Catenin subgraph-26
+N-Beta-Catenin subgraph-22	activation	N-Beta-Catenin subgraph-1 2 3 4 5
+N-Beta-Catenin subgraph-29	activation	N-Beta-Catenin subgraph-1 2 3 4 5
+N-Beta-Catenin subgraph-29	activation	N-Beta-Catenin subgraph-27
+N-Beta-Catenin subgraph-29	activation	N-Beta-Catenin subgraph-27
+N-Beta-Catenin subgraph-29	activation	N-Beta-Catenin subgraph-27
+N-Beta-Catenin subgraph-29	activation	N-Beta-Catenin subgraph-27
+N-Beta-Catenin subgraph-29	activation	N-Beta-Catenin subgraph-27
+N-Beta-Catenin subgraph-29	activation	N-Beta-Catenin subgraph-32
+N-Beta-Catenin subgraph-29	activation	N-Beta-Catenin subgraph-33
+N-Beta-Catenin subgraph-29	inhibition	N-Beta-Catenin subgraph-26

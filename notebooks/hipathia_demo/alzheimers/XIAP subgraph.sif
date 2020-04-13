@@ -1,0 +1,12 @@
+0	1	2
+N-XIAP subgraph-12	activation	N-XIAP subgraph-11
+N-XIAP subgraph-8	activation	N-XIAP subgraph-5
+N-XIAP subgraph-7	inhibition	N-XIAP subgraph-11
+N-XIAP subgraph-7	inhibition	N-XIAP subgraph-11
+N-XIAP subgraph-6	inhibition	N-XIAP subgraph-9
+N-XIAP subgraph-13	activation	N-XIAP subgraph-12
+N-XIAP subgraph-10	inhibition	N-XIAP subgraph-12
+N-XIAP subgraph-10	inhibition	N-XIAP subgraph-12
+N-XIAP subgraph-10	inhibition	N-XIAP subgraph-12
+N-XIAP subgraph-10	inhibition	N-XIAP subgraph-11
+N-XIAP subgraph-14	inhibition	N-XIAP subgraph-10

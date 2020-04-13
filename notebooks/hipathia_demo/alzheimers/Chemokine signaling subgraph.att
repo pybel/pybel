@@ -1,0 +1,28 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Chemokine signaling subgraph-11	CXCL12	56510	30764	white	rectangle	gene	0.5	black	46	17	10672
+N-Chemokine signaling subgraph-13	CCR2	9546	8055	white	rectangle	gene	0.5	black	46	17	1603
+N-Chemokine signaling subgraph-14	CCR5	1065	7936	white	rectangle	gene	0.5	black	46	17	1606
+N-Chemokine signaling subgraph-15	CCR7	10863	52800	white	rectangle	gene	0.5	black	46	17	1608
+N-Chemokine signaling subgraph-16	TREM2	3741	53864	white	rectangle	gene	0.5	black	46	17	17761
+N-Chemokine signaling subgraph-17	CSF1R	56728	12563	white	rectangle	gene	0.5	black	46	17	2433
+N-Chemokine signaling subgraph-18	HSPB6	16458	2809	white	rectangle	gene	0.5	black	46	17	26511
+N-Chemokine signaling subgraph-19	IL34	52338	6820	white	rectangle	gene	0.5	black	46	17	28529
+N-Chemokine signaling subgraph-20	CXCL1	14359	28824	white	rectangle	gene	0.5	black	46	17	4602
+N-Chemokine signaling subgraph-21	CXCL2	25498	23160	white	rectangle	gene	0.5	black	46	17	4603
+N-Chemokine signaling subgraph-22	GSK3B	7572	23074	white	rectangle	gene	0.5	black	46	17	4617
+N-Chemokine signaling subgraph-23	HSPB2	10568	0	white	rectangle	gene	0.5	black	46	17	5247
+N-Chemokine signaling subgraph-24	HSPB3	3797	2245	white	rectangle	gene	0.5	black	46	17	5248
+N-Chemokine signaling subgraph-25	IL10	20374	12972	white	rectangle	gene	0.5	black	46	17	5962
+N-Chemokine signaling subgraph-26	IL1B	17222	23851	white	rectangle	gene	0.5	black	46	17	5992
+N-Chemokine signaling subgraph-27	APP	49941	0	white	rectangle	gene	0.5	black	46	17	620
+N-Chemokine signaling subgraph-28	NFKB1	3435	35042	white	rectangle	gene	0.5	black	46	17	7794
+N-Chemokine signaling subgraph-29	NFKBIA	63630	29700	white	rectangle	gene	0.5	black	46	17	7797
+N-Chemokine signaling subgraph-3 4	Gfap Il12b	43564	52770	white	rectangle	gene,gene	0.5	black	46	17	95697,/,96540
+N-Chemokine signaling subgraph-30	Cxcr3	48352	46771	white	rectangle	gene	0.5	black	46	17	1277207
+N-Chemokine signaling subgraph-31	Il12a	55940	47949	white	rectangle	gene	0.5	black	46	17	96539
+N-Chemokine signaling subgraph-32	Il12b	45614	39600	white	rectangle	gene	0.5	black	46	17	96540
+N-Chemokine signaling subgraph-5	CCL2	12783	16283	white	rectangle	gene	0.5	black	46	17	10618
+N-Chemokine signaling subgraph-6	CCL20	23426	29888	white	rectangle	gene	0.5	black	46	17	10619
+N-Chemokine signaling subgraph-7	CCL3	0	41909	white	rectangle	gene	0.5	black	46	17	10627
+N-Chemokine signaling subgraph-8	CCL5	349	27560	white	rectangle	gene	0.5	black	46	17	10632
+N-Chemokine signaling subgraph-9	CXCL10	9935	30173	white	rectangle	gene	0.5	black	46	17	10637

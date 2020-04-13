@@ -1,0 +1,23 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-DKK1 subgraph-1	S100B	16794	7552	white	rectangle	gene	0.5	black	46	17	10500
+N-DKK1 subgraph-10	GSK3B	19152	0	white	rectangle	gene	0.5	black	46	17	4617
+N-DKK1 subgraph-11	APP	22831	15844	white	rectangle	gene	0.5	black	46	17	620
+N-DKK1 subgraph-12	APP	18736	11491	white	rectangle	gene	0.5	black	46	17	620
+N-DKK1 subgraph-13	MAP2	19673	21435	white	rectangle	gene	0.5	black	46	17	6839
+N-DKK1 subgraph-14	MAPT	13404	26147	white	rectangle	gene	0.5	black	46	17	6893
+N-DKK1 subgraph-15	NAB2	7571	32325	white	rectangle	gene	0.5	black	46	17	7627
+N-DKK1 subgraph-16	NEFH	23161	20845	white	rectangle	gene	0.5	black	46	17	7737
+N-DKK1 subgraph-17	BACE1	7346	11687	white	rectangle	gene	0.5	black	46	17	933
+N-DKK1 subgraph-18	Dkk1	50076	33438	white	rectangle	gene	0.5	black	46	17	1307313
+N-DKK1 subgraph-19	Mapt	55262	27183	white	rectangle	gene	0.5	black	46	17	69329
+N-DKK1 subgraph-2	KLF10	15027	34231	white	rectangle	gene	0.5	black	46	17	11810
+N-DKK1 subgraph-20	Mapt	45700	26600	white	rectangle	gene	0.5	black	46	17	69329
+N-DKK1 subgraph-21	Mapt	42242	35572	white	rectangle	gene	0.5	black	46	17	69329
+N-DKK1 subgraph-22	Mapt	57655	36384	white	rectangle	gene	0.5	black	46	17	69329
+N-DKK1 subgraph-23	Mapt	49693	41556	white	rectangle	gene	0.5	black	46	17	69329
+N-DKK1 subgraph-4	WNT3A	21660	28225	white	rectangle	gene	0.5	black	46	17	15983
+N-DKK1 subgraph-5	CLU	12187	10027	white	rectangle	gene	0.5	black	46	17	2095
+N-DKK1 subgraph-6	DKK1	14334	16996	white	rectangle	gene	0.5	black	46	17	2891
+N-DKK1 subgraph-7	DKK4	0	21834	white	rectangle	gene	0.5	black	46	17	2894
+N-DKK1 subgraph-8	EGR1	8355	22181	white	rectangle	gene	0.5	black	46	17	3238
+N-DKK1 subgraph-9	FOS	5471	16870	white	rectangle	gene	0.5	black	46	17	3796

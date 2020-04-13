@@ -1,0 +1,36 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Matrix metalloproteinase subgraph-1 2	PLAU PLAUR	3054	12872	white	rectangle	gene,gene	0.5	black	46	17	9052,/,9053
+N-Matrix metalloproteinase subgraph-10	GRIN3B	57965	40300	white	rectangle	gene	0.5	black	46	17	16768
+N-Matrix metalloproteinase subgraph-11	CLSTN1	58640	57973	white	rectangle	gene	0.5	black	46	17	17447
+N-Matrix metalloproteinase subgraph-12	ADAM10	54655	50153	white	rectangle	gene	0.5	black	46	17	188
+N-Matrix metalloproteinase subgraph-13	ADAM17	52229	40976	white	rectangle	gene	0.5	black	46	17	195
+N-Matrix metalloproteinase subgraph-14	CHRM1	50041	1063	white	rectangle	gene	0.5	black	46	17	1950
+N-Matrix metalloproteinase subgraph-15	ADAM9	52834	43639	white	rectangle	gene	0.5	black	46	17	216
+N-Matrix metalloproteinase subgraph-16	F2	43841	63922	white	rectangle	gene	0.5	black	46	17	3535
+N-Matrix metalloproteinase subgraph-17	GRIN2A	47106	48642	white	rectangle	gene	0.5	black	46	17	4585
+N-Matrix metalloproteinase subgraph-18	GRIN2B	47347	41741	white	rectangle	gene	0.5	black	46	17	4586
+N-Matrix metalloproteinase subgraph-19	GRIN2C	59950	43363	white	rectangle	gene	0.5	black	46	17	4587
+N-Matrix metalloproteinase subgraph-20	GRIN2D	59627	46573	white	rectangle	gene	0.5	black	46	17	4588
+N-Matrix metalloproteinase subgraph-21	ITGA2	18861	16834	white	rectangle	gene	0.5	black	46	17	6137
+N-Matrix metalloproteinase subgraph-22	ITGA3	6275	7345	white	rectangle	gene	0.5	black	46	17	6139
+N-Matrix metalloproteinase subgraph-23	APP	57163	0	white	rectangle	gene	0.5	black	46	17	620
+N-Matrix metalloproteinase subgraph-24	APP	17636	35431	white	rectangle	gene	0.5	black	46	17	620
+N-Matrix metalloproteinase subgraph-25	APP	8675	22664	white	rectangle	gene	0.5	black	46	17	620
+N-Matrix metalloproteinase subgraph-26	MMP14	6641	37365	white	rectangle	gene	0.5	black	46	17	7160
+N-Matrix metalloproteinase subgraph-27	MMP2	11174	30677	white	rectangle	gene	0.5	black	46	17	7166
+N-Matrix metalloproteinase subgraph-28	MMP3	46941	22764	white	rectangle	gene	0.5	black	46	17	7173
+N-Matrix metalloproteinase subgraph-29	MMP7	441	24382	white	rectangle	gene	0.5	black	46	17	7174
+N-Matrix metalloproteinase subgraph-3	sAPP-alpha	13147	6200	white	rectangle	gene	0.5	black	46	17	CONSO00067
+N-Matrix metalloproteinase subgraph-30	MMP9	11166	14202	white	rectangle	gene	0.5	black	46	17	7176
+N-Matrix metalloproteinase subgraph-31	NGF	18691	10393	white	rectangle	gene	0.5	black	46	17	7808
+N-Matrix metalloproteinase subgraph-32	BACE1	63580	64317	white	rectangle	gene	0.5	black	46	17	933
+N-Matrix metalloproteinase subgraph-33	PRKCH	49916	50428	white	rectangle	gene	0.5	black	46	17	9403
+N-Matrix metalloproteinase subgraph-34	RARB	59820	31000	white	rectangle	gene	0.5	black	46	17	9865
+N-Matrix metalloproteinase subgraph-35	Il1b	6784	62163	white	rectangle	gene	0.5	black	46	17	96543
+N-Matrix metalloproteinase subgraph-36	Mmp2	2395	56421	white	rectangle	gene	0.5	black	46	17	97009
+N-Matrix metalloproteinase subgraph-4	MMP	54063	21700	white	rectangle	gene	0.5	black	46	17	MMP
+N-Matrix metalloproteinase subgraph-5	Notch	63046	52604	white	rectangle	gene	0.5	black	46	17	Notch
+N-Matrix metalloproteinase subgraph-6	TGFB	0	49600	white	rectangle	gene	0.5	black	46	17	TGFB
+N-Matrix metalloproteinase subgraph-7	TIMP1	49508	58167	white	rectangle	gene	0.5	black	46	17	11820
+N-Matrix metalloproteinase subgraph-8	SIRT1	52700	32064	white	rectangle	gene	0.5	black	46	17	14929
+N-Matrix metalloproteinase subgraph-9	GRIN3A	46375	45500	white	rectangle	gene	0.5	black	46	17	16767

@@ -1,0 +1,23 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-DYRK1A subgraph-1 2	STXBP1 DYRK1A	2453	38464	white	rectangle	gene,gene	0.5	black	46	17	11444,/,3091
+N-DYRK1A subgraph-10	NFAT	5635	4688	white	rectangle	gene	0.5	black	46	17	NFAT
+N-DYRK1A subgraph-11	SNCA	0	13241	white	rectangle	gene	0.5	black	46	17	11138
+N-DYRK1A subgraph-12	STXBP1	9574	37400	white	rectangle	gene	0.5	black	46	17	11444
+N-DYRK1A subgraph-13	DYRK1A	8666	12518	white	rectangle	gene	0.5	black	46	17	3091
+N-DYRK1A subgraph-14	DYRK1A	46753	0	white	rectangle	gene	0.5	black	46	17	3091
+N-DYRK1A subgraph-15	AKAP13	9419	27902	white	rectangle	gene	0.5	black	46	17	371
+N-DYRK1A subgraph-16	APP	15560	7310	white	rectangle	gene	0.5	black	46	17	620
+N-DYRK1A subgraph-17	MAP3K5	44773	17600	white	rectangle	gene	0.5	black	46	17	6857
+N-DYRK1A subgraph-18	MAPT	1420	8105	white	rectangle	gene	0.5	black	46	17	6893
+N-DYRK1A subgraph-19	MAPT	9885	20999	white	rectangle	gene	0.5	black	46	17	6893
+N-DYRK1A subgraph-20	MAPT	13349	19740	white	rectangle	gene	0.5	black	46	17	6893
+N-DYRK1A subgraph-21	MAPT	17176	12194	white	rectangle	gene	0.5	black	46	17	6893
+N-DYRK1A subgraph-22	MAPT	2122	17878	white	rectangle	gene	0.5	black	46	17	6893
+N-DYRK1A subgraph-23	EIF2AK2	17840	25047	white	rectangle	gene	0.5	black	46	17	9437
+N-DYRK1A subgraph-24	PSEN1	39632	1063	white	rectangle	gene	0.5	black	46	17	9508
+N-DYRK1A subgraph-25	Stxbp1	47279	33179	white	rectangle	gene	0.5	black	46	17	107363
+N-DYRK1A subgraph-26	Dyrk1a	33032	34693	white	rectangle	gene	0.5	black	46	17	1330299
+N-DYRK1A subgraph-3 4	JKAMP DYRK1A	37653	18664	white	rectangle	gene,gene	0.5	black	46	17	20184,/,3091
+N-DYRK1A subgraph-5 6	Stxbp1 Dyrk1a	40058	33000	white	rectangle	gene,gene	0.5	black	46	17	107363,/,1330299
+N-DYRK1A subgraph-7 8	Stxbp1 Stx1a	54467	33711	white	rectangle	gene,gene	0.5	black	46	17	107363,/,109355
+N-DYRK1A subgraph-9	CREB	11071	4400	white	rectangle	gene	0.5	black	46	17	CREB

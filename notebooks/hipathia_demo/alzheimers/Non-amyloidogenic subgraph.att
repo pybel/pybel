@@ -1,0 +1,102 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Non-amyloidogenic subgraph-100	IDE	14192	34095	white	rectangle	gene	0.5	black	46	17	5381
+N-Non-amyloidogenic subgraph-101	APBA1	24676	26216	white	rectangle	gene	0.5	black	46	17	578
+N-Non-amyloidogenic subgraph-102	APBA2	29936	31661	white	rectangle	gene	0.5	black	46	17	579
+N-Non-amyloidogenic subgraph-103	APBA3	21186	42716	white	rectangle	gene	0.5	black	46	17	580
+N-Non-amyloidogenic subgraph-104	APBB1	42000	4063	white	rectangle	gene	0.5	black	46	17	581
+N-Non-amyloidogenic subgraph-105	IL1B	63584	12000	white	rectangle	gene	0.5	black	46	17	5992
+N-Non-amyloidogenic subgraph-106	IL1RN	70805	12179	white	rectangle	gene	0.5	black	46	17	6000
+N-Non-amyloidogenic subgraph-107	IL4	15274	32583	white	rectangle	gene	0.5	black	46	17	6014
+N-Non-amyloidogenic subgraph-108	INS	18090	37265	white	rectangle	gene	0.5	black	46	17	6081
+N-Non-amyloidogenic subgraph-109	APOE	30906	37199	white	rectangle	gene	0.5	black	46	17	613
+N-Non-amyloidogenic subgraph-11 12 13	DCC APP NTN1	73736	49064	white	rectangle	gene,gene,gene	0.5	black	46	17	2701,/,620,/,8029
+N-Non-amyloidogenic subgraph-110	APOE	29674	26949	white	rectangle	gene	0.5	black	46	17	613
+N-Non-amyloidogenic subgraph-111	APP	13469	42093	white	rectangle	gene	0.5	black	46	17	620
+N-Non-amyloidogenic subgraph-112	APP	24633	16234	white	rectangle	gene	0.5	black	46	17	620
+N-Non-amyloidogenic subgraph-113	APP	22565	34132	white	rectangle	gene	0.5	black	46	17	620
+N-Non-amyloidogenic subgraph-114	APP	7221	6240	white	rectangle	gene	0.5	black	46	17	620
+N-Non-amyloidogenic subgraph-115	APP	30150	40971	white	rectangle	gene	0.5	black	46	17	620
+N-Non-amyloidogenic subgraph-118	LRP1	32075	39772	white	rectangle	gene	0.5	black	46	17	6692
+N-Non-amyloidogenic subgraph-119	LRP2	18793	15000	white	rectangle	gene	0.5	black	46	17	6694
+N-Non-amyloidogenic subgraph-120	MAPK8IP2	24632	29120	white	rectangle	gene	0.5	black	46	17	6883
+N-Non-amyloidogenic subgraph-121	A2M	27509	29889	white	rectangle	gene	0.5	black	46	17	7
+N-Non-amyloidogenic subgraph-123	MME	31473	29726	white	rectangle	gene	0.5	black	46	17	7154
+N-Non-amyloidogenic subgraph-125	MMP7	29557	35054	white	rectangle	gene	0.5	black	46	17	7174
+N-Non-amyloidogenic subgraph-127	NFKB1	17281	40814	white	rectangle	gene	0.5	black	46	17	7794
+N-Non-amyloidogenic subgraph-128	NFKB2	5189	45033	white	rectangle	gene	0.5	black	46	17	7795
+N-Non-amyloidogenic subgraph-129	NGF	0	6193	white	rectangle	gene	0.5	black	46	17	7808
+N-Non-amyloidogenic subgraph-130	NOS3	26586	35124	white	rectangle	gene	0.5	black	46	17	7876
+N-Non-amyloidogenic subgraph-131	PDGFRL	17667	52029	white	rectangle	gene	0.5	black	46	17	8805
+N-Non-amyloidogenic subgraph-132	PIN1	22931	39136	white	rectangle	gene	0.5	black	46	17	8988
+N-Non-amyloidogenic subgraph-133	PLAT	19256	24272	white	rectangle	gene	0.5	black	46	17	9051
+N-Non-amyloidogenic subgraph-134	PLG	23703	23914	white	rectangle	gene	0.5	black	46	17	9071
+N-Non-amyloidogenic subgraph-135	PPARG	27242	33311	white	rectangle	gene	0.5	black	46	17	9236
+N-Non-amyloidogenic subgraph-136	BACE1	25119	37259	white	rectangle	gene	0.5	black	46	17	933
+N-Non-amyloidogenic subgraph-137	PRKCA	14693	51845	white	rectangle	gene	0.5	black	46	17	9393
+N-Non-amyloidogenic subgraph-138	PRNP	20444	38157	white	rectangle	gene	0.5	black	46	17	9449
+N-Non-amyloidogenic subgraph-139	RAC1	5597	39893	white	rectangle	gene	0.5	black	46	17	9801
+N-Non-amyloidogenic subgraph-140	Cdk5	18000	72548	white	rectangle	gene	0.5	black	46	17	101765
+N-Non-amyloidogenic subgraph-141	Abcc1	15680	29389	white	rectangle	gene	0.5	black	46	17	102676
+N-Non-amyloidogenic subgraph-142	Casp3	13155	31481	white	rectangle	gene	0.5	black	46	17	107739
+N-Non-amyloidogenic subgraph-143	Gsk3b	24813	60000	white	rectangle	gene	0.5	black	46	17	1861437
+N-Non-amyloidogenic subgraph-144	Cysltr1	10035	18808	white	rectangle	gene	0.5	black	46	17	1926218
+N-Non-amyloidogenic subgraph-145	App	22402	66815	white	rectangle	gene	0.5	black	46	17	88059
+N-Non-amyloidogenic subgraph-146	Bcl2	14201	26970	white	rectangle	gene	0.5	black	46	17	88138
+N-Non-amyloidogenic subgraph-16 17	HSPB8 BAG3	22888	43615	white	rectangle	gene,gene	0.5	black	46	17	30171,/,939
+N-Non-amyloidogenic subgraph-18 19	GCG GLP1R	15890	26932	white	rectangle	gene,gene	0.5	black	46	17	4191,/,4324
+N-Non-amyloidogenic subgraph-20 21	APBA1 APP	27808	25669	white	rectangle	gene,gene	0.5	black	46	17	578,/,620
+N-Non-amyloidogenic subgraph-22 23	APBA1 ARL3	9838	49990	white	rectangle	gene,gene	0.5	black	46	17	578,/,694
+N-Non-amyloidogenic subgraph-24 25	APBA1 Amyloidogenic glycoprotein, intracellular domain, conserved site	20176	27044	white	rectangle	gene,gene	0.5	black	46	17	578,/,IPR019745
+N-Non-amyloidogenic subgraph-26 27	APBA2 ARL3	16300	50566	white	rectangle	gene,gene	0.5	black	46	17	579,/,694
+N-Non-amyloidogenic subgraph-28 29	APBA2 NFKB1	17465	26035	white	rectangle	gene,gene	0.5	black	46	17	579,/,7794
+N-Non-amyloidogenic subgraph-3 4	CLSTN1 KLC1	6134	42847	white	rectangle	gene,gene	0.5	black	46	17	17447,/,6387
+N-Non-amyloidogenic subgraph-30 31	APBA3 ARL3	19458	51478	white	rectangle	gene,gene	0.5	black	46	17	580,/,694
+N-Non-amyloidogenic subgraph-32 33 34	APBB1 APP LRP1	4769	36997	white	rectangle	gene,gene,gene	0.5	black	46	17	581,/,620,/,6692
+N-Non-amyloidogenic subgraph-35 36 37	APBB1 APP LRP2	7175	47870	white	rectangle	gene,gene,gene	0.5	black	46	17	581,/,620,/,6694
+N-Non-amyloidogenic subgraph-38 39	APBB1 KLC1	4792	35278	white	rectangle	gene,gene	0.5	black	46	17	581,/,6387
+N-Non-amyloidogenic subgraph-40 41	IL1B IL1R1	77992	12711	white	rectangle	gene,gene	0.5	black	46	17	5992,/,5993
+N-Non-amyloidogenic subgraph-42 43	INS INSR	24825	44058	white	rectangle	gene,gene	0.5	black	46	17	6081,/,6091
+N-Non-amyloidogenic subgraph-44 45	APOE APP	27003	39366	white	rectangle	gene,gene	0.5	black	46	17	613,/,620
+N-Non-amyloidogenic subgraph-46 47	APP LRP1	49121	3000	white	rectangle	gene,gene	0.5	black	46	17	620,/,6692
+N-Non-amyloidogenic subgraph-48 49	APP NTN1	32791	33110	white	rectangle	gene,gene	0.5	black	46	17	620,/,8029
+N-Non-amyloidogenic subgraph-5 6	RTN4R APP	13481	36604	white	rectangle	gene,gene	0.5	black	46	17	18601,/,620
+N-Non-amyloidogenic subgraph-50 51	APP NTRK1	3659	0	white	rectangle	gene,gene	0.5	black	46	17	620,/,8031
+N-Non-amyloidogenic subgraph-52 53	APP LRP1	40981	40716	white	rectangle	gene,gene	0.5	black	46	17	620,/,6692
+N-Non-amyloidogenic subgraph-54	amyloid-beta	78960	30814	white	rectangle	gene	0.5	black	46	17	64645
+N-Non-amyloidogenic subgraph-55	YENPTY endocytosis motif (APP)	16724	35515	white	rectangle	gene	0.5	black	46	17	CONSO00041
+N-Non-amyloidogenic subgraph-56	sAPP-alpha	64177	63134	white	rectangle	gene	0.5	black	46	17	CONSO00067
+N-Non-amyloidogenic subgraph-57	ERK	80857	48000	white	rectangle	gene	0.5	black	46	17	ERK
+N-Non-amyloidogenic subgraph-59	ATXN1	28731	42473	white	rectangle	gene	0.5	black	46	17	10548
+N-Non-amyloidogenic subgraph-60	SOD1	27549	27516	white	rectangle	gene	0.5	black	46	17	11179
+N-Non-amyloidogenic subgraph-61	SORL1	15891	39123	white	rectangle	gene	0.5	black	46	17	11185
+N-Non-amyloidogenic subgraph-62	SRC	3771	38748	white	rectangle	gene	0.5	black	46	17	11283
+N-Non-amyloidogenic subgraph-63	TTR	18269	33403	white	rectangle	gene	0.5	black	46	17	12405
+N-Non-amyloidogenic subgraph-64	RANBP9	13949	30004	white	rectangle	gene	0.5	black	46	17	13727
+N-Non-amyloidogenic subgraph-65	CASP8	22300	29352	white	rectangle	gene	0.5	black	46	17	1509
+N-Non-amyloidogenic subgraph-66	CAST	24092	41600	white	rectangle	gene	0.5	black	46	17	1515
+N-Non-amyloidogenic subgraph-67	SORCS1	30120	38983	white	rectangle	gene	0.5	black	46	17	16697
+N-Non-amyloidogenic subgraph-68	CPQ	30712	28305	white	rectangle	gene	0.5	black	46	17	16910
+N-Non-amyloidogenic subgraph-69	CLSTN1	7528	45531	white	rectangle	gene	0.5	black	46	17	17447
+N-Non-amyloidogenic subgraph-70	CDK5	68788	57000	white	rectangle	gene	0.5	black	46	17	1774
+N-Non-amyloidogenic subgraph-71	RTN4R	4530	28602	white	rectangle	gene	0.5	black	46	17	18601
+N-Non-amyloidogenic subgraph-72	ADAM10	67129	70218	white	rectangle	gene	0.5	black	46	17	188
+N-Non-amyloidogenic subgraph-73	ADAM17	56558	13693	white	rectangle	gene	0.5	black	46	17	195
+N-Non-amyloidogenic subgraph-74	CHRM1	4040	41829	white	rectangle	gene	0.5	black	46	17	1950
+N-Non-amyloidogenic subgraph-75	ADAM19	56558	62179	white	rectangle	gene	0.5	black	46	17	197
+N-Non-amyloidogenic subgraph-76	SYVN1	37546	46700	white	rectangle	gene	0.5	black	46	17	20738
+N-Non-amyloidogenic subgraph-77	CLU	20636	23801	white	rectangle	gene	0.5	black	46	17	2095
+N-Non-amyloidogenic subgraph-78	CNR1	81370	24000	white	rectangle	gene	0.5	black	46	17	2159
+N-Non-amyloidogenic subgraph-79	CNR2	74558	36548	white	rectangle	gene	0.5	black	46	17	2160
+N-Non-amyloidogenic subgraph-80	CST3	19109	31554	white	rectangle	gene	0.5	black	46	17	2475
+N-Non-amyloidogenic subgraph-81	CTSB	18232	28337	white	rectangle	gene	0.5	black	46	17	2527
+N-Non-amyloidogenic subgraph-82	CTSD	9611	47803	white	rectangle	gene	0.5	black	46	17	2529
+N-Non-amyloidogenic subgraph-83	CTSE	12275	51252	white	rectangle	gene	0.5	black	46	17	2530
+N-Non-amyloidogenic subgraph-84	ACE	22411	25007	white	rectangle	gene	0.5	black	46	17	2707
+N-Non-amyloidogenic subgraph-85	DHCR24	26965	43815	white	rectangle	gene	0.5	black	46	17	2859
+N-Non-amyloidogenic subgraph-86	ABCA1	32664	36489	white	rectangle	gene	0.5	black	46	17	29
+N-Non-amyloidogenic subgraph-87	DPP4	25962	24318	white	rectangle	gene	0.5	black	46	17	3009
+N-Non-amyloidogenic subgraph-88	ECE1	20073	41132	white	rectangle	gene	0.5	black	46	17	3146
+N-Non-amyloidogenic subgraph-89	ABCA7	26633	42017	white	rectangle	gene	0.5	black	46	17	37
+N-Non-amyloidogenic subgraph-90	MTRNR2L2	32097	34583	white	rectangle	gene	0.5	black	46	17	37156
+N-Non-amyloidogenic subgraph-94	GCG	12822	49215	white	rectangle	gene	0.5	black	46	17	4191
+N-Non-amyloidogenic subgraph-98	HSPA1B	32363	31295	white	rectangle	gene	0.5	black	46	17	5233

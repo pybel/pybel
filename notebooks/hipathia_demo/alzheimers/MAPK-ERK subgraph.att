@@ -1,0 +1,88 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-MAPK-ERK subgraph-1 2	IRS GRB2	31214	40773	white	rectangle	gene,gene	0.5	black	46	17	IRS,/,4566
+N-MAPK-ERK subgraph-10 11 12	SOS1 GAB1 GRB2	24801	46509	white	rectangle	gene,gene,gene	0.5	black	46	17	11187,/,4066,/,4566
+N-MAPK-ERK subgraph-100	BAD	91056	32880	white	rectangle	gene	0.5	black	46	17	936
+N-MAPK-ERK subgraph-101	PRKACA	30580	75732	white	rectangle	gene	0.5	black	46	17	9380
+N-MAPK-ERK subgraph-102	PRKCA	94036	92000	white	rectangle	gene	0.5	black	46	17	9393
+N-MAPK-ERK subgraph-103	PSEN1	51704	0	white	rectangle	gene	0.5	black	46	17	9508
+N-MAPK-ERK subgraph-104	RAF1	18457	52529	white	rectangle	gene	0.5	black	46	17	9829
+N-MAPK-ERK subgraph-105	RASGRF1	9868	41260	white	rectangle	gene	0.5	black	46	17	9875
+N-MAPK-ERK subgraph-106	Casp3	68144	64400	white	rectangle	gene	0.5	black	46	17	107739
+N-MAPK-ERK subgraph-107	Casp9	78966	70102	white	rectangle	gene	0.5	black	46	17	1277950
+N-MAPK-ERK subgraph-108	Map3k5	64976	76418	white	rectangle	gene	0.5	black	46	17	1346876
+N-MAPK-ERK subgraph-109	Stk4	64663	83893	white	rectangle	gene	0.5	black	46	17	1929004
+N-MAPK-ERK subgraph-110	Ifna13	87630	51664	white	rectangle	gene	0.5	black	46	17	2667155
+N-MAPK-ERK subgraph-111	Sod1	70758	79524	white	rectangle	gene	0.5	black	46	17	98351
+N-MAPK-ERK subgraph-13 14	SPAG9 MAPK14	15064	97265	white	rectangle	gene,gene	0.5	black	46	17	14524,/,6876
+N-MAPK-ERK subgraph-15 16	SHC3 APP	13263	70748	white	rectangle	gene,gene	0.5	black	46	17	18181,/,620
+N-MAPK-ERK subgraph-17 18	SHC2 GRB2	16378	44616	white	rectangle	gene,gene	0.5	black	46	17	29869,/,4566
+N-MAPK-ERK subgraph-19 20 21	SHC2 GRB2 APP	2031	58308	white	rectangle	gene,gene,gene	0.5	black	46	17	29869,/,4566,/,620
+N-MAPK-ERK subgraph-22 23 24	SHC2 GRB2 APP	8272	55962	white	rectangle	gene,gene,gene	0.5	black	46	17	29869,/,4566,/,620
+N-MAPK-ERK subgraph-25 26	GAB1 GRB2	27543	38565	white	rectangle	gene,gene	0.5	black	46	17	4066,/,4566
+N-MAPK-ERK subgraph-27 28	GRB2 APP	11162	47379	white	rectangle	gene,gene	0.5	black	46	17	4566,/,620
+N-MAPK-ERK subgraph-29 30 31	GRB2 APP PSEN1	15984	70896	white	rectangle	gene,gene,gene	0.5	black	46	17	4566,/,620,/,9508
+N-MAPK-ERK subgraph-3 4	MEK GRB2	1247	70383	white	rectangle	gene,gene	0.5	black	46	17	MEK,/,4566
+N-MAPK-ERK subgraph-32 33	GRB2 PSEN1	3981	74344	white	rectangle	gene,gene	0.5	black	46	17	4566,/,9508
+N-MAPK-ERK subgraph-34 35	JUN PIN1	62141	46000	white	rectangle	gene,gene	0.5	black	46	17	6204,/,8988
+N-MAPK-ERK subgraph-36 37	PRKCA RAF1	25800	58548	white	rectangle	gene,gene	0.5	black	46	17	9393,/,9829
+N-MAPK-ERK subgraph-38	CAMK2_family	22705	66094	white	rectangle	gene	0.5	black	46	17	CAMK2_family
+N-MAPK-ERK subgraph-39	AKT	84436	28795	white	rectangle	gene	0.5	black	46	17	AKT
+N-MAPK-ERK subgraph-40	CAMK	37798	64517	white	rectangle	gene	0.5	black	46	17	CAMK
+N-MAPK-ERK subgraph-41	CREB	18921	70299	white	rectangle	gene	0.5	black	46	17	CREB
+N-MAPK-ERK subgraph-42	CREB	20555	74381	white	rectangle	gene	0.5	black	46	17	CREB
+N-MAPK-ERK subgraph-43	CREB	29176	66503	white	rectangle	gene	0.5	black	46	17	CREB
+N-MAPK-ERK subgraph-44	ERK	19086	63539	white	rectangle	gene	0.5	black	46	17	ERK
+N-MAPK-ERK subgraph-46	ERK	12027	68208	white	rectangle	gene	0.5	black	46	17	ERK
+N-MAPK-ERK subgraph-47	ERK	14664	67793	white	rectangle	gene	0.5	black	46	17	ERK
+N-MAPK-ERK subgraph-48	IRS	23442	58223	white	rectangle	gene	0.5	black	46	17	IRS
+N-MAPK-ERK subgraph-49	JNK	26773	77915	white	rectangle	gene	0.5	black	46	17	JNK
+N-MAPK-ERK subgraph-5 6 7	SHC1 GRB2 APP	14620	65189	white	rectangle	gene,gene,gene	0.5	black	46	17	10840,/,4566,/,620
+N-MAPK-ERK subgraph-50	MEK	9372	66584	white	rectangle	gene	0.5	black	46	17	MEK
+N-MAPK-ERK subgraph-51	RAF	13704	62090	white	rectangle	gene	0.5	black	46	17	RAF
+N-MAPK-ERK subgraph-52	RAS	21215	54767	white	rectangle	gene	0.5	black	46	17	RAS
+N-MAPK-ERK subgraph-53	p38	71202	71730	white	rectangle	gene	0.5	black	46	17	p38
+N-MAPK-ERK subgraph-54	Mitogen-activated protein kinases	94756	50600	white	rectangle	gene	0.5	black	46	17	651
+N-MAPK-ERK subgraph-55	RPS6KA1	25855	64854	white	rectangle	gene	0.5	black	46	17	10430
+N-MAPK-ERK subgraph-56	RPS6KA2	28440	59880	white	rectangle	gene	0.5	black	46	17	10431
+N-MAPK-ERK subgraph-57	RPS6KA3	37316	69052	white	rectangle	gene	0.5	black	46	17	10432
+N-MAPK-ERK subgraph-58	SOS1	12910	56741	white	rectangle	gene	0.5	black	46	17	11187
+N-MAPK-ERK subgraph-59	SOS2	11785	57903	white	rectangle	gene	0.5	black	46	17	11188
+N-MAPK-ERK subgraph-60	CAMK2A	13835	80484	white	rectangle	gene	0.5	black	46	17	1460
+N-MAPK-ERK subgraph-61	CAST	0	45500	white	rectangle	gene	0.5	black	46	17	1515
+N-MAPK-ERK subgraph-62	LAMTOR3	7082	42623	white	rectangle	gene	0.5	black	46	17	15606
+N-MAPK-ERK subgraph-63	CDH2	16824	89689	white	rectangle	gene	0.5	black	46	17	1759
+N-MAPK-ERK subgraph-64	ADAM10	91625	98820	white	rectangle	gene	0.5	black	46	17	188
+N-MAPK-ERK subgraph-65	CREB1	37271	59113	white	rectangle	gene	0.5	black	46	17	2345
+N-MAPK-ERK subgraph-67	ELK1	35398	72722	white	rectangle	gene	0.5	black	46	17	3321
+N-MAPK-ERK subgraph-68	ELK1	26439	69348	white	rectangle	gene	0.5	black	46	17	3321
+N-MAPK-ERK subgraph-69	FOS	23436	61445	white	rectangle	gene	0.5	black	46	17	3796
+N-MAPK-ERK subgraph-70	GRB2	49008	6910	white	rectangle	gene	0.5	black	46	17	4566
+N-MAPK-ERK subgraph-71	GSK3A	78020	33188	white	rectangle	gene	0.5	black	46	17	4616
+N-MAPK-ERK subgraph-72	GSK3B	84396	13800	white	rectangle	gene	0.5	black	46	17	4617
+N-MAPK-ERK subgraph-73	GSK3B	84214	21120	white	rectangle	gene	0.5	black	46	17	4617
+N-MAPK-ERK subgraph-74	IGF1	30377	32436	white	rectangle	gene	0.5	black	46	17	5464
+N-MAPK-ERK subgraph-75	IGF1R	39073	28918	white	rectangle	gene	0.5	black	46	17	5465
+N-MAPK-ERK subgraph-76	INS	34947	34111	white	rectangle	gene	0.5	black	46	17	6081
+N-MAPK-ERK subgraph-77	INSR	37357	25242	white	rectangle	gene	0.5	black	46	17	6091
+N-MAPK-ERK subgraph-78	IRS1	28367	9798	white	rectangle	gene	0.5	black	46	17	6125
+N-MAPK-ERK subgraph-79	IRS1	31986	17416	white	rectangle	gene	0.5	black	46	17	6125
+N-MAPK-ERK subgraph-8 9	SHC1 APP	9566	62255	white	rectangle	gene,gene	0.5	black	46	17	10840,/,620
+N-MAPK-ERK subgraph-80	IRS2	56411	25899	white	rectangle	gene	0.5	black	46	17	6126
+N-MAPK-ERK subgraph-81	IRS2	47869	26533	white	rectangle	gene	0.5	black	46	17	6126
+N-MAPK-ERK subgraph-82	IRS4	45376	13594	white	rectangle	gene	0.5	black	46	17	6128
+N-MAPK-ERK subgraph-83	IRS4	41524	20532	white	rectangle	gene	0.5	black	46	17	6128
+N-MAPK-ERK subgraph-84	APOE	23163	69731	white	rectangle	gene	0.5	black	46	17	613
+N-MAPK-ERK subgraph-86	APP	21391	82300	white	rectangle	gene	0.5	black	46	17	620
+N-MAPK-ERK subgraph-87	APP	290	64514	white	rectangle	gene	0.5	black	46	17	620
+N-MAPK-ERK subgraph-88	APP	4140	53399	white	rectangle	gene	0.5	black	46	17	620
+N-MAPK-ERK subgraph-89	JUN	87220	104550	white	rectangle	gene	0.5	black	46	17	6204
+N-MAPK-ERK subgraph-90	JUN	16130	58851	white	rectangle	gene	0.5	black	46	17	6204
+N-MAPK-ERK subgraph-91	MAPK1	8878	49244	white	rectangle	gene	0.5	black	46	17	6871
+N-MAPK-ERK subgraph-92	MAPK14	22738	89689	white	rectangle	gene	0.5	black	46	17	6876
+N-MAPK-ERK subgraph-93	MAPK3	13782	48788	white	rectangle	gene	0.5	black	46	17	6877
+N-MAPK-ERK subgraph-94	MAPK8	2872	60474	white	rectangle	gene	0.5	black	46	17	6881
+N-MAPK-ERK subgraph-95	MAPK8IP2	29257	87562	white	rectangle	gene	0.5	black	46	17	6883
+N-MAPK-ERK subgraph-96	MAPT	20910	72844	white	rectangle	gene	0.5	black	46	17	6893
+N-MAPK-ERK subgraph-97	MYC	27022	62259	white	rectangle	gene	0.5	black	46	17	7553
+N-MAPK-ERK subgraph-98	PIN1	55019	47064	white	rectangle	gene	0.5	black	46	17	8988
+N-MAPK-ERK subgraph-99	BACE1	18561	56513	white	rectangle	gene	0.5	black	46	17	933

@@ -1,0 +1,30 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Glutamatergic subgraph-1	sAPP-alpha	52621	14000	white	rectangle	gene	0.5	black	46	17	CONSO00067
+N-Glutamatergic subgraph-10	ADAM10	17354	6180	white	rectangle	gene	0.5	black	46	17	188
+N-Glutamatergic subgraph-12	ADAM17	16285	8094	white	rectangle	gene	0.5	black	46	17	195
+N-Glutamatergic subgraph-13	ADAM9	18539	8055	white	rectangle	gene	0.5	black	46	17	216
+N-Glutamatergic subgraph-14	ITGB1BP1	0	50400	white	rectangle	gene	0.5	black	46	17	23927
+N-Glutamatergic subgraph-15	DNM1	19754	38331	white	rectangle	gene	0.5	black	46	17	2972
+N-Glutamatergic subgraph-16	DNM2	9105	37010	white	rectangle	gene	0.5	black	46	17	2974
+N-Glutamatergic subgraph-17	GRIA1	15298	31001	white	rectangle	gene	0.5	black	46	17	4571
+N-Glutamatergic subgraph-18	GRIA2	1927	55941	white	rectangle	gene	0.5	black	46	17	4572
+N-Glutamatergic subgraph-19	GRIA3	17591	65591	white	rectangle	gene	0.5	black	46	17	4573
+N-Glutamatergic subgraph-2	Glutamate ionotropic receptor NMDA type subunits	9650	8099	white	rectangle	gene	0.5	black	46	17	1201
+N-Glutamatergic subgraph-21	GRIN2A	20686	321	white	rectangle	gene	0.5	black	46	17	4585
+N-Glutamatergic subgraph-22	GRIN2A	7391	67006	white	rectangle	gene	0.5	black	46	17	4585
+N-Glutamatergic subgraph-23	GRIN2B	16928	15405	white	rectangle	gene	0.5	black	46	17	4586
+N-Glutamatergic subgraph-24	GRIN2C	24644	4125	white	rectangle	gene	0.5	black	46	17	4587
+N-Glutamatergic subgraph-25	GRIN2D	10560	3273	white	rectangle	gene	0.5	black	46	17	4588
+N-Glutamatergic subgraph-26	GRINA	52179	24500	white	rectangle	gene	0.5	black	46	17	4589
+N-Glutamatergic subgraph-29	APP	8605	51839	white	rectangle	gene	0.5	black	46	17	620
+N-Glutamatergic subgraph-3	SH3GLB2	14266	37805	white	rectangle	gene	0.5	black	46	17	10834
+N-Glutamatergic subgraph-31	ARC	13766	44836	white	rectangle	gene	0.5	black	46	17	648
+N-Glutamatergic subgraph-32	PDE2A	45500	15063	white	rectangle	gene	0.5	black	46	17	8777
+N-Glutamatergic subgraph-33	BACE1	21524	48606	white	rectangle	gene	0.5	black	46	17	933
+N-Glutamatergic subgraph-34	RELN	11651	60034	white	rectangle	gene	0.5	black	46	17	9957
+N-Glutamatergic subgraph-4	SLC1A2	52179	56000	white	rectangle	gene	0.5	black	46	17	10940
+N-Glutamatergic subgraph-5	SOD1	45058	57064	white	rectangle	gene	0.5	black	46	17	11179
+N-Glutamatergic subgraph-6	TNF	16328	23249	white	rectangle	gene	0.5	black	46	17	11892
+N-Glutamatergic subgraph-7	SKAP1	45058	25564	white	rectangle	gene	0.5	black	46	17	15605
+N-Glutamatergic subgraph-8	GRIN3A	25055	9103	white	rectangle	gene	0.5	black	46	17	16767
+N-Glutamatergic subgraph-9	GRIN3B	14810	0	white	rectangle	gene	0.5	black	46	17	16768

@@ -1,0 +1,21 @@
+0	1	2
+N-Axonal guidance subgraph-21	activation	N-Axonal guidance subgraph-3 4
+N-Axonal guidance subgraph-25	activation	N-Axonal guidance subgraph-16
+N-Axonal guidance subgraph-10 11	inhibition	N-Axonal guidance subgraph-22
+N-Axonal guidance subgraph-17	inhibition	N-Axonal guidance subgraph-1 2
+N-Axonal guidance subgraph-14	activation	N-Axonal guidance subgraph-17
+N-Axonal guidance subgraph-14	activation	N-Axonal guidance subgraph-17
+N-Axonal guidance subgraph-14	activation	N-Axonal guidance subgraph-18
+N-Axonal guidance subgraph-14	activation	N-Axonal guidance subgraph-16
+N-Axonal guidance subgraph-14	activation	N-Axonal guidance subgraph-16
+N-Axonal guidance subgraph-14	activation	N-Axonal guidance subgraph-16
+N-Axonal guidance subgraph-23	activation	N-Axonal guidance subgraph-24
+N-Axonal guidance subgraph-13	activation	N-Axonal guidance subgraph-16
+N-Axonal guidance subgraph-3 4	inhibition	N-Axonal guidance subgraph-22
+N-Axonal guidance subgraph-15	activation	N-Axonal guidance subgraph-3 4
+N-Axonal guidance subgraph-7 8 9	activation	N-Axonal guidance subgraph-12
+N-Axonal guidance subgraph-19	activation	N-Axonal guidance subgraph-16
+N-Axonal guidance subgraph-20	activation	N-Axonal guidance subgraph-16
+N-Axonal guidance subgraph-20	activation	N-Axonal guidance subgraph-16
+N-Axonal guidance subgraph-20	activation	N-Axonal guidance subgraph-16
+N-Axonal guidance subgraph-20	activation	N-Axonal guidance subgraph-16

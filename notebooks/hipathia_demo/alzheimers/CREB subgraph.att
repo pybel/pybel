@@ -1,0 +1,26 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-CREB subgraph-1 2	SHC1 APP	23965	24045	white	rectangle	gene,gene	0.5	black	46	17	10840,/,620
+N-CREB subgraph-10	CREB	9125	18025	white	rectangle	gene	0.5	black	46	17	CREB
+N-CREB subgraph-11	CREB	51920	16800	white	rectangle	gene	0.5	black	46	17	CREB
+N-CREB subgraph-12	CREB	12570	11097	white	rectangle	gene	0.5	black	46	17	CREB
+N-CREB subgraph-13	ERK	17519	17955	white	rectangle	gene	0.5	black	46	17	ERK
+N-CREB subgraph-14	RPS6KA1	19427	12944	white	rectangle	gene	0.5	black	46	17	10430
+N-CREB subgraph-15	RPS6KA3	19731	4812	white	rectangle	gene	0.5	black	46	17	10432
+N-CREB subgraph-16	RPS6KA5	29140	3740	white	rectangle	gene	0.5	black	46	17	10434
+N-CREB subgraph-17	WWOX	2136	22196	white	rectangle	gene	0.5	black	46	17	12799
+N-CREB subgraph-19	CAST	48042	43064	white	rectangle	gene	0.5	black	46	17	1515
+N-CREB subgraph-21	CREB3L4	24362	44800	white	rectangle	gene	0.5	black	46	17	18854
+N-CREB subgraph-22	CREB1	55162	42000	white	rectangle	gene	0.5	black	46	17	2345
+N-CREB subgraph-23	CREB1	23190	9731	white	rectangle	gene	0.5	black	46	17	2345
+N-CREB subgraph-25	ALOX5	6934	26127	white	rectangle	gene	0.5	black	46	17	435
+N-CREB subgraph-26	GSK3B	17242	45864	white	rectangle	gene	0.5	black	46	17	4617
+N-CREB subgraph-27	APP	948	16102	white	rectangle	gene	0.5	black	46	17	620
+N-CREB subgraph-28	APP	28459	30676	white	rectangle	gene	0.5	black	46	17	620
+N-CREB subgraph-29	PRKACA	16564	2969	white	rectangle	gene	0.5	black	46	17	9380
+N-CREB subgraph-3 4	SHC3 APP	16679	25554	white	rectangle	gene,gene	0.5	black	46	17	18181,/,620
+N-CREB subgraph-30	PRKACB	31211	10649	white	rectangle	gene	0.5	black	46	17	9381
+N-CREB subgraph-31	PRKCA	5560	5666	white	rectangle	gene	0.5	black	46	17	9393
+N-CREB subgraph-5 6	GRB2 APP	32507	37021	white	rectangle	gene,gene	0.5	black	46	17	4566,/,620
+N-CREB subgraph-7	calcium ion	0	0	white	rectangle	gene	0.5	black	46	17	39124
+N-CREB subgraph-8	AKT	44799	17864	white	rectangle	gene	0.5	black	46	17	AKT
+N-CREB subgraph-9	CAMK	15467	6152	white	rectangle	gene	0.5	black	46	17	CAMK

@@ -1,0 +1,9 @@
+0	1	2
+N-Autophagy signaling subgraph-10	activation	N-Autophagy signaling subgraph-12
+N-Autophagy signaling subgraph-13	inhibition	N-Autophagy signaling subgraph-12
+N-Autophagy signaling subgraph-11	activation	N-Autophagy signaling subgraph-3 4
+N-Autophagy signaling subgraph-9	activation	N-Autophagy signaling subgraph-3 4
+N-Autophagy signaling subgraph-9	inhibition	N-Autophagy signaling subgraph-12
+N-Autophagy signaling subgraph-9	inhibition	N-Autophagy signaling subgraph-12
+N-Autophagy signaling subgraph-8	inhibition	N-Autophagy signaling subgraph-14
+N-Autophagy signaling subgraph-3 4	inhibition	N-Autophagy signaling subgraph-12

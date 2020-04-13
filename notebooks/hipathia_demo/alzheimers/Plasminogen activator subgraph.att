@@ -1,0 +1,12 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Plasminogen activator subgraph-1	TIMP1	40800	41651	white	rectangle	gene	0.5	black	46	17	11820
+N-Plasminogen activator subgraph-10	PLAT	9334	5949	white	rectangle	gene	0.5	black	46	17	9051
+N-Plasminogen activator subgraph-12	PLAUR	15333	19356	white	rectangle	gene	0.5	black	46	17	9053
+N-Plasminogen activator subgraph-13	PLG	5314	8944	white	rectangle	gene	0.5	black	46	17	9071
+N-Plasminogen activator subgraph-3	EDN1	54091	32942	white	rectangle	gene	0.5	black	46	17	3176
+N-Plasminogen activator subgraph-4	F2	47422	37266	white	rectangle	gene	0.5	black	46	17	3535
+N-Plasminogen activator subgraph-5	APP	0	5918	white	rectangle	gene	0.5	black	46	17	620
+N-Plasminogen activator subgraph-6	APP	11567	13062	white	rectangle	gene	0.5	black	46	17	620
+N-Plasminogen activator subgraph-7	MAPT	43106	30600	white	rectangle	gene	0.5	black	46	17	6893
+N-Plasminogen activator subgraph-8	MAPT	51806	43897	white	rectangle	gene	0.5	black	46	17	6893
+N-Plasminogen activator subgraph-9	SERPINI1	7779	0	white	rectangle	gene	0.5	black	46	17	8943

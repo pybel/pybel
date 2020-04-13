@@ -1,0 +1,18 @@
+0	1	2
+N-Reelin signaling subgraph-21	activation	N-Reelin signaling subgraph-24
+N-Reelin signaling subgraph-21	activation	N-Reelin signaling subgraph-12
+N-Reelin signaling subgraph-19	activation	N-Reelin signaling subgraph-14
+N-Reelin signaling subgraph-19	inhibition	N-Reelin signaling subgraph-7 8
+N-Reelin signaling subgraph-7 8	activation	N-Reelin signaling subgraph-10
+N-Reelin signaling subgraph-9	activation	N-Reelin signaling subgraph-23
+N-Reelin signaling subgraph-10	activation	N-Reelin signaling subgraph-11
+N-Reelin signaling subgraph-23	inhibition	N-Reelin signaling subgraph-24
+N-Reelin signaling subgraph-5 6	activation	N-Reelin signaling subgraph-21
+N-Reelin signaling subgraph-1 2	activation	N-Reelin signaling subgraph-22
+N-Reelin signaling subgraph-24	activation	N-Reelin signaling subgraph-16
+N-Reelin signaling subgraph-24	activation	N-Reelin signaling subgraph-18
+N-Reelin signaling subgraph-24	activation	N-Reelin signaling subgraph-14
+N-Reelin signaling subgraph-24	activation	N-Reelin signaling subgraph-14
+N-Reelin signaling subgraph-24	activation	N-Reelin signaling subgraph-17
+N-Reelin signaling subgraph-24	activation	N-Reelin signaling subgraph-15
+N-Reelin signaling subgraph-13	inhibition	N-Reelin signaling subgraph-3 4

@@ -1,0 +1,36 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Bcl-2 subgraph-10	CTSB	6000	60000	white	rectangle	gene	0.5	black	46	17	2527
+N-Bcl-2 subgraph-11	CTSD	12785	72563	white	rectangle	gene	0.5	black	46	17	2529
+N-Bcl-2 subgraph-12	DDIT3	50395	15821	white	rectangle	gene	0.5	black	46	17	2726
+N-Bcl-2 subgraph-13	PIK3R5	24000	1063	white	rectangle	gene	0.5	black	46	17	30035
+N-Bcl-2 subgraph-14	GDNF	16580	33199	white	rectangle	gene	0.5	black	46	17	4232
+N-Bcl-2 subgraph-15	GSK3B	26193	14557	white	rectangle	gene	0.5	black	46	17	4617
+N-Bcl-2 subgraph-16	APP	0	33998	white	rectangle	gene	0.5	black	46	17	620
+N-Bcl-2 subgraph-18	MAPT	48000	31064	white	rectangle	gene	0.5	black	46	17	6893
+N-Bcl-2 subgraph-19	PTPA	8518	42492	white	rectangle	gene	0.5	black	46	17	9308
+N-Bcl-2 subgraph-20	BAD	11446	12060	white	rectangle	gene	0.5	black	46	17	936
+N-Bcl-2 subgraph-21	BAD	16896	9000	white	rectangle	gene	0.5	black	46	17	936
+N-Bcl-2 subgraph-22	PSEN1	15297	49799	white	rectangle	gene	0.5	black	46	17	9508
+N-Bcl-2 subgraph-23	BAX	19004	24949	white	rectangle	gene	0.5	black	46	17	959
+N-Bcl-2 subgraph-24	BAX	27118	22277	white	rectangle	gene	0.5	black	46	17	959
+N-Bcl-2 subgraph-25	RAF1	31120	0	white	rectangle	gene	0.5	black	46	17	9829
+N-Bcl-2 subgraph-26	BCL2	16754	41855	white	rectangle	gene	0.5	black	46	17	990
+N-Bcl-2 subgraph-27	BCL2L1	8072	34518	white	rectangle	gene	0.5	black	46	17	992
+N-Bcl-2 subgraph-28	BCL2L11	48000	9000	white	rectangle	gene	0.5	black	46	17	994
+N-Bcl-2 subgraph-29	Casp3	50357	68134	white	rectangle	gene	0.5	black	46	17	107739
+N-Bcl-2 subgraph-3 4	PPP2CA BCL2	55120	30000	white	rectangle	gene,gene	0.5	black	46	17	9299,/,990
+N-Bcl-2 subgraph-30	Bad	63728	53733	white	rectangle	gene	0.5	black	46	17	1096330
+N-Bcl-2 subgraph-31	Retn	46062	59789	white	rectangle	gene	0.5	black	46	17	1888506
+N-Bcl-2 subgraph-32	Afap1	36000	69837	white	rectangle	gene	0.5	black	46	17	1917542
+N-Bcl-2 subgraph-33	Cysltr1	51462	45000	white	rectangle	gene	0.5	black	46	17	1926218
+N-Bcl-2 subgraph-34	Bcl2	51785	53033	white	rectangle	gene	0.5	black	46	17	88138
+N-Bcl-2 subgraph-35	Bcl2l1	63717	63426	white	rectangle	gene	0.5	black	46	17	88139
+N-Bcl-2 subgraph-36	Cycs	42326	65637	white	rectangle	gene	0.5	black	46	17	88578
+N-Bcl-2 subgraph-37	Pparg	41556	55757	white	rectangle	gene	0.5	black	46	17	97747
+N-Bcl-2 subgraph-38	Sod1	57225	58439	white	rectangle	gene	0.5	black	46	17	98351
+N-Bcl-2 subgraph-39	Bax	49612	62146	white	rectangle	gene	0.5	black	46	17	99702
+N-Bcl-2 subgraph-5	AKT	17966	16697	white	rectangle	gene	0.5	black	46	17	AKT
+N-Bcl-2 subgraph-6	BID	8395	66821	white	rectangle	gene	0.5	black	46	17	1050
+N-Bcl-2 subgraph-7	CASP3	24556	34986	white	rectangle	gene	0.5	black	46	17	1504
+N-Bcl-2 subgraph-8	BBC3	54785	21563	white	rectangle	gene	0.5	black	46	17	17868
+N-Bcl-2 subgraph-9	CYCS	23589	46693	white	rectangle	gene	0.5	black	46	17	19986

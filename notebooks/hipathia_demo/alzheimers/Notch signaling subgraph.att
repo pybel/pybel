@@ -1,0 +1,17 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Notch signaling subgraph-1 2	NCSTN PSEN1	0	6114	white	rectangle	gene,gene	0.5	black	46	17	17091,/,9508
+N-Notch signaling subgraph-10	CTNNB1	21716	11144	white	rectangle	gene	0.5	black	46	17	2514
+N-Notch signaling subgraph-11	CTNNB1	29092	10154	white	rectangle	gene	0.5	black	46	17	2514
+N-Notch signaling subgraph-12	APH1A	10697	5004	white	rectangle	gene	0.5	black	46	17	29509
+N-Notch signaling subgraph-13	IL6	53784	33887	white	rectangle	gene	0.5	black	46	17	6018
+N-Notch signaling subgraph-14	APP	4627	0	white	rectangle	gene	0.5	black	46	17	620
+N-Notch signaling subgraph-15	NOTCH1	6337	10754	white	rectangle	gene	0.5	black	46	17	7881
+N-Notch signaling subgraph-16	PSEN1	13824	12124	white	rectangle	gene	0.5	black	46	17	9508
+N-Notch signaling subgraph-20	RARB	46757	0	white	rectangle	gene	0.5	black	46	17	9865
+N-Notch signaling subgraph-3	sAPP-alpha	45269	39762	white	rectangle	gene	0.5	black	46	17	CONSO00067
+N-Notch signaling subgraph-4	Notch	45846	31894	white	rectangle	gene	0.5	black	46	17	Notch
+N-Notch signaling subgraph-5	STAT3	39635	36755	white	rectangle	gene	0.5	black	46	17	11364
+N-Notch signaling subgraph-6	RBPJL	49505	24800	white	rectangle	gene	0.5	black	46	17	13761
+N-Notch signaling subgraph-7	SIRT1	39635	1063	white	rectangle	gene	0.5	black	46	17	14929
+N-Notch signaling subgraph-8	CDH2	13165	20253	white	rectangle	gene	0.5	black	46	17	1759
+N-Notch signaling subgraph-9	ADAM10	39673	26498	white	rectangle	gene	0.5	black	46	17	188
