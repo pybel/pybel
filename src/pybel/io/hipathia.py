@@ -197,9 +197,9 @@ def from_hipathia_dfs(name: str, att_df: pd.DataFrame, sif_df: pd.DataFrame) -> 
     return graph
 
 
-def to_hipathia(graph: BELGraph, directory: str) -> None:
+def to_hipathia(graph: BELGraph, directory: str, draw: bool = True) -> None:
     """Export HiPathia artifacts for the graph."""
-    att_df, sif_df = to_hipathia_dfs(graph)
+    att_df, sif_df = to_hipathia_dfs(graph, draw_directory=directory if draw else None)
     att_df.to_csv(os.path.join(directory, '{}.att'.format(graph.name)), sep='\t', index=False)
     sif_df.to_csv(os.path.join(directory, '{}.sif'.format(graph.name)), sep='\t', index=False)
 
@@ -218,7 +218,7 @@ def _is_node_family(graph: BELGraph, node: Protein) -> Optional[Set[Protein]]:
     return children
 
 
-def to_hipathia_dfs(graph: BELGraph) -> Tuple[pd.DataFrame, pd.DataFrame]:
+def to_hipathia_dfs(graph: BELGraph, draw_directory: Optional[str] = None) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Get the ATT and SIF dataframes.
 
     1. Identify nodes:
@@ -310,6 +310,7 @@ def to_hipathia_dfs(graph: BELGraph) -> Tuple[pd.DataFrame, pd.DataFrame]:
 
     composite_graph = nx.Graph([(k_source, k_target) for k_source, _, k_target in edges])
     pos = nx.spring_layout(composite_graph)
+    nx_labels = {}  # from k to label
     min_x = min(x for x, y in pos.values())
     min_y = min(y for x, y in pos.values())
 
@@ -319,7 +320,7 @@ def to_hipathia_dfs(graph: BELGraph) -> Tuple[pd.DataFrame, pd.DataFrame]:
             logger.warning('node not in graph: %s', k)
             continue
 
-        label = ' '.join(labels)
+        nx_labels[k] = label = ' '.join(labels)
         types = ','.join(['gene'] * len(labels))
         gene_list = ',/,'.join(
             ','.join(gene_list)
@@ -345,6 +346,17 @@ def to_hipathia_dfs(graph: BELGraph) -> Tuple[pd.DataFrame, pd.DataFrame]:
         'ID', 'label', 'X', 'Y', 'color', 'shape', 'type', 'label.cex', 'label.color', 'width', 'height',
         'genesList'
     ])
+
+    if draw_directory is not None:
+        try:
+            import matplotlib.pyplot as plt
+        except ImportError:
+            logger.warning('could not draw graph because matplotlib is not installed')
+        else:
+            plt.figure(figsize=(20, 20))
+            nx.draw_networkx(composite_graph, pos, labels=nx_labels)
+            plt.axis('off')
+            plt.savefig(os.path.join(draw_directory, '{}.png'.format(graph.name)))
 
     return att_df, sif_df
 
