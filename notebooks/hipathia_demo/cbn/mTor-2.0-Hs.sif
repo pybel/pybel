@@ -1,21 +1,21 @@
 0	1	2
-N-mTor-2.0-Hs-11	inhibition	N-mTor-2.0-Hs-10
-N-mTor-2.0-Hs-8	activation	N-mTor-2.0-Hs-18
 N-mTor-2.0-Hs-21	activation	N-mTor-2.0-Hs-17
-N-mTor-2.0-Hs-13	activation	N-mTor-2.0-Hs-10
-N-mTor-2.0-Hs-13	activation	N-mTor-2.0-Hs-10
+N-mTor-2.0-Hs-20	inhibition	N-mTor-2.0-Hs-5 6
+N-mTor-2.0-Hs-20	inhibition	N-mTor-2.0-Hs-5 6
+N-mTor-2.0-Hs-20	inhibition	N-mTor-2.0-Hs-5 6
+N-mTor-2.0-Hs-9	activation	N-mTor-2.0-Hs-8
+N-mTor-2.0-Hs-1 2	inhibition	N-mTor-2.0-Hs-7
+N-mTor-2.0-Hs-1 2	inhibition	N-mTor-2.0-Hs-7
+N-mTor-2.0-Hs-1 2	inhibition	N-mTor-2.0-Hs-7
+N-mTor-2.0-Hs-1 2	inhibition	N-mTor-2.0-Hs-7
+N-mTor-2.0-Hs-8	activation	N-mTor-2.0-Hs-18
+N-mTor-2.0-Hs-15	activation	N-mTor-2.0-Hs-14
 N-mTor-2.0-Hs-5 6	inhibition	N-mTor-2.0-Hs-17
+N-mTor-2.0-Hs-22	activation	N-mTor-2.0-Hs-19
+N-mTor-2.0-Hs-13	activation	N-mTor-2.0-Hs-10
+N-mTor-2.0-Hs-13	activation	N-mTor-2.0-Hs-10
+N-mTor-2.0-Hs-16	inhibition	N-mTor-2.0-Hs-1 2
 N-mTor-2.0-Hs-10	activation	N-mTor-2.0-Hs-12
 N-mTor-2.0-Hs-10	activation	N-mTor-2.0-Hs-18
-N-mTor-2.0-Hs-1 2	inhibition	N-mTor-2.0-Hs-7
-N-mTor-2.0-Hs-1 2	inhibition	N-mTor-2.0-Hs-7
-N-mTor-2.0-Hs-1 2	inhibition	N-mTor-2.0-Hs-7
-N-mTor-2.0-Hs-1 2	inhibition	N-mTor-2.0-Hs-7
+N-mTor-2.0-Hs-11	inhibition	N-mTor-2.0-Hs-10
 N-mTor-2.0-Hs-18	activation	N-mTor-2.0-Hs-3 4
-N-mTor-2.0-Hs-20	inhibition	N-mTor-2.0-Hs-5 6
-N-mTor-2.0-Hs-20	inhibition	N-mTor-2.0-Hs-5 6
-N-mTor-2.0-Hs-20	inhibition	N-mTor-2.0-Hs-5 6
-N-mTor-2.0-Hs-15	activation	N-mTor-2.0-Hs-14
-N-mTor-2.0-Hs-22	activation	N-mTor-2.0-Hs-19
-N-mTor-2.0-Hs-9	activation	N-mTor-2.0-Hs-8
-N-mTor-2.0-Hs-16	inhibition	N-mTor-2.0-Hs-1 2

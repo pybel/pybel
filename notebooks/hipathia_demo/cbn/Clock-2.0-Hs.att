@@ -1,31 +1,31 @@
 ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
-N-Clock-2.0-Hs-1 2	CCNB1 CDK1	180	6	white	rectangle	gene,gene	0.5	black	46	17	1579,/,1722
-N-Clock-2.0-Hs-11 12	CRY2 PER1	77	147	white	rectangle	gene,gene	0.5	black	46	17	2385,/,8845
-N-Clock-2.0-Hs-13 14	CRY2 PER2	81	129	white	rectangle	gene,gene	0.5	black	46	17	2385,/,8846
-N-Clock-2.0-Hs-15 16	CRY2 PER3	84	144	white	rectangle	gene,gene	0.5	black	46	17	2385,/,8847
-N-Clock-2.0-Hs-17 18	ARNTL NPAS2	78	135	white	rectangle	gene,gene	0.5	black	46	17	701,/,7895
-N-Clock-2.0-Hs-19	BHLHE40	62	147	white	rectangle	gene	0.5	black	46	17	1046
-N-Clock-2.0-Hs-20	WEE1	190	0	white	rectangle	gene	0.5	black	46	17	12761
-N-Clock-2.0-Hs-21	SIRT1	164	27	white	rectangle	gene	0.5	black	46	17	14929
-N-Clock-2.0-Hs-22	CCNA2	145	18	white	rectangle	gene	0.5	black	46	17	1578
-N-Clock-2.0-Hs-23	CCNB1	139	12	white	rectangle	gene	0.5	black	46	17	1579
-N-Clock-2.0-Hs-24	BHLHE41	66	151	white	rectangle	gene	0.5	black	46	17	16617
-N-Clock-2.0-Hs-25	CHEK1	19	59	white	rectangle	gene	0.5	black	46	17	1925
-N-Clock-2.0-Hs-26	CHEK1	10	60	white	rectangle	gene	0.5	black	46	17	1925
-N-Clock-2.0-Hs-28	CSNK1D	119	19	white	rectangle	gene	0.5	black	46	17	2452
-N-Clock-2.0-Hs-29	CSNK1E	136	26	white	rectangle	gene	0.5	black	46	17	2453
-N-Clock-2.0-Hs-3 4	CLOCK ARNTL	74	139	white	rectangle	gene,gene	0.5	black	46	17	2082,/,701
-N-Clock-2.0-Hs-30	CTNNB1	8	7	white	rectangle	gene	0.5	black	46	17	2514
-N-Clock-2.0-Hs-31	ARNTL	151	28	white	rectangle	gene	0.5	black	46	17	701
-N-Clock-2.0-Hs-32	ARNTL	127	14	white	rectangle	gene	0.5	black	46	17	701
-N-Clock-2.0-Hs-34	ATM	164	64	white	rectangle	gene	0.5	black	46	17	795
-N-Clock-2.0-Hs-35	ATR	0	61	white	rectangle	gene	0.5	black	46	17	882
-N-Clock-2.0-Hs-36	PER1	155	55	white	rectangle	gene	0.5	black	46	17	8845
-N-Clock-2.0-Hs-37	PER1	126	19	white	rectangle	gene	0.5	black	46	17	8845
-N-Clock-2.0-Hs-38	PER1	145	42	white	rectangle	gene	0.5	black	46	17	8845
-N-Clock-2.0-Hs-39	PER2	15	13	white	rectangle	gene	0.5	black	46	17	8846
-N-Clock-2.0-Hs-40	PER2	121	28	white	rectangle	gene	0.5	black	46	17	8846
-N-Clock-2.0-Hs-41	PER3	126	27	white	rectangle	gene	0.5	black	46	17	8847
-N-Clock-2.0-Hs-5 6	CRY1 PER1	67	134	white	rectangle	gene,gene	0.5	black	46	17	2384,/,8845
-N-Clock-2.0-Hs-7 8	CRY1 PER2	72	128	white	rectangle	gene,gene	0.5	black	46	17	2384,/,8846
-N-Clock-2.0-Hs-9 10	CRY1 PER3	86	137	white	rectangle	gene,gene	0.5	black	46	17	2384,/,8847
+N-Clock-2.0-Hs-1 2	CCNB1 CDK1	49120	22400	white	rectangle	gene,gene	0.5	black	46	17	1579,/,1722
+N-Clock-2.0-Hs-11 12	CRY2 PER1	44251	46005	white	rectangle	gene,gene	0.5	black	46	17	2385,/,8845
+N-Clock-2.0-Hs-13 14	CRY2 PER2	34705	37648	white	rectangle	gene,gene	0.5	black	46	17	2385,/,8846
+N-Clock-2.0-Hs-15 16	CRY2 PER3	37701	32376	white	rectangle	gene,gene	0.5	black	46	17	2385,/,8847
+N-Clock-2.0-Hs-17 18	ARNTL NPAS2	40344	39549	white	rectangle	gene,gene	0.5	black	46	17	701,/,7895
+N-Clock-2.0-Hs-19	BHLHE40	52834	36551	white	rectangle	gene	0.5	black	46	17	1046
+N-Clock-2.0-Hs-20	WEE1	41999	23464	white	rectangle	gene	0.5	black	46	17	12761
+N-Clock-2.0-Hs-21	SIRT1	28705	16041	white	rectangle	gene	0.5	black	46	17	14929
+N-Clock-2.0-Hs-22	CCNA2	15293	13658	white	rectangle	gene	0.5	black	46	17	1578
+N-Clock-2.0-Hs-23	CCNB1	19983	24756	white	rectangle	gene	0.5	black	46	17	1579
+N-Clock-2.0-Hs-24	BHLHE41	50199	31289	white	rectangle	gene	0.5	black	46	17	16617
+N-Clock-2.0-Hs-25	CHEK1	12412	39200	white	rectangle	gene	0.5	black	46	17	1925
+N-Clock-2.0-Hs-26	CHEK1	10001	46015	white	rectangle	gene	0.5	black	46	17	1925
+N-Clock-2.0-Hs-28	CSNK1D	5137	31614	white	rectangle	gene	0.5	black	46	17	2452
+N-Clock-2.0-Hs-29	CSNK1E	12648	20761	white	rectangle	gene	0.5	black	46	17	2453
+N-Clock-2.0-Hs-3 4	CLOCK ARNTL	44209	37619	white	rectangle	gene,gene	0.5	black	46	17	2082,/,701
+N-Clock-2.0-Hs-30	CTNNB1	25199	6663	white	rectangle	gene	0.5	black	46	17	2514
+N-Clock-2.0-Hs-31	ARNTL	20966	17867	white	rectangle	gene	0.5	black	46	17	701
+N-Clock-2.0-Hs-32	ARNTL	10769	28231	white	rectangle	gene	0.5	black	46	17	701
+N-Clock-2.0-Hs-34	ATM	0	0	white	rectangle	gene	0.5	black	46	17	795
+N-Clock-2.0-Hs-35	ATR	5599	51748	white	rectangle	gene	0.5	black	46	17	882
+N-Clock-2.0-Hs-36	PER1	3137	6777	white	rectangle	gene	0.5	black	46	17	8845
+N-Clock-2.0-Hs-37	PER1	6552	24800	white	rectangle	gene	0.5	black	46	17	8845
+N-Clock-2.0-Hs-38	PER1	7630	13294	white	rectangle	gene	0.5	black	46	17	8845
+N-Clock-2.0-Hs-39	PER2	32320	5600	white	rectangle	gene	0.5	black	46	17	8846
+N-Clock-2.0-Hs-40	PER2	13926	29881	white	rectangle	gene	0.5	black	46	17	8846
+N-Clock-2.0-Hs-41	PER3	3690	22927	white	rectangle	gene	0.5	black	46	17	8847
+N-Clock-2.0-Hs-5 6	CRY1 PER1	38003	44900	white	rectangle	gene,gene	0.5	black	46	17	2384,/,8845
+N-Clock-2.0-Hs-7 8	CRY1 PER2	42684	30800	white	rectangle	gene,gene	0.5	black	46	17	2384,/,8846
+N-Clock-2.0-Hs-9 10	CRY1 PER3	48678	43051	white	rectangle	gene,gene	0.5	black	46	17	2384,/,8847

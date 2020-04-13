@@ -20,7 +20,7 @@ def main():
 
     graph = pybel.load(PATH)
     graph = pybel.ground.ground_graph(graph)
-    pybel.to_hipathia(graph, os.path.dirname(__file__))
+    pybel.to_hipathia(graph, os.path.dirname(__file__), layout='neato')
 
 
 if __name__ == '__main__':

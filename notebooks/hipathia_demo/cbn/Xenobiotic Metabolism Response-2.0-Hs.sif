@@ -1,4 +1,15 @@
 0	1	2
+N-Xenobiotic Metabolism Response-2.0-Hs-25	activation	N-Xenobiotic Metabolism Response-2.0-Hs-23
+N-Xenobiotic Metabolism Response-2.0-Hs-25	activation	N-Xenobiotic Metabolism Response-2.0-Hs-16
+N-Xenobiotic Metabolism Response-2.0-Hs-25	activation	N-Xenobiotic Metabolism Response-2.0-Hs-20
+N-Xenobiotic Metabolism Response-2.0-Hs-24	activation	N-Xenobiotic Metabolism Response-2.0-Hs-16
+N-Xenobiotic Metabolism Response-2.0-Hs-24	activation	N-Xenobiotic Metabolism Response-2.0-Hs-18
+N-Xenobiotic Metabolism Response-2.0-Hs-24	activation	N-Xenobiotic Metabolism Response-2.0-Hs-19
+N-Xenobiotic Metabolism Response-2.0-Hs-1 2	activation	N-Xenobiotic Metabolism Response-2.0-Hs-11
+N-Xenobiotic Metabolism Response-2.0-Hs-1 2	activation	N-Xenobiotic Metabolism Response-2.0-Hs-11
+N-Xenobiotic Metabolism Response-2.0-Hs-1 2	activation	N-Xenobiotic Metabolism Response-2.0-Hs-13
+N-Xenobiotic Metabolism Response-2.0-Hs-1 2	activation	N-Xenobiotic Metabolism Response-2.0-Hs-13
+N-Xenobiotic Metabolism Response-2.0-Hs-1 2	activation	N-Xenobiotic Metabolism Response-2.0-Hs-19
 N-Xenobiotic Metabolism Response-2.0-Hs-19	activation	N-Xenobiotic Metabolism Response-2.0-Hs-20
 N-Xenobiotic Metabolism Response-2.0-Hs-19	activation	N-Xenobiotic Metabolism Response-2.0-Hs-20
 N-Xenobiotic Metabolism Response-2.0-Hs-19	activation	N-Xenobiotic Metabolism Response-2.0-Hs-24
@@ -10,27 +21,16 @@ N-Xenobiotic Metabolism Response-2.0-Hs-19	activation	N-Xenobiotic Metabolism Re
 N-Xenobiotic Metabolism Response-2.0-Hs-19	activation	N-Xenobiotic Metabolism Response-2.0-Hs-25
 N-Xenobiotic Metabolism Response-2.0-Hs-19	activation	N-Xenobiotic Metabolism Response-2.0-Hs-17
 N-Xenobiotic Metabolism Response-2.0-Hs-19	activation	N-Xenobiotic Metabolism Response-2.0-Hs-13
-N-Xenobiotic Metabolism Response-2.0-Hs-17	inhibition	N-Xenobiotic Metabolism Response-2.0-Hs-18
-N-Xenobiotic Metabolism Response-2.0-Hs-17	inhibition	N-Xenobiotic Metabolism Response-2.0-Hs-19
-N-Xenobiotic Metabolism Response-2.0-Hs-17	inhibition	N-Xenobiotic Metabolism Response-2.0-Hs-19
 N-Xenobiotic Metabolism Response-2.0-Hs-3	activation	N-Xenobiotic Metabolism Response-2.0-Hs-24
 N-Xenobiotic Metabolism Response-2.0-Hs-3	activation	N-Xenobiotic Metabolism Response-2.0-Hs-25
 N-Xenobiotic Metabolism Response-2.0-Hs-3	inhibition	N-Xenobiotic Metabolism Response-2.0-Hs-18
 N-Xenobiotic Metabolism Response-2.0-Hs-3	inhibition	N-Xenobiotic Metabolism Response-2.0-Hs-18
 N-Xenobiotic Metabolism Response-2.0-Hs-3	inhibition	N-Xenobiotic Metabolism Response-2.0-Hs-18
-N-Xenobiotic Metabolism Response-2.0-Hs-16	activation	N-Xenobiotic Metabolism Response-2.0-Hs-22
-N-Xenobiotic Metabolism Response-2.0-Hs-24	activation	N-Xenobiotic Metabolism Response-2.0-Hs-16
-N-Xenobiotic Metabolism Response-2.0-Hs-24	activation	N-Xenobiotic Metabolism Response-2.0-Hs-18
-N-Xenobiotic Metabolism Response-2.0-Hs-24	activation	N-Xenobiotic Metabolism Response-2.0-Hs-19
-N-Xenobiotic Metabolism Response-2.0-Hs-25	activation	N-Xenobiotic Metabolism Response-2.0-Hs-23
-N-Xenobiotic Metabolism Response-2.0-Hs-25	activation	N-Xenobiotic Metabolism Response-2.0-Hs-16
-N-Xenobiotic Metabolism Response-2.0-Hs-25	activation	N-Xenobiotic Metabolism Response-2.0-Hs-20
-N-Xenobiotic Metabolism Response-2.0-Hs-1 2	activation	N-Xenobiotic Metabolism Response-2.0-Hs-11
-N-Xenobiotic Metabolism Response-2.0-Hs-1 2	activation	N-Xenobiotic Metabolism Response-2.0-Hs-11
-N-Xenobiotic Metabolism Response-2.0-Hs-1 2	activation	N-Xenobiotic Metabolism Response-2.0-Hs-13
-N-Xenobiotic Metabolism Response-2.0-Hs-1 2	activation	N-Xenobiotic Metabolism Response-2.0-Hs-13
-N-Xenobiotic Metabolism Response-2.0-Hs-1 2	activation	N-Xenobiotic Metabolism Response-2.0-Hs-19
-N-Xenobiotic Metabolism Response-2.0-Hs-27	activation	N-Xenobiotic Metabolism Response-2.0-Hs-15
-N-Xenobiotic Metabolism Response-2.0-Hs-27	activation	N-Xenobiotic Metabolism Response-2.0-Hs-15
 N-Xenobiotic Metabolism Response-2.0-Hs-26	activation	N-Xenobiotic Metabolism Response-2.0-Hs-11
 N-Xenobiotic Metabolism Response-2.0-Hs-26	activation	N-Xenobiotic Metabolism Response-2.0-Hs-12
+N-Xenobiotic Metabolism Response-2.0-Hs-27	activation	N-Xenobiotic Metabolism Response-2.0-Hs-15
+N-Xenobiotic Metabolism Response-2.0-Hs-27	activation	N-Xenobiotic Metabolism Response-2.0-Hs-15
+N-Xenobiotic Metabolism Response-2.0-Hs-16	activation	N-Xenobiotic Metabolism Response-2.0-Hs-22
+N-Xenobiotic Metabolism Response-2.0-Hs-17	inhibition	N-Xenobiotic Metabolism Response-2.0-Hs-18
+N-Xenobiotic Metabolism Response-2.0-Hs-17	inhibition	N-Xenobiotic Metabolism Response-2.0-Hs-19
+N-Xenobiotic Metabolism Response-2.0-Hs-17	inhibition	N-Xenobiotic Metabolism Response-2.0-Hs-19

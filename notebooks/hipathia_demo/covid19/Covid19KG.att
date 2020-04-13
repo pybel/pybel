@@ -1,190 +1,190 @@
 ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
-N-Covid19KG-100	3.4.22.69	75	179	white	rectangle	gene	0.5	black	46	17	3.4.22.69
-N-Covid19KG-101	3.4.22.69	40	143	white	rectangle	gene	0.5	black	46	17	3.4.22.69
-N-Covid19KG-102	NF-kappa B complex subunits	82	57	white	rectangle	gene	0.5	black	46	17	1254
-N-Covid19KG-105	Interferons	74	58	white	rectangle	gene	0.5	black	46	17	598
-N-Covid19KG-106	Protein phosphatase 1 regulatory subunits	75	99	white	rectangle	gene	0.5	black	46	17	694
-N-Covid19KG-108	BECN1	30	56	white	rectangle	gene	0.5	black	46	17	1034
-N-Covid19KG-109	BECN1	23	56	white	rectangle	gene	0.5	black	46	17	1034
-N-Covid19KG-11 12	Severe acute respiratory syndrome coronavirus 2 ACE2	96	0	white	rectangle	gene,gene	0.5	black	46	17	13557
-N-Covid19KG-110	CCL2	91	101	white	rectangle	gene	0.5	black	46	17	10618
-N-Covid19KG-111	CCL3	75	45	white	rectangle	gene	0.5	black	46	17	10627
-N-Covid19KG-112	CCL5	73	46	white	rectangle	gene	0.5	black	46	17	10632
-N-Covid19KG-113	CXCL10	77	44	white	rectangle	gene	0.5	black	46	17	10637
-N-Covid19KG-114	SKP2	25	55	white	rectangle	gene	0.5	black	46	17	10901
-N-Covid19KG-115	STAT1	50	23	white	rectangle	gene	0.5	black	46	17	11362
-N-Covid19KG-116	STAT1	82	87	white	rectangle	gene	0.5	black	46	17	11362
-N-Covid19KG-117	TBK1	88	64	white	rectangle	gene	0.5	black	46	17	11584
-N-Covid19KG-118	TBK1	114	75	white	rectangle	gene	0.5	black	46	17	11584
-N-Covid19KG-119	TGFB1	16	92	white	rectangle	gene	0.5	black	46	17	11766
-N-Covid19KG-120	TLR3	116	99	white	rectangle	gene	0.5	black	46	17	11849
-N-Covid19KG-121	TMPRSS2	148	103	white	rectangle	gene	0.5	black	46	17	11876
-N-Covid19KG-122	TNF	79	105	white	rectangle	gene	0.5	black	46	17	11892
-N-Covid19KG-123	HSP90B1	79	115	white	rectangle	gene	0.5	black	46	17	12028
-N-Covid19KG-124	TRAF2	60	96	white	rectangle	gene	0.5	black	46	17	12032
-N-Covid19KG-126	VIM	23	92	white	rectangle	gene	0.5	black	46	17	12692
-N-Covid19KG-127	XBP1	61	162	white	rectangle	gene	0.5	black	46	17	12801
-N-Covid19KG-128	ERO1A	86	96	white	rectangle	gene	0.5	black	46	17	13280
-N-Covid19KG-129	ACE2	153	102	white	rectangle	gene	0.5	black	46	17	13557
-N-Covid19KG-13 14	viral replication complex R1AB_CVHSA	192	100	white	rectangle	gene,gene	0.5	black	46	17	0019034,/,P0C6X7
-N-Covid19KG-130	ACE2	149	108	white	rectangle	gene	0.5	black	46	17	13557
-N-Covid19KG-131	ACE2	146	107	white	rectangle	gene	0.5	black	46	17	13557
-N-Covid19KG-132	PPP1R15A	78	101	white	rectangle	gene	0.5	black	46	17	14375
-N-Covid19KG-133	CASP1	71	112	white	rectangle	gene	0.5	black	46	17	1499
-N-Covid19KG-134	MBTPS2	70	9	white	rectangle	gene	0.5	black	46	17	15455
-N-Covid19KG-135	MBTPS1	74	12	white	rectangle	gene	0.5	black	46	17	15456
-N-Covid19KG-136	IL1F10	69	110	white	rectangle	gene	0.5	black	46	17	15552
-N-Covid19KG-137	IL37	86	101	white	rectangle	gene	0.5	black	46	17	15563
-N-Covid19KG-138	TLR7	113	94	white	rectangle	gene	0.5	black	46	17	15631
-N-Covid19KG-139	TLR8	111	92	white	rectangle	gene	0.5	black	46	17	15632
-N-Covid19KG-140	TLR9	114	96	white	rectangle	gene	0.5	black	46	17	15633
-N-Covid19KG-141	TRIB3	83	95	white	rectangle	gene	0.5	black	46	17	16228
-N-Covid19KG-142	TICAM1	111	95	white	rectangle	gene	0.5	black	46	17	18348
-N-Covid19KG-143	RNF41	94	71	white	rectangle	gene	0.5	black	46	17	18401
-N-Covid19KG-144	IFIH1	115	93	white	rectangle	gene	0.5	black	46	17	18873
-N-Covid19KG-145	EDEM1	63	160	white	rectangle	gene	0.5	black	46	17	18967
-N-Covid19KG-146	CASP12	55	91	white	rectangle	gene	0.5	black	46	17	19004
-N-Covid19KG-147	DDX58	113	97	white	rectangle	gene	0.5	black	46	17	19102
-N-Covid19KG-15 16	E BRD2	110	5	white	rectangle	gene,gene	0.5	black	46	17	1103
-N-Covid19KG-151	CGAS	115	95	white	rectangle	gene	0.5	black	46	17	21367
-N-Covid19KG-152	TMPRSS11D	153	95	white	rectangle	gene	0.5	black	46	17	24059
-N-Covid19KG-153	EIF2AK1	75	96	white	rectangle	gene	0.5	black	46	17	24921
-N-Covid19KG-154	CTSL	128	14	white	rectangle	gene	0.5	black	46	17	2537
-N-Covid19KG-155	CUL2	115	180	white	rectangle	gene	0.5	black	46	17	2552
-N-Covid19KG-158	DDIT3	82	99	white	rectangle	gene	0.5	black	46	17	2726
-N-Covid19KG-159	MAVS	113	92	white	rectangle	gene	0.5	black	46	17	29233
-N-Covid19KG-160	LARP1	176	114	white	rectangle	gene	0.5	black	46	17	29531
-N-Covid19KG-161	DNM1L	121	87	white	rectangle	gene	0.5	black	46	17	2973
-N-Covid19KG-162	DNM1L	121	80	white	rectangle	gene	0.5	black	46	17	2973
-N-Covid19KG-164	G3BP1	173	145	white	rectangle	gene	0.5	black	46	17	30292
-N-Covid19KG-165	DUSP1	144	32	white	rectangle	gene	0.5	black	46	17	3064
-N-Covid19KG-167	EIF2A	72	87	white	rectangle	gene	0.5	black	46	17	3254
-N-Covid19KG-168	EIF2AK3	79	97	white	rectangle	gene	0.5	black	46	17	3255
-N-Covid19KG-169	EIF2S1	170	39	white	rectangle	gene	0.5	black	46	17	3265
-N-Covid19KG-17 18	E BRD4	186	89	white	rectangle	gene,gene	0.5	black	46	17	13575
-N-Covid19KG-170	EIF2S1	79	99	white	rectangle	gene	0.5	black	46	17	3265
-N-Covid19KG-171	EIF4A1	168	142	white	rectangle	gene	0.5	black	46	17	3282
-N-Covid19KG-173	ERN1	66	102	white	rectangle	gene	0.5	black	46	17	3449
-N-Covid19KG-174	ERN1	60	102	white	rectangle	gene	0.5	black	46	17	3449
-N-Covid19KG-175	FGA	84	116	white	rectangle	gene	0.5	black	46	17	3661
-N-Covid19KG-176	FGB	80	118	white	rectangle	gene	0.5	black	46	17	3662
-N-Covid19KG-177	FGG	81	116	white	rectangle	gene	0.5	black	46	17	3694
-N-Covid19KG-178	AKT1	61	104	white	rectangle	gene	0.5	black	46	17	391
-N-Covid19KG-179	MTOR	176	112	white	rectangle	gene	0.5	black	46	17	3942
-N-Covid19KG-180	GFAP	27	90	white	rectangle	gene	0.5	black	46	17	4235
-N-Covid19KG-181	GPT	156	100	white	rectangle	gene	0.5	black	46	17	4552
-N-Covid19KG-182	HAS2	73	110	white	rectangle	gene	0.5	black	46	17	4819
-N-Covid19KG-183	HDAC2	129	180	white	rectangle	gene	0.5	black	46	17	4853
-N-Covid19KG-185	HSPA5	88	115	white	rectangle	gene	0.5	black	46	17	5238
-N-Covid19KG-186	HSPB1	22	87	white	rectangle	gene	0.5	black	46	17	5246
-N-Covid19KG-187	HYAL1	69	115	white	rectangle	gene	0.5	black	46	17	5320
-N-Covid19KG-188	IFNA1	118	104	white	rectangle	gene	0.5	black	46	17	5417
-N-Covid19KG-189	IFNAR1	88	113	white	rectangle	gene	0.5	black	46	17	5432
-N-Covid19KG-190	IFNAR1	82	118	white	rectangle	gene	0.5	black	46	17	5432
-N-Covid19KG-191	IFNAR1	84	119	white	rectangle	gene	0.5	black	46	17	5432
-N-Covid19KG-192	IFNB1	111	79	white	rectangle	gene	0.5	black	46	17	5434
-N-Covid19KG-193	IFNB1	119	90	white	rectangle	gene	0.5	black	46	17	5434
-N-Covid19KG-194	IFNG	120	103	white	rectangle	gene	0.5	black	46	17	5438
-N-Covid19KG-195	ATG5	123	83	white	rectangle	gene	0.5	black	46	17	589
-N-Covid19KG-196	IL1B	74	107	white	rectangle	gene	0.5	black	46	17	5992
-N-Covid19KG-197	IL6	76	101	white	rectangle	gene	0.5	black	46	17	6018
-N-Covid19KG-201	IRF3	101	77	white	rectangle	gene	0.5	black	46	17	6118
-N-Covid19KG-202	IRF3	114	85	white	rectangle	gene	0.5	black	46	17	6118
-N-Covid19KG-203	IRF7	110	74	white	rectangle	gene	0.5	black	46	17	6122
-N-Covid19KG-204	NAE1	118	181	white	rectangle	gene	0.5	black	46	17	621
-N-Covid19KG-205	LY6E	2	94	white	rectangle	gene	0.5	black	46	17	6727
-N-Covid19KG-206	MAP1LC3A	122	81	white	rectangle	gene	0.5	black	46	17	6838
-N-Covid19KG-207	MAP3K7	75	104	white	rectangle	gene	0.5	black	46	17	6859
-N-Covid19KG-208	MAPK1	85	95	white	rectangle	gene	0.5	black	46	17	6871
-N-Covid19KG-209	MAPK1	147	28	white	rectangle	gene	0.5	black	46	17	6871
-N-Covid19KG-210	MAPK14	150	26	white	rectangle	gene	0.5	black	46	17	6876
-N-Covid19KG-212	MAPK3	16	88	white	rectangle	gene	0.5	black	46	17	6877
-N-Covid19KG-213	MAPK8	51	88	white	rectangle	gene	0.5	black	46	17	6881
-N-Covid19KG-214	MAPK8	61	100	white	rectangle	gene	0.5	black	46	17	6881
-N-Covid19KG-215	MAPK8	148	29	white	rectangle	gene	0.5	black	46	17	6881
-N-Covid19KG-217	MCL1	80	86	white	rectangle	gene	0.5	black	46	17	6943
-N-Covid19KG-218	MYD88	101	91	white	rectangle	gene	0.5	black	46	17	7562
-N-Covid19KG-219	NFKBIA	171	37	white	rectangle	gene	0.5	black	46	17	7797
-N-Covid19KG-22 23	ORF1ab HDAC2	130	183	white	rectangle	gene,gene	0.5	black	46	17	4853
-N-Covid19KG-220	NFKBIA	173	35	white	rectangle	gene	0.5	black	46	17	7797
-N-Covid19KG-221	ATF3	140	37	white	rectangle	gene	0.5	black	46	17	785
-N-Covid19KG-223	ATF4	83	106	white	rectangle	gene	0.5	black	46	17	786
-N-Covid19KG-224	ATF6	81	92	white	rectangle	gene	0.5	black	46	17	791
-N-Covid19KG-225	ATF6	72	13	white	rectangle	gene	0.5	black	46	17	791
-N-Covid19KG-226	FURIN	96	5	white	rectangle	gene	0.5	black	46	17	8568
-N-Covid19KG-228	PRKAA1	90	104	white	rectangle	gene	0.5	black	46	17	9376
-N-Covid19KG-229	EIF2AK2	77	91	white	rectangle	gene	0.5	black	46	17	9437
-N-Covid19KG-230	DNAJC3	59	166	white	rectangle	gene	0.5	black	46	17	9439
-N-Covid19KG-231	BCL2	87	98	white	rectangle	gene	0.5	black	46	17	990
-N-Covid19KG-232	BCL2L11	81	95	white	rectangle	gene	0.5	black	46	17	994
-N-Covid19KG-233	Interferon Type I	103	88	white	rectangle	gene	0.5	black	46	17	D007370
-N-Covid19KG-235	Proteins	112	178	white	rectangle	gene	0.5	black	46	17	D011506
-N-Covid19KG-236	Viral Envelope Proteins	34	19	white	rectangle	gene	0.5	black	46	17	D014759
-N-Covid19KG-237	Viral Matrix Proteins	147	183	white	rectangle	gene	0.5	black	46	17	D014763
-N-Covid19KG-239	Spike Glycoprotein, Coronavirus	173	60	white	rectangle	gene	0.5	black	46	17	D064370
-N-Covid19KG-24 25	ORF1ab RNF41	95	70	white	rectangle	gene,gene	0.5	black	46	17	18401
-N-Covid19KG-240	Spike Glycoprotein, Coronavirus	129	12	white	rectangle	gene	0.5	black	46	17	D064370
-N-Covid19KG-241	Tnf	127	31	white	rectangle	gene	0.5	black	46	17	104798
-N-Covid19KG-243	Ace2	165	95	white	rectangle	gene	0.5	black	46	17	1917258
-N-Covid19KG-244	Arg1	132	21	white	rectangle	gene	0.5	black	46	17	88070
-N-Covid19KG-245	Dpp4	129	25	white	rectangle	gene	0.5	black	46	17	94919
-N-Covid19KG-247	Il6	129	21	white	rectangle	gene	0.5	black	46	17	96559
-N-Covid19KG-250	A0A0D3MU52_9BETC	69	56	white	rectangle	gene	0.5	black	46	17	A0A0D3MU52
-N-Covid19KG-251	A0A0D9R1K1_CHLSB	153	148	white	rectangle	gene	0.5	black	46	17	A0A0D9R1K1
-N-Covid19KG-254	A0A0D9RBG0_CHLSB	151	140	white	rectangle	gene	0.5	black	46	17	A0A0D9RBG0
-N-Covid19KG-255	A0A0D9RCP6_CHLSB	159	147	white	rectangle	gene	0.5	black	46	17	A0A0D9RCP6
-N-Covid19KG-256	A0A0D9RCS6_CHLSB	157	149	white	rectangle	gene	0.5	black	46	17	A0A0D9RCS6
-N-Covid19KG-257	A0A0D9REG4_CHLSB	83	122	white	rectangle	gene	0.5	black	46	17	A0A0D9REG4
-N-Covid19KG-259	A0A0D9RP74_CHLSB	78	117	white	rectangle	gene	0.5	black	46	17	A0A0D9RP74
-N-Covid19KG-261	A0A0D9RUU7_CHLSB	164	97	white	rectangle	gene	0.5	black	46	17	A0A0D9RUU7
-N-Covid19KG-262	A0A0D9S017_CHLSB	155	149	white	rectangle	gene	0.5	black	46	17	A0A0D9S017
-N-Covid19KG-263	A0A0D9S1P0_CHLSB	86	114	white	rectangle	gene	0.5	black	46	17	A0A0D9S1P0
-N-Covid19KG-264	A0A0D9S2F1_CHLSB	9	125	white	rectangle	gene	0.5	black	46	17	A0A0D9S2F1
-N-Covid19KG-265	A0A0D9S8I4_CHLSB	82	122	white	rectangle	gene	0.5	black	46	17	A0A0D9S8I4
-N-Covid19KG-267	A0A0D9SAF4_CHLSB	163	150	white	rectangle	gene	0.5	black	46	17	A0A0D9SAF4
-N-Covid19KG-269	G4XXN2_CHLAE	87	118	white	rectangle	gene	0.5	black	46	17	G4XXN2
-N-Covid19KG-272	ORF4B_CVEMC	106	74	white	rectangle	gene	0.5	black	46	17	K9N643
-N-Covid19KG-273	M2_I34A1	68	107	white	rectangle	gene	0.5	black	46	17	P06821
-N-Covid19KG-276	R1AB_CVHSA	77	49	white	rectangle	gene	0.5	black	46	17	P0C6X7
-N-Covid19KG-277	R1AB_CVHSA	15	90	white	rectangle	gene	0.5	black	46	17	P0C6X7
-N-Covid19KG-278	R1AB_CVHSA	113	178	white	rectangle	gene	0.5	black	46	17	P0C6X7
-N-Covid19KG-280	R1AB_CVHSA	20	90	white	rectangle	gene	0.5	black	46	17	P0C6X7
-N-Covid19KG-281	R1AB_CVHSA	113	183	white	rectangle	gene	0.5	black	46	17	P0C6X7
-N-Covid19KG-282	R1AB_CVHSA	193	98	white	rectangle	gene	0.5	black	46	17	P0C6X7
-N-Covid19KG-284	SPIKE_CVH22	0	92	white	rectangle	gene	0.5	black	46	17	P15423
-N-Covid19KG-285	SPIKE_CVHSA	159	97	white	rectangle	gene	0.5	black	46	17	P59594
-N-Covid19KG-286	SPIKE_CVHSA	152	98	white	rectangle	gene	0.5	black	46	17	P59594
-N-Covid19KG-287	NCAP_CVHSA	154	145	white	rectangle	gene	0.5	black	46	17	P59595
-N-Covid19KG-288	AP3A_CVHSA	83	112	white	rectangle	gene	0.5	black	46	17	P59632
-N-Covid19KG-290	AP3A_CVHSA	86	117	white	rectangle	gene	0.5	black	46	17	P59632
-N-Covid19KG-293	AP3A_CVHSA	84	127	white	rectangle	gene	0.5	black	46	17	P59632
-N-Covid19KG-294	AP3A_CVHSA	82	127	white	rectangle	gene	0.5	black	46	17	P59632
-N-Covid19KG-295	AP3A_CVHSA	30	38	white	rectangle	gene	0.5	black	46	17	P59632
-N-Covid19KG-297	AP3A_CVHSA	81	127	white	rectangle	gene	0.5	black	46	17	P59632
-N-Covid19KG-298	ORF9B_CVHSA	117	84	white	rectangle	gene	0.5	black	46	17	P59636
-N-Covid19KG-299	VEMP_CVHSA	69	112	white	rectangle	gene	0.5	black	46	17	P59637
-N-Covid19KG-3 4	lopinavir 3.4.22.69	75	184	white	rectangle	gene,gene	0.5	black	46	17	31781,/,3.4.22.69
-N-Covid19KG-30 31	S ACE2	151	104	white	rectangle	gene,gene	0.5	black	46	17	13557
-N-Covid19KG-303	Q19QW2_CVHSA	103	72	white	rectangle	gene	0.5	black	46	17	Q19QW2
-N-Covid19KG-304	Q19QW5_CVHSA	49	22	white	rectangle	gene	0.5	black	46	17	Q19QW5
-N-Covid19KG-306	POLG_EMCVR	68	109	white	rectangle	gene	0.5	black	46	17	Q66765
-N-Covid19KG-307	Q6S8E2_CVHSA	101	73	white	rectangle	gene	0.5	black	46	17	Q6S8E2
-N-Covid19KG-308	R9UNW8_9BETC	81	60	white	rectangle	gene	0.5	black	46	17	R9UNW8
-N-Covid19KG-5 6	lopinavir 3.4.22.69	36	147	white	rectangle	gene,gene	0.5	black	46	17	31781,/,3.4.22.69
-N-Covid19KG-52 53	nsp5a EIF2AK2	75	85	white	rectangle	gene,gene	0.5	black	46	17	9437
-N-Covid19KG-54 55	43740568 BSG	130	0	white	rectangle	gene,gene	0.5	black	46	17	1116
-N-Covid19KG-60 61	956533 RNA, Double-Stranded	71	88	white	rectangle	gene,gene	0.5	black	46	17	D012330
-N-Covid19KG-66 67	Histones BRD2	109	2	white	rectangle	gene,gene	0.5	black	46	17	864,/,1103
-N-Covid19KG-68 69	Histones BRD4	184	88	white	rectangle	gene,gene	0.5	black	46	17	864,/,13575
-N-Covid19KG-7 8	ritonavir 3.4.22.69	73	182	white	rectangle	gene,gene	0.5	black	46	17	45409,/,3.4.22.69
-N-Covid19KG-74 75	CLEC4M Spike Glycoprotein, Coronavirus	171	63	white	rectangle	gene,gene	0.5	black	46	17	13523,/,D064370
-N-Covid19KG-76 77	ACE2 Spike Glycoprotein, Coronavirus	177	58	white	rectangle	gene,gene	0.5	black	46	17	13557,/,D064370
-N-Covid19KG-80 81	CANX Spike Glycoprotein, Coronavirus	170	58	white	rectangle	gene,gene	0.5	black	46	17	1473,/,D064370
-N-Covid19KG-84 85	CD209 Spike Glycoprotein, Coronavirus	178	60	white	rectangle	gene,gene	0.5	black	46	17	1641,/,D064370
-N-Covid19KG-88 89	EIF2AK2 RNA, Double-Stranded	73	85	white	rectangle	gene,gene	0.5	black	46	17	9437,/,D012330
-N-Covid19KG-9 10	ritonavir 3.4.22.69	44	140	white	rectangle	gene,gene	0.5	black	46	17	45409,/,3.4.22.69
-N-Covid19KG-90 91	Immunoglobulin G SPIKE_CVHSA	162	99	white	rectangle	gene,gene	0.5	black	46	17	D007074,/,P59594
-N-Covid19KG-92 93	Ace2 SPIKE_CVHSA	170	94	white	rectangle	gene,gene	0.5	black	46	17	1917258,/,P59594
-N-Covid19KG-94 95	A0A0D9RKI4_CHLSB NCAP_CVHSA	12	124	white	rectangle	gene,gene	0.5	black	46	17	A0A0D9RKI4,/,P59595
-N-Covid19KG-96 97	AP3A_CVHSA AP3A_CVHSA	34	41	white	rectangle	gene,gene	0.5	black	46	17	P59632,/,P59632
-N-Covid19KG-99	3.2.1.20	168	56	white	rectangle	gene	0.5	black	46	17	3.2.1.20
+N-Covid19KG-100	3.4.22.69	69374	20821	white	rectangle	gene	0.5	black	46	17	3.4.22.69
+N-Covid19KG-101	3.4.22.69	11016	18021	white	rectangle	gene	0.5	black	46	17	3.4.22.69
+N-Covid19KG-102	NF-kappa B complex subunits	91780	70639	white	rectangle	gene	0.5	black	46	17	1254
+N-Covid19KG-105	Interferons	99461	58723	white	rectangle	gene	0.5	black	46	17	598
+N-Covid19KG-106	Protein phosphatase 1 regulatory subunits	38290	86781	white	rectangle	gene	0.5	black	46	17	694
+N-Covid19KG-108	BECN1	78400	78400	white	rectangle	gene	0.5	black	46	17	1034
+N-Covid19KG-109	BECN1	85185	90963	white	rectangle	gene	0.5	black	46	17	1034
+N-Covid19KG-11 12	Severe acute respiratory syndrome coronavirus 2 ACE2	37921	5600	white	rectangle	gene,gene	0.5	black	46	17	13557
+N-Covid19KG-110	CCL2	58114	69943	white	rectangle	gene	0.5	black	46	17	10618
+N-Covid19KG-111	CCL3	105741	78537	white	rectangle	gene	0.5	black	46	17	10627
+N-Covid19KG-112	CCL5	106801	71822	white	rectangle	gene	0.5	black	46	17	10632
+N-Covid19KG-113	CXCL10	101551	83333	white	rectangle	gene	0.5	black	46	17	10637
+N-Covid19KG-114	SKP2	80795	85221	white	rectangle	gene	0.5	black	46	17	10901
+N-Covid19KG-115	STAT1	130321	106400	white	rectangle	gene	0.5	black	46	17	11362
+N-Covid19KG-116	STAT1	24576	98620	white	rectangle	gene	0.5	black	46	17	11362
+N-Covid19KG-117	TBK1	84821	66455	white	rectangle	gene	0.5	black	46	17	11584
+N-Covid19KG-118	TBK1	78021	46257	white	rectangle	gene	0.5	black	46	17	11584
+N-Covid19KG-119	TGFB1	18361	33600	white	rectangle	gene	0.5	black	46	17	11766
+N-Covid19KG-120	TLR3	52800	39283	white	rectangle	gene	0.5	black	46	17	11849
+N-Covid19KG-121	TMPRSS2	102561	115100	white	rectangle	gene	0.5	black	46	17	11876
+N-Covid19KG-122	TNF	47368	74171	white	rectangle	gene	0.5	black	46	17	11892
+N-Covid19KG-123	HSP90B1	30480	63517	white	rectangle	gene	0.5	black	46	17	12028
+N-Covid19KG-124	TRAF2	55394	90156	white	rectangle	gene	0.5	black	46	17	12032
+N-Covid19KG-126	VIM	25576	45905	white	rectangle	gene	0.5	black	46	17	12692
+N-Covid19KG-127	XBP1	16395	138420	white	rectangle	gene	0.5	black	46	17	12801
+N-Covid19KG-128	ERO1A	20996	81015	white	rectangle	gene	0.5	black	46	17	13280
+N-Covid19KG-129	ACE2	104101	99550	white	rectangle	gene	0.5	black	46	17	13557
+N-Covid19KG-13 14	viral replication complex R1AB_CVHSA	135921	72800	white	rectangle	gene,gene	0.5	black	46	17	0019034,/,P0C6X7
+N-Covid19KG-130	ACE2	94631	112600	white	rectangle	gene	0.5	black	46	17	13557
+N-Covid19KG-131	ACE2	110851	113830	white	rectangle	gene	0.5	black	46	17	13557
+N-Covid19KG-132	PPP1R15A	39801	80897	white	rectangle	gene	0.5	black	46	17	14375
+N-Covid19KG-133	CASP1	45290	67003	white	rectangle	gene	0.5	black	46	17	1499
+N-Covid19KG-134	MBTPS2	14000	121750	white	rectangle	gene	0.5	black	46	17	15455
+N-Covid19KG-135	MBTPS1	20812	109200	white	rectangle	gene	0.5	black	46	17	15456
+N-Covid19KG-136	IL1F10	42998	65398	white	rectangle	gene	0.5	black	46	17	15552
+N-Covid19KG-137	IL37	51754	66609	white	rectangle	gene	0.5	black	46	17	15563
+N-Covid19KG-138	TLR7	60873	48879	white	rectangle	gene	0.5	black	46	17	15631
+N-Covid19KG-139	TLR8	54851	42827	white	rectangle	gene	0.5	black	46	17	15632
+N-Covid19KG-140	TLR9	57647	42950	white	rectangle	gene	0.5	black	46	17	15633
+N-Covid19KG-141	TRIB3	23740	85592	white	rectangle	gene	0.5	black	46	17	16228
+N-Covid19KG-142	TICAM1	53715	50155	white	rectangle	gene	0.5	black	46	17	18348
+N-Covid19KG-143	RNF41	76333	65946	white	rectangle	gene	0.5	black	46	17	18401
+N-Covid19KG-144	IFIH1	49100	44105	white	rectangle	gene	0.5	black	46	17	18873
+N-Covid19KG-145	EDEM1	20785	144160	white	rectangle	gene	0.5	black	46	17	18967
+N-Covid19KG-146	CASP12	57811	98460	white	rectangle	gene	0.5	black	46	17	19004
+N-Covid19KG-147	DDX58	51552	42675	white	rectangle	gene	0.5	black	46	17	19102
+N-Covid19KG-15 16	E BRD2	37063	23464	white	rectangle	gene,gene	0.5	black	46	17	1103
+N-Covid19KG-151	CGAS	50528	46246	white	rectangle	gene	0.5	black	46	17	21367
+N-Covid19KG-152	TMPRSS11D	110631	125950	white	rectangle	gene	0.5	black	46	17	24059
+N-Covid19KG-153	EIF2AK1	34899	91601	white	rectangle	gene	0.5	black	46	17	24921
+N-Covid19KG-154	CTSL	131601	40264	white	rectangle	gene	0.5	black	46	17	2537
+N-Covid19KG-155	CUL2	128391	88021	white	rectangle	gene	0.5	black	46	17	2552
+N-Covid19KG-158	DDIT3	29179	81644	white	rectangle	gene	0.5	black	46	17	2726
+N-Covid19KG-159	MAVS	57167	48577	white	rectangle	gene	0.5	black	46	17	29233
+N-Covid19KG-160	LARP1	0	3863	white	rectangle	gene	0.5	black	46	17	29531
+N-Covid19KG-161	DNM1L	69423	38794	white	rectangle	gene	0.5	black	46	17	2973
+N-Covid19KG-162	DNM1L	73240	39460	white	rectangle	gene	0.5	black	46	17	2973
+N-Covid19KG-164	G3BP1	65921	5600	white	rectangle	gene	0.5	black	46	17	30292
+N-Covid19KG-165	DUSP1	128221	25731	white	rectangle	gene	0.5	black	46	17	3064
+N-Covid19KG-167	EIF2A	18280	94069	white	rectangle	gene	0.5	black	46	17	3254
+N-Covid19KG-168	EIF2AK3	26851	87208	white	rectangle	gene	0.5	black	46	17	3255
+N-Covid19KG-169	EIF2S1	132811	120400	white	rectangle	gene	0.5	black	46	17	3265
+N-Covid19KG-17 18	E BRD4	67863	115859	white	rectangle	gene,gene	0.5	black	46	17	13575
+N-Covid19KG-170	EIF2S1	31899	82497	white	rectangle	gene	0.5	black	46	17	3265
+N-Covid19KG-171	EIF4A1	58800	6663	white	rectangle	gene	0.5	black	46	17	3282
+N-Covid19KG-173	ERN1	50100	81686	white	rectangle	gene	0.5	black	46	17	3449
+N-Covid19KG-174	ERN1	49395	90549	white	rectangle	gene	0.5	black	46	17	3449
+N-Covid19KG-175	FGA	28375	74276	white	rectangle	gene	0.5	black	46	17	3661
+N-Covid19KG-176	FGB	27790	67672	white	rectangle	gene	0.5	black	46	17	3662
+N-Covid19KG-177	FGG	36539	75660	white	rectangle	gene	0.5	black	46	17	3694
+N-Covid19KG-178	AKT1	58380	83939	white	rectangle	gene	0.5	black	46	17	391
+N-Covid19KG-179	MTOR	7121	2800	white	rectangle	gene	0.5	black	46	17	3942
+N-Covid19KG-180	GFAP	18522	50107	white	rectangle	gene	0.5	black	46	17	4235
+N-Covid19KG-181	GPT	105751	92400	white	rectangle	gene	0.5	black	46	17	4552
+N-Covid19KG-182	HAS2	48416	78222	white	rectangle	gene	0.5	black	46	17	4819
+N-Covid19KG-183	HDAC2	89600	17864	white	rectangle	gene	0.5	black	46	17	4853
+N-Covid19KG-185	HSPA5	24770	73251	white	rectangle	gene	0.5	black	46	17	5238
+N-Covid19KG-186	HSPB1	11303	46096	white	rectangle	gene	0.5	black	46	17	5246
+N-Covid19KG-187	HYAL1	55908	84429	white	rectangle	gene	0.5	black	46	17	5320
+N-Covid19KG-188	IFNA1	47266	32527	white	rectangle	gene	0.5	black	46	17	5417
+N-Covid19KG-189	IFNAR1	24187	70214	white	rectangle	gene	0.5	black	46	17	5432
+N-Covid19KG-190	IFNAR1	34375	77014	white	rectangle	gene	0.5	black	46	17	5432
+N-Covid19KG-191	IFNAR1	27315	71004	white	rectangle	gene	0.5	black	46	17	5432
+N-Covid19KG-192	IFNB1	70881	51358	white	rectangle	gene	0.5	black	46	17	5434
+N-Covid19KG-193	IFNB1	61382	41499	white	rectangle	gene	0.5	black	46	17	5434
+N-Covid19KG-194	IFNG	52770	30800	white	rectangle	gene	0.5	black	46	17	5438
+N-Covid19KG-195	ATG5	68497	35470	white	rectangle	gene	0.5	black	46	17	589
+N-Covid19KG-196	IL1B	43345	72062	white	rectangle	gene	0.5	black	46	17	5992
+N-Covid19KG-197	IL6	50055	76541	white	rectangle	gene	0.5	black	46	17	6018
+N-Covid19KG-201	IRF3	67786	60010	white	rectangle	gene	0.5	black	46	17	6118
+N-Covid19KG-202	IRF3	65216	48786	white	rectangle	gene	0.5	black	46	17	6118
+N-Covid19KG-203	IRF7	78585	50779	white	rectangle	gene	0.5	black	46	17	6122
+N-Covid19KG-204	NAE1	126001	81200	white	rectangle	gene	0.5	black	46	17	621
+N-Covid19KG-205	LY6E	30800	15063	white	rectangle	gene	0.5	black	46	17	6727
+N-Covid19KG-206	MAP1LC3A	64651	34672	white	rectangle	gene	0.5	black	46	17	6838
+N-Covid19KG-207	MAP3K7	46044	82805	white	rectangle	gene	0.5	black	46	17	6859
+N-Covid19KG-208	MAPK1	32976	89481	white	rectangle	gene	0.5	black	46	17	6871
+N-Covid19KG-209	MAPK1	120401	24660	white	rectangle	gene	0.5	black	46	17	6871
+N-Covid19KG-210	MAPK14	120841	16800	white	rectangle	gene	0.5	black	46	17	6876
+N-Covid19KG-212	MAPK3	11200	37790	white	rectangle	gene	0.5	black	46	17	6877
+N-Covid19KG-213	MAPK8	59974	106170	white	rectangle	gene	0.5	black	46	17	6881
+N-Covid19KG-214	MAPK8	52975	88404	white	rectangle	gene	0.5	black	46	17	6881
+N-Covid19KG-215	MAPK8	128641	17853	white	rectangle	gene	0.5	black	46	17	6881
+N-Covid19KG-217	MCL1	30323	100030	white	rectangle	gene	0.5	black	46	17	6943
+N-Covid19KG-218	MYD88	57529	58395	white	rectangle	gene	0.5	black	46	17	7562
+N-Covid19KG-219	NFKBIA	130401	127220	white	rectangle	gene	0.5	black	46	17	7797
+N-Covid19KG-22 23	ORF1ab HDAC2	96721	16800	white	rectangle	gene,gene	0.5	black	46	17	4853
+N-Covid19KG-220	NFKBIA	126001	132950	white	rectangle	gene	0.5	black	46	17	7797
+N-Covid19KG-221	ATF3	132951	31560	white	rectangle	gene	0.5	black	46	17	785
+N-Covid19KG-223	ATF4	29639	77588	white	rectangle	gene	0.5	black	46	17	786
+N-Covid19KG-224	ATF6	28430	91122	white	rectangle	gene	0.5	black	46	17	791
+N-Covid19KG-225	ATF6	18402	116020	white	rectangle	gene	0.5	black	46	17	791
+N-Covid19KG-226	FURIN	30800	6663	white	rectangle	gene	0.5	black	46	17	8568
+N-Covid19KG-228	PRKAA1	50269	60867	white	rectangle	gene	0.5	black	46	17	9376
+N-Covid19KG-229	EIF2AK2	21029	85385	white	rectangle	gene	0.5	black	46	17	9437
+N-Covid19KG-230	DNAJC3	14000	131600	white	rectangle	gene	0.5	black	46	17	9439
+N-Covid19KG-231	BCL2	30211	89117	white	rectangle	gene	0.5	black	46	17	990
+N-Covid19KG-232	BCL2L11	19846	78476	white	rectangle	gene	0.5	black	46	17	994
+N-Covid19KG-233	Interferon Type I	61651	61089	white	rectangle	gene	0.5	black	46	17	D007370
+N-Covid19KG-235	Proteins	132781	93763	white	rectangle	gene	0.5	black	46	17	D011506
+N-Covid19KG-236	Viral Envelope Proteins	0	109200	white	rectangle	gene	0.5	black	46	17	D014759
+N-Covid19KG-237	Viral Matrix Proteins	81200	100800	white	rectangle	gene	0.5	black	46	17	D014763
+N-Covid19KG-239	Spike Glycoprotein, Coronavirus	42194	124500	white	rectangle	gene	0.5	black	46	17	D064370
+N-Covid19KG-24 25	ORF1ab RNF41	77239	62753	white	rectangle	gene,gene	0.5	black	46	17	18401
+N-Covid19KG-240	Spike Glycoprotein, Coronavirus	138721	39200	white	rectangle	gene	0.5	black	46	17	D064370
+N-Covid19KG-241	Tnf	135571	58749	white	rectangle	gene	0.5	black	46	17	104798
+N-Covid19KG-243	Ace2	102201	137950	white	rectangle	gene	0.5	black	46	17	1917258
+N-Covid19KG-244	Arg1	123201	63570	white	rectangle	gene	0.5	black	46	17	88070
+N-Covid19KG-245	Dpp4	127991	57571	white	rectangle	gene	0.5	black	46	17	94919
+N-Covid19KG-247	Il6	125251	50400	white	rectangle	gene	0.5	black	46	17	96559
+N-Covid19KG-250	A0A0D3MU52_9BETC	106491	54812	white	rectangle	gene	0.5	black	46	17	A0A0D3MU52
+N-Covid19KG-251	A0A0D9R1K1_CHLSB	110541	32239	white	rectangle	gene	0.5	black	46	17	A0A0D9R1K1
+N-Covid19KG-254	A0A0D9RBG0_CHLSB	112101	40823	white	rectangle	gene	0.5	black	46	17	A0A0D9RBG0
+N-Covid19KG-255	A0A0D9RCP6_CHLSB	99911	31094	white	rectangle	gene	0.5	black	46	17	A0A0D9RCP6
+N-Covid19KG-256	A0A0D9RCS6_CHLSB	97221	41516	white	rectangle	gene	0.5	black	46	17	A0A0D9RCS6
+N-Covid19KG-257	A0A0D9REG4_CHLSB	24264	65637	white	rectangle	gene	0.5	black	46	17	A0A0D9REG4
+N-Covid19KG-259	A0A0D9RP74_CHLSB	33100	63992	white	rectangle	gene	0.5	black	46	17	A0A0D9RP74
+N-Covid19KG-261	A0A0D9RUU7_CHLSB	89600	129400	white	rectangle	gene	0.5	black	46	17	A0A0D9RUU7
+N-Covid19KG-262	A0A0D9S017_CHLSB	104691	45974	white	rectangle	gene	0.5	black	46	17	A0A0D9S017
+N-Covid19KG-263	A0A0D9S1P0_CHLSB	34383	66776	white	rectangle	gene	0.5	black	46	17	A0A0D9S1P0
+N-Covid19KG-264	A0A0D9S2F1_CHLSB	122581	8400	white	rectangle	gene	0.5	black	46	17	A0A0D9S2F1
+N-Covid19KG-265	A0A0D9S8I4_CHLSB	25794	63952	white	rectangle	gene	0.5	black	46	17	A0A0D9S8I4
+N-Covid19KG-267	A0A0D9SAF4_CHLSB	95201	25200	white	rectangle	gene	0.5	black	46	17	A0A0D9SAF4
+N-Covid19KG-269	G4XXN2_CHLAE	35840	70127	white	rectangle	gene	0.5	black	46	17	G4XXN2
+N-Covid19KG-272	ORF4B_CVEMC	73970	57049	white	rectangle	gene	0.5	black	46	17	K9N643
+N-Covid19KG-273	M2_I34A1	47660	70288	white	rectangle	gene	0.5	black	46	17	P06821
+N-Covid19KG-276	R1AB_CVHSA	98831	75224	white	rectangle	gene	0.5	black	46	17	P0C6X7
+N-Covid19KG-277	R1AB_CVHSA	25517	37701	white	rectangle	gene	0.5	black	46	17	P0C6X7
+N-Covid19KG-278	R1AB_CVHSA	86800	9464	white	rectangle	gene	0.5	black	46	17	P0C6X7
+N-Covid19KG-280	R1AB_CVHSA	18378	41851	white	rectangle	gene	0.5	black	46	17	P0C6X7
+N-Covid19KG-281	R1AB_CVHSA	93921	8400	white	rectangle	gene	0.5	black	46	17	P0C6X7
+N-Covid19KG-282	R1AB_CVHSA	128801	73864	white	rectangle	gene	0.5	black	46	17	P0C6X7
+N-Covid19KG-284	SPIKE_CVH22	37921	14000	white	rectangle	gene	0.5	black	46	17	P15423
+N-Covid19KG-285	SPIKE_CVHSA	97871	130730	white	rectangle	gene	0.5	black	46	17	P59594
+N-Covid19KG-286	SPIKE_CVHSA	102591	123609	white	rectangle	gene	0.5	black	46	17	P59594
+N-Covid19KG-287	NCAP_CVHSA	104531	37824	white	rectangle	gene	0.5	black	46	17	P59595
+N-Covid19KG-288	AP3A_CVHSA	32698	72467	white	rectangle	gene	0.5	black	46	17	P59632
+N-Covid19KG-290	AP3A_CVHSA	30887	66781	white	rectangle	gene	0.5	black	46	17	P59632
+N-Covid19KG-293	AP3A_CVHSA	21932	57222	white	rectangle	gene	0.5	black	46	17	P59632
+N-Covid19KG-294	AP3A_CVHSA	18704	59940	white	rectangle	gene	0.5	black	46	17	P59632
+N-Covid19KG-295	AP3A_CVHSA	64400	138260	white	rectangle	gene	0.5	black	46	17	P59632
+N-Covid19KG-297	AP3A_CVHSA	16668	63730	white	rectangle	gene	0.5	black	46	17	P59632
+N-Covid19KG-298	ORF9B_CVHSA	66125	44215	white	rectangle	gene	0.5	black	46	17	P59636
+N-Covid19KG-299	VEMP_CVHSA	49759	73363	white	rectangle	gene	0.5	black	46	17	P59637
+N-Covid19KG-3 4	lopinavir 3.4.22.69	73764	26563	white	rectangle	gene,gene	0.5	black	46	17	31781,/,3.4.22.69
+N-Covid19KG-30 31	S ACE2	103071	107059	white	rectangle	gene,gene	0.5	black	46	17	13557
+N-Covid19KG-303	Q19QW2_CVHSA	70892	66950	white	rectangle	gene	0.5	black	46	17	Q19QW2
+N-Covid19KG-304	Q19QW5_CVHSA	123201	107459	white	rectangle	gene	0.5	black	46	17	Q19QW5
+N-Covid19KG-306	POLG_EMCVR	41906	63195	white	rectangle	gene	0.5	black	46	17	Q66765
+N-Covid19KG-307	Q6S8E2_CVHSA	72135	62716	white	rectangle	gene	0.5	black	46	17	Q6S8E2
+N-Covid19KG-308	R9UNW8_9BETC	92461	63601	white	rectangle	gene	0.5	black	46	17	R9UNW8
+N-Covid19KG-5 6	lopinavir 3.4.22.69	15406	23763	white	rectangle	gene,gene	0.5	black	46	17	31781,/,3.4.22.69
+N-Covid19KG-52 53	nsp5a EIF2AK2	14842	90659	white	rectangle	gene,gene	0.5	black	46	17	9437
+N-Covid19KG-54 55	43740568 BSG	87463	0	white	rectangle	gene,gene	0.5	black	46	17	1116
+N-Covid19KG-60 61	956533 RNA, Double-Stranded	11863	81821	white	rectangle	gene,gene	0.5	black	46	17	D012330
+N-Covid19KG-66 67	Histones BRD2	44184	22400	white	rectangle	gene,gene	0.5	black	46	17	864,/,1103
+N-Covid19KG-68 69	Histones BRD4	74984	114800	white	rectangle	gene,gene	0.5	black	46	17	864,/,13575
+N-Covid19KG-7 8	ritonavir 3.4.22.69	66978	14000	white	rectangle	gene,gene	0.5	black	46	17	45409,/,3.4.22.69
+N-Covid19KG-74 75	CLEC4M Spike Glycoprotein, Coronavirus	34263	126080	white	rectangle	gene,gene	0.5	black	46	17	13523,/,D064370
+N-Covid19KG-76 77	ACE2 Spike Glycoprotein, Coronavirus	42601	132400	white	rectangle	gene,gene	0.5	black	46	17	13557,/,D064370
+N-Covid19KG-80 81	CANX Spike Glycoprotein, Coronavirus	41816	116580	white	rectangle	gene,gene	0.5	black	46	17	1473,/,D064370
+N-Covid19KG-84 85	CD209 Spike Glycoprotein, Coronavirus	50255	125200	white	rectangle	gene,gene	0.5	black	46	17	1641,/,D064370
+N-Covid19KG-88 89	EIF2AK2 RNA, Double-Stranded	12606	86220	white	rectangle	gene,gene	0.5	black	46	17	9437,/,D012330
+N-Covid19KG-9 10	ritonavir 3.4.22.69	8621	11200	white	rectangle	gene,gene	0.5	black	46	17	45409,/,3.4.22.69
+N-Covid19KG-90 91	Immunoglobulin G SPIKE_CVHSA	92211	136290	white	rectangle	gene,gene	0.5	black	46	17	D007074,/,P59594
+N-Covid19KG-92 93	Ace2 SPIKE_CVHSA	104931	145140	white	rectangle	gene,gene	0.5	black	46	17	1917258,/,P59594
+N-Covid19KG-94 95	A0A0D9RKI4_CHLSB NCAP_CVHSA	115461	9464	white	rectangle	gene,gene	0.5	black	46	17	A0A0D9RKI4,/,P59595
+N-Covid19KG-96 97	AP3A_CVHSA AP3A_CVHSA	71521	137200	white	rectangle	gene,gene	0.5	black	46	17	P59632,/,P59632
+N-Covid19KG-99	3.2.1.20	40933	109200	white	rectangle	gene	0.5	black	46	17	3.2.1.20

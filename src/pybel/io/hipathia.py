@@ -197,7 +197,11 @@ def from_hipathia_dfs(name: str, att_df: pd.DataFrame, sif_df: pd.DataFrame) -> 
     return graph
 
 
-def to_hipathia(graph: BELGraph, directory: str, draw: bool = True) -> None:
+def to_hipathia(
+    graph: BELGraph,
+    directory: str,
+    draw: bool = True,
+) -> None:
     """Export HiPathia artifacts for the graph."""
     att_df, sif_df = to_hipathia_dfs(graph, draw_directory=directory if draw else None)
     att_df.to_csv(os.path.join(directory, '{}.att'.format(graph.name)), sep='\t', index=False)
@@ -218,8 +222,14 @@ def _is_node_family(graph: BELGraph, node: Protein) -> Optional[Set[Protein]]:
     return children
 
 
-def to_hipathia_dfs(graph: BELGraph, draw_directory: Optional[str] = None) -> Tuple[pd.DataFrame, pd.DataFrame]:
+def to_hipathia_dfs(
+    graph: BELGraph,
+    draw_directory: Optional[str] = None,
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """Get the ATT and SIF dataframes.
+
+    :param graph: A BEL graph
+    :param draw_directory: The directory in which a drawing should be output
 
     1. Identify nodes:
        1. Identify all proteins
@@ -309,7 +319,14 @@ def to_hipathia_dfs(graph: BELGraph, draw_directory: Optional[str] = None) -> Tu
     sif_df = pd.DataFrame(edges)  # DONE
 
     composite_graph = nx.Graph([(k_source, k_target) for k_source, _, k_target in edges])
-    pos = nx.spring_layout(composite_graph)
+
+    try:
+        from networkx.drawing.nx_agraph import graphviz_layout
+    except ImportError:
+        pos = nx.spring_layout(composite_graph)
+    else:
+        pos = graphviz_layout(composite_graph, prog="neato")
+
     nx_labels = {}  # from k to label
     min_x = min(x for x, y in pos.values())
     min_y = min(y for x, y in pos.values())
