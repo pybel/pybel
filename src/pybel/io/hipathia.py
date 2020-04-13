@@ -68,7 +68,7 @@ import logging
 import os
 from collections import defaultdict
 from itertools import groupby
-from typing import List, Optional, Set, Tuple
+from typing import List, Optional, Set, Tuple, Union
 
 import networkx as nx
 import pandas as pd
@@ -204,6 +204,9 @@ def to_hipathia(
 ) -> None:
     """Export HiPathia artifacts for the graph."""
     att_df, sif_df = to_hipathia_dfs(graph, draw_directory=directory if draw else None)
+    if att_df is None and sif_df is None:
+        logger.warning('can not convert graph %s', graph.name)
+        return
     att_df.to_csv(os.path.join(directory, '{}.att'.format(graph.name)), sep='\t', index=False)
     sif_df.to_csv(os.path.join(directory, '{}.sif'.format(graph.name)), sep='\t', index=False)
 
@@ -225,7 +228,7 @@ def _is_node_family(graph: BELGraph, node: Protein) -> Optional[Set[Protein]]:
 def to_hipathia_dfs(
     graph: BELGraph,
     draw_directory: Optional[str] = None,
-) -> Tuple[pd.DataFrame, pd.DataFrame]:
+) -> Union[Tuple[None, None], Tuple[pd.DataFrame, pd.DataFrame]]:
     """Get the ATT and SIF dataframes.
 
     :param graph: A BEL graph
@@ -325,6 +328,9 @@ def to_hipathia_dfs(
         pos = graphviz_layout(composite_graph, prog="neato")
     except ImportError:
         pos = nx.spring_layout(composite_graph)
+
+    if not pos:
+        return None, None
 
     nx_labels = {}  # from k to label
     min_x = min(x for x, y in pos.values())
