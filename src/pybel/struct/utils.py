@@ -4,6 +4,11 @@
 
 import networkx as nx
 
+from ..constants import (
+    GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_NAMESPACE_PATTERN,
+    GRAPH_NAMESPACE_URL,
+)
+
 __all__ = [
     'update_metadata',
     'update_node_helper',
@@ -16,12 +21,12 @@ def update_metadata(source, target) -> None:
     :param pybel.BELGraph source:
     :param pybel.BELGraph target:
     """
-    target.namespace_url.update(source.namespace_url)
-    target.namespace_pattern.update(source.namespace_pattern)
+    target.namespace_url.update(source.graph.get(GRAPH_NAMESPACE_URL, {}))
+    target.namespace_pattern.update(source.graph.get(GRAPH_NAMESPACE_PATTERN, {}))
 
-    target.annotation_url.update(source.annotation_url)
-    target.annotation_pattern.update(source.annotation_pattern)
-    for keyword, values in source.annotation_list.items():
+    target.annotation_url.update(source.graph.get(GRAPH_ANNOTATION_URL, {}))
+    target.annotation_pattern.update(source.graph.get(GRAPH_ANNOTATION_PATTERN, {}))
+    for keyword, values in source.graph.get(GRAPH_ANNOTATION_LIST, {}).items():
         if keyword not in target.annotation_list:
             target.annotation_list[keyword] = values
         else:
