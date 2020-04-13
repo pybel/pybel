@@ -1,0 +1,96 @@
+0	1	2
+N-HemeKG-34	activation	N-HemeKG-24
+N-HemeKG-34	activation	N-HemeKG-25
+N-HemeKG-50	activation	N-HemeKG-60
+N-HemeKG-71	activation	N-HemeKG-66
+N-HemeKG-71	activation	N-HemeKG-76
+N-HemeKG-75	activation	N-HemeKG-76
+N-HemeKG-75	activation	N-HemeKG-76
+N-HemeKG-75	activation	N-HemeKG-34
+N-HemeKG-101	activation	N-HemeKG-100
+N-HemeKG-56	inhibition	N-HemeKG-1 2 3
+N-HemeKG-55	inhibition	N-HemeKG-34
+N-HemeKG-55	inhibition	N-HemeKG-74
+N-HemeKG-19 20	activation	N-HemeKG-86
+N-HemeKG-59	activation	N-HemeKG-69
+N-HemeKG-59	inhibition	N-HemeKG-28
+N-HemeKG-59	activation	N-HemeKG-29
+N-HemeKG-59	inhibition	N-HemeKG-54
+N-HemeKG-102	activation	N-HemeKG-112
+N-HemeKG-102	activation	N-HemeKG-99
+N-HemeKG-102	activation	N-HemeKG-108
+N-HemeKG-62	inhibition	N-HemeKG-60
+N-HemeKG-62	inhibition	N-HemeKG-60
+N-HemeKG-62	inhibition	N-HemeKG-60
+N-HemeKG-62	inhibition	N-HemeKG-60
+N-HemeKG-62	inhibition	N-HemeKG-60
+N-HemeKG-62	inhibition	N-HemeKG-60
+N-HemeKG-62	inhibition	N-HemeKG-60
+N-HemeKG-62	inhibition	N-HemeKG-60
+N-HemeKG-62	inhibition	N-HemeKG-60
+N-HemeKG-62	inhibition	N-HemeKG-60
+N-HemeKG-62	inhibition	N-HemeKG-60
+N-HemeKG-62	inhibition	N-HemeKG-60
+N-HemeKG-46	activation	N-HemeKG-27
+N-HemeKG-46	activation	N-HemeKG-60
+N-HemeKG-16 17 18	activation	N-HemeKG-34
+N-HemeKG-33	activation	N-HemeKG-75
+N-HemeKG-33	activation	N-HemeKG-75
+N-HemeKG-33	activation	N-HemeKG-75
+N-HemeKG-33	activation	N-HemeKG-48
+N-HemeKG-33	activation	N-HemeKG-48
+N-HemeKG-33	activation	N-HemeKG-16 17 18
+N-HemeKG-33	activation	N-HemeKG-76
+N-HemeKG-33	activation	N-HemeKG-34
+N-HemeKG-48	activation	N-HemeKG-71
+N-HemeKG-48	activation	N-HemeKG-76
+N-HemeKG-78	inhibition	N-HemeKG-36
+N-HemeKG-78	inhibition	N-HemeKG-70
+N-HemeKG-78	inhibition	N-HemeKG-61
+N-HemeKG-78	inhibition	N-HemeKG-50
+N-HemeKG-78	inhibition	N-HemeKG-79
+N-HemeKG-72	activation	N-HemeKG-4 5
+N-HemeKG-72	inhibition	N-HemeKG-4 5
+N-HemeKG-60	activation	N-HemeKG-61
+N-HemeKG-60	activation	N-HemeKG-65
+N-HemeKG-60	activation	N-HemeKG-105
+N-HemeKG-60	activation	N-HemeKG-96
+N-HemeKG-60	inhibition	N-HemeKG-38
+N-HemeKG-60	activation	N-HemeKG-116
+N-HemeKG-37	inhibition	N-HemeKG-53
+N-HemeKG-93	inhibition	N-HemeKG-88
+N-HemeKG-93	inhibition	N-HemeKG-88
+N-HemeKG-93	activation	N-HemeKG-88
+N-HemeKG-82	inhibition	N-HemeKG-81
+N-HemeKG-82	inhibition	N-HemeKG-107
+N-HemeKG-82	inhibition	N-HemeKG-110
+N-HemeKG-82	activation	N-HemeKG-104
+N-HemeKG-82	activation	N-HemeKG-103
+N-HemeKG-82	activation	N-HemeKG-87
+N-HemeKG-82	inhibition	N-HemeKG-91
+N-HemeKG-82	activation	N-HemeKG-109
+N-HemeKG-82	inhibition	N-HemeKG-102
+N-HemeKG-82	inhibition	N-HemeKG-96
+N-HemeKG-82	inhibition	N-HemeKG-96
+N-HemeKG-82	inhibition	N-HemeKG-86
+N-HemeKG-82	activation	N-HemeKG-111
+N-HemeKG-82	activation	N-HemeKG-111
+N-HemeKG-82	inhibition	N-HemeKG-21 22 23
+N-HemeKG-82	activation	N-HemeKG-89
+N-HemeKG-82	inhibition	N-HemeKG-113
+N-HemeKG-82	inhibition	N-HemeKG-106
+N-HemeKG-76	activation	N-HemeKG-34
+N-HemeKG-76	activation	N-HemeKG-34
+N-HemeKG-76	activation	N-HemeKG-70
+N-HemeKG-8 9	activation	N-HemeKG-51
+N-HemeKG-41	activation	N-HemeKG-61
+N-HemeKG-92	inhibition	N-HemeKG-84
+N-HemeKG-97	inhibition	N-HemeKG-96
+N-HemeKG-97	inhibition	N-HemeKG-96
+N-HemeKG-97	inhibition	N-HemeKG-94
+N-HemeKG-96	inhibition	N-HemeKG-83
+N-HemeKG-96	inhibition	N-HemeKG-98
+N-HemeKG-57	inhibition	N-HemeKG-1 2 3
+N-HemeKG-63	inhibition	N-HemeKG-47
+N-HemeKG-63	inhibition	N-HemeKG-40
+N-HemeKG-63	inhibition	N-HemeKG-34
