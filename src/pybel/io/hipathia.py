@@ -322,10 +322,9 @@ def to_hipathia_dfs(
 
     try:
         from networkx.drawing.nx_agraph import graphviz_layout
+        pos = graphviz_layout(composite_graph, prog="neato")
     except ImportError:
         pos = nx.spring_layout(composite_graph)
-    else:
-        pos = graphviz_layout(composite_graph, prog="neato")
 
     nx_labels = {}  # from k to label
     min_x = min(x for x, y in pos.values())
