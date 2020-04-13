@@ -11,7 +11,7 @@ from typing import Any, Mapping, TextIO, Union
 from networkx.utils import open_file
 
 from .utils import ensure_version
-from ..constants import GRAPH_ANNOTATION_LIST, MEMBERS, PRODUCTS, REACTANTS
+from ..constants import FUSION, GRAPH_ANNOTATION_LIST, MEMBERS, PARTNER_3P, PARTNER_5P, PRODUCTS, REACTANTS
 from ..dsl import BaseEntity
 from ..struct import BELGraph
 from ..tokens import parse_result_to_dsl
@@ -134,6 +134,9 @@ def _augment_node(node: BaseEntity) -> BaseEntity:
     rv['bel'] = node.as_bel()
     for m in chain(node.get(MEMBERS, []), node.get(REACTANTS, []), node.get(PRODUCTS, [])):
         m.update(_augment_node(m))
+    if FUSION in node:
+        node[FUSION][PARTNER_3P].update(_augment_node(node[FUSION][PARTNER_3P]))
+        node[FUSION][PARTNER_5P].update(_augment_node(node[FUSION][PARTNER_5P]))
     return rv
 
 
