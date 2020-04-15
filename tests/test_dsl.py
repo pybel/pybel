@@ -54,6 +54,27 @@ class TestDSL(unittest.TestCase):
         with self.assertRaises(ValueError):
             Protein(namespace='test')
 
+        with self.assertRaises(ValueError):
+            Protein(namespace='')
+
+        with self.assertRaises(TypeError):
+            Protein(namespace='uniprot', name=1234)
+
+        with self.assertRaises(TypeError):
+            Protein(namespace='uniprot', identifier=1234)
+
+        with self.assertRaises(ValueError):
+            Protein(namespace='uniprot', name='')
+
+        with self.assertRaises(ValueError):
+            Protein(namespace='uniprot', identifier='')
+
+        with self.assertRaises(ValueError):
+            Protein(namespace='uniprot', identifier='12345', name='')
+
+        with self.assertRaises(ValueError):
+            Protein(namespace='uniprot', identifier='', name='123')
+
     def test_abundance_as_bel_quoted(self):
         """Test converting an abundance to BEL with a name that needs quotation."""
         namespace, name = 'HGNC', 'YFG-1'
