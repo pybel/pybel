@@ -11,7 +11,7 @@ from ...constants import (
     OBJECT, PART_OF, REGULATES, RELATION,
 )
 from ...dsl import (
-    Abundance, BaseAbundance, BaseEntity, BiologicalProcess, CentralDogma, ComplexAbundance, MicroRna,
+    Abundance, BaseAbundance, BaseEntity, BiologicalProcess, CentralDogma, ComplexAbundance, Gene, MicroRna,
     NamedComplexAbundance, Pathology, Population, Protein, Reaction, Rna,
 )
 from ...typing import EdgeData
@@ -434,3 +434,34 @@ class MiRNADirectlyDecreasesExpressionConverter(MiRNARegulatesExpressionConverte
 
     relation = DIRECTLY_DECREASES
     target_relation = 'repressesExpressionOf'
+
+
+class TranscriptionFactorForConverter(Converter):
+    """Converts ``complex(g(A), p(B)) directlyIncreases r(A)```."""
+
+    @classmethod
+    def convert(cls, u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
+        """Convert a transcription factor for edge."""
+        gene = v.get_gene()
+        if gene == u.members[0]:
+            return _safe_label(u.members[1]), edge_data[RELATION], _safe_label(v)
+        else:
+            return _safe_label(u.members[0]), edge_data[RELATION], _safe_label(v)
+
+    @classmethod
+    def predicate(cls, u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> bool:
+        """Test a BEL edge."""
+        if not isinstance(u, ComplexAbundance) or len(u.members) != 2:
+            return False
+
+        if isinstance(u.members[0], Gene) and isinstance(u.members[1], Protein):
+            gene = u.members[0]
+        elif isinstance(u.members[1], Gene) and isinstance(u.members[0], Protein):
+            gene = u.members[1]
+        else:
+            return False
+
+        if not isinstance(v, Rna):
+            return False
+
+        return gene == v.get_gene()
