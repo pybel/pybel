@@ -11,8 +11,8 @@ from pybel.constants import (
     NEGATIVE_CORRELATION, OBJECT, PART_OF, POSITIVE_CORRELATION, REGULATES, RELATION,
 )
 from pybel.dsl import (
-    Abundance, BaseEntity, BiologicalProcess, MicroRna, NamedComplexAbundance, Pathology, Population, Protein, Rna,
-    activity,
+    Abundance, BaseEntity, BiologicalProcess, ComplexAbundance, Gene, MicroRna, NamedComplexAbundance, Pathology,
+    Population, Protein, Rna, activity,
 )
 from pybel.io.tsv.api import get_triple
 from pybel.io.tsv.converters import (
@@ -20,7 +20,7 @@ from pybel.io.tsv.converters import (
     AbundancePartOfPopulationConverter, AssociationConverter, Converter, CorrelationConverter, DecreasesAmountConverter,
     DrugIndicationConverter, DrugSideEffectConverter, EquivalenceConverter, IncreasesAmountConverter, IsAConverter,
     MiRNADecreasesExpressionConverter, PartOfNamedComplexConverter, RegulatesActivityConverter,
-    RegulatesAmountConverter, SubprocessPartOfBiologicalProcessConverter,
+    RegulatesAmountConverter, SubprocessPartOfBiologicalProcessConverter, TranscriptionFactorForConverter,
 )
 from pybel.testing.utils import n
 from pybel.typing import EdgeData
@@ -49,6 +49,11 @@ r1 = Rna('HGNC', '1')
 r2 = Rna('HGNC', '2')
 nca1 = NamedComplexAbundance('FPLX', '1')
 pop1 = Population('taxonomy', '1')
+
+p2 = Protein('HGNC', identifier='9236')
+g3 = Gene('HGNC', identifier='9212')
+r3 = g3.get_rna()
+c1 = ComplexAbundance([p2, g3])
 
 converters_true_list = [
     (PartOfNamedComplexConverter, p1, nca1, _rel(PART_OF), ('HGNC:1', 'partOf', 'FPLX:1')),
@@ -87,6 +92,15 @@ converters_true_list = [
     (SubprocessPartOfBiologicalProcessConverter, b1, b2, _rel(PART_OF), ('GO:1', 'partOf', 'GO:2')),
     # Misc
     (AbundancePartOfPopulationConverter, a1, pop1, _rel(PART_OF), ('CHEBI:1', 'partOf', 'taxonomy:1')),
+    # complex(g(hgnc:9212), p(hgnc:9236)) directlyIncreases r(hgnc:9212)
+    (
+        TranscriptionFactorForConverter, c1, r3, _rel(DIRECTLY_INCREASES),
+        ('HGNC:9236', DIRECTLY_INCREASES, 'HGNC:9212'),
+    ),
+    (
+        TranscriptionFactorForConverter, c1, r3, _rel(DIRECTLY_DECREASES),
+        ('HGNC:9236', DIRECTLY_DECREASES, 'HGNC:9212'),
+    ),
 ]
 
 converters_false_list = [
@@ -128,11 +142,11 @@ class TestConverters(unittest.TestCase):
     def test_converters_true(self):
         """Test passing converters."""
         for converter, u, v, edge_data, triple in converters_true_list:
-            with self.subTest(msg='Converter: {}'.format(converter.__qualname__)):
+            with self.subTest(converter=converter.__qualname__):
                 self.help_test_convert(converter, u, v, edge_data, triple)
 
     def test_converters_false(self):
         """Test falsification of converters."""
         for converter, u, v, edge_data in converters_false_list:
-            with self.subTest():
+            with self.subTest(converter=converter.__qualname__):
                 self.assertFalse(converter.predicate(u, v, n(), edge_data))

@@ -34,6 +34,8 @@ class Entity(dict):
             raise ValueError('cannot create an entity with neither a name nor identifier')
         if not isinstance(namespace, str):
             raise TypeError('namespace should be a string: {}'.format(namespace))
+        if not namespace:
+            raise ValueError('namespace should be non-empty')
 
         super().__init__({
             NAMESPACE: namespace,
@@ -42,11 +44,15 @@ class Entity(dict):
         if name is not None:
             if not isinstance(name, str):
                 raise TypeError('name should be a string: {}'.format(name))
+            if not name:
+                raise ValueError('name should be non-empty')
             self[NAME] = name
 
         if identifier is not None:
             if not isinstance(identifier, str):
                 raise TypeError('identifier should be a string {}'.format(identifier))
+            if not identifier:
+                raise ValueError('identifier shold be non-empty')
             self[IDENTIFIER] = identifier
 
     @property
