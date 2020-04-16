@@ -1,0 +1,17 @@
+SET DOCUMENT Name = "PyBEL Test Simple"
+SET DOCUMENT Description = "Made for testing PyBEL parsing"
+SET DOCUMENT Version = "1.6.0"
+SET DOCUMENT Copyright = "Copyright (c) Charles Tapley Hoyt. All Rights Reserved."
+SET DOCUMENT Authors = "Charles Tapley Hoyt"
+SET DOCUMENT Licenses = "WTF License"
+SET DOCUMENT ContactInfo = "cthoyt@gmail.com"
+SET DOCUMENT Project = "PyBEL Testing"
+
+# Definition
+DEFINE NAMESPACE hgnc AS PATTERN "\d+"
+
+# Statement
+SET Citation = {"PubMed", "123456"}
+SET Evidence = "Test Evidence"
+
+p(hgnc:391 ! AKT1) -> p(hgnc:3236 ! EGFR)

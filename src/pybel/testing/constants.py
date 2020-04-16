@@ -48,6 +48,7 @@ test_bel_thorough = os.path.join(bel_dir_path, 'thorough.bel')
 test_bel_isolated = os.path.join(bel_dir_path, 'isolated.bel')
 test_bel_misordered = os.path.join(bel_dir_path, 'misordered.bel')
 test_bel_no_identifier_valiation = os.path.join(bel_dir_path, 'no_identifier_validation_test.bel')
+test_bel_with_obo = os.path.join(bel_dir_path, 'obo.bel')
 
 # JSON Files
 

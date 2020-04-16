@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import re
 import unittest
 
 from pybel.constants import DIRTY
 from pybel.parser import ConceptParser
-from pybel.parser.exc import NakedNameWarning
+from pybel.parser.exc import MissingNamespaceRegexWarning, NakedNameWarning
 
 
 class _ParserMixin(unittest.TestCase):
@@ -23,7 +24,7 @@ class _ParserMixin(unittest.TestCase):
         }
 
 
-class TestIdentifierParser(_ParserMixin):
+class TestConceptEnumerated(_ParserMixin):
     def setUp(self):
         super().setUp()
         self.parser = ConceptParser(namespace_to_term_to_encoding=self.namespace_to_term)
@@ -67,7 +68,9 @@ class TestIdentifierParser(_ParserMixin):
             self.parser.parseString(s)
 
 
-class TestNamespaceParserDefault(_ParserMixin):
+class TestConceptParserDefault(_ParserMixin):
+    """Tests where the concept parser allows an enumerated list of unqualified entities."""
+
     def setUp(self):
         super().setUp()
         default_namespace = {'X', 'Y', 'W Z'}
@@ -82,6 +85,7 @@ class TestNamespaceParserDefault(_ParserMixin):
 
         self.assertIn('namespace', result)
         self.assertIn('name', result)
+        self.assertNotIn('identifier', result)
         self.assertEqual('A', result['namespace'])
         self.assertEqual('3', result['name'])
 
@@ -97,6 +101,7 @@ class TestNamespaceParserDefault(_ParserMixin):
         result = self.parser.parseString(s)
 
         self.assertIn('name', result)
+        self.assertNotIn('identifier', result)
         self.assertEqual('W Z', result['name'])
 
     def test_not_in_defaultNs(self):
@@ -105,7 +110,9 @@ class TestNamespaceParserDefault(_ParserMixin):
             self.parser.parseString(s)
 
 
-class TestNamespaceParserLenient(_ParserMixin):
+class TestConceptParserLenient(_ParserMixin):
+    """Tests where naked names are allowed."""
+
     def setUp(self):
         super().setUp()
         self.parser = ConceptParser(
@@ -119,6 +126,7 @@ class TestNamespaceParserLenient(_ParserMixin):
 
         self.assertIn('namespace', result)
         self.assertIn('name', result)
+        self.assertNotIn('identifier', result)
         self.assertEqual('A', result['namespace'])
         self.assertEqual('3', result['name'])
 
@@ -128,6 +136,7 @@ class TestNamespaceParserLenient(_ParserMixin):
 
         self.assertIn('namespace', result)
         self.assertIn('name', result)
+        self.assertNotIn('identifier', result)
         self.assertEqual('A', result['namespace'])
         self.assertEqual('3', result['name'])
 
@@ -145,11 +154,63 @@ class TestNamespaceParserLenient(_ParserMixin):
         s = 'bare'
         result = self.parser.parseString(s)
 
+        self.assertIn('namespace', result)
+        self.assertIn('name', result)
+        self.assertNotIn('identifier', result)
         self.assertEqual(DIRTY, result['namespace'])
         self.assertEqual('bare', result['name'])
 
     def test_not_invalid_4(self):
         s = '"quoted"'
         result = self.parser.parseString(s)
+
+        self.assertIn('namespace', result)
+        self.assertIn('name', result)
+        self.assertNotIn('identifier', result)
         self.assertEqual(DIRTY, result['namespace'])
         self.assertEqual('quoted', result['name'])
+
+
+class TestConceptParserRegex(unittest.TestCase):
+    """Tests for regular expression parsing"""
+
+    def setUp(self) -> None:
+        self.parser = ConceptParser(namespace_to_pattern={'hgnc': re.compile(r'\d+')})
+        self.assertEqual({}, self.parser.namespace_to_identifier_to_encoding)
+        self.assertEqual({}, self.parser.namespace_to_name_to_encoding)
+
+    def test_valid(self):
+        s = 'hgnc:391'
+        result = self.parser.parseString(s)
+
+        self.assertIn('namespace', result)
+        self.assertIn('name', result)
+        self.assertNotIn('identifier', result)
+        self.assertEqual('hgnc', result['namespace'])
+        self.assertEqual('391', result['name'])
+
+    def test_invalid(self):
+        """Test invalid BEL term."""
+        s = 'hgnc:AKT1'
+        with self.assertRaises(MissingNamespaceRegexWarning):
+            result = self.parser.parseString(s)
+            print(result.asDict())
+
+    def test_valid_obo(self):
+        """Test parsing an identifier that has a name."""
+        s = 'hgnc:391 ! AKT1'
+        result = self.parser.parseString(s)
+
+        self.assertIn('namespace', result)
+        self.assertIn('name', result)
+        self.assertIn('identifier', result)
+        self.assertEqual('hgnc', result['namespace'])
+        self.assertEqual('AKT1', result['name'])
+        self.assertEqual('391', result['identifier'])
+
+    def test_invalid_obo(self):
+        """Test parsing an OBO-style identifier where the identifier and name are switched."""
+        s = 'hgnc:AKT1 ! 391'
+        with self.assertRaises(MissingNamespaceRegexWarning):
+            result = self.parser.parseString(s)
+            print(result.asDict())

@@ -14,6 +14,7 @@ from pybel import (
     BELGraph, from_bel_script, from_bel_script_url, from_bytes, from_nodelink, from_nodelink_file, from_pickle,
     to_bel_script_lines, to_bytes, to_csv, to_graphml, to_gsea, to_nodelink, to_nodelink_file, to_pickle, to_sif,
 )
+from pybel.io.line_utils import parse_definitions
 from pybel.config import PYBEL_MINIMUM_IMPORT_VERSION
 from pybel.constants import (
     ANNOTATIONS, CITATION, DECREASES, DIRECTLY_DECREASES, EVIDENCE, GRAPH_PYBEL_VERSION, INCREASES, RELATION,
@@ -30,7 +31,7 @@ from pybel.parser.exc import (
 from pybel.struct.summary import get_syntax_errors
 from pybel.testing.cases import TemporaryCacheClsMixin
 from pybel.testing.constants import (
-    test_bel_isolated, test_bel_misordered, test_bel_simple, test_bel_slushy, test_bel_thorough,
+    test_bel_isolated, test_bel_misordered, test_bel_simple, test_bel_slushy, test_bel_thorough, test_bel_with_obo,
 )
 from pybel.testing.mocks import mock_bel_resources
 from tests.constants import (
@@ -430,6 +431,22 @@ class TestRandom(unittest.TestCase):
                 import_version_message_fmt.format('0.0.0', PYBEL_MINIMUM_IMPORT_VERSION),
                 str(cm.exception)
             )
+
+
+class TestNomenclature(unittest.TestCase):
+    """Test that `BEP-0008 nomenclature <http://bep.bel.bio/published/BEP-0008.html>`_ gets validated properly."""
+
+    def test_bep_0008(self):
+        """Test parsing works right"""
+        graph = from_bel_script(test_bel_with_obo)
+        self.assertIn('hgnc', graph.namespace_pattern)
+        self.assertEqual(r'\d+', graph.namespace_pattern['hgnc'])
+
+        self.assertEqual(0, graph.number_of_warnings(), msg=',\n'.join(map(str, graph.warnings)))
+
+        self.assertEqual(2, graph.number_of_nodes())
+        self.assertIn(Protein(namespace='hgnc', identifier='391', name='AKT1'), graph)
+        self.assertIn(Protein(namespace='hgnc', identifier='3236', name='EGFR'), graph)
 
 
 if __name__ == '__main__':

@@ -3,6 +3,7 @@
 """Tests for the BEL parser."""
 
 import logging
+import re
 import unittest
 
 from pybel import BELGraph
@@ -96,8 +97,8 @@ class TestAbundanceLabeled(TestTokenParserBase):
         self.parser.clear()
         self.parser.general_abundance.setParseAction(self.parser.handle_term)
 
-        self.expected_node = abundance(namespace='chebi', name='oxygen atom', identifier='CHEBI:25805')
-        self.expected_canonical_bel = 'a(chebi:"CHEBI:25805" ! "oxygen atom")'
+        self.expected_node = abundance(namespace='CHEBI', name='oxygen atom', identifier='CHEBI:25805')
+        self.expected_canonical_bel = 'a(CHEBI:"CHEBI:25805" ! "oxygen atom")'
 
     def _test_abundance_helper(self, statement):
         result = self.parser.general_abundance.parseString(statement)
@@ -111,8 +112,8 @@ class TestAbundanceLabeled(TestTokenParserBase):
 
     def test_abundance(self):
         """Test short/long abundance name."""
-        for s in ('a(chebi:"CHEBI:25805"!"oxygen atom")', 'abundance(chebi:"CHEBI:25805"!"oxygen atom")',
-                  'abundance(chebi:"CHEBI:25805" ! "oxygen atom")'):
+        for s in ('a(CHEBI:"CHEBI:25805"!"oxygen atom")', 'abundance(CHEBI:"CHEBI:25805"!"oxygen atom")',
+                  'abundance(CHEBI:"CHEBI:25805" ! "oxygen atom")'):
             with self.subTest(s=s):
                 self._test_abundance_helper(s)
 
@@ -122,7 +123,7 @@ class TestAbundanceLabeled(TestTokenParserBase):
         expected_result = {
             FUNCTION: ABUNDANCE,
             CONCEPT: {
-                NAMESPACE: 'chebi',
+                NAMESPACE: 'CHEBI',
                 NAME: 'oxygen atom',
                 IDENTIFIER: 'CHEBI:25805',
             },
@@ -148,11 +149,11 @@ class TestAbundanceLabeled(TestTokenParserBase):
 
     def test_abundance_with_location(self):
         """Test short/long abundance name and short/long location name."""
-        self._test_abundance_with_location_helper('a(chebi:"CHEBI:25805"!"oxygen atom", loc(GO:intracellular))')
-        self._test_abundance_with_location_helper('abundance(chebi:"CHEBI:25805"!"oxygen atom", loc(GO:intracellular))')
-        self._test_abundance_with_location_helper('a(chebi:"CHEBI:25805"!"oxygen atom", location(GO:intracellular))')
+        self._test_abundance_with_location_helper('a(CHEBI:"CHEBI:25805"!"oxygen atom", loc(GO:intracellular))')
+        self._test_abundance_with_location_helper('abundance(CHEBI:"CHEBI:25805"!"oxygen atom", loc(GO:intracellular))')
+        self._test_abundance_with_location_helper('a(CHEBI:"CHEBI:25805"!"oxygen atom", location(GO:intracellular))')
         self._test_abundance_with_location_helper(
-            'abundance(chebi:"CHEBI:25805"!"oxygen atom", location(GO:intracellular))'
+            'abundance(CHEBI:"CHEBI:25805"!"oxygen atom", location(GO:intracellular))'
         )
 
 
@@ -1326,19 +1327,19 @@ class TestComplex(TestTokenParserBase):
         self.parser.complex_abundances.setParseAction(self.parser.handle_term)
 
     def test_named_complex_singleton(self):
-        statement = 'complex(SCOMP:"AP-1 Complex")'
+        statement = 'complex(FPLX:AP1)'
         result = self.parser.complex_abundances.parseString(statement)
 
         expected_dict = {
             FUNCTION: COMPLEX,
             CONCEPT: {
-                NAMESPACE: 'SCOMP',
-                NAME: 'AP-1 Complex',
+                NAMESPACE: 'FPLX',
+                NAME: 'AP1',
             },
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = named_complex_abundance('SCOMP', 'AP-1 Complex')
+        expected_node = named_complex_abundance('FPLX', 'AP1')
         self.assert_has_node(expected_node)
 
     def test_complex_list_short(self):
@@ -1507,22 +1508,22 @@ class TestPopulation(TestTokenParserBase):
         self.parser.population.setParseAction(self.parser.handle_term)
 
     def test_parse_population(self):
-        statement = 'pop(uberon:blood)'
+        statement = 'pop(UBERON:blood)'
         result = self.parser.population.parseString(statement)
 
         expected_dict = {
             FUNCTION: POPULATION,
             CONCEPT: {
-                NAMESPACE: 'uberon',
+                NAMESPACE: 'UBERON',
                 NAME: 'blood',
             },
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = Population('uberon', 'blood')
+        expected_node = Population('UBERON', 'blood')
         self.assert_has_node(expected_node)
 
-        self.assertEqual('pop(uberon:blood)',
+        self.assertEqual('pop(UBERON:blood)',
                          self.graph.node_to_bel(expected_node),
                          msg='Nodes: {}'.format(list(self.graph)))
 
@@ -1612,13 +1613,13 @@ class TestActivity(TestTokenParserBase):
 
     def test_activity_withMolecularActivityCustom(self):
         """Tests activity modifier with molecular activity from custom namespaced"""
-        statement = 'act(p(HGNC:AKT1), ma(GOMF:"catalytic activity"))'
+        statement = 'act(p(HGNC:AKT1), ma(GO:"catalytic activity"))'
         result = self.parser.activity.parseString(statement)
 
         expected_dict = {
             MODIFIER: ACTIVITY,
             EFFECT: {
-                NAMESPACE: 'GOMF',
+                NAMESPACE: 'GO',
                 NAME: 'catalytic activity'
             },
             TARGET: {
@@ -1635,7 +1636,7 @@ class TestActivity(TestTokenParserBase):
         expected_mod = {
             MODIFIER: ACTIVITY,
             EFFECT: {
-                NAMESPACE: 'GOMF',
+                NAMESPACE: 'GO',
                 NAME: 'catalytic activity'
             },
         }
@@ -1699,6 +1700,10 @@ class TestTranslocationPermissive(unittest.TestCase):
         cls.parser = BELParser(
             cls.graph,
             disallow_unqualified_translocations=False,
+            namespace_to_pattern={
+                'HGNC': re.compile(r'.*'),
+                'CHEBI': re.compile(r'.*'),
+            }
         )
 
     def setUp(self):
@@ -1745,14 +1750,14 @@ class TestTranslocationPermissive(unittest.TestCase):
         """
         update_provenance(self.parser.control_parser)
 
-        statement = 'a(ADO:"Abeta_42") => tloc(a(CHEBI:"calcium(2+)"))'
+        statement = 'a(CHEBI:"Abeta_42") => tloc(a(CHEBI:"calcium(2+)"))'
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
             SUBJECT: {
                 FUNCTION: ABUNDANCE,
                 CONCEPT: {
-                    NAMESPACE: 'ADO',
+                    NAMESPACE: 'CHEBI',
                     NAME: 'Abeta_42',
                 },
             },
@@ -1770,7 +1775,7 @@ class TestTranslocationPermissive(unittest.TestCase):
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        sub = abundance('ADO', 'Abeta_42')
+        sub = abundance('CHEBI', 'Abeta_42')
         self.assert_has_node(sub)
 
         obj = abundance('CHEBI', 'calcium(2+)')
@@ -1912,7 +1917,7 @@ class TestTransformation(TestTokenParserBase):
 
     def test_unqualified_translocation_strict(self):
         """Fail on an improperly written single argument translocation"""
-        statement = 'tloc(a(NS:"T-Lymphocytes"))'
+        statement = 'tloc(pop(EFO:"CD8-Positive T-Lymphocytes"))'
         with self.assertRaises(MalformedTranslocationWarning):
             self.parser.translocation.parseString(statement)
 
