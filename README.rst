@@ -105,8 +105,8 @@ Logo
 ~~~~
 The PyBEL `logo <https://github.com/pybel/pybel-art>`_ was designed by `Scott Colby <https://github.com/scolby33>`_.
 
-.. |build| image:: https://travis-ci.org/pybel/pybel.svg?branch=develop
-    :target: https://travis-ci.org/pybel/pybel
+.. |build| image:: https://travis-ci.com/pybel/pybel.svg?branch=develop
+    :target: https://travis-ci.com/pybel/pybel
     :alt: Development Build Status
 
 .. |windows_build| image:: https://ci.appveyor.com/api/projects/status/v22l3ymg3bdq525d/branch/develop?svg=true
