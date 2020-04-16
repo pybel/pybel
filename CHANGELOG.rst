@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.14.7 <https://github.com/pybel/pybel/compare/v0.14.6...v0.14.7>`_ - 2020-04-16
+---------------------------------------------------------------------------------
+Added
+~~~~~
+- Support for transcription factor relationshions in TSV (machine learning) output
+
+Fixed
+~~~~~
+- Fixed incorrect parsing of OBO-style identifiers (https://github.com/pybel/pybel/pull/421)
+- Make sure pop() works in translocations (https://github.com/pybel/pybel/pull/421)
+- None and non-empty string checks in DSL (3156d519)
+- Fixed Jupyter export (the interface changed in Jinja2; d6e7e619)
+
 `0.14.6 <https://github.com/pybel/pybel/compare/v0.14.5...v0.14.6>`_ - 2020-04-01
 ---------------------------------------------------------------------------------
 Added
