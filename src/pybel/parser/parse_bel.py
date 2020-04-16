@@ -293,14 +293,16 @@ class BELParser(BaseParser):
                 annotation_to_term=annotation_to_term,
                 annotation_to_pattern=annotation_to_pattern,
                 annotation_to_local=annotation_to_local,
+                #
                 citation_clearing=citation_clearing,
                 required_annotations=required_annotations,
             )
 
             self.concept_parser = ConceptParser(
-                allow_naked_names=allow_naked_names,
                 namespace_to_term_to_encoding=namespace_to_term_to_encoding,
                 namespace_to_pattern=namespace_to_pattern,
+                #
+                allow_naked_names=allow_naked_names,
             )
 
         self.control_parser.get_line_number = self.get_line_number
@@ -385,12 +387,15 @@ class BELParser(BaseParser):
             ]) + opt_location,
         )
 
+        self.population = population_tag + nest(concept)
+
         self.single_abundance = MatchFirst([
             self.general_abundance,
             self.gene,
             self.mirna,
             self.protein,
             self.rna,
+            self.population,
         ])
 
         #: `2.1.2 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XcomplexA>`_
@@ -433,9 +438,7 @@ class BELParser(BaseParser):
         #: `2.3.2 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_pathology_path>`_
         self.pathology = pathology_tag + nest(concept)
 
-        self.population = population_tag + nest(concept)
-
-        self.bp_path = self.biological_process | self.pathology | self.population
+        self.bp_path = self.biological_process | self.pathology
         self.bp_path.setParseAction(self.check_function_semantics)
 
         self.activity_standard = activity_tag + nest(

@@ -228,7 +228,7 @@ def enrich_pubmed_citations(
     :param sleep_time: Number of seconds to sleep between queries. Defaults to 1 second.
     :return: A set of PMIDs for which the eUtils service crashed
     """
-    pmids = get_pubmed_identifiers(graph)
+    pmids = {x for x in get_pubmed_identifiers(graph) if x}
     pmid_data, errors = get_citations_by_pmids(manager, pmids=pmids, group_size=group_size, sleep_time=sleep_time)
 
     for u, v, k in filter_edges(graph, has_pubmed):

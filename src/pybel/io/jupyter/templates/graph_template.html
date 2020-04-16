@@ -8,14 +8,14 @@
         {% include "pybel_vis.js" %}
     </script>
     <script type="text/javascript">
-        graph_data = {{ json }};
+        graph = {{ graph|safe }};
+        colorMap = {{ color_map|safe }};
 
         $(document).ready(function () {
             w = $("#graph-chart").width();
             g = document.getElementsByTagName('body')[0];
             h = w.innerHeight || document.documentElement.clientHeight || g.clientHeight;
-            color_map = {{ cmap }};
-            init_d3_force(d3, graph_data, "#graph-chart", w, h, color_map);
+            init_d3_force(d3, graph, "#graph-chart", w, h, colorMap);
         });
     </script>
 </head>

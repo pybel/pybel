@@ -145,6 +145,7 @@ def get_triple(
         converters.DecreasesDegradationConverter,
         converters.RegulatesDegradationConverter,
         converters.NoChangeDegradationConverter,
+        converters.TranscriptionFactorForConverter,
     ]
 
     for converter in _converters:

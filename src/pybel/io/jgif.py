@@ -10,9 +10,10 @@ JSON. Interchange with this format provides compatibilty with other software and
 import gzip
 import json
 import logging
+import re
 from collections import defaultdict
 from operator import methodcaller
-from typing import TextIO, Union
+from typing import Any, Mapping, Optional, TextIO, Union
 
 import requests
 from networkx.utils import open_file
@@ -126,6 +127,33 @@ def map_cbn(d):
     return d
 
 
+NAMESPACE_URLS = {
+    'HGNC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/hgnc-human-genes/hgnc-human-genes-20150601.belns',
+    'GOBP': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process/go-biological-process-20150601.belns',
+    'SFAM': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/selventa-protein-families/selventa-protein-families-20150601.belns',
+    'GOCC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-cellular-component/go-cellular-component-20170511.belns',
+    'MESHPP': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-processes/mesh-processes-20150601.belns',
+    'MGI': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mgi-mouse-genes/mgi-mouse-genes-20150601.belns',
+    'RGD': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/rgd-rat-genes/rgd-rat-genes-20150601.belns',
+    'CHEBI': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/chebi/chebi-20150601.belns',
+    'SCHEM': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/selventa-legacy-chemicals/selventa-legacy-chemicals-20150601.belns',
+    'EGID': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/entrez-gene-ids/entrez-gene-ids-20150601.belns',
+    'MESHD': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-diseases/mesh-diseases-20150601.belns',
+    'SDIS': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/selventa-legacy-diseases/selventa-legacy-diseases-20150601.belns',
+    'SCOMP': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/selventa-named-complexes/selventa-named-complexes-20150601.belns',
+    'MESHC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-chemicals/mesh-chemicals-20170511.belns',
+    'GOBPID': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process-ids/go-biological-process-ids-20150601.belns',
+    'MESHCS': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-cell-structures/mesh-cell-structures-20150601.belns',
+}
+
+ANNOTATION_URLS = {
+    'Cell': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/cell-line/cell-line-20150601.belanno',
+    'Disease': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/disease/disease-20150601.belanno',
+    'Species': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/species-taxonomy-id/species-taxonomy-id-20170511.belanno',
+    'Tissue': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/mesh-anatomy/mesh-anatomy-20150601.belanno',
+}
+
+
 def from_cbn_jgif(graph_jgif_dict):
     """Build a BEL graph from CBN JGIF.
 
@@ -173,36 +201,13 @@ def from_cbn_jgif(graph_jgif_dict):
 
     graph = from_jgif(graph_jgif_dict)
 
-    graph.namespace_url.update({
-        'HGNC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/hgnc-human-genes/hgnc-human-genes-20150601.belns',
-        'GOBP': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process/go-biological-process-20150601.belns',
-        'SFAM': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/selventa-protein-families/selventa-protein-families-20150601.belns',
-        'GOCC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-cellular-component/go-cellular-component-20170511.belns',
-        'MESHPP': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-processes/mesh-processes-20150601.belns',
-        'MGI': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mgi-mouse-genes/mgi-mouse-genes-20150601.belns',
-        'RGD': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/rgd-rat-genes/rgd-rat-genes-20150601.belns',
-        'CHEBI': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/chebi/chebi-20150601.belns',
-        'SCHEM': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/selventa-legacy-chemicals/selventa-legacy-chemicals-20150601.belns',
-        'EGID': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/entrez-gene-ids/entrez-gene-ids-20150601.belns',
-        'MESHD': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-diseases/mesh-diseases-20150601.belns',
-        'SDIS': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/selventa-legacy-diseases/selventa-legacy-diseases-20150601.belns',
-        'SCOMP': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/selventa-named-complexes/selventa-named-complexes-20150601.belns',
-        'MESHC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-chemicals/mesh-chemicals-20170511.belns',
-        'GOBPID': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process-ids/go-biological-process-ids-20150601.belns',
-        'MESHCS': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-cell-structures/mesh-cell-structures-20150601.belns',
-    })
-
-    graph.annotation_url.update({
-        'Cell': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/cell-line/cell-line-20150601.belanno',
-        'Disease': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/disease/disease-20150601.belanno',
-        'Species': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/species-taxonomy-id/species-taxonomy-id-20170511.belanno',
-        'Tissue': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/mesh-anatomy/mesh-anatomy-20150601.belanno',
-    })
+    graph.namespace_url.update(NAMESPACE_URLS)
+    graph.annotation_url.update(ANNOTATION_URLS)
 
     return graph
 
 
-def from_jgif(graph_jgif_dict):
+def from_jgif(graph_jgif_dict, parser_kwargs: Optional[Mapping[str, Any]] = None):
     """Build a BEL graph from a JGIF JSON object.
 
     :param dict graph_jgif_dict: The JSON object representing the graph in JGIF format
@@ -222,7 +227,10 @@ def from_jgif(graph_jgif_dict):
             if key in metadata:
                 graph.document[key] = metadata[key]
 
-    parser = BELParser(graph)
+    parser = BELParser(graph, namespace_to_pattern={
+        namespace: re.compile(r'.*')  # don't validate anything
+        for namespace in (set(NAMESPACE_URLS) | {'GO'})
+    })
     parser.bel_term.addParseAction(parser.handle_term)
 
     for node in root['nodes']:

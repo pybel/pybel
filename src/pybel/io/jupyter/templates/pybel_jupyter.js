@@ -11,5 +11,5 @@ var elementInnerHTML = "<div id='{{ chart }}'></div>";
 element.append(elementInnerHTML);
 
 require(['d3'], function (d3) {
-    return init_d3_force(d3, {{ graph}}, "#{{ chart }}", {{ width }}, {{ height }}, {{ color_map  }});
+    return init_d3_force(d3, {{ graph|safe }}, "#{{ chart }}", {{ width }}, {{ height }}, {{ color_map|safe }});
 });

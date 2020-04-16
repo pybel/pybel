@@ -3,6 +3,7 @@
 """Test parsing variants."""
 
 import logging
+import re
 import unittest
 
 from pybel.constants import (
@@ -95,7 +96,10 @@ class TestHGVSParser(unittest.TestCase):
 
 class TestPmod(unittest.TestCase):
     def setUp(self):
-        identifier_parser = ConceptParser()
+        identifier_parser = ConceptParser(namespace_to_pattern={
+            'MOD': re.compile('.*'),
+            'HGNC': re.compile('.*'),
+        })
         identifier_qualified = identifier_parser.identifier_qualified
         self.parser = get_protein_modification_language(identifier_qualified)
 
@@ -117,15 +121,11 @@ class TestPmod(unittest.TestCase):
         self._help_test_pmod_simple('proteinModification(P)')
         # long function, new modification
         self._help_test_pmod_simple('proteinModification(Ph)')
-        # long function, qualified modification
-        self._help_test_pmod_simple('proteinModification(bel:Ph)')
 
         # short function, legacy modification
         self._help_test_pmod_simple('pmod(P)')
         # short function, new modification
         self._help_test_pmod_simple('pmod(Ph)')
-        # short function, qualified modification
-        self._help_test_pmod_simple('pmod(bel:Ph)')
 
     def _help_test_pmod_with_residue(self, statement):
         result = self.parser.parseString(statement)
@@ -168,14 +168,10 @@ class TestPmod(unittest.TestCase):
         self._help_test_pmod_full('proteinModification(P, S, 473)')
         self._help_test_pmod_full('proteinModification(Ph, Ser, 473)')
         self._help_test_pmod_full('proteinModification(Ph, S, 473)')
-        self._help_test_pmod_full('proteinModification(bel:Ph, Ser, 473)')
-        self._help_test_pmod_full('proteinModification(bel:Ph, S, 473)')
         self._help_test_pmod_full('pmod(P, Ser, 473)')
         self._help_test_pmod_full('pmod(P, S, 473)')
         self._help_test_pmod_full('pmod(Ph, Ser, 473)')
         self._help_test_pmod_full('pmod(Ph, S, 473)')
-        self._help_test_pmod_full('pmod(bel:Ph, Ser, 473)')
-        self._help_test_pmod_full('pmod(bel:Ph, S, 473)')
 
     def _help_test_non_standard_namespace(self, statement):
         result = self.parser.parseString(statement)
@@ -372,7 +368,7 @@ class TestTruncationParser(unittest.TestCase):
 
 class TestFusionParser(unittest.TestCase):
     def setUp(self):
-        identifier_parser = ConceptParser()
+        identifier_parser = ConceptParser(namespace_to_pattern={'HGNC': re.compile('.*')})
         identifier_qualified = identifier_parser.identifier_qualified
         self.parser = get_fusion_language(identifier_qualified)
 
@@ -505,7 +501,7 @@ class TestFusionParser(unittest.TestCase):
 
 class TestLocation(unittest.TestCase):
     def setUp(self):
-        identifier_parser = ConceptParser()
+        identifier_parser = ConceptParser(namespace_to_pattern={'GO': re.compile('.*')})
         identifier_qualified = identifier_parser.identifier_qualified
         self.parser = get_location_language(identifier_qualified)
 
