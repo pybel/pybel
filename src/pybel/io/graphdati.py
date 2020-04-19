@@ -31,7 +31,6 @@ __all__ = [
     'from_graphdati_jsons',
     'to_graphdati_jsonl',
     'to_graphdati_jsonl_gz',
-
 ]
 
 logger = logging.getLogger(__name__)
