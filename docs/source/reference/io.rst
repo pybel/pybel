@@ -122,15 +122,17 @@ GraphDati
 .. autofunction:: pybel.from_graphdati
 
 .. autofunction:: pybel.to_graphdati_file
+.. autofunction:: pybel.from_graphdati_file
 
 .. autofunction:: pybel.to_graphdati_gz
+.. autofunction:: pybel.from_graphdati_gz
+
+.. autofunction:: pybel.to_graphdati_jsons
+.. autofunction:: pybel.from_graphdati_jsons
 
 .. autofunction:: pybel.to_graphdati_jsonl
 
 .. autofunction:: pybel.to_graphdati_jsonl_gz
-
-.. autofunction:: pybel.to_graphdati_jsons
-.. autofunction:: pybel.from_graphdati_jsons
 
 INDRA
 ~~~~~

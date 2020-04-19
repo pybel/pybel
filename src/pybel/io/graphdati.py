@@ -26,7 +26,9 @@ __all__ = [
     'to_graphdati',
     'from_graphdati',
     'to_graphdati_file',
+    'from_graphdati_file',
     'to_graphdati_gz',
+    'from_graphdati_gz',
     'to_graphdati_jsons',
     'from_graphdati_jsons',
     'to_graphdati_jsonl',
@@ -55,10 +57,24 @@ def to_graphdati_file(graph: BELGraph, path: Union[str, TextIO], use_identifiers
     json.dump(to_graphdati(graph, use_identifiers=use_identifiers), path, ensure_ascii=False, **kwargs)
 
 
+def from_graphdati_file(path: Union[str, TextIO]) -> BELGraph:
+    """Load a file containing GraphDati JSON.
+
+    :param path: A path or file-like
+    """
+    return from_graphdati(json.load(path))
+
+
 def to_graphdati_gz(graph: BELGraph, path: str, **kwargs) -> None:
     """Write a graph as GraphDati JSON to a gzip file."""
     with gzip.open(path, 'wt') as file:
         to_graphdati_file(graph, file, **kwargs)
+
+
+def from_graphdati_gz(path: str) -> BELGraph:
+    """Read a graph as GraphDati JSON from a gzip file."""
+    with gzip.open(path, 'rt') as file:
+        return from_graphdati(json.load(file))
 
 
 def to_graphdati_jsons(graph: BELGraph, **kwargs) -> str:
