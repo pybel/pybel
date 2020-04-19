@@ -153,6 +153,11 @@ ANNOTATION_URLS = {
     'Tissue': 'https://arty.scai.fraunhofer.de/artifactory/bel/annotation/mesh-anatomy/mesh-anatomy-20150601.belanno',
 }
 
+NAMESPACE_TO_PATTERN = {
+    namespace: re.compile(r'.*')  # don't validate anything
+    for namespace in (set(NAMESPACE_URLS) | {'GO', 'MESH'})
+}
+
 
 def from_cbn_jgif(graph_jgif_dict):
     """Build a BEL graph from CBN JGIF.
@@ -164,11 +169,13 @@ def from_cbn_jgif(graph_jgif_dict):
     :rtype: BELGraph
 
     Example:
-    >>> import requests
-    >>> from pybel import from_cbn_jgif
-    >>> apoptosis_url = 'http://causalbionet.com/Networks/GetJSONGraphFile?networkId=810385422'
-    >>> graph_jgif_dict = requests.get(apoptosis_url).json()
-    >>> graph = from_cbn_jgif(graph_jgif_dict)
+    .. code-block:: python
+
+        import requests
+        from pybel import from_cbn_jgif
+        apoptosis_url = 'http://causalbionet.com/Networks/GetJSONGraphFile?networkId=810385422'
+        graph_jgif_dict = requests.get(apoptosis_url).json()
+        graph = from_cbn_jgif(graph_jgif_dict)
 
     .. warning::
 
@@ -227,10 +234,7 @@ def from_jgif(graph_jgif_dict, parser_kwargs: Optional[Mapping[str, Any]] = None
             if key in metadata:
                 graph.document[key] = metadata[key]
 
-    parser = BELParser(graph, namespace_to_pattern={
-        namespace: re.compile(r'.*')  # don't validate anything
-        for namespace in (set(NAMESPACE_URLS) | {'GO'})
-    })
+    parser = BELParser(graph, namespace_to_pattern=NAMESPACE_TO_PATTERN)
     parser.bel_term.addParseAction(parser.handle_term)
 
     for node in root['nodes']:
@@ -335,12 +339,14 @@ def to_jgif(graph):
         use Cytoscape.js, we suggest using :func:`pybel.to_cx` instead.
 
     Example:
-    >>> import pybel, os, json
-    >>> graph_url = 'https://arty.scai.fraunhofer.de/artifactory/bel/knowledge/selventa-small-corpus/selventa-small-corpus-20150611.bel'
-    >>> graph = pybel.from_bel_script_url(graph_url)
-    >>> graph_jgif_json = pybel.to_jgif(graph)
-    >>> with open(os.path.expanduser('~/Desktop/small_corpus.json'), 'w') as f:
-    ...     json.dump(graph_jgif_json, f)
+    .. code-block:: python
+
+        import pybel, os, json
+        graph_url = 'https://arty.scai.fraunhofer.de/artifactory/bel/knowledge/selventa-small-corpus/selventa-small-corpus-20150611.bel'
+        graph = pybel.from_bel_script_url(graph_url)
+        graph_jgif_json = pybel.to_jgif(graph)
+        with open(os.path.expanduser('~/Desktop/small_corpus.json'), 'w') as f:
+            json.dump(graph_jgif_json, f)
 
     """
     u_v_r_bel = {}

@@ -7,12 +7,14 @@ export to other programs. Notably, a *de facto* interchange using Resource Descr
 ability of other existing software is excluded due the immaturity of the BEL to RDF mapping.
 """
 
+from .bel_commons_client import from_bel_commons, to_bel_commons
+from .biodati_client import from_biodati, to_biodati
 from .cx import from_cx, from_cx_file, from_cx_gz, from_cx_jsons, to_cx, to_cx_file, to_cx_gz, to_cx_jsons
 from .extras import to_csv, to_gsea, to_sif
 from .gpickle import from_bytes, from_pickle, to_bytes, to_pickle
 from .graphdati import (
-    post_graphdati, to_graphdati, to_graphdati_file, to_graphdati_gz, to_graphdati_jsonl, to_graphdati_jsonl_gz,
-    to_graphdati_jsons,
+    from_graphdati, from_graphdati_jsons, to_graphdati, to_graphdati_file, to_graphdati_gz, to_graphdati_jsonl,
+    to_graphdati_jsonl_gz, to_graphdati_jsons,
 )
 from .graphml import to_graphml
 from .hetionet import from_hetionet_file, from_hetionet_gz, from_hetionet_json, get_hetionet
@@ -34,4 +36,3 @@ from .nodelink import (
 from .pynpa import to_npa_dfs, to_npa_directory
 from .tsv import to_edgelist, to_tsv
 from .umbrella_nodelink import to_umbrella_nodelink, to_umbrella_nodelink_file, to_umbrella_nodelink_gz
-from .web import from_web, to_web

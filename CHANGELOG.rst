@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+Unreleased
+----------
+Changed
+~~~~~~~
+- `pybel.post_graphdati` has been renamed to `pybel.to_biodati`
+- `pybel.to_web` has been renamed to `pybel.to_bel_commons`
+- `pybel.from_web` has been renamed to `pybel.from_bel_commons`
+
+Added
+~~~~~
+- Can import content from GraphDati format with `pybel.from_graphdati`
+- Can get content from BioDati with `pybel.from_biodati`
+
 `0.14.7 <https://github.com/pybel/pybel/compare/v0.14.6...v0.14.7>`_ - 2020-04-16
 ---------------------------------------------------------------------------------
 Added

@@ -98,7 +98,6 @@ def to_cx(graph: BELGraph) -> List[Dict]:  # noqa: C901
     .. seealso::
 
         - `NDEx Python Client <https://github.com/ndexbio/ndex-python>`_
-        - `PyBEL / NDEx Python Client Wrapper <https://github.com/pybel/pybel2ndex>`_
     """
     node_mapping = build_node_mapping(graph)
     node_index_data = {}
@@ -330,10 +329,12 @@ def to_cx_file(graph: BELGraph, path: Union[str, TextIO], indent: Optional[int] 
     :param indent: How many spaces to use to pretty print. Change to None for no pretty printing
 
     Example:
-    >>> from pybel.examples import sialic_acid_graph
-    >>> from pybel import to_cx_file
-    >>> with open('graph.cx', 'w') as f:
-    >>> ... to_cx_file(sialic_acid_graph, f)
+    .. code-block:: python
+
+        from pybel.examples import sialic_acid_graph
+        from pybel import to_cx_file
+        with open('graph.cx', 'w') as f:
+            to_cx_file(sialic_acid_graph, f)
 
     """
     graph_cx_json_dict = to_cx(graph)
