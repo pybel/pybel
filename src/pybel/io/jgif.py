@@ -30,6 +30,7 @@ from ..version import get_version
 
 __all__ = [
     'from_cbn_jgif',
+    'from_cbn_jgif_file',
     'from_jgif',
     'from_jgif_file',
     'from_jgif_gz',
@@ -157,6 +158,15 @@ NAMESPACE_TO_PATTERN = {
     namespace: re.compile(r'.*')  # don't validate anything
     for namespace in (set(NAMESPACE_URLS) | {'GO', 'MESH'})
 }
+
+
+@open_file(0, mode='r')
+def from_cbn_jgif_file(path: Union[str, TextIO]) -> BELGraph:
+    """Build a graph from a file containing the CBN variant of JGIF.
+
+    :param path: A path or file-like
+    """
+    return from_cbn_jgif(json.load(path))
 
 
 def from_cbn_jgif(graph_jgif_dict):
@@ -338,16 +348,15 @@ def to_jgif(graph):
         Untested! This format is not general purpose and is therefore time is not heavily invested. If you want to
         use Cytoscape.js, we suggest using :func:`pybel.to_cx` instead.
 
-    Example:
+    The example below shows how to output a BEL graph as a JGIF dictionary.
+
     .. code-block:: python
 
-        import pybel, os, json
-        graph_url = 'https://arty.scai.fraunhofer.de/artifactory/bel/knowledge/selventa-small-corpus/selventa-small-corpus-20150611.bel'
-        graph = pybel.from_bel_script_url(graph_url)
-        graph_jgif_json = pybel.to_jgif(graph)
-        with open(os.path.expanduser('~/Desktop/small_corpus.json'), 'w') as f:
-            json.dump(graph_jgif_json, f)
+        import os
+        from pybel.examples import sialic_acid_graph
+        graph_jgif_json = pybel.to_jgif(sialic_acid_graph)
 
+    If you want to write the graph directly to a file as JGIF, see func:`to_jgif_file`.
     """
     u_v_r_bel = {}
 
@@ -411,7 +420,31 @@ def to_jgif(graph):
 
 @open_file(1, mode='w')
 def to_jgif_file(graph: BELGraph, file: Union[str, TextIO], **kwargs) -> None:
-    """Write JGIF to a file."""
+    """Write JGIF to a file.
+
+    :param graph: A BEL graph
+    :param file: A writable file or file-like
+
+    The example below shows how to output a BEL graph as JGIF to an open file.
+
+    .. code-block:: python
+
+       from pybel.examples import sialic_acid_graph
+       from pybel import to_jgif_file
+       with open('graph.bel.jgif.json', 'w') as file:
+           to_jgif_file(sialic_acid_graph, file)
+
+    The example below shows how to output a BEL graph as JGIF to a file at a given path.
+
+    .. code-block:: python
+
+        from pybel.examples import sialic_acid_graph
+        from pybel import to_jgif_file
+        to_jgif_file(sialic_acid_graph, 'graph.bel.jgif.json')
+
+    If you have a big graph, you might consider storing it as a gzipped JGIF file
+    by using :func:`to_jgif_gz`.
+    """
     json.dump(to_jgif(graph), file, ensure_ascii=False, **kwargs)
 
 

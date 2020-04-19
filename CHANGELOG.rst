@@ -19,6 +19,8 @@ Added
   and enable usage of respective extensions ``*.bel.graphdati.json`` and ``*.bel.graphdati.json.gz`` with
   ``pybel.load()`` (https://github.com/pybel/pybel/pull/425)
 - Content importer from BioDati with ``pybel.from_biodati()`` (https://github.com/pybel/pybel/pull/425)
+- Add direct function for loading CBN files (so you don't have to load the JSON first) with
+ ``pybel.from_cbn_jgif_file()``
 
 `0.14.7 <https://github.com/pybel/pybel/compare/v0.14.6...v0.14.7>`_ - 2020-04-16
 ---------------------------------------------------------------------------------

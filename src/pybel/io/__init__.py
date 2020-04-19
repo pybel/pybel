@@ -13,8 +13,8 @@ from .cx import from_cx, from_cx_file, from_cx_gz, from_cx_jsons, to_cx, to_cx_f
 from .extras import to_csv, to_gsea, to_sif
 from .gpickle import from_bytes, from_pickle, to_bytes, to_pickle
 from .graphdati import (
-    from_graphdati, from_graphdati_jsons, to_graphdati, to_graphdati_file, to_graphdati_gz, to_graphdati_jsonl,
-    to_graphdati_jsonl_gz, to_graphdati_jsons,
+    from_graphdati, from_graphdati_file, from_graphdati_gz, from_graphdati_jsons, to_graphdati, to_graphdati_file,
+    to_graphdati_gz, to_graphdati_jsonl, to_graphdati_jsonl_gz, to_graphdati_jsons,
 )
 from .graphml import to_graphml
 from .hetionet import from_hetionet_file, from_hetionet_gz, from_hetionet_json, get_hetionet
@@ -24,7 +24,7 @@ from .indra import (
     to_indra_statements, to_indra_statements_json, to_indra_statements_json_file,
 )
 from .jgif import (
-    from_cbn_jgif, from_jgif, from_jgif_file, from_jgif_gz, from_jgif_jsons, post_jgif, to_jgif,
+    from_cbn_jgif, from_cbn_jgif_file, from_jgif, from_jgif_file, from_jgif_gz, from_jgif_jsons, post_jgif, to_jgif,
     to_jgif_file, to_jgif_gz, to_jgif_jsons,
 )
 from .lines import from_bel_script, from_bel_script_url

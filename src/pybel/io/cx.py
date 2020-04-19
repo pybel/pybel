@@ -328,14 +328,25 @@ def to_cx_file(graph: BELGraph, path: Union[str, TextIO], indent: Optional[int] 
     :param path: A writable file or file-like
     :param indent: How many spaces to use to pretty print. Change to None for no pretty printing
 
-    Example:
+    The example below shows how to output a BEL graph as CX to an open file.
+
+    .. code-block:: python
+
+       from pybel.examples import sialic_acid_graph
+       from pybel import to_cx_file
+       with open('graph.bel.cx.json', 'w') as file:
+           to_cx_file(sialic_acid_graph, file)
+
+    The example below shows how to output a BEL graph as CX to a file at a given path.
+
     .. code-block:: python
 
         from pybel.examples import sialic_acid_graph
         from pybel import to_cx_file
-        with open('graph.cx', 'w') as f:
-            to_cx_file(sialic_acid_graph, f)
+        to_cx_file(sialic_acid_graph, 'graph.bel.cx.json')
 
+    If you have a big graph, you might consider storing it as a gzipped JGIF file
+    by using :func:`to_cx_gz`.
     """
     graph_cx_json_dict = to_cx(graph)
     json.dump(graph_cx_json_dict, path, ensure_ascii=False, indent=indent, **kwargs)
@@ -366,7 +377,7 @@ def _iterate_list_of_dicts(list_of_dicts: List[Dict]):
 def from_cx(cx: List[Dict]) -> BELGraph:  # noqa: C901
     """Rebuild a BELGraph from CX JSON output from PyBEL.
 
-    :param cx: The CX JSON for this graph
+    :param cx: The CX JSON object for this graph
     """
     graph = BELGraph()
 

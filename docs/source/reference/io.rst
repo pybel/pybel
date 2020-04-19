@@ -113,6 +113,7 @@ JSON Graph Interchange Format
 .. autofunction:: pybel.post_jgif
 
 .. autofunction:: pybel.from_cbn_jgif
+.. autofunction:: pybel.from_cbn_jgif_file
 
 GraphDati
 ~~~~~~~~~
