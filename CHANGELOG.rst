@@ -9,16 +9,15 @@ Unreleased
 ----------
 Changed
 ~~~~~~~
-- ``pybel.post_graphdati()`` has been renamed to ``pybel.to_biodati()`` (https://github.com/pybel/pybel/pull/425)
-- ``pybel.to_web()`` has been renamed to ``pybel.to_bel_commons()`` (https://github.com/pybel/pybel/pull/425)
-- ``pybel.from_web()`` has been renamed to ``pybel.from_bel_commons()`` (https://github.com/pybel/pybel/pull/425)
+- ``pybel.post_graphdati()`` has been renamed to ``pybel.to_biodati()``
+- ``pybel.to_web()`` has been renamed to ``pybel.to_bel_commons()``
+- ``pybel.from_web()`` has been renamed to ``pybel.from_bel_commons()``
 
 Added
 ~~~~~
 - Content importers from GraphDati format with ``pybel.from_graphdati()`` and ``pybel.from_graphdati()``
-  (https://github.com/pybel/pybel/pull/425)
-- Enable usage of respective extensions ``*.bel.graphdati.json`` and ``*.bel.graphdati.json.gz`` with ``pybel.load()``
-  (https://github.com/pybel/pybel/pull/425)
+  and enable usage of respective extensions ``*.bel.graphdati.json`` and ``*.bel.graphdati.json.gz`` with
+  ``pybel.load()`` (https://github.com/pybel/pybel/pull/425)
 - Content importer from BioDati with ``pybel.from_biodati()`` (https://github.com/pybel/pybel/pull/425)
 
 `0.14.7 <https://github.com/pybel/pybel/compare/v0.14.6...v0.14.7>`_ - 2020-04-16
