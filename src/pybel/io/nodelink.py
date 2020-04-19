@@ -11,11 +11,11 @@ from typing import Any, Mapping, TextIO, Union
 from networkx.utils import open_file
 
 from .utils import ensure_version
-from ..constants import GRAPH_ANNOTATION_LIST, MEMBERS, PRODUCTS, REACTANTS
+from ..constants import FUSION, GRAPH_ANNOTATION_LIST, MEMBERS, PARTNER_3P, PARTNER_5P, PRODUCTS, REACTANTS
 from ..dsl import BaseEntity
 from ..struct import BELGraph
 from ..tokens import parse_result_to_dsl
-from ..utils import tokenize_version
+from ..utils import hash_edge, tokenize_version
 
 __all__ = [
     'to_nodelink',
@@ -134,6 +134,9 @@ def _augment_node(node: BaseEntity) -> BaseEntity:
     rv['bel'] = node.as_bel()
     for m in chain(node.get(MEMBERS, []), node.get(REACTANTS, []), node.get(PRODUCTS, [])):
         m.update(_augment_node(m))
+    if FUSION in node:
+        node[FUSION][PARTNER_3P].update(_augment_node(node[FUSION][PARTNER_3P]))
+        node[FUSION][PARTNER_5P].update(_augment_node(node[FUSION][PARTNER_5P]))
     return rv
 
 
@@ -165,6 +168,6 @@ def _from_nodelink_json_helper(data: Mapping[str, Any]) -> BELGraph:
             for k, v in data.items()
             if k not in {'source', 'target', 'key'}
         }
-        graph.add_edge(u, v, key=data['key'], **edge_data)
+        graph.add_edge(u, v, key=hash_edge(u, v, edge_data), **edge_data)
 
     return graph
