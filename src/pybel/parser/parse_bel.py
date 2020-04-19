@@ -804,7 +804,7 @@ class BELParser(BaseParser):
                     ae: True
                     for ae in annotation_entry
                 }
-                if isinstance(annotation_entry, set) else
+                if isinstance(annotation_entry, (set, list)) else
                 {
                     annotation_entry: True,
                 }

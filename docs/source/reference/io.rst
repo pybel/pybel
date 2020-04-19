@@ -113,6 +113,52 @@ JSON Graph Interchange Format
 .. autofunction:: pybel.post_jgif
 
 .. autofunction:: pybel.from_cbn_jgif
+.. autofunction:: pybel.from_cbn_jgif_file
+
+GraphDati
+~~~~~~~~~
+.. automodule:: pybel.io.graphdati
+
+.. autofunction:: pybel.to_graphdati
+.. autofunction:: pybel.from_graphdati
+
+.. autofunction:: pybel.to_graphdati_file
+.. autofunction:: pybel.from_graphdati_file
+
+.. autofunction:: pybel.to_graphdati_gz
+.. autofunction:: pybel.from_graphdati_gz
+
+.. autofunction:: pybel.to_graphdati_jsons
+.. autofunction:: pybel.from_graphdati_jsons
+
+.. autofunction:: pybel.to_graphdati_jsonl
+
+.. autofunction:: pybel.to_graphdati_jsonl_gz
+
+INDRA
+~~~~~
+.. automodule:: pybel.io.indra
+
+.. autofunction:: pybel.from_indra_statements
+.. autofunction:: pybel.from_indra_statements_json
+.. autofunction:: pybel.from_indra_statements_json_file
+
+.. autofunction:: pybel.to_indra_statements
+.. autofunction:: pybel.to_indra_statements_json
+.. autofunction:: pybel.to_indra_statements_json_file
+
+.. autofunction:: pybel.from_biopax
+
+
+
+Analytical Services
+-------------------
+PyNPA
+~~~~~
+.. automodule:: pybel.io.pynpa
+
+.. autofunction:: pybel.to_npa_directory
+.. autofunction:: pybel.to_npa_dfs
 
 HiPathia
 ~~~~~~~~
@@ -124,55 +170,28 @@ HiPathia
 .. autofunction:: pybel.from_hipathia_paths
 .. autofunction:: pybel.from_hipathia_dfs
 
-Export
-------
-Umbrella Node-Link JSON
-~~~~~~~~~~~~~~~~~~~~~~~
-.. automodule:: pybel.io.umbrella_nodelink
+Machine Learning
+~~~~~~~~~~~~~~~~
+.. automodule:: pybel.io.tsv
 
-.. autofunction:: pybel.to_umbrella_nodelink
-.. autofunction:: pybel.to_umbrella_nodelink_file
-.. autofunction:: pybel.to_umbrella_nodelink_gz
-
-GraphDati
-~~~~~~~~~
-.. automodule:: pybel.io.graphdati
-
-.. autofunction:: pybel.to_graphdati
-
-.. autofunction:: pybel.to_graphdati_file
-
-.. autofunction:: pybel.to_graphdati_gz
-
-.. autofunction:: pybel.to_graphdati_jsonl
-
-.. autofunction:: pybel.to_graphdati_jsonl_gz
-
-.. autofunction:: pybel.to_graphdati_jsons
-
-.. autofunction:: pybel.post_graphdati
-
-GraphML
-~~~~~~~
-.. automodule:: pybel.io.graphml
-
-.. autofunction:: pybel.to_graphml
-
-PyNPA
-~~~~~
-.. automodule:: pybel.io.pynpa
-
-.. autofunction:: pybel.to_npa_directory
-.. autofunction:: pybel.to_npa_dfs
-
-Miscellaneous
-~~~~~~~~~~~~~
-.. automodule:: pybel.io.extras
-
-.. autofunction:: pybel.to_csv
-.. autofunction:: pybel.to_sif
-.. autofunction:: pybel.to_gsea
 .. autofunction:: pybel.to_tsv
+.. autofunction:: pybel.to_edgelist
+
+Web Services
+------------
+BEL Commons
+~~~~~~~~~~~
+.. automodule:: pybel.io.bel_commons_client
+
+.. autofunction:: pybel.from_bel_commons
+.. autofunction:: pybel.to_bel_commons
+
+BioDati
+~~~~~~~
+.. automodule:: pybel.io.biodati_client
+
+.. autofunction:: pybel.to_biodati
+.. autofunction:: pybel.from_biodati
 
 Databases
 ---------
@@ -189,23 +208,26 @@ Neo4j
 
 .. autofunction:: pybel.to_neo4j
 
-BEL Commons
------------
-.. automodule:: pybel.io.web
+Lossy Export
+------------
+Umbrella Node-Link JSON
+~~~~~~~~~~~~~~~~~~~~~~~
+.. automodule:: pybel.io.umbrella_nodelink
 
-.. autofunction:: pybel.from_web
-.. autofunction:: pybel.to_web
+.. autofunction:: pybel.to_umbrella_nodelink
+.. autofunction:: pybel.to_umbrella_nodelink_file
+.. autofunction:: pybel.to_umbrella_nodelink_gz
 
-INDRA
------
-.. automodule:: pybel.io.indra
+GraphML
+~~~~~~~
+.. automodule:: pybel.io.graphml
 
-.. autofunction:: pybel.from_indra_statements
-.. autofunction:: pybel.from_indra_statements_json
-.. autofunction:: pybel.from_indra_statements_json_file
+.. autofunction:: pybel.to_graphml
 
-.. autofunction:: pybel.to_indra_statements
-.. autofunction:: pybel.to_indra_statements_json
-.. autofunction:: pybel.to_indra_statements_json_file
+Miscellaneous
+~~~~~~~~~~~~~
+.. automodule:: pybel.io.extras
 
-.. autofunction:: pybel.from_biopax
+.. autofunction:: pybel.to_csv
+.. autofunction:: pybel.to_sif
+.. autofunction:: pybel.to_gsea

@@ -28,10 +28,10 @@ This example shows how you can load/parse the triples from a BEL document stored
 
 import numpy as np
 
+from .bel_commons_client import from_bel_commons
 from .gpickle import from_pickle
 from .nodelink import from_nodelink_file
 from .tsv.api import get_triples
-from .web import from_web
 
 __all__ = [
     'get_triples_from_bel',
@@ -59,7 +59,7 @@ def get_triples_from_bel_pickle(path: str) -> np.ndarray:
 
 def get_triples_from_bel_commons(network_id: str) -> np.ndarray:
     """Load a BEL document from BEL Commons."""
-    return _from_bel(str(network_id), from_web)
+    return _from_bel(str(network_id), from_bel_commons)
 
 
 def _from_bel(path, bel_importer) -> np.ndarray:
