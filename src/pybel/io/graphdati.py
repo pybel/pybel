@@ -1,35 +1,50 @@
 # -*- coding: utf-8 -*-
 
-"""Conversion functions for BEL graphs with GraphDati."""
+"""Conversion functions for BEL graphs with GraphDati.
+
+Note that these are not exact I/O - you can't currently use them as a round trip because
+the input functions expect the GraphDati format that's output by BioDati.
+"""
 
 import gzip
 import json
-from io import BytesIO
-from typing import Any, Iterable, List, Mapping, Optional, TextIO, Union
+import logging
+from collections import defaultdict
+from typing import Any, Iterable, List, Mapping, TextIO, Tuple, Union
 
-import requests
-from more_itertools import chunked
+import pyparsing
 from networkx.utils import open_file
 from tqdm import tqdm
 
+from .jgif import NAMESPACE_TO_PATTERN
 from ..canonicalize import edge_to_tuple
-from ..constants import CITATION, CITATION_DB, CITATION_IDENTIFIER, EVIDENCE
+from ..constants import CITATION, CITATION_DB, CITATION_IDENTIFIER, CITATION_TYPE_PUBMED, CITATION_TYPE_URL, EVIDENCE
+from ..parser import BELParser
 from ..struct import BELGraph
 
 __all__ = [
     'to_graphdati',
+    'from_graphdati',
     'to_graphdati_file',
+    'from_graphdati_file',
     'to_graphdati_gz',
+    'from_graphdati_gz',
     'to_graphdati_jsons',
+    'from_graphdati_jsons',
     'to_graphdati_jsonl',
     'to_graphdati_jsonl_gz',
-    'BioDatiClient',
-    'post_graphdati',
 ]
+
+logger = logging.getLogger(__name__)
 
 NanopubMapping = Mapping[str, Mapping[str, Any]]
 
 SCHEMA_URI = 'https://github.com/belbio/schemas/blob/master/schemas/nanopub_bel-1.0.0.yaml'
+GRAPHDATI_PUBLICATION_TYPES = {
+    'PMID': CITATION_TYPE_PUBMED,
+    'http': CITATION_TYPE_URL,
+    'https': CITATION_TYPE_URL,
+}
 
 
 @open_file(1, mode='w')
@@ -42,10 +57,24 @@ def to_graphdati_file(graph: BELGraph, path: Union[str, TextIO], use_identifiers
     json.dump(to_graphdati(graph, use_identifiers=use_identifiers), path, ensure_ascii=False, **kwargs)
 
 
+def from_graphdati_file(path: Union[str, TextIO]) -> BELGraph:
+    """Load a file containing GraphDati JSON.
+
+    :param path: A path or file-like
+    """
+    return from_graphdati(json.load(path))
+
+
 def to_graphdati_gz(graph: BELGraph, path: str, **kwargs) -> None:
     """Write a graph as GraphDati JSON to a gzip file."""
     with gzip.open(path, 'wt') as file:
         to_graphdati_file(graph, file, **kwargs)
+
+
+def from_graphdati_gz(path: str) -> BELGraph:
+    """Read a graph as GraphDati JSON from a gzip file."""
+    with gzip.open(path, 'rt') as file:
+        return from_graphdati(json.load(file))
 
 
 def to_graphdati_jsons(graph: BELGraph, **kwargs) -> str:
@@ -56,13 +85,15 @@ def to_graphdati_jsons(graph: BELGraph, **kwargs) -> str:
     return json.dumps(to_graphdati(graph), ensure_ascii=False, **kwargs)
 
 
+def from_graphdati_jsons(s: str) -> BELGraph:
+    """Load a graph from a GraphDati JSON string."""
+    return from_graphdati(json.loads(s))
+
+
 @open_file(1, mode='w')
 def to_graphdati_jsonl(graph, file, use_identifiers: bool = True, use_tqdm: bool = True):
     """Write this graph as a GraphDati JSON lines file."""
-    nanopubs = _iter_graphdati(graph, use_identifiers=use_identifiers)
-    if use_tqdm:
-        nanopubs = tqdm(nanopubs, desc='Outputting GraphDati JSONL', total=graph.number_of_edges())
-    for nanopub in nanopubs:
+    for nanopub in _iter_graphdati(graph, use_identifiers=use_identifiers, use_tqdm=use_tqdm):
         print(json.dumps(nanopub), file=file)
 
 
@@ -81,8 +112,11 @@ def to_graphdati(graph, use_identifiers: bool = True) -> List[NanopubMapping]:
     return list(_iter_graphdati(graph, use_identifiers=use_identifiers))
 
 
-def _iter_graphdati(graph, use_identifiers: bool = True) -> Iterable[NanopubMapping]:
-    for u, v, k, d in graph.edges(keys=True, data=True):
+def _iter_graphdati(graph, *, use_identifiers: bool = True, use_tqdm: bool = False) -> Iterable[NanopubMapping]:
+    it = graph.edges(keys=True, data=True)
+    if use_tqdm:
+        it = tqdm(it, total=graph.number_of_edges(), desc='iterating as nanopubs')
+    for u, v, k, d in it:
         yield _make_nanopub(graph, u, v, k, d, use_identifiers)
 
 
@@ -135,114 +169,94 @@ def _get_annotations(d):
     return []  # TODO later
 
 
-def post_graphdati(  # noqa: S107
-    graph: BELGraph,
-    username: str = 'demo@biodati.com',
-    password: str = 'demo',
-    base_url: str = 'https://nanopubstore.demo.biodati.com',
-    chunksize: Optional[int] = None,
-    **kwargs
-) -> requests.Response:
-    """Post this graph to a BioDati server.
+def from_graphdati(j, use_tqdm: bool = True) -> BELGraph:
+    """Convert data from the "normal" network format.
 
-    :param graph: A BEL graph
-    :param username: The email address to log in to BioDati. Defaults to "demo@biodati.com" for the demo server
-    :param password: The password to log in to BioDati. Defaults to "demo" for the demo server
-    :param base_url: The BioDati server base url. Defaults to "https://nanopubstore.demo.biodati.com" for the demo
-     server
-    :param chunksize: The number of nanopubs to post at a time. By default, does all.
-
-    .. warning::
-
-        The default public BioDati server has been put here. You should
-        switch it to yours.
+    .. warning:: BioDati crashes when requesting the ``full`` network format, so this isn't yet explicitly supported
     """
-    connection = BioDatiClient(username, password, base_url)
-    if chunksize:
-        return connection.post_graph_chunked(graph, chunksize, **kwargs)
-    else:
-        return connection.post_graph(graph, **kwargs)
+    root = j['graph']
+    graph = BELGraph(
+        name=root.get('label'),
+        version=root['metadata'].get('gd_rev'),
+        authors=root['metadata'].get('gd_creator'),
+        description=root.get('gd_description'),
+    )
+    # Just in case you want to find it again
+    graph.graph['biodati_network_id'] = root['metadata']['id']
+
+    parser = BELParser(
+        graph=graph,
+        namespace_to_pattern=NAMESPACE_TO_PATTERN,  # To be updated manually depending on what William is up to
+    )
+
+    it = root['edges']
+    if use_tqdm:
+        it = tqdm(it, desc='iterating edges')
+
+    for i, edge in enumerate(it):
+        relation = edge.get('relation')
+        if relation is None:
+            logger.warning('no relation for edge: %s', edge)
+
+        if relation in {'actsIn', 'translocates'}:
+            continue  # don't need legacy BEL format
+
+        bel_statement = edge.get('label')  # this is actually the BEL statement
+        if bel_statement is None:
+            logger.debug('No BEL statement for edge %s', edge)
+            continue
+
+        # Fill up that sweet, sweet metadata
+        metadata_entries = edge['metadata']['nanopub_data']
+        for metadata in metadata_entries:
+            parser.control_parser.clear()
+
+            citation = metadata['citation_id']  # as CURIE
+            citation_db, citation_id = _parse_biodati_citation(citation)
+            if citation_db is None:
+                continue
+            parser.control_parser.citation_db = citation_db
+            parser.control_parser.citation_db_id = citation_id
+
+            # FIXME where is the evidence/support/summary text?
+            parser.control_parser.evidence = 'No evidence available from BioDai'
+
+            nanopub_id = metadata['nanopub_id']
+            parser.control_parser.annotations['biodati_nanopub_id'] = [nanopub_id]
+
+            annotations = metadata['annotations']
+            parser.control_parser.annotations.update(_parse_biodati_annotations(annotations))
+
+            # Finally, parse the BEL statement (once to go with each set of metadata)
+            # TODO change parser to give back pre-compiled info so this doesn't need to be repeated
+            try:
+                parser.parseString(bel_statement, line_number=i)
+            except pyparsing.ParseException as e:
+                logger.warning('parse error for %s: %s', bel_statement, e)
+
+    return graph
 
 
-class BioDatiClient:
-    """A connection to the BioDati API."""
+def _parse_biodati_citation(citation: str) -> Union[Tuple[None, None], Tuple[str, str]]:
+    try:
+        citation_db, citation_id = citation.split(':')
+    except ValueError:
+        logger.warning('structured citation not available for %s', citation)
+        return None, None
 
-    def __init__(self, username, password, base_url):
-        self.base_url = base_url.rstrip('/')
-        self.username = username
-        res = requests.post(
-            '{}/token'.format(base_url),
-            data=dict(username=username, password=password),
-        )
-        token_dict = res.json()
-        self.token_type = token_dict['token_type']
-        self.id_token = token_dict['id_token']
-        self.access_token = token_dict['access_token']
+    try:
+        citation_db = GRAPHDATI_PUBLICATION_TYPES[citation_db]
+    except KeyError:
+        logger.warning('invalid citation structure: %s', citation)
+        return None, None
 
-    def post(self, endpoint: str, **kwargs):
-        """Send a post request to BioDati."""
-        url = '{}/{}'.format(self.base_url, endpoint)
-        headers = {'Authorization': '{} {}'.format(self.token_type, self.id_token)}
-        return requests.post(url, headers=headers, **kwargs)
-
-    def post_graph(self, graph: BELGraph, **kwargs) -> requests.Response:
-        """Post the graph to BioDati."""
-        return self.post_graph_json(to_graphdati(graph), **kwargs)
-
-    def post_graph_chunked(self, graph: BELGraph, chunksize: int, use_tqdm: bool = True, **kwargs):
-        """Post the graph to BioDati in chunks, when the graph is too big for a normal upload."""
-        iterable = _iter_graphdati(graph)
-        if use_tqdm:
-            iterable = tqdm(iterable, total=graph.number_of_edges())
-        res = None
-        for chunk in chunked(iterable, chunksize):
-            res = self.post_graph_json(chunk, **kwargs)
-        return res
-
-    def post_graph_json(self, graph_json, **kwargs) -> requests.Response:
-        """Post the GraphDati object to BioDati."""
-        file = BytesIO()
-        file.write(json.dumps(graph_json).encode('utf-8'))
-        file.seek(0)
-        return self.post_graph_file(file, **kwargs)
-
-    def post_graph_file(
-        self,
-        file,
-        overwrite: bool = False,
-        validate: bool = True,
-        email: bool = False,
-    ) -> requests.Response:
-        """Post a graph to BioDati."""
-        params = dict(overwrite=overwrite, validate=validate)
-        if isinstance(email, str):
-            params['email'] = email
-        elif email:
-            params['email'] = self.username
-
-        return self.post(
-            'nanopubs/import/file',
-            files=dict(file=file),
-            params=params,
-        )
+    return citation_db, citation_id
 
 
-def _main():
-    """Run with python -m pybel.io.graphdati."""
-    import pybel.examples
-    import os
-
-    for x in dir(pybel.examples):
-        graph = getattr(pybel.examples, x)
-        if isinstance(graph, BELGraph):
-            name = graph.name.lower().replace(' ', '_')
-            to_graphdati_file(
-                graph,
-                os.path.join(os.path.expanduser('~'), 'Desktop', '{}.graphdati.json'.format(name)),
-                indent=2,
-            )
-            post_graphdati(graph, chunksize=2)
-
-
-if __name__ == '__main__':
-    _main()
+def _parse_biodati_annotations(annotations: List[Mapping[str, str]]) -> Mapping[str, Mapping[str, bool]]:
+    rv = defaultdict(set)
+    for annotation in annotations:
+        annotation_curie = annotation['id']
+        annotation_prefix, annotation_id = annotation_curie.split(':', 1)
+        rv[annotation_prefix].add(annotation_id)
+    return dict(rv)

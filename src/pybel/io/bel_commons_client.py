@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
 
-"""This module facilitates rudimentary data exchange with `BEL Commons <https://bel-commons.scai.fraunhofer.de>`_."""
+"""Transport functions for `BEL Commons <https://github.com/bel-commons/bel-commons>`_.
+
+BEL Commons is a free, open-source platform for hosting BEL content. Because it was originally
+developed and published in an academic capacity at Fraunhofer SCAI, a public instance can be
+found at https://bel-commons-dev.scai.fraunhofer.de. However, this instance is only supported
+out of posterity and will not be updated. If you would like to host your own instance of
+BEL Commons, there are instructions on its GitHub page.
+"""
 
 import logging
 import os
@@ -15,8 +22,8 @@ from ..struct.graph import BELGraph
 from ..version import get_version
 
 __all__ = [
-    'to_web',
-    'from_web',
+    'to_bel_commons',
+    'from_bel_commons',
 ]
 
 logger = logging.getLogger(__name__)
@@ -49,7 +56,7 @@ def _get_password() -> Optional[str]:
     return _get_config_or_env(PYBEL_REMOTE_PASSWORD)
 
 
-def to_web(
+def to_bel_commons(
     graph: BELGraph,
     host: Optional[str] = None,
     user: Optional[str] = None,
@@ -101,7 +108,7 @@ def to_web(
     return response
 
 
-def from_web(network_id: int, host: Optional[str] = None) -> BELGraph:
+def from_bel_commons(network_id: int, host: Optional[str] = None) -> BELGraph:
     """Retrieve a public network from BEL Commons.
 
     In the future, this function may be extended to support authentication.

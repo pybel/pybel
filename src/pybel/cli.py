@@ -28,10 +28,10 @@ from .canonicalize import to_bel_script
 from .constants import get_cache_connection
 from .examples import braf_graph, egf_graph, homology_graph, sialic_acid_graph, statin_graph
 from .io import (
-    from_bel_script, from_pickle, to_edgelist, to_graphml, to_gsea, to_neo4j, to_nodelink_file, to_pickle, to_sif,
-    to_tsv, to_web,
+    from_bel_script, from_pickle, to_bel_commons, to_edgelist, to_graphml, to_gsea, to_neo4j, to_nodelink_file,
+    to_pickle, to_sif, to_tsv,
 )
-from .io.web import _get_host
+from .io.bel_commons_client import _get_host
 from .manager import Manager
 from .manager.database_io import to_database
 from .manager.models import Edge, Namespace, Node
@@ -217,7 +217,7 @@ def insert(manager, graph: BELGraph):
 @host_option
 def post(graph: BELGraph, host: str):
     """Upload a graph to BEL Commons."""
-    resp = to_web(graph, host=host)
+    resp = to_bel_commons(graph, host=host)
     resp.raise_for_status()
 
 
@@ -299,7 +299,7 @@ def machine(manager: Manager, agents: List[str], local: bool, host: str):
     if local:
         to_database(graph, manager=manager)
     else:
-        resp = to_web(graph, host=host)
+        resp = to_bel_commons(graph, host=host)
         resp.raise_for_status()
 
 
