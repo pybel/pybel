@@ -175,8 +175,8 @@ def _handle_name_and_not_identifier(*, concept, prefix, name) -> None:
         concept[IDENTIFIER] = name
         return
 
-    if prefix == 'bel':
-        kind = concept.get(KIND)
+    if prefix == 'bel' and KIND in concept:
+        kind = concept[KIND]
         if kind == PMOD and name in pmod_mappings:
             # the 0th position xref is the preferred one (usually GO)
             _mapped = pmod_mappings[name]['xrefs'][0]
