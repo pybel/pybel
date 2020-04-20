@@ -1,6 +1,53 @@
 # -*- coding: utf-8 -*-
 
-"""Grounding BEL JSON."""
+"""Grounding for PyBEL.
+
+Why does this module exist, even though BEL relies on definitions of external vocabularies?
+
+BEL namespaces only have names, and there's no standard for mapping back to identifiers.
+PyBEL has a internal rule that for any given namespace, it will try and look up another
+"identifier" space in the same directory. However, this is an implementation detail and does
+
+This module uses PyOBO to look the identifiers for nodes in a BEL graph when possible
+or replace the label given with BEP-0008 (OBO-style) syntax. It also normalizes namespace
+names to their standards, as defined by Identifiers.org/OBOFoundry/PyOBO internal standard.
+
+Finally, it has a tool that allows for the definition of remapping of namespace/name pairs.
+Right now, it's only set up to use the FamPlex mappings, but it will be made more extensible
+to help support the clean-up of curation efforts that created their own low-quality terminologies
+(publicly accessible examples include the Selventa Large Corpus, Selventa Small Corpus, HemeKG,
+covid19kg, and the Causal Biological Networks database).
+
+After installation with ``pip install git+https://github.com/hemekg/hemekg.git``, it can be run with:
+
+.. code-block:: python
+
+    import hemekg
+    heme_graph = hemekg.get_graph()
+
+    import pybel.grounding
+    pybel.grounding.ground(heme_graph)
+
+After installation with ``pip install git+https://github.com/covid19kg/covid19kg.git``, it can be run with:
+
+.. code-block:: python
+
+    import covid19kg
+    covid19_graph = covid19kg.get_graph()
+
+    import pybel.grounding
+    pybel.grounding.ground(covid19_graph)
+
+After installation with ``pip install git+https://github.com/cthoyt/selventa-knowledge.git``, it can be run with:
+
+.. code-block:: python
+
+    import selventa_knowledge
+    selventa_graph = selventa_knowledge.get_graph()
+
+    import pybel.grounding
+    pybel.grounding.ground(selventa_graph)
+"""
 
 import logging
 import unittest
@@ -22,8 +69,8 @@ from pybel.language import gmod_mappings, pmod_mappings
 from pybel.struct import BELGraph
 
 __all__ = [
-    'ground_nodelink',
     'ground',
+    'ground_nodelink',
 ]
 
 logger = logging.getLogger(__name__)
@@ -34,7 +81,7 @@ NO_NAMES = {'fplx', 'eccode', 'dbsnp'}
 _REMAPPING = get_remapping()
 
 
-def _get_remapping(prefix, name) -> Union[Tuple[str, str, str], Tuple[None, None, None]]:
+def _get_remapping(prefix: str, name: str) -> Union[Tuple[str, str, str], Tuple[None, None, None]]:
     return _REMAPPING.get((prefix, name), (None, None, None))
 
 
