@@ -3,124 +3,209 @@
 """Grounding BEL JSON."""
 
 import logging
-from typing import List, Mapping, Optional, Tuple
+import unittest
+from typing import Tuple, Union
 
-import pyobo
 from protmapper.uniprot_client import get_mnemonic
+from pyobo.extract import get_id_name_mapping, get_name_id_mapping
+from pyobo.getters import NoOboFoundry
 from pyobo.identifier_utils import normalize_prefix
+from pyobo.xrefdb.sources.famplex import get_remapping
 from tqdm import tqdm
 
-from .constants import (
+from pybel.constants import (
     CONCEPT, FUSION, IDENTIFIER, MEMBERS, NAME, NAMESPACE, PARTNER_3P, PARTNER_5P, PRODUCTS,
     REACTANTS,
 )
-from .io import from_nodelink, to_nodelink
-from .struct import BELGraph
+from pybel.io import from_nodelink, to_nodelink
+from pybel.struct import BELGraph
 
 __all__ = [
     'ground_nodelink',
     'ground_graph',
+    'ground_node',
 ]
 
 logger = logging.getLogger(__name__)
 SKIP = {'ncbigene', 'pubchem.compound'}
 NO_NAMES = {'fplx', 'eccode', 'dbsnp'}
 
+# TODO will get updated
+_REMAPPING = get_remapping()
 
-def ground_graph(
-    graph: BELGraph,
-    prefixes: Optional[List[str]] = None,
-    remapping: Optional[Mapping[Tuple[str, str], Tuple[str, str]]] = None,
-) -> BELGraph:
+
+def _get_remapping(prefix, name) -> Union[Tuple[str, str, str], Tuple[None, None, None]]:
+    return _REMAPPING.get((prefix, name), (None, None, None))
+
+
+def ground_graph(graph: BELGraph) -> BELGraph:
     """Ground all entities in a BEL graph."""
     j = to_nodelink(graph)
-    ground_nodelink(j, prefixes=prefixes, remapping=remapping)
+    ground_nodelink(j)
     return from_nodelink(j)
 
 
-def ground_nodelink(
-    j,
-    prefixes: Optional[List[str]] = None,
-    remapping: Optional[Mapping[Tuple[str, str], Tuple[str, str]]] = None,
-) -> None:
+def ground_nodelink(j) -> None:
     """Ground entities in a nodelink data structure."""
-    if prefixes is None:
-        prefixes = (
-            'hgnc', 'chebi', 'mgi', 'rgd', 'efo', 'ncbitaxon', 'conso',
-            'go', 'mesh', 'hgnc.genefamily', 'hp', 'doid', 'interpro',
-        )
-    if remapping is None:
-        remapping = {}
-
-    name_to_ids = {
-        prefix: pyobo.get_name_id_mapping(prefix)
-        for prefix in prefixes
-    }
-
     for node in tqdm(j['nodes'], desc='mapping nodes'):
-        _process_concept(node, name_to_ids, remapping)
-        _process_members(node, name_to_ids, remapping, MEMBERS)
-        _process_members(node, name_to_ids, remapping, REACTANTS)
-        _process_members(node, name_to_ids, remapping, PRODUCTS)
-        _process_fusion(node, name_to_ids, remapping)
+        ground_node(node)
 
 
 _UNHANDLED_NAMESPACES = set()
 
 
-def _process_concept(node, name_to_ids, remapping):
+def ground_node(node) -> None:
+    """Process a node JSON object, in place."""
+    _process_concept(node)
+    _process_members(node, MEMBERS)
+    _process_members(node, REACTANTS)
+    _process_members(node, PRODUCTS)
+    _process_fusion(node)
+
+
+def _process_concept(node) -> None:
+    """Process a node JSON object."""
     concept = node.get(CONCEPT)
     if concept is None:
         return
 
-    name = concept[NAME]
     namespace = concept[NAMESPACE]
-
     if namespace.lower() in {'text', 'fixme'}:
         return
 
-    if (namespace, name) in remapping:
-        return remapping[namespace, name]
+    prefix = normalize_prefix(namespace)
+    if prefix is None:
+        logger.warning('could not normalize namespace: %s', namespace)
+        return
 
-    norm_namespace = normalize_prefix(namespace)
-    if norm_namespace is None:
-        logger.warning('could not normalize namespace for %s ! %s', namespace, name)
+    concept[NAMESPACE] = prefix
+
+    identifier = concept.get(IDENTIFIER)
+    if identifier:  # don't trust whatever was put for the name, even if it's available
+        _handle_identifier_not_name(concept=concept, prefix=prefix, identifier=identifier)
         return
-    elif norm_namespace in SKIP:
+
+    name = concept.get(NAME)
+    _handle_name_and_not_identifier(concept=concept, prefix=prefix, name=name)
+
+
+def _handle_identifier_not_name(*, concept, prefix, identifier) -> None:
+    id_name_mapping = get_id_name_mapping(prefix)
+    if id_name_mapping is None:
+        logger.warning('could not get names for prefix %s', prefix)
         return
-    concept[NAMESPACE] = norm_namespace
-    if norm_namespace in NO_NAMES:
+    name = id_name_mapping.get(identifier)
+    if name is None:
+        logger.warning('could not get name for %s:%s', prefix, identifier)
+        return
+    concept[NAME] = name
+    return
+
+
+def _handle_name_and_not_identifier(*, concept, prefix, name) -> None:
+    remapped_prefix, remapped_identifier, remapped_name = _get_remapping(prefix, name)
+    if remapped_prefix:
+        concept[NAMESPACE] = remapped_prefix
+        concept[IDENTIFIER] = remapped_identifier
+        concept[NAME] = remapped_name
+        return
+
+    # Some namespaces are just too much of a problem at the moment to look up
+    if prefix in SKIP:
+        return
+
+    concept[NAMESPACE] = prefix
+    if prefix in NO_NAMES:
         concept[IDENTIFIER] = name
-    elif norm_namespace == 'uniprot':
+        return
+
+    if prefix == 'uniprot':
         identifier = concept.get(IDENTIFIER)
         if identifier is not None:
             concept[NAME] = get_mnemonic(identifier, web_fallback=True)
-        else:  # assume identifier given as name
-            mnemomic = get_mnemonic(name, web_fallback=True)
-            concept[IDENTIFIER] = name
-            concept[NAME] = mnemomic
-    elif norm_namespace in name_to_ids:
-        identifier = name_to_ids[norm_namespace].get(name)
-        if identifier is None:
-            logger.warning('could not look up %s ! %s', norm_namespace, name)
             return
-        concept[IDENTIFIER] = identifier
-    elif norm_namespace not in _UNHANDLED_NAMESPACES:
-        _UNHANDLED_NAMESPACES.add(norm_namespace)
-        logger.warning('unhandled namespace: %s for %s', norm_namespace, node)
+
+        # assume identifier given as name
+        mnemomic = get_mnemonic(name, web_fallback=True)
+        concept[IDENTIFIER] = name
+        concept[NAME] = mnemomic
+        return
+
+    try:
+        id_name_mapping = get_name_id_mapping(prefix)
+    except NoOboFoundry:
+        id_name_mapping = None
+
+    if id_name_mapping is None:
+        logger.warning('unhandled namespace in %s ! %s', prefix, name)
+        return
+
+    identifier = id_name_mapping.get(name)
+    if identifier is None:
+        logger.warning('could not find name %s in namespace %s', name, prefix)
+        return
+
+    concept[IDENTIFIER] = identifier
 
 
-def _process_fusion(node, name_to_ids, remapping):
+def _process_fusion(node) -> None:
     fusion = node.get(FUSION)
     if not fusion:
         return
-    _process_concept(fusion[PARTNER_3P], name_to_ids, remapping)
-    _process_concept(fusion[PARTNER_5P], name_to_ids, remapping)
+    _process_concept(fusion[PARTNER_3P])
+    _process_concept(fusion[PARTNER_5P])
 
 
-def _process_members(node, name_to_ids, remapping, key):
+def _process_members(node, key) -> None:
     members = node.get(key)
     if not members:
         return
     for member in members:
-        _process_concept(member, name_to_ids, remapping)
+        _process_concept(member)
+
+
+class TestGround(unittest.TestCase):
+    """Test grounding."""
+
+    def _test_ground(self, expected, result):
+        ground_node(result)
+        self.assertEqual(expected, result)
+
+    def test_normalize_prefix_case(self):
+        """Test that the prefix is normalized to the correct case."""
+        self._test_ground(
+            {NAMESPACE: 'mesh', NAME: 'Neurons', IDENTIFIER: 'D009474'},
+            {NAMESPACE: 'MESH', NAME: 'Neurons', IDENTIFIER: 'D009474'}
+        )
+
+    def test_normalize_prefix_synonym(self):
+        """Test that the prefix is normalized by a synonym."""
+        self._test_ground(
+            {NAMESPACE: 'mesh', NAME: 'Neurons', IDENTIFIER: 'D009474'},
+            {NAMESPACE: 'MESHA', NAME: 'Neurons', IDENTIFIER: 'D009474'}
+        )
+
+    def test_add_identifier(self):
+        """Test that the identifier can get looked up."""
+        self._test_ground(
+            {NAMESPACE: 'mesh', NAME: 'Neurons', IDENTIFIER: 'D009474'},
+            {NAMESPACE: 'MESH', NAME: 'Neurons'}
+        )
+
+    def test_add_identifier_fix_wrong_name(self):
+        """Test that the name is replaced if the identifier is already available.."""
+        self._test_ground(
+            {NAMESPACE: 'mesh', NAME: 'Neurons', IDENTIFIER: 'D009474'},
+            {NAMESPACE: 'MESH', NAME: 'Nonsense name!', IDENTIFIER: 'D009474'}
+        )
+
+    def test_remap(self):
+        """Test remapping using FamPlex."""
+        self._test_ground(
+            {NAMESPACE: 'fplx', NAME: 'TAP', IDENTIFIER: 'TAP'},
+            {NAMESPACE: 'SFAM', NAME: 'TAP Family'},
+        )
+        self._test_ground(
+            {NAMESPACE: 'fplx', NAME: 'Gamma_secretase', IDENTIFIER: 'Gamma_secretase'},
+            {NAMESPACE: 'SCOMP', NAME: 'gamma Secretase Complex'},
+        )
