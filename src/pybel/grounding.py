@@ -223,13 +223,13 @@ def _handle_name_and_not_identifier(*, concept, prefix, name) -> None:
 
 
 def _process_fusion(fusion) -> None:
-    _process_concept(fusion[PARTNER_3P])
-    _process_concept(fusion[PARTNER_5P])
+    _process_node(fusion[PARTNER_3P])
+    _process_node(fusion[PARTNER_5P])
 
 
 def _process_list(members) -> None:
     for member in members:
-        _process_concept(member)
+        _process_node(member)
 
 
 class TestGround(unittest.TestCase):
