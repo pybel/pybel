@@ -56,7 +56,7 @@ from typing import Tuple, Union
 from protmapper.uniprot_client import get_id_from_mnemonic, get_mnemonic
 from pyobo.extract import get_id_name_mapping, get_name_id_mapping
 from pyobo.getters import NoOboFoundry
-from pyobo.identifier_utils import normalize_prefix
+from pyobo.identifier_utils import normalize_prefix, SYNONYM_TO_KEY
 from pyobo.xrefdb.sources.famplex import get_remapping
 from tqdm import tqdm
 
@@ -106,7 +106,7 @@ _UNHANDLED_NAMESPACES = set()
 def _process_node(node) -> None:
     """Process a node JSON object, in place."""
     if CONCEPT in node:
-        _process_concept(node[CONCEPT])
+        _process_concept(node=node)
     if VARIANTS in node:
         _process_list(node[VARIANTS])
     if MEMBERS in node:
@@ -119,8 +119,9 @@ def _process_node(node) -> None:
         _process_fusion(node[FUSION])
 
 
-def _process_concept(concept) -> None:
+def _process_concept(*, node) -> None:
     """Process a node JSON object."""
+    concept = node[CONCEPT]
     namespace = concept[NAMESPACE]
     if namespace.lower() in {'text', 'fixme'}:
         return
@@ -138,7 +139,7 @@ def _process_concept(concept) -> None:
         return
 
     name = concept.get(NAME)
-    _handle_name_and_not_identifier(concept=concept, prefix=prefix, name=name)
+    _handle_name_and_not_identifier(node=node, concept=concept, prefix=prefix, name=name)
 
 
 def _handle_identifier_not_name(*, concept, prefix, identifier) -> None:
@@ -158,7 +159,7 @@ def _handle_identifier_not_name(*, concept, prefix, identifier) -> None:
     return
 
 
-def _handle_name_and_not_identifier(*, concept, prefix, name) -> None:
+def _handle_name_and_not_identifier(*, node, concept, prefix, name) -> None:
     remapped_prefix, remapped_identifier, remapped_name = _get_remapping(prefix, name)
     if remapped_prefix:
         concept[NAMESPACE] = remapped_prefix
@@ -175,8 +176,8 @@ def _handle_name_and_not_identifier(*, concept, prefix, name) -> None:
         concept[IDENTIFIER] = name
         return
 
-    if prefix == 'bel' and KIND in concept:
-        kind = concept[KIND]
+    if prefix == 'bel' and KIND in node:
+        kind = node[KIND]
         if kind == PMOD and name in pmod_mappings:
             # the 0th position xref is the preferred one (usually GO)
             _mapped = pmod_mappings[name]['xrefs'][0]
@@ -240,53 +241,54 @@ class TestGround(unittest.TestCase):
         r = [
             (
                 'Normalize prefix to correct case',
-                {NAMESPACE: 'mesh', NAME: 'Neurons', IDENTIFIER: 'D009474'},
-                {NAMESPACE: 'MESH', NAME: 'Neurons', IDENTIFIER: 'D009474'},
+                {CONCEPT: {NAMESPACE: 'mesh', NAME: 'Neurons', IDENTIFIER: 'D009474'}},
+                {CONCEPT: {NAMESPACE: 'MESH', NAME: 'Neurons', IDENTIFIER: 'D009474'}},
             ),
             (
                 'Normalize prefix by synonym',
-                {NAMESPACE: 'mesh', NAME: 'Neurons', IDENTIFIER: 'D009474'},
-                {NAMESPACE: 'MESHA', NAME: 'Neurons', IDENTIFIER: 'D009474'},
+                {CONCEPT: {NAMESPACE: 'mesh', NAME: 'Neurons', IDENTIFIER: 'D009474'}},
+                {CONCEPT: {NAMESPACE: 'MESHA', NAME: 'Neurons', IDENTIFIER: 'D009474'}},
             ),
             (
                 'Look up identifier by name',
-                {NAMESPACE: 'mesh', NAME: 'Neurons', IDENTIFIER: 'D009474'},
-                {NAMESPACE: 'MESH', NAME: 'Neurons'},
+                {CONCEPT: {NAMESPACE: 'mesh', NAME: 'Neurons', IDENTIFIER: 'D009474'}},
+                {CONCEPT: {NAMESPACE: 'MESH', NAME: 'Neurons'}},
             ),
             (
                 'Lookup by UniProt identifier as name',
-                {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN', IDENTIFIER: 'O60921'},
-                {NAMESPACE: 'UniProt', NAME: 'O60921'},
+                {CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN', IDENTIFIER: 'O60921'}},
+                {CONCEPT: {NAMESPACE: 'UniProt', NAME: 'O60921'}},
             ),
             (
                 'Lookup by UniProt mnemonic as name',
-                {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN', IDENTIFIER: 'O60921'},
-                {NAMESPACE: 'UniProt', NAME: 'HUS1_HUMAN'},
+                {CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN', IDENTIFIER: 'O60921'}},
+                {CONCEPT: {NAMESPACE: 'UniProt', NAME: 'HUS1_HUMAN'}},
             ),
             (
                 'Rewrite wrong UniProt name',
-                {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN', IDENTIFIER: 'O60921'},
-                {NAMESPACE: 'UniProt', NAME: 'WRONG!!!!', IDENTIFIER: 'O60921'},
+                {CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN', IDENTIFIER: 'O60921'}},
+                {CONCEPT: {NAMESPACE: 'UniProt', NAME: 'WRONG!!!!', IDENTIFIER: 'O60921'}},
             ),
             (
                 'Overwrite name by identifier',
-                {NAMESPACE: 'mesh', NAME: 'Neurons', IDENTIFIER: 'D009474'},
-                {NAMESPACE: 'MESH', NAME: 'Nonsense name!', IDENTIFIER: 'D009474'},
+                {CONCEPT: {NAMESPACE: 'mesh', NAME: 'Neurons', IDENTIFIER: 'D009474'}},
+                {CONCEPT: {NAMESPACE: 'MESH', NAME: 'Nonsense name!', IDENTIFIER: 'D009474'}},
             ),
             (
                 'Remap example 1',
-                {NAMESPACE: 'fplx', NAME: 'TAP', IDENTIFIER: 'TAP'},
-                {NAMESPACE: 'SFAM', NAME: 'TAP Family'},
+                {CONCEPT: {NAMESPACE: 'fplx', NAME: 'TAP', IDENTIFIER: 'TAP'}},
+                {CONCEPT: {NAMESPACE: 'SFAM', NAME: 'TAP Family'}},
             ),
             (
                 'Remap example 2',
-                {NAMESPACE: 'fplx', NAME: 'Gamma_secretase', IDENTIFIER: 'Gamma_secretase'},
-                {NAMESPACE: 'SCOMP', NAME: 'gamma Secretase Complex'},
+                {CONCEPT: {NAMESPACE: 'fplx', NAME: 'Gamma_secretase', IDENTIFIER: 'Gamma_secretase'}},
+                {CONCEPT: {NAMESPACE: 'SCOMP', NAME: 'gamma Secretase Complex'}},
             ),
         ]
         for name, expected, result in r:
             with self.subTest(name=name):
-                _process_concept(result)
+                self.assertIn(expected[CONCEPT][NAMESPACE], SYNONYM_TO_KEY)
+                _process_concept(node=result)
                 self.assertEqual(expected, result)
 
     def test_process_nodes(self):
@@ -342,33 +344,48 @@ class TestGround(unittest.TestCase):
                 'Normalize pmod using default BEL namespace',
                 {
                     CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN', IDENTIFIER: 'O60921'},
-                    VARIANTS: [{NAMESPACE: 'go', IDENTIFIER: '0006468', NAME: 'protein phosphorylation', KIND: PMOD}]
+                    VARIANTS: [
+                        {
+                            CONCEPT: {NAMESPACE: 'go', IDENTIFIER: '0006468', NAME: 'protein phosphorylation'},
+                            KIND: PMOD,
+                        },
+                    ]
                 },
                 {
                     CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN'},
-                    VARIANTS: [{NAMESPACE: 'bel', NAME: 'Ph', KIND: PMOD}]
+                    VARIANTS: [
+                        {CONCEPT: {NAMESPACE: 'bel', NAME: 'Ph'}, KIND: PMOD},
+                    ]
                 },
             ),
             (
                 'Normalize pmod using default BEL namespace - Me (to investigate conflict with gmod)',
                 {
                     CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN', IDENTIFIER: 'O60921'},
-                    VARIANTS: [{NAMESPACE: 'go', IDENTIFIER: '0006479', NAME: 'protein methylation', KIND: PMOD}]
+                    VARIANTS: [
+                        {CONCEPT: {NAMESPACE: 'go', IDENTIFIER: '0006479', NAME: 'protein methylation'}, KIND: PMOD},
+                    ]
                 },
                 {
                     CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN'},
-                    VARIANTS: [{NAMESPACE: 'bel', NAME: 'Me', KIND: PMOD}]
+                    VARIANTS: [
+                        {CONCEPT: {NAMESPACE: 'bel', NAME: 'Me'}, KIND: PMOD},
+                    ]
                 },
             ),
             (
                 'Normalize gmod using default BEL namespace - Me (to investigate conflict with pmod)',
                 {
                     CONCEPT: {NAMESPACE: 'hgnc', NAME: 'MAPT', IDENTIFIER: '6893'},
-                    VARIANTS: [{NAMESPACE: 'go', IDENTIFIER: '0006306', NAME: 'DNA methylation', KIND: GMOD}]
+                    VARIANTS: [
+                        {CONCEPT: {NAMESPACE: 'go', IDENTIFIER: '0006306', NAME: 'DNA methylation'}, KIND: GMOD},
+                    ]
                 },
                 {
                     CONCEPT: {NAMESPACE: 'HGNC', NAME: 'MAPT'},
-                    VARIANTS: [{NAMESPACE: 'bel', NAME: 'Me', KIND: GMOD}]
+                    VARIANTS: [
+                        {CONCEPT: {NAMESPACE: 'bel', NAME: 'Me'}, KIND: GMOD},
+                    ]
                 },
             ),
         ]
