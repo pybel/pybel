@@ -56,7 +56,7 @@ from typing import Tuple, Union
 from protmapper.uniprot_client import get_id_from_mnemonic, get_mnemonic
 from pyobo.extract import get_id_name_mapping, get_name_id_mapping
 from pyobo.getters import NoOboFoundry
-from pyobo.identifier_utils import normalize_prefix, SYNONYM_TO_KEY
+from pyobo.identifier_utils import SYNONYM_TO_KEY, normalize_prefix
 from pyobo.xrefdb.sources.famplex import get_remapping
 from tqdm import tqdm
 
@@ -296,25 +296,25 @@ class TestGround(unittest.TestCase):
         r = [
             (
                 'Look up identifier of member by name',
-                {MEMBERS: [{NAMESPACE: 'mesh', NAME: 'Neurons', IDENTIFIER: 'D009474'}]},
-                {MEMBERS: [{NAMESPACE: 'MESH', NAME: 'Neurons'}]},
+                {MEMBERS: [{CONCEPT: {NAMESPACE: 'mesh', NAME: 'Neurons', IDENTIFIER: 'D009474'}}]},
+                {MEMBERS: [{CONCEPT: {NAMESPACE: 'MESH', NAME: 'Neurons'}}]},
             ),
             (
                 'Look up identifier of member by name AND name of complex',
                 {
                     CONCEPT: {NAMESPACE: 'complexportal', NAME: 'Checkpoint clamp complex', IDENTIFIER: 'CPX-1829'},
                     MEMBERS: [
-                        {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN', IDENTIFIER: 'O60921'},
-                        {NAMESPACE: 'uniprot', NAME: 'RAD9A_HUMAN', IDENTIFIER: 'Q99638'},
-                        {NAMESPACE: 'uniprot', NAME: 'RAD1_HUMAN', IDENTIFIER: 'O60671'},
+                        {CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN', IDENTIFIER: 'O60921'}},
+                        {CONCEPT: {NAMESPACE: 'uniprot', NAME: 'RAD9A_HUMAN', IDENTIFIER: 'Q99638'}},
+                        {CONCEPT: {NAMESPACE: 'uniprot', NAME: 'RAD1_HUMAN', IDENTIFIER: 'O60671'}},
                     ]
                 },
                 {
                     CONCEPT: {NAMESPACE: 'complexportal', NAME: 'Checkpoint clamp complex'},
                     MEMBERS: [
-                        {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN'},
-                        {NAMESPACE: 'uniprot', NAME: 'RAD9A_HUMAN'},
-                        {NAMESPACE: 'uniprot', NAME: 'RAD1_HUMAN'},
+                        {CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN'}},
+                        {CONCEPT: {NAMESPACE: 'uniprot', NAME: 'RAD9A_HUMAN'}},
+                        {CONCEPT: {NAMESPACE: 'uniprot', NAME: 'RAD1_HUMAN'}},
                     ]
                 },
             ),
@@ -322,22 +322,42 @@ class TestGround(unittest.TestCase):
                 'Normalize pmod by name',
                 {
                     CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN', IDENTIFIER: 'O60921'},
-                    VARIANTS: [{NAMESPACE: 'go', IDENTIFIER: '0006468', NAME: 'protein phosphorylation'}]
+                    VARIANTS: [
+                        {
+                            KIND: PMOD,
+                            CONCEPT: {NAMESPACE: 'go', IDENTIFIER: '0006468', NAME: 'protein phosphorylation'},
+                        },
+                    ]
                 },
                 {
                     CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN'},
-                    VARIANTS: [{NAMESPACE: 'GO', NAME: 'protein phosphorylation'}]
+                    VARIANTS: [
+                        {
+                            KIND: PMOD,
+                            CONCEPT: {NAMESPACE: 'GO', NAME: 'protein phosphorylation'},
+                        },
+                    ]
                 },
             ),
             (
                 'Fix name in pmod by identifier lookup',
                 {
                     CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN', IDENTIFIER: 'O60921'},
-                    VARIANTS: [{NAMESPACE: 'go', IDENTIFIER: '0006468', NAME: 'protein phosphorylation'}]
+                    VARIANTS: [
+                        {
+                            KIND: PMOD,
+                            CONCEPT: {NAMESPACE: 'go', IDENTIFIER: '0006468', NAME: 'protein phosphorylation'},
+                        },
+                    ]
                 },
                 {
                     CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN'},
-                    VARIANTS: [{NAMESPACE: 'GO', IDENTIFIER: '0006468', NAME: 'WRONG!'}]
+                    VARIANTS: [
+                        {
+                            KIND: PMOD,
+                            CONCEPT: {NAMESPACE: 'GO', IDENTIFIER: '0006468', NAME: 'WRONG!'},
+                        },
+                    ]
                 },
             ),
             (
@@ -346,15 +366,18 @@ class TestGround(unittest.TestCase):
                     CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN', IDENTIFIER: 'O60921'},
                     VARIANTS: [
                         {
-                            CONCEPT: {NAMESPACE: 'go', IDENTIFIER: '0006468', NAME: 'protein phosphorylation'},
                             KIND: PMOD,
+                            CONCEPT: {NAMESPACE: 'go', IDENTIFIER: '0006468', NAME: 'protein phosphorylation'},
                         },
                     ]
                 },
                 {
                     CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN'},
                     VARIANTS: [
-                        {CONCEPT: {NAMESPACE: 'bel', NAME: 'Ph'}, KIND: PMOD},
+                        {
+                            KIND: PMOD,
+                            CONCEPT: {NAMESPACE: 'bel', NAME: 'Ph'},
+                        },
                     ]
                 },
             ),
@@ -363,13 +386,19 @@ class TestGround(unittest.TestCase):
                 {
                     CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN', IDENTIFIER: 'O60921'},
                     VARIANTS: [
-                        {CONCEPT: {NAMESPACE: 'go', IDENTIFIER: '0006479', NAME: 'protein methylation'}, KIND: PMOD},
+                        {
+                            KIND: PMOD,
+                            CONCEPT: {NAMESPACE: 'go', IDENTIFIER: '0006479', NAME: 'protein methylation'}
+                        },
                     ]
                 },
                 {
                     CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN'},
                     VARIANTS: [
-                        {CONCEPT: {NAMESPACE: 'bel', NAME: 'Me'}, KIND: PMOD},
+                        {
+                            KIND: PMOD,
+                            CONCEPT: {NAMESPACE: 'bel', NAME: 'Me'}
+                        },
                     ]
                 },
             ),
