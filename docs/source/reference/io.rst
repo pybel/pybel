@@ -199,6 +199,12 @@ BioDati
 .. autofunction:: pybel.to_biodati
 .. autofunction:: pybel.from_biodati
 
+Fraunhofer OrientDB
+~~~~~~~~~~~~~~~~~~~
+.. automodule:: pybel.io.fraunhofer_orientdb
+
+.. autofunction:: pybel.from_fraunhofer_orientdb
+
 Databases
 ---------
 SQL Databases
