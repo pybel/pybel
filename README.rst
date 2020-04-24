@@ -94,7 +94,7 @@ so the following demo shows how to add the corresponding identifiers to all node
     graph = pybel.load('large_corpus.bel.nodelink.json.gz')
 
     import pybel.grounding
-    pybel.grounding.ground(covid19_graph)
+    pybel.grounding.ground(graph)
 
 Note: you have to install ``pyobo`` for this to work and be running Python 3.7+.
 
