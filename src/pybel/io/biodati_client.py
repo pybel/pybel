@@ -83,7 +83,7 @@ def from_biodati(  # noqa: S107
 
     .. code-block:: python
 
-        from pybel import get_biodati_network
+        from pybel import from_biodati
         network_id = '01E46GDFQAGK5W8EFS9S9WMH12'  # COVID-19 graph example from Wendy Zimmermann
         graph = from_biodati(
             network_id=network_id,
