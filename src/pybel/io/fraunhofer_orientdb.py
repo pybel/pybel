@@ -134,7 +134,7 @@ def _request_graphstore(
     if count_query is None:
         count_query = 'select count(@rid) from E'
     count_query = quote_plus(count_query)
-    count_url = f'{base}/{database}/sql/{count_query}'
+    count_url = '{base}/{database}/sql/{count_query}'.format(base=base, database=database, count_query=count_query)
     count_res = requests.get(count_url, auth=(user, password))
     count = count_res.json()['result'][0]['count']
     logging.debug('fraunhofer orientdb has %d edges', count)
@@ -147,7 +147,9 @@ def _request_graphstore(
         select_query = select_query_template.format(limit=page_size, offset=offset * page_size)
         logger.debug('query: %s', select_query)
         select_query = quote_plus(select_query)
-        select_url = f'{base}/{database}/sql/{select_query}/{page_size}/*:1'
+        select_url = '{base}/{database}/sql/{select_query}/{page_size}/*:1'.format(
+            base=base, database=database, select_query=select_query, page_size=page_size,
+        )
         res = requests.get(select_url, auth=(user, password))
         res_json = res.json()
         result = res_json['result']
