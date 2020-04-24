@@ -56,7 +56,7 @@ def from_fraunhofer_orientdb(  # noqa:S107
     | covid    | covid_user | covid    |
     +----------+------------+----------+
 
-    The COVID graph can be downloaded like this:
+    The ``covid`` database can be downloaded and converted to a BEL graph like this:
 
     .. code-block:: python
 
@@ -67,6 +67,17 @@ def from_fraunhofer_orientdb(  # noqa:S107
             password='covid',
         )
         graph.summarize()
+
+    However, because the source BEL scripts for the COVID-19 Knowledge Graph are available on
+    `GitHub <https://github.com/covid19kg/covid19kg>`_ and the authors pre-enabled it for PyBEL, it can
+    be downloaded with ``pip install git+https://github.com/covid19kg/covid19kg.git`` and used
+    with the following python code:
+
+    .. code-block:: python
+
+       import covid19kg
+       graph = covid19kg.get_graph()
+       graph.summarize()
 
     .. warning::
 
