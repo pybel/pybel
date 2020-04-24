@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-"""Transport functions for `Franhofer SCAI's OrientDB <http://graphstore.scai.fraunhofer.de>`_.
+"""Transport functions for `Franhofer's OrientDB <http://graphstore.scai.fraunhofer.de>`_.
 
-Fraunhofer SCAI hosts an OrientDB instance that contains BEL in a schema similar to Umbrella
-Node-Link. However, they include custom relations that do not come from a controlled vocabulary,
-and have not made the schema, ETL scripts, or documentation available.
+`Fraunhofer <https://www.scai.fraunhofer.de/en/business-research-areas/bioinformatics.html>`_ hosts
+an instance of `OrientDB <https://orientdb.com/>`_ that contains BEL in a schema similar to
+:mod:`pybel.io.umbrella_nodelink`. However, they include custom relations that do not come
+from a controlled vocabulary, and have not made the schema, ETL scripts, or documentation available.
 
 Unlike BioDati and BEL Commons, the Fraunhofer OrientDB does not allow for uploads, so only
-a single function :func:`from_fraunhofer_orientdb` is provided by PyBEL.
+a single function :func:`pybel.from_fraunhofer_orientdb` is provided by PyBEL.
 """
 
 import logging
@@ -34,7 +35,7 @@ def from_fraunhofer_orientdb(  # noqa:S107
     password: str = 'covid',
     query: Optional[str] = None
 ) -> BELGraph:
-    """Get a BEL graph from the Fraunhofer SCAI OrientDB.
+    """Get a BEL graph from the Fraunhofer OrientDB.
 
     :param database: The OrientDB database to connect to
     :param user: The user to connect to OrientDB
@@ -45,7 +46,7 @@ def from_fraunhofer_orientdb(  # noqa:S107
      properly, because OrientDB's RESTful API puts it in the URL's path.
 
     By default, this function connects to the ``covid`` database, that corresponds to the
-    COVID-19 Knowledge Graph [0]_. If other databases in the Fraunhofer SCAI OrientDB are
+    COVID-19 Knowledge Graph [0]_. If other databases in the Fraunhofer OrientDB are
     published and demo username/password combinations are given, the following table will
     be updated.
 
@@ -54,11 +55,6 @@ def from_fraunhofer_orientdb(  # noqa:S107
     +==========+============+==========+
     | covid    | covid_user | covid    |
     +----------+------------+----------+
-
-    .. [0] Domingo-Fernández, D., *et al.* (2020). `COVID-19 Knowledge Graph: a computable, multi-modal,
-           cause-and-effect knowledge model of COVID-19 pathophysiology
-           <https://doi.org/10.1101/2020.04.14.040667>`_. *bioRxiv* 2020.04.14.040667.
-
 
     The COVID graph can be downloaded like this:
 
@@ -71,6 +67,17 @@ def from_fraunhofer_orientdb(  # noqa:S107
             password='covid',
         )
         graph.summarize()
+
+    .. warning::
+
+        It was initially planned to handle some of the non-standard relationships listed in the
+        Fraunhofer OrientDB's `schema <http://graphstore.scai.fraunhofer.de/studio/index.html#/database/covid/schema>`_
+        in their OrientDB Studio instance, but none of them actually appear in the only network that is accessible.
+        If this changes, please leave an issue at https://github.com/pybel/pybel/issues so it can be addressed.
+
+    .. [0] Domingo-Fernández, D., *et al.* (2020). `COVID-19 Knowledge Graph: a computable, multi-modal,
+           cause-and-effect knowledge model of COVID-19 pathophysiology
+           <https://doi.org/10.1101/2020.04.14.040667>`_. *bioRxiv* 2020.04.14.040667.
     """
     graph = BELGraph(name='Fraunhofer OrientDB: {}'.format(database))
     parser = BELParser(graph, skip_validation=True)
