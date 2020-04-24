@@ -31,7 +31,7 @@ def from_fraunhofer_orientdb(  # noqa:S107
     password: str = 'covid',
     query: Optional[str] = None
 ) -> BELGraph:
-    """Get a BEL graph.
+    """Get a BEL graph from the Fraunhofer SCAI OrientDB.
 
     :param database: The OrientDB database to connect to
     :param user: The user to connect to OrientDB
@@ -40,6 +40,21 @@ def from_fraunhofer_orientdb(  # noqa:S107
      where ``E`` is all edges in the OrientDB edge database. Likely does not need to be changed,
      except in the case of selecting specific subsets of edges. Make sure you URL encode it
      properly, because OrientDB's RESTful API puts it in the URL's path.
+
+    By default, this function connects to the ``covid`` database, that corresponds to the
+    COVID-19 Knowledge Graph [0]_. If other databases in the Fraunhofer SCAI OrientDB are
+    published and demo username/password combinations are given, the following table will
+    be updated.
+
+    +----------+------------+----------+
+    | Database | Username   | Password |
+    +==========+============+==========+
+    | covid    | covid_user | covid    |
+    +----------+------------+----------+
+
+    .. [0] Domingo-Fernández, D., *et al.* (2020). `COVID-19 Knowledge Graph: a computable, multi-modal,
+           cause-and-effect knowledge model of COVID-19 pathophysiology
+           <https://doi.org/10.1101/2020.04.14.040667>`_. *bioRxiv* 2020.04.14.040667.
     """
     graph = BELGraph()
     parser = BELParser(graph, skip_validation=True)
