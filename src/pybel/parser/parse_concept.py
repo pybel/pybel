@@ -36,6 +36,7 @@ class ConceptParser(BaseParser):
         namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
         default_namespace: Optional[Set[str]] = None,
         allow_naked_names: bool = False,
+        skip_validation: bool = False,
     ) -> None:
         """Initialize the concept parser.
 
@@ -67,8 +68,9 @@ class ConceptParser(BaseParser):
             self.namespace_to_name_to_encoding = {}
             self.namespace_to_identifier_to_encoding = {}
 
-        self.identifier_fqualified.setParseAction(self.handle_identifier_fqualified)
-        self.identifier_qualified.setParseAction(self.handle_identifier_qualified)
+        if not skip_validation:
+            self.identifier_fqualified.setParseAction(self.handle_identifier_fqualified)
+            self.identifier_qualified.setParseAction(self.handle_identifier_qualified)
 
         self.namespace_to_pattern = namespace_to_pattern or {}
         self.default_namespace = set(default_namespace) if default_namespace is not None else None
