@@ -9,8 +9,3 @@ and warnings to the directory :code:`~/.pybel/`.
 .. click:: pybel.cli:main
    :prog: pybel
    :show-nested:
-
-Plugins
--------
-PyBEL's command line interface uses `click-plugins <https://github.com/click-contrib/click-plugins>`_ to load
-extensions.

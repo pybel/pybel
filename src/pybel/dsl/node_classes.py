@@ -18,33 +18,40 @@ from ..constants import (
 from ..language import Entity
 
 __all__ = [
+    # Base Classes
+    'Entity',
+    'BaseEntity',
+    'BaseAbundance',
+    'ListAbundance',
+
+    # Named entities
     'Abundance',
+    'BiologicalProcess',
+    'Pathology',
+    'Population',
+    'NamedComplexAbundance',
 
     # Central Dogma Stuff
+    'CentralDogma',
     'Gene',
+    'Transcribable',
     'Rna',
     'MicroRna',
     'Protein',
 
     # Fusions
+    'FusionBase',
     'ProteinFusion',
     'RnaFusion',
     'GeneFusion',
 
     # Fusion Ranges
+    'FusionRangeBase',
     'EnumeratedFusionRange',
     'MissingFusionRange',
 
-    # Transformations
-    'ComplexAbundance',
-    'CompositeAbundance',
-    'BiologicalProcess',
-    'Pathology',
-    'Population',
-    'NamedComplexAbundance',
-    'Reaction',
-
     # Variants
+    'Variant',
     'ProteinModification',
     'GeneModification',
     'Hgvs',
@@ -53,15 +60,10 @@ __all__ = [
     'ProteinSubstitution',
     'Fragment',
 
-    # Base Classes
-    'Entity',
-    'BaseEntity',
-    'BaseAbundance',
-    'CentralDogma',
-    'ListAbundance',
-    'Variant',
-    'FusionBase',
-    'FusionRangeBase',
+    # List Entities
+    'ComplexAbundance',
+    'CompositeAbundance',
+    'Reaction',
 ]
 
 # A methodcaller for the key argument of sorted()
@@ -69,15 +71,20 @@ _as_bel = methodcaller('as_bel')
 
 
 class BaseEntity(dict, metaclass=ABCMeta):
-    """This class represents all BEL nodes.
+    """This is the superclass for all BEL terms.
 
-    It can be converted to a tuple and hashed.
+    A BEL term has three properties:
+
+    1. It has a type. Subclasses of this function should set the class variable
+       ``function``.
+    2. It can be converted to BEL. Note, this is an abstract class, so all sub-classes
+       must implement this functionality in ``as_bel()``.
+    3. It can be hashed, based on the BEL conversion
     """
 
     function = ...
 
     def __init__(self) -> None:
-        """Build a PyBEL node."""
         super().__init__(**{FUNCTION: self.function})
         self._md5 = None
 
@@ -110,10 +117,18 @@ class BaseEntity(dict, metaclass=ABCMeta):
 
 
 class BaseAbundance(BaseEntity):
-    """The superclass for building node data dictionaries.
+    """The superclass for all named BEL terms.
 
-    This class must be subclassed and the class variable `function` must be
-    overridden.
+    A named BEL term has:
+
+    1. A type (taken care of by being a subclass of :class:`BaseEntity`)
+    2. A named :class:`Entity`. Though this doesn't directly inherit from
+       :class:`Entity`, it creates one internally using the namespace,
+       identifier, and name. Ideally, both the identifier and name are given.
+       If one is missing, it can be looked up with :func:`pybel.grounding.ground`
+    3. An optional list of xrefs, corresponding to the whole entity,
+       not just the namespace/name. For example, the BEL term
+       ``p(HGNC:APP, frag(672_713)`` could xref CHEBI:64647.
     """
 
     def __init__(
@@ -185,9 +200,8 @@ class BaseAbundance(BaseEntity):
 class Abundance(BaseAbundance):
     """Builds an abundance node.
 
-    Example:
+    >>> from pybel.dsl import Abundance
     >>> Abundance(namespace='CHEBI', name='water')
-
     """
 
     function = ABUNDANCE
@@ -196,9 +210,8 @@ class Abundance(BaseAbundance):
 class BiologicalProcess(BaseAbundance):
     """Builds a biological process node.
 
-    Example:
+    >>> from pybel.dsl import BiologicalProcess
     >>> BiologicalProcess(namespace='GO', name='apoptosis')
-
     """
 
     function = BIOPROCESS
@@ -207,20 +220,18 @@ class BiologicalProcess(BaseAbundance):
 class Pathology(BaseAbundance):
     """Build a pathology node.
 
-    Example:
+    >>> from pybel.dsl import Pathology
     >>> Pathology(namespace='DO', name='Alzheimer Disease')
-
     """
 
     function = PATHOLOGY
 
 
 class Population(BaseAbundance):
-    """Builds a popuation node.
+    """Builds a population node.
 
-    Example:
+    >>> from pybel.dsl import Population
     >>> Population(namespace='uberon', name='blood')
-
     """
 
     function = POPULATION
@@ -294,12 +305,10 @@ class CentralDogma(BaseAbundance):
     def get_parent(self) -> Optional['CentralDogma']:
         """Get the parent, or none if it's already a reference node.
 
-        Example usage:
-
+        >>> from pybel.dsl import Protein, Fragment
         >>> ab42 = Protein(name='APP', namespace='HGNC', variants=[Fragment(start=672, stop=713)])
         >>> app = ab42.get_parent()
         >>> assert 'p(HGNC:APP)' == app.as_bel()
-
         """
         if VARIANTS not in self:
             return None
@@ -316,12 +325,10 @@ class CentralDogma(BaseAbundance):
 
         :param variants: An optional variant or list of variants
 
-        Example Usage:
-
+        >>> from pybel.dsl import Protein, Fragment
         >>> app = Protein(name='APP', namespace='HGNC')
         >>> ab42 = app.with_variants([Fragment(start=672, stop=713)])
         >>> assert 'p(HGNC:APP, frag(672_713))' == ab42.as_bel()
-
         """
         return self.__class__(
             namespace=self.namespace,
@@ -358,16 +365,19 @@ class ProteinModification(Variant):
 
         Example from BEL default namespace:
 
+        >>> from pybel.dsl import ProteinModification
         >>> ProteinModification('Ph', code='Thr', position=308)
 
         Example from custom namespace:
 
+        >>> from pybel.dsl import ProteinModification
         >>> ProteinModification(name='protein phosphorylation', namespace='GO', code='Thr', position=308)
 
         Example from custom namespace additionally qualified with identifier:
 
+        >>> from pybel.dsl import ProteinModification
         >>> ProteinModification(name='protein phosphorylation', namespace='GO',
-        >>>                     identifier='GO:0006468', code='Thr', position=308)
+        >>>                     identifier='0006468', code='Thr', position=308)
 
         """
         super().__init__(kind=PMOD)
@@ -425,11 +435,13 @@ class GeneModification(Variant):
 
         Example from BEL default namespace:
 
+        >>> from pybel.dsl import GeneModification
         >>> GeneModification(name='Me')
 
         Example from custom namespace:
 
-        >>> GeneModification(name='DNA methylation', namespace='GO', identifier='GO:0006306',)
+        >>> from pybel.dsl import GeneModification
+        >>> GeneModification(name='DNA methylation', namespace='GO', identifier='0006306',)
         """
         super().__init__(kind=GMOD)
 
@@ -464,9 +476,8 @@ class Hgvs(Variant):
 
         :param variant: The HGVS variant string
 
-        Example:
+        >>> from pybel.dsl import Protein, Hgvs
         >>> Protein(namespace='HGNC', name='AKT1', variants=[Hgvs('p.Ala127Tyr')])
-
         """
         super().__init__(kind=HGVS)
         self[HGVS] = variant
@@ -505,7 +516,7 @@ class ProteinSubstitution(Hgvs):
         :param position: The position of the residue
         :param to_aa: The 3-letter amino acid code of the new residue
 
-        Example:
+        >>> from pybel.dsl import Protein, ProteinSubstitution
         >>> Protein(namespace='HGNC', name='AKT1', variants=[ProteinSubstitution('Ala', 127, 'Tyr')])
 
         """
@@ -529,10 +540,12 @@ class Fragment(Variant):
 
         Example of specified fragment:
 
+        >>> from pybel.dsl import Protein, Fragment
         >>> Protein(name='APP', namespace='HGNC', variants=[Fragment(start=672, stop=713)])
 
         Example of unspecified fragment:
 
+        >>> from pybel.dsl import Protein, Fragment
         >>> Protein(name='APP', namespace='HGNC', variants=[Fragment()])
 
         """
@@ -582,7 +595,7 @@ class Gene(CentralDogma):
         )
 
 
-class _Transcribable(CentralDogma):
+class Transcribable(CentralDogma):
     """A base class for RNA and micro-RNA to share getting of their corresponding genes."""
 
     def get_gene(self) -> Gene:
@@ -601,22 +614,24 @@ class _Transcribable(CentralDogma):
         )
 
 
-class Rna(_Transcribable):
+class Rna(Transcribable):
     """Builds an RNA node.
 
     Example: AKT1 protein coding gene's RNA:
 
+    >>> from pybel.dsl import Rna
     >>> Rna(namespace='HGNC', name='AKT1', identifier='391')
 
     Non-coding RNAs can also be encoded such as `U85 <https://www-snorna.biotoul.fr/plus.php?id=U85>`_:
 
+    >>> from pybel.dsl import Rna
     >>> Rna(namespace='SNORNABASE', identifier='SR0000073')
     """
 
     function = RNA
 
 
-class MicroRna(_Transcribable):
+class MicroRna(Transcribable):
     """Represents an micro-RNA.
 
     Human miRNA's are listed on HUGO's `MicroRNAs (MIR) <https://www.genenames.org/cgi-bin/genefamilies/set/476>`_
@@ -624,14 +639,17 @@ class MicroRna(_Transcribable):
 
     MIR1-1 from `HGNC <https://www.genenames.org/cgi-bin/gene_symbol_report?hgnc_id=31499>`_:
 
+    >>> from pybel.dsl import MicroRna
     >>> MicroRna(namespace='HGNC', name='MIR1-1', identifier='31499')
 
     MIR1-1 from `miRBase <http://www.mirbase.org/cgi-bin/mirna_entry.pl?acc=MI0000651>`_:
 
+    >>> from pybel.dsl import MicroRna
     >>> MicroRna(namespace='MIRBASE', identifier='MI0000651')
 
     MIR1-1 from `Entrez Gene <https://view.ncbi.nlm.nih.gov/gene/406904>`_
 
+    >>> from pybel.dsl import MicroRna
     >>> MicroRna(namespace='ENTREZ', identifier='406904')
     """
 
@@ -643,14 +661,17 @@ class Protein(CentralDogma):
 
     Example: AKT
 
+    >>> from pybel.dsl import Protein
     >>> Protein(namespace='HGNC', name='AKT1')
 
     Example: AKT with optionally included HGNC database identifier
 
+    >>> from pybel.dsl import Protein
     >>> Protein(namespace='HGNC', name='AKT1', identifier='391')
 
     Example: AKT with phosphorylation
 
+    >>> from pybel.dsl import Protein, ProteinModification
     >>> Protein(namespace='HGNC', name='AKT', variants=[ProteinModification('Ph', code='Thr', position=308)])
     """
 
@@ -695,7 +716,7 @@ class Reaction(BaseEntity):
         :param reactants: A list of PyBEL node data dictionaries representing the reactants
         :param products: A list of PyBEL node data dictionaries representing the products
 
-        Example:
+        >>> from pybel.dsl import Reaction, Protein, Abundance
         >>> Reaction([Protein(namespace='HGNC', name='KNG1')], [Abundance(namespace='CHEBI', name='bradykinin')])
 
         """
@@ -742,7 +763,7 @@ class Reaction(BaseEntity):
 
 
 class ListAbundance(BaseEntity):
-    """The superclass for building list abundance (complex, abundance) node data dictionaries."""
+    """The superclass for all BEL terms defined by lists, as opposed to by names like in :class:`BaseAbundance`."""
 
     def __init__(self, members: Union[BaseAbundance, Iterable[BaseAbundance]]) -> None:
         """Build a list abundance node.
@@ -817,16 +838,30 @@ class ComplexAbundance(ListAbundance):
 class NamedComplexAbundance(BaseAbundance):
     """Build a named complex abundance node.
 
-    Example:
+    >>> from pybel.dsl import NamedComplexAbundance
     >>> NamedComplexAbundance(namespace='FPLX', name='Calcineurin Complex')
-
     """
 
     function = COMPLEX
 
 
 class CompositeAbundance(ListAbundance):
-    """Build a composite abundance node."""
+    """Build a composite abundance node.
+
+    This node is effectively the "AND" inside BEL, which can help
+    represent when two things need to be true at the same time. For
+    example, in COVID 19, if both the NF-KB and IL6-STAT complex are
+    present, then acute respiratory distress syndrome happens.
+
+    >>> from pybel.dsl import CompositeAbundance, ComplexAbundance, Protein, NamedComplexAbundance
+    >>> CompositeAbundance([
+    ...     NamedComplexAbundance('fplx', 'nfkb'),
+    ...     ComplexAbundance([
+    ...         Protein('hgnc', identifier='6018', name='IL6'),
+    ...         Protein('hgnc', identifier='11364', name='STAT3'),
+    ...     ]),
+    ... ])
+    """
 
     function = COMPOSITE
 
@@ -963,6 +998,7 @@ class RnaFusion(FusionBase):
 
     Example, with fusion ranges using the 'r' qualifier:
 
+    >>> from pybel.dsl import RnaFusion, Rna
     >>> RnaFusion(
     >>> ... partner_5p=Rna(namespace='HGNC', name='TMPRSS2'),
     >>> ... range_5p=EnumeratedFusionRange('r', 1, 79),
@@ -973,6 +1009,7 @@ class RnaFusion(FusionBase):
 
     Example with missing fusion ranges:
 
+    >>> from pybel.dsl import RnaFusion, Rna
     >>> RnaFusion(
     >>> ... partner_5p=Rna(namespace='HGNC', name='TMPRSS2'),
     >>> ... partner_3p=Rna(namespace='HGNC', name='ERG'),
@@ -988,6 +1025,7 @@ class GeneFusion(FusionBase):
 
     Example, using fusion ranges with the 'c' qualifier
 
+    >>> from pybel.dsl import GeneFusion, Gene
     >>> GeneFusion(
     >>> ... partner_5p=Gene(namespace='HGNC', name='TMPRSS2'),
     >>> ... range_5p=EnumeratedFusionRange('c', 1, 79),
@@ -997,6 +1035,7 @@ class GeneFusion(FusionBase):
 
     Example with missing fusion ranges:
 
+    >>> from pybel.dsl import GeneFusion, Gene
     >>> GeneFusion(
     >>> ... partner_5p=Gene(namespace='HGNC', name='TMPRSS2'),
     >>> ... partner_3p=Gene(namespace='HGNC', name='ERG'),

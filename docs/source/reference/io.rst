@@ -149,7 +149,13 @@ INDRA
 
 .. autofunction:: pybel.from_biopax
 
+Visualization
+-------------
+Jupyter
+~~~~~~~
+.. automodule:: pybel.io.jupyter
 
+.. autofunction:: pybel.io.jupyter.to_jupyter
 
 Analytical Services
 -------------------

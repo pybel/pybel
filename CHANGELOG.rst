@@ -5,8 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-Unreleased
-----------
+`0.14.8 <https://github.com/pybel/pybel/compare/v0.14.7...v0.14.8>`_ - 2020-04-24
+---------------------------------------------------------------------------------
 Changed
 ~~~~~~~
 - ``pybel.post_graphdati()`` has been renamed to ``pybel.to_biodati()``
@@ -29,7 +29,7 @@ Added
 ---------------------------------------------------------------------------------
 Added
 ~~~~~
-- Support for transcription factor relationshions in TSV (machine learning) output
+- Support for transcription factor relationships in TSV (machine learning) output
 
 Fixed
 ~~~~~
