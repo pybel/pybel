@@ -11,12 +11,15 @@ a single function :func:`from_fraunhofer_orientdb` is provided by PyBEL.
 """
 
 import logging
-from typing import Any, List, Mapping, Optional
+from typing import Any, Iterable, Mapping, Optional
+from urllib.parse import quote_plus
 
 import requests
+from pyparsing import ParseException
 
-from pybel.parser import BELParser
-from pybel.struct import BELGraph
+from .. import constants as pc
+from ..parser import BELParser
+from ..struct import BELGraph
 
 __all__ = [
     'from_fraunhofer_orientdb',
@@ -55,62 +58,97 @@ def from_fraunhofer_orientdb(  # noqa:S107
     .. [0] Domingo-Fernández, D., *et al.* (2020). `COVID-19 Knowledge Graph: a computable, multi-modal,
            cause-and-effect knowledge model of COVID-19 pathophysiology
            <https://doi.org/10.1101/2020.04.14.040667>`_. *bioRxiv* 2020.04.14.040667.
+
+
+    The COVID graph can be downloaded like this:
+
+    .. code-block:: python
+
+        import pybel
+        graph = pybel.from_fraunhofer_orientdb(
+            database='covid',
+            user='covid_user',
+            password='covid',
+        )
+        graph.summarize()
     """
-    graph = BELGraph()
+    graph = BELGraph(name='Fraunhofer OrientDB: {}'.format(database))
     parser = BELParser(graph, skip_validation=True)
-
-    # FIXME this does not page through results, so it only
-    #  gets the first set of 20 or so. Needs updating
-
-    results = _request_graphstore(database, user, password, query=query)
+    results = _request_graphstore(database, user, password, select_query_template=query)
     for result in results:
         _parse_result(parser, result)
     return graph
 
 
 def _parse_result(parser: BELParser, result: Mapping[str, Any]) -> None:
+    citation_db, citation_id = pc.CITATION_TYPE_PUBMED, result.get('pmid')
+    if citation_id is None:
+        citation_db, citation_id = pc.CITATION_TYPE_PMC, result.get('pmc')
+    if citation_id is None:
+        if 'citation' in result:
+            logger.warning('incorrect citation information for %s: %s', result['@rid'], result['citation'])
+        else:
+            logger.debug('no citation information for %s', result['@rid'])
+        return
+
     parser.control_parser.clear()
-    parser.control_parser.citation_db = 'PubMed'
-    parser.control_parser.citation_db_id = result['pmid']
+    parser.control_parser.citation_db = citation_db
+    parser.control_parser.citation_db_id = citation_id
     parser.control_parser.evidence = result['evidence']
     parser.control_parser.annotations.update(result['annotation'])
 
     source = result['in']['bel']
     relation = result['@class']
+    relation = RELATION_MAP.get(relation, relation)
     target = result['out']['bel']
     statement = ' '.join([source, relation, target])
-    parser.parseString(statement)
+
+    try:
+        parser.parseString(statement)
+    except ParseException:
+        logger.warning('could not parse %s', statement)
+
+
+RELATION_MAP = {
+    'causes_no_change': pc.CAUSES_NO_CHANGE,
+    'positive_correlation': pc.POSITIVE_CORRELATION,
+    'negative_correlation': pc.NEGATIVE_CORRELATION,
+    'is_a': pc.IS_A,
+    'has_member': 'hasMember',
+    'has_members': 'hasMembers',
+    'has_component': 'hasComponent',
+    'has_components': 'hasComponents',
+}
 
 
 def _request_graphstore(
     database: str,
     user: str,
     password: str,
-    query: Optional[str] = None,
-    limit='5',
-) -> List[Mapping[str, Any]]:
-    if query is None:
-        query = 'select%20from%20E'
-    url = 'http://graphstore.scai.fraunhofer.de/query/{}/sql/{}/{}/*:1'.format(database, query, limit)
-    res = requests.get(url, auth=(user, password))
-    res_json = res.json()
-    for k, v in res_json.items():
-        if k != 'result':
-            logger.debug('%s: %s', k, v)
-    return res_json['result']
+    count_query: Optional[str] = None,
+    select_query_template: Optional[str] = None,
+    page_size: int = 500,
+    base: str = 'http://graphstore.scai.fraunhofer.de/query'
+) -> Iterable[Mapping[str, Any]]:
+    """Make an API call to the OrientDB."""
+    if count_query is None:
+        count_query = 'select count(@rid) from E'
+    count_query = quote_plus(count_query)
+    count_url = f'{base}/{database}/sql/{count_query}'
+    count_res = requests.get(count_url, auth=(user, password))
+    count = count_res.json()['result'][0]['count']
+    logging.debug('fraunhofer orientdb has %d edges', count)
 
+    if select_query_template is None:
+        select_query_template = 'select from E order by @rid limit {limit} offset {offset}'
 
-def _main():
-    graph = from_fraunhofer_orientdb()
-    print('NODES\n')
-    for node in graph:
-        print(node)
-
-    print('\n\nEDGES\n')
-    for u, v, d in graph.edges(data=True):
-        print(graph.edge_to_bel(u, v, d))
-
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    _main()
+    offsets = count // page_size
+    for offset in range(offsets + 1):
+        select_query = select_query_template.format(limit=page_size, offset=offset * page_size)
+        logger.debug('query: %s', select_query)
+        select_query = quote_plus(select_query)
+        select_url = f'{base}/{database}/sql/{select_query}/{page_size}/*:1'
+        res = requests.get(select_url, auth=(user, password))
+        res_json = res.json()
+        result = res_json['result']
+        yield from result
