@@ -46,8 +46,8 @@ Getting Started
 More examples can be found in the `documentation <http://pybel.readthedocs.io>`_ and in the
 `PyBEL Notebooks <https://github.com/pybel/pybel-notebooks>`_ repository.
 
-Compiling a BEL Graph
-~~~~~~~~~~~~~~~~~~~~~
+Compiling and Saving a BEL Graph
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This example illustrates how the a BEL document from the `Human Brain Pharmacome
 <https://raw.githubusercontent.com/pharmacome/knowledge>`_ project can be loaded from GitHub.
 
@@ -59,6 +59,44 @@ This example illustrates how the a BEL document from the `Human Brain Pharmacome
 
 PyBEL can handle `BEL 1.0 <http://openbel.org/language/version_1.0/bel_specification_version_1.0.html>`_
 and `BEL 2.0+ <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_ simultaneously.
+
+After you have a BEL graph, there are numerous ways to save it. The ``pybel.dump`` function knows
+how to output it in many formats based on the file extension you give. For all of the possibilities,
+check the `I/O documentation <https://pybel.readthedocs.io/en/latest/reference/io.html>`_.
+
+.. code-block:: python
+
+   >>> import pybel
+   >>> graph = ...
+   >>> # write as BEL
+   >>> pybel.dump(graph, 'my_graph.bel')
+   >>> # write as Node-Link JSON for network viewers like D3
+   >>> pybel.dump(graph, 'my_graph.bel.nodelink.json')
+   >>> # write as GraphDati JSON for BioDati
+   >>> pybel.dump(graph, 'my_graph.bel.graphdati.json')
+   >>> # write as CX JSON for NDEx
+   >>> pybel.dump(graph, 'my_graph.bel.cx.json')
+
+Grounding the Graph
+~~~~~~~~~~~~~~~~~~~
+Not all BEL graphs contain both the name and identifier for each entity. Some even use non-standard prefixes
+(also called **namespaces** in BEL). Usually, BEL graphs are validated against controlled vocabularies,
+so the following demo shows how to add the corresponding identifiers to all nodes.
+
+.. code-block:: python
+
+    from urllib.request import urlretrieve
+
+    url = 'https://github.com/cthoyt/selventa-knowledge/blob/master/selventa_knowledge/large_corpus.bel.nodelink.json.gz'
+    urlretrieve(url, 'large_corpus.bel.nodelink.json.gz')
+
+    import pybel
+    graph = pybel.load('large_corpus.bel.nodelink.json.gz')
+
+    import pybel.grounding
+    pybel.grounding.ground(covid19_graph)
+
+Note: you have to install ``pyobo`` for this to work and be running Python 3.7+.
 
 Displaying a BEL Graph in Jupyter
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
