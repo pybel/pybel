@@ -20,7 +20,10 @@ Added
   ``pybel.load()`` (https://github.com/pybel/pybel/pull/425)
 - Content importer from BioDati with ``pybel.from_biodati()`` (https://github.com/pybel/pybel/pull/425)
 - Add direct function for loading CBN files (so you don't have to load the JSON first) with
- ``pybel.from_cbn_jgif_file()``
+  ``pybel.from_cbn_jgif_file()``
+- Added ``pybel.grounding.ground()`` function that uses the unlisted Python 3.7+ dependency, ``pyobo```
+  to ground/normalize entities in a given BEL graph. This also takes care of upgrading legacy namespace
+  names and mapping SCOMP/SFAM via FamPlex. (https://github.com/pybel/pybel/pull/426)
 
 `0.14.7 <https://github.com/pybel/pybel/compare/v0.14.6...v0.14.7>`_ - 2020-04-16
 ---------------------------------------------------------------------------------
