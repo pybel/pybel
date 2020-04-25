@@ -2,10 +2,18 @@ PyBEL |zenodo| |build| |windows_build| |coverage| |documentation|
 =================================================================
 `PyBEL <http://pybel.readthedocs.io>`_ is a pure Python package for parsing and handling biological networks encoded in
 the `Biological Expression Language <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_
-(BEL). It also facilitates data interchange between common formats and databases such as
-`NetworkX <http://networkx.github.io/>`_, JSON, JGIF, CSV, SIF, `Cytoscape <http://www.cytoscape.org/>`_,
-`CX <http://www.home.ndexbio.org/data-model/>`_, `NDEx <https://github.com/pybel/pybel2cx>`_, SQL, and
-`Neo4J <https://neo4j.com>`_.
+(BEL).
+
+It facilitates data interchange between data formats like `NetworkX <http://networkx.github.io/>`_,
+Node-Link JSON, `JGIF <https://github.com/jsongraph/json-graph-specification>`_, CSV, SIF,
+`Cytoscape <http://www.cytoscape.org/>`_, `CX <http://www.home.ndexbio.org/data-model/>`_,
+`INDRA <https://github.com/sorgerlab/indra>`_, and `GraphDati <https://github.com/graphdati/schemas>`_; database systems
+like SQL and `Neo4J <https://neo4j.com>`_; and web services like `NDEx <https://github.com/pybel/pybel2cx>`_,
+`BioDati Studio <https://biodati.com/>`_, and `BEL Commons <https://bel-commons-dev.scai.fraunhofer.de>`_. It also
+provides exports for analytical tools like `HiPathia <http://hipathia.babelomics.org/>`_ and
+`SPIA <https://bioconductor.org/packages/release/bioc/html/SPIA.html>`_; machine learning tools like
+`PyKEEN <https://github.com/smartdataanalytics/biokeen>`_ and
+`OpenBioLink <https://github.com/OpenBioLink/OpenBioLink#biological-expression-language-bel-writer>`_; and others.
 
 Its companion package, `PyBEL Tools <http://pybel-tools.readthedocs.io/>`_, contains a
 suite of functions and pipelines for analyzing the resulting biological networks.
