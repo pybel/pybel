@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+Unreleased
+----------
+Changed
+~~~~~~~
+- Updated GraphDati and BioDati exports (https://github.com/pybel/pybel/commit/c9f95344b72ff86239c8987d6b534000ba509a1f)
+- Refactoring of ``pybel.struct.filters`` and ``pybel.struct.mutation`` - some imports might have to be updated
+
+Added
+~~~~~
+- Importer from Fraunhofer OrientDB (https://github.com/pybel/pybel/pull/429)
+
 `0.14.8 <https://github.com/pybel/pybel/compare/v0.14.7...v0.14.8>`_ - 2020-04-24
 ---------------------------------------------------------------------------------
 Changed
