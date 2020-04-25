@@ -211,13 +211,13 @@ def _get_annotations(d: EdgeData) -> List[Mapping[str, str]]:
         if isinstance(values, dict):
             for value in values:
                 rv.append({
-                    "type": "Metadata",
+                    "type": "Evidence",
                     "label": key,
                     "id": str(value),
                 })
         else:
             rv.append({
-                "type": "Metadata",
+                "type": "Evidence",
                 "label": key,
                 "id": str(values),
             })
