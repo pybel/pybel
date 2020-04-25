@@ -5,7 +5,7 @@
 import itertools as itt
 from typing import Mapping, Set
 
-from ...filters import filter_edges
+from ...filters.edge_filters import filter_edges
 from ...filters.edge_predicate_builders import build_relation_predicate
 from ...pipeline import in_place_transformation
 from ....constants import HAS_VARIANT

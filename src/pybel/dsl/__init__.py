@@ -18,11 +18,11 @@ from .edges import activity, cell_surface_expression, degradation, location, sec
 from .exc import InferCentralDogmaException, ListAbundanceEmptyException, PyBELDSLException, ReactionEmptyException
 from .namespaces import chebi, hgnc, mirbase
 from .node_classes import (
-    Abundance, BaseAbundance, BaseEntity, BiologicalProcess, CentralDogma, ComplexAbundance, CompositeAbundance, Entity,
-    EnumeratedFusionRange, Fragment, FusionBase, FusionRangeBase, Gene, GeneFusion, GeneModification, Hgvs,
-    HgvsReference, HgvsUnspecified, ListAbundance, MicroRna, MissingFusionRange, NamedComplexAbundance, Pathology,
-    Population, Protein, ProteinFusion, ProteinModification, ProteinSubstitution, Reaction, Rna, RnaFusion,
-    Transcribable, Variant,
+    Abundance, BaseAbundance, BaseConcept, BaseEntity, BiologicalProcess, CentralDogma, ComplexAbundance,
+    CompositeAbundance, Entity, EnumeratedFusionRange, Fragment, FusionBase, FusionRangeBase, Gene, GeneFusion,
+    GeneModification, Hgvs, HgvsReference, HgvsUnspecified, ListAbundance, MicroRna, MissingFusionRange,
+    NamedComplexAbundance, Pathology, Population, Protein, ProteinFusion, ProteinModification, ProteinSubstitution,
+    Reaction, Rna, RnaFusion, Transcribable, Variant,
 )
 
 entity = Entity

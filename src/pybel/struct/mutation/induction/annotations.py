@@ -5,7 +5,7 @@
 import logging
 
 from .utils import get_subgraph_by_edge_filter
-from ...filters import build_annotation_dict_all_filter, build_annotation_dict_any_filter
+from ...filters.edge_predicate_builders import build_annotation_dict_all_filter, build_annotation_dict_any_filter
 from ...pipeline import transformation
 
 __all__ = [

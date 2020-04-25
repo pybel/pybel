@@ -15,7 +15,7 @@ from pybel.struct.filters.edge_predicate_builders import (
     build_annotation_dict_any_filter,
 )
 from pybel.struct.filters.edge_predicates import keep_edge_permissive
-from pybel.struct.filters.node_predicates import keep_node_permissive
+from pybel.struct.filters.node_predicates import true_node_predicate
 from pybel.struct.filters.typing import EdgeIterator
 from pybel.testing.utils import n
 
@@ -47,7 +47,7 @@ class TestNodeFilters(unittest.TestCase):
         self.assertEqual(self.all_universe_nodes, nodes)
 
     def test_keep_node_permissive(self):
-        nodes = get_nodes(self.universe, keep_node_permissive)
+        nodes = get_nodes(self.universe, true_node_predicate)
         self.assertEqual(self.all_universe_nodes, nodes)
 
     def test_missing_node_filter(self):
@@ -55,7 +55,7 @@ class TestNodeFilters(unittest.TestCase):
         self.assertEqual(self.all_universe_nodes, nodes)
 
     def test_concatenate_single_node_filter(self):
-        nodes = get_nodes(self.universe, [keep_node_permissive])
+        nodes = get_nodes(self.universe, [true_node_predicate])
         self.assertEqual(self.all_universe_nodes, nodes)
 
     def test_concatenate_multiple_node_filters(self):

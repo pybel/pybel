@@ -5,10 +5,8 @@
 from ...filters.edge_filters import filter_edges
 from ...filters.edge_predicates import is_associative_relation, not_causal_relation
 from ...filters.node_filters import filter_nodes
-from ...filters.node_predicate_builders import function_inclusion_filter_builder
-from ...filters.node_predicates import is_isolated_list_abundance
+from ...filters.node_predicates import is_biological_process, is_isolated_list_abundance, is_pathology
 from ...pipeline import in_place_transformation
-from ....constants import BIOPROCESS, PATHOLOGY
 
 __all__ = [
     'remove_filtered_edges',
@@ -60,7 +58,7 @@ def remove_pathologies(graph):
 
     :param pybel.BELGraph graph: A BEL graph
     """
-    remove_filtered_nodes(graph, node_predicates=function_inclusion_filter_builder(PATHOLOGY))
+    remove_filtered_nodes(graph, node_predicates=is_pathology)
 
 
 @in_place_transformation
@@ -69,7 +67,7 @@ def remove_biological_processes(graph):
 
     :param pybel.BELGraph graph: A BEL graph
     """
-    remove_filtered_nodes(graph, node_predicates=function_inclusion_filter_builder(BIOPROCESS))
+    remove_filtered_nodes(graph, node_predicates=is_biological_process)
 
 
 @in_place_transformation

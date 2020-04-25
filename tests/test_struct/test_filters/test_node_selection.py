@@ -6,7 +6,7 @@ import unittest
 
 from pybel import BELGraph
 from pybel.dsl import Protein
-from pybel.struct.filters.node_selection import get_nodes_by_namespace
+from pybel.struct.filters import get_nodes_by_namespace
 
 
 class TestNodeSelection(unittest.TestCase):

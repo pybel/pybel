@@ -6,7 +6,7 @@ import logging
 from typing import Iterable, Union
 
 from .utils import get_subgraph_by_edge_filter
-from ...filters import build_downstream_edge_predicate, build_upstream_edge_predicate
+from ...filters.edge_predicate_builders import build_downstream_edge_predicate, build_upstream_edge_predicate
 from ...pipeline import transformation
 from ....dsl import BaseEntity
 

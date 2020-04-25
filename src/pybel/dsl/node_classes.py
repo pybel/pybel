@@ -116,7 +116,46 @@ class BaseEntity(dict, metaclass=ABCMeta):
         return self.as_bel()
 
 
-class BaseAbundance(BaseEntity):
+class BaseConcept(dict):
+    """A dictionary containing a concept entry."""
+
+    @property
+    def entity(self) -> Entity:  # noqa:D401
+        """This node's concept."""
+        return self[CONCEPT]
+
+    @property
+    def xrefs(self) -> List[Entity]:  # noqa:D401
+        """Alternative identifiers for the node's concept."""
+        return self.get(XREFS, [])
+
+    @property
+    def namespace(self) -> str:  # noqa:D401
+        """The namespace of this abundance."""
+        return self.entity.namespace
+
+    @property
+    def name(self) -> Optional[str]:  # noqa:D401
+        """The name of this abundance."""
+        return self.entity.name
+
+    @property
+    def identifier(self) -> Optional[str]:  # noqa:D401
+        """The identifier of this abundance."""
+        return self.entity.identifier
+
+    @property
+    def curie(self):  # noqa: D401
+        """The CURIE-style identifier for this node."""
+        return self.entity.curie
+
+    @property
+    def obo(self) -> str:  # noqa: D401
+        """The OBO-style identifier for this node."""
+        return self.entity.obo
+
+
+class BaseAbundance(BaseEntity, BaseConcept):
     """The superclass for all named BEL terms.
 
     A named BEL term has:
@@ -153,41 +192,6 @@ class BaseAbundance(BaseEntity):
         )
         if xrefs:
             self[XREFS] = xrefs
-
-    @property
-    def entity(self) -> Entity:  # noqa:D401
-        """This node's concept."""
-        return self[CONCEPT]
-
-    @property
-    def xrefs(self) -> List[Entity]:  # noqa:D401
-        """Alternative identifiers for the node's concept."""
-        return self.get(XREFS, [])
-
-    @property
-    def namespace(self) -> str:  # noqa:D401
-        """The namespace of this abundance."""
-        return self.entity.namespace
-
-    @property
-    def name(self) -> Optional[str]:  # noqa:D401
-        """The name of this abundance."""
-        return self.entity.name
-
-    @property
-    def identifier(self) -> Optional[str]:  # noqa:D401
-        """The identifier of this abundance."""
-        return self.entity.identifier
-
-    @property
-    def curie(self):  # noqa: D401
-        """The CURIE-style identifier for this node."""
-        return self.entity.curie
-
-    @property
-    def obo(self) -> str:  # noqa: D401
-        """The OBO-style identifier for this node."""
-        return self.entity.obo
 
     def as_bel(self, use_identifiers: bool = True) -> str:
         """Return this node as a BEL string."""
@@ -339,8 +343,43 @@ class CentralDogma(BaseAbundance):
         )
 
 
-class ProteinModification(Variant):
+class EntityVariant(Variant, BaseConcept):
+    """A variant that contains a reference."""
+
+    function = ...
+
+    def __init__(
+        self,
+        name: str,
+        namespace: Optional[str] = None,
+        identifier: Optional[str] = None,
+        xrefs: Optional[List[Entity]] = None,
+    ) -> None:
+        """Build a variant that has a reference.
+
+        :param name: The name of the modification
+        :param namespace: The namespace to which the name of this modification belongs
+        :param identifier: The identifier of the name of the modification
+        :param xrefs: Alternative database xrefs
+
+        Either the name or the identifier must be used. If the namespace is omitted, it is assumed that a name is
+        specified from the BEL default namespace.
+        """
+        super().__init__(kind=self.function)
+
+        self[CONCEPT] = Entity(
+            namespace=(namespace or BEL_DEFAULT_NAMESPACE),
+            name=name,
+            identifier=identifier,
+        )
+        if xrefs:
+            self['xref'] = xrefs
+
+
+class ProteinModification(EntityVariant):
     """Build a protein modification variant dictionary."""
+
+    function = PMOD
 
     def __init__(
         self,
@@ -380,26 +419,18 @@ class ProteinModification(Variant):
         >>>                     identifier='0006468', code='Thr', position=308)
 
         """
-        super().__init__(kind=PMOD)
-
-        self[CONCEPT] = Entity(
-            namespace=(namespace or BEL_DEFAULT_NAMESPACE),
+        super().__init__(
             name=name,
+            namespace=namespace,
             identifier=identifier,
+            xrefs=xrefs,
         )
-        if xrefs:
-            self['xref'] = xrefs
 
         if code:
             self[PMOD_CODE] = code
 
         if position:
             self[PMOD_POSITION] = position
-
-    @property
-    def entity(self) -> Entity:  # noqa:D401
-        """The concept for this protein modification."""
-        return self[CONCEPT]
 
     def as_bel(self, use_identifiers: bool = True) -> str:
         """Return this protein modification variant as a BEL string."""
@@ -414,49 +445,24 @@ class ProteinModification(Variant):
         )
 
 
-class GeneModification(Variant):
-    """Build a gene modification variant dictionary."""
+class GeneModification(EntityVariant):
+    """Build a gene modification variant dictionary.
 
-    def __init__(
-        self,
-        name: str,
-        namespace: Optional[str] = None,
-        identifier: Optional[str] = None,
-        xrefs: Optional[List[Entity]] = None,
-    ) -> None:
-        """Build a gene modification variant data dictionary.
+    Either the name or the identifier must be used. If the namespace is omitted, it is assumed that a name is
+    specified from the BEL default namespace.
 
-        :param name: The name of the gene modification
-        :param namespace: The namespace of the gene modification
-        :param identifier: The identifier of the name in the database
+    Example from BEL default namespace:
 
-        Either the name or the identifier must be used. If the namespace is omitted, it is assumed that a name is
-        specified from the BEL default namespace.
+    >>> from pybel.dsl import GeneModification
+    >>> GeneModification(name='Me')
 
-        Example from BEL default namespace:
+    Example from custom namespace:
 
-        >>> from pybel.dsl import GeneModification
-        >>> GeneModification(name='Me')
+    >>> from pybel.dsl import GeneModification
+    >>> GeneModification(name='DNA methylation', namespace='GO', identifier='0006306',)
+    """
 
-        Example from custom namespace:
-
-        >>> from pybel.dsl import GeneModification
-        >>> GeneModification(name='DNA methylation', namespace='GO', identifier='0006306',)
-        """
-        super().__init__(kind=GMOD)
-
-        self[CONCEPT] = Entity(
-            namespace=(namespace or BEL_DEFAULT_NAMESPACE),
-            name=name,
-            identifier=identifier,
-        )
-        if xrefs:
-            self[XREFS] = xrefs
-
-    @property
-    def entity(self) -> Entity:
-        """Represent the entity in this gene modification."""
-        return self[CONCEPT]
+    function = GMOD
 
     def as_bel(self, use_identifiers: bool = True) -> str:
         """Return this gene modification variant as a BEL string."""

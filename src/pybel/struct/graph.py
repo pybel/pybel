@@ -315,8 +315,12 @@ class BELGraph(nx.MultiDiGraph):
                 yield data[CITATION][CITATION_DB], data[CITATION][CITATION_IDENTIFIER]
 
     def number_of_authors(self) -> int:
-        """Return the number of citations contained within the graph."""
-        return len(set(self._iterate_authors()))
+        """Return the number of authors contained within the graph."""
+        return len(self.get_authors())
+
+    def get_authors(self) -> Set[str]:
+        """Get the authors for the citations in the graph."""
+        return set(self._iterate_authors())
 
     def _iterate_authors(self) -> Iterable[str]:
         return chain.from_iterable(

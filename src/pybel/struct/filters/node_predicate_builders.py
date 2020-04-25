@@ -6,8 +6,8 @@ from typing import Any, Callable, Iterable, List, Union
 
 from .typing import NodePredicate
 from ..graph import BELGraph
-from ...constants import CONCEPT, NAME, NAMESPACE
-from ...dsl import BaseEntity
+from ...constants import CONCEPT, NAME
+from ...dsl import BaseConcept, BaseEntity
 from ...typing import Strings
 
 __all__ = [
@@ -72,10 +72,10 @@ def data_missing_key_builder(key: str) -> NodePredicate:  # noqa: D202
     return data_does_not_contain_key
 
 
-def build_node_data_search(
+def build_node_data_search(  # noqa: D202
     key: Union[str, List[str]],
     data_predicate: Callable[[Any], bool],
-) -> NodePredicate:  # noqa: D202
+) -> NodePredicate:
     """Build a filter for nodes whose associated data with the given key passes the given predicate.
 
     :param key: The node data dictionary key to check
@@ -94,10 +94,10 @@ def build_node_data_search(
     return node_data_filter
 
 
-def build_node_graph_data_search(
+def build_node_graph_data_search(  # noqa: D202
     key: Union[str, List[str]],
     data_predicate: Callable[[Any], bool],
-):  # noqa: D202
+) -> NodePredicate:
     """Build a function for testing data associated with the node in the graph.
 
     :param key: The node data dictionary key to check
@@ -129,7 +129,10 @@ def _get_single_value(d, key):
     return d.get(key)
 
 
-def build_node_key_search(query: Strings, key: Union[str, List[str]]) -> NodePredicate:
+def build_node_key_search(
+    query: Strings,
+    key: Union[str, List[str]],
+) -> NodePredicate:
     """Build a node filter for nodes whose values for the given key are superstrings of the query string(s).
 
     :param query: The query string or strings to check if they're in the node name
@@ -159,14 +162,14 @@ def namespace_inclusion_builder(namespace: Strings) -> NodePredicate:
     if isinstance(namespace, str):
         def namespace_filter(_: BELGraph, node: BaseEntity) -> bool:
             """Pass only for a node that has the enclosed namespace."""
-            return CONCEPT in node and node[CONCEPT][NAMESPACE] == namespace
+            return isinstance(node, BaseConcept) and node.namespace == namespace
 
     elif isinstance(namespace, Iterable):
         namespaces = set(namespace)
 
         def namespace_filter(_: BELGraph, node: BaseEntity) -> bool:
             """Pass only for a node that has a namespace in the enclosed set."""
-            return CONCEPT in node and node[CONCEPT][NAMESPACE] in namespaces
+            return isinstance(node, BaseConcept) and node.namespace in namespaces
 
     else:
         raise TypeError('Invalid type for argument: {}'.format(namespace))
