@@ -15,11 +15,10 @@ currently maintained in an academic capacity. Disclosure: BEL Commons is develop
 import json
 import logging
 from io import BytesIO
-from typing import Optional
+from typing import Any, Iterable, List, Mapping, Optional, Union
 
 import requests
 from more_itertools import chunked
-from tqdm import tqdm
 
 from .graphdati import _iter_graphdati, from_graphdati, to_graphdati
 from ..struct import BELGraph
@@ -34,11 +33,16 @@ logger = logging.getLogger(__name__)
 
 def to_biodati(  # noqa: S107
     graph: BELGraph,
+    *,
     username: str = 'demo@biodati.com',
     password: str = 'demo',
     base_url: str = 'https://nanopubstore.demo.biodati.com',
     chunksize: Optional[int] = None,
-    **kwargs
+    use_tqdm: bool = True,
+    collections: Optional[Iterable[str]] = None,
+    overwrite: bool = False,
+    validate: bool = True,
+    email: Union[bool, str] = False,
 ) -> requests.Response:
     """Post this graph to a BioDati server.
 
@@ -48,6 +52,13 @@ def to_biodati(  # noqa: S107
     :param base_url: The BioDati nanopub store base url. Defaults to "https://nanopubstore.demo.biodati.com" for
      the demo server's nanopub store
     :param chunksize: The number of nanopubs to post at a time. By default, does all.
+    :param use_tqdm: Should tqdm be used when iterating?
+    :param collections: Tags to add to the nanopubs for lookup on BioDati
+    :param overwrite: Set the BioDati upload "overwrite" setting
+    :param validate: Set the BioDati upload "validate" setting
+    :param email: Who should get emailed with results about the upload? If true, emails to user
+     used for login. If string, emails to that user. If false, no email.
+    :return: The response from the BioDati server (last response if using chunking)
 
     .. warning::
 
@@ -60,9 +71,24 @@ def to_biodati(  # noqa: S107
     """
     biodati_client = BiodatiClient(username, password, base_url)
     if chunksize:
-        return biodati_client.post_graph_chunked(graph, chunksize, **kwargs)
+        return biodati_client.post_graph_chunked(
+            graph,
+            chunksize,
+            use_tqdm=use_tqdm,
+            collections=collections,
+            overwrite=overwrite,
+            validate=validate,
+            email=email,
+        )
     else:
-        return biodati_client.post_graph(graph, **kwargs)
+        return biodati_client.post_graph(
+            graph,
+            use_tqdm=use_tqdm,
+            collections=collections,
+            overwrite=overwrite,
+            validate=validate,
+            email=email,
+        )
 
 
 def from_biodati(  # noqa: S107
@@ -105,7 +131,7 @@ def from_biodati(  # noqa: S107
 class BiodatiClient:
     """A client for the BioDati nanopub store and network store's APIs."""
 
-    def __init__(self, username: str, password: str, base_url):
+    def __init__(self, username: str, password: str, base_url: str):
         self.base_url = base_url.rstrip('/')
         self.username = username
         res = requests.post(
@@ -146,35 +172,115 @@ class BiodatiClient:
         res_json = res.json()
         return res_json
 
-    def post_graph(self, graph: BELGraph, **kwargs) -> requests.Response:
-        """Post the graph to BioDati."""
-        return self.post_graph_json(to_graphdati(graph), **kwargs)
+    def post_graph(
+        self,
+        graph: BELGraph,
+        *,
+        use_tqdm: bool = True,
+        collections: Optional[List[str]] = None,
+        overwrite: bool = False,
+        validate: bool = True,
+        email: Union[bool, str] = False,
+    ) -> requests.Response:
+        """Post the graph to BioDati.
 
-    def post_graph_chunked(self, graph: BELGraph, chunksize: int, use_tqdm: bool = True, **kwargs):
-        """Post the graph to BioDati in chunks, when the graph is too big for a normal upload."""
-        iterable = _iter_graphdati(graph)
-        if use_tqdm:
-            iterable = tqdm(iterable, total=graph.number_of_edges())
+        :param graph: A BEL graph
+        :param use_tqdm: Should tqdm be used when iterating?
+        :param collections: Tags to add to the nanopubs for lookup on BioDati
+        :param overwrite: Set the BioDati upload "overwrite" setting
+        :param validate: Set the BioDati upload "validate" setting
+        :param email: Who should get emailed with results about the upload? If true, emails to user
+         used for login. If string, emails to that user. If false, no email.
+        :return: Last response from upload
+        """
+        metadata_extras = dict()
+        if collections is not None:
+            metadata_extras.update(collections=list(collections))
+        j = to_graphdati(graph, use_tqdm=use_tqdm, metadata_extras=metadata_extras)
+        return self.post_graph_json(
+            j,
+            overwrite=overwrite,
+            validate=validate,
+            email=email,
+        )
+
+    def post_graph_chunked(
+        self,
+        graph: BELGraph,
+        chunksize: int,
+        *,
+        use_tqdm: bool = True,
+        collections: Optional[Iterable[str]] = None,
+        overwrite: bool = False,
+        validate: bool = True,
+        email: Union[bool, str] = False,
+    ) -> requests.Response:
+        """Post the graph to BioDati in chunks, when the graph is too big for a normal upload.
+
+        :param graph: A BEL graph
+        :param chunksize: The size of the chunks of nanopubs to upload
+        :param use_tqdm: Should tqdm be used when iterating?
+        :param collections: Tags to add to the nanopubs for lookup on BioDati
+        :param overwrite: Set the BioDati upload "overwrite" setting
+        :param validate: Set the BioDati upload "validate" setting
+        :param email: Who should get emailed with results about the upload? If true, emails to user
+         used for login. If string, emails to that user. If false, no email.
+        :return: Last response from upload
+        """
+        metadata_extras = dict()
+        if collections is not None:
+            metadata_extras.update(collections=list(collections))
+        iterable = _iter_graphdati(graph, use_tqdm=use_tqdm, metadata_extras=metadata_extras)
         res = None
         for chunk in chunked(iterable, chunksize):
-            res = self.post_graph_json(chunk, **kwargs)
+            res = self.post_graph_json(
+                chunk,
+                overwrite=overwrite,
+                validate=validate,
+                email=email,
+            )
         return res
 
-    def post_graph_json(self, graph_json, **kwargs) -> requests.Response:
-        """Post the GraphDati object to BioDati."""
+    def post_graph_json(
+        self,
+        graph_json: List[Mapping[str, Any]],
+        overwrite: bool = False,
+        validate: bool = True,
+        email: Union[bool, str] = False,
+    ) -> requests.Response:
+        """Post the GraphDati object to BioDati.
+
+        :param graph_json: The JSON object (in GraphDati schema) to upload to BioDati
+        :param overwrite: Set the BioDati upload "overwrite" setting
+        :param validate: Set the BioDati upload "validate" setting
+        :param email: Who should get emailed with results about the upload? If true, emails to user
+         used for login. If string, emails to that user. If false, no email.
+        """
         file = BytesIO()
         file.write(json.dumps(graph_json).encode('utf-8'))
         file.seek(0)
-        return self.post_graph_file(file, **kwargs)
+        return self.post_graph_file(
+            file,
+            overwrite=overwrite,
+            validate=validate,
+            email=email,
+        )
 
     def post_graph_file(
         self,
-        file,
+        file: BytesIO,
         overwrite: bool = False,
         validate: bool = True,
-        email: bool = False,
+        email: Union[bool, str] = False,
     ) -> requests.Response:
-        """Post a graph to BioDati."""
+        """Post a graph to BioDati.
+
+        :param file: A file in bytes mode or BytesIO object
+        :param overwrite: Set the BioDati upload "overwrite" setting
+        :param validate: Set the BioDati upload "validate" setting
+        :param email: Who should get emailed with results about the upload? If true, emails to user
+         used for login. If string, emails to that user. If false, no email.
+        """
         params = dict(overwrite=overwrite, validate=validate)
         if isinstance(email, str):
             params['email'] = email
@@ -190,8 +296,8 @@ class BiodatiClient:
 
 def _main():
     """Run with python -m pybel.io.graphdati."""
-    netowork_id = '01E46GDFQAGK5W8EFS9S9WMH12'
-    graph = from_biodati(network_id=netowork_id)
+    network_id = '01E46GDFQAGK5W8EFS9S9WMH12'
+    graph = from_biodati(network_id=network_id)
     graph.summarize()
 
 
