@@ -42,7 +42,7 @@ def to_biodati(  # noqa: S107
     collections: Optional[Iterable[str]] = None,
     overwrite: bool = False,
     validate: bool = True,
-    email: Union[bool, str] = False,
+    email: Union[bool, str] = False
 ) -> requests.Response:
     """Post this graph to a BioDati server.
 
@@ -180,7 +180,7 @@ class BiodatiClient:
         collections: Optional[List[str]] = None,
         overwrite: bool = False,
         validate: bool = True,
-        email: Union[bool, str] = False,
+        email: Union[bool, str] = False
     ) -> requests.Response:
         """Post the graph to BioDati.
 
@@ -213,7 +213,7 @@ class BiodatiClient:
         collections: Optional[Iterable[str]] = None,
         overwrite: bool = False,
         validate: bool = True,
-        email: Union[bool, str] = False,
+        email: Union[bool, str] = False
     ) -> requests.Response:
         """Post the graph to BioDati in chunks, when the graph is too big for a normal upload.
 

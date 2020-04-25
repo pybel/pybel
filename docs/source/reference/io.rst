@@ -176,6 +176,14 @@ HiPathia
 .. autofunction:: pybel.from_hipathia_paths
 .. autofunction:: pybel.from_hipathia_dfs
 
+SPIA
+~~~~
+.. automodule:: pybel.io.spia
+
+.. autofunction:: pybel.to_spia_dfs
+.. autofunction:: pybel.to_spia_excel
+.. autofunction:: pybel.to_spia_tsvs
+
 Machine Learning
 ~~~~~~~~~~~~~~~~
 .. automodule:: pybel.io.tsv

@@ -14,7 +14,8 @@ Changed
 
 Added
 ~~~~~
-- Importer from Fraunhofer OrientDB (https://github.com/pybel/pybel/pull/429)
+- Importer from `Fraunhofer OrientDB <http://graphstore.scai.fraunhofer.de>`_ (https://github.com/pybel/pybel/pull/429)
+- Exporter for `SPIA <https://bioconductor.org/packages/release/bioc/html/SPIA.html>`_ analytical tool (https://github.com/pybel/pybel/pull/430)
 
 `0.14.8 <https://github.com/pybel/pybel/compare/v0.14.7...v0.14.8>`_ - 2020-04-24
 ---------------------------------------------------------------------------------

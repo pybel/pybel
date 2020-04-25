@@ -16,7 +16,8 @@ from .io import (
     to_graphdati_jsonl_gz, to_graphdati_jsons, to_graphml, to_gsea, to_hipathia, to_hipathia_dfs, to_indra_statements,
     to_indra_statements_json, to_indra_statements_json_file, to_jgif, to_jgif_file, to_jgif_gz, to_jgif_jsons, to_neo4j,
     to_nodelink, to_nodelink_file, to_nodelink_gz, to_nodelink_jsons, to_npa_dfs, to_npa_directory, to_pickle, to_sif,
-    to_tsv, to_umbrella_nodelink, to_umbrella_nodelink_file, to_umbrella_nodelink_gz,
+    to_spia_dfs, to_spia_excel, to_spia_tsvs, to_tsv, to_umbrella_nodelink, to_umbrella_nodelink_file,
+    to_umbrella_nodelink_gz,
 )
 from .manager import Manager, from_database, to_database
 from .struct import BELGraph, Pipeline, Query

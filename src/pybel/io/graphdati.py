@@ -118,10 +118,11 @@ def to_graphdati_jsonl_gz(graph: BELGraph, path: str, **kwargs) -> None:
 
 def to_graphdati(
     graph,
+    *,
     use_identifiers: bool = True,
     skip_unqualified: bool = True,
     use_tqdm: bool = False,
-    metadata_extras: Optional[Mapping[str, Any]] = None,
+    metadata_extras: Optional[Mapping[str, Any]] = None
 ) -> List[NanopubMapping]:
     """Export a GraphDati list using the nanopub.
 
@@ -146,7 +147,7 @@ def _iter_graphdati(
     skip_unqualified: bool = True,
     use_identifiers: bool = True,
     use_tqdm: bool = False,
-    metadata_extras: Optional[Mapping[str, Any]] = None,
+    metadata_extras: Optional[Mapping[str, Any]] = None
 ) -> Iterable[NanopubMapping]:
     it = graph.edges(keys=True, data=True)
     if use_tqdm:
