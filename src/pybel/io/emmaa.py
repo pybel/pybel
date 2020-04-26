@@ -48,7 +48,10 @@ def from_emmaa(model: str, *, date: Optional[str] = None) -> BELGraph:
     url = URL_FORMAT.format(model, date)
     res = requests.get(url)
     res_json = res.json()
-    return from_indra_statements_json(res_json)
+    graph = from_indra_statements_json(res_json)
+    graph.name = model
+    graph.version = date
+    return graph
 
 
 def _get_latest_date(model: str) -> str:
