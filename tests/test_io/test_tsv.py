@@ -22,6 +22,7 @@ from pybel.io.tsv.converters import (
     MiRNADecreasesExpressionConverter, PartOfNamedComplexConverter, RegulatesActivityConverter,
     RegulatesAmountConverter, SubprocessPartOfBiologicalProcessConverter, TranscriptionFactorForConverter,
 )
+from pybel.io.tsv import converters as tsvc
 from pybel.testing.utils import n
 from pybel.typing import EdgeData
 
@@ -101,6 +102,10 @@ converters_true_list = [
         TranscriptionFactorForConverter, c1, r3, _rel(DIRECTLY_DECREASES),
         ('HGNC:9236', DIRECTLY_DECREASES, 'HGNC:9212'),
     ),
+    (
+        tsvc.BindsGeneConverter, p2, c1, _rel(DIRECTLY_INCREASES),
+        (p2.curie, 'bindsToGene', g3.curie),
+    )
 ]
 
 converters_false_list = [
