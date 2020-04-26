@@ -213,6 +213,12 @@ Fraunhofer OrientDB
 
 .. autofunction:: pybel.from_fraunhofer_orientdb
 
+EMMAA
+~~~~~~
+.. automodule:: pybel.io.emmaa
+
+.. autofunction:: pybel.from_emmaa
+
 Databases
 ---------
 SQL Databases
