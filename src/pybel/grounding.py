@@ -78,11 +78,16 @@ SKIP = {'ncbigene', 'pubchem.compound'}
 NO_NAMES = {'fplx', 'eccode', 'dbsnp'}
 
 # TODO will get updated
-_REMAPPING = get_remapping()
+_NAME_REMAPPING = get_remapping()
+_ID_REMAPPING = {}
 
 
-def _get_remapping(prefix: str, name: str) -> Union[Tuple[str, str, str], Tuple[None, None, None]]:
-    return _REMAPPING.get((prefix, name), (None, None, None))
+def _get_name_remapping(prefix: str, name: str) -> Union[Tuple[str, str, str], Tuple[None, None, None]]:
+    return _NAME_REMAPPING.get((prefix, name), (None, None, None))
+
+
+def _get_id_remapping(prefix: str, identifier: str) -> Union[Tuple[str, str, str], Tuple[None, None, None]]:
+    return _ID_REMAPPING.get((prefix, identifier), (None, None, None))
 
 
 def ground(graph: BELGraph) -> BELGraph:
@@ -94,7 +99,8 @@ def ground(graph: BELGraph) -> BELGraph:
 
 def ground_nodelink(graph_nodelink_dict) -> None:
     """Ground entities in a nodelink data structure."""
-    for node in tqdm(graph_nodelink_dict['nodes'], desc='mapping nodes'):
+    name = graph_nodelink_dict.get('graph', {}).get('name', 'graph')
+    for node in tqdm(graph_nodelink_dict['nodes'], desc='grounding nodes in {}'.format(name)):
         _process_node(node)
 
     # TODO ground entities in edges! what about all those fabulous activities?
@@ -134,12 +140,25 @@ def _process_concept(*, node) -> None:
     concept[NAMESPACE] = prefix
 
     identifier = concept.get(IDENTIFIER)
+    name = concept.get(NAME)
     if identifier:  # don't trust whatever was put for the name, even if it's available
         _handle_identifier_not_name(concept=concept, prefix=prefix, identifier=identifier)
-        return
+    else:
+        _handle_name_and_not_identifier(node=node, concept=concept, prefix=prefix, name=name)
+    _remap_by_identifier(concept)
 
-    name = concept.get(NAME)
-    _handle_name_and_not_identifier(node=node, concept=concept, prefix=prefix, name=name)
+
+def _remap_by_identifier(concept) -> bool:
+    namespace, identifier = concept[NAMESPACE], concept[IDENTIFIER]
+    logger.debug('attempting to remap %s:%s', namespace, identifier)
+    remapped_prefix, remapped_identifier, remapped_name = _get_id_remapping(namespace, identifier)
+    logger.debug('remapping result %s:%s ! %s', remapped_prefix, remapped_identifier, remapped_name)
+    if remapped_prefix:
+        concept[NAMESPACE] = remapped_prefix
+        concept[IDENTIFIER] = remapped_identifier
+        concept[NAME] = remapped_name
+        return True
+    return False
 
 
 def _handle_identifier_not_name(*, concept, prefix, identifier) -> None:
@@ -160,7 +179,7 @@ def _handle_identifier_not_name(*, concept, prefix, identifier) -> None:
 
 
 def _handle_name_and_not_identifier(*, node, concept, prefix, name) -> None:
-    remapped_prefix, remapped_identifier, remapped_name = _get_remapping(prefix, name)
+    remapped_prefix, remapped_identifier, remapped_name = _get_name_remapping(prefix, name)
     if remapped_prefix:
         concept[NAMESPACE] = remapped_prefix
         concept[IDENTIFIER] = remapped_identifier
