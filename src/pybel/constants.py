@@ -553,7 +553,7 @@ PYBEL_REMOTE_USER = 'PYBEL_REMOTE_USER'
 PYBEL_REMOTE_PASSWORD = 'PYBEL_REMOTE_PASSWORD'  # noqa: S105
 
 #: The default location of PyBEL Web
-DEFAULT_SERVICE_URL = 'https://bel-commons.scai.fraunhofer.de'
+DEFAULT_SERVICE_URL = 'https://bel-commons-dev.scai.fraunhofer.de'
 
 PYBEL_PUBMED = '29048466'
 SET_CITATION_FMT = 'SET Citation = {{"{}", "{}"}}'
