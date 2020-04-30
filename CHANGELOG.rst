@@ -10,6 +10,14 @@ Unreleased
 Added
 ~~~~~
 - Importer from `EMMAA <https://emmaa.indra.bio>`_ (https://github.com/pybel/pybel/pull/432)
+- I/O for Amazon S3 (https://github.com/pybel/pybel/pull/431)
+- Add TSV exporter converter for protein binds gene (d7d12878)
+- Add identifier-based entity remapper (ba8aa933)
+
+Changed
+~~~~~~~
+- Updated default BEL Commons instance from https://bel-commons.scai.fraunhofer.de to
+  https://bel-commons-dev.scai.fraunhofer.de
 
 `0.14.9 <https://github.com/pybel/pybel/compare/v0.14.8...v0.14.9>`_ - 2020-04-25
 ---------------------------------------------------------------------------------
