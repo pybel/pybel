@@ -6,12 +6,9 @@ from .canonicalize import edge_to_bel, to_bel_script, to_bel_script_gz, to_bel_s
 from .dsl import BaseAbundance, BaseEntity
 from .io.api import dump, load
 from .io.aws import from_s3, to_s3
-from .io.bel_commons_client import from_bel_commons, from_bel_commons, to_bel_commons, to_bel_commons
-from .io.biodati_client import from_biodati, from_biodati, to_biodati, to_biodati
-from .io.cx import (
-    from_cx, from_cx, from_cx_file, from_cx_file, from_cx_gz, from_cx_gz, from_cx_jsons, from_cx_jsons,
-    to_cx, to_cx, to_cx_file, to_cx_file, to_cx_gz, to_cx_gz, to_cx_jsons, to_cx_jsons,
-)
+from .io.bel_commons_client import from_bel_commons, to_bel_commons
+from .io.biodati_client import from_biodati, to_biodati
+from .io.cx import from_cx, from_cx_file, from_cx_gz, from_cx_jsons, to_cx, to_cx_file, to_cx_gz, to_cx_jsons
 from .io.emmaa import from_emmaa
 from .io.extras import to_csv, to_gsea, to_sif
 from .io.fraunhofer_orientdb import from_fraunhofer_orientdb
