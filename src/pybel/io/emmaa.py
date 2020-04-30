@@ -41,7 +41,7 @@ def from_emmaa(model: str, *, date: Optional[str] = None) -> BELGraph:
 
     PyBEL does its best to look up the most recent model, but if that doesn't work,
     you can specify it explicitly with the ``date`` keyword argument in the form
-    of ``%Y-%m-%d %H:%M:%S`` like in the following:
+    of ``%Y-%m-%d-%H-%M-%S`` like in the following:
 
     .. code-block:: python
 
