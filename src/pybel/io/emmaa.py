@@ -15,7 +15,7 @@ from xml.etree import ElementTree  # noqa:S405
 
 import requests
 
-from .indra import from_indra_statements_json
+from .indra import from_indra_statements
 from ..struct import BELGraph
 
 __all__ = [
@@ -50,16 +50,24 @@ def from_emmaa(model: str, *, date: Optional[str] = None) -> BELGraph:
         covid19_emmaa_graph = pybel.from_emmaa('covid19', '2020-04-23-17-44-57')
         covid19_emmaa_graph.summarize()
     """
+    statements = get_statements_from_emmaa(model=model, date=date)
+    return from_indra_statements(statements, name=model, version=date)
+
+
+def get_statements_from_emmaa(model: str, *, date: Optional[str] = None):
+    """Get INDRA statements from EMMAA.
+
+    :rtype: List[indra.statements.Statement]
+    """
+    from indra.statements import stmts_from_json
+
     if date is None:
         date = _get_latest_date(model)
 
     url = URL_FORMAT.format(model, date)
     res = requests.get(url)
     res_json = res.json()
-    graph = from_indra_statements_json(res_json)
-    graph.name = model
-    graph.version = date
-    return graph
+    return stmts_from_json(res_json)
 
 
 def _get_latest_date(model: str) -> str:
