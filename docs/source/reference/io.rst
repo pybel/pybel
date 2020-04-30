@@ -184,6 +184,15 @@ SPIA
 .. autofunction:: pybel.to_spia_excel
 .. autofunction:: pybel.to_spia_tsvs
 
+PyKEEN
+~~~~~~
+.. automodule:: pybel.io.pykeen
+
+.. autofunction:: pybel.io.pykeen.get_triples_from_bel
+.. autofunction:: pybel.io.pykeen.get_triples_from_bel_nodelink
+.. autofunction:: pybel.io.pykeen.get_triples_from_bel_pickle
+.. autofunction:: pybel.io.pykeen.get_triples_from_bel_commons
+
 Machine Learning
 ~~~~~~~~~~~~~~~~
 .. automodule:: pybel.io.tsv
