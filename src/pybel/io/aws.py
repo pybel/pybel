@@ -29,7 +29,7 @@ def to_s3(graph: BELGraph, *, bucket: str, key: str, client: Optional[S3Client] 
     If you don't specify an instantiated client, PyBEL will do its best to load a default
     one using :func:`boto3.client` like in the following example:
 
-    . code-block:: python
+    .. code-block:: python
 
         import pybel
         from pybel.examples import sialic_acid_graph
@@ -75,7 +75,7 @@ def from_s3(*, bucket: str, key: str, client: Optional[S3Client] = None) -> BELG
     If you don't specify an instantiated client, PyBEL will do its best to load a default
     one using :func:`boto3.client` like in the following example:
 
-    . code-block:: python
+    .. code-block:: python
 
         graph = pybel.from_s3(bucket='your bucket', key='your file name.bel.nodelink.json.gz')
 
