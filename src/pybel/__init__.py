@@ -5,6 +5,7 @@
 from .canonicalize import edge_to_bel, to_bel_script, to_bel_script_gz, to_bel_script_lines
 from .dsl import BaseAbundance, BaseEntity
 from .io.api import dump, load
+from .io.aws import from_s3, to_s3
 from .io.bel_commons_client import from_bel_commons, to_bel_commons
 from .io.biodati_client import from_biodati, to_biodati
 from .io.cx import from_cx, from_cx_file, from_cx_gz, from_cx_jsons, to_cx, to_cx_file, to_cx_gz, to_cx_jsons

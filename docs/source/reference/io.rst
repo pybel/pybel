@@ -209,6 +209,13 @@ BEL Commons
 .. autofunction:: pybel.from_bel_commons
 .. autofunction:: pybel.to_bel_commons
 
+Amazon Simple Storage Service (S3)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. automodule:: pybel.io.aws
+
+.. autofunction:: pybel.to_s3
+.. autofunction:: pybel.from_s3
+
 BioDati
 ~~~~~~~
 .. automodule:: pybel.io.biodati_client

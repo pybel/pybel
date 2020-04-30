@@ -4,6 +4,7 @@
 
 import gzip
 import json
+from io import BytesIO
 from itertools import chain, count
 from operator import methodcaller
 from typing import Any, Mapping, TextIO, Union
@@ -26,6 +27,8 @@ __all__ = [
     'from_nodelink_file',
     'from_nodelink_gz',
     'from_nodelink_jsons',
+    'to_nodelink_gz_io',
+    'from_nodelink_gz_io',
 ]
 
 
@@ -171,3 +174,21 @@ def _from_nodelink_json_helper(data: Mapping[str, Any]) -> BELGraph:
         graph.add_edge(u, v, key=hash_edge(u, v, edge_data), **edge_data)
 
     return graph
+
+
+def to_nodelink_gz_io(graph: BELGraph) -> BytesIO:
+    """Get a BEL graph as a compressed BytesIO."""
+    bytes_io = BytesIO()
+    with gzip.GzipFile(fileobj=bytes_io, mode='w') as file:
+        s = to_nodelink_jsons(graph)
+        file.write(s.encode('utf-8'))
+    bytes_io.seek(0)
+    return bytes_io
+
+
+def from_nodelink_gz_io(bytes_io: BytesIO) -> BELGraph:
+    """Get BEL from gzipped nodelink JSON."""
+    with gzip.GzipFile(fileobj=bytes_io, mode='r') as file:
+        s = file.read()
+    j = s.decode('utf-8')
+    return from_nodelink_jsons(j)

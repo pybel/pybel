@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Transport functions for `Franhofer's OrientDB <http://graphstore.scai.fraunhofer.de>`_.
+"""Transport functions for `Fraunhofer's OrientDB <http://graphstore.scai.fraunhofer.de>`_.
 
 `Fraunhofer <https://www.scai.fraunhofer.de/en/business-research-areas/bioinformatics.html>`_ hosts
 an instance of `OrientDB <https://orientdb.com/>`_ that contains BEL in a schema similar to
