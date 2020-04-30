@@ -11,6 +11,7 @@ from .api import dump, load
 from .bel_commons_client import from_bel_commons, to_bel_commons
 from .biodati_client import from_biodati, to_biodati
 from .cx import from_cx, from_cx_file, from_cx_gz, from_cx_jsons, to_cx, to_cx_file, to_cx_gz, to_cx_jsons
+from .emmaa import from_emmaa
 from .extras import to_csv, to_gsea, to_sif
 from .fraunhofer_orientdb import from_fraunhofer_orientdb
 from .gpickle import from_bytes, from_pickle, to_bytes, to_pickle

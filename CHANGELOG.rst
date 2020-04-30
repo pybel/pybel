@@ -7,6 +7,12 @@ and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
 Unreleased
 ----------
+Added
+~~~~~
+- Importer from `EMMAA <https://emmaa.indra.bio>`_ (https://github.com/pybel/pybel/pull/432)
+
+`0.14.9 <https://github.com/pybel/pybel/compare/v0.14.8...v0.14.9>`_ - 2020-04-25
+---------------------------------------------------------------------------------
 Changed
 ~~~~~~~
 - Updated GraphDati and BioDati exports (https://github.com/pybel/pybel/commit/c9f95344b72ff86239c8987d6b534000ba509a1f)
