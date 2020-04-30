@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
 
-"""Ecosystem of Machine-maintained Models with Automated Analysis (EMMAA)."""
+"""Ecosystem of Machine-maintained Models with Automated Analysis (EMMAA).
+
+`EMMAA <https://emmaa.indra.bio/>`_ is a project built on top of INDRA by
+the Sorger Lab at Harvard Medical School. It automatically builds knowledge
+graphs around pathways/indications periodically (almost daily) using the
+INDRA Database, which in turn is updated periodically (almost daily)
+with the most recent literature from MEDLINE, PubMed Central, several
+major publishers, and other bespoke text corpora such as CORD-19.
+"""
 
 from typing import Iterable, Optional
 from xml.etree import ElementTree  # noqa:S405
