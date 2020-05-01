@@ -66,7 +66,7 @@ from pybel.constants import (
 )
 from pybel.io import from_nodelink, to_nodelink
 from pybel.language import gmod_mappings, pmod_mappings
-from pybel.struct import BELGraph
+from pybel.struct import BELGraph, get_namespaces, get_ungrounded_nodes
 
 __all__ = [
     'ground',
@@ -90,17 +90,29 @@ def _get_id_remapping(prefix: str, identifier: str) -> Union[Tuple[str, str, str
     return _ID_REMAPPING.get((prefix, identifier), (None, None, None))
 
 
-def ground(graph: BELGraph) -> BELGraph:
+def ground(graph: BELGraph, remove_ungrounded: bool = True) -> BELGraph:
     """Ground all entities in a BEL graph."""
     j = to_nodelink(graph)
     ground_nodelink(j)
-    return from_nodelink(j)
+    graph = from_nodelink(j)
+
+    if remove_ungrounded:
+        ungrounded_nodes = get_ungrounded_nodes(graph)
+        graph.remove_nodes_from(ungrounded_nodes)
+        graph.namespace_url.clear()
+        graph.namespace_pattern.update({
+            namespace: '.*'
+            for namespace in get_namespaces(graph)
+        })
+
+    return graph
 
 
 def ground_nodelink(graph_nodelink_dict) -> None:
     """Ground entities in a nodelink data structure."""
     name = graph_nodelink_dict.get('graph', {}).get('name', 'graph')
-    for node in tqdm(graph_nodelink_dict['nodes'], desc='grounding nodes in {}'.format(name)):
+    node_it = tqdm(graph_nodelink_dict['nodes'], desc='grounding nodes in {}'.format(name))
+    for node in node_it:
         _process_node(node)
 
     # TODO ground entities in edges! what about all those fabulous activities?
@@ -109,47 +121,60 @@ def ground_nodelink(graph_nodelink_dict) -> None:
 _UNHANDLED_NAMESPACES = set()
 
 
-def _process_node(node) -> None:
-    """Process a node JSON object, in place."""
+def _process_node(node) -> bool:
+    """Process a node JSON object, in place.
+
+    :return: If all parts of the node were successfully grounded
+    """
+    success = True
     if CONCEPT in node:
-        _process_concept(node=node)
+        success = success and _process_concept(node=node)
     if VARIANTS in node:
-        _process_list(node[VARIANTS])
+        success = success and _process_list(node[VARIANTS])
     if MEMBERS in node:
-        _process_list(node[MEMBERS])
+        success = success and _process_list(node[MEMBERS])
     if REACTANTS in node:
-        _process_list(node[REACTANTS])
+        success = success and _process_list(node[REACTANTS])
     if PRODUCTS in node:
-        _process_list(node[PRODUCTS])
+        success = success and _process_list(node[PRODUCTS])
     if FUSION in node:
-        _process_fusion(node[FUSION])
+        success = success and _process_fusion(node[FUSION])
+    return success
 
 
-def _process_concept(*, node) -> None:
+def _process_concept(*, node) -> bool:
     """Process a node JSON object."""
     concept = node[CONCEPT]
     namespace = concept[NAMESPACE]
     if namespace.lower() in {'text', 'fixme'}:
-        return
+        return False
 
     prefix = normalize_prefix(namespace)
     if prefix is None:
         logger.warning('could not normalize namespace: %s', namespace)
-        return
+        return False
 
     concept[NAMESPACE] = prefix
 
     identifier = concept.get(IDENTIFIER)
     name = concept.get(NAME)
     if identifier:  # don't trust whatever was put for the name, even if it's available
-        _handle_identifier_not_name(concept=concept, prefix=prefix, identifier=identifier)
+        map_success = _handle_identifier_not_name(concept=concept, prefix=prefix, identifier=identifier)
     else:
-        _handle_name_and_not_identifier(node=node, concept=concept, prefix=prefix, name=name)
+        map_success = _handle_name_and_not_identifier(node=node, concept=concept, prefix=prefix, name=name)
+
+    if not map_success:
+        return False
+
     _remap_by_identifier(concept)
+    return True
 
 
 def _remap_by_identifier(concept) -> bool:
-    namespace, identifier = concept[NAMESPACE], concept[IDENTIFIER]
+    identifier = concept.get(IDENTIFIER)
+    if identifier is None:
+        return False
+    namespace = concept[NAMESPACE]
     logger.debug('attempting to remap %s:%s', namespace, identifier)
     remapped_prefix, remapped_identifier, remapped_name = _get_id_remapping(namespace, identifier)
     logger.debug('remapping result %s:%s ! %s', remapped_prefix, remapped_identifier, remapped_name)
@@ -161,39 +186,40 @@ def _remap_by_identifier(concept) -> bool:
     return False
 
 
-def _handle_identifier_not_name(*, concept, prefix, identifier) -> None:
+def _handle_identifier_not_name(*, concept, prefix, identifier) -> bool:
     if prefix == 'uniprot':
         concept[NAME] = get_mnemonic(identifier)
-        return
+        return True
 
     id_name_mapping = get_id_name_mapping(prefix)
     if id_name_mapping is None:
         logger.warning('could not get names for prefix %s', prefix)
-        return
+        return False
     name = id_name_mapping.get(identifier)
     if name is None:
         logger.warning('could not get name for %s:%s', prefix, identifier)
-        return
+        return False
     concept[NAME] = name
-    return
+
+    return True
 
 
-def _handle_name_and_not_identifier(*, node, concept, prefix, name) -> None:
+def _handle_name_and_not_identifier(*, node, concept, prefix, name) -> bool:
     remapped_prefix, remapped_identifier, remapped_name = _get_name_remapping(prefix, name)
     if remapped_prefix:
         concept[NAMESPACE] = remapped_prefix
         concept[IDENTIFIER] = remapped_identifier
         concept[NAME] = remapped_name
-        return
+        return True
 
     # Some namespaces are just too much of a problem at the moment to look up
     if prefix in SKIP:
-        return
+        return False
 
     concept[NAMESPACE] = prefix
     if prefix in NO_NAMES:
         concept[IDENTIFIER] = name
-        return
+        return True
 
     if prefix == 'bel' and KIND in node:
         kind = node[KIND]
@@ -207,23 +233,23 @@ def _handle_name_and_not_identifier(*, node, concept, prefix, name) -> None:
         concept[NAMESPACE] = _mapped[NAMESPACE]
         concept[IDENTIFIER] = _mapped[IDENTIFIER]
         concept[NAME] = _mapped[NAME]
-        return
+        return True
 
     if prefix == 'uniprot':
         # assume identifier given as name
         identifier = get_id_from_mnemonic(name)
         if identifier is not None:
             concept[IDENTIFIER] = identifier
-            return
+            return True
 
         mnemomic = get_mnemonic(name, web_fallback=True)
         if mnemomic is not None:
             concept[IDENTIFIER] = name
             concept[NAME] = mnemomic
-            return
+            return True
 
         logger.warning('could not interpret uniprot name: %s', name)
-        return
+        return False
 
     try:
         id_name_mapping = get_name_id_mapping(prefix)
@@ -232,24 +258,28 @@ def _handle_name_and_not_identifier(*, node, concept, prefix, name) -> None:
 
     if id_name_mapping is None:
         logger.warning('unhandled namespace in %s ! %s', prefix, name)
-        return
+        return False
 
     identifier = id_name_mapping.get(name)
     if identifier is None:
         logger.warning('could not find name %s in namespace %s', name, prefix)
-        return
+        return False
 
     concept[IDENTIFIER] = identifier
+    return True
 
 
-def _process_fusion(fusion) -> None:
-    _process_node(fusion[PARTNER_3P])
-    _process_node(fusion[PARTNER_5P])
+def _process_fusion(fusion) -> bool:
+    success_3p = _process_node(fusion[PARTNER_3P])
+    success_5p = _process_node(fusion[PARTNER_5P])
+    return success_3p and success_5p
 
 
-def _process_list(members) -> None:
+def _process_list(members) -> bool:
+    success = True
     for member in members:
-        _process_node(member)
+        success = success and _process_node(member)
+    return success
 
 
 class TestGround(unittest.TestCase):

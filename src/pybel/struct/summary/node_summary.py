@@ -12,7 +12,8 @@ from ...constants import (
     ACTIVITY, CONCEPT, EFFECT, FROM_LOC, FUSION, KIND, LOCATION, MEMBERS, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P,
     PARTNER_5P, SUBJECT, TO_LOC, TRANSLOCATION, VARIANTS,
 )
-from ...dsl import BaseEntity, Pathology
+from ...dsl import BaseConcept, BaseEntity, CentralDogma, EntityVariant, FusionBase, ListAbundance, Pathology, Reaction
+from ...language import Entity
 
 __all__ = [
     'get_functions',
@@ -27,6 +28,9 @@ __all__ = [
     'count_pathologies',
     'get_top_pathologies',
     'get_top_hubs',
+    'iterate_node_entities',
+    'node_is_grounded',
+    'get_ungrounded_nodes',
 ]
 
 
@@ -57,11 +61,8 @@ def count_functions(graph) -> typing.Counter[str]:
 
 
 def _iterate_namespaces(graph) -> Iterable[str]:
-    return (
-        node[CONCEPT][NAMESPACE]
-        for node in graph
-        if CONCEPT in node
-    )
+    for entity in iterate_entities(graph):
+        yield entity.namespace
 
 
 def count_namespaces(graph) -> typing.Counter[str]:
@@ -102,6 +103,46 @@ def get_names(graph) -> Mapping[str, Set[str]]:
     for namespace, name in _identifier_filtered_iterator(graph):
         rv[namespace].add(name)
     return dict(rv)
+
+
+def get_entities(graph) -> Set[Entity]:
+    return set(iterate_entities(graph))
+
+
+def iterate_entities(graph) -> Iterable[Entity]:
+    for node in graph:
+        yield from iterate_node_entities(node)
+
+
+def node_is_grounded(node: BaseEntity) -> bool:
+    """Check if a node is grounded."""
+    return all(
+        entity.identifier is not None and entity.name is not None
+        for entity in iterate_node_entities(node)
+    )
+
+
+def iterate_node_entities(node) -> Iterable[Entity]:
+    """Iterate over all named entites that comprise a node.
+
+    This includes the node's name, the members/reactants/products of the node,
+    the fusion partners, the named variants, and all recursive ones too.
+    """
+    if isinstance(node, BaseConcept):
+        yield node.entity
+    if isinstance(node, ListAbundance):
+        for member in node.members:
+            yield from iterate_node_entities(member)
+    if isinstance(node, Reaction):
+        for member in itt.chain(node.reactants, node.products):
+            yield from iterate_node_entities(member)
+    if isinstance(node, CentralDogma):
+        for variant in node.variants or []:
+            if isinstance(variant, EntityVariant):
+                yield variant.entity
+    if isinstance(node, FusionBase):
+        yield from iterate_node_entities(node.partner_5p)
+        yield from iterate_node_entities(node.partner_3p)
 
 
 def _identifier_filtered_iterator(graph) -> Iterable[Tuple[str, str]]:
@@ -236,3 +277,12 @@ def get_top_pathologies(graph, n: Optional[int] = 15) -> List[Tuple[BaseEntity, 
     :param n: The number of top connected pathologies to return. If None, returns all nodes
     """
     return count_pathologies(graph).most_common(n)
+
+
+def get_ungrounded_nodes(graph) -> Set[BaseEntity]:
+    """Get all ungrounded nodes in the graph."""
+    return {
+        node
+        for node in graph
+        if not node_is_grounded(node)
+    }
