@@ -319,7 +319,8 @@ class Node(Base):
     md5 = Column(String(255), nullable=False, index=True)
 
     namespace_entry_id = Column(Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), nullable=True)
-    namespace_entry = relationship(NamespaceEntry, foreign_keys=[namespace_entry_id])
+    namespace_entry = relationship(NamespaceEntry, foreign_keys=[namespace_entry_id],
+                                   backref=backref('nodes', lazy='dynamic'))
 
     data = Column(JSON, nullable=False, doc='PyBEL BaseEntity as JSON')
 
