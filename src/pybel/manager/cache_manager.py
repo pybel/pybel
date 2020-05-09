@@ -9,9 +9,8 @@ enable this option, but can specify a database location if they choose.
 import json
 import logging
 import time
-from copy import deepcopy
 from itertools import chain
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Set, Tuple, Union
+from typing import Any, Iterable, List, Mapping, Optional, Set, Tuple
 
 import requests
 import sqlalchemy
@@ -24,29 +23,23 @@ from .base_manager import BaseManager, build_engine_session
 from .exc import EdgeAddError
 from .lookup_manager import LookupManager
 from .models import (
-    Author, Citation, Edge, Evidence, Modification, Namespace, NamespaceEntry, Network, Node, Property, edge_annotation,
-    edge_property, network_edge, network_node,
+    Author, Citation, Edge, Evidence, Namespace, NamespaceEntry, Network, Node, edge_annotation, network_edge,
+    network_node,
 )
 from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, update_insert_values
 from ..constants import (
-    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_DB,
-    CITATION_DB_NAME, CITATION_FIRST_AUTHOR, CITATION_IDENTIFIER, CITATION_ISSUE, CITATION_JOURNAL,
-    CITATION_LAST_AUTHOR, CITATION_PAGES, CITATION_TYPE_PUBMED, CITATION_VOLUME, CONCEPT, DEGRADATION, EFFECT, EVIDENCE,
-    FRAGMENT, FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP, FUSION, FUSION_REFERENCE, FUSION_START, FUSION_STOP,
-    GMOD, HGVS, KIND, LOCATION, METADATA_INSERT_KEYS, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PMOD,
-    PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P, RELATION, SUBJECT, TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS,
-    belns_encodings, get_cache_connection,
+    ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_DB, CITATION_IDENTIFIER, CITATION_TYPE_PUBMED, EVIDENCE,
+    METADATA_INSERT_KEYS, OBJECT, RELATION, SUBJECT, UNQUALIFIED_EDGES, belns_encodings, get_cache_connection,
 )
-from ..dsl import BaseEntity
+from ..dsl import BaseConcept, BaseEntity
 from ..language import (
-    BEL_DEFAULT_NAMESPACE_URL, BEL_DEFAULT_NAMESPACE_VERSION, activity_mapping, compartment_mapping, gmod_mappings,
-    pmod_mappings,
+    BEL_DEFAULT_NAMESPACE_URL, BEL_DEFAULT_NAMESPACE_VERSION, Entity, activity_mapping, compartment_mapping,
+    gmod_mappings, pmod_mappings,
 )
 from ..struct.graph import AnnotationsDict, BELGraph
 from ..struct.operations import union
 from ..typing import EdgeData
-from ..utils import hash_dump, parse_datetime
 
 __all__ = [
     'Manager',
@@ -286,29 +279,29 @@ class NamespaceManager(BaseManager):
         entry_filter = and_(Namespace.url == url, NamespaceEntry.identifier == identifier)
         return self.session.query(NamespaceEntry).join(Namespace).filter(entry_filter).one_or_none()
 
-    def get_or_create_regex_namespace_entry(self, namespace: str, pattern: str, name: str) -> NamespaceEntry:
+    def get_or_create_regex_namespace_entry(self, *, pattern: str, concept: Entity) -> NamespaceEntry:
         """Get a namespace entry from a regular expression.
 
         Need to commit after!
 
-        :param namespace: The name of the namespace
         :param pattern: The regular expression pattern for the namespace
-        :param name: The entry to get
+        :param concept: The prefix/identifier/name triple
         """
-        namespace = self.ensure_regex_namespace(namespace, pattern)
+        namespace = self.ensure_regex_namespace(concept.namespace, pattern)
 
-        n_filter = and_(Namespace.pattern == pattern, NamespaceEntry.name == name)
+        n_filter = and_(Namespace.pattern == pattern, NamespaceEntry.name == concept.name)
 
-        name_model = self.session.query(NamespaceEntry).join(Namespace).filter(n_filter).one_or_none()
+        namespace_entry = self.session.query(NamespaceEntry).join(Namespace).filter(n_filter).one_or_none()
 
-        if name_model is None:
-            name_model = NamespaceEntry(
+        if namespace_entry is None:
+            namespace_entry = NamespaceEntry(
                 namespace=namespace,
-                name=name,
+                name=concept.name,
+                identifier=concept.identifier,
             )
-            self.session.add(name_model)
+            self.session.add(namespace_entry)
 
-        return name_model
+        return namespace_entry
 
     def list_annotations(self) -> List[Namespace]:
         """List all annotations."""
@@ -434,11 +427,6 @@ class NetworkManager(NamespaceManager):
 
         # delete the network-to-node mappings for this network
         self.session.query(network_node).filter(network_node.c.network_id == network.id).delete(
-            synchronize_session=False,
-        )
-
-        # delete the edge-to-property mappings for the to-be-orphaned edges
-        self.session.query(edge_property).filter(edge_property.c.edge_id.in_(edge_ids)).delete(
             synchronize_session=False,
         )
 
@@ -581,7 +569,7 @@ class InsertManager(NamespaceManager, LookupManager):
     def insert_graph(
         self,
         graph: BELGraph,
-        use_tqdm: bool = False,
+        use_tqdm: bool = True,
         tqdm_kwargs: Optional[Mapping[str, Any]] = None,
     ) -> Network:
         """Insert a graph in the database and returns the corresponding Network model.
@@ -617,13 +605,11 @@ class InsertManager(NamespaceManager, LookupManager):
         for annotation_url in annotation_urls:
             self.get_or_create_annotation(annotation_url)
 
-        network = Network(
-            **{
-                key: value
-                for key, value in graph.document.items()
-                if key in METADATA_INSERT_KEYS
-            },
-        )
+        network = Network(**{
+            key: value
+            for key, value in graph.document.items()
+            if key in METADATA_INSERT_KEYS
+        })
 
         network.store_bel(graph)
 
@@ -771,12 +757,13 @@ class InsertManager(NamespaceManager, LookupManager):
     def _get_annotation_entries_from_data(self, graph: BELGraph, data: EdgeData) -> Optional[List[NamespaceEntry]]:
         """Get the annotation entries from an edge data dictionary."""
         annotations_dict = data.get(ANNOTATIONS)
-        if annotations_dict is not None:
-            return [
-                entry
-                for url, names in self._iter_from_annotations_dict(graph, annotations_dict=annotations_dict)
-                for entry in self.get_annotation_entries_by_names(url, names)
-            ]
+        if annotations_dict is None:
+            return
+        rv = []
+        for url, names in self._iter_from_annotations_dict(graph, annotations_dict=annotations_dict):
+            for entry in self.get_annotation_entries_by_names(url, names):
+                rv.append(entry)
+        return rv
 
     def _add_qualified_edge(
         self,
@@ -794,11 +781,6 @@ class InsertManager(NamespaceManager, LookupManager):
             db_id=citation_dict[CITATION_IDENTIFIER],
         )
         evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
-
-        properties = self.get_or_create_properties(graph, data)
-        if properties is None:
-            return
-
         annotations = self._get_annotation_entries_from_data(graph, data)
 
         return self.get_or_create_edge(
@@ -809,7 +791,6 @@ class InsertManager(NamespaceManager, LookupManager):
             md5=key,
             data=data,
             evidence=evidence,
-            properties=properties,
             annotations=annotations,
         )
 
@@ -858,13 +839,14 @@ class InsertManager(NamespaceManager, LookupManager):
 
         node_model = Node._start_from_base_entity(node)
 
-        concept = node.get(CONCEPT)
-        if concept is None:
-            pass
+        if not isinstance(node, BaseConcept):
+            self.session.add(node_model)
+            self.object_cache_node[node_md5] = node_model
+            return node_model
 
-        elif concept[NAMESPACE] in graph.namespace_url:
-            url = graph.namespace_url[concept[NAMESPACE]]
-            name = concept[NAME]
+        if node.namespace in graph.namespace_url:
+            url = graph.namespace_url[node.namespace]
+            name = node.name
             entry = self.get_namespace_entry(url, name)
 
             if entry is None:
@@ -874,29 +856,17 @@ class InsertManager(NamespaceManager, LookupManager):
             self.session.add(entry)
             node_model.namespace_entry = entry
 
-        elif concept[NAMESPACE] in graph.namespace_pattern:
-            name = concept[NAME]
-            pattern = graph.namespace_pattern[concept[NAMESPACE]]
-            entry = self.get_or_create_regex_namespace_entry(concept[NAMESPACE], pattern, name)
-
+        elif node.namespace in graph.namespace_pattern:
+            entry = self.get_or_create_regex_namespace_entry(
+                concept=node.entity,
+                pattern=graph.namespace_pattern[node.namespace],
+            )
             self.session.add(entry)
             node_model.namespace_entry = entry
 
         else:
-            logger.warning("No reference in BELGraph for namespace: {}".format(concept[NAMESPACE]))
+            logger.warning("No reference in BELGraph for namespace: {}".format(node.namespace))
             return
-
-        if VARIANTS in node or FUSION in node:
-            node_model.is_variant = True
-            node_model.has_fusion = FUSION in node
-
-            modifications = self.get_or_create_modification(graph, node)
-
-            if modifications is None:
-                logger.warning('could not create %s because had an uncachable modification', node.as_bel())
-                return
-
-            node_model.modifications = modifications
 
         self.session.add(node_model)
         self.object_cache_node[node_md5] = node_model
@@ -930,7 +900,6 @@ class InsertManager(NamespaceManager, LookupManager):
         data: EdgeData,
         evidence: Optional[Evidence] = None,
         annotations: Optional[List[NamespaceEntry]] = None,
-        properties: Optional[List[Property]] = None,
     ) -> Edge:
         """Create an edge if it does not exist, or return it if it does.
 
@@ -941,7 +910,6 @@ class InsertManager(NamespaceManager, LookupManager):
         :param md5: The MD5 hash of the edge as a string
         :param data: The PyBEL data dictionary
         :param evidence: Evidence object that proves the given relation
-        :param properties: List of all properties that belong to the edge
         :param annotations: List of all annotations that belong to the edge
         """
         if md5 in self.object_cache_edge:
@@ -957,17 +925,17 @@ class InsertManager(NamespaceManager, LookupManager):
 
         edge = Edge(
             source=source,
+            source_modifier=data.get(SUBJECT),
             target=target,
+            target_modifier=data.get(OBJECT),
             relation=relation,
             bel=bel,
             md5=md5,
-            data=json.dumps(data),
+            data=data,
         )
 
         if evidence is not None:
             edge.evidence = evidence
-        if properties is not None:
-            edge.properties = properties
         if annotations is not None:
             edge.annotations = annotations
 
@@ -1022,229 +990,6 @@ class InsertManager(NamespaceManager, LookupManager):
         author = self.object_cache_author[name] = Author(name=name)
         self.session.add(author)
         return author
-
-    def get_modification_by_hash(self, md5: str) -> Optional[Modification]:
-        """Get a modification by a MD5 hash."""
-        return self.session.query(Modification).filter(Modification.md5 == md5).one_or_none()
-
-    def get_or_create_modification(self, graph: BELGraph, node: BaseEntity) -> Optional[List[Modification]]:
-        """Create a list of node modification objects that belong to the node described by node_data.
-
-        Return ``None`` if the list can not be constructed, and the node should also be skipped.
-
-        :param graph: A BEL graph
-        :param dict node: Describes the given node and contains is_variant information
-        :return: A list of modification objects belonging to the given node
-        """
-        modification_list = []
-        if FUSION in node:
-            mod_type = FUSION
-            node = node[FUSION]
-
-            partner_3p_concept = node[PARTNER_3P][CONCEPT]
-            p3_namespace_url = graph.namespace_url[partner_3p_concept[NAMESPACE]]
-            p3_name = partner_3p_concept[NAME]
-            p3_namespace_entry = self.get_namespace_entry(p3_namespace_url, p3_name)
-
-            if p3_namespace_entry is None:
-                logger.warning('Could not find namespace entry %s %s', p3_namespace_url, p3_name)
-                return  # FIXME raise?
-
-            partner_5p_concept = node[PARTNER_5P][CONCEPT]
-            p5_namespace_url = graph.namespace_url[partner_5p_concept[NAMESPACE]]
-            p5_name = partner_5p_concept[NAME]
-            p5_namespace_entry = self.get_namespace_entry(p5_namespace_url, p5_name)
-
-            if p5_namespace_entry is None:
-                logger.warning('Could not find namespace entry %s %s', p5_namespace_url, p5_name)
-                return  # FIXME raise?
-
-            fusion_dict = {
-                'type': mod_type,
-                'p3_partner': p3_namespace_entry,
-                'p5_partner': p5_namespace_entry,
-            }
-
-            node_range_3p = node.get(RANGE_3P)
-            if node_range_3p and FUSION_REFERENCE in node_range_3p:
-                fusion_dict.update({
-                    'p3_reference': node_range_3p[FUSION_REFERENCE],
-                    'p3_start': node_range_3p[FUSION_START],
-                    'p3_stop': node_range_3p[FUSION_STOP],
-                })
-
-            node_range_5p = node.get(RANGE_5P)
-            if node_range_5p and FUSION_REFERENCE in node_range_5p:
-                fusion_dict.update({
-                    'p5_reference': node_range_5p[FUSION_REFERENCE],
-                    'p5_start': node_range_5p[FUSION_START],
-                    'p5_stop': node_range_5p[FUSION_STOP],
-                })
-
-            modification_list.append(fusion_dict)
-
-        else:
-            for variant in node[VARIANTS]:
-                mod_type = variant[KIND].strip()
-                if mod_type == HGVS:
-                    modification_list.append({
-                        'type': mod_type,
-                        'variantString': variant[HGVS],
-                    })
-
-                elif mod_type == FRAGMENT:
-                    if FRAGMENT_MISSING in variant:
-                        modification_list.append({
-                            'type': mod_type,
-                        })
-                    else:
-                        modification_list.append({
-                            'type': mod_type,
-                            'p3_start': variant[FRAGMENT_START],
-                            'p3_stop': variant[FRAGMENT_STOP],
-                        })
-
-                elif mod_type in {GMOD, PMOD}:
-                    variant_identifier = variant[CONCEPT]
-                    namespace_url = _normalize_url(graph, variant_identifier[NAMESPACE])
-                    mod_entry = self.get_namespace_entry(
-                        namespace_url,
-                        variant_identifier[NAME],
-                    )
-
-                    if mod_type == GMOD:
-                        modification_list.append({
-                            'type': mod_type,
-                            'identifier': mod_entry,
-                        })
-                    if mod_type == PMOD:
-                        modification_list.append({
-                            'type': mod_type,
-                            'identifier': mod_entry,
-                            'residue': variant[PMOD_CODE].strip() if PMOD_CODE in variant else None,
-                            'position': variant[PMOD_POSITION] if PMOD_POSITION in variant else None,
-                        })
-
-        modifications = []
-        for modification in modification_list:
-            mod_hash = hash_dump(modification)
-
-            mod = self.object_cache_modification.get(mod_hash)
-            if mod is None:
-                mod = self.get_modification_by_hash(mod_hash)
-                if not mod:
-                    modification['md5'] = mod_hash
-                    mod = Modification(**modification)
-
-                self.object_cache_modification[mod_hash] = mod
-            modifications.append(mod)
-
-        return modifications
-
-    def get_property_by_hash(self, property_hash: str) -> Optional[Property]:
-        """Get a property by its hash if it exists."""
-        return self.session.query(Property).filter(Property.md5 == property_hash).one_or_none()
-
-    def _make_property_from_dict(self, property_def: Dict) -> Property:
-        """Build an edge property from a dictionary."""
-        property_hash = hash_dump(property_def)
-
-        edge_property_model = self.object_cache_property.get(property_hash)
-        if edge_property_model is None:
-            edge_property_model = self.get_property_by_hash(property_hash)
-
-            if not edge_property_model:
-                property_def['md5'] = property_hash
-                edge_property_model = Property(**property_def)
-
-            self.object_cache_property[property_hash] = edge_property_model
-
-        return edge_property_model
-
-    # TODO make for just single property then loop with other fn.
-    def get_or_create_properties(self, graph: BELGraph, edge_data: EdgeData) -> Optional[List[Property]]:
-        """Create a list of edge subject/object property models.
-
-        Return None if the property cannot be constructed due to missing cache entries.
-
-        :return: A list of all subject and object properties of the edge
-        """
-        property_list = []
-        for participant in (SUBJECT, OBJECT):
-            participant_data = edge_data.get(participant)
-            if participant_data is None:
-                continue
-
-            location = participant_data.get(LOCATION)
-            if location is not None:
-                location_property_dict = {
-                    'is_subject': participant == SUBJECT,
-                    'modifier': LOCATION,
-                }
-
-                location_namespace = location[NAMESPACE]
-
-                namespace_url = graph.namespace_url[location_namespace]
-                participant_name = location[NAME]
-                location_property_dict['effect'] = self.get_namespace_entry(namespace_url, participant_name)
-                if location_property_dict['effect'] is None:
-                    raise IndexError('did not get {}: {}'.format(namespace_url, participant_name))
-
-                property_list.append(location_property_dict)
-
-            modifier = participant_data.get(MODIFIER)
-            if modifier is not None:
-                modifier_property_dict = {
-                    'is_subject': participant == SUBJECT,
-                    'modifier': modifier,
-                }
-
-                if modifier == TRANSLOCATION:
-                    for effect_type, effect_value in participant_data.get(EFFECT, {}).items():
-                        tmp_dict = deepcopy(modifier_property_dict)
-                        tmp_dict['relative_key'] = effect_type
-
-                        if NAMESPACE not in effect_value:
-                            tmp_dict['propValue'] = effect_value
-                            raise ValueError('shouldnt use propValue')
-                        else:
-                            effect_namespace = effect_value[NAMESPACE]
-
-                            if effect_namespace in graph.namespace_url:
-                                namespace_url = graph.namespace_url[effect_namespace]
-                            elif effect_namespace == BEL_DEFAULT_NAMESPACE:
-                                namespace_url = BEL_DEFAULT_NAMESPACE_URL
-                            else:
-                                logger.warning('namespace not enumerated in modifier %s', effect_namespace)
-                                return
-
-                            effect_name = effect_value[NAME]
-                            tmp_dict['effect'] = self.get_namespace_entry(namespace_url, effect_name)
-
-                            if tmp_dict['effect'] is None:
-                                logger.warning('could not find tloc() %s %s', namespace_url, effect_name)
-                                return  # FIXME raise?
-
-                        property_list.append(tmp_dict)
-
-                elif modifier == ACTIVITY:
-                    effect = participant_data.get(EFFECT)
-                    if effect is not None:
-                        namespace_url = _normalize_url(graph, effect[NAMESPACE])
-                        modifier_property_dict['effect'] = self.get_namespace_entry(namespace_url, effect[NAME])
-
-                    property_list.append(modifier_property_dict)
-
-                elif modifier == DEGRADATION:
-                    property_list.append(modifier_property_dict)
-
-                else:
-                    raise ValueError('unknown modifier: {}'.format(modifier))
-
-        return [
-            self._make_property_from_dict(property_def)
-            for property_def in property_list
-        ]
 
 
 class _Manager(QueryManager, InsertManager, NetworkManager):

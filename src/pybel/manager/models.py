@@ -8,20 +8,18 @@ from collections import defaultdict
 from typing import Any, Iterable, Mapping, Optional, Tuple
 
 from sqlalchemy import (
-    Boolean, Column, Date, DateTime, ForeignKey, Integer, LargeBinary, String, Table, Text, UniqueConstraint,
+    Boolean, Column, Date, DateTime, ForeignKey, Integer, JSON, LargeBinary, String, Table, Text, UniqueConstraint,
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import backref, relationship
 
-from .utils import int_or_str
 from ..constants import (
     CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_DB, CITATION_DB_NAME, CITATION_FIRST_AUTHOR,
     CITATION_IDENTIFIER, CITATION_JOURNAL, CITATION_LAST_AUTHOR, CITATION_PAGES, CITATION_TYPE_PUBMED, CITATION_VOLUME,
-    EFFECT, EVIDENCE, FRAGMENT, FUSION, GMOD, HGVS, IDENTIFIER, LOCATION, METADATA_AUTHORS, METADATA_CONTACT,
+    EVIDENCE, IDENTIFIER, METADATA_AUTHORS, METADATA_CONTACT,
     METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION,
-    MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PMOD, RANGE_3P, RANGE_5P, SUBJECT,
+    NAME, NAMESPACE,
 )
-from ..dsl import EnumeratedFusionRange, Fragment, GeneModification, Hgvs, MissingFusionRange, ProteinModification
 from ..io.gpickle import from_bytes, to_bytes
 from ..tokens import parse_result_to_dsl
 
@@ -31,14 +29,11 @@ __all__ = [
     'NamespaceEntry',
     'Network',
     'Node',
-    'Modification',
     'Author',
     'Citation',
     'Evidence',
     'Edge',
-    'Property',
     'edge_annotation',
-    'edge_property',
     'network_edge',
     'network_node',
 ]
@@ -47,14 +42,9 @@ NAME_TABLE_NAME = 'pybel_name'
 NAMESPACE_TABLE_NAME = 'pybel_namespace'
 
 NODE_TABLE_NAME = 'pybel_node'
-MODIFICATION_TABLE_NAME = 'pybel_modification'
-NODE_MODIFICATION_TABLE_NAME = 'pybel_node_modification'
-
-PROPERTY_TABLE_NAME = 'pybel_property'
 
 EDGE_TABLE_NAME = 'pybel_edge'
 EDGE_ANNOTATION_TABLE_NAME = 'pybel_edge_name'
-EDGE_PROPERTY_TABLE_NAME = 'pybel_edge_property'
 
 AUTHOR_TABLE_NAME = 'pybel_author'
 CITATION_TABLE_NAME = 'pybel_citation'
@@ -318,112 +308,6 @@ class Network(Base):
         self.blob = to_bytes(graph)
 
 
-node_modification = Table(
-    NODE_MODIFICATION_TABLE_NAME, Base.metadata,
-    Column('node_id', Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), primary_key=True),
-    Column('modification_id', Integer, ForeignKey('{}.id'.format(MODIFICATION_TABLE_NAME)), primary_key=True),
-)
-
-
-class Modification(Base):
-    """The modifications that are present in the network are stored in this table."""
-
-    __tablename__ = MODIFICATION_TABLE_NAME
-    id = Column(Integer, primary_key=True)
-
-    type = Column(String(255), nullable=False, doc='Type of the stored modification e.g. Fusion, gmod, pmod, etc')
-
-    variantString = Column(String(255), nullable=True, doc='HGVS string if sequence modification')  # noqa: N815
-
-    p3_partner_id = Column(Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), nullable=True)
-    p3_partner = relationship(NamespaceEntry, foreign_keys=[p3_partner_id])
-
-    p3_reference = Column(String(10), nullable=True)
-    p3_start = Column(String(255), nullable=True)
-    p3_stop = Column(String(255), nullable=True)
-
-    p5_partner_id = Column(Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), nullable=True)
-    p5_partner = relationship(NamespaceEntry, foreign_keys=[p5_partner_id])
-
-    p5_reference = Column(String(10), nullable=True)
-    p5_start = Column(String(255), nullable=True)
-    p5_stop = Column(String(255), nullable=True)
-
-    identifier_id = Column(Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), nullable=True)
-    identifier = relationship(NamespaceEntry, foreign_keys=[identifier_id])
-
-    residue = Column(String(3), nullable=True, doc='Three letter amino acid code if PMOD')
-    position = Column(Integer, nullable=True, doc='Position of PMOD or GMOD')
-
-    md5 = Column(String(255), index=True)
-
-    def _fusion_to_json(self) -> Mapping[str, Any]:
-        """Convert this modification to a FUSION data dictionary.
-
-        Don't use this without checking ``self.type == FUSION`` first.
-        """
-        if self.p5_reference:
-            range_5p = EnumeratedFusionRange(
-                reference=str(self.p5_reference),
-                start=int_or_str(self.p5_start),
-                stop=int_or_str(self.p5_stop),
-            )
-        else:
-            range_5p = MissingFusionRange()
-
-        if self.p3_reference:
-            range_3p = EnumeratedFusionRange(
-                reference=str(self.p3_reference),
-                start=int_or_str(self.p3_start),
-                stop=int_or_str(self.p3_stop),
-            )
-        else:
-            range_3p = MissingFusionRange()
-
-        return {
-            PARTNER_5P: self.p5_partner.to_json(),  # just the identifier pair
-            PARTNER_3P: self.p3_partner.to_json(),  # just the identifier pair
-            RANGE_5P: range_5p,
-            RANGE_3P: range_3p,
-        }
-
-    def to_json(self):
-        """Recreate a is_variant dictionary for :class:`BELGraph`.
-
-        :return: Dictionary that describes a variant or a fusion.
-        :rtype: Variant or FusionBase
-        """
-        if self.type == FUSION:
-            return self._fusion_to_json()
-
-        if self.type == FRAGMENT:
-            return Fragment(
-                start=int_or_str(self.p3_start),
-                stop=int_or_str(self.p3_stop),
-            )
-
-        if self.type == HGVS:
-            return Hgvs(str(self.variantString))
-
-        if self.type == GMOD:
-            return GeneModification(
-                namespace=self.identifier.namespace.keyword,
-                name=self.identifier.name,
-                identifier=self.identifier.identifier,
-            )
-
-        if self.type == PMOD:
-            return ProteinModification(
-                namespace=self.identifier.namespace.keyword,
-                name=self.identifier.name,
-                identifier=self.identifier.identifier,
-                code=self.residue,
-                position=self.position,
-            )
-
-        raise TypeError('unhandled type ({}) for modification {}'.format(self.type, self))
-
-
 class Node(Base):
     """Represents a BEL Term."""
 
@@ -431,20 +315,14 @@ class Node(Base):
     id = Column(Integer, primary_key=True)
 
     type = Column(String(255), nullable=False, doc='The type of the represented biological entity e.g. Protein or Gene')
-    is_variant = Column(Boolean, default=False, doc='Identifies weather or not the given node is a variant')
-    has_fusion = Column(Boolean, default=False, doc='Identifies weather or not the given node is a fusion')
     bel = Column(String(255), nullable=False, doc='Canonical BEL term that represents the given node')
-    md5 = Column(String(255), nullable=True, index=True)
+    md5 = Column(String(255), nullable=False, index=True)
 
     namespace_entry_id = Column(Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), nullable=True)
-    namespace_entry = relationship(NamespaceEntry, foreign_keys=[namespace_entry_id])
+    namespace_entry = relationship(NamespaceEntry, foreign_keys=[namespace_entry_id],
+                                   backref=backref('nodes', lazy='dynamic'))
 
-    modifications = relationship(
-        Modification, secondary=node_modification, lazy='dynamic',
-        backref=backref('nodes', lazy='dynamic'),
-    )
-
-    data = Column(Text, nullable=False, doc='PyBEL BaseEntity as JSON')
+    data = Column(JSON, nullable=False, doc='PyBEL BaseEntity as JSON')
 
     @staticmethod
     def _start_from_base_entity(base_entity) -> 'Node':
@@ -456,7 +334,7 @@ class Node(Base):
             type=base_entity.function,
             bel=base_entity.as_bel(),
             md5=base_entity.md5,
-            data=json.dumps(base_entity),
+            data=base_entity,
         )
 
     @classmethod
@@ -481,7 +359,7 @@ class Node(Base):
 
         :rtype: pybel.dsl.BaseEntity
         """
-        return parse_result_to_dsl(json.loads(self.data))
+        return parse_result_to_dsl(self.data)
 
     def to_json(self):
         """Serialize this node as a JSON object using as_bel()."""
@@ -645,64 +523,6 @@ edge_annotation = Table(
     Column('name_id', Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), primary_key=True),
 )
 
-edge_property = Table(
-    EDGE_PROPERTY_TABLE_NAME, Base.metadata,
-    Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True),
-    Column('property_id', Integer, ForeignKey('{}.id'.format(PROPERTY_TABLE_NAME)), primary_key=True),
-)
-
-
-class Property(Base):
-    """The property table contains additional information that is used to describe the context of a relation."""
-
-    __tablename__ = PROPERTY_TABLE_NAME
-
-    id = Column(Integer, primary_key=True)
-
-    is_subject = Column(Boolean, doc='Identifies which participant of the edge if affected by the given property')
-    modifier = Column(String(255), doc='The modifier: one of activity, degradation, location, or translocation')
-
-    relative_key = Column(String(255), nullable=True, doc='Relative key of effect e.g. to_tloc or from_tloc')
-
-    md5 = Column(String(255), index=True)
-
-    effect_id = Column(Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), nullable=True)
-    effect = relationship(NamespaceEntry)
-
-    @property
-    def side(self) -> str:
-        """Return either :data:`pybel.constants.SUBJECT` or :data:`pybel.constants.OBJECT`."""
-        return SUBJECT if self.is_subject else OBJECT
-
-    def to_json(self):
-        """Create a property dict that is used to recreate an edge dictionary for a :class:`BELGraph`.
-
-        :return: Property dictionary of an edge that is participant (sub/obj) related.
-        :rtype: dict
-        """
-        participant = self.side
-
-        prop_dict = {
-            participant: {
-                MODIFIER: self.modifier,  # FIXME this is probably wrong for location
-            },
-        }
-
-        if self.modifier == LOCATION:
-            prop_dict[participant] = {
-                LOCATION: self.effect.to_json(),
-            }
-        if self.relative_key:  # for translocations
-            prop_dict[participant][EFFECT] = {
-                self.relative_key: self.effect.to_json(),
-            }
-        elif self.effect:  # for activities
-            prop_dict[participant][EFFECT] = self.effect.to_json()
-
-        # degradations don't have modifications
-
-        return prop_dict
-
 
 class Edge(Base):
     """Relationships between BEL nodes and their properties, annotations, and provenance."""
@@ -733,11 +553,15 @@ class Edge(Base):
         NamespaceEntry, secondary=edge_annotation, lazy="dynamic",
         backref=backref('edges', lazy='dynamic'),
     )
-    properties = relationship(Property, secondary=edge_property, lazy="dynamic")  # , cascade='all, delete-orphan')
+
+    # free_annotations = Column(JSON, nullable=True, doc='Ungrounded extra annotations')
+
+    source_modifier = Column(JSON, nullable=True, doc='Modifiers for the source of the edge')
+    target_modifier = Column(JSON, nullable=True, doc='Modifiers for the target of the edge')
 
     md5 = Column(String(255), index=True, doc='The hash of the source, target, and associated metadata')
 
-    data = Column(Text, nullable=False, doc='The stringified JSON representing this edge')
+    data = Column(JSON, nullable=False, doc='The stringified JSON representing this edge')
 
     def __str__(self):
         return self.bel
@@ -773,7 +597,7 @@ class Edge(Base):
             'source': source_dict,
             'target': target_dict,
             'key': self.md5,
-            'data': json.loads(self.data),
+            'data': self.data,
         }
 
         if include_id:
@@ -790,6 +614,6 @@ class Edge(Base):
         v = self.target.as_bel()
 
         if self.evidence:
-            return graph.add_qualified_edge(u, v, **json.loads(self.data))
+            return graph.add_qualified_edge(u, v, **self.data)
         else:
             return graph.add_unqualified_edge(u, v, self.relation)

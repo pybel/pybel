@@ -58,9 +58,9 @@ egf_graph = BELGraph(
 )
 
 egf_graph.namespace_url.update({
-    'HGNC': HGNC_URL,
-    'CHEBI': CHEBI_URL,
-    'GO': GO_URL,
+    'hgnc': HGNC_URL,
+    'chebi': CHEBI_URL,
+    'go': GO_URL,
 })
 
 egf_graph.annotation_url.update({
@@ -71,21 +71,21 @@ egf_graph.annotation_pattern.update({
     'Species': SPECIES_PATTERN,
 })
 
-ar = Protein(name='AR', namespace='HGNC')
-egf = Protein(name='EGF', namespace='HGNC')
-ifna1 = Protein(name='IFNA1', namespace='HGNC')
-ifng = Protein(name='IFNG', namespace='HGNC')
-vcp = Protein(name='VCP', namespace='HGNC')
+ar = Protein(name='AR', namespace='hgnc')
+egf = Protein(name='EGF', namespace='hgnc')
+ifna1 = Protein(name='IFNA1', namespace='hgnc')
+ifng = Protein(name='IFNG', namespace='hgnc')
+vcp = Protein(name='VCP', namespace='hgnc')
 
-nfkb1 = Protein(name='NFKB1', namespace='HGNC')
-nfkb2 = Protein(name='NFKB2', namespace='HGNC')
-rel = Protein(name='REL', namespace='HGNC')
-rela = Protein(name='RELA', namespace='HGNC')
-relb = Protein(name='RELB', namespace='HGNC')
+nfkb1 = Protein(name='NFKB1', namespace='hgnc')
+nfkb2 = Protein(name='NFKB2', namespace='hgnc')
+rel = Protein(name='REL', namespace='hgnc')
+rela = Protein(name='RELA', namespace='hgnc')
+relb = Protein(name='RELB', namespace='hgnc')
 
 nfkb_complex = ComplexAbundance([nfkb1, nfkb2, rel, rela, relb])
 
-apoptosis = BiologicalProcess(namespace='GO', name='apoptotic process', identifier='GO:0006915')
+apoptosis = BiologicalProcess(namespace='go', name='apoptotic process', identifier='0006915')
 
 egf_graph.add_increases(
     ar,

@@ -61,7 +61,7 @@ def to_bel_commons(
     host: Optional[str] = None,
     user: Optional[str] = None,
     password: Optional[str] = None,
-    public: bool = False,
+    public: bool = True,
 ) -> requests.Response:
     """Send a graph to the receiver service and returns the :mod:`requests` response object.
 

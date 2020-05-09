@@ -10,6 +10,7 @@ from ...filters.edge_predicate_builders import build_relation_predicate
 from ...pipeline import in_place_transformation
 from ....constants import HAS_VARIANT
 from ....dsl import BaseEntity
+from ....utils import hash_edge
 
 __all__ = [
     'collapse_pair',
@@ -40,18 +41,19 @@ def collapse_pair(graph, survivor: BaseEntity, victim: BaseEntity) -> None:
     :param victim: The BEL node to collapse into the surviving node
     """
     graph.add_edges_from(
-        (survivor, successor, key, edge_data)
-        for _, successor, key, edge_data in graph.out_edges(victim, keys=True, data=True)
+        (survivor, successor, hash_edge(survivor, successor, edge_data), edge_data)
+        for _, successor, edge_data in graph.out_edges(victim, data=True)
         if successor != survivor
-    )  # FIXME key should be updated
+    )
 
     graph.add_edges_from(
-        (predecessor, survivor, key, data)
-        for predecessor, _, key, data in graph.in_edges(victim, keys=True, data=True)
+        (predecessor, survivor, hash_edge(predecessor, survivor, edge_data), edge_data)
+        for predecessor, _, edge_data in graph.in_edges(victim, data=True)
         if predecessor != survivor
-    )  # FIXME key should be updated
+    )
 
-    graph.remove_node(victim)
+    if victim in graph:
+        graph.remove_node(victim)
 
 
 # TODO what happens when collapsing is not consistent? Need to build intermediate mappings and test their consistency.

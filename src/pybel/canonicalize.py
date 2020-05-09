@@ -93,7 +93,7 @@ def _decanonicalize_edge_node(
     edge_data: EdgeData,
     node_position: str,
     *,
-    use_identifiers: bool = False
+    use_identifiers: bool = True
 ) -> str:
     """Canonicalize a node with its modifiers stored in the given edge to a BEL string.
 
@@ -164,7 +164,7 @@ def edge_to_tuple(
     u: BaseEntity,
     v: BaseEntity,
     data: EdgeData,
-    use_identifiers: bool = False,
+    use_identifiers: bool = True,
 ) -> Tuple[str, str, str]:
     """Take two nodes and gives back a BEL string representing the statement.
 
@@ -183,7 +183,7 @@ def edge_to_bel(
     v: BaseEntity,
     data: EdgeData,
     sep: Optional[str] = None,
-    use_identifiers: bool = False,
+    use_identifiers: bool = True,
 ) -> str:
     """Take two nodes and gives back a BEL string representing the statement.
 
