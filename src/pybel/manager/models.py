@@ -18,7 +18,7 @@ from ..constants import (
     EVIDENCE, IDENTIFIER, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION,
     METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAME, NAMESPACE,
 )
-from ..io import from_bytes, to_bytes
+from ..io.gpickle import from_bytes, to_bytes
 from ..tokens import parse_result_to_dsl
 
 __all__ = [
