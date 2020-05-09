@@ -12,7 +12,8 @@ from ...constants import (
     ACTIVITY, CONCEPT, EFFECT, FROM_LOC, FUSION, KIND, LOCATION, MEMBERS, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P,
     PARTNER_5P, SUBJECT, TO_LOC, TRANSLOCATION, VARIANTS,
 )
-from ...dsl import BaseConcept, BaseEntity, CentralDogma, EntityVariant, FusionBase, ListAbundance, Pathology, Reaction
+from ...dsl import BaseConcept, BaseEntity, CentralDogma, FusionBase, ListAbundance, Pathology, Reaction
+from ...dsl.node_classes import EntityVariant
 from ...language import Entity
 
 __all__ = [
@@ -61,8 +62,34 @@ def count_functions(graph) -> typing.Counter[str]:
 
 
 def _iterate_namespaces(graph) -> Iterable[str]:
-    for entity in iterate_entities(graph):
+    for entity in itt.chain(iterate_entities(graph), _iterate_edge_entities(graph)):
         yield entity.namespace
+
+
+def _iterate_edge_entities(graph) -> Iterable[Entity]:
+    for ((_, _, data), side) in itt.product(graph.edges(data=True), (SUBJECT, OBJECT)):
+        side_data = data.get(side)
+        if side_data is None:
+            continue
+
+        modifier = side_data.get(MODIFIER)
+        effect = side_data.get(EFFECT)
+
+        if modifier == ACTIVITY and effect is not None:
+            assert isinstance(effect, Entity)
+            yield effect
+        elif modifier == TRANSLOCATION and effect is not None:
+            from_loc = effect[FROM_LOC]
+            assert isinstance(from_loc, Entity)
+            yield from_loc
+            to_loc = effect[TO_LOC]
+            assert isinstance(to_loc, Entity)
+            yield to_loc
+
+        location = side_data.get(LOCATION)
+        if location is not None:
+            assert isinstance(location, Entity)
+            yield location
 
 
 def count_namespaces(graph) -> typing.Counter[str]:
@@ -70,7 +97,6 @@ def count_namespaces(graph) -> typing.Counter[str]:
 
     :param pybel.BELGraph graph: A BEL graph
     :return: A Counter from {namespace: frequency}
-    :rtype: collections.Counter
     """
     return Counter(_iterate_namespaces(graph))
 
@@ -97,7 +123,6 @@ def get_names(graph) -> Mapping[str, Set[str]]:
     """Get all names for each namespace.
 
     :type graph: pybel.BELGraph
-    :rtype: dict[str,set[str]]
     """
     rv = defaultdict(set)
     for namespace, name in _identifier_filtered_iterator(graph):

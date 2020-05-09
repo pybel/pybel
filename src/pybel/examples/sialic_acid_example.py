@@ -58,9 +58,9 @@ sialic_acid_graph = BELGraph(
 )
 
 sialic_acid_graph.namespace_url.update({
-    'HGNC': HGNC_URL,
-    'CHEBI': CHEBI_URL,
-    'GO': GO_URL,
+    'hgnc': HGNC_URL,
+    'chebi': CHEBI_URL,
+    'go': GO_URL,
 })
 
 sialic_acid_graph.annotation_url.update({
@@ -71,23 +71,23 @@ sialic_acid_graph.annotation_pattern.update({
     'Species': SPECIES_PATTERN,
 })
 
-sialic_acid = Abundance(name='sialic acid', namespace='CHEBI', identifier='26667')
+sialic_acid = Abundance(name='sialic acid', namespace='chebi', identifier='26667')
 cd33 = Protein(
     name='CD33',
-    namespace='HGNC',
+    namespace='hgnc',
     identifier='1659',
     xrefs=[
         Entity(namespace='uniprot', identifier='P20138'),
     ],
 )
 sialic_acid_cd33_complex = ComplexAbundance([sialic_acid, cd33])
-shp1 = Protein(namespace='HGNC', name='PTPN6', identifier='9658')
-shp2 = Protein(namespace='HGNC', name='PTPN11', identifier='9644')
-syk = Protein(namespace='HGNC', name='SYK', identifier='11491')
-dap12 = Protein(namespace='HGNC', name='TYROBP', identifier='12449')
-trem2 = Protein(namespace='HGNC', name='TREM2', identifier='17761')
-cd33_phosphorylated = Protein(name='CD33', namespace='HGNC', identifier='1659', variants=ProteinModification('Ph'))
-immune_response = BiologicalProcess(name='immune response', namespace='GO', identifier='0006955')
+shp1 = Protein(namespace='hgnc', name='PTPN6', identifier='9658')
+shp2 = Protein(namespace='hgnc', name='PTPN11', identifier='9644')
+syk = Protein(namespace='hgnc', name='SYK', identifier='11491')
+dap12 = Protein(namespace='hgnc', name='TYROBP', identifier='12449')
+trem2 = Protein(namespace='hgnc', name='TREM2', identifier='17761')
+cd33_phosphorylated = Protein(name='CD33', namespace='hgnc', identifier='1659', variants=ProteinModification('Ph'))
+immune_response = BiologicalProcess(name='immune response', namespace='go', identifier='0006955')
 
 sialic_acid_graph.add_increases(
     sialic_acid_cd33_complex,

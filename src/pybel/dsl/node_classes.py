@@ -52,6 +52,7 @@ __all__ = [
 
     # Variants
     'Variant',
+    'EntityVariant',
     'ProteinModification',
     'GeneModification',
     'Hgvs',

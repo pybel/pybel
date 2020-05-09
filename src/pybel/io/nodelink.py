@@ -12,9 +12,12 @@ from typing import Any, Mapping, TextIO, Union
 from networkx.utils import open_file
 
 from .utils import ensure_version
-from ..constants import FUSION, GRAPH_ANNOTATION_LIST, MEMBERS, PARTNER_3P, PARTNER_5P, PRODUCTS, REACTANTS
+from ..constants import (
+    FUSION, GRAPH_ANNOTATION_LIST, MEMBERS, OBJECT, PARTNER_3P, PARTNER_5P, PRODUCTS, REACTANTS, SUBJECT,
+)
 from ..dsl import BaseEntity
 from ..struct import BELGraph
+from ..struct.graph import _handle_modifier
 from ..tokens import parse_result_to_dsl
 from ..utils import hash_edge, tokenize_version
 
@@ -171,6 +174,12 @@ def _from_nodelink_json_helper(data: Mapping[str, Any]) -> BELGraph:
             for k, v in data.items()
             if k not in {'source', 'target', 'key'}
         }
+
+        for side in (SUBJECT, OBJECT):
+            side_data = edge_data.get(side)
+            if side_data:
+                _handle_modifier(side_data)
+
         graph.add_edge(u, v, key=hash_edge(u, v, edge_data), **edge_data)
 
     return graph
