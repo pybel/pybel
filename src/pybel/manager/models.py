@@ -597,7 +597,7 @@ class Edge(Base):
             'source': source_dict,
             'target': target_dict,
             'key': self.md5,
-            'data': json.loads(self.data),
+            'data': self.data,
         }
 
         if include_id:
@@ -614,6 +614,6 @@ class Edge(Base):
         v = self.target.as_bel()
 
         if self.evidence:
-            return graph.add_qualified_edge(u, v, **json.loads(self.data))
+            return graph.add_qualified_edge(u, v, **self.data)
         else:
             return graph.add_unqualified_edge(u, v, self.relation)
