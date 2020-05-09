@@ -149,7 +149,8 @@ def ground_nodelink(graph_nodelink_dict) -> None:
     for data in tqdm(graph_nodelink_dict['links'], desc='grounding edges in {}'.format(name)):
         _process_edge_side(data.get(SUBJECT))
         _process_edge_side(data.get(OBJECT))
-        _process_annotations(data)
+        if ANNOTATIONS in data:
+            _process_annotations(data)
 
     for node in tqdm(graph_nodelink_dict['nodes'], desc='grounding nodes in {}'.format(name)):
         _process_node(node)
@@ -168,7 +169,7 @@ _UNHANDLED_ANNOTATION = set()
 def _process_annotations(data, add_free_annotations: bool = False):
     x = []
     y = []
-    for prefix, names in data.get(ANNOTATIONS, {}).items():
+    for prefix, names in data[ANNOTATIONS].items():
         if prefix == 'CellLine':
             efo_name_to_id = get_name_id_mapping('efo')
             # clo_name_to_id = get_name_id_mapping('clo')  # FIXME implement CLO import
