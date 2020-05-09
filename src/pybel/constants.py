@@ -72,7 +72,7 @@ CITATION_DATE = 'date'
 #: Represents the key for the citation authors in a citation dictionary
 CITATION_AUTHORS = 'authors'
 #: Represents the key for the citation comment in a citation dictionary
-CITATION_JOURNAL = 'db_name'
+CITATION_JOURNAL = 'journal'
 #: Represents the key for the optional PyBEL citation volume entry in a citation dictionary
 CITATION_VOLUME = 'volume'
 #: Represents the key for the optional PyBEL citation issue entry in a citation dictionary
