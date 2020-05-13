@@ -40,7 +40,13 @@ class TestHetionet(unittest.TestCase):
             data={},
         )
 
-        graph = from_hetionet_json(dict(nodes=[source, target], edges=[edge]))
+        if h_id.lower().startswith('{}:'.format(h_namespace.lower())):
+            h_id = h_id[len(h_namespace) + 1:]
+
+        if t_id.lower().startswith('{}:'.format(t_namespace.lower())):
+            t_id = t_id[len(t_namespace) + 1:]
+
+        graph = from_hetionet_json(dict(nodes=[source, target], edges=[edge]), use_tqdm=False)
         source_node = h_dsl(namespace=h_namespace, identifier=h_id, name=h_name)
         self.assertIn(source_node, graph, msg='Nodes: {}'.format(list(graph)))
         target_node = t_dsl(namespace=t_namespace, identifier=t_id, name=t_name)
