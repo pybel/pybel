@@ -24,7 +24,7 @@ from ..constants import (
     METADATA_INSERT_KEYS, METADATA_LICENSES, RELATION, UNQUALIFIED_EDGES,
 )
 from ..parser import BELParser
-from ..parser.exc import NakedNameWarning
+from ..parser.exc import NakedNameWarning, UndefinedNamespaceWarning
 from ..struct import BELGraph
 from ..version import get_version
 
@@ -144,6 +144,7 @@ NAMESPACE_URLS = {
     'SCOMP': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/selventa-named-complexes/selventa-named-complexes-20150601.belns',
     'MESHC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-chemicals/mesh-chemicals-20170511.belns',
     'GOBPID': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process-ids/go-biological-process-ids-20150601.belns',
+    'GOCCID': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-cellular-component-ids/go-cellular-component-ids-20150601.belns',
     'MESHCS': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-cell-structures/mesh-cell-structures-20150601.belns',
 }
 
@@ -258,6 +259,8 @@ def from_jgif(graph_jgif_dict, parser_kwargs: Optional[Mapping[str, Any]] = None
             parser.bel_term.parseString(node_label)
         except NakedNameWarning as e:
             logger.info('Naked name: %s', e)
+        except UndefinedNamespaceWarning as e:
+            logger.info('Undefined namespace: %s', e)
         except ParseException:
             logger.info('Parse exception for %s', node_label)
 
