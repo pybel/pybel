@@ -31,22 +31,22 @@ from tests.constants import (
     test_evidence_text,
 )
 
-fos = hgnc('FOS')
-jun = hgnc('JUN')
-mirna_1 = mirbase(n())
-mirna_2 = mirbase(n())
+fos = hgnc(name='FOS')
+jun = hgnc(name='JUN')
+mirna_1 = mirbase(name=n())
+mirna_2 = mirbase(name=n())
 pathology_1 = Pathology('DO', n())
 ap1_complex = ComplexAbundance([fos, jun])
 
 egfr_dimer = ComplexAbundance([egfr, egfr])
 
-yfg_data = hgnc('YFG')
-e2f4_data = hgnc('E2F4')
+yfg_data = hgnc(name='YFG')
+e2f4_data = hgnc(name='E2F4')
 bound_ap1_e2f4 = ComplexAbundance([ap1_complex, e2f4_data])
 
-superoxide = chebi('superoxide')
-hydrogen_peroxide = chebi('hydrogen peroxide')
-oxygen = chebi('oxygen')
+superoxide = chebi(name='superoxide')
+hydrogen_peroxide = chebi(name='hydrogen peroxide')
+oxygen = chebi(name='oxygen')
 superoxide_decomposition = Reaction(reactants=[superoxide], products=[hydrogen_peroxide, oxygen])
 
 
@@ -760,7 +760,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
     @mock_bel_resources
     def test_composite(self, mock):
         interleukin_23_complex = NamedComplexAbundance('GO', 'interleukin-23 complex')
-        il6 = hgnc('IL6')
+        il6 = hgnc(name='IL6')
         interleukin_23_and_il6 = CompositeAbundance([interleukin_23_complex, il6])
 
         self._help_reconstitute(interleukin_23_and_il6, 3, 2)

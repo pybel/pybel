@@ -60,7 +60,7 @@ akt1_gene = akt1_rna.get_gene()
 akt_methylated = akt1_gene.with_variants(GeneModification('Me'))
 akt1_phe_508_del = akt1_gene.with_variants(Hgvs('p.Phe508del'))
 
-cftr = hgnc('CFTR')
+cftr = hgnc(name='CFTR')
 cftr_protein_unspecified_variant = cftr.with_variants(HgvsUnspecified())
 cftr_protein_phe_508_del = cftr.with_variants(Hgvs('p.Phe508del'))
 
@@ -83,12 +83,12 @@ bcr_jak2_gene_fusion = GeneFusion(
     partner_5p=Gene('HGNC', 'BCR'),
     range_5p=EnumeratedFusionRange('c', '?', 1875),
     partner_3p=Gene('HGNC', 'JAK2'),
-    range_3p=EnumeratedFusionRange('c', 2626, '?')
+    range_3p=EnumeratedFusionRange('c', 2626, '?'),
 )
 
 chchd4_aifm1_gene_fusion = GeneFusion(
     partner_5p=Gene('HGNC', 'CHCHD4'),
-    partner_3p=Gene('HGNC', 'AIFM1')
+    partner_3p=Gene('HGNC', 'AIFM1'),
 )
 
 tmprss2_erg_protein_fusion = ProteinFusion(
