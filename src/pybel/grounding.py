@@ -75,7 +75,7 @@ __all__ = [
 ]
 
 logger = logging.getLogger(__name__)
-SKIP = {'ncbigene', 'pubchem.compound'}
+SKIP = {'ncbigene', 'pubchem.compound', 'chembl.compound'}
 NO_NAMES = {'fplx', 'eccode', 'dbsnp'}
 
 # TODO will get updated
