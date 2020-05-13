@@ -309,6 +309,10 @@ def _remap_by_identifier(concept) -> bool:
 
 
 def _handle_identifier_not_name(*, concept, prefix, identifier) -> bool:
+    # Some namespaces are just too much of a problem at the moment to look up
+    if prefix in SKIP:
+        return False
+
     if prefix in NO_NAMES:
         concept[NAME] = concept[IDENTIFIER]
         return True
