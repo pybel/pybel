@@ -23,13 +23,13 @@ SYMPTOM = 'Symptom'
 
 DSL_MAP = {
     ANATOMY: 'uberon',
-    GENE: 'ncbigene',
-    PATHWAY: 'reactome',
     BIOPROCESS: 'go',
     COMPOUND: 'drugbank',
-    SIDE_EFFECT: 'umls',
     DISEASE: 'doid',
+    GENE: 'ncbigene',
+    PATHWAY: 'reactome',
     PHARMACOLOGICAL_CLASS: 'drugcentral',
+    SIDE_EFFECT: 'umls',
     SYMPTOM: 'mesh',
 }
 
