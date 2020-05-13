@@ -22,9 +22,6 @@ __all__ = [
     'to_html_file',
 ]
 
-#: Renders templates from pybel.io.jupyter.templates folder
-render_template = build_template_renderer(__file__)
-
 
 def to_html(graph: BELGraph, color_map: Optional[Mapping[str, str]] = None) -> str:
     """Create an HTML visualization for the given JSON representation of a BEL graph.
@@ -35,6 +32,7 @@ def to_html(graph: BELGraph, color_map: Optional[Mapping[str, str]] = None) -> s
     :return: HTML string representing the graph
     """
     color_map = DEFAULT_COLOR_MAP if color_map is None else color_map
+    render_template = build_template_renderer(__file__)
     return render_template(
         'graph_template.html',
         graph=to_nodelink_jsons(graph),

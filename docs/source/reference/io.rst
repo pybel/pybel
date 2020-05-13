@@ -155,7 +155,7 @@ Jupyter
 ~~~~~~~
 .. automodule:: pybel.io.jupyter
 
-.. autofunction:: pybel.io.jupyter.to_jupyter
+.. autofunction:: pybel.to_jupyter
 
 Analytical Services
 -------------------

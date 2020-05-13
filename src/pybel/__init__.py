@@ -28,6 +28,7 @@ from .io.jgif import (
     from_cbn_jgif, from_cbn_jgif_file, from_jgif, from_jgif_file, from_jgif_gz, from_jgif_jsons, post_jgif, to_jgif,
     to_jgif_file, to_jgif_gz, to_jgif_jsons,
 )
+from .io.jupyter import to_jupyter, to_jupyter_str
 from .io.lines import from_bel_script, from_bel_script_url
 from .io.neo4j import to_neo4j
 from .io.nodelink import (
