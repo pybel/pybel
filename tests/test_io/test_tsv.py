@@ -11,9 +11,10 @@ from pybel.constants import (
     NEGATIVE_CORRELATION, OBJECT, PART_OF, POSITIVE_CORRELATION, REGULATES, RELATION,
 )
 from pybel.dsl import (
-    Abundance, BaseEntity, BiologicalProcess, ComplexAbundance, Gene, MicroRna, NamedComplexAbundance, Pathology,
+    Abundance, BaseEntity, BiologicalProcess, ComplexAbundance, MicroRna, NamedComplexAbundance, Pathology,
     Population, Protein, Rna, activity,
 )
+from pybel.io.tsv import converters as tsvc
 from pybel.io.tsv.api import get_triple
 from pybel.io.tsv.converters import (
     AbundanceDirectlyDecreasesProteinActivityConverter, AbundanceDirectlyIncreasesProteinActivityConverter,
@@ -22,7 +23,6 @@ from pybel.io.tsv.converters import (
     MiRNADecreasesExpressionConverter, PartOfNamedComplexConverter, RegulatesActivityConverter,
     RegulatesAmountConverter, SubprocessPartOfBiologicalProcessConverter, TranscriptionFactorForConverter,
 )
-from pybel.io.tsv import converters as tsvc
 from pybel.testing.utils import n
 from pybel.typing import EdgeData
 
@@ -52,8 +52,10 @@ nca1 = NamedComplexAbundance('FPLX', '1')
 pop1 = Population('taxonomy', '1')
 
 p2 = Protein('HGNC', identifier='9236')
-g3 = Gene('HGNC', identifier='9212')
-r3 = g3.get_rna()
+p3 = Protein('HGNC', identifier='9212')
+r3 = p3.get_rna()
+g3 = r3.get_gene()
+
 c1 = ComplexAbundance([p2, g3])
 c2 = ComplexAbundance([p1, p2])
 c3 = ComplexAbundance([a1, p2])
@@ -115,6 +117,22 @@ converters_true_list = [
     (
         tsvc.BindsProteinConverter, a1, c3, _rel(DIRECTLY_INCREASES),
         (a1.curie, 'bindsToProtein', p2.curie),
+    ),
+    (
+        tsvc.ProteinRegulatesComplex, p3, c2, _rel(DIRECTLY_INCREASES),
+        (p3.curie, 'increasesAmountOf', str(c2)),
+    ),
+    (
+        tsvc.ProteinRegulatesComplex, p3, c2, _rel(DIRECTLY_DECREASES),
+        (p3.curie, 'decreasesAmountOf', str(c2)),
+    ),
+    (
+        tsvc.ProteinRegulatesComplex, p3, c2, _rel(DECREASES),
+        (p3.curie, 'decreasesAmountOf', str(c2)),
+    ),
+    (
+        tsvc.ProteinRegulatesComplex, p3, c2, _rel(INCREASES),
+        (p3.curie, 'increasesAmountOf', str(c2)),
     ),
 ]
 

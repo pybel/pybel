@@ -154,6 +154,7 @@ def get_triple(
         converters.TranscriptionFactorForConverter,
         converters.BindsGeneConverter,
         converters.BindsProteinConverter,
+        converters.ProteinRegulatesComplex,
     ]
 
     for converter in _converters:

@@ -6,9 +6,9 @@ from abc import ABC, abstractmethod
 from typing import Dict, Tuple
 
 from ...constants import (
-    ACTIVITY, ASSOCIATION, CAUSES_NO_CHANGE, CORRELATIVE_RELATIONS, DECREASES, DEGRADATION, DIRECTLY_DECREASES,
-    DIRECTLY_INCREASES, EQUIVALENT_TO, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A, MODIFIER,
-    OBJECT, PART_OF, REGULATES, RELATION,
+    ACTIVITY, ASSOCIATION, CAUSAL_DECREASE_RELATIONS, CAUSAL_INCREASE_RELATIONS, CAUSAL_RELATIONS, CAUSES_NO_CHANGE,
+    CORRELATIVE_RELATIONS, DECREASES, DEGRADATION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO, HAS_PRODUCT,
+    HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A, MODIFIER, OBJECT, PART_OF, REGULATES, RELATION,
 )
 from ...dsl import (
     Abundance, BaseAbundance, BaseEntity, BiologicalProcess, CentralDogma, ComplexAbundance, Gene, MicroRna,
@@ -508,3 +508,33 @@ class BindsGeneConverter(Converter):
         """Convert a transcription factor for edge."""
         g = [m for m in v.members if m != u][0]
         return _safe_label(u), 'bindsToGene', _safe_label(g)
+
+
+class ProteinRegulatesComplex(Converter):
+    """Converts ``p(B) directlyIncreases complex(x(X), y(Y))```."""
+
+    @staticmethod
+    def predicate(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> bool:
+        """Test a BEL edge"""
+        return (
+            isinstance(u, Protein)
+            and isinstance(v, ComplexAbundance)
+            and u not in v.members
+            and edge_data[RELATION] in CAUSAL_RELATIONS
+            and edge_data[RELATION] != CAUSES_NO_CHANGE
+        )
+
+    @staticmethod
+    def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
+        """Convert a transcription factor for edge."""
+        relation = edge_data[RELATION]
+        if relation in CAUSAL_INCREASE_RELATIONS:
+            relation = 'increasesAmountOf'
+        elif relation in CAUSAL_DECREASE_RELATIONS:
+            relation = 'decreasesAmountOf'
+        elif relation == REGULATES:
+            relation = 'regulatesAmountOf'
+        else:
+            raise ValueError('invalid relation type')
+
+        return _safe_label(u), relation, _safe_label(v)
