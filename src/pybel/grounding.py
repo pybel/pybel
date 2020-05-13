@@ -56,7 +56,7 @@ from typing import Any, Mapping, Tuple, Union
 
 from protmapper.uniprot_client import get_id_from_mnemonic, get_mnemonic
 from pyobo.extract import get_id_name_mapping, get_name_id_mapping
-from pyobo.getters import NoOboFoundry
+from pyobo.getters import NoOboFoundry, MissingOboBuild
 from pyobo.identifier_utils import SYNONYM_TO_KEY, normalize_prefix
 from pyobo.xrefdb.sources.famplex import get_remapping
 from tqdm import tqdm
@@ -302,7 +302,11 @@ def _handle_identifier_not_name(*, concept, prefix, identifier) -> bool:
         concept[NAME] = get_mnemonic(identifier)
         return True
 
-    id_name_mapping = get_id_name_mapping(prefix)
+    try:
+        id_name_mapping = get_id_name_mapping(prefix)
+    except (NoOboFoundry, MissingOboBuild):
+        return False
+
     if id_name_mapping is None:
         logger.warning('could not get names for prefix %s', prefix)
         return False
@@ -379,8 +383,9 @@ def _handle_name_and_not_identifier(*, concept, prefix, name, node=None) -> bool
 
     try:
         id_name_mapping = get_name_id_mapping(prefix)
-    except NoOboFoundry:
-        id_name_mapping = None
+    except (NoOboFoundry, MissingOboBuild) as e:
+        logger.warning('could not get namespace %s', prefix, e)
+        return False
 
     if id_name_mapping is None:
         logger.warning('unhandled namespace in %s ! %s', prefix, name)
