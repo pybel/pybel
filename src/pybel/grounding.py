@@ -166,9 +166,20 @@ _BEL_ANNOTATION_PREFIX_MAP = {
 _UNHANDLED_ANNOTATION = set()
 
 
+def _process_findable_annotations(x, y, prefix, names):
+    name_id = get_name_id_mapping(prefix)
+    for name, polarity in names.items():
+        identifier = name_id.get(name)
+        if identifier:
+            x.append((Entity(namespace=prefix, identifier=identifier, name=name), polarity))
+        else:
+            y.append((prefix, name, polarity))
+
+
 def _process_annotations(data, add_free_annotations: bool = False):
     x = []
     y = []
+
     for prefix, names in data[ANNOTATIONS].items():
         if prefix == 'CellLine':
             efo_name_to_id = get_name_id_mapping('efo')
@@ -181,21 +192,25 @@ def _process_annotations(data, add_free_annotations: bool = False):
                     x.append((Entity(namespace=prefix, identifier=identifier, name=name), polarity))
                 else:
                     y.append((prefix, identifier, polarity))
+
         elif prefix in _BEL_ANNOTATION_PREFIX_MAP:
             prefix = _BEL_ANNOTATION_PREFIX_MAP[prefix]
-            name_id = get_name_id_mapping(prefix)
-            for name, polarity in names.items():
-                identifier = name_id.get(name)
-                if identifier:
-                    x.append((Entity(namespace=prefix, identifier=identifier, name=name), polarity))
-                else:
-                    y.append((prefix, name, polarity))
+            _process_findable_annotations(x, y, prefix, names)
+
+        elif normalize_prefix(prefix):
+            prefix_norm = normalize_prefix(prefix)
+            _process_findable_annotations(x, y, prefix_norm, names)
+
         else:
             if prefix not in _UNHANDLED_ANNOTATION:
                 logger.warning('unhandled annotation: %s', prefix)
                 _UNHANDLED_ANNOTATION.add(prefix)
-            for name, polarity in names.items():
-                y.append((prefix, name, polarity))
+
+            if isinstance(names, dict):
+                for name, polarity in names.items():
+                    y.append((prefix, name, polarity))
+            else:
+                y.append((prefix, names, True))
 
     data[ANNOTATIONS] = defaultdict(dict)
     for entity, polarity in x:
