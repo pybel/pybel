@@ -153,6 +153,7 @@ def get_triple(
         converters.NoChangeDegradationConverter,
         converters.TranscriptionFactorForConverter,
         converters.BindsGeneConverter,
+        converters.BindsProteinConverter,
     ]
 
     for converter in _converters:

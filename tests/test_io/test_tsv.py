@@ -55,6 +55,8 @@ p2 = Protein('HGNC', identifier='9236')
 g3 = Gene('HGNC', identifier='9212')
 r3 = g3.get_rna()
 c1 = ComplexAbundance([p2, g3])
+c2 = ComplexAbundance([p1, p2])
+c3 = ComplexAbundance([a1, p2])
 
 converters_true_list = [
     (PartOfNamedComplexConverter, p1, nca1, _rel(PART_OF), ('HGNC:1', 'partOf', 'FPLX:1')),
@@ -105,7 +107,15 @@ converters_true_list = [
     (
         tsvc.BindsGeneConverter, p2, c1, _rel(DIRECTLY_INCREASES),
         (p2.curie, 'bindsToGene', g3.curie),
-    )
+    ),
+    (
+        tsvc.BindsProteinConverter, p1, c2, _rel(DIRECTLY_INCREASES),
+        (p1.curie, 'bindsToProtein', p2.curie),
+    ),
+    (
+        tsvc.BindsProteinConverter, a1, c3, _rel(DIRECTLY_INCREASES),
+        (a1.curie, 'bindsToProtein', p2.curie),
+    ),
 ]
 
 converters_false_list = [

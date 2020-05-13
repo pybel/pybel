@@ -467,6 +467,27 @@ class TranscriptionFactorForConverter(Converter):
         return gene == v.get_gene()
 
 
+class BindsProteinConverter(Converter):
+    """Converts ``x(B) => complex(p(A), x(B))```."""
+
+    @staticmethod
+    def predicate(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> bool:
+        """Test a BEL edge."""
+        return (
+            edge_data[RELATION] == DIRECTLY_INCREASES
+            and isinstance(v, ComplexAbundance)
+            and len(v.members) == 2
+            and u in v.members
+            and isinstance([m for m in v.members if m != u][0], Protein)
+        )
+
+    @staticmethod
+    def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
+        """Convert a binds protein factor for edge."""
+        g = [m for m in v.members if m != u][0]
+        return _safe_label(u), 'bindsToProtein', _safe_label(g)
+
+
 class BindsGeneConverter(Converter):
     """Converts ``p(B) directlyIncreases complex(g(A), p(B))```."""
 
