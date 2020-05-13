@@ -258,7 +258,7 @@ def _process_concept(*, concept, node=None) -> bool:
 
     prefix = normalize_prefix(namespace)
     if prefix is None:
-        logger.warning('could not normalize namespace: %s ! %s', namespace, concept.name)
+        logger.warning('could not normalize namespace %s in concept %s', namespace, concept)
         return False
 
     concept[NAMESPACE] = prefix
