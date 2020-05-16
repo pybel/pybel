@@ -147,3 +147,7 @@ tags
 [._]*.un~
 
 .mypy_cache
+
+# Testing SBGN files
+src/pybel/io/sbgnml/*.xml.sbgn
+src/pybel/io/sbgnml/*.xml
