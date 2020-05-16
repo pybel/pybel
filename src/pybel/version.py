@@ -30,7 +30,7 @@ def get_git_hash() -> str:
 
 
 def get_version(with_git_hash: bool = False):
-    """Get the PyOBO version string, including a git hash."""
+    """Get the PyBEL version string, including a git hash."""
     return f'{VERSION}-{get_git_hash()}' if with_git_hash else VERSION
 
 
