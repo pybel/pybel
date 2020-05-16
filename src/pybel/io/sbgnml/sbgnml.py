@@ -6,14 +6,17 @@ Inspired by https://github.com/cannin/sbgn2sif.
 """
 
 import itertools as itt
+import json
 import logging
 from collections import defaultdict
+from typing import Any, Mapping
 from xml.etree import ElementTree  # noqa:S405
 
+import click
 import pyobo
 
 from pybel import dsl
-from pybel.io.sbgnml.constants import SBGN, chebi_name_to_id, go_name_to_id, hgnc_name_to_id
+from pybel.io.sbgnml.constants import SBGN, XHTML, chebi_name_to_id, hgnc_name_to_id
 from pybel.io.sbgnml.utils import _get_label, _iter_references
 
 logger = logging.getLogger(__name__)
@@ -27,36 +30,43 @@ DSL_MAPPING = {
 
 def parse(path: str):
     """Parse a SBGN-ML file."""
-    # type: ElementTree
     tree = ElementTree.parse(path)  # noqa:S314
+    return parse_sbgn_tree(tree)
+
+
+def parse_sbgn_tree(tree: ElementTree.ElementTree) -> Mapping[str, Any]:
+    """Parse an SBGN-ML XML element tree."""
     root = tree.getroot()
-    for sbgn_map in root.findall(f"{SBGN}map"):
-        handle_sbgn_map(sbgn_map)
+    maps = list(root.findall(f"{SBGN}map"))
+    if 1 < len(maps):
+        raise ValueError('not supporting multiple maps in one XML now')
+    sbgn_map = maps[0]
+    return handle_sbgn_map(sbgn_map)
 
 
-def handle_sbgn_map(sbgn_map):  # noqa: C901
-    """Handle a map in an SBGN-ML XML element tree."""
+def handle_sbgn_map(sbgn_map: ElementTree.Element):  # noqa: C901
+    """Handle a map element from an SBGN-ML XML element tree."""
     compartments = {}
     for compartment in sbgn_map.findall(f'{SBGN}glyph[@class="compartment"]'):
         compartment_id = compartment.get('id')
         compartment_label = compartment.findall(f'{SBGN}label')[0].get('text')
 
-        go_id = None
+        g_prefix, g_id, g_name = None, None, None
         if compartment_label:
-            go_id = go_name_to_id.get(compartment_label)
-            if go_id is None:  # time to do NLP lol
-                _, go_id, _ = pyobo.ground('go', compartment_label)
-                if go_id:
-                    compartment_label = pyobo.get_name('go', go_id)
-            if not go_id:
-                logger.warning('could not find GO cellular component %s %s', compartment_id, compartment_label)
+            _namespaces = ['go', 'mesh']
+            g_prefix, g_id, g_name = pyobo.multiground(_namespaces, compartment_label)
+            if not g_prefix and not g_id:
+                logger.warning(
+                    'could not find %s [id=%s] in namespaces %s',
+                    compartment_label, compartment_id, _namespaces,
+                )
 
         v = {
             'glyph_id': compartment_id,
             'entity': {
-                'prefix': 'go',
-                'identifier': go_id,
-                'name': compartment_label,
+                'prefix': g_prefix,
+                'identifier': g_id,
+                'name': g_name or compartment_label,
             },
         }
 
@@ -94,23 +104,24 @@ def handle_sbgn_map(sbgn_map):  # noqa: C901
     glyphs = {}
 
     # Build up phenotype glyphs
-    for phenotype in sbgn_map.findall(f'{SBGN}glyph[@class="phenotype"]'):
-        phenotype_glyph_id = phenotype.get('id')
-        phenotype_label = _get_label(phenotype)
-
-        _namespaces = ['go', 'efo']
-        g_prefix, g_id, g_name = pyobo.multiground(_namespaces, phenotype_label)
-        if g_id is None:
-            logger.warning('could not look up phenotype %s %s', phenotype_glyph_id, phenotype_label)
-
+    for phenotype_glyph in sbgn_map.findall(f'{SBGN}glyph[@class="phenotype"]'):
+        phenotype_glyph_id = phenotype_glyph.get('id')
+        phenotype_glyph_label = _get_label(phenotype_glyph)
+        references = _get_references(
+            glyph=phenotype_glyph,
+            glyph_id=phenotype_glyph_id,
+            glyph_class='phenotype',
+            glyph_label=phenotype_glyph_label,
+            prefixes=['go', 'efo'],
+        )
         glyphs[phenotype_glyph_id] = {
             'glyph_id': phenotype_glyph_id,
             'class': 'phenotype',
             'entity': {
-                'prefix': g_prefix,
-                'identifier': g_id,
-                'name': g_name,
-            }
+                'prefix': references[0][0] if references else None,
+                'identifier': references[0][1] if references else None,
+                'name': phenotype_glyph_label,
+            },
         }
 
     # Build up normal glyphs (and ones inside complexes)
@@ -122,10 +133,11 @@ def handle_sbgn_map(sbgn_map):  # noqa: C901
         if glyph_class is None:
             logger.warning('glyph missing class')
             continue
-        if glyph_class in {'compartment', 'process', 'and'}:
+        if glyph_class in {'compartment', 'process', 'and', 'phenotype', 'complex'}:
             continue  # already handled
 
-        if glyph_class in {'phenotype', 'complex', 'uncertain process'}:  # FIXME skip for now
+        if glyph_class not in {'macromolecule', 'simple chemical', 'nucleic acid feature'}:
+            logger.warning('unhandled class: %s', glyph_class)
             continue
 
         glyph_id = glyph.get('id')
@@ -160,20 +172,19 @@ def handle_sbgn_map(sbgn_map):  # noqa: C901
             f'with info: {info}' if info else '',
         )
 
-        references = list(_iter_references(glyph))
-
-        if not references and label in hgnc_name_to_id:
-            references = [('hgnc', hgnc_name_to_id[label])]
-        if not references and label in chebi_name_to_id:
-            references = [('chebi', chebi_name_to_id[label])]
-        elif not references:
-            logger.warning('no references for %s %s %s', glyph_class, glyph_id, label)
-        elif len(references) > 1 and glyph_class == 'macromolecule':
+        references = _get_references(
+            glyph=glyph,
+            glyph_id=glyph_id,
+            glyph_class=glyph_class,
+            glyph_label=label,
+            prefixes=['chebi', 'hgnc'],
+        )
+        if len(references) > 1 and glyph_class == 'macromolecule':
             logger.warning(
-                '%s %s %s has multiple references. Should be a complex?',
-                glyph_class,
-                glyph_id,
+                'multiple references for %s [id=%s, class=%s]. Should be a complex?',
                 label,
+                glyph_id,
+                glyph_class,
             )
             glyph_class = 'complex'
         elif len(references) > 1:
@@ -228,7 +239,7 @@ def handle_sbgn_map(sbgn_map):  # noqa: C901
                 tag = None
 
             component_label_to_info[component_label] = {
-                'glyph_id': complex_id,
+                # 'glyph_id': ??
                 'entity': {
                     'prefix': component_prefix,
                     'identifier': component_identifier,
@@ -239,6 +250,7 @@ def handle_sbgn_map(sbgn_map):  # noqa: C901
 
         glyphs[complex_id] = {
             'glyph_id': complex_id,
+            'class': 'complex',
             'label': label,
             'components': component_label_to_info,
         }
@@ -269,6 +281,7 @@ def handle_sbgn_map(sbgn_map):  # noqa: C901
             arc_source_id in process_to_ports
             or arc_source_id in and_to_ports
         ):
+            # FIXME need to differentiate between these two
             arc_source = arc_source_id
         elif arc_source_id in port_to_process:
             arc_source = port_to_process[arc_source_id]
@@ -290,6 +303,7 @@ def handle_sbgn_map(sbgn_map):  # noqa: C901
             arc_target_id in process_to_ports
             or arc_target_id in and_to_ports
         ):
+            # FIXME need to differentiate between these two
             arc_target = arc_target_id
         elif arc_target_id in port_to_process:
             arc_target = port_to_process[arc_target_id]
@@ -308,43 +322,49 @@ def handle_sbgn_map(sbgn_map):  # noqa: C901
         }
 
     logger.warning('successful: %d / failure: %d', successful, failures)
-    # print(json.dumps(arcs, indent=2))
 
-    # just direct relations, can be added directly
-    direct_stuff = {}
-    # mediated by process
-    process_to_input = {}
-    process_to_output = {}
+    reified_arcs = defaultdict(dict)
+    direct_arcs = []
 
-    for arc in arcs.values():
+    for arc_id, arc in arcs.items():
         # TODO just put this in previous loop
         arc_class = arc['class']
         arc_source = arc['source']
         arc_target = arc['target']
 
-        if arc_class == 'production' and isinstance(arc_source, str) and isinstance(arc_target, dict):
-            logger.info('handling production from %s to %s', arc_source, arc_target['glyph_id'])
+        if isinstance(arc_source, str) and isinstance(arc_target, dict):
+            logger.info('handling %s from %s to %s', arc_class, arc_source, arc_target['glyph_id'])
+            reified_arcs[arc_source]['process'] = arc_source
+            if 'targets' not in reified_arcs[arc_source]:
+                reified_arcs[arc_source]['targets'] = defaultdict(list)
+            reified_arcs[arc_source]['targets'][arc_class].append({
+                'arc_id': arc_id,
+                'arc_class': arc_class,
+                'glyph': arc_target,
+            })
 
-        elif arc_class == 'consumption' and isinstance(arc_source, dict) and isinstance(arc_target, str):
-            logger.info('handling consumption from %s to %s', arc_source['glyph_id'], arc_target)
+        elif isinstance(arc_source, dict) and isinstance(arc_target, str):
+            logger.info('handling %s from %s to %s', arc_class, arc_source['glyph_id'], arc_target)
+            reified_arcs[arc_target]['process'] = arc_target
+            if 'sources' not in reified_arcs[arc_target]:
+                reified_arcs[arc_target]['sources'] = defaultdict(list)
+            reified_arcs[arc_target]['sources'][arc_class].append({
+                'arc_id': arc_id,
+                'arc_class': arc_class,
+                'glyph': arc_source,
+            })
 
-        elif arc_class == 'catalysis' and isinstance(arc_source, dict) and isinstance(arc_target, str):
-            logger.info('handling catalysis from %s on %s', arc_source['glyph_id'], arc_target)
+        elif isinstance(arc_source, str) and isinstance(arc_target, str):
+            logger.warning('unhandled process->process %s', arc_class)
 
-        elif arc_class == 'catalysis' and isinstance(arc_source, str) and isinstance(arc_target, str):
-            logger.warning('unhandled process->process catalysis')
-
-        elif arc_class == 'inhibition' and isinstance(arc_source, dict) and isinstance(arc_target, str):
-            logger.info('handling inhibition of process from %s to %s', arc_source['glyph_id'], arc_target)
-
-        elif arc_class == 'inhibition' and isinstance(arc_source, dict) and isinstance(arc_target, dict):
-            logger.info('handling direct inhibition from %s to %s', arc_source['glyph_id'], arc_target['glyph_id'])
-
-        elif arc_class == 'stimulation' and isinstance(arc_source, dict) and isinstance(arc_target, dict):
-            logger.info('handling direct stimulation from %s to %s', arc_source['glyph_id'], arc_target['glyph_id'])
-
-        elif arc_class == 'logic arc' and isinstance(arc_source, dict) and isinstance(arc_target, str):
-            logger.info('handling AND relation on process %s', arc_target)
+        elif isinstance(arc_source, dict) and isinstance(arc_target, dict):
+            logger.info('handling direct %s from %s to %s', arc_class, arc_source['glyph_id'], arc_target['glyph_id'])
+            direct_arcs.append({
+                'arc_id': arc_id,
+                'arc_class': arc_class,
+                'source': arc_source,
+                'target': arc_target,
+            })
 
         else:
             logger.warning(
@@ -353,9 +373,60 @@ def handle_sbgn_map(sbgn_map):  # noqa: C901
                 arc_source, arc_target
             )
 
+    bodies = sbgn_map.findall(f'{SBGN}notes/{XHTML}html/{XHTML}body')
+    try:
+        body = bodies[0]
+    except IndexError:
+        title = None
+    else:
+        title = body.text.strip()
 
+    return {
+        'title': title,
+        'reified': list(reified_arcs.values()),
+        'direct': direct_arcs,
+    }
+
+
+def _get_references(*, glyph, glyph_id, glyph_label, glyph_class, prefixes):
+    references = list(_iter_references(glyph))
+    if references:
+        return references
+
+    logger.warning(
+        'no references for %s [id=%s, class=%s]. Trying grounding with %s',
+        glyph_label, glyph_id, glyph_class, prefixes,
+    )
+    # references = list(_iter_references(glyph))
+    g_prefix, g_id, g_name = pyobo.multiground(prefixes, glyph_label)
+    if g_prefix:
+        return [(g_prefix, g_id)]
+
+    logger.warning(
+        'grounding failed for %s [id=%s, class=%s] with %s',
+        glyph_label, glyph_id, glyph_class, prefixes,
+    )
+    return []
+
+
+@click.command()
 def _main():
-    parse('ER_Stress_Cov19.xml')
+    import time
+    for path in [
+        'Apoptosis_VS_SSA_AN.xml.sbgn',
+        'COVID19_PAMP_signaling.xml.sbgn',
+        'ER_Stress_Cov19.xml.sbgn',
+        'HMOX1 pathway.xml.sbgn',
+        'Interferon2.xml.sbgn',
+    ]:
+        click.secho(f'Parsing {path}', bold=True, fg='green')
+        rv = parse(path)
+        output = path[:-len('.xml.sbgn')]
+        with open(f'{output}.json', 'w') as file:
+            json.dump(rv, file, indent=2)
+
+        click.echo('sleeping to make sure output is okay')
+        time.sleep(1)
 
 
 if __name__ == '__main__':

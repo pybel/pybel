@@ -4,6 +4,7 @@
 
 import logging
 from typing import Iterable, Optional, Tuple
+from urllib.parse import unquote_plus
 
 from pybel.io.sbgnml.constants import RDF, SBGN, hgnc_name_to_id
 
@@ -35,8 +36,25 @@ def _iter_references(glyph) -> Iterable[Tuple[str, str]]:
                     yield 'chebi', r[len('urn:miriam:obo.chebi:CHEBI%3A:'):]
                 elif r.startswith('urn:miriam:hgnc:HGNC%3A'):
                     yield 'hgnc', r[len('urn:miriam:hgnc:HGNC%3A'):]
-                elif r.startswith('urn:miriam:pubmed:'):
-                    yield 'pubmed', r[len('urn:miriam:pubmed:'):]
+                elif r.startswith('urn:miriam:doi:'):
+                    yield 'doi', unquote_plus(r[len('urn:miriam:doi:'):])
+                elif r.startswith('urn:miriam:'):
+                    r = r[len('urn:miriam:'):]
+                    for sf in [
+                        'kegg.pathway',
+                        'ncbigene',
+                        'uniprot',
+                        'pubmed',
+                        'hgnc',
+                        'ncbiprotein',
+                        'drugbank',
+                    ]:
+                        if r.startswith(sf):
+                            yield sf, r[len(sf) + 1:]
+                            break
+                    else:
+                        logger.warning(f'unhandled urn:miriam resource: %s', r)
+
                 else:
                     logger.warning(f'unhandled resource: %s', r)
                     continue

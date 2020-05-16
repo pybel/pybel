@@ -151,3 +151,4 @@ tags
 # Testing SBGN files
 src/pybel/io/sbgnml/*.xml.sbgn
 src/pybel/io/sbgnml/*.xml
+src/pybel/io/sbgnml/*.json
