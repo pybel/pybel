@@ -15,9 +15,9 @@ from xml.etree import ElementTree  # noqa:S405
 import click
 import pyobo
 
-from pybel import dsl
-from pybel.io.sbgnml.constants import SBGN, XHTML, chebi_name_to_id, hgnc_name_to_id
-from pybel.io.sbgnml.utils import _get_label, _iter_references
+from ... import dsl
+from .constants import SBGN, XHTML, chebi_name_to_id, hgnc_name_to_id
+from .utils import _get_label, _iter_references
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +28,9 @@ DSL_MAPPING = {
 }
 
 
-def parse(path: str):
-    """Parse a SBGN-ML file."""
+
+def parse_sbgn(path: str) -> Mapping[str, Any]:
+    """Parse a SBGN-ML file into a usable dictionary."""
     tree = ElementTree.parse(path)  # noqa:S314
     return parse_sbgn_tree(tree)
 
@@ -407,32 +408,3 @@ def _get_references(*, glyph, glyph_id, glyph_label, glyph_class, prefixes):
         glyph_label, glyph_id, glyph_class, prefixes,
     )
     return []
-
-
-@click.command()
-def _main():
-    import time
-    for path in [
-        'Apoptosis_VS_SSA_AN.xml.sbgn',
-        'COVID19_PAMP_signaling.xml.sbgn',
-        'ER_Stress_Cov19.xml.sbgn',
-        'HMOX1 pathway.xml.sbgn',
-        'Interferon2.xml.sbgn',
-    ]:
-        click.secho(f'Parsing {path}', bold=True, fg='green')
-        rv = parse(path)
-        output = path[:-len('.xml.sbgn')]
-        with open(f'{output}.json', 'w') as file:
-            json.dump(rv, file, indent=2)
-
-        click.echo('sleeping to make sure output is okay')
-        time.sleep(1)
-
-
-if __name__ == '__main__':
-    logging.basicConfig(
-        level=logging.WARNING,
-        format='[%(asctime)s] %(levelname)-8s - %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S',
-    )
-    _main()

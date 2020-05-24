@@ -6,7 +6,7 @@ import logging
 from typing import Iterable, Optional, Tuple
 from urllib.parse import unquote_plus
 
-from pybel.io.sbgnml.constants import RDF, SBGN, hgnc_name_to_id
+from .constants import RDF, SBGN, hgnc_name_to_id
 
 logger = logging.getLogger(__name__)
 

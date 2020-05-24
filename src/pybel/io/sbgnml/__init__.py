@@ -4,3 +4,5 @@
 
 Inspired by https://github.com/cannin/sbgn2sif.
 """
+
+from .sbgnml import parse_sbgn
