@@ -110,6 +110,22 @@ class PartOfNamedComplexConverter(_PartOfConverter):
     object_type = NamedComplexAbundance
 
 
+class ProcessCausalConverter(SimpleConverter, SimpleTypedPredicate):
+    """Converts BEL statements like ``bp(X) increases/decreases bp(Y)``."""
+
+    subject_type = BiologicalProcess
+    relations = CAUSAL_RELATIONS
+    object_type = BiologicalProcess
+
+    @classmethod
+    def predicate(cls, u, v, key, edge_data) -> bool:
+        """Test a BEL edge has a given relation."""
+        return (
+            isinstance(u, cls.subject_type)
+            and edge_data[RELATION] in cls.relations
+            and isinstance(v, cls.object_type)
+        )
+
 class SubprocessPartOfBiologicalProcessConverter(_PartOfConverter):
     """Converts BEL statements like ``bp(X) partOf bp(Y)``."""
 

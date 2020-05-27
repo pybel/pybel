@@ -63,6 +63,10 @@ c3 = ComplexAbundance([a1, p2])
 converters_true_list = [
     (PartOfNamedComplexConverter, p1, nca1, _rel(PART_OF), ('HGNC:1', 'partOf', 'FPLX:1')),
     (SubprocessPartOfBiologicalProcessConverter, b1, b2, _rel(PART_OF), ('GO:1', 'partOf', 'GO:2')),
+    (tsvc.ProcessCausalConverter, b1, b2, _rel(INCREASES), ('GO:1', INCREASES, 'GO:2')),
+    (tsvc.ProcessCausalConverter, b1, b2, _rel(DECREASES), ('GO:1', DECREASES, 'GO:2')),
+    (tsvc.ProcessCausalConverter, b1, b2, _rel(DIRECTLY_INCREASES), ('GO:1', DIRECTLY_INCREASES, 'GO:2')),
+    (tsvc.ProcessCausalConverter, b1, b2, _rel(DIRECTLY_DECREASES), ('GO:1', DIRECTLY_DECREASES, 'GO:2')),
     (AssociationConverter, r1, r2, _rel(ASSOCIATION), ('HGNC:1', 'association', 'HGNC:2')),
     (AssociationConverter, r1, r2, _assoc('similarity'), ('HGNC:1', 'similarity', 'HGNC:2')),
     (CorrelationConverter, r1, r2, _rel(POSITIVE_CORRELATION), ('HGNC:1', 'positiveCorrelation', 'HGNC:2')),
