@@ -168,15 +168,20 @@ _BEL_ANNOTATION_PREFIX_MAP = {
     'Disease': 'doid',
     'Cell': 'cl',
 }
+_BEL_ANNOTATION_PREFIX_CATEGORY_MAP = {
+    'MeSHDisease': 'Disease',
+    'MeSHAnatomy': 'Anatomy',
+}
+
 _UNHANDLED_ANNOTATION = set()
 
 
-def _process_findable_annotations(x, y, prefix, names):
+def _process_findable_annotations(x, y, z, prefix, names):
     name_id = get_name_id_mapping(prefix)
     for name, polarity in names.items():
         identifier = name_id.get(name)
         if identifier:
-            x.append((Entity(namespace=prefix, identifier=identifier, name=name), polarity))
+            x.append((z, Entity(namespace=prefix, identifier=identifier, name=name), polarity))
         else:
             y.append((prefix, name, polarity))
 
@@ -190,21 +195,24 @@ def _process_annotations(data, add_free_annotations: bool = False):
             efo_name_to_id = get_name_id_mapping('efo')
             # clo_name_to_id = get_name_id_mapping('clo')  # FIXME implement CLO import
             for name, polarity in names.items():
-                prefix, identifier = 'efo', efo_name_to_id.get(name)
+                efo_prefix, identifier = 'efo', efo_name_to_id.get(name)
                 # if identifier is None:
                 #     prefix, identifier = 'clo', clo_name_to_id.get(name)
                 if identifier is not None:
-                    x.append((Entity(namespace=prefix, identifier=identifier, name=name), polarity))
+                    x.append((prefix, Entity(namespace=efo_prefix, identifier=identifier, name=name), polarity))
                 else:
                     y.append((prefix, identifier, polarity))
 
         elif prefix in _BEL_ANNOTATION_PREFIX_MAP:
-            prefix = _BEL_ANNOTATION_PREFIX_MAP[prefix]
-            _process_findable_annotations(x, y, prefix, names)
+            _process_findable_annotations(
+                x, y,
+                _BEL_ANNOTATION_PREFIX_CATEGORY_MAP.get(prefix, prefix),
+                _BEL_ANNOTATION_PREFIX_MAP[prefix], names,
+            )
 
         elif normalize_prefix(prefix):
             prefix_norm = normalize_prefix(prefix)
-            _process_findable_annotations(x, y, prefix_norm, names)
+            _process_findable_annotations(x, y, prefix, prefix_norm, names)
 
         else:
             if prefix not in _UNHANDLED_ANNOTATION:
@@ -218,8 +226,8 @@ def _process_annotations(data, add_free_annotations: bool = False):
                 y.append((prefix, names, True))
 
     data[ANNOTATIONS] = defaultdict(dict)
-    for entity, polarity in x:
-        data[ANNOTATIONS][entity.namespace][entity.identifier] = polarity
+    for prefix, entity, polarity in x:
+        data[ANNOTATIONS][prefix][entity.curie] = polarity
 
     if add_free_annotations:
         data['free_annotations'] = defaultdict(dict)
