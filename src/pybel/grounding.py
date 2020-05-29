@@ -65,6 +65,7 @@ from pybel.constants import (
     ACTIVITY, ANNOTATIONS, CONCEPT, EFFECT, FROM_LOC, FUSION, GMOD, IDENTIFIER, KIND, LOCATION, MEMBERS, MODIFIER, NAME,
     NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PMOD, PRODUCTS, REACTANTS, SUBJECT, TO_LOC, TRANSLOCATION, VARIANTS,
 )
+from pybel.dsl import BaseConcept
 from pybel.io import from_nodelink, to_nodelink
 from pybel.language import Entity, activity_mapping, compartment_mapping, gmod_mappings, pmod_mappings
 from pybel.struct import BELGraph, get_annotations, get_namespaces, get_ungrounded_nodes
@@ -76,7 +77,7 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 SKIP = {'ncbigene', 'pubchem.compound', 'chembl.compound'}
-NO_NAMES = {'fplx', 'eccode', 'dbsnp'}
+NO_NAMES = {'fplx', 'eccode', 'dbsnp', 'smiles', 'inchi', 'inchikey'}
 
 # TODO will get updated
 #: A mapping of (prefix, name) pairs to (prefix, identifier, name) triples
@@ -103,7 +104,11 @@ def ground(graph: BELGraph, remove_ungrounded: bool = True) -> BELGraph:
     remove_unused_annotation_metadata(graph)
 
     if remove_ungrounded:
-        ungrounded_nodes = get_ungrounded_nodes(graph)
+        ungrounded_nodes = {
+            node
+            for node in get_ungrounded_nodes(graph)
+            if not isinstance(node, BaseConcept) or node.namespace not in NO_NAMES
+        }
         graph.remove_nodes_from(ungrounded_nodes)
         graph.namespace_url.clear()
         graph.namespace_pattern.clear()

@@ -137,6 +137,7 @@ def get_triple(
         converters.DrugIndicationConverter,
         converters.DrugSideEffectConverter,
         converters.RegulatesAmountConverter,
+        converters.ProcessCausalConverter,
         converters.IncreasesAmountConverter,
         converters.DecreasesAmountConverter,
         converters.NoChangeAmountConverter,
