@@ -14,6 +14,7 @@ import pybel.grounding
 HERE = os.path.dirname(__file__)
 URL = 'https://github.com/hemekg/hemekg/raw/master/hemekg/_cache.bel.nodelink.json'
 PATH = os.path.join(HERE, 'hemekg.bel.nodelink.json')
+GROUNDED_PATH = os.path.join(HERE, 'hemekg-grounded.bel.nodelink.json')
 
 
 @click.command()
@@ -22,9 +23,12 @@ def main():
     """Convert the HemeKG graph to Hipathia."""
     if not os.path.exists(PATH):
         urlretrieve(URL, PATH)
-
-    graph = pybel.load(PATH)
-    graph = pybel.grounding.ground(graph)
+    if not os.path.exists(GROUNDED_PATH):
+        graph = pybel.load(PATH)
+        graph = pybel.grounding.ground(graph)
+        pybel.dump(graph, GROUNDED_PATH)
+    else:
+        graph = pybel.load(GROUNDED_PATH)
     pybel.to_hipathia(graph, HERE)
 
 

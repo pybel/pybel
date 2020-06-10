@@ -14,6 +14,7 @@ import pybel.grounding
 HERE = os.path.dirname(__file__)
 URL = 'https://github.com/covid19kg/covid19kg/raw/master/covid19kg/_cache.bel.nodelink.json'
 PATH = os.path.join(HERE, 'covid19.bel.nodelink.json')
+GROUNDED_PATH = os.path.join(HERE, 'covid19-grounded.bel.nodelink.json')
 
 
 @click.command()
@@ -22,9 +23,12 @@ def main():
     """Convert the COVID-19 graph to Hipathia."""
     if not os.path.exists(PATH):
         urlretrieve(URL, PATH)
-
-    graph = pybel.load(PATH)
-    graph = pybel.grounding.ground(graph)
+    if not os.path.exists(GROUNDED_PATH):
+        graph = pybel.load(PATH)
+        graph = pybel.grounding.ground(graph)
+        pybel.dump(graph, GROUNDED_PATH, indent=2)
+    else:
+        graph = pybel.load(GROUNDED_PATH)
     pybel.to_hipathia(graph, HERE)
 
 
