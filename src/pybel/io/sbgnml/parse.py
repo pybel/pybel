@@ -9,7 +9,7 @@ import itertools as itt
 import logging
 import re
 from collections import defaultdict
-from typing import Any, Mapping
+from typing import Any, Iterable, List, Mapping, Optional, Tuple, Union
 from xml.etree import ElementTree  # noqa:S405
 
 import pyobo
@@ -21,24 +21,33 @@ logger = logging.getLogger(__name__)
 
 COMPLEX_DELIM = re.compile(r'[:/]')
 
+GroundingMap = Mapping[str, Tuple[str, str, str]]
 
-def parse_sbgn(path: str) -> Mapping[str, Any]:
+
+def parse_sbgn(path: str, grounding_map: Optional[GroundingMap] = None) -> Mapping[str, Any]:
     """Parse a SBGN-ML file into a usable dictionary."""
     tree = ElementTree.parse(path)  # noqa:S314
-    return parse_sbgn_tree(tree)
+    return parse_sbgn_tree(tree, grounding_map=grounding_map)
 
 
-def parse_sbgn_tree(tree: ElementTree.ElementTree) -> Mapping[str, Any]:
+def parse_sbgn_tree(tree: ElementTree.ElementTree, grounding_map: Optional[GroundingMap] = None) -> Mapping[str, Any]:
     """Parse an SBGN-ML XML element tree."""
     root = tree.getroot()
     maps = list(root.findall(f"{SBGN}map"))
     if 1 < len(maps):
         raise ValueError('not supporting multiple maps in one XML now')
     sbgn_map = maps[0]
-    return handle_sbgn_map(sbgn_map)
+    return handle_sbgn_map(sbgn_map, grounding_map=grounding_map)
 
 
-def handle_sbgn_map(sbgn_map: ElementTree.Element):  # noqa: C901
+def ground(namespaces: Union[str, Iterable[str]], text: str, *, grounding_map: Optional[GroundingMap] = None):
+    """Ground using a custom map."""
+    if grounding_map and text in grounding_map:
+        return grounding_map[text]
+    return pyobo.ground(namespaces, text)
+
+
+def handle_sbgn_map(sbgn_map: ElementTree.Element, grounding_map: Optional[GroundingMap] = None):  # noqa: C901
     """Handle a map element from an SBGN-ML XML element tree."""
     compartments = {}
     for compartment in sbgn_map.findall(f'{SBGN}glyph[@class="compartment"]'):
@@ -46,9 +55,10 @@ def handle_sbgn_map(sbgn_map: ElementTree.Element):  # noqa: C901
         compartment_label = compartment.findall(f'{SBGN}label')[0].get('text')
 
         g_prefix, g_id, g_name = None, None, None
+
         if compartment_label:
             _namespaces = ['go', 'mesh']
-            g_prefix, g_id, g_name = pyobo.ground(_namespaces, compartment_label)
+            g_prefix, g_id, g_name = ground(_namespaces, compartment_label, grounding_map=grounding_map)
             if not g_prefix and not g_id:
                 logger.warning(
                     'could not find %s [id=%s] in namespaces %s',
@@ -107,6 +117,7 @@ def handle_sbgn_map(sbgn_map: ElementTree.Element):  # noqa: C901
             glyph_class='phenotype',
             glyph_label=phenotype_glyph_label,
             prefixes=['go', 'efo', 'hp', 'doid', 'mesh'],
+            grounding_map=grounding_map,
         )
         glyphs[phenotype_glyph_id] = {
             'glyph_id': phenotype_glyph_id,
@@ -172,6 +183,7 @@ def handle_sbgn_map(sbgn_map: ElementTree.Element):  # noqa: C901
             glyph_class=glyph_class,
             glyph_label=label,
             prefixes=['hgnc', 'fplx', 'go', 'chebi'],
+            grounding_map=grounding_map,
         )
         if len(references) > 1 and glyph_class == 'macromolecule':
             logger.warning(
@@ -215,13 +227,13 @@ def handle_sbgn_map(sbgn_map: ElementTree.Element):  # noqa: C901
                 component_label = component_label[:-len('-ubq')]
                 (component_prefix,
                  component_identifier,
-                 component_label) = pyobo.ground(['fplx', 'hgnc', 'go'], component_label)
+                 component_label) = ground(['fplx', 'hgnc', 'go'], component_label, grounding_map=grounding_map)
                 tag = 'ubq'
             elif component_label.endswith('-P'):  # phosphorylated
                 component_label = component_label[:-len('-P')]
                 (component_prefix,
                  component_identifier,
-                 component_label) = pyobo.ground(['fplx', 'hgnc', 'go'], component_label)
+                 component_label) = ground(['fplx', 'hgnc', 'go'], component_label, grounding_map=grounding_map)
                 tag = 'P'
             elif component_label.endswith('*'):  # complex of family of genes with ascending numbers :)
                 component_identifier = '?'
@@ -234,7 +246,7 @@ def handle_sbgn_map(sbgn_map: ElementTree.Element):  # noqa: C901
             else:
                 (component_prefix,
                  component_identifier,
-                 component_label) = pyobo.ground(['fplx', 'hgnc', 'go'], component_label)
+                 component_label) = ground(['fplx', 'hgnc', 'go'], component_label, grounding_map=grounding_map)
                 tag = None
 
             component_label_to_info[component_label] = {
@@ -387,13 +399,16 @@ def handle_sbgn_map(sbgn_map: ElementTree.Element):  # noqa: C901
     }
 
 
-def _get_references(*, glyph, glyph_id, glyph_label, glyph_class, prefixes):
+def _get_references(
+    *, glyph, glyph_id, glyph_label, glyph_class,
+    prefixes, grounding_map: Optional[GroundingMap],
+) -> List[Tuple[str, str]]:
     references = list(_iter_references(glyph))
     if references:
         return references
 
     # references = list(_iter_references(glyph))
-    g_prefix, g_id, g_name = pyobo.ground(prefixes, glyph_label)
+    g_prefix, g_id, g_name = ground(prefixes, glyph_label, grounding_map=grounding_map)
     if g_prefix:
         return [(g_prefix, g_id)]
 

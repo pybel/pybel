@@ -1,0 +1,551 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sbgn xmlns="http://sbgn.org/libsbgn/0.2">
+    <map language="process description">
+        <extension>
+            <renderInformation backgroundColor="#ffffff" id="renderInformation" programName="cd2sbgnml" programVersion="0.1" xmlns="http://www.sbml.org/sbml/level3/version1/render/version1">
+                <listOfColorDefinitions>
+                    <colorDefinition id="color_6" value="#cc99ffff"/>
+                    <colorDefinition id="color_7" value="#ff00ffff"/>
+                    <colorDefinition id="color_1" value="#ccffccff"/>
+                    <colorDefinition id="color_3" value="#ccff66ff"/>
+                    <colorDefinition id="color_2" value="#000000ff"/>
+                    <colorDefinition id="color_4" value="#ffccccff"/>
+                    <colorDefinition id="color_5" value="#ffff66ff"/>
+                    <colorDefinition id="color_8" value="#ffffff00"/>
+                </listOfColorDefinitions>
+                <listOfStyles>
+                    <style id="style_1.0ffff00ff12.0ff000000" idList="s22_sa28 s23_sa6 s23_sa26 s18_sa22">
+                        <g fill="color_7" fontSize="12.0" stroke="color_2" strokeWidth="1.0"/>
+                    </style>
+                    <style id="style_1.0ffccff6612.0ff000000" idList="s3_sa3 s4_sa4 s10_sa12 s12_sa15 s13_sa17">
+                        <g fill="color_3" fontSize="12.0" stroke="color_2" strokeWidth="1.0"/>
+                    </style>
+                    <style id="style_1.0ffffcccc12.0ff000000" idList="s14_sa18">
+                        <g fill="color_4" fontSize="12.0" stroke="color_2" strokeWidth="1.0"/>
+                    </style>
+                    <style id="style_1.0ffcc99ff12.0ff000000" idList="s20_sa24">
+                        <g fill="color_6" fontSize="12.0" stroke="color_2" strokeWidth="1.0"/>
+                    </style>
+                    <style id="style_1.0ffffff6612.0ff000000" idList="s19_sa23">
+                        <g fill="color_5" fontSize="12.0" stroke="color_2" strokeWidth="1.0"/>
+                    </style>
+                    <style id="style_1.0ffccffcc12.0ff000000" idList="s1_sa1 s2_sa2 s5_sa5 s5_sa25 s11_sa14 s15_sa19 s16_sa20 s17_sa21">
+                        <g fill="color_1" fontSize="12.0" stroke="color_2" strokeWidth="1.0"/>
+                    </style>
+                    <style id="style_1.000ffffff12.0ff000000" idList="pr_709a4e98-05d8-4082-adfe-caa8c611f4d0 cons_c0ff5385-9c1b-455f-9ab9-623c4d2a2fcd prod_34396826-ce2a-43c3-be81-c51228aca50d modif_68582918-ca63-49f8-aa8d-aa3136556655 pr_4a0cc77d-c161-4f64-a2cd-36bf26823118 cons_86e9f5cb-c57a-4e82-8ed2-56937ec79d45 prod_4b144073-b9b3-4266-bd31-2393b40d5bb6 modif_6b66ecab-12dc-4626-adc1-932bf12220d8 pr_cfb3588c-03f2-4eeb-b378-3a637e7da11b cons_e17b5ab4-92a6-42fd-a27b-7d5157bc8708 prod_4aa5872b-98ce-4957-982d-5534534dc9b6 modif_7e31d63e-c114-428b-904a-6c4a57ee7bc9 pr_b53ff4de-181a-45b5-9cf0-2ae7fdebfcd4 cons_ad05202d-1c9a-4d1e-95d8-83860ff3807e prod_a5c06ef7-5a0d-4f9f-8733-054c7b5e7012 modif_191338af-c592-4354-98f7-3824bd932a14 pr_102b0f95-a71c-40ac-9f12-8af0d2a7c0c1 cons_f8161609-8a55-4ef5-be39-1a2dd21a3193 prod_05a8be11-d84b-4435-8624-aa205d27f240 modif_f9f77552-0e1e-40e1-b0b2-959b6ebe3af5 pr_4aeca22a-2a44-4377-85e3-7dc5c413ca2f cons_385a6150-1dd9-40e2-8474-64e12549fdd5 prod_4cc10932-4da4-419b-8d28-2a56e6fbf695 pr_a7140ca9-079f-4a2c-925f-1cf275a4000a cons_e70fe582-c099-496b-a8ef-7fe8927dd80a prod_35da9340-5ceb-41dd-b211-454d473825b6 pr_7568b1ea-1c74-406f-9cd1-194215120571 cons_9bf7d4f2-2065-436b-ae5c-a0089fe0ec7d prod_d74e98fa-6688-4be3-8b6c-f4aef1b9bf59 pr_50c22b0b-6616-47a2-b4a3-9473639a4318 cons_24cb0ebf-c68b-4be0-8ff5-dfe4f23d74fe prod_7cac4edc-c278-4bfb-8305-2a2f7bf9dfb5 pr_0d9d9e7b-6af4-4d7a-894c-9ff4f44bed22 cons_e6a2fdc6-dd04-4eef-a73e-39416a3336f6 prod_0cb60729-20fa-4b66-a947-f4df72dc905e pr_adfd3f0f-a848-4a07-8581-934a4965b6c0 cons_3e8c8423-70c6-4ecd-882d-f75d3743c738 prod_9de35c8f-f853-495e-936e-5519b590ff04 pr_80d47b95-0014-4e0e-b69a-957e71837eaa cons_a351b4d1-81f0-46a7-933c-4a44a4fd8eac prod_5c9d1eca-17e1-43ee-a622-8e92fafdfad4 modif_d7327560-6344-4431-89b5-c99c90c8d946 direct_98706067-e7ac-4235-992a-e6d4f75feb35 direct_6ff8868c-ed23-4c15-80ab-8778d5c7e989 direct_ead5a13b-39d1-4ed6-bf0e-cde3048367bf pr_272c39e4-624c-4509-be6c-8202c5e74c9b cons_71cf2032-ae0c-4fcf-940e-45540ed8475f prod_28cc5039-75fe-4eb7-a8a3-780d45e24457 pr_fbb9e7e9-2603-4d6c-bce0-28eb348b9c4d cons_bf653301-f015-4035-9b11-9335271b5ef7 prod_64d2450c-0b4c-4b62-9c8e-7b3c0e6d10c2 modif_55ce2496-0de7-4c95-9d3f-e4b2d8de0b8b pr_5965e10f-1efe-4ee6-9321-55c20dacb9ef cons_4d460554-a53c-4050-aab1-eee02077d8de prod_bb6ccebd-a49f-4715-89a1-c7b36bfc1d17 pr_a97815a9-a056-4043-a1f2-639d62fac29c cons_d8f3a992-31a6-439b-a7aa-49b6b2041be7 prod_b0b28562-1062-440f-ae34-5f8c73ade0dc">
+                        <g fill="color_8" fontSize="12.0" stroke="color_2" strokeWidth="1.0"/>
+                    </style>
+                </listOfStyles>
+            </renderInformation>
+        </extension>
+        <glyph class="macromolecule" id="s1_sa1">
+            <label text="AGT"/>
+            <bbox w="80.0" h="40.0" x="258.0" y="25.0"/>
+        </glyph>
+        <glyph class="macromolecule" id="s2_sa2">
+            <label text="REN"/>
+            <bbox w="80.0" h="40.0" x="158.0" y="90.0"/>
+        </glyph>
+        <glyph class="simple chemical" id="s3_sa3">
+            <label text="angiotensin I"/>
+            <bbox w="108.0" h="46.0" x="243.0" y="153.5"/>
+        </glyph>
+        <glyph class="simple chemical" id="s4_sa4">
+            <label text="angiotensin II"/>
+            <bbox w="108.0" h="46.0" x="242.0" y="261.0"/>
+        </glyph>
+        <glyph class="macromolecule" id="s5_sa5">
+            <label text="ACE"/>
+            <clone/>
+            <bbox w="80.0" h="40.0" x="152.0" y="209.0"/>
+        </glyph>
+        <glyph class="macromolecule" id="s5_sa25">
+            <label text="ACE"/>
+            <clone/>
+            <bbox w="80.0" h="40.0" x="570.5" y="211.5"/>
+        </glyph>
+        <glyph class="simple chemical" id="s10_sa12">
+            <label text="angiotensin I-9"/>
+            <bbox w="108.0" h="46.0" x="475.0" y="154.0"/>
+        </glyph>
+        <glyph class="macromolecule" id="s11_sa14">
+            <label text="ACE2"/>
+            <bbox w="80.0" h="40.0" x="393.0" y="212.0"/>
+            <glyph class="unit of information" id="_794acead-831e-4516-ae62-c82627d6f2ab">
+                <label text="receptor"/>
+                <bbox w="45.0" h="10.0" x="410.5" y="207.0"/>
+            </glyph>
+        </glyph>
+        <glyph class="simple chemical" id="s12_sa15">
+            <label text="angiotensin I-7"/>
+            <bbox w="108.0" h="46.0" x="475.0" y="263.0"/>
+        </glyph>
+        <glyph class="simple chemical" id="s13_sa17">
+            <label text="Calcitriol"/>
+            <bbox w="70.0" h="25.0" x="81.0" y="46.5"/>
+        </glyph>
+        <glyph class="macromolecule" id="s14_sa18">
+            <label text="SPIKE"/>
+            <bbox w="69.0" h="39.0" x="399.0" y="24.0"/>
+        </glyph>
+        <glyph class="macromolecule" id="s15_sa19">
+            <label text="AGTR1"/>
+            <bbox w="80.0" h="40.0" x="312.0" y="384.0"/>
+            <glyph class="unit of information" id="_309d8bad-384a-4597-8d2f-7d880ea48d02">
+                <label text="receptor"/>
+                <bbox w="45.0" h="10.0" x="329.5" y="379.0"/>
+            </glyph>
+        </glyph>
+        <glyph class="macromolecule" id="s16_sa20">
+            <label text="AGTR2"/>
+            <bbox w="80.0" h="40.0" x="191.0" y="387.0"/>
+            <glyph class="unit of information" id="_c630862b-5027-46d7-a515-6506c66f6700">
+                <label text="receptor"/>
+                <bbox w="45.0" h="10.0" x="208.5" y="382.0"/>
+            </glyph>
+        </glyph>
+        <glyph class="macromolecule" id="s17_sa21">
+            <label text="MAS1"/>
+            <bbox w="80.0" h="40.0" x="490.0" y="383.0"/>
+            <glyph class="unit of information" id="_a0d2204d-e16a-4f93-950e-3e20d1486a6b">
+                <label text="receptor"/>
+                <bbox w="45.0" h="10.0" x="507.5" y="378.0"/>
+            </glyph>
+        </glyph>
+        <glyph class="nucleic acid feature" id="s19_sa23">
+            <label text="REN"/>
+            <bbox w="70.0" h="25.0" x="16.0" y="97.5"/>
+        </glyph>
+        <glyph class="phenotype" id="s20_sa24">
+            <label text="blood pressure"/>
+            <bbox w="138.0" h="35.0" x="312.0" y="448.0"/>
+        </glyph>
+        <glyph class="simple chemical" id="s22_sa28">
+            <label text="CGP42112A"/>
+            <bbox w="113.0" h="29.0" x="55.0" y="345.6"/>
+            <glyph class="unit of information" id="_a9c7847b-89be-436c-a2f3-2ee7630accc7">
+                <label text="drug"/>
+                <bbox w="25.0" h="10.0" x="99.0" y="340.6"/>
+            </glyph>
+        </glyph>
+        <glyph class="simple chemical" id="s23_sa6">
+            <label text="Lisinopril"/>
+            <clone/>
+            <bbox w="116.0" h="41.0" x="7.0" y="209.0"/>
+            <glyph class="unit of information" id="_c2c74300-988e-4c2b-ac5d-773ef1842f09">
+                <label text="drug"/>
+                <bbox w="25.0" h="10.0" x="52.5" y="204.0"/>
+            </glyph>
+        </glyph>
+        <glyph class="simple chemical" id="s23_sa26">
+            <label text="Lisinopril"/>
+            <clone/>
+            <bbox w="117.0" h="42.0" x="679.5" y="210.5"/>
+            <glyph class="unit of information" id="_f5a4d7f9-5a9f-4718-bf27-d1d979e00556">
+                <label text="drug"/>
+                <bbox w="25.0" h="10.0" x="725.5" y="205.5"/>
+            </glyph>
+        </glyph>
+        <glyph class="simple chemical" id="s18_sa22">
+            <notes>
+                <html xmlns="http://www.w3.org/1999/xhtml" xmlns:celldesigner="http://www.sbml.org/2001/ns/celldesigner">
+                    <head>
+                        <title/>
+</head>
+                    <body>Angiotensin receptor blockers
+</body>
+</html>
+            </notes>
+            <label text="losartan"/>
+            <bbox w="113.0" h="29.0" x="394.0" y="343.0"/>
+            <glyph class="unit of information" id="_835b4fb1-cfbe-466e-9d10-559ed30b6a5d">
+                <label text="drug"/>
+                <bbox w="25.0" h="10.0" x="438.0" y="338.0"/>
+            </glyph>
+        </glyph>
+        <glyph class="process" orientation="vertical" id="pr_709a4e98-05d8-4082-adfe-caa8c611f4d0">
+            <notes>
+                <html xmlns="http://www.w3.org/1999/xhtml" xmlns:celldesigner="http://www.sbml.org/2001/ns/celldesigner">
+                    <head>
+                        <title/>
+</head>
+                    <body>Renin provides only one known function, to cleave the 10-amino acid precursor peptide angiotensin I (Ang-I),1 from the N terminus of mature angiotensinogen (AGT). PMID:10585461
+</body>
+</html>
+            </notes>
+            <bbox w="10.0" h="10.0" x="292.60315" y="104.25"/>
+            <port id="pr_709a4e98-05d8-4082-adfe-caa8c611f4d0_p1" x="297.60315" y="94.25"/>
+            <port id="pr_709a4e98-05d8-4082-adfe-caa8c611f4d0_p2" x="297.60315" y="124.25"/>
+        </glyph>
+        <glyph class="process" orientation="vertical" id="pr_4a0cc77d-c161-4f64-a2cd-36bf26823118">
+            <notes>
+                <html xmlns="http://www.w3.org/1999/xhtml" xmlns:celldesigner="http://www.sbml.org/2001/ns/celldesigner">
+                    <head>
+                        <title/>
+</head>
+                    <body>The angiotensin I converting enzyme has two important functions: it inactivates bradykinin and converts angiotensin I to angiotensin II. PMID:190881
+</body>
+</html>
+            </notes>
+            <bbox w="10.0" h="10.0" x="291.3639" y="225.25"/>
+            <port id="pr_4a0cc77d-c161-4f64-a2cd-36bf26823118_p1" x="296.3639" y="215.25"/>
+            <port id="pr_4a0cc77d-c161-4f64-a2cd-36bf26823118_p2" x="296.3639" y="245.25"/>
+        </glyph>
+        <glyph class="process" orientation="horizontal" id="pr_cfb3588c-03f2-4eeb-b378-3a637e7da11b">
+            <notes>
+                <html xmlns="http://www.w3.org/1999/xhtml" xmlns:celldesigner="http://www.sbml.org/2001/ns/celldesigner">
+                    <head>
+                        <title/>
+</head>
+                    <body> Recombinant ACE2 hydrolyzes the carboxy terminal leucine from angiotensin I to generate angiotensin 1-9, which is converted to smaller angiotensin peptides by ACE in vitro and by cardiomyocytes in culture. PMID:10969042
+</body>
+</html>
+            </notes>
+            <bbox w="10.0" h="10.0" x="408.0" y="171.75"/>
+            <port id="pr_cfb3588c-03f2-4eeb-b378-3a637e7da11b_p1" x="398.0" y="176.75"/>
+            <port id="pr_cfb3588c-03f2-4eeb-b378-3a637e7da11b_p2" x="428.0" y="176.75"/>
+        </glyph>
+        <glyph class="process" orientation="vertical" id="pr_b53ff4de-181a-45b5-9cf0-2ae7fdebfcd4">
+            <bbox w="10.0" h="10.0" x="524.0" y="226.5"/>
+            <port id="pr_b53ff4de-181a-45b5-9cf0-2ae7fdebfcd4_p1" x="529.0" y="216.5"/>
+            <port id="pr_b53ff4de-181a-45b5-9cf0-2ae7fdebfcd4_p2" x="529.0" y="246.5"/>
+        </glyph>
+        <glyph class="process" orientation="horizontal" id="pr_102b0f95-a71c-40ac-9f12-8af0d2a7c0c1">
+            <notes>
+                <html xmlns="http://www.w3.org/1999/xhtml" xmlns:celldesigner="http://www.sbml.org/2001/ns/celldesigner">
+                    <head>
+                        <title/>
+</head>
+                    <body>The main role of ACE2 is the degradation of Ang II resulting in the formation of angiotensin 1-7 (Ang 1-7) which opposes the actions of Ang II. PMID:22536270
+</body>
+</html>
+            </notes>
+            <bbox w="10.0" h="10.0" x="407.5" y="280.3017"/>
+            <port id="pr_102b0f95-a71c-40ac-9f12-8af0d2a7c0c1_p1" x="397.5" y="285.3017"/>
+            <port id="pr_102b0f95-a71c-40ac-9f12-8af0d2a7c0c1_p2" x="427.5" y="285.3017"/>
+        </glyph>
+        <glyph class="process" orientation="vertical" id="pr_4aeca22a-2a44-4377-85e3-7dc5c413ca2f">
+            <notes>
+                <html xmlns="http://www.w3.org/1999/xhtml" xmlns:celldesigner="http://www.sbml.org/2001/ns/celldesigner">
+                    <head>
+                        <title/>
+</head>
+                    <body>Recently, ACE2 was reported as an entry receptor for SARS-CoV-2. In this study, we present the crystal structure of the C-terminal domain of SARS-CoV-2 (SARS-CoV-2-CTD) spike (S) protein in complex with human ACE2 (hACE2), which reveals a hACE2-binding mode similar overall to that observed for SARS-CoV. PMID:32275855
+</body>
+</html>
+            </notes>
+            <bbox w="10.0" h="10.0" x="428.2337" y="132.5"/>
+            <port id="pr_4aeca22a-2a44-4377-85e3-7dc5c413ca2f_p1" x="433.2337" y="122.5"/>
+            <port id="pr_4aeca22a-2a44-4377-85e3-7dc5c413ca2f_p2" x="433.2337" y="152.5"/>
+        </glyph>
+        <glyph class="process" orientation="horizontal" id="pr_a7140ca9-079f-4a2c-925f-1cf275a4000a">
+            <notes>
+                <html xmlns="http://www.w3.org/1999/xhtml" xmlns:celldesigner="http://www.sbml.org/2001/ns/celldesigner">
+                    <head>
+                        <title/>
+</head>
+                    <body>We studied the efficacy of the ACE inhibitor lisinopril in treating overt proteinuria in comparison with the NSAID indomethacin, and evaluated some of the conditions that could influence this antiproteinuric effect. PMID: 2550696
+</body>
+</html>
+            </notes>
+            <bbox w="10.0" h="10.0" x="132.5" y="224.39493"/>
+            <port id="pr_a7140ca9-079f-4a2c-925f-1cf275a4000a_p1" x="122.5" y="229.39493"/>
+            <port id="pr_a7140ca9-079f-4a2c-925f-1cf275a4000a_p2" x="152.5" y="229.39493"/>
+        </glyph>
+        <glyph class="process" orientation="vertical" id="pr_7568b1ea-1c74-406f-9cd1-194215120571">
+            <notes>
+                <html xmlns="http://www.w3.org/1999/xhtml" xmlns:celldesigner="http://www.sbml.org/2001/ns/celldesigner">
+                    <head>
+                        <title/>
+</head>
+                    <body>Angiotensin II (ANGII) signaling, mediated via angiotensin II receptor type 1 (AGTR1) or type 2 (AGTR2), controls tissue remodeling in fibrosis, but the relevance of AGTR2 remains elusive. PMID:17630322 
+</body>
+</html>
+            </notes>
+            <bbox w="10.0" h="10.0" x="316.3647" y="340.5"/>
+            <port id="pr_7568b1ea-1c74-406f-9cd1-194215120571_p1" x="321.3647" y="330.5"/>
+            <port id="pr_7568b1ea-1c74-406f-9cd1-194215120571_p2" x="321.3647" y="360.5"/>
+        </glyph>
+        <glyph class="process" orientation="vertical" id="pr_50c22b0b-6616-47a2-b4a3-9473639a4318">
+            <notes>
+                <html xmlns="http://www.w3.org/1999/xhtml" xmlns:celldesigner="http://www.sbml.org/2001/ns/celldesigner">
+                    <head>
+                        <title/>
+</head>
+                    <body>Angiotensin II (ANGII) signaling, mediated via angiotensin II receptor type 1 (AGTR1) or type 2 (AGTR2), controls tissue remodeling in fibrosis, but the relevance of AGTR2 remains elusive. PMID:17630322 
+</body>
+</html>
+            </notes>
+            <bbox w="10.0" h="10.0" x="261.45453" y="342.0"/>
+            <port id="pr_50c22b0b-6616-47a2-b4a3-9473639a4318_p1" x="266.45453" y="332.0"/>
+            <port id="pr_50c22b0b-6616-47a2-b4a3-9473639a4318_p2" x="266.45453" y="362.0"/>
+        </glyph>
+        <glyph class="process" orientation="vertical" id="pr_0d9d9e7b-6af4-4d7a-894c-9ff4f44bed22">
+            <notes>
+                <html xmlns="http://www.w3.org/1999/xhtml" xmlns:celldesigner="http://www.sbml.org/2001/ns/celldesigner">
+                    <head>
+                        <title/>
+</head>
+                    <body>ANG-(1-7) itself acts on the receptor MAS to influence a range of mechanisms in the heart, kidney, brain, and other tissues. PMID:29351514
+</body>
+</html>
+            </notes>
+            <bbox w="10.0" h="10.0" x="524.3936" y="341.0"/>
+            <port id="pr_0d9d9e7b-6af4-4d7a-894c-9ff4f44bed22_p1" x="529.3936" y="331.0"/>
+            <port id="pr_0d9d9e7b-6af4-4d7a-894c-9ff4f44bed22_p2" x="529.3936" y="361.0"/>
+        </glyph>
+        <glyph class="process" orientation="horizontal" id="pr_adfd3f0f-a848-4a07-8581-934a4965b6c0">
+            <notes>
+                <html xmlns="http://www.w3.org/1999/xhtml" xmlns:celldesigner="http://www.sbml.org/2001/ns/celldesigner">
+                    <head>
+                        <title/>
+</head>
+                    <body>Native Xenopus lung preparations were used for Ussing chamber recordings and apically applied ANGII (10μM) induced a significant increase of short-circuit current (ISC: 8±2%, n=13). Pre-incubation with losartan (LOS), an antagonist of ATR1 prevented the effect of ANGII on ISC. PMID:24530803
+</body>
+</html>
+            </notes>
+            <bbox w="10.0" h="10.0" x="416.25" y="381.0"/>
+            <port id="pr_adfd3f0f-a848-4a07-8581-934a4965b6c0_p1" x="436.25" y="386.0"/>
+            <port id="pr_adfd3f0f-a848-4a07-8581-934a4965b6c0_p2" x="406.25" y="386.0"/>
+        </glyph>
+        <glyph class="process" orientation="horizontal" id="pr_80d47b95-0014-4e0e-b69a-957e71837eaa">
+            <notes>
+                <html xmlns="http://www.w3.org/1999/xhtml" xmlns:celldesigner="http://www.sbml.org/2001/ns/celldesigner">
+                    <head>
+                        <title/>
+</head>
+                    <body>In wild-type mice, inhibition of 1,25-dihydroxyvitamin D(3) [1,25(OH)(2)D(3)] synthesis also led to an increase in renin expression, whereas 1,25(OH)(2)D(3) injection led to renin suppression. PMID:12122115
+</body>
+</html>
+            </notes>
+            <bbox w="10.0" h="10.0" x="117.0" y="105.0"/>
+            <port id="pr_80d47b95-0014-4e0e-b69a-957e71837eaa_p1" x="107.0" y="110.0"/>
+            <port id="pr_80d47b95-0014-4e0e-b69a-957e71837eaa_p2" x="137.0" y="110.0"/>
+        </glyph>
+        <glyph class="process" orientation="horizontal" id="pr_272c39e4-624c-4509-be6c-8202c5e74c9b">
+            <notes>
+                <html xmlns="http://www.w3.org/1999/xhtml" xmlns:celldesigner="http://www.sbml.org/2001/ns/celldesigner">
+                    <head>
+                        <title/>
+</head>
+                    <body>We studied the efficacy of the ACE inhibitor lisinopril in treating overt proteinuria in comparison with the NSAID indomethacin, and evaluated some of the conditions that could influence this antiproteinuric effect. PMID: 2550696
+</body>
+</html>
+            </notes>
+            <bbox w="10.0" h="10.0" x="660.0" y="226.5"/>
+            <port id="pr_272c39e4-624c-4509-be6c-8202c5e74c9b_p1" x="680.0" y="231.5"/>
+            <port id="pr_272c39e4-624c-4509-be6c-8202c5e74c9b_p2" x="650.0" y="231.5"/>
+        </glyph>
+        <glyph class="process" orientation="vertical" id="pr_fbb9e7e9-2603-4d6c-bce0-28eb348b9c4d">
+            <notes>
+                <html xmlns="http://www.w3.org/1999/xhtml" xmlns:celldesigner="http://www.sbml.org/2001/ns/celldesigner">
+                    <head>
+                        <title/>
+</head>
+                    <body>Because AT1R seems to be essential for Ang-II–mediated ACE2 internalization, we also tested whether ACE2 and AT1R physically interact. Coimmunoprecipitation experiments confirmed this dimerization in control conditions (Figure 5B, second lane). However, Ang-II treatment decreased this interaction in a time-dependent manner [...]. PMID:25225202 
+</body>
+</html>
+            </notes>
+            <bbox w="10.0" h="10.0" x="370.0625" y="309.0"/>
+            <port id="pr_fbb9e7e9-2603-4d6c-bce0-28eb348b9c4d_p1" x="375.0625" y="299.0"/>
+            <port id="pr_fbb9e7e9-2603-4d6c-bce0-28eb348b9c4d_p2" x="375.0625" y="329.0"/>
+        </glyph>
+        <glyph class="process" orientation="vertical" id="pr_5965e10f-1efe-4ee6-9321-55c20dacb9ef">
+            <notes>
+                <html xmlns="http://www.w3.org/1999/xhtml" xmlns:celldesigner="http://www.sbml.org/2001/ns/celldesigner">
+                    <head>
+                        <title/>
+</head>
+                    <body>Although treatment with AGTR1 antagonist (losartan) or AGTR2 agonist (CGP42112A) inhibits tumor progression in several cancer cells, their combined treatment has not been reported. PMID:25014541 
+</body>
+</html>
+            </notes>
+            <bbox w="10.0" h="10.0" x="174.5" y="383.8"/>
+            <port id="pr_5965e10f-1efe-4ee6-9321-55c20dacb9ef_p1" x="179.5" y="373.8"/>
+            <port id="pr_5965e10f-1efe-4ee6-9321-55c20dacb9ef_p2" x="179.5" y="403.8"/>
+        </glyph>
+        <glyph class="process" orientation="vertical" id="pr_a97815a9-a056-4043-a1f2-639d62fac29c">
+            <notes>
+                <html xmlns="http://www.w3.org/1999/xhtml" xmlns:celldesigner="http://www.sbml.org/2001/ns/celldesigner">
+                    <head>
+                        <title/>
+</head>
+                    <body>Several lines of evidence indicate that Ang-II–induced ACE2 internalization and lysosomal degradation are mediated by AT1R. First, this effect is blocked by the AT1R blocker losartan. PMID:25225202  
+</body>
+</html>
+            </notes>
+            <bbox w="10.0" h="10.0" x="446.6974" y="292.5"/>
+            <port id="pr_a97815a9-a056-4043-a1f2-639d62fac29c_p1" x="451.6974" y="312.5"/>
+            <port id="pr_a97815a9-a056-4043-a1f2-639d62fac29c_p2" x="451.6974" y="282.5"/>
+        </glyph>
+        <arc class="consumption" id="cons_c0ff5385-9c1b-455f-9ab9-623c4d2a2fcd" source="s1_sa1" target="pr_709a4e98-05d8-4082-adfe-caa8c611f4d0_p1">
+            <start x="298.0" y="65.0"/>
+            <end x="297.60315" y="94.25"/>
+        </arc>
+        <arc class="production" id="prod_34396826-ce2a-43c3-be81-c51228aca50d" source="pr_709a4e98-05d8-4082-adfe-caa8c611f4d0_p2" target="s3_sa3">
+            <start x="297.60315" y="124.25"/>
+            <end x="297.20627" y="153.5"/>
+        </arc>
+        <arc class="catalysis" id="modif_68582918-ca63-49f8-aa8d-aa3136556655" source="s2_sa2" target="pr_709a4e98-05d8-4082-adfe-caa8c611f4d0">
+            <start x="238.0" y="110.0"/>
+            <end x="292.60336" y="109.205154"/>
+        </arc>
+        <arc class="consumption" id="cons_86e9f5cb-c57a-4e82-8ed2-56937ec79d45" source="s3_sa3" target="pr_4a0cc77d-c161-4f64-a2cd-36bf26823118_p1">
+            <start x="296.7278" y="199.5"/>
+            <end x="296.3639" y="215.25"/>
+        </arc>
+        <arc class="production" id="prod_4b144073-b9b3-4266-bd31-2393b40d5bb6" source="pr_4a0cc77d-c161-4f64-a2cd-36bf26823118_p2" target="s4_sa4">
+            <start x="296.3639" y="245.25"/>
+            <end x="296.0" y="261.0"/>
+        </arc>
+        <arc class="catalysis" id="modif_6b66ecab-12dc-4626-adc1-932bf12220d8" source="s5_sa5" target="pr_4a0cc77d-c161-4f64-a2cd-36bf26823118">
+            <start x="232.0" y="229.0"/>
+            <end x="301.36356" y="230.30916"/>
+        </arc>
+        <arc class="consumption" id="cons_e17b5ab4-92a6-42fd-a27b-7d5157bc8708" source="s3_sa3" target="pr_cfb3588c-03f2-4eeb-b378-3a637e7da11b_p1">
+            <start x="351.0" y="176.61638"/>
+            <end x="398.0" y="176.75"/>
+        </arc>
+        <arc class="production" id="prod_4aa5872b-98ce-4957-982d-5534534dc9b6" source="pr_cfb3588c-03f2-4eeb-b378-3a637e7da11b_p2" target="s10_sa12">
+            <start x="428.0" y="176.75"/>
+            <end x="475.0" y="176.88362"/>
+        </arc>
+        <arc class="catalysis" id="modif_7e31d63e-c114-428b-904a-6c4a57ee7bc9" source="s11_sa14" target="pr_cfb3588c-03f2-4eeb-b378-3a637e7da11b">
+            <start x="413.00098" y="212.0"/>
+            <end x="413.01077" y="171.75002"/>
+        </arc>
+        <arc class="consumption" id="cons_ad05202d-1c9a-4d1e-95d8-83860ff3807e" source="s10_sa12" target="pr_b53ff4de-181a-45b5-9cf0-2ae7fdebfcd4_p1">
+            <start x="529.0" y="200.0"/>
+            <end x="529.0" y="216.5"/>
+        </arc>
+        <arc class="production" id="prod_a5c06ef7-5a0d-4f9f-8733-054c7b5e7012" source="pr_b53ff4de-181a-45b5-9cf0-2ae7fdebfcd4_p2" target="s12_sa15">
+            <start x="529.0" y="246.5"/>
+            <end x="529.0" y="263.0"/>
+        </arc>
+        <arc class="catalysis" id="modif_191338af-c592-4354-98f7-3824bd932a14" source="s5_sa25" target="pr_b53ff4de-181a-45b5-9cf0-2ae7fdebfcd4">
+            <start x="570.5" y="231.5"/>
+            <end x="534.0" y="231.5"/>
+        </arc>
+        <arc class="consumption" id="cons_f8161609-8a55-4ef5-be39-1a2dd21a3193" source="s4_sa4" target="pr_102b0f95-a71c-40ac-9f12-8af0d2a7c0c1_p1">
+            <start x="350.0" y="284.60336"/>
+            <end x="397.5" y="285.3017"/>
+        </arc>
+        <arc class="production" id="prod_05a8be11-d84b-4435-8624-aa205d27f240" source="pr_102b0f95-a71c-40ac-9f12-8af0d2a7c0c1_p2" target="s12_sa15">
+            <start x="427.5" y="285.3017"/>
+            <end x="475.0" y="286.0"/>
+        </arc>
+        <arc class="catalysis" id="modif_f9f77552-0e1e-40e1-b0b2-959b6ebe3af5" source="s11_sa14" target="pr_102b0f95-a71c-40ac-9f12-8af0d2a7c0c1">
+            <start x="412.945" y="252.0"/>
+            <end x="412.55585" y="280.302"/>
+        </arc>
+        <arc class="consumption" id="cons_385a6150-1dd9-40e2-8474-64e12549fdd5" source="s14_sa18" target="pr_4aeca22a-2a44-4377-85e3-7dc5c413ca2f_p1">
+            <start x="433.44476" y="63.0"/>
+            <end x="433.2337" y="122.5"/>
+        </arc>
+        <arc class="production" id="prod_4cc10932-4da4-419b-8d28-2a56e6fbf695" source="pr_4aeca22a-2a44-4377-85e3-7dc5c413ca2f_p2" target="s11_sa14">
+            <start x="433.2337" y="152.5"/>
+            <end x="433.02267" y="212.0"/>
+        </arc>
+        <arc class="consumption" id="cons_e70fe582-c099-496b-a8ef-7fe8927dd80a" source="s23_sa6" target="pr_a7140ca9-079f-4a2c-925f-1cf275a4000a_p1">
+            <start x="123.0" y="229.5"/>
+            <end x="122.5" y="229.39493"/>
+        </arc>
+        <arc class="production" id="prod_35da9340-5ceb-41dd-b211-454d473825b6" source="pr_a7140ca9-079f-4a2c-925f-1cf275a4000a_p2" target="s5_sa5">
+            <start x="152.5" y="229.39493"/>
+            <end x="152.0" y="229.28986"/>
+        </arc>
+        <arc class="consumption" id="cons_9bf7d4f2-2065-436b-ae5c-a0089fe0ec7d" source="s4_sa4" target="pr_7568b1ea-1c74-406f-9cd1-194215120571_p1">
+            <start x="296.0" y="307.0"/>
+            <end x="321.3647" y="330.5"/>
+        </arc>
+        <arc class="production" id="prod_d74e98fa-6688-4be3-8b6c-f4aef1b9bf59" source="pr_7568b1ea-1c74-406f-9cd1-194215120571_p2" target="s15_sa19">
+            <start x="321.3647" y="360.5"/>
+            <end x="346.7294" y="384.0"/>
+        </arc>
+        <arc class="consumption" id="cons_24cb0ebf-c68b-4be0-8ff5-dfe4f23d74fe" source="s4_sa4" target="pr_50c22b0b-6616-47a2-b4a3-9473639a4318_p1">
+            <start x="296.0" y="307.0"/>
+            <end x="266.45453" y="332.0"/>
+        </arc>
+        <arc class="production" id="prod_7cac4edc-c278-4bfb-8305-2a2f7bf9dfb5" source="pr_50c22b0b-6616-47a2-b4a3-9473639a4318_p2" target="s16_sa20">
+            <start x="266.45453" y="362.0"/>
+            <end x="236.90909" y="387.0"/>
+        </arc>
+        <arc class="consumption" id="cons_e6a2fdc6-dd04-4eef-a73e-39416a3336f6" source="s12_sa15" target="pr_0d9d9e7b-6af4-4d7a-894c-9ff4f44bed22_p1">
+            <start x="529.0" y="309.0"/>
+            <end x="529.3936" y="331.0"/>
+        </arc>
+        <arc class="production" id="prod_0cb60729-20fa-4b66-a947-f4df72dc905e" source="pr_0d9d9e7b-6af4-4d7a-894c-9ff4f44bed22_p2" target="s17_sa21">
+            <start x="529.3936" y="361.0"/>
+            <end x="529.78723" y="383.0"/>
+        </arc>
+        <arc class="consumption" id="cons_3e8c8423-70c6-4ecd-882d-f75d3743c738" source="s18_sa22" target="pr_adfd3f0f-a848-4a07-8581-934a4965b6c0_p1">
+            <start x="450.5" y="372.0"/>
+            <end x="436.25" y="386.0"/>
+        </arc>
+        <arc class="production" id="prod_9de35c8f-f853-495e-936e-5519b590ff04" source="pr_adfd3f0f-a848-4a07-8581-934a4965b6c0_p2" target="s15_sa19">
+            <start x="406.25" y="386.0"/>
+            <end x="392.0" y="400.0"/>
+        </arc>
+        <arc class="consumption" id="cons_a351b4d1-81f0-46a7-933c-4a44a4fd8eac" source="s19_sa23" target="pr_80d47b95-0014-4e0e-b69a-957e71837eaa_p1">
+            <start x="86.0" y="110.0"/>
+            <end x="107.0" y="110.0"/>
+        </arc>
+        <arc class="production" id="prod_5c9d1eca-17e1-43ee-a622-8e92fafdfad4" source="pr_80d47b95-0014-4e0e-b69a-957e71837eaa_p2" target="s2_sa2">
+            <start x="137.0" y="110.0"/>
+            <end x="158.0" y="110.0"/>
+        </arc>
+        <arc class="inhibition" id="modif_d7327560-6344-4431-89b5-c99c90c8d946" source="s13_sa17" target="pr_80d47b95-0014-4e0e-b69a-957e71837eaa">
+            <start x="116.271736" y="71.5"/>
+            <end x="117.0" y="105.0"/>
+        </arc>
+        <arc class="inhibition" id="direct_98706067-e7ac-4235-992a-e6d4f75feb35" source="s17_sa21" target="s20_sa24">
+            <start x="504.8387" y="423.0"/>
+            <end x="450.0" y="465.5"/>
+        </arc>
+        <arc class="inhibition" id="direct_6ff8868c-ed23-4c15-80ab-8778d5c7e989" source="s16_sa20" target="s20_sa24">
+            <start x="271.0" y="422.6"/>
+            <end x="336.1282" y="448.0"/>
+        </arc>
+        <arc class="stimulation" id="direct_ead5a13b-39d1-4ed6-bf0e-cde3048367bf" source="s15_sa19" target="s20_sa24">
+            <start x="353.47726" y="424.0"/>
+            <end x="355.25" y="448.0"/>
+        </arc>
+        <arc class="consumption" id="cons_71cf2032-ae0c-4fcf-940e-45540ed8475f" source="s23_sa26" target="pr_272c39e4-624c-4509-be6c-8202c5e74c9b_p1">
+            <start x="679.5" y="231.5"/>
+            <end x="680.0" y="231.5"/>
+        </arc>
+        <arc class="production" id="prod_28cc5039-75fe-4eb7-a8a3-780d45e24457" source="pr_272c39e4-624c-4509-be6c-8202c5e74c9b_p2" target="s5_sa25">
+            <start x="650.0" y="231.5"/>
+            <end x="650.5" y="231.5"/>
+        </arc>
+        <arc class="consumption" id="cons_bf653301-f015-4035-9b11-9335271b5ef7" source="s11_sa14" target="pr_fbb9e7e9-2603-4d6c-bce0-28eb348b9c4d_p1">
+            <start x="393.0" y="244.0"/>
+            <end x="375.0625" y="299.0"/>
+        </arc>
+        <arc class="production" id="prod_64d2450c-0b4c-4b62-9c8e-7b3c0e6d10c2" source="pr_fbb9e7e9-2603-4d6c-bce0-28eb348b9c4d_p2" target="s15_sa19">
+            <start x="375.0625" y="329.0"/>
+            <end x="357.125" y="384.0"/>
+        </arc>
+        <arc class="modulation" id="modif_55ce2496-0de7-4c95-9d3f-e4b2d8de0b8b" source="s4_sa4" target="pr_fbb9e7e9-2603-4d6c-bce0-28eb348b9c4d">
+            <start x="345.8895" y="292.80173"/>
+            <end x="370.219" y="312.75885"/>
+        </arc>
+        <arc class="consumption" id="cons_4d460554-a53c-4050-aab1-eee02077d8de" source="s22_sa28" target="pr_5965e10f-1efe-4ee6-9321-55c20dacb9ef_p1">
+            <start x="168.0" y="374.6"/>
+            <end x="179.5" y="373.8"/>
+        </arc>
+        <arc class="production" id="prod_bb6ccebd-a49f-4715-89a1-c7b36bfc1d17" source="pr_5965e10f-1efe-4ee6-9321-55c20dacb9ef_p2" target="s16_sa20">
+            <start x="179.5" y="403.8"/>
+            <end x="191.0" y="403.0"/>
+        </arc>
+        <arc class="consumption" id="cons_d8f3a992-31a6-439b-a7aa-49b6b2041be7" source="s18_sa22" target="pr_a97815a9-a056-4043-a1f2-639d62fac29c_p1">
+            <start x="450.5" y="343.0"/>
+            <end x="451.6974" y="312.5"/>
+        </arc>
+        <arc class="production" id="prod_b0b28562-1062-440f-ae34-5f8c73ade0dc" source="pr_a97815a9-a056-4043-a1f2-639d62fac29c_p2" target="s11_sa14">
+            <start x="451.6974" y="282.5"/>
+            <end x="452.89474" y="252.0"/>
+        </arc>
+    </map>
+</sbgn>
+
