@@ -68,6 +68,7 @@ import logging
 import os
 from collections import defaultdict
 from itertools import groupby
+from operator import itemgetter
 from typing import List, Optional, Set, Tuple, Union
 
 import networkx as nx
@@ -244,7 +245,7 @@ def to_hipathia_dfs(
     proteins = set()
     families = defaultdict(set)
     complexes = set()
-    for node in graph:
+    for node in sorted(graph, key=str):
         if isinstance(node, Protein):
             children = _is_node_family(graph, node)
             if children:
@@ -254,12 +255,15 @@ def to_hipathia_dfs(
         elif isinstance(node, ComplexAbundance) and all(isinstance(m, Protein) for m in node.members):
             complexes.add(node)
 
-    families = {k: sorted(values, key=str) for k, values in families.items()}
+    families = {
+        node: sorted(values, key=str)
+        for node, values in sorted(families.items(), key=itemgetter(0))
+    }
 
-    nodes = proteins.union(families).union(complexes)
+    nodes = sorted(proteins.union(families).union(complexes), key=str)
     new_nodes = set()
     edges = []
-    for u, v, d in graph.out_edges(nodes, data=True):
+    for u, v, _, d in sorted(graph.out_edges(nodes, keys=True, data=True), key=lambda t: (str(t[0]), str(t[1]), t[2])):
         relation = d[RELATION]
         if relation not in CAUSAL_POLAR_RELATIONS:
             continue
@@ -324,10 +328,11 @@ def to_hipathia_dfs(
     composite_graph = nx.Graph([(k_source, k_target) for k_source, _, k_target in edges])
 
     try:
-        from networkx.drawing.nx_agraph import graphviz_layout
-        pos = graphviz_layout(composite_graph, prog="neato")
+        from networkx.drawing.nx_agraph import pygraphviz_layout
+        pos = pygraphviz_layout(composite_graph, prog="neato", args='-Gstart=5')
     except ImportError:
-        pos = nx.spring_layout(composite_graph)
+        logger.warning('could not import pygraphviz. Falling back to force directed')
+        pos = nx.fruchterman_reingold_layout(composite_graph, seed=5)
 
     if not pos:
         return None, None
