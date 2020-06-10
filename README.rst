@@ -1,7 +1,7 @@
 PyBEL |zenodo| |build| |windows_build| |coverage| |documentation|
 =================================================================
 `PyBEL <http://pybel.readthedocs.io>`_ is a pure Python package for parsing and handling biological networks encoded in
-the `Biological Expression Language <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_
+the `Biological Expression Language <https://biological-expression-language.github.io/>`_
 (BEL).
 
 It facilitates data interchange between data formats like `NetworkX <http://networkx.github.io/>`_,
@@ -10,9 +10,9 @@ Node-Link JSON, `JGIF <https://github.com/jsongraph/json-graph-specification>`_,
 `INDRA <https://github.com/sorgerlab/indra>`_, and `GraphDati <https://github.com/graphdati/schemas>`_; database systems
 like SQL and `Neo4J <https://neo4j.com>`_; and web services like `NDEx <https://github.com/pybel/pybel2cx>`_,
 `BioDati Studio <https://biodati.com/>`_, and `BEL Commons <https://bel-commons-dev.scai.fraunhofer.de>`_. It also
-provides exports for analytical tools like `HiPathia <http://hipathia.babelomics.org/>`_ and
-`SPIA <https://bioconductor.org/packages/release/bioc/html/SPIA.html>`_; machine learning tools like
-`PyKEEN <https://github.com/smartdataanalytics/biokeen>`_ and
+provides exports for analytical tools like `HiPathia <http://hipathia.babelomics.org/>`_,
+`Drug2ways <https://github.com/drug2ways/>`_ and `SPIA <https://bioconductor.org/packages/release/bioc/html/SPIA.html>`_;
+machine learning tools like `PyKEEN <https://github.com/smartdataanalytics/biokeen>`_ and
 `OpenBioLink <https://github.com/OpenBioLink/OpenBioLink#biological-expression-language-bel-writer>`_; and others.
 
 Its companion package, `PyBEL Tools <http://pybel-tools.readthedocs.io/>`_, contains a
@@ -65,8 +65,9 @@ This example illustrates how the a BEL document from the `Human Brain Pharmacome
    >>> url = 'https://raw.githubusercontent.com/pharmacome/knowledge/master/hbp_knowledge/proteostasis/kim2013.bel'
    >>> graph = pybel.from_url(url)
 
-PyBEL can handle `BEL 1.0 <http://openbel.org/language/version_1.0/bel_specification_version_1.0.html>`_
-and `BEL 2.0+ <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_ simultaneously.
+PyBEL can handle `BEL 1.0 <https://github.com/OpenBEL/language/raw/master/docs/version_1.0/bel_specification_version_1.0.pdf>`_
+and `BEL 2.0+ <https://github.com/OpenBEL/language/raw/master/docs/version_2.0/bel_specification_version_2.0.pdf>`_
+simultaneously.
 
 After you have a BEL graph, there are numerous ways to save it. The ``pybel.dump`` function knows
 how to output it in many formats based on the file extension you give. For all of the possibilities,
@@ -141,6 +142,7 @@ Supporters
 ~~~~~~~~~~
 This project has been supported by several organizations:
 
+- `Enveda Therapeutics <https://envedatherapeutics.com/>`_
 - `University of Bonn <https://www.uni-bonn.de>`_
 - `Bonn Aachen International Center for IT <http://www.b-it-center.de>`_
 - `Fraunhofer Institute for Algorithms and Scientific Computing <https://www.scai.fraunhofer.de>`_
