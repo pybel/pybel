@@ -256,6 +256,8 @@ CITATION = 'citation'
 EVIDENCE = 'evidence'
 #: The key for an internal edge data dictionary for the annotations dictionary
 ANNOTATIONS = 'annotations'
+#: The key for free annotations
+FREE_ANNOTATIONS = 'free_annotations'
 #: The key for an internal edge data dictionary for the subject modifier dictionary
 SUBJECT = 'subject'
 #: The key for an internal edge data dictionary for the object modifier dictionary

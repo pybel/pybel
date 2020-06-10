@@ -126,6 +126,7 @@ class ProcessCausalConverter(SimpleConverter, SimpleTypedPredicate):
             and isinstance(v, cls.object_type)
         )
 
+
 class SubprocessPartOfBiologicalProcessConverter(_PartOfConverter):
     """Converts BEL statements like ``bp(X) partOf bp(Y)``."""
 
@@ -531,7 +532,7 @@ class ProteinRegulatesComplex(Converter):
 
     @staticmethod
     def predicate(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> bool:
-        """Test a BEL edge"""
+        """Test a BEL edge."""
         return (
             isinstance(u, Protein)
             and isinstance(v, ComplexAbundance)
