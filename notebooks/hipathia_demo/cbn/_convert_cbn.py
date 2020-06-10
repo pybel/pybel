@@ -12,7 +12,7 @@ from pyobo.cli_utils import verbose_option
 from tqdm import tqdm
 
 import pybel
-import pybel.ground
+import pybel.grounding
 
 HERE = os.path.dirname(__file__)
 OUTPUT = os.path.join(HERE, 'output')
@@ -41,7 +41,7 @@ def main():
             cbn_jgif_dict = json.load(f)
 
         graph = pybel.from_cbn_jgif(cbn_jgif_dict)
-        graph = pybel.ground.ground_graph(graph)
+        graph = pybel.grounding.ground(graph)
         pybel.to_hipathia(graph, OUTPUT)
 
 

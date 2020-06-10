@@ -425,7 +425,7 @@ def _handle_name_and_not_identifier(*, concept, prefix, name, node=None) -> bool
     try:
         id_name_mapping = get_name_id_mapping(prefix)
     except (NoOboFoundry, MissingOboBuild) as e:
-        logger.warning('could not get namespace %s', prefix, e)
+        logger.warning('could not get namespace %s - %s', prefix, e)
         return False
 
     if id_name_mapping is None:

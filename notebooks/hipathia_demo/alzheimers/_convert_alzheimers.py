@@ -8,7 +8,7 @@ import click
 from pyobo.cli_utils import verbose_option
 
 import pybel
-import pybel.ground
+import pybel.grounding
 from pybel.struct import get_subgraphs_by_annotation
 
 HERE = os.path.dirname(__file__)
@@ -22,7 +22,7 @@ PATH = os.path.join(HERE, 'alzheimers.bel.nodelink.json')
 def main():
     """Convert the AD graph to Hipathia."""
     graph = pybel.load(PATH)
-    graph = pybel.ground.ground_graph(graph)
+    graph = pybel.grounding.ground(graph)
 
     graphs = get_subgraphs_by_annotation(graph, annotation='Subgraph')
     for name, graph in graphs.items():

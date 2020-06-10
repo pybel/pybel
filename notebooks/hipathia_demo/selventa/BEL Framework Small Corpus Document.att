@@ -1,358 +1,459 @@
 ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
-N-BEL Framework Small Corpus Document-1 2	Anaphase Promoting Complex CDC20	162	144	white	rectangle	gene,gene	0.5	black	46	17	1723
-N-BEL Framework Small Corpus Document-101 102	CDK2 CDKN1A	66	99	white	rectangle	gene,gene	0.5	black	46	17	1771,/,1784
-N-BEL Framework Small Corpus Document-103 104 105	IRAK4 IRAK1 MYD88	132	117	white	rectangle	gene,gene,gene	0.5	black	46	17	17967,/,6112,/,7562
-N-BEL Framework Small Corpus Document-106 107	CYCS APAF1	4	50	white	rectangle	gene,gene	0.5	black	46	17	19986,/,576
-N-BEL Framework Small Corpus Document-108 109	CREBBP CTNNB1	71	59	white	rectangle	gene,gene	0.5	black	46	17	2348,/,2514
-N-BEL Framework Small Corpus Document-11 12 13	ARRB Family PDE4 Family ADRB2	188	127	white	rectangle	gene,gene,gene	0.5	black	46	17	286
-N-BEL Framework Small Corpus Document-110 111	CREBBP AKT1	59	87	white	rectangle	gene,gene	0.5	black	46	17	2348,/,391
-N-BEL Framework Small Corpus Document-112 113	CREBBP HIF1A	97	81	white	rectangle	gene,gene	0.5	black	46	17	2348,/,4910
-N-BEL Framework Small Corpus Document-114 115	CTNNB1 LEF1	70	58	white	rectangle	gene,gene	0.5	black	46	17	2514,/,6551
-N-BEL Framework Small Corpus Document-118 119	EP300 AKT1	60	85	white	rectangle	gene,gene	0.5	black	46	17	3373,/,391
-N-BEL Framework Small Corpus Document-120 121	EP300 HIF1A	96	82	white	rectangle	gene,gene	0.5	black	46	17	3373,/,4910
-N-BEL Framework Small Corpus Document-122 123	F3 F7	153	36	white	rectangle	gene,gene	0.5	black	46	17	3541,/,3544
-N-BEL Framework Small Corpus Document-127 128	FN1 ITGB1	119	45	white	rectangle	gene,gene	0.5	black	46	17	3778,/,6153
-N-BEL Framework Small Corpus Document-137 138	APC IQGAP1	61	147	white	rectangle	gene,gene	0.5	black	46	17	583,/,6110
-N-BEL Framework Small Corpus Document-139 140	IRAK1 MYD88	113	116	white	rectangle	gene,gene	0.5	black	46	17	6112,/,7562
-N-BEL Framework Small Corpus Document-14 15	AXIN Family APC	64	70	white	rectangle	gene,gene	0.5	black	46	17	583
-N-BEL Framework Small Corpus Document-143 144	ITGA2 ITGB1	56	127	white	rectangle	gene,gene	0.5	black	46	17	6137,/,6153
-N-BEL Framework Small Corpus Document-145 146	ITGA2B ITGB3	95	20	white	rectangle	gene,gene	0.5	black	46	17	6138,/,6156
-N-BEL Framework Small Corpus Document-147 148	ITGA5 ITGB1	95	11	white	rectangle	gene,gene	0.5	black	46	17	6141,/,6153
-N-BEL Framework Small Corpus Document-149 150	ITGA6 ITGB1	162	124	white	rectangle	gene,gene	0.5	black	46	17	6142,/,6153
-N-BEL Framework Small Corpus Document-151 152	ITGA6 ITGB4	57	138	white	rectangle	gene,gene	0.5	black	46	17	6142,/,6158
-N-BEL Framework Small Corpus Document-153 154	ITGAM ITGB2	83	13	white	rectangle	gene,gene	0.5	black	46	17	6149,/,6155
-N-BEL Framework Small Corpus Document-155 156	ITGAV ITGB3	88	83	white	rectangle	gene,gene	0.5	black	46	17	6150,/,6156
-N-BEL Framework Small Corpus Document-163 164 165	ITGB1 PRKCA PTK2B	126	50	white	rectangle	gene,gene,gene	0.5	black	46	17	6153,/,9393,/,9612
-N-BEL Framework Small Corpus Document-172 173	Vegfa Flt1	53	160	white	rectangle	gene,gene	0.5	black	46	17	103178,/,95558
-N-BEL Framework Small Corpus Document-178 179 180	Itgb4 Shc1 Itga6	186	83	white	rectangle	gene,gene,gene	0.5	black	46	17	2928,/,620446,/,621633
-N-BEL Framework Small Corpus Document-182	RPS6	13	69	white	rectangle	gene	0.5	black	46	17	10429
-N-BEL Framework Small Corpus Document-183	RPS6KB2	17	70	white	rectangle	gene	0.5	black	46	17	10437
-N-BEL Framework Small Corpus Document-184	SAA1	176	102	white	rectangle	gene	0.5	black	46	17	10513
-N-BEL Framework Small Corpus Document-185	CXCL12	118	82	white	rectangle	gene	0.5	black	46	17	10672
-N-BEL Framework Small Corpus Document-186	SELE	108	94	white	rectangle	gene	0.5	black	46	17	10718
-N-BEL Framework Small Corpus Document-187	SELP	147	37	white	rectangle	gene	0.5	black	46	17	10721
-N-BEL Framework Small Corpus Document-188	SGK1	73	123	white	rectangle	gene	0.5	black	46	17	10810
-N-BEL Framework Small Corpus Document-189	SHC1	55	142	white	rectangle	gene	0.5	black	46	17	10840
-N-BEL Framework Small Corpus Document-190	SHC1	57	131	white	rectangle	gene	0.5	black	46	17	10840
-N-BEL Framework Small Corpus Document-191	SKP2	63	92	white	rectangle	gene	0.5	black	46	17	10901
-N-BEL Framework Small Corpus Document-192	BRAF	61	118	white	rectangle	gene	0.5	black	46	17	1097
-N-BEL Framework Small Corpus Document-193	BRAF	57	121	white	rectangle	gene	0.5	black	46	17	1097
-N-BEL Framework Small Corpus Document-194	BRAF	58	122	white	rectangle	gene	0.5	black	46	17	1097
-N-BEL Framework Small Corpus Document-195	SLC2A4	83	80	white	rectangle	gene	0.5	black	46	17	11009
-N-BEL Framework Small Corpus Document-196	SMARCA4	126	3	white	rectangle	gene	0.5	black	46	17	11100
-N-BEL Framework Small Corpus Document-198	SRC	106	130	white	rectangle	gene	0.5	black	46	17	11283
-N-BEL Framework Small Corpus Document-20 21	E2F Family EP300	88	89	white	rectangle	gene,gene	0.5	black	46	17	3373
-N-BEL Framework Small Corpus Document-200	BTK	51	15	white	rectangle	gene	0.5	black	46	17	1133
-N-BEL Framework Small Corpus Document-201	STAT1	178	100	white	rectangle	gene	0.5	black	46	17	11362
-N-BEL Framework Small Corpus Document-202	STAT3	170	102	white	rectangle	gene	0.5	black	46	17	11364
-N-BEL Framework Small Corpus Document-205	SYK	161	122	white	rectangle	gene	0.5	black	46	17	11491
-N-BEL Framework Small Corpus Document-206	TEC	52	10	white	rectangle	gene	0.5	black	46	17	11719
-N-BEL Framework Small Corpus Document-207	TEK	90	113	white	rectangle	gene	0.5	black	46	17	11724
-N-BEL Framework Small Corpus Document-208	TGFA	108	96	white	rectangle	gene	0.5	black	46	17	11765
-N-BEL Framework Small Corpus Document-209	THBD	144	46	white	rectangle	gene	0.5	black	46	17	11784
-N-BEL Framework Small Corpus Document-211	TIMP2	110	96	white	rectangle	gene	0.5	black	46	17	11821
-N-BEL Framework Small Corpus Document-213	TNF	102	95	white	rectangle	gene	0.5	black	46	17	11892
-N-BEL Framework Small Corpus Document-214	TNFRSF1A	95	100	white	rectangle	gene	0.5	black	46	17	11916
-N-BEL Framework Small Corpus Document-216	TP53	51	82	white	rectangle	gene	0.5	black	46	17	11998
-N-BEL Framework Small Corpus Document-217	TP53	69	114	white	rectangle	gene	0.5	black	46	17	11998
-N-BEL Framework Small Corpus Document-218	TP73	23	55	white	rectangle	gene	0.5	black	46	17	12003
-N-BEL Framework Small Corpus Document-22 23	E2F Family RB1	83	97	white	rectangle	gene,gene	0.5	black	46	17	9884
-N-BEL Framework Small Corpus Document-220	ACP1	103	127	white	rectangle	gene	0.5	black	46	17	122
-N-BEL Framework Small Corpus Document-221	EGLN1	99	74	white	rectangle	gene	0.5	black	46	17	1232
-N-BEL Framework Small Corpus Document-222	TYK2	172	96	white	rectangle	gene	0.5	black	46	17	12440
-N-BEL Framework Small Corpus Document-223	UCP1	103	93	white	rectangle	gene	0.5	black	46	17	12517
-N-BEL Framework Small Corpus Document-225	VEGFA	123	51	white	rectangle	gene	0.5	black	46	17	12680
-N-BEL Framework Small Corpus Document-226	VHL	109	89	white	rectangle	gene	0.5	black	46	17	12687
-N-BEL Framework Small Corpus Document-227	VTN	84	82	white	rectangle	gene	0.5	black	46	17	12724
-N-BEL Framework Small Corpus Document-228	VWF	141	45	white	rectangle	gene	0.5	black	46	17	12726
-N-BEL Framework Small Corpus Document-229	WNT1	117	60	white	rectangle	gene	0.5	black	46	17	12774
-N-BEL Framework Small Corpus Document-231	WNT5A	145	15	white	rectangle	gene	0.5	black	46	17	12784
-N-BEL Framework Small Corpus Document-232	XPO1	60	84	white	rectangle	gene	0.5	black	46	17	12825
-N-BEL Framework Small Corpus Document-233	ADAMTS13	137	46	white	rectangle	gene	0.5	black	46	17	1366
-N-BEL Framework Small Corpus Document-234	HDAC4	107	177	white	rectangle	gene	0.5	black	46	17	14063
-N-BEL Framework Small Corpus Document-235	HDAC4	107	179	white	rectangle	gene	0.5	black	46	17	14063
-N-BEL Framework Small Corpus Document-236	GP6	163	121	white	rectangle	gene	0.5	black	46	17	14388
-N-BEL Framework Small Corpus Document-237	CALM1	151	30	white	rectangle	gene	0.5	black	46	17	1442
-N-BEL Framework Small Corpus Document-238	CAMK1	107	173	white	rectangle	gene	0.5	black	46	17	1459
-N-BEL Framework Small Corpus Document-239	EGLN2	99	74	white	rectangle	gene	0.5	black	46	17	14660
-N-BEL Framework Small Corpus Document-24 25	E2F Family RBL1	92	83	white	rectangle	gene,gene	0.5	black	46	17	9893
-N-BEL Framework Small Corpus Document-240	EGLN3	98	75	white	rectangle	gene	0.5	black	46	17	14661
-N-BEL Framework Small Corpus Document-242	CASP9	8	52	white	rectangle	gene	0.5	black	46	17	1511
-N-BEL Framework Small Corpus Document-244	CAV1	107	126	white	rectangle	gene	0.5	black	46	17	1527
-N-BEL Framework Small Corpus Document-245	CAV1	132	169	white	rectangle	gene	0.5	black	46	17	1527
-N-BEL Framework Small Corpus Document-246	ANAPC5	156	137	white	rectangle	gene	0.5	black	46	17	15713
-N-BEL Framework Small Corpus Document-247	CCND1	83	117	white	rectangle	gene	0.5	black	46	17	1582
-N-BEL Framework Small Corpus Document-248	HIF3A	111	85	white	rectangle	gene	0.5	black	46	17	15825
-N-BEL Framework Small Corpus Document-249	CCND2	82	116	white	rectangle	gene	0.5	black	46	17	1583
-N-BEL Framework Small Corpus Document-250	PRPF6	127	3	white	rectangle	gene	0.5	black	46	17	15860
-N-BEL Framework Small Corpus Document-251	TP63	20	53	white	rectangle	gene	0.5	black	46	17	15979
-N-BEL Framework Small Corpus Document-253	CD24	114	66	white	rectangle	gene	0.5	black	46	17	1645
-N-BEL Framework Small Corpus Document-255	RAPGEF3	62	120	white	rectangle	gene	0.5	black	46	17	16629
-N-BEL Framework Small Corpus Document-257	TAB2	101	103	white	rectangle	gene	0.5	black	46	17	17075
-N-BEL Framework Small Corpus Document-258	TAB2	16	83	white	rectangle	gene	0.5	black	46	17	17075
-N-BEL Framework Small Corpus Document-259	HIF1AN	88	76	white	rectangle	gene	0.5	black	46	17	17113
-N-BEL Framework Small Corpus Document-26 27	E2F Family RBL2	90	83	white	rectangle	gene,gene	0.5	black	46	17	9894
-N-BEL Framework Small Corpus Document-261	CDC16	161	139	white	rectangle	gene	0.5	black	46	17	1720
-N-BEL Framework Small Corpus Document-262	CDK1	159	140	white	rectangle	gene	0.5	black	46	17	1722
-N-BEL Framework Small Corpus Document-264	CDC23	156	140	white	rectangle	gene	0.5	black	46	17	1724
-N-BEL Framework Small Corpus Document-265	CDC27	159	142	white	rectangle	gene	0.5	black	46	17	1728
-N-BEL Framework Small Corpus Document-266	PRPF4B	126	8	white	rectangle	gene	0.5	black	46	17	17346
-N-BEL Framework Small Corpus Document-267	PRPF4B	124	14	white	rectangle	gene	0.5	black	46	17	17346
-N-BEL Framework Small Corpus Document-269	LRIG1	119	113	white	rectangle	gene	0.5	black	46	17	17360
-N-BEL Framework Small Corpus Document-270	CDH5	107	135	white	rectangle	gene	0.5	black	46	17	1764
-N-BEL Framework Small Corpus Document-271	CDK2	67	98	white	rectangle	gene	0.5	black	46	17	1771
-N-BEL Framework Small Corpus Document-272	CDK4	82	112	white	rectangle	gene	0.5	black	46	17	1773
-N-BEL Framework Small Corpus Document-273	CDKN1A	65	100	white	rectangle	gene	0.5	black	46	17	1784
-N-BEL Framework Small Corpus Document-274	CDKN1A	61	102	white	rectangle	gene	0.5	black	46	17	1784
-N-BEL Framework Small Corpus Document-275	CDKN1B	61	91	white	rectangle	gene	0.5	black	46	17	1785
-N-BEL Framework Small Corpus Document-276	CDKN1B	67	95	white	rectangle	gene	0.5	black	46	17	1785
-N-BEL Framework Small Corpus Document-277	CDKN1B	60	93	white	rectangle	gene	0.5	black	46	17	1785
-N-BEL Framework Small Corpus Document-278	BBC3	20	52	white	rectangle	gene	0.5	black	46	17	17868
-N-BEL Framework Small Corpus Document-279	CDKN2A	75	110	white	rectangle	gene	0.5	black	46	17	1787
-N-BEL Framework Small Corpus Document-28 29	FOXO Family SKP2	59	84	white	rectangle	gene,gene	0.5	black	46	17	10901
-N-BEL Framework Small Corpus Document-280	IRAK4	128	116	white	rectangle	gene	0.5	black	46	17	17967
-N-BEL Framework Small Corpus Document-281	TAB1	105	103	white	rectangle	gene	0.5	black	46	17	18157
-N-BEL Framework Small Corpus Document-283	NAA10	105	82	white	rectangle	gene	0.5	black	46	17	18704
-N-BEL Framework Small Corpus Document-284	RIN1	115	113	white	rectangle	gene	0.5	black	46	17	18749
-N-BEL Framework Small Corpus Document-285	MAPKAP1	64	78	white	rectangle	gene	0.5	black	46	17	18752
-N-BEL Framework Small Corpus Document-290	ANAPC1	161	141	white	rectangle	gene	0.5	black	46	17	19988
-N-BEL Framework Small Corpus Document-293	CNTF	174	94	white	rectangle	gene	0.5	black	46	17	2169
-N-BEL Framework Small Corpus Document-294	COPS5	104	81	white	rectangle	gene	0.5	black	46	17	2240
-N-BEL Framework Small Corpus Document-295	HBP1	90	186	white	rectangle	gene	0.5	black	46	17	23200
-N-BEL Framework Small Corpus Document-299	CRP	176	98	white	rectangle	gene	0.5	black	46	17	2367
-N-BEL Framework Small Corpus Document-3 4	14-3-3 Family FOXO Family	58	90	white	rectangle	gene,gene	0.5	black	46	17	
-N-BEL Framework Small Corpus Document-300	CSNK1A1	65	61	white	rectangle	gene	0.5	black	46	17	2451
-N-BEL Framework Small Corpus Document-301	CSNK1G2	61	65	white	rectangle	gene	0.5	black	46	17	2455
-N-BEL Framework Small Corpus Document-303	CTNNB1	69	64	white	rectangle	gene	0.5	black	46	17	2514
-N-BEL Framework Small Corpus Document-304	CTNNB1	67	65	white	rectangle	gene	0.5	black	46	17	2514
-N-BEL Framework Small Corpus Document-305	CXCR4	114	84	white	rectangle	gene	0.5	black	46	17	2561
-N-BEL Framework Small Corpus Document-306	CYBB	59	118	white	rectangle	gene	0.5	black	46	17	2578
-N-BEL Framework Small Corpus Document-308	DCN	119	108	white	rectangle	gene	0.5	black	46	17	2705
-N-BEL Framework Small Corpus Document-311	ADRB2	192	129	white	rectangle	gene	0.5	black	46	17	286
-N-BEL Framework Small Corpus Document-312	DKK1	143	17	white	rectangle	gene	0.5	black	46	17	2891
-N-BEL Framework Small Corpus Document-314	EDN1	49	117	white	rectangle	gene	0.5	black	46	17	3176
-N-BEL Framework Small Corpus Document-315	EDN2	39	118	white	rectangle	gene	0.5	black	46	17	3177
-N-BEL Framework Small Corpus Document-316	EDN3	37	116	white	rectangle	gene	0.5	black	46	17	3178
-N-BEL Framework Small Corpus Document-317	EDNRA	43	118	white	rectangle	gene	0.5	black	46	17	3179
-N-BEL Framework Small Corpus Document-318	EDNRB	42	117	white	rectangle	gene	0.5	black	46	17	3180
-N-BEL Framework Small Corpus Document-320	EGF	118	117	white	rectangle	gene	0.5	black	46	17	3229
-N-BEL Framework Small Corpus Document-321	EGFR	114	107	white	rectangle	gene	0.5	black	46	17	3236
-N-BEL Framework Small Corpus Document-322	EGFR	117	112	white	rectangle	gene	0.5	black	46	17	3236
-N-BEL Framework Small Corpus Document-323	EPAS1	113	87	white	rectangle	gene	0.5	black	46	17	3374
-N-BEL Framework Small Corpus Document-324	EPO	76	120	white	rectangle	gene	0.5	black	46	17	3415
-N-BEL Framework Small Corpus Document-325	ERBB2	121	111	white	rectangle	gene	0.5	black	46	17	3430
-N-BEL Framework Small Corpus Document-326	ERBB3	123	116	white	rectangle	gene	0.5	black	46	17	3431
-N-BEL Framework Small Corpus Document-327	ERBB4	123	115	white	rectangle	gene	0.5	black	46	17	3432
-N-BEL Framework Small Corpus Document-328	ERBB4	121	121	white	rectangle	gene	0.5	black	46	17	3432
-N-BEL Framework Small Corpus Document-332	F10	150	37	white	rectangle	gene	0.5	black	46	17	3528
-N-BEL Framework Small Corpus Document-333	F2	145	41	white	rectangle	gene	0.5	black	46	17	3535
-N-BEL Framework Small Corpus Document-334	F2R	149	40	white	rectangle	gene	0.5	black	46	17	3537
-N-BEL Framework Small Corpus Document-335	F3	148	38	white	rectangle	gene	0.5	black	46	17	3541
-N-BEL Framework Small Corpus Document-336	F5	144	53	white	rectangle	gene	0.5	black	46	17	3542
-N-BEL Framework Small Corpus Document-337	F8	140	49	white	rectangle	gene	0.5	black	46	17	3546
-N-BEL Framework Small Corpus Document-338	F9	150	39	white	rectangle	gene	0.5	black	46	17	3551
-N-BEL Framework Small Corpus Document-339	FES	50	10	white	rectangle	gene	0.5	black	46	17	3657
-N-BEL Framework Small Corpus Document-34 35	PIK3R Class IA Family ERBB3	120	121	white	rectangle	gene,gene	0.5	black	46	17	3431
-N-BEL Framework Small Corpus Document-341	FLT1	122	45	white	rectangle	gene	0.5	black	46	17	3763
-N-BEL Framework Small Corpus Document-342	FLT1	124	46	white	rectangle	gene	0.5	black	46	17	3763
-N-BEL Framework Small Corpus Document-343	FN1	95	15	white	rectangle	gene	0.5	black	46	17	3778
-N-BEL Framework Small Corpus Document-344	FOXO3	58	88	white	rectangle	gene	0.5	black	46	17	3821
-N-BEL Framework Small Corpus Document-345	FOXO3	107	124	white	rectangle	gene	0.5	black	46	17	3821
-N-BEL Framework Small Corpus Document-346	AKT1	62	88	white	rectangle	gene	0.5	black	46	17	391
-N-BEL Framework Small Corpus Document-347	AKT1	67	81	white	rectangle	gene	0.5	black	46	17	391
-N-BEL Framework Small Corpus Document-348	AKT1	68	82	white	rectangle	gene	0.5	black	46	17	391
-N-BEL Framework Small Corpus Document-349	AKT2	140	6	white	rectangle	gene	0.5	black	46	17	392
-N-BEL Framework Small Corpus Document-350	MTOR	19	71	white	rectangle	gene	0.5	black	46	17	3942
-N-BEL Framework Small Corpus Document-351	MTOR	62	85	white	rectangle	gene	0.5	black	46	17	3942
-N-BEL Framework Small Corpus Document-352	ALB	178	98	white	rectangle	gene	0.5	black	46	17	399
-N-BEL Framework Small Corpus Document-356	GSK3A	67	72	white	rectangle	gene	0.5	black	46	17	4616
-N-BEL Framework Small Corpus Document-357	GSK3A	62	70	white	rectangle	gene	0.5	black	46	17	4616
-N-BEL Framework Small Corpus Document-358	GSK3B	65	73	white	rectangle	gene	0.5	black	46	17	4617
-N-BEL Framework Small Corpus Document-359	GSK3B	60	70	white	rectangle	gene	0.5	black	46	17	4617
-N-BEL Framework Small Corpus Document-36 37	RAS Family RAF1	77	128	white	rectangle	gene,gene	0.5	black	46	17	9829
-N-BEL Framework Small Corpus Document-360	ANGPT1	80	116	white	rectangle	gene	0.5	black	46	17	484
-N-BEL Framework Small Corpus Document-361	HCK	56	17	white	rectangle	gene	0.5	black	46	17	4840
-N-BEL Framework Small Corpus Document-362	ANGPT2	70	117	white	rectangle	gene	0.5	black	46	17	485
-N-BEL Framework Small Corpus Document-363	HIF1A	102	84	white	rectangle	gene	0.5	black	46	17	4910
-N-BEL Framework Small Corpus Document-364	HIF1A	105	83	white	rectangle	gene	0.5	black	46	17	4910
-N-BEL Framework Small Corpus Document-365	HIF1A	92	79	white	rectangle	gene	0.5	black	46	17	4910
-N-BEL Framework Small Corpus Document-366	HIF1A	105	81	white	rectangle	gene	0.5	black	46	17	4910
-N-BEL Framework Small Corpus Document-367	HIF1A	100	77	white	rectangle	gene	0.5	black	46	17	4910
-N-BEL Framework Small Corpus Document-368	HIF1A	100	77	white	rectangle	gene	0.5	black	46	17	4910
-N-BEL Framework Small Corpus Document-369	HIF1A	99	77	white	rectangle	gene	0.5	black	46	17	4910
-N-BEL Framework Small Corpus Document-370	HIF1A	94	74	white	rectangle	gene	0.5	black	46	17	4910
-N-BEL Framework Small Corpus Document-371	HRAS	79	108	white	rectangle	gene	0.5	black	46	17	5173
-N-BEL Framework Small Corpus Document-372	HRAS	84	115	white	rectangle	gene	0.5	black	46	17	5173
-N-BEL Framework Small Corpus Document-373	HSPB1	112	93	white	rectangle	gene	0.5	black	46	17	5246
-N-BEL Framework Small Corpus Document-374	ICAM1	104	95	white	rectangle	gene	0.5	black	46	17	5344
-N-BEL Framework Small Corpus Document-376	IGF1	73	77	white	rectangle	gene	0.5	black	46	17	5464
-N-BEL Framework Small Corpus Document-377	IGF1R	79	72	white	rectangle	gene	0.5	black	46	17	5465
-N-BEL Framework Small Corpus Document-378	IKBKB	110	119	white	rectangle	gene	0.5	black	46	17	5960
-N-BEL Framework Small Corpus Document-38 39	BCL9 CTNNB1	69	59	white	rectangle	gene,gene	0.5	black	46	17	1008,/,2514
-N-BEL Framework Small Corpus Document-381	IL1B	112	112	white	rectangle	gene	0.5	black	46	17	5992
-N-BEL Framework Small Corpus Document-382	IL2	177	101	white	rectangle	gene	0.5	black	46	17	6001
-N-BEL Framework Small Corpus Document-385	IL6	173	99	white	rectangle	gene	0.5	black	46	17	6018
-N-BEL Framework Small Corpus Document-386	IL6R	53	14	white	rectangle	gene	0.5	black	46	17	6019
-N-BEL Framework Small Corpus Document-387	INS	92	84	white	rectangle	gene	0.5	black	46	17	6081
-N-BEL Framework Small Corpus Document-388	INSR	87	75	white	rectangle	gene	0.5	black	46	17	6091
-N-BEL Framework Small Corpus Document-389	INSR	94	80	white	rectangle	gene	0.5	black	46	17	6091
-N-BEL Framework Small Corpus Document-391	IRAK1	121	115	white	rectangle	gene	0.5	black	46	17	6112
-N-BEL Framework Small Corpus Document-392	IRAK1	133	118	white	rectangle	gene	0.5	black	46	17	6112
-N-BEL Framework Small Corpus Document-393	IRAK1	125	117	white	rectangle	gene	0.5	black	46	17	6112
-N-BEL Framework Small Corpus Document-395	IRS1	95	84	white	rectangle	gene	0.5	black	46	17	6125
-N-BEL Framework Small Corpus Document-396	IRS1	83	71	white	rectangle	gene	0.5	black	46	17	6125
-N-BEL Framework Small Corpus Document-397	IRS2	90	81	white	rectangle	gene	0.5	black	46	17	6126
-N-BEL Framework Small Corpus Document-398	IRS2	96	83	white	rectangle	gene	0.5	black	46	17	6126
-N-BEL Framework Small Corpus Document-399	IRS2	84	71	white	rectangle	gene	0.5	black	46	17	6126
-N-BEL Framework Small Corpus Document-40 41	CLIP1 APC	62	146	white	rectangle	gene,gene	0.5	black	46	17	10461,/,583
-N-BEL Framework Small Corpus Document-400	IRS4	83	72	white	rectangle	gene	0.5	black	46	17	6128
-N-BEL Framework Small Corpus Document-401	ITGB1	119	53	white	rectangle	gene	0.5	black	46	17	6153
-N-BEL Framework Small Corpus Document-402	ITGB2	84	17	white	rectangle	gene	0.5	black	46	17	6155
-N-BEL Framework Small Corpus Document-403	JAK1	173	95	white	rectangle	gene	0.5	black	46	17	6190
-N-BEL Framework Small Corpus Document-404	JAK2	171	95	white	rectangle	gene	0.5	black	46	17	6192
-N-BEL Framework Small Corpus Document-405	JAK2	119	122	white	rectangle	gene	0.5	black	46	17	6192
-N-BEL Framework Small Corpus Document-407	JUN	61	6	white	rectangle	gene	0.5	black	46	17	6204
-N-BEL Framework Small Corpus Document-408	KDR	105	123	white	rectangle	gene	0.5	black	46	17	6307
-N-BEL Framework Small Corpus Document-411	KDR	105	128	white	rectangle	gene	0.5	black	46	17	6307
-N-BEL Framework Small Corpus Document-412	KDR	104	127	white	rectangle	gene	0.5	black	46	17	6307
-N-BEL Framework Small Corpus Document-413	KRAS	64	99	white	rectangle	gene	0.5	black	46	17	6407
-N-BEL Framework Small Corpus Document-414	ARAF	59	116	white	rectangle	gene	0.5	black	46	17	646
-N-BEL Framework Small Corpus Document-415	LEF1	90	190	white	rectangle	gene	0.5	black	46	17	6551
-N-BEL Framework Small Corpus Document-416	ARF6	59	147	white	rectangle	gene	0.5	black	46	17	659
-N-BEL Framework Small Corpus Document-417	LIF	172	93	white	rectangle	gene	0.5	black	46	17	6596
-N-BEL Framework Small Corpus Document-418	RHOA	53	140	white	rectangle	gene	0.5	black	46	17	667
-N-BEL Framework Small Corpus Document-419	LRP5	63	67	white	rectangle	gene	0.5	black	46	17	6697
-N-BEL Framework Small Corpus Document-42 43	CLIP1 IQGAP1	58	146	white	rectangle	gene,gene	0.5	black	46	17	10461,/,6110
-N-BEL Framework Small Corpus Document-420	LRP6	62	68	white	rectangle	gene	0.5	black	46	17	6698
-N-BEL Framework Small Corpus Document-421	MAP2K1	63	114	white	rectangle	gene	0.5	black	46	17	6840
-N-BEL Framework Small Corpus Document-422	MAP2K2	65	114	white	rectangle	gene	0.5	black	46	17	6842
-N-BEL Framework Small Corpus Document-426	MAP2K7	87	104	white	rectangle	gene	0.5	black	46	17	6847
-N-BEL Framework Small Corpus Document-427	MAP3K11	60	1	white	rectangle	gene	0.5	black	46	17	6850
-N-BEL Framework Small Corpus Document-428	MAP3K11	139	8	white	rectangle	gene	0.5	black	46	17	6850
-N-BEL Framework Small Corpus Document-430	MAP3K5	67	113	white	rectangle	gene	0.5	black	46	17	6857
-N-BEL Framework Small Corpus Document-431	MAP3K7	102	100	white	rectangle	gene	0.5	black	46	17	6859
-N-BEL Framework Small Corpus Document-432	MAP3K7	12	85	white	rectangle	gene	0.5	black	46	17	6859
-N-BEL Framework Small Corpus Document-433	MAPK1	60	101	white	rectangle	gene	0.5	black	46	17	6871
-N-BEL Framework Small Corpus Document-434	MAPK11	110	94	white	rectangle	gene	0.5	black	46	17	6873
-N-BEL Framework Small Corpus Document-436	MAPK3	61	99	white	rectangle	gene	0.5	black	46	17	6877
-N-BEL Framework Small Corpus Document-438	MAPKAPK2	115	92	white	rectangle	gene	0.5	black	46	17	6887
-N-BEL Framework Small Corpus Document-439	MAPKAPK3	115	94	white	rectangle	gene	0.5	black	46	17	6888
-N-BEL Framework Small Corpus Document-44 45	SHC1 GRB2	54	141	white	rectangle	gene,gene	0.5	black	46	17	10840,/,4566
-N-BEL Framework Small Corpus Document-440	MDM2	56	85	white	rectangle	gene	0.5	black	46	17	6973
-N-BEL Framework Small Corpus Document-441	MMP14	105	99	white	rectangle	gene	0.5	black	46	17	7160
-N-BEL Framework Small Corpus Document-442	MMP2	108	102	white	rectangle	gene	0.5	black	46	17	7166
-N-BEL Framework Small Corpus Document-443	MMP9	114	97	white	rectangle	gene	0.5	black	46	17	7176
-N-BEL Framework Small Corpus Document-445	MYD88	132	115	white	rectangle	gene	0.5	black	46	17	7562
-N-BEL Framework Small Corpus Document-447	NFKBIA	111	116	white	rectangle	gene	0.5	black	46	17	7797
-N-BEL Framework Small Corpus Document-448	NFKBIA	65	111	white	rectangle	gene	0.5	black	46	17	7797
-N-BEL Framework Small Corpus Document-449	NOS1	153	27	white	rectangle	gene	0.5	black	46	17	7872
-N-BEL Framework Small Corpus Document-450	NOS3	148	35	white	rectangle	gene	0.5	black	46	17	7876
-N-BEL Framework Small Corpus Document-454	NRAS	66	110	white	rectangle	gene	0.5	black	46	17	7989
-N-BEL Framework Small Corpus Document-455	NRG1	121	117	white	rectangle	gene	0.5	black	46	17	7997
-N-BEL Framework Small Corpus Document-456	OSM	171	94	white	rectangle	gene	0.5	black	46	17	8506
-N-BEL Framework Small Corpus Document-457	SERPINE1	197	73	white	rectangle	gene	0.5	black	46	17	8583
-N-BEL Framework Small Corpus Document-458	PAK1	65	123	white	rectangle	gene	0.5	black	46	17	8590
-N-BEL Framework Small Corpus Document-459	PAK3	67	124	white	rectangle	gene	0.5	black	46	17	8592
-N-BEL Framework Small Corpus Document-46 47	SKP2 CDKN1B	70	97	white	rectangle	gene,gene	0.5	black	46	17	10901,/,1785
-N-BEL Framework Small Corpus Document-460	PAWR	55	87	white	rectangle	gene	0.5	black	46	17	8614
-N-BEL Framework Small Corpus Document-461	PAWR	56	88	white	rectangle	gene	0.5	black	46	17	8614
-N-BEL Framework Small Corpus Document-462	PAWR	49	86	white	rectangle	gene	0.5	black	46	17	8614
-N-BEL Framework Small Corpus Document-467	PDGFRB	115	128	white	rectangle	gene	0.5	black	46	17	8804
-N-BEL Framework Small Corpus Document-468	PDPK1	59	89	white	rectangle	gene	0.5	black	46	17	8816
-N-BEL Framework Small Corpus Document-472	SERPINA1	177	100	white	rectangle	gene	0.5	black	46	17	8941
-N-BEL Framework Small Corpus Document-473	PLAT	196	72	white	rectangle	gene	0.5	black	46	17	9051
-N-BEL Framework Small Corpus Document-474	PLK1	158	138	white	rectangle	gene	0.5	black	46	17	9077
-N-BEL Framework Small Corpus Document-475	PMAIP1	19	53	white	rectangle	gene	0.5	black	46	17	9108
-N-BEL Framework Small Corpus Document-476	BAD	58	86	white	rectangle	gene	0.5	black	46	17	936
-N-BEL Framework Small Corpus Document-479	BAG1	65	109	white	rectangle	gene	0.5	black	46	17	937
-N-BEL Framework Small Corpus Document-480	BAG1	70	114	white	rectangle	gene	0.5	black	46	17	937
-N-BEL Framework Small Corpus Document-481	PRKACA	57	68	white	rectangle	gene	0.5	black	46	17	9380
-N-BEL Framework Small Corpus Document-482	PRKCA	120	49	white	rectangle	gene	0.5	black	46	17	9393
-N-BEL Framework Small Corpus Document-483	PRKCD	112	86	white	rectangle	gene	0.5	black	46	17	9399
-N-BEL Framework Small Corpus Document-484	PRKCD	54	68	white	rectangle	gene	0.5	black	46	17	9399
-N-BEL Framework Small Corpus Document-485	PRKCI	113	88	white	rectangle	gene	0.5	black	46	17	9404
-N-BEL Framework Small Corpus Document-488	PRKCZ	88	81	white	rectangle	gene	0.5	black	46	17	9412
-N-BEL Framework Small Corpus Document-489	PROC	141	52	white	rectangle	gene	0.5	black	46	17	9451
-N-BEL Framework Small Corpus Document-490	PROS1	142	54	white	rectangle	gene	0.5	black	46	17	9456
-N-BEL Framework Small Corpus Document-491	PTEN	57	87	white	rectangle	gene	0.5	black	46	17	9588
-N-BEL Framework Small Corpus Document-493	PTK2B	125	48	white	rectangle	gene	0.5	black	46	17	9612
-N-BEL Framework Small Corpus Document-494	PTK2B	121	50	white	rectangle	gene	0.5	black	46	17	9612
-N-BEL Framework Small Corpus Document-495	PTPN11	100	110	white	rectangle	gene	0.5	black	46	17	9644
-N-BEL Framework Small Corpus Document-496	PTPRJ	107	127	white	rectangle	gene	0.5	black	46	17	9673
-N-BEL Framework Small Corpus Document-497	RAB5A	116	112	white	rectangle	gene	0.5	black	46	17	9783
-N-BEL Framework Small Corpus Document-498	RAC1	61	142	white	rectangle	gene	0.5	black	46	17	9801
-N-BEL Framework Small Corpus Document-499	RAF1	70	110	white	rectangle	gene	0.5	black	46	17	9829
-N-BEL Framework Small Corpus Document-50 51	SMARCA4 PRPF4B	125	10	white	rectangle	gene,gene	0.5	black	46	17	11100,/,17346
-N-BEL Framework Small Corpus Document-500	RAF1	73	118	white	rectangle	gene	0.5	black	46	17	9829
-N-BEL Framework Small Corpus Document-501	RAF1	68	118	white	rectangle	gene	0.5	black	46	17	9829
-N-BEL Framework Small Corpus Document-502	RAF1	73	117	white	rectangle	gene	0.5	black	46	17	9829
-N-BEL Framework Small Corpus Document-503	RAF1	74	115	white	rectangle	gene	0.5	black	46	17	9829
-N-BEL Framework Small Corpus Document-505	RANBP2	107	183	white	rectangle	gene	0.5	black	46	17	9848
-N-BEL Framework Small Corpus Document-506	RAP1A	65	116	white	rectangle	gene	0.5	black	46	17	9855
-N-BEL Framework Small Corpus Document-508	RB1	78	106	white	rectangle	gene	0.5	black	46	17	9884
-N-BEL Framework Small Corpus Document-509	BCL2	68	112	white	rectangle	gene	0.5	black	46	17	990
-N-BEL Framework Small Corpus Document-510	BCL2	71	112	white	rectangle	gene	0.5	black	46	17	990
-N-BEL Framework Small Corpus Document-512	Tsc2	154	110	white	rectangle	gene	0.5	black	46	17	102548
-N-BEL Framework Small Corpus Document-513	Tsc2	152	111	white	rectangle	gene	0.5	black	46	17	102548
-N-BEL Framework Small Corpus Document-514	Stat3	178	122	white	rectangle	gene	0.5	black	46	17	103038
-N-BEL Framework Small Corpus Document-515	Stat1	169	36	white	rectangle	gene	0.5	black	46	17	103063
-N-BEL Framework Small Corpus Document-516	Vegfa	53	154	white	rectangle	gene	0.5	black	46	17	103178
-N-BEL Framework Small Corpus Document-517	Eif4ebp1	108	20	white	rectangle	gene	0.5	black	46	17	103267
-N-BEL Framework Small Corpus Document-518	Eif4ebp1	108	10	white	rectangle	gene	0.5	black	46	17	103267
-N-BEL Framework Small Corpus Document-519	Ccl11	180	52	white	rectangle	gene	0.5	black	46	17	103576
-N-BEL Framework Small Corpus Document-52 53	BTRC CTNNB1	67	61	white	rectangle	gene,gene	0.5	black	46	17	1144,/,2514
-N-BEL Framework Small Corpus Document-520	Cdkn1b	68	23	white	rectangle	gene	0.5	black	46	17	104565
-N-BEL Framework Small Corpus Document-521	Tnf	179	56	white	rectangle	gene	0.5	black	46	17	104798
-N-BEL Framework Small Corpus Document-522	Pgf	55	156	white	rectangle	gene	0.5	black	46	17	105095
-N-BEL Framework Small Corpus Document-526	Lrig1	153	98	white	rectangle	gene	0.5	black	46	17	107935
-N-BEL Framework Small Corpus Document-527	Angpt1	137	182	white	rectangle	gene	0.5	black	46	17	108448
-N-BEL Framework Small Corpus Document-530	Itch	65	182	white	rectangle	gene	0.5	black	46	17	1202301
-N-BEL Framework Small Corpus Document-532	Trp63	66	179	white	rectangle	gene	0.5	black	46	17	1330810
-N-BEL Framework Small Corpus Document-534	Mapk1	154	67	white	rectangle	gene	0.5	black	46	17	1346858
-N-BEL Framework Small Corpus Document-535	Mapk3	157	69	white	rectangle	gene	0.5	black	46	17	1346859
-N-BEL Framework Small Corpus Document-536	Foxo1	153	107	white	rectangle	gene	0.5	black	46	17	1890077
-N-BEL Framework Small Corpus Document-537	Foxo3	152	106	white	rectangle	gene	0.5	black	46	17	1890081
-N-BEL Framework Small Corpus Document-538	Pias1	173	33	white	rectangle	gene	0.5	black	46	17	1913125
-N-BEL Framework Small Corpus Document-539	Pias3	168	104	white	rectangle	gene	0.5	black	46	17	1913126
-N-BEL Framework Small Corpus Document-54 55	THBD F2	145	37	white	rectangle	gene,gene	0.5	black	46	17	11784,/,3535
-N-BEL Framework Small Corpus Document-542	Mtor	108	14	white	rectangle	gene	0.5	black	46	17	1928394
-N-BEL Framework Small Corpus Document-546	Mapkap1	153	105	white	rectangle	gene	0.5	black	46	17	2444554
-N-BEL Framework Small Corpus Document-549	Akt1	151	108	white	rectangle	gene	0.5	black	46	17	87986
-N-BEL Framework Small Corpus Document-550	Akt1	74	4	white	rectangle	gene	0.5	black	46	17	87986
-N-BEL Framework Small Corpus Document-551	Akt1	151	104	white	rectangle	gene	0.5	black	46	17	87986
-N-BEL Framework Small Corpus Document-554	Camk4	128	182	white	rectangle	gene	0.5	black	46	17	88258
-N-BEL Framework Small Corpus Document-555	Ctnnb1	153	69	white	rectangle	gene	0.5	black	46	17	88276
-N-BEL Framework Small Corpus Document-556	Creb1	126	183	white	rectangle	gene	0.5	black	46	17	88494
-N-BEL Framework Small Corpus Document-557	Egf	151	100	white	rectangle	gene	0.5	black	46	17	95290
-N-BEL Framework Small Corpus Document-558	Flt1	58	155	white	rectangle	gene	0.5	black	46	17	95558
-N-BEL Framework Small Corpus Document-559	Hck	181	54	white	rectangle	gene	0.5	black	46	17	96052
-N-BEL Framework Small Corpus Document-560	Hck	177	55	white	rectangle	gene	0.5	black	46	17	96052
-N-BEL Framework Small Corpus Document-561	Hras	66	19	white	rectangle	gene	0.5	black	46	17	96224
-N-BEL Framework Small Corpus Document-562	Il5	171	58	white	rectangle	gene	0.5	black	46	17	96557
-N-BEL Framework Small Corpus Document-563	Il6st	177	120	white	rectangle	gene	0.5	black	46	17	96560
-N-BEL Framework Small Corpus Document-565	Kdr	50	153	white	rectangle	gene	0.5	black	46	17	96683
-N-BEL Framework Small Corpus Document-571	Tek	138	184	white	rectangle	gene	0.5	black	46	17	98664
-N-BEL Framework Small Corpus Document-573	Irs1	73	0	white	rectangle	gene	0.5	black	46	17	99454
-N-BEL Framework Small Corpus Document-575	Ptpn11	178	119	white	rectangle	gene	0.5	black	46	17	99511
-N-BEL Framework Small Corpus Document-579	Chuk	37	27	white	rectangle	gene	0.5	black	46	17	1306661
-N-BEL Framework Small Corpus Document-580	Chuk	38	25	white	rectangle	gene	0.5	black	46	17	1306661
-N-BEL Framework Small Corpus Document-581	Chuk	34	24	white	rectangle	gene	0.5	black	46	17	1306661
-N-BEL Framework Small Corpus Document-587	Itgb4	188	83	white	rectangle	gene	0.5	black	46	17	2928
-N-BEL Framework Small Corpus Document-591	Ikbkb	0	113	white	rectangle	gene	0.5	black	46	17	621375
-N-BEL Framework Small Corpus Document-592	Ikbkb	1	111	white	rectangle	gene	0.5	black	46	17	621375
-N-BEL Framework Small Corpus Document-593	Ikbkb	2	114	white	rectangle	gene	0.5	black	46	17	621375
-N-BEL Framework Small Corpus Document-61 62 63	TRAF6 UBE2N UBE2V1	103	104	white	rectangle	gene,gene,gene	0.5	black	46	17	12036,/,12492,/,12494
-N-BEL Framework Small Corpus Document-64 65 66 67 68 69	TRAF6 TAB2 IRAK4 TAB1 IRAK1 MAP3K7	16	85	white	rectangle	gene,gene,gene,gene,gene,gene	0.5	black	46	17	12036,/,17075,/,17967,/,18157,/,6112,/,6859
-N-BEL Framework Small Corpus Document-7 8	14-3-3 Family PAWR	51	88	white	rectangle	gene,gene	0.5	black	46	17	8614
-N-BEL Framework Small Corpus Document-70 71	TRAF6 IRAK1	137	120	white	rectangle	gene,gene	0.5	black	46	17	12036,/,6112
-N-BEL Framework Small Corpus Document-72 73	ACP1 CAV1	130	166	white	rectangle	gene,gene	0.5	black	46	17	122,/,1527
-N-BEL Framework Small Corpus Document-76 77 78 79 80	VHL CUL2 RBX1 TCEB1 TCEB2	97	78	white	rectangle	gene,gene,gene,gene,gene	0.5	black	46	17	12687,/,2552,/,9928
-N-BEL Framework Small Corpus Document-81 82	VHL HIF1A	100	74	white	rectangle	gene,gene	0.5	black	46	17	12687,/,4910
-N-BEL Framework Small Corpus Document-83 84 85	VTN ITGAV ITGB3	110	126	white	rectangle	gene,gene,gene	0.5	black	46	17	12724,/,6150,/,6156
-N-BEL Framework Small Corpus Document-89 90	CAV1 CSK	129	170	white	rectangle	gene,gene	0.5	black	46	17	1527,/,2444
-N-BEL Framework Small Corpus Document-9 10	14-3-3 Family RAF1	76	122	white	rectangle	gene,gene	0.5	black	46	17	9829
-N-BEL Framework Small Corpus Document-91 92	CAV1 GRB7	134	171	white	rectangle	gene,gene	0.5	black	46	17	1527,/,4567
-N-BEL Framework Small Corpus Document-93 94	CAV1 KDR	133	173	white	rectangle	gene,gene	0.5	black	46	17	1527,/,6307
-N-BEL Framework Small Corpus Document-95 96	CCND1 CDK4	76	108	white	rectangle	gene,gene	0.5	black	46	17	1582,/,1773
-N-BEL Framework Small Corpus Document-97 98	PRPF6 PRPF4B	123	21	white	rectangle	gene,gene	0.5	black	46	17	15860,/,17346
-N-BEL Framework Small Corpus Document-99 100	SH3RF1 MAP3K11	59	3	white	rectangle	gene,gene	0.5	black	46	17	17650,/,6850
+N-BEL Framework Small Corpus Document-1 2	HDAC_II p14_3_3	9	73	white	rectangle	gene,gene	0.5	black	46	17	HDAC_II,/,p14_3_3
+N-BEL Framework Small Corpus Document-101 102	CREBBP CTNNB1	103	67	white	rectangle	gene,gene	0.5	black	46	17	2348,/,2514
+N-BEL Framework Small Corpus Document-103 104	CREBBP AKT1	96	106	white	rectangle	gene,gene	0.5	black	46	17	2348,/,391
+N-BEL Framework Small Corpus Document-105 106	CREBBP HIF1A	101	123	white	rectangle	gene,gene	0.5	black	46	17	2348,/,4910
+N-BEL Framework Small Corpus Document-107 108	CTNNB1 LEF1	104	67	white	rectangle	gene,gene	0.5	black	46	17	2514,/,6551
+N-BEL Framework Small Corpus Document-11 12	p14_3_3 PAWR	90	112	white	rectangle	gene,gene	0.5	black	46	17	p14_3_3,/,8614
+N-BEL Framework Small Corpus Document-111 112	EP300 AKT1	95	105	white	rectangle	gene,gene	0.5	black	46	17	3373,/,391
+N-BEL Framework Small Corpus Document-113 114	EP300 HIF1A	100	123	white	rectangle	gene,gene	0.5	black	46	17	3373,/,4910
+N-BEL Framework Small Corpus Document-115 116	F3 F7	97	58	white	rectangle	gene,gene	0.5	black	46	17	3541,/,3544
+N-BEL Framework Small Corpus Document-120 121	FN1 ITGB1	68	93	white	rectangle	gene,gene	0.5	black	46	17	3778,/,6153
+N-BEL Framework Small Corpus Document-122 123	FNTA FNTB	114	88	white	rectangle	gene,gene	0.5	black	46	17	3782,/,3785
+N-BEL Framework Small Corpus Document-13 14	p14_3_3 RAF1	91	77	white	rectangle	gene,gene	0.5	black	46	17	p14_3_3,/,9829
+N-BEL Framework Small Corpus Document-130 131	APC IQGAP1	127	88	white	rectangle	gene,gene	0.5	black	46	17	583,/,6110
+N-BEL Framework Small Corpus Document-132 133	IRAK1 MYD88	92	97	white	rectangle	gene,gene	0.5	black	46	17	6112,/,7562
+N-BEL Framework Small Corpus Document-134 135	IRAK1 PELI2	79	96	white	rectangle	gene,gene	0.5	black	46	17	6112,/,8828
+N-BEL Framework Small Corpus Document-136 137	ITGA2 ITGB1	124	79	white	rectangle	gene,gene	0.5	black	46	17	6137,/,6153
+N-BEL Framework Small Corpus Document-138 139	ITGA2B ITGB3	53	179	white	rectangle	gene,gene	0.5	black	46	17	6138,/,6156
+N-BEL Framework Small Corpus Document-140 141	ITGA5 ITGB1	55	179	white	rectangle	gene,gene	0.5	black	46	17	6141,/,6153
+N-BEL Framework Small Corpus Document-142 143	ITGA6 ITGB1	141	58	white	rectangle	gene,gene	0.5	black	46	17	6142,/,6153
+N-BEL Framework Small Corpus Document-144 145	ITGA6 ITGB4	111	94	white	rectangle	gene,gene	0.5	black	46	17	6142,/,6158
+N-BEL Framework Small Corpus Document-146 147	ITGAM ITGB2	185	88	white	rectangle	gene,gene	0.5	black	46	17	6149,/,6155
+N-BEL Framework Small Corpus Document-148 149	ITGAV ITGB3	103	103	white	rectangle	gene,gene	0.5	black	46	17	6150,/,6156
+N-BEL Framework Small Corpus Document-15 16 17	ARRB PDE4 ADRB2	179	37	white	rectangle	gene,gene,gene	0.5	black	46	17	ARRB,/,PDE4,/,286
+N-BEL Framework Small Corpus Document-150 151 152	ITGAV ITGB3 KDR	126	96	white	rectangle	gene,gene,gene	0.5	black	46	17	6150,/,6156,/,6307
+N-BEL Framework Small Corpus Document-153 154 155	ITGAV ITGB3 PDGFRB	118	102	white	rectangle	gene,gene,gene	0.5	black	46	17	6150,/,6156,/,8804
+N-BEL Framework Small Corpus Document-156 157 158	ITGB1 PRKCA PTK2B	60	101	white	rectangle	gene,gene,gene	0.5	black	46	17	6153,/,9393,/,9612
+N-BEL Framework Small Corpus Document-159 160	KDR PTPN11	126	93	white	rectangle	gene,gene	0.5	black	46	17	6307,/,9644
+N-BEL Framework Small Corpus Document-161 162	KDR PTPN6	125	94	white	rectangle	gene,gene	0.5	black	46	17	6307,/,9658
+N-BEL Framework Small Corpus Document-163 164	ARF6 RAC1	125	97	white	rectangle	gene,gene	0.5	black	46	17	659,/,9801
+N-BEL Framework Small Corpus Document-165 166	Vegfa Flt1	128	11	white	rectangle	gene,gene	0.5	black	46	17	103178,/,95558
+N-BEL Framework Small Corpus Document-171 172 173	Itgb4 Shc1 Itga6	176	162	white	rectangle	gene,gene,gene	0.5	black	46	17	2928,/,620446,/,621633
+N-BEL Framework Small Corpus Document-174	CAMK2_family	14	76	white	rectangle	gene	0.5	black	46	17	CAMK2_family
+N-BEL Framework Small Corpus Document-175	G_i	125	122	white	rectangle	gene	0.5	black	46	17	G_i
+N-BEL Framework Small Corpus Document-176	HDAC_II	12	72	white	rectangle	gene	0.5	black	46	17	HDAC_II
+N-BEL Framework Small Corpus Document-177	HDAC_II	10	75	white	rectangle	gene	0.5	black	46	17	HDAC_II
+N-BEL Framework Small Corpus Document-178	PI3K_p110	52	99	white	rectangle	gene	0.5	black	46	17	PI3K_p110
+N-BEL Framework Small Corpus Document-179	PIK3R_I	58	99	white	rectangle	gene	0.5	black	46	17	PIK3R_I
+N-BEL Framework Small Corpus Document-18 19	AXIN APC	101	79	white	rectangle	gene,gene	0.5	black	46	17	AXIN,/,583
+N-BEL Framework Small Corpus Document-181	p14_3_3	100	96	white	rectangle	gene	0.5	black	46	17	p14_3_3
+N-BEL Framework Small Corpus Document-184	AKT	100	93	white	rectangle	gene	0.5	black	46	17	AKT
+N-BEL Framework Small Corpus Document-185	AKT	95	96	white	rectangle	gene	0.5	black	46	17	AKT
+N-BEL Framework Small Corpus Document-186	AKT	91	102	white	rectangle	gene	0.5	black	46	17	AKT
+N-BEL Framework Small Corpus Document-187	AKT	103	90	white	rectangle	gene	0.5	black	46	17	AKT
+N-BEL Framework Small Corpus Document-189	CAMK	90	100	white	rectangle	gene	0.5	black	46	17	CAMK
+N-BEL Framework Small Corpus Document-190	CDC25	100	81	white	rectangle	gene	0.5	black	46	17	CDC25
+N-BEL Framework Small Corpus Document-191	COL1	127	73	white	rectangle	gene	0.5	black	46	17	COL1
+N-BEL Framework Small Corpus Document-192	COL4	138	66	white	rectangle	gene	0.5	black	46	17	COL4
+N-BEL Framework Small Corpus Document-194	DNM	88	84	white	rectangle	gene	0.5	black	46	17	DNM
+N-BEL Framework Small Corpus Document-195	DVL	94	63	white	rectangle	gene	0.5	black	46	17	DVL
+N-BEL Framework Small Corpus Document-196	E2F	30	14	white	rectangle	gene	0.5	black	46	17	E2F
+N-BEL Framework Small Corpus Document-197	ERK	105	88	white	rectangle	gene	0.5	black	46	17	ERK
+N-BEL Framework Small Corpus Document-198	ERK	93	77	white	rectangle	gene	0.5	black	46	17	ERK
+N-BEL Framework Small Corpus Document-199	FOXO	105	103	white	rectangle	gene	0.5	black	46	17	FOXO
+N-BEL Framework Small Corpus Document-20 21	DVL DVL	92	57	white	rectangle	gene,gene	0.5	black	46	17	DVL,/,DVL
+N-BEL Framework Small Corpus Document-200	FOXO	101	103	white	rectangle	gene	0.5	black	46	17	FOXO
+N-BEL Framework Small Corpus Document-201	FOXO	110	106	white	rectangle	gene	0.5	black	46	17	FOXO
+N-BEL Framework Small Corpus Document-202	GSK3	119	75	white	rectangle	gene	0.5	black	46	17	GSK3
+N-BEL Framework Small Corpus Document-204	IL1	84	99	white	rectangle	gene	0.5	black	46	17	IL1
+N-BEL Framework Small Corpus Document-205	IRS	6	140	white	rectangle	gene	0.5	black	46	17	IRS
+N-BEL Framework Small Corpus Document-206	JAK	79	99	white	rectangle	gene	0.5	black	46	17	JAK
+N-BEL Framework Small Corpus Document-207	JNK	101	105	white	rectangle	gene	0.5	black	46	17	JNK
+N-BEL Framework Small Corpus Document-208	JNK	102	111	white	rectangle	gene	0.5	black	46	17	JNK
+N-BEL Framework Small Corpus Document-209	MEF2	82	111	white	rectangle	gene	0.5	black	46	17	MEF2
+N-BEL Framework Small Corpus Document-210	NFAT	72	124	white	rectangle	gene	0.5	black	46	17	NFAT
+N-BEL Framework Small Corpus Document-212	P70S6K	95	84	white	rectangle	gene	0.5	black	46	17	P70S6K
+N-BEL Framework Small Corpus Document-213	P70S6K	96	82	white	rectangle	gene	0.5	black	46	17	P70S6K
+N-BEL Framework Small Corpus Document-214	P90RSK	108	98	white	rectangle	gene	0.5	black	46	17	P90RSK
+N-BEL Framework Small Corpus Document-215	P90RSK	108	83	white	rectangle	gene	0.5	black	46	17	P90RSK
+N-BEL Framework Small Corpus Document-216	PAK	108	113	white	rectangle	gene	0.5	black	46	17	PAK
+N-BEL Framework Small Corpus Document-217	PDE4	93	189	white	rectangle	gene	0.5	black	46	17	PDE4
+N-BEL Framework Small Corpus Document-218	PDGF	113	100	white	rectangle	gene	0.5	black	46	17	PDGF
+N-BEL Framework Small Corpus Document-219	PKC	75	102	white	rectangle	gene	0.5	black	46	17	PKC
+N-BEL Framework Small Corpus Document-22 23	DVL FZD	93	57	white	rectangle	gene,gene	0.5	black	46	17	DVL,/,FZD
+N-BEL Framework Small Corpus Document-220	PLA2	110	85	white	rectangle	gene	0.5	black	46	17	PLA2
+N-BEL Framework Small Corpus Document-221	PLC	116	140	white	rectangle	gene	0.5	black	46	17	PLC
+N-BEL Framework Small Corpus Document-222	PRKAC	99	88	white	rectangle	gene	0.5	black	46	17	PRKAC
+N-BEL Framework Small Corpus Document-223	RAC	106	105	white	rectangle	gene	0.5	black	46	17	RAC
+N-BEL Framework Small Corpus Document-224	RAF	89	90	white	rectangle	gene	0.5	black	46	17	RAF
+N-BEL Framework Small Corpus Document-225	RAS	101	95	white	rectangle	gene	0.5	black	46	17	RAS
+N-BEL Framework Small Corpus Document-226	RAS	109	91	white	rectangle	gene	0.5	black	46	17	RAS
+N-BEL Framework Small Corpus Document-227	RHO	107	84	white	rectangle	gene	0.5	black	46	17	RHO
+N-BEL Framework Small Corpus Document-228	SRC	93	105	white	rectangle	gene	0.5	black	46	17	SRC
+N-BEL Framework Small Corpus Document-229	STAT5	73	75	white	rectangle	gene	0.5	black	46	17	STAT5
+N-BEL Framework Small Corpus Document-230	STAT5	80	75	white	rectangle	gene	0.5	black	46	17	STAT5
+N-BEL Framework Small Corpus Document-231	VEGF	119	94	white	rectangle	gene	0.5	black	46	17	VEGF
+N-BEL Framework Small Corpus Document-232	Wnt	98	77	white	rectangle	gene	0.5	black	46	17	Wnt
+N-BEL Framework Small Corpus Document-233	p38	119	96	white	rectangle	gene	0.5	black	46	17	p38
+N-BEL Framework Small Corpus Document-234	ROCK1	111	78	white	rectangle	gene	0.5	black	46	17	10251
+N-BEL Framework Small Corpus Document-235	RPS6	77	0	white	rectangle	gene	0.5	black	46	17	10429
+N-BEL Framework Small Corpus Document-236	RPS6KB2	77	4	white	rectangle	gene	0.5	black	46	17	10437
+N-BEL Framework Small Corpus Document-237	SAA1	58	71	white	rectangle	gene	0.5	black	46	17	10513
+N-BEL Framework Small Corpus Document-238	CXCL12	86	137	white	rectangle	gene	0.5	black	46	17	10672
+N-BEL Framework Small Corpus Document-239	SELE	90	123	white	rectangle	gene	0.5	black	46	17	10718
+N-BEL Framework Small Corpus Document-24 25	E2F EP300	93	52	white	rectangle	gene,gene	0.5	black	46	17	E2F,/,3373
+N-BEL Framework Small Corpus Document-240	SELP	108	57	white	rectangle	gene	0.5	black	46	17	10721
+N-BEL Framework Small Corpus Document-241	SGK1	91	80	white	rectangle	gene	0.5	black	46	17	10810
+N-BEL Framework Small Corpus Document-242	SHC1	116	91	white	rectangle	gene	0.5	black	46	17	10840
+N-BEL Framework Small Corpus Document-243	SHC1	118	86	white	rectangle	gene	0.5	black	46	17	10840
+N-BEL Framework Small Corpus Document-244	SKP2	101	107	white	rectangle	gene	0.5	black	46	17	10901
+N-BEL Framework Small Corpus Document-245	BRAF	95	83	white	rectangle	gene	0.5	black	46	17	1097
+N-BEL Framework Small Corpus Document-246	BRAF	92	77	white	rectangle	gene	0.5	black	46	17	1097
+N-BEL Framework Small Corpus Document-247	BRAF	91	78	white	rectangle	gene	0.5	black	46	17	1097
+N-BEL Framework Small Corpus Document-248	SLC2A4	89	101	white	rectangle	gene	0.5	black	46	17	11009
+N-BEL Framework Small Corpus Document-249	SMARCA4	58	49	white	rectangle	gene	0.5	black	46	17	11100
+N-BEL Framework Small Corpus Document-251	SRC	101	92	white	rectangle	gene	0.5	black	46	17	11283
+N-BEL Framework Small Corpus Document-253	BTK	115	177	white	rectangle	gene	0.5	black	46	17	1133
+N-BEL Framework Small Corpus Document-254	STAT1	59	73	white	rectangle	gene	0.5	black	46	17	11362
+N-BEL Framework Small Corpus Document-255	STAT3	56	73	white	rectangle	gene	0.5	black	46	17	11364
+N-BEL Framework Small Corpus Document-258	SYK	137	61	white	rectangle	gene	0.5	black	46	17	11491
+N-BEL Framework Small Corpus Document-259	TEC	115	184	white	rectangle	gene	0.5	black	46	17	11719
+N-BEL Framework Small Corpus Document-26 27	E2F RB1	95	61	white	rectangle	gene,gene	0.5	black	46	17	E2F,/,9884
+N-BEL Framework Small Corpus Document-260	TEK	113	113	white	rectangle	gene	0.5	black	46	17	11724
+N-BEL Framework Small Corpus Document-261	TGFA	98	101	white	rectangle	gene	0.5	black	46	17	11765
+N-BEL Framework Small Corpus Document-262	THBD	113	56	white	rectangle	gene	0.5	black	46	17	11784
+N-BEL Framework Small Corpus Document-264	TIMP2	91	121	white	rectangle	gene	0.5	black	46	17	11821
+N-BEL Framework Small Corpus Document-266	TNF	94	115	white	rectangle	gene	0.5	black	46	17	11892
+N-BEL Framework Small Corpus Document-267	TNFRSF1A	90	105	white	rectangle	gene	0.5	black	46	17	11916
+N-BEL Framework Small Corpus Document-269	TP53	106	113	white	rectangle	gene	0.5	black	46	17	11998
+N-BEL Framework Small Corpus Document-270	TP53	97	81	white	rectangle	gene	0.5	black	46	17	11998
+N-BEL Framework Small Corpus Document-271	TP73	133	167	white	rectangle	gene	0.5	black	46	17	12003
+N-BEL Framework Small Corpus Document-273	ACP1	117	93	white	rectangle	gene	0.5	black	46	17	122
+N-BEL Framework Small Corpus Document-274	EGLN1	107	124	white	rectangle	gene	0.5	black	46	17	1232
+N-BEL Framework Small Corpus Document-275	TYK2	65	77	white	rectangle	gene	0.5	black	46	17	12440
+N-BEL Framework Small Corpus Document-276	UCP1	90	120	white	rectangle	gene	0.5	black	46	17	12517
+N-BEL Framework Small Corpus Document-278	VEGFA	65	99	white	rectangle	gene	0.5	black	46	17	12680
+N-BEL Framework Small Corpus Document-279	VHL	93	124	white	rectangle	gene	0.5	black	46	17	12687
+N-BEL Framework Small Corpus Document-28 29	E2F RBL1	92	46	white	rectangle	gene,gene	0.5	black	46	17	E2F,/,9893
+N-BEL Framework Small Corpus Document-280	VTN	102	106	white	rectangle	gene	0.5	black	46	17	12724
+N-BEL Framework Small Corpus Document-281	VWF	111	53	white	rectangle	gene	0.5	black	46	17	12726
+N-BEL Framework Small Corpus Document-282	WNT1	57	96	white	rectangle	gene	0.5	black	46	17	12774
+N-BEL Framework Small Corpus Document-284	WNT5A	119	118	white	rectangle	gene	0.5	black	46	17	12784
+N-BEL Framework Small Corpus Document-285	XPO1	102	104	white	rectangle	gene	0.5	black	46	17	12825
+N-BEL Framework Small Corpus Document-286	ADAMTS13	112	48	white	rectangle	gene	0.5	black	46	17	1366
+N-BEL Framework Small Corpus Document-287	HDAC4	53	19	white	rectangle	gene	0.5	black	46	17	14063
+N-BEL Framework Small Corpus Document-288	HDAC4	55	22	white	rectangle	gene	0.5	black	46	17	14063
+N-BEL Framework Small Corpus Document-289	GP6	133	66	white	rectangle	gene	0.5	black	46	17	14388
+N-BEL Framework Small Corpus Document-290	CALM1	121	71	white	rectangle	gene	0.5	black	46	17	1442
+N-BEL Framework Small Corpus Document-291	CAMK1	51	21	white	rectangle	gene	0.5	black	46	17	1459
+N-BEL Framework Small Corpus Document-292	EGLN2	105	124	white	rectangle	gene	0.5	black	46	17	14660
+N-BEL Framework Small Corpus Document-293	EGLN3	106	125	white	rectangle	gene	0.5	black	46	17	14661
+N-BEL Framework Small Corpus Document-295	CASP9	13	167	white	rectangle	gene	0.5	black	46	17	1511
+N-BEL Framework Small Corpus Document-297	CAV1	118	95	white	rectangle	gene	0.5	black	46	17	1527
+N-BEL Framework Small Corpus Document-298	CAV1	132	98	white	rectangle	gene	0.5	black	46	17	1527
+N-BEL Framework Small Corpus Document-299	ANAPC5	164	38	white	rectangle	gene	0.5	black	46	17	15713
+N-BEL Framework Small Corpus Document-3 4	PIK3R_I IRS	2	142	white	rectangle	gene,gene	0.5	black	46	17	PIK3R_I,/,IRS
+N-BEL Framework Small Corpus Document-30 31	E2F RBL2	91	46	white	rectangle	gene,gene	0.5	black	46	17	E2F,/,9894
+N-BEL Framework Small Corpus Document-300	CCND1	109	68	white	rectangle	gene	0.5	black	46	17	1582
+N-BEL Framework Small Corpus Document-301	HIF3A	93	130	white	rectangle	gene	0.5	black	46	17	15825
+N-BEL Framework Small Corpus Document-302	CCND2	108	67	white	rectangle	gene	0.5	black	46	17	1583
+N-BEL Framework Small Corpus Document-303	PRPF6	56	49	white	rectangle	gene	0.5	black	46	17	15860
+N-BEL Framework Small Corpus Document-304	TP63	134	171	white	rectangle	gene	0.5	black	46	17	15979
+N-BEL Framework Small Corpus Document-306	CD24	51	96	white	rectangle	gene	0.5	black	46	17	1645
+N-BEL Framework Small Corpus Document-308	RAPGEF3	91	73	white	rectangle	gene	0.5	black	46	17	16629
+N-BEL Framework Small Corpus Document-309	CD36	132	70	white	rectangle	gene	0.5	black	46	17	1663
+N-BEL Framework Small Corpus Document-310	TAB2	83	110	white	rectangle	gene	0.5	black	46	17	17075
+N-BEL Framework Small Corpus Document-311	TAB2	54	188	white	rectangle	gene	0.5	black	46	17	17075
+N-BEL Framework Small Corpus Document-312	HIF1AN	102	134	white	rectangle	gene	0.5	black	46	17	17113
+N-BEL Framework Small Corpus Document-313	CDC16	158	41	white	rectangle	gene	0.5	black	46	17	1720
+N-BEL Framework Small Corpus Document-314	CDK1	161	40	white	rectangle	gene	0.5	black	46	17	1722
+N-BEL Framework Small Corpus Document-315	CDC23	163	40	white	rectangle	gene	0.5	black	46	17	1724
+N-BEL Framework Small Corpus Document-316	CDC27	161	41	white	rectangle	gene	0.5	black	46	17	1728
+N-BEL Framework Small Corpus Document-317	PRPF4B	59	52	white	rectangle	gene	0.5	black	46	17	17346
+N-BEL Framework Small Corpus Document-318	PRPF4B	60	56	white	rectangle	gene	0.5	black	46	17	17346
+N-BEL Framework Small Corpus Document-319	CDC42	109	120	white	rectangle	gene	0.5	black	46	17	1736
+N-BEL Framework Small Corpus Document-32 33	FOXO SKP2	98	107	white	rectangle	gene,gene	0.5	black	46	17	FOXO,/,10901
+N-BEL Framework Small Corpus Document-320	LRIG1	86	84	white	rectangle	gene	0.5	black	46	17	17360
+N-BEL Framework Small Corpus Document-321	CDH5	106	90	white	rectangle	gene	0.5	black	46	17	1764
+N-BEL Framework Small Corpus Document-322	CDK2	98	105	white	rectangle	gene	0.5	black	46	17	1771
+N-BEL Framework Small Corpus Document-323	CDK4	105	73	white	rectangle	gene	0.5	black	46	17	1773
+N-BEL Framework Small Corpus Document-324	CDKN1A	103	96	white	rectangle	gene	0.5	black	46	17	1784
+N-BEL Framework Small Corpus Document-325	CDKN1A	112	96	white	rectangle	gene	0.5	black	46	17	1784
+N-BEL Framework Small Corpus Document-326	CDKN1B	102	106	white	rectangle	gene	0.5	black	46	17	1785
+N-BEL Framework Small Corpus Document-327	CDKN1B	98	112	white	rectangle	gene	0.5	black	46	17	1785
+N-BEL Framework Small Corpus Document-328	CDKN1B	103	111	white	rectangle	gene	0.5	black	46	17	1785
+N-BEL Framework Small Corpus Document-329	BBC3	134	170	white	rectangle	gene	0.5	black	46	17	17868
+N-BEL Framework Small Corpus Document-330	CDKN2A	99	57	white	rectangle	gene	0.5	black	46	17	1787
+N-BEL Framework Small Corpus Document-331	IRAK4	78	93	white	rectangle	gene	0.5	black	46	17	17967
+N-BEL Framework Small Corpus Document-332	TAB1	84	112	white	rectangle	gene	0.5	black	46	17	18157
+N-BEL Framework Small Corpus Document-334	NAA10	101	120	white	rectangle	gene	0.5	black	46	17	18704
+N-BEL Framework Small Corpus Document-335	RIN1	94	84	white	rectangle	gene	0.5	black	46	17	18749
+N-BEL Framework Small Corpus Document-336	MAPKAP1	85	104	white	rectangle	gene	0.5	black	46	17	18752
+N-BEL Framework Small Corpus Document-337	SOCS1	73	102	white	rectangle	gene	0.5	black	46	17	19383
+N-BEL Framework Small Corpus Document-338	SOCS3	73	101	white	rectangle	gene	0.5	black	46	17	19391
+N-BEL Framework Small Corpus Document-34 35	RAS RAF1	88	72	white	rectangle	gene,gene	0.5	black	46	17	RAS,/,9829
+N-BEL Framework Small Corpus Document-340	CYCS	105	109	white	rectangle	gene	0.5	black	46	17	19986
+N-BEL Framework Small Corpus Document-341	ANAPC1	163	37	white	rectangle	gene	0.5	black	46	17	19988
+N-BEL Framework Small Corpus Document-344	CNTF	67	79	white	rectangle	gene	0.5	black	46	17	2169
+N-BEL Framework Small Corpus Document-345	COPS5	99	120	white	rectangle	gene	0.5	black	46	17	2240
+N-BEL Framework Small Corpus Document-346	HBP1	129	95	white	rectangle	gene	0.5	black	46	17	23200
+N-BEL Framework Small Corpus Document-347	HBP1	127	96	white	rectangle	gene	0.5	black	46	17	23200
+N-BEL Framework Small Corpus Document-348	CREB1	105	93	white	rectangle	gene	0.5	black	46	17	2345
+N-BEL Framework Small Corpus Document-349	CRP	59	71	white	rectangle	gene	0.5	black	46	17	2367
+N-BEL Framework Small Corpus Document-350	CSNK1A1	101	69	white	rectangle	gene	0.5	black	46	17	2451
+N-BEL Framework Small Corpus Document-351	CSNK1G2	98	73	white	rectangle	gene	0.5	black	46	17	2455
+N-BEL Framework Small Corpus Document-353	CTNNB1	102	73	white	rectangle	gene	0.5	black	46	17	2514
+N-BEL Framework Small Corpus Document-354	CTNNB1	101	75	white	rectangle	gene	0.5	black	46	17	2514
+N-BEL Framework Small Corpus Document-355	CXCR4	89	132	white	rectangle	gene	0.5	black	46	17	2561
+N-BEL Framework Small Corpus Document-356	CYBB	120	111	white	rectangle	gene	0.5	black	46	17	2578
+N-BEL Framework Small Corpus Document-358	DCN	87	86	white	rectangle	gene	0.5	black	46	17	2705
+N-BEL Framework Small Corpus Document-359	DDR1	130	125	white	rectangle	gene	0.5	black	46	17	2730
+N-BEL Framework Small Corpus Document-36 37	BCL9 CTNNB1	104	68	white	rectangle	gene,gene	0.5	black	46	17	1008,/,2514
+N-BEL Framework Small Corpus Document-360	DDR1	133	69	white	rectangle	gene	0.5	black	46	17	2730
+N-BEL Framework Small Corpus Document-361	ADRB2	182	35	white	rectangle	gene	0.5	black	46	17	286
+N-BEL Framework Small Corpus Document-362	DKK1	111	112	white	rectangle	gene	0.5	black	46	17	2891
+N-BEL Framework Small Corpus Document-363	EDN1	119	125	white	rectangle	gene	0.5	black	46	17	3176
+N-BEL Framework Small Corpus Document-364	EDN2	118	138	white	rectangle	gene	0.5	black	46	17	3177
+N-BEL Framework Small Corpus Document-365	EDN3	120	140	white	rectangle	gene	0.5	black	46	17	3178
+N-BEL Framework Small Corpus Document-366	EDNRA	117	134	white	rectangle	gene	0.5	black	46	17	3179
+N-BEL Framework Small Corpus Document-367	EDNRB	119	134	white	rectangle	gene	0.5	black	46	17	3180
+N-BEL Framework Small Corpus Document-369	EGF	85	80	white	rectangle	gene	0.5	black	46	17	3229
+N-BEL Framework Small Corpus Document-370	EGFR	93	89	white	rectangle	gene	0.5	black	46	17	3236
+N-BEL Framework Small Corpus Document-371	EGFR	88	84	white	rectangle	gene	0.5	black	46	17	3236
+N-BEL Framework Small Corpus Document-372	EPAS1	90	129	white	rectangle	gene	0.5	black	46	17	3374
+N-BEL Framework Small Corpus Document-373	EPO	86	92	white	rectangle	gene	0.5	black	46	17	3415
+N-BEL Framework Small Corpus Document-374	ERBB2	83	83	white	rectangle	gene	0.5	black	46	17	3430
+N-BEL Framework Small Corpus Document-375	ERBB3	93	88	white	rectangle	gene	0.5	black	46	17	3431
+N-BEL Framework Small Corpus Document-376	ERBB4	82	80	white	rectangle	gene	0.5	black	46	17	3432
+N-BEL Framework Small Corpus Document-377	ERBB4	82	74	white	rectangle	gene	0.5	black	46	17	3432
+N-BEL Framework Small Corpus Document-38 39	CLIP1 APC	129	89	white	rectangle	gene,gene	0.5	black	46	17	10461,/,583
+N-BEL Framework Small Corpus Document-381	F10	101	60	white	rectangle	gene	0.5	black	46	17	3528
+N-BEL Framework Small Corpus Document-382	F2	108	62	white	rectangle	gene	0.5	black	46	17	3535
+N-BEL Framework Small Corpus Document-383	F2R	109	57	white	rectangle	gene	0.5	black	46	17	3537
+N-BEL Framework Small Corpus Document-384	F3	105	58	white	rectangle	gene	0.5	black	46	17	3541
+N-BEL Framework Small Corpus Document-385	F5	119	49	white	rectangle	gene	0.5	black	46	17	3542
+N-BEL Framework Small Corpus Document-386	F8	114	50	white	rectangle	gene	0.5	black	46	17	3546
+N-BEL Framework Small Corpus Document-387	F9	102	59	white	rectangle	gene	0.5	black	46	17	3551
+N-BEL Framework Small Corpus Document-388	FES	114	175	white	rectangle	gene	0.5	black	46	17	3657
+N-BEL Framework Small Corpus Document-390	FLT1	61	103	white	rectangle	gene	0.5	black	46	17	3763
+N-BEL Framework Small Corpus Document-391	FLT1	60	99	white	rectangle	gene	0.5	black	46	17	3763
+N-BEL Framework Small Corpus Document-392	FN1	56	175	white	rectangle	gene	0.5	black	46	17	3778
+N-BEL Framework Small Corpus Document-393	FOXO3	96	107	white	rectangle	gene	0.5	black	46	17	3821
+N-BEL Framework Small Corpus Document-394	FOXO3	109	103	white	rectangle	gene	0.5	black	46	17	3821
+N-BEL Framework Small Corpus Document-395	AKT1	98	101	white	rectangle	gene	0.5	black	46	17	391
+N-BEL Framework Small Corpus Document-396	AKT1	91	101	white	rectangle	gene	0.5	black	46	17	391
+N-BEL Framework Small Corpus Document-397	AKT1	94	99	white	rectangle	gene	0.5	black	46	17	391
+N-BEL Framework Small Corpus Document-398	AKT2	93	117	white	rectangle	gene	0.5	black	46	17	392
+N-BEL Framework Small Corpus Document-399	MTOR	78	9	white	rectangle	gene	0.5	black	46	17	3942
+N-BEL Framework Small Corpus Document-40 41	CLIP1 IQGAP1	128	88	white	rectangle	gene,gene	0.5	black	46	17	10461,/,6110
+N-BEL Framework Small Corpus Document-400	MTOR	94	104	white	rectangle	gene	0.5	black	46	17	3942
+N-BEL Framework Small Corpus Document-401	ALB	58	74	white	rectangle	gene	0.5	black	46	17	399
+N-BEL Framework Small Corpus Document-405	GSK3A	99	90	white	rectangle	gene	0.5	black	46	17	4616
+N-BEL Framework Small Corpus Document-406	GSK3A	105	86	white	rectangle	gene	0.5	black	46	17	4616
+N-BEL Framework Small Corpus Document-407	GSK3B	99	84	white	rectangle	gene	0.5	black	46	17	4617
+N-BEL Framework Small Corpus Document-408	GSK3B	105	85	white	rectangle	gene	0.5	black	46	17	4617
+N-BEL Framework Small Corpus Document-409	ANGPT1	118	116	white	rectangle	gene	0.5	black	46	17	484
+N-BEL Framework Small Corpus Document-410	HCK	117	184	white	rectangle	gene	0.5	black	46	17	4840
+N-BEL Framework Small Corpus Document-411	ANGPT2	122	116	white	rectangle	gene	0.5	black	46	17	485
+N-BEL Framework Small Corpus Document-412	HIF1A	99	114	white	rectangle	gene	0.5	black	46	17	4910
+N-BEL Framework Small Corpus Document-413	HIF1A	100	120	white	rectangle	gene	0.5	black	46	17	4910
+N-BEL Framework Small Corpus Document-414	HIF1A	101	129	white	rectangle	gene	0.5	black	46	17	4910
+N-BEL Framework Small Corpus Document-415	HIF1A	102	119	white	rectangle	gene	0.5	black	46	17	4910
+N-BEL Framework Small Corpus Document-416	HIF1A	104	121	white	rectangle	gene	0.5	black	46	17	4910
+N-BEL Framework Small Corpus Document-417	HIF1A	104	122	white	rectangle	gene	0.5	black	46	17	4910
+N-BEL Framework Small Corpus Document-418	HIF1A	104	122	white	rectangle	gene	0.5	black	46	17	4910
+N-BEL Framework Small Corpus Document-419	HRAS	101	85	white	rectangle	gene	0.5	black	46	17	5173
+N-BEL Framework Small Corpus Document-42 43	SHC1 GRB2	107	94	white	rectangle	gene,gene	0.5	black	46	17	10840,/,4566
+N-BEL Framework Small Corpus Document-420	HRAS	108	68	white	rectangle	gene	0.5	black	46	17	5173
+N-BEL Framework Small Corpus Document-421	HSPB1	86	128	white	rectangle	gene	0.5	black	46	17	5246
+N-BEL Framework Small Corpus Document-422	ICAM1	92	120	white	rectangle	gene	0.5	black	46	17	5344
+N-BEL Framework Small Corpus Document-423	IFNB1	83	88	white	rectangle	gene	0.5	black	46	17	5434
+N-BEL Framework Small Corpus Document-424	IGF1	92	95	white	rectangle	gene	0.5	black	46	17	5464
+N-BEL Framework Small Corpus Document-425	IGF1R	83	101	white	rectangle	gene	0.5	black	46	17	5465
+N-BEL Framework Small Corpus Document-426	IKBKB	103	102	white	rectangle	gene	0.5	black	46	17	5960
+N-BEL Framework Small Corpus Document-427	IKBKB	69	105	white	rectangle	gene	0.5	black	46	17	5960
+N-BEL Framework Small Corpus Document-429	IL1B	95	101	white	rectangle	gene	0.5	black	46	17	5992
+N-BEL Framework Small Corpus Document-430	IL2	60	70	white	rectangle	gene	0.5	black	46	17	6001
+N-BEL Framework Small Corpus Document-431	IL3	91	190	white	rectangle	gene	0.5	black	46	17	6011
+N-BEL Framework Small Corpus Document-432	IL4	92	193	white	rectangle	gene	0.5	black	46	17	6014
+N-BEL Framework Small Corpus Document-433	IL6	63	75	white	rectangle	gene	0.5	black	46	17	6018
+N-BEL Framework Small Corpus Document-434	IL6R	115	180	white	rectangle	gene	0.5	black	46	17	6019
+N-BEL Framework Small Corpus Document-435	INS	92	105	white	rectangle	gene	0.5	black	46	17	6081
+N-BEL Framework Small Corpus Document-436	INSR	83	105	white	rectangle	gene	0.5	black	46	17	6091
+N-BEL Framework Small Corpus Document-437	INSR	88	109	white	rectangle	gene	0.5	black	46	17	6091
+N-BEL Framework Small Corpus Document-439	IRAK1	89	96	white	rectangle	gene	0.5	black	46	17	6112
+N-BEL Framework Small Corpus Document-44 45	SKP2 CDKN1B	97	119	white	rectangle	gene,gene	0.5	black	46	17	10901,/,1785
+N-BEL Framework Small Corpus Document-440	IRAK1	70	91	white	rectangle	gene	0.5	black	46	17	6112
+N-BEL Framework Small Corpus Document-441	IRAK1	93	96	white	rectangle	gene	0.5	black	46	17	6112
+N-BEL Framework Small Corpus Document-443	IRS1	89	110	white	rectangle	gene	0.5	black	46	17	6125
+N-BEL Framework Small Corpus Document-444	IRS1	79	104	white	rectangle	gene	0.5	black	46	17	6125
+N-BEL Framework Small Corpus Document-445	IRS2	87	107	white	rectangle	gene	0.5	black	46	17	6126
+N-BEL Framework Small Corpus Document-446	IRS2	87	108	white	rectangle	gene	0.5	black	46	17	6126
+N-BEL Framework Small Corpus Document-447	IRS2	80	105	white	rectangle	gene	0.5	black	46	17	6126
+N-BEL Framework Small Corpus Document-448	IRS4	79	105	white	rectangle	gene	0.5	black	46	17	6128
+N-BEL Framework Small Corpus Document-449	ITGB1	65	96	white	rectangle	gene	0.5	black	46	17	6153
+N-BEL Framework Small Corpus Document-450	ITGB2	181	88	white	rectangle	gene	0.5	black	46	17	6155
+N-BEL Framework Small Corpus Document-451	JAK1	74	81	white	rectangle	gene	0.5	black	46	17	6190
+N-BEL Framework Small Corpus Document-452	JAK2	65	76	white	rectangle	gene	0.5	black	46	17	6192
+N-BEL Framework Small Corpus Document-453	JAK2	79	76	white	rectangle	gene	0.5	black	46	17	6192
+N-BEL Framework Small Corpus Document-455	JUN	104	110	white	rectangle	gene	0.5	black	46	17	6204
+N-BEL Framework Small Corpus Document-456	KDR	112	96	white	rectangle	gene	0.5	black	46	17	6307
+N-BEL Framework Small Corpus Document-457	KDR	126	94	white	rectangle	gene	0.5	black	46	17	6307
+N-BEL Framework Small Corpus Document-458	KDR	124	97	white	rectangle	gene	0.5	black	46	17	6307
+N-BEL Framework Small Corpus Document-459	KDR	117	97	white	rectangle	gene	0.5	black	46	17	6307
+N-BEL Framework Small Corpus Document-46 47	BRAF RAF1	106	96	white	rectangle	gene,gene	0.5	black	46	17	1097,/,9829
+N-BEL Framework Small Corpus Document-460	KDR	117	95	white	rectangle	gene	0.5	black	46	17	6307
+N-BEL Framework Small Corpus Document-461	KRAS	94	93	white	rectangle	gene	0.5	black	46	17	6407
+N-BEL Framework Small Corpus Document-462	ARAF	93	72	white	rectangle	gene	0.5	black	46	17	646
+N-BEL Framework Small Corpus Document-463	LEF1	135	94	white	rectangle	gene	0.5	black	46	17	6551
+N-BEL Framework Small Corpus Document-464	ARF6	124	92	white	rectangle	gene	0.5	black	46	17	659
+N-BEL Framework Small Corpus Document-465	LIF	68	77	white	rectangle	gene	0.5	black	46	17	6596
+N-BEL Framework Small Corpus Document-466	RHOA	116	92	white	rectangle	gene	0.5	black	46	17	667
+N-BEL Framework Small Corpus Document-467	LRP5	99	77	white	rectangle	gene	0.5	black	46	17	6697
+N-BEL Framework Small Corpus Document-468	LRP6	96	73	white	rectangle	gene	0.5	black	46	17	6698
+N-BEL Framework Small Corpus Document-469	MAP2K1	95	79	white	rectangle	gene	0.5	black	46	17	6840
+N-BEL Framework Small Corpus Document-470	MAP2K2	96	81	white	rectangle	gene	0.5	black	46	17	6842
+N-BEL Framework Small Corpus Document-471	MAP2K3	111	95	white	rectangle	gene	0.5	black	46	17	6843
+N-BEL Framework Small Corpus Document-472	MAP2K4	102	100	white	rectangle	gene	0.5	black	46	17	6844
+N-BEL Framework Small Corpus Document-473	MAP2K6	111	96	white	rectangle	gene	0.5	black	46	17	6846
+N-BEL Framework Small Corpus Document-474	MAP2K7	98	97	white	rectangle	gene	0.5	black	46	17	6847
+N-BEL Framework Small Corpus Document-475	MAP3K11	105	110	white	rectangle	gene	0.5	black	46	17	6850
+N-BEL Framework Small Corpus Document-476	MAP3K11	97	112	white	rectangle	gene	0.5	black	46	17	6850
+N-BEL Framework Small Corpus Document-478	MAP3K5	99	80	white	rectangle	gene	0.5	black	46	17	6857
+N-BEL Framework Small Corpus Document-479	MAP3K7	89	108	white	rectangle	gene	0.5	black	46	17	6859
+N-BEL Framework Small Corpus Document-48 49	SMARCA4 PRPF4B	58	56	white	rectangle	gene,gene	0.5	black	46	17	11100,/,17346
+N-BEL Framework Small Corpus Document-480	MAP3K7	58	182	white	rectangle	gene	0.5	black	46	17	6859
+N-BEL Framework Small Corpus Document-481	MAPK1	88	92	white	rectangle	gene	0.5	black	46	17	6871
+N-BEL Framework Small Corpus Document-482	MAPK11	92	125	white	rectangle	gene	0.5	black	46	17	6873
+N-BEL Framework Small Corpus Document-483	MAPK3	89	91	white	rectangle	gene	0.5	black	46	17	6877
+N-BEL Framework Small Corpus Document-484	MAPKAPK2	92	132	white	rectangle	gene	0.5	black	46	17	6887
+N-BEL Framework Small Corpus Document-485	MAPKAPK3	93	131	white	rectangle	gene	0.5	black	46	17	6888
+N-BEL Framework Small Corpus Document-486	MDM2	103	108	white	rectangle	gene	0.5	black	46	17	6973
+N-BEL Framework Small Corpus Document-487	MMP14	92	117	white	rectangle	gene	0.5	black	46	17	7160
+N-BEL Framework Small Corpus Document-488	MMP2	93	112	white	rectangle	gene	0.5	black	46	17	7166
+N-BEL Framework Small Corpus Document-489	MMP9	89	126	white	rectangle	gene	0.5	black	46	17	7176
+N-BEL Framework Small Corpus Document-491	MYD88	72	92	white	rectangle	gene	0.5	black	46	17	7562
+N-BEL Framework Small Corpus Document-493	NFKBIA	96	103	white	rectangle	gene	0.5	black	46	17	7797
+N-BEL Framework Small Corpus Document-494	NFKBIA	97	80	white	rectangle	gene	0.5	black	46	17	7797
+N-BEL Framework Small Corpus Document-495	NOS1	125	67	white	rectangle	gene	0.5	black	46	17	7872
+N-BEL Framework Small Corpus Document-496	NOS3	116	77	white	rectangle	gene	0.5	black	46	17	7876
+N-BEL Framework Small Corpus Document-5 6	PIK3R_I DDR1	131	69	white	rectangle	gene,gene	0.5	black	46	17	PIK3R_I,/,2730
+N-BEL Framework Small Corpus Document-50 51	BTRC CTNNB1	103	70	white	rectangle	gene,gene	0.5	black	46	17	1144,/,2514
+N-BEL Framework Small Corpus Document-500	NRAS	101	82	white	rectangle	gene	0.5	black	46	17	7989
+N-BEL Framework Small Corpus Document-501	NRG1	81	81	white	rectangle	gene	0.5	black	46	17	7997
+N-BEL Framework Small Corpus Document-502	OSM	68	78	white	rectangle	gene	0.5	black	46	17	8506
+N-BEL Framework Small Corpus Document-503	SERPINE1	3	116	white	rectangle	gene	0.5	black	46	17	8583
+N-BEL Framework Small Corpus Document-504	PAK1	109	86	white	rectangle	gene	0.5	black	46	17	8590
+N-BEL Framework Small Corpus Document-505	PAK3	110	87	white	rectangle	gene	0.5	black	46	17	8592
+N-BEL Framework Small Corpus Document-506	PAWR	92	109	white	rectangle	gene	0.5	black	46	17	8614
+N-BEL Framework Small Corpus Document-507	PAWR	93	108	white	rectangle	gene	0.5	black	46	17	8614
+N-BEL Framework Small Corpus Document-508	PAWR	88	114	white	rectangle	gene	0.5	black	46	17	8614
+N-BEL Framework Small Corpus Document-510	PDE4B	109	84	white	rectangle	gene	0.5	black	46	17	8781
+N-BEL Framework Small Corpus Document-511	PDE4C	109	83	white	rectangle	gene	0.5	black	46	17	8782
+N-BEL Framework Small Corpus Document-512	PDE4D	111	84	white	rectangle	gene	0.5	black	46	17	8783
+N-BEL Framework Small Corpus Document-513	PDGFRB	127	92	white	rectangle	gene	0.5	black	46	17	8804
+N-BEL Framework Small Corpus Document-514	PDPK1	93	102	white	rectangle	gene	0.5	black	46	17	8816
+N-BEL Framework Small Corpus Document-515	PELI1	78	97	white	rectangle	gene	0.5	black	46	17	8827
+N-BEL Framework Small Corpus Document-516	PELI2	78	99	white	rectangle	gene	0.5	black	46	17	8828
+N-BEL Framework Small Corpus Document-517	PGR	69	71	white	rectangle	gene	0.5	black	46	17	8910
+N-BEL Framework Small Corpus Document-518	SERPINA1	58	73	white	rectangle	gene	0.5	black	46	17	8941
+N-BEL Framework Small Corpus Document-519	PLAT	0	117	white	rectangle	gene	0.5	black	46	17	9051
+N-BEL Framework Small Corpus Document-52 53	THBD F2	106	57	white	rectangle	gene,gene	0.5	black	46	17	11784,/,3535
+N-BEL Framework Small Corpus Document-520	PLK1	161	39	white	rectangle	gene	0.5	black	46	17	9077
+N-BEL Framework Small Corpus Document-521	PMAIP1	136	169	white	rectangle	gene	0.5	black	46	17	9108
+N-BEL Framework Small Corpus Document-522	BAD	102	98	white	rectangle	gene	0.5	black	46	17	936
+N-BEL Framework Small Corpus Document-523	BAD	113	102	white	rectangle	gene	0.5	black	46	17	936
+N-BEL Framework Small Corpus Document-524	BAD	103	92	white	rectangle	gene	0.5	black	46	17	936
+N-BEL Framework Small Corpus Document-525	BAG1	96	80	white	rectangle	gene	0.5	black	46	17	937
+N-BEL Framework Small Corpus Document-526	BAG1	99	81	white	rectangle	gene	0.5	black	46	17	937
+N-BEL Framework Small Corpus Document-527	PRKACA	115	79	white	rectangle	gene	0.5	black	46	17	9380
+N-BEL Framework Small Corpus Document-528	PRKCA	74	94	white	rectangle	gene	0.5	black	46	17	9393
+N-BEL Framework Small Corpus Document-529	PRKCD	90	130	white	rectangle	gene	0.5	black	46	17	9399
+N-BEL Framework Small Corpus Document-530	PRKCD	120	76	white	rectangle	gene	0.5	black	46	17	9399
+N-BEL Framework Small Corpus Document-531	PRKCI	92	130	white	rectangle	gene	0.5	black	46	17	9404
+N-BEL Framework Small Corpus Document-532	PKN1	112	79	white	rectangle	gene	0.5	black	46	17	9405
+N-BEL Framework Small Corpus Document-533	PKN2	110	79	white	rectangle	gene	0.5	black	46	17	9406
+N-BEL Framework Small Corpus Document-534	PRKCZ	87	105	white	rectangle	gene	0.5	black	46	17	9412
+N-BEL Framework Small Corpus Document-535	PROC	116	52	white	rectangle	gene	0.5	black	46	17	9451
+N-BEL Framework Small Corpus Document-536	PROS1	120	50	white	rectangle	gene	0.5	black	46	17	9456
+N-BEL Framework Small Corpus Document-537	PTEN	94	107	white	rectangle	gene	0.5	black	46	17	9588
+N-BEL Framework Small Corpus Document-539	PTK2B	60	100	white	rectangle	gene	0.5	black	46	17	9612
+N-BEL Framework Small Corpus Document-540	PTK2B	67	101	white	rectangle	gene	0.5	black	46	17	9612
+N-BEL Framework Small Corpus Document-541	PTPN11	106	108	white	rectangle	gene	0.5	black	46	17	9644
+N-BEL Framework Small Corpus Document-542	PTPRJ	117	94	white	rectangle	gene	0.5	black	46	17	9673
+N-BEL Framework Small Corpus Document-543	RAB5A	94	85	white	rectangle	gene	0.5	black	46	17	9783
+N-BEL Framework Small Corpus Document-544	RAC1	122	91	white	rectangle	gene	0.5	black	46	17	9801
+N-BEL Framework Small Corpus Document-545	RAF1	97	86	white	rectangle	gene	0.5	black	46	17	9829
+N-BEL Framework Small Corpus Document-546	RAF1	95	84	white	rectangle	gene	0.5	black	46	17	9829
+N-BEL Framework Small Corpus Document-547	RAF1	104	88	white	rectangle	gene	0.5	black	46	17	9829
+N-BEL Framework Small Corpus Document-548	RAF1	93	81	white	rectangle	gene	0.5	black	46	17	9829
+N-BEL Framework Small Corpus Document-549	RAF1	89	95	white	rectangle	gene	0.5	black	46	17	9829
+N-BEL Framework Small Corpus Document-550	RALA	106	109	white	rectangle	gene	0.5	black	46	17	9839
+N-BEL Framework Small Corpus Document-551	RANBP2	57	24	white	rectangle	gene	0.5	black	46	17	9848
+N-BEL Framework Small Corpus Document-552	RAP1A	94	79	white	rectangle	gene	0.5	black	46	17	9855
+N-BEL Framework Small Corpus Document-553	RB1	27	11	white	rectangle	gene	0.5	black	46	17	9884
+N-BEL Framework Small Corpus Document-554	RB1	98	71	white	rectangle	gene	0.5	black	46	17	9884
+N-BEL Framework Small Corpus Document-555	BCL2	92	86	white	rectangle	gene	0.5	black	46	17	990
+N-BEL Framework Small Corpus Document-556	BCL2	99	82	white	rectangle	gene	0.5	black	46	17	990
+N-BEL Framework Small Corpus Document-557	RELA	101	111	white	rectangle	gene	0.5	black	46	17	9955
+N-BEL Framework Small Corpus Document-558	Tsc2	122	110	white	rectangle	gene	0.5	black	46	17	102548
+N-BEL Framework Small Corpus Document-559	Tsc2	122	109	white	rectangle	gene	0.5	black	46	17	102548
+N-BEL Framework Small Corpus Document-560	Stat3	142	9	white	rectangle	gene	0.5	black	46	17	103038
+N-BEL Framework Small Corpus Document-561	Stat1	187	117	white	rectangle	gene	0.5	black	46	17	103063
+N-BEL Framework Small Corpus Document-562	Vegfa	127	5	white	rectangle	gene	0.5	black	46	17	103178
+N-BEL Framework Small Corpus Document-563	Eif4ebp1	157	12	white	rectangle	gene	0.5	black	46	17	103267
+N-BEL Framework Small Corpus Document-564	Eif4ebp1	156	11	white	rectangle	gene	0.5	black	46	17	103267
+N-BEL Framework Small Corpus Document-565	Ccl11	32	147	white	rectangle	gene	0.5	black	46	17	103576
+N-BEL Framework Small Corpus Document-566	Cdkn1b	121	102	white	rectangle	gene	0.5	black	46	17	104565
+N-BEL Framework Small Corpus Document-567	Tnf	36	141	white	rectangle	gene	0.5	black	46	17	104798
+N-BEL Framework Small Corpus Document-568	Pgf	128	7	white	rectangle	gene	0.5	black	46	17	105095
+N-BEL Framework Small Corpus Document-571	Irak1	77	98	white	rectangle	gene	0.5	black	46	17	107420
+N-BEL Framework Small Corpus Document-572	Lrig1	136	105	white	rectangle	gene	0.5	black	46	17	107935
+N-BEL Framework Small Corpus Document-573	Angpt1	39	9	white	rectangle	gene	0.5	black	46	17	108448
+N-BEL Framework Small Corpus Document-575	Itch	186	107	white	rectangle	gene	0.5	black	46	17	1202301
+N-BEL Framework Small Corpus Document-577	Trp63	191	108	white	rectangle	gene	0.5	black	46	17	1330810
+N-BEL Framework Small Corpus Document-578	Ppargc1a	78	116	white	rectangle	gene	0.5	black	46	17	1342774
+N-BEL Framework Small Corpus Document-579	Mapk1	183	136	white	rectangle	gene	0.5	black	46	17	1346858
+N-BEL Framework Small Corpus Document-580	Mapk3	184	134	white	rectangle	gene	0.5	black	46	17	1346859
+N-BEL Framework Small Corpus Document-581	Foxo1	123	106	white	rectangle	gene	0.5	black	46	17	1890077
+N-BEL Framework Small Corpus Document-582	Foxo3	123	107	white	rectangle	gene	0.5	black	46	17	1890081
+N-BEL Framework Small Corpus Document-583	Pias1	187	116	white	rectangle	gene	0.5	black	46	17	1913125
+N-BEL Framework Small Corpus Document-584	Pias3	51	72	white	rectangle	gene	0.5	black	46	17	1913126
+N-BEL Framework Small Corpus Document-587	Mtor	154	15	white	rectangle	gene	0.5	black	46	17	1928394
+N-BEL Framework Small Corpus Document-59 60 61	TRAF6 UBE2N UBE2V1	84	111	white	rectangle	gene,gene,gene	0.5	black	46	17	12036,/,12492,/,12494
+N-BEL Framework Small Corpus Document-590	Mapkap1	126	107	white	rectangle	gene	0.5	black	46	17	2444554
+N-BEL Framework Small Corpus Document-592	Hdac4	85	102	white	rectangle	gene	0.5	black	46	17	3036234
+N-BEL Framework Small Corpus Document-593	Akt1	117	105	white	rectangle	gene	0.5	black	46	17	87986
+N-BEL Framework Small Corpus Document-594	Akt1	32	47	white	rectangle	gene	0.5	black	46	17	87986
+N-BEL Framework Small Corpus Document-595	Akt1	122	104	white	rectangle	gene	0.5	black	46	17	87986
+N-BEL Framework Small Corpus Document-598	Camk4	76	119	white	rectangle	gene	0.5	black	46	17	88258
+N-BEL Framework Small Corpus Document-599	Ctnnb1	180	134	white	rectangle	gene	0.5	black	46	17	88276
+N-BEL Framework Small Corpus Document-600	Creb1	73	124	white	rectangle	gene	0.5	black	46	17	88494
+N-BEL Framework Small Corpus Document-601	Egf	130	105	white	rectangle	gene	0.5	black	46	17	95290
+N-BEL Framework Small Corpus Document-602	Flt1	130	3	white	rectangle	gene	0.5	black	46	17	95558
+N-BEL Framework Small Corpus Document-603	Hck	27	147	white	rectangle	gene	0.5	black	46	17	96052
+N-BEL Framework Small Corpus Document-604	Hck	31	145	white	rectangle	gene	0.5	black	46	17	96052
+N-BEL Framework Small Corpus Document-605	Hras	127	104	white	rectangle	gene	0.5	black	46	17	96224
+N-BEL Framework Small Corpus Document-606	Il5	28	148	white	rectangle	gene	0.5	black	46	17	96557
+N-BEL Framework Small Corpus Document-607	Il6st	142	12	white	rectangle	gene	0.5	black	46	17	96560
+N-BEL Framework Small Corpus Document-609	Kdr	125	4	white	rectangle	gene	0.5	black	46	17	96683
+N-BEL Framework Small Corpus Document-615	Tek	42	13	white	rectangle	gene	0.5	black	46	17	98664
+N-BEL Framework Small Corpus Document-617	Irs1	33	46	white	rectangle	gene	0.5	black	46	17	99454
+N-BEL Framework Small Corpus Document-619	Ptpn11	144	11	white	rectangle	gene	0.5	black	46	17	99511
+N-BEL Framework Small Corpus Document-62 63 64 65 66 67	TRAF6 TAB2 IRAK4 TAB1 IRAK1 MAP3K7	56	186	white	rectangle	gene,gene,gene,gene,gene,gene	0.5	black	46	17	12036,/,17075,/,17967,/,18157,/,6112,/,6859
+N-BEL Framework Small Corpus Document-621	Chuk	68	5	white	rectangle	gene	0.5	black	46	17	1306661
+N-BEL Framework Small Corpus Document-622	Chuk	70	10	white	rectangle	gene	0.5	black	46	17	1306661
+N-BEL Framework Small Corpus Document-623	Chuk	67	1	white	rectangle	gene	0.5	black	46	17	1306661
+N-BEL Framework Small Corpus Document-624	Igf1	99	87	white	rectangle	gene	0.5	black	46	17	2868
+N-BEL Framework Small Corpus Document-625	Itgb4	178	165	white	rectangle	gene	0.5	black	46	17	2928
+N-BEL Framework Small Corpus Document-626	Jun	102	110	white	rectangle	gene	0.5	black	46	17	2943
+N-BEL Framework Small Corpus Document-627	Ikbkb	153	143	white	rectangle	gene	0.5	black	46	17	621375
+N-BEL Framework Small Corpus Document-628	Ikbkb	152	145	white	rectangle	gene	0.5	black	46	17	621375
+N-BEL Framework Small Corpus Document-629	Ikbkb	155	142	white	rectangle	gene	0.5	black	46	17	621375
+N-BEL Framework Small Corpus Document-68 69	TRAF6 IRAK1	65	90	white	rectangle	gene,gene	0.5	black	46	17	12036,/,6112
+N-BEL Framework Small Corpus Document-7 8	PIK3R_I ERBB3	81	75	white	rectangle	gene,gene	0.5	black	46	17	PIK3R_I,/,3431
+N-BEL Framework Small Corpus Document-70 71	ACP1 CAV1	139	98	white	rectangle	gene,gene	0.5	black	46	17	122,/,1527
+N-BEL Framework Small Corpus Document-72 73	ACP1 KDR	125	95	white	rectangle	gene,gene	0.5	black	46	17	122,/,6307
+N-BEL Framework Small Corpus Document-74 75	VHL HIF1A	105	125	white	rectangle	gene,gene	0.5	black	46	17	12687,/,4910
+N-BEL Framework Small Corpus Document-76 77 78	VTN ITGAV ITGB3	121	93	white	rectangle	gene,gene,gene	0.5	black	46	17	12724,/,6150,/,6156
+N-BEL Framework Small Corpus Document-82 83	CAV1 CSK	139	100	white	rectangle	gene,gene	0.5	black	46	17	1527,/,2444
+N-BEL Framework Small Corpus Document-84 85	CAV1 GRB7	138	101	white	rectangle	gene,gene	0.5	black	46	17	1527,/,4567
+N-BEL Framework Small Corpus Document-86 87	CAV1 KDR	138	99	white	rectangle	gene,gene	0.5	black	46	17	1527,/,6307
+N-BEL Framework Small Corpus Document-88 89	CCND1 CDK4	99	63	white	rectangle	gene,gene	0.5	black	46	17	1582,/,1773
+N-BEL Framework Small Corpus Document-9 10	p14_3_3 FOXO	97	106	white	rectangle	gene,gene	0.5	black	46	17	p14_3_3,/,FOXO
+N-BEL Framework Small Corpus Document-90 91	PRPF6 PRPF4B	60	59	white	rectangle	gene,gene	0.5	black	46	17	15860,/,17346
+N-BEL Framework Small Corpus Document-92 93	SH3RF1 MAP3K11	103	110	white	rectangle	gene,gene	0.5	black	46	17	17650,/,6850
+N-BEL Framework Small Corpus Document-94 95	CDK2 CDKN1A	97	96	white	rectangle	gene,gene	0.5	black	46	17	1771,/,1784
+N-BEL Framework Small Corpus Document-96 97 98	IRAK4 IRAK1 MYD88	72	91	white	rectangle	gene,gene,gene	0.5	black	46	17	17967,/,6112,/,7562
+N-BEL Framework Small Corpus Document-99 100	CYCS APAF1	13	165	white	rectangle	gene,gene	0.5	black	46	17	19986,/,576

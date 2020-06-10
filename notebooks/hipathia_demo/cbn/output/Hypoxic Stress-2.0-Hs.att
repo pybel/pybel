@@ -1,36 +1,36 @@
 ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
-N-Hypoxic Stress-2.0-Hs-1 2	TSC1 TSC2	180	23	white	rectangle	gene,gene	0.5	black	46	17	12362,/,12363
-N-Hypoxic Stress-2.0-Hs-11	RHEB	182	17	white	rectangle	gene	0.5	black	46	17	10011
-N-Hypoxic Stress-2.0-Hs-12	BNIP3	85	50	white	rectangle	gene	0.5	black	46	17	1084
-N-Hypoxic Stress-2.0-Hs-15	TGFB1	44	119	white	rectangle	gene	0.5	black	46	17	11766
-N-Hypoxic Stress-2.0-Hs-16	TGFBR1	40	130	white	rectangle	gene	0.5	black	46	17	11772
-N-Hypoxic Stress-2.0-Hs-17	TLR2	93	42	white	rectangle	gene	0.5	black	46	17	11848
-N-Hypoxic Stress-2.0-Hs-18	EGLN1	101	60	white	rectangle	gene	0.5	black	46	17	1232
-N-Hypoxic Stress-2.0-Hs-19	VHL	111	60	white	rectangle	gene	0.5	black	46	17	12687
-N-Hypoxic Stress-2.0-Hs-20	EGLN2	105	59	white	rectangle	gene	0.5	black	46	17	14660
-N-Hypoxic Stress-2.0-Hs-21	EGLN3	101	53	white	rectangle	gene	0.5	black	46	17	14661
-N-Hypoxic Stress-2.0-Hs-22	HIF3A	122	65	white	rectangle	gene	0.5	black	46	17	15825
-N-Hypoxic Stress-2.0-Hs-23	TLR6	88	66	white	rectangle	gene	0.5	black	46	17	16711
-N-Hypoxic Stress-2.0-Hs-24	TXNIP	93	68	white	rectangle	gene	0.5	black	46	17	16952
-N-Hypoxic Stress-2.0-Hs-25	HIF1AN	74	47	white	rectangle	gene	0.5	black	46	17	17113
-N-Hypoxic Stress-2.0-Hs-26	CFTR	8	99	white	rectangle	gene	0.5	black	46	17	1884
-N-Hypoxic Stress-2.0-Hs-27	CFTR	1	103	white	rectangle	gene	0.5	black	46	17	1884
-N-Hypoxic Stress-2.0-Hs-28	EIF2AK4	13	3	white	rectangle	gene	0.5	black	46	17	19687
-N-Hypoxic Stress-2.0-Hs-29	CREBBP	107	49	white	rectangle	gene	0.5	black	46	17	2348
-N-Hypoxic Stress-2.0-Hs-3 4	CREBBP HIF1A	63	42	white	rectangle	gene,gene	0.5	black	46	17	2348,/,4910
-N-Hypoxic Stress-2.0-Hs-32	EIF2AK3	0	10	white	rectangle	gene	0.5	black	46	17	3255
-N-Hypoxic Stress-2.0-Hs-33	EIF2S1	6	5	white	rectangle	gene	0.5	black	46	17	3265
-N-Hypoxic Stress-2.0-Hs-35	EP300	103	46	white	rectangle	gene	0.5	black	46	17	3373
-N-Hypoxic Stress-2.0-Hs-36	EPAS1	107	53	white	rectangle	gene	0.5	black	46	17	3374
-N-Hypoxic Stress-2.0-Hs-37	HIF1A	94	55	white	rectangle	gene	0.5	black	46	17	4910
-N-Hypoxic Stress-2.0-Hs-38	IFNA1	84	63	white	rectangle	gene	0.5	black	46	17	5417
-N-Hypoxic Stress-2.0-Hs-39	IFNB1	98	67	white	rectangle	gene	0.5	black	46	17	5434
-N-Hypoxic Stress-2.0-Hs-40	SMAD3	37	138	white	rectangle	gene	0.5	black	46	17	6769
-N-Hypoxic Stress-2.0-Hs-41	MAP2K1	88	44	white	rectangle	gene	0.5	black	46	17	6840
-N-Hypoxic Stress-2.0-Hs-42	ARNT	99	47	white	rectangle	gene	0.5	black	46	17	700
-N-Hypoxic Stress-2.0-Hs-43	ATF4	4	0	white	rectangle	gene	0.5	black	46	17	786
-N-Hypoxic Stress-2.0-Hs-46	PRKCZ	169	2	white	rectangle	gene	0.5	black	46	17	9412
-N-Hypoxic Stress-2.0-Hs-47	PRKCZ	163	2	white	rectangle	gene	0.5	black	46	17	9412
-N-Hypoxic Stress-2.0-Hs-5 6	EP300 EPAS1	63	49	white	rectangle	gene,gene	0.5	black	46	17	3373,/,3374
-N-Hypoxic Stress-2.0-Hs-7 8	EP300 HIF1A	67	37	white	rectangle	gene,gene	0.5	black	46	17	3373,/,4910
-N-Hypoxic Stress-2.0-Hs-9 10	HIF1A ARNT	83	57	white	rectangle	gene,gene	0.5	black	46	17	4910,/,700
+N-Hypoxic Stress-2.0-Hs-1 2	TSC1 TSC2	23	66	white	rectangle	gene,gene	0.5	black	46	17	12362,/,12363
+N-Hypoxic Stress-2.0-Hs-11	RHEB	18	70	white	rectangle	gene	0.5	black	46	17	10011
+N-Hypoxic Stress-2.0-Hs-12	BNIP3	129	117	white	rectangle	gene	0.5	black	46	17	1084
+N-Hypoxic Stress-2.0-Hs-15	TGFB1	8	114	white	rectangle	gene	0.5	black	46	17	11766
+N-Hypoxic Stress-2.0-Hs-16	TGFBR1	8	121	white	rectangle	gene	0.5	black	46	17	11772
+N-Hypoxic Stress-2.0-Hs-17	TLR2	127	122	white	rectangle	gene	0.5	black	46	17	11848
+N-Hypoxic Stress-2.0-Hs-18	EGLN1	107	114	white	rectangle	gene	0.5	black	46	17	1232
+N-Hypoxic Stress-2.0-Hs-19	VHL	123	102	white	rectangle	gene	0.5	black	46	17	12687
+N-Hypoxic Stress-2.0-Hs-20	EGLN2	116	103	white	rectangle	gene	0.5	black	46	17	14660
+N-Hypoxic Stress-2.0-Hs-21	EGLN3	108	106	white	rectangle	gene	0.5	black	46	17	14661
+N-Hypoxic Stress-2.0-Hs-22	HIF3A	133	95	white	rectangle	gene	0.5	black	46	17	15825
+N-Hypoxic Stress-2.0-Hs-23	TLR6	106	124	white	rectangle	gene	0.5	black	46	17	16711
+N-Hypoxic Stress-2.0-Hs-24	TXNIP	117	129	white	rectangle	gene	0.5	black	46	17	16952
+N-Hypoxic Stress-2.0-Hs-25	HIF1AN	103	96	white	rectangle	gene	0.5	black	46	17	17113
+N-Hypoxic Stress-2.0-Hs-26	CFTR	60	0	white	rectangle	gene	0.5	black	46	17	1884
+N-Hypoxic Stress-2.0-Hs-27	CFTR	63	7	white	rectangle	gene	0.5	black	46	17	1884
+N-Hypoxic Stress-2.0-Hs-28	EIF2AK4	156	52	white	rectangle	gene	0.5	black	46	17	19687
+N-Hypoxic Stress-2.0-Hs-29	CREBBP	104	111	white	rectangle	gene	0.5	black	46	17	2348
+N-Hypoxic Stress-2.0-Hs-3 4	CREBBP HIF1A	96	86	white	rectangle	gene,gene	0.5	black	46	17	2348,/,4910
+N-Hypoxic Stress-2.0-Hs-32	EIF2AK3	155	40	white	rectangle	gene	0.5	black	46	17	3255
+N-Hypoxic Stress-2.0-Hs-33	EIF2S1	149	49	white	rectangle	gene	0.5	black	46	17	3265
+N-Hypoxic Stress-2.0-Hs-35	EP300	120	108	white	rectangle	gene	0.5	black	46	17	3373
+N-Hypoxic Stress-2.0-Hs-36	EPAS1	113	108	white	rectangle	gene	0.5	black	46	17	3374
+N-Hypoxic Stress-2.0-Hs-37	HIF1A	116	114	white	rectangle	gene	0.5	black	46	17	4910
+N-Hypoxic Stress-2.0-Hs-38	IFNA1	124	126	white	rectangle	gene	0.5	black	46	17	5417
+N-Hypoxic Stress-2.0-Hs-39	IFNB1	111	127	white	rectangle	gene	0.5	black	46	17	5434
+N-Hypoxic Stress-2.0-Hs-40	SMAD3	0	124	white	rectangle	gene	0.5	black	46	17	6769
+N-Hypoxic Stress-2.0-Hs-41	MAP2K1	128	111	white	rectangle	gene	0.5	black	46	17	6840
+N-Hypoxic Stress-2.0-Hs-42	ARNT	111	117	white	rectangle	gene	0.5	black	46	17	700
+N-Hypoxic Stress-2.0-Hs-43	ATF4	141	49	white	rectangle	gene	0.5	black	46	17	786
+N-Hypoxic Stress-2.0-Hs-46	PRKCZ	37	191	white	rectangle	gene	0.5	black	46	17	9412
+N-Hypoxic Stress-2.0-Hs-47	PRKCZ	42	184	white	rectangle	gene	0.5	black	46	17	9412
+N-Hypoxic Stress-2.0-Hs-5 6	EP300 EPAS1	92	91	white	rectangle	gene,gene	0.5	black	46	17	3373,/,3374
+N-Hypoxic Stress-2.0-Hs-7 8	EP300 HIF1A	103	84	white	rectangle	gene,gene	0.5	black	46	17	3373,/,4910
+N-Hypoxic Stress-2.0-Hs-9 10	HIF1A ARNT	120	124	white	rectangle	gene,gene	0.5	black	46	17	4910,/,700

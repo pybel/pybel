@@ -1,20 +1,24 @@
 ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
-N-mTor-2.0-Hs-1 2	TSC1 TSC2	21	98	white	rectangle	gene,gene	0.5	black	46	17	12362,/,12363
-N-mTor-2.0-Hs-10	RPS6KB1	141	41	white	rectangle	gene	0.5	black	46	17	10436
-N-mTor-2.0-Hs-11	RPS6KB1	125	42	white	rectangle	gene	0.5	black	46	17	10436
-N-mTor-2.0-Hs-12	RPS6KB1	138	55	white	rectangle	gene	0.5	black	46	17	10436
-N-mTor-2.0-Hs-13	RPS6KB1	135	27	white	rectangle	gene	0.5	black	46	17	10436
-N-mTor-2.0-Hs-14	TSC2	182	113	white	rectangle	gene	0.5	black	46	17	12363
-N-mTor-2.0-Hs-15	TSC2	191	121	white	rectangle	gene	0.5	black	46	17	12363
-N-mTor-2.0-Hs-16	TSC2	10	92	white	rectangle	gene	0.5	black	46	17	12363
-N-mTor-2.0-Hs-17	EIF4E	13	171	white	rectangle	gene	0.5	black	46	17	3287
-N-mTor-2.0-Hs-18	EIF4E	162	38	white	rectangle	gene	0.5	black	46	17	3287
-N-mTor-2.0-Hs-19	EIF4EBP1	31	10	white	rectangle	gene	0.5	black	46	17	3288
-N-mTor-2.0-Hs-20	EIF4EBP1	0	145	white	rectangle	gene	0.5	black	46	17	3288
-N-mTor-2.0-Hs-21	EIF4G1	25	176	white	rectangle	gene	0.5	black	46	17	3296
-N-mTor-2.0-Hs-22	SMAD4	24	0	white	rectangle	gene	0.5	black	46	17	6770
-N-mTor-2.0-Hs-3 4	EIF3A EIF4E	170	25	white	rectangle	gene,gene	0.5	black	46	17	3271,/,3287
-N-mTor-2.0-Hs-5 6	EIF4E EIF4EBP1	5	158	white	rectangle	gene,gene	0.5	black	46	17	3287,/,3288
-N-mTor-2.0-Hs-7	RHEB	30	106	white	rectangle	gene	0.5	black	46	17	10011
-N-mTor-2.0-Hs-8	RPS6KA1	177	47	white	rectangle	gene	0.5	black	46	17	10430
-N-mTor-2.0-Hs-9	RPS6KA1	193	47	white	rectangle	gene	0.5	black	46	17	10430
+N-mTor-2.0-Hs-1 2	TSC1 TSC2	95	133	white	rectangle	gene,gene	0.5	black	46	17	12362,/,12363
+N-mTor-2.0-Hs-10	STAT	37	2	white	rectangle	gene	0.5	black	46	17	STAT
+N-mTor-2.0-Hs-11	RHEB	88	139	white	rectangle	gene	0.5	black	46	17	10011
+N-mTor-2.0-Hs-12	RPS6KA1	29	94	white	rectangle	gene	0.5	black	46	17	10430
+N-mTor-2.0-Hs-13	RPS6KA1	34	85	white	rectangle	gene	0.5	black	46	17	10430
+N-mTor-2.0-Hs-14	RPS6KB1	11	114	white	rectangle	gene	0.5	black	46	17	10436
+N-mTor-2.0-Hs-15	RPS6KB1	3	108	white	rectangle	gene	0.5	black	46	17	10436
+N-mTor-2.0-Hs-16	RPS6KB1	15	124	white	rectangle	gene	0.5	black	46	17	10436
+N-mTor-2.0-Hs-17	RPS6KB1	0	117	white	rectangle	gene	0.5	black	46	17	10436
+N-mTor-2.0-Hs-18	TSC2	84	173	white	rectangle	gene	0.5	black	46	17	12363
+N-mTor-2.0-Hs-19	TSC2	86	167	white	rectangle	gene	0.5	black	46	17	12363
+N-mTor-2.0-Hs-20	TSC2	103	130	white	rectangle	gene	0.5	black	46	17	12363
+N-mTor-2.0-Hs-21	EIF4E	16	31	white	rectangle	gene	0.5	black	46	17	3287
+N-mTor-2.0-Hs-22	EIF4E	22	105	white	rectangle	gene	0.5	black	46	17	3287
+N-mTor-2.0-Hs-23	EIF4EBP1	147	119	white	rectangle	gene	0.5	black	46	17	3288
+N-mTor-2.0-Hs-24	EIF4EBP1	32	24	white	rectangle	gene	0.5	black	46	17	3288
+N-mTor-2.0-Hs-25	EIF4G1	7	32	white	rectangle	gene	0.5	black	46	17	3296
+N-mTor-2.0-Hs-26	SMAD4	150	125	white	rectangle	gene	0.5	black	46	17	6770
+N-mTor-2.0-Hs-3 4	EIF3A EIF4E	32	107	white	rectangle	gene,gene	0.5	black	46	17	3271,/,3287
+N-mTor-2.0-Hs-5 6	EIF4E EIF4EBP1	25	29	white	rectangle	gene,gene	0.5	black	46	17	3287,/,3288
+N-mTor-2.0-Hs-7	AKT	112	128	white	rectangle	gene	0.5	black	46	17	AKT
+N-mTor-2.0-Hs-8	JAK	30	0	white	rectangle	gene	0.5	black	46	17	JAK
+N-mTor-2.0-Hs-9	PPP2C	5	124	white	rectangle	gene	0.5	black	46	17	PPP2C
