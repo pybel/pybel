@@ -1,0 +1,16 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Calcium-dependent signal transduction-10	CDH2	90	0	white	rectangle	gene	0.5	black	46	17	1759
+N-Calcium-dependent signal transduction-13	CTNNB1	33	126	white	rectangle	gene	0.5	black	46	17	2514
+N-Calcium-dependent signal transduction-14	DKK1	32	156	white	rectangle	gene	0.5	black	46	17	2891
+N-Calcium-dependent signal transduction-15	AGER	44	152	white	rectangle	gene	0.5	black	46	17	320
+N-Calcium-dependent signal transduction-16	GSK3B	45	130	white	rectangle	gene	0.5	black	46	17	4617
+N-Calcium-dependent signal transduction-18	APOE	0	25	white	rectangle	gene	0.5	black	46	17	613
+N-Calcium-dependent signal transduction-20	MAPK8	22	148	white	rectangle	gene	0.5	black	46	17	6881
+N-Calcium-dependent signal transduction-21	MAPT	17	131	white	rectangle	gene	0.5	black	46	17	6893
+N-Calcium-dependent signal transduction-23	PSEN1	98	5	white	rectangle	gene	0.5	black	46	17	9508
+N-Calcium-dependent signal transduction-27	MOK	50	142	white	rectangle	gene	0.5	black	46	17	9833
+N-Calcium-dependent signal transduction-4	RYR3	150	91	white	rectangle	gene	0.5	black	46	17	10485
+N-Calcium-dependent signal transduction-5	S100B	34	140	white	rectangle	gene	0.5	black	46	17	10500
+N-Calcium-dependent signal transduction-6	XBP1	138	92	white	rectangle	gene	0.5	black	46	17	12801
+N-Calcium-dependent signal transduction-7	CAMK2A	3	127	white	rectangle	gene	0.5	black	46	17	1460
+N-Calcium-dependent signal transduction-9	CASR	9	28	white	rectangle	gene	0.5	black	46	17	1514

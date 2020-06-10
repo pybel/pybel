@@ -1,0 +1,19 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Axonal guidance subgraph-1 2	TUBA4A DPYSL2	0	80	white	rectangle	gene,gene	0.5	black	46	17	12407,/,3014
+N-Axonal guidance subgraph-10 11	APP NTN1	134	25	white	rectangle	gene,gene	0.5	black	46	17	620,/,8029
+N-Axonal guidance subgraph-12	ERK	181	19	white	rectangle	gene	0.5	black	46	17	ERK
+N-Axonal guidance subgraph-13	SEMA3A	33	127	white	rectangle	gene	0.5	black	46	17	10723
+N-Axonal guidance subgraph-14	CDK5	27	94	white	rectangle	gene	0.5	black	46	17	1774
+N-Axonal guidance subgraph-15	RTN4R	110	0	white	rectangle	gene	0.5	black	46	17	18601
+N-Axonal guidance subgraph-16	DPYSL2	36	113	white	rectangle	gene	0.5	black	46	17	3014
+N-Axonal guidance subgraph-17	DPYSL2	12	86	white	rectangle	gene	0.5	black	46	17	3014
+N-Axonal guidance subgraph-18	DPYSL2	29	82	white	rectangle	gene	0.5	black	46	17	3014
+N-Axonal guidance subgraph-19	GSK3A	45	123	white	rectangle	gene	0.5	black	46	17	4616
+N-Axonal guidance subgraph-20	GSK3B	48	111	white	rectangle	gene	0.5	black	46	17	4617
+N-Axonal guidance subgraph-21	APP	101	19	white	rectangle	gene	0.5	black	46	17	620
+N-Axonal guidance subgraph-22	APP	123	20	white	rectangle	gene	0.5	black	46	17	620
+N-Axonal guidance subgraph-23	APP	133	162	white	rectangle	gene	0.5	black	46	17	620
+N-Axonal guidance subgraph-24	MAPK1	138	154	white	rectangle	gene	0.5	black	46	17	6871
+N-Axonal guidance subgraph-25	Amyloidogenic glycoprotein, intracellular domain, conserved site	23	119	white	rectangle	gene	0.5	black	46	17	IPR019745
+N-Axonal guidance subgraph-3 4	RTN4R APP	112	13	white	rectangle	gene,gene	0.5	black	46	17	18601,/,620
+N-Axonal guidance subgraph-7 8 9	DCC APP NTN1	175	12	white	rectangle	gene,gene,gene	0.5	black	46	17	2701,/,620,/,8029

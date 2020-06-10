@@ -1,0 +1,38 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Inflammatory response subgraph-100	Lcn2	173	62	white	rectangle	gene	0.5	black	46	17	96757
+N-Inflammatory response subgraph-101	Nos2	158	19	white	rectangle	gene	0.5	black	46	17	97361
+N-Inflammatory response subgraph-102	Ptgs2	146	34	white	rectangle	gene	0.5	black	46	17	97798
+N-Inflammatory response subgraph-14 15	TREM2 HSPD1	106	174	white	rectangle	gene,gene	0.5	black	46	17	17761,/,5261
+N-Inflammatory response subgraph-18 19	APP Tlr2	0	139	white	rectangle	gene,gene	0.5	black	46	17	620,/,1346060
+N-Inflammatory response subgraph-20 21	NFKB1 RELB	65	145	white	rectangle	gene,gene	0.5	black	46	17	7794,/,9956
+N-Inflammatory response subgraph-24 25	Tnf Tnfrsf1a	177	66	white	rectangle	gene,gene	0.5	black	46	17	104798,/,1314884
+N-Inflammatory response subgraph-29	S100B	4	85	white	rectangle	gene	0.5	black	46	17	10500
+N-Inflammatory response subgraph-31	STAT3	84	141	white	rectangle	gene	0.5	black	46	17	11364
+N-Inflammatory response subgraph-32	TLR2	36	29	white	rectangle	gene	0.5	black	46	17	11848
+N-Inflammatory response subgraph-33	TLR4	191	85	white	rectangle	gene	0.5	black	46	17	11850
+N-Inflammatory response subgraph-34	TNF	94	176	white	rectangle	gene	0.5	black	46	17	11892
+N-Inflammatory response subgraph-35	TNFSF10	115	7	white	rectangle	gene	0.5	black	46	17	11925
+N-Inflammatory response subgraph-38	IL23A	35	21	white	rectangle	gene	0.5	black	46	17	15488
+N-Inflammatory response subgraph-4 5	SDC1 ITGA5	72	135	white	rectangle	gene,gene	0.5	black	46	17	10658,/,6141
+N-Inflammatory response subgraph-40	CCR7	101	178	white	rectangle	gene	0.5	black	46	17	1608
+N-Inflammatory response subgraph-41	CD14	50	19	white	rectangle	gene	0.5	black	46	17	1628
+N-Inflammatory response subgraph-45	TREM2	98	168	white	rectangle	gene	0.5	black	46	17	17761
+N-Inflammatory response subgraph-47	CHI3L1	76	144	white	rectangle	gene	0.5	black	46	17	1932
+N-Inflammatory response subgraph-49	CD200R1	164	120	white	rectangle	gene	0.5	black	46	17	24235
+N-Inflammatory response subgraph-6 7	SDC1 ITGB3	67	139	white	rectangle	gene,gene	0.5	black	46	17	10658,/,6156
+N-Inflammatory response subgraph-60	IFNG	107	167	white	rectangle	gene	0.5	black	46	17	5438
+N-Inflammatory response subgraph-61	IL12B	41	17	white	rectangle	gene	0.5	black	46	17	5970
+N-Inflammatory response subgraph-62	IL13	170	124	white	rectangle	gene	0.5	black	46	17	5973
+N-Inflammatory response subgraph-66	IL4	156	116	white	rectangle	gene	0.5	black	46	17	6014
+N-Inflammatory response subgraph-67	IL6	88	155	white	rectangle	gene	0.5	black	46	17	6018
+N-Inflammatory response subgraph-69	APP	192	90	white	rectangle	gene	0.5	black	46	17	620
+N-Inflammatory response subgraph-70	APP	44	26	white	rectangle	gene	0.5	black	46	17	620
+N-Inflammatory response subgraph-75	MYD88	52	26	white	rectangle	gene	0.5	black	46	17	7562
+N-Inflammatory response subgraph-76	NFKB1	75	153	white	rectangle	gene	0.5	black	46	17	7794
+N-Inflammatory response subgraph-77	NFKB2	68	151	white	rectangle	gene	0.5	black	46	17	7795
+N-Inflammatory response subgraph-78	OSM	79	135	white	rectangle	gene	0.5	black	46	17	8506
+N-Inflammatory response subgraph-8 9	TNFRSF10B TNFSF10	116	0	white	rectangle	gene,gene	0.5	black	46	17	11905,/,11925
+N-Inflammatory response subgraph-86	MOK	0	81	white	rectangle	gene	0.5	black	46	17	9833
+N-Inflammatory response subgraph-89	Kng1	152	26	white	rectangle	gene	0.5	black	46	17	1097705
+N-Inflammatory response subgraph-93	Tlr2	7	136	white	rectangle	gene	0.5	black	46	17	1346060
+N-Inflammatory response subgraph-96	Cd40lg	47	35	white	rectangle	gene	0.5	black	46	17	88337

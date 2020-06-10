@@ -1,0 +1,191 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-COVID-19 Knowledge Graph-1 2	lopinavir 3.4.22.69	119	7	white	rectangle	gene,gene	0.5	black	46	17	31781,/,3.4.22.69
+N-COVID-19 Knowledge Graph-100	3.4.22.69	122	7	white	rectangle	gene	0.5	black	46	17	3.4.22.69
+N-COVID-19 Knowledge Graph-101	3.4.22.69	13	140	white	rectangle	gene	0.5	black	46	17	3.4.22.69
+N-COVID-19 Knowledge Graph-102	NF-kappa B complex subunits	53	50	white	rectangle	gene	0.5	black	46	17	1254
+N-COVID-19 Knowledge Graph-105	Interferons	48	54	white	rectangle	gene	0.5	black	46	17	598
+N-COVID-19 Knowledge Graph-106	Protein phosphatase 1 regulatory subunits	96	93	white	rectangle	gene	0.5	black	46	17	694
+N-COVID-19 Knowledge Graph-108	BECN1	68	16	white	rectangle	gene	0.5	black	46	17	1034
+N-COVID-19 Knowledge Graph-109	BECN1	73	15	white	rectangle	gene	0.5	black	46	17	1034
+N-COVID-19 Knowledge Graph-11 12	Severe acute respiratory syndrome coronavirus 2 ACE2	82	190	white	rectangle	gene,gene	0.5	black	46	17	13557
+N-COVID-19 Knowledge Graph-110	CCL2	85	77	white	rectangle	gene	0.5	black	46	17	10618
+N-COVID-19 Knowledge Graph-111	CCL3	42	44	white	rectangle	gene	0.5	black	46	17	10627
+N-COVID-19 Knowledge Graph-112	CCL5	42	42	white	rectangle	gene	0.5	black	46	17	10632
+N-COVID-19 Knowledge Graph-113	CXCL10	44	41	white	rectangle	gene	0.5	black	46	17	10637
+N-COVID-19 Knowledge Graph-114	SKP2	70	14	white	rectangle	gene	0.5	black	46	17	10901
+N-COVID-19 Knowledge Graph-115	STAT1	106	0	white	rectangle	gene	0.5	black	46	17	11362
+N-COVID-19 Knowledge Graph-116	STAT1	105	85	white	rectangle	gene	0.5	black	46	17	11362
+N-COVID-19 Knowledge Graph-117	TBK1	61	54	white	rectangle	gene	0.5	black	46	17	11584
+N-COVID-19 Knowledge Graph-118	TBK1	83	44	white	rectangle	gene	0.5	black	46	17	11584
+N-COVID-19 Knowledge Graph-119	TGFB1	178	80	white	rectangle	gene	0.5	black	46	17	11766
+N-COVID-19 Knowledge Graph-120	TLR3	102	54	white	rectangle	gene	0.5	black	46	17	11849
+N-COVID-19 Knowledge Graph-121	TMPRSS2	79	132	white	rectangle	gene	0.5	black	46	17	11876
+N-COVID-19 Knowledge Graph-122	TNF	88	87	white	rectangle	gene	0.5	black	46	17	11892
+N-COVID-19 Knowledge Graph-123	HSP90B1	100	108	white	rectangle	gene	0.5	black	46	17	12028
+N-COVID-19 Knowledge Graph-124	TRAF2	67	98	white	rectangle	gene	0.5	black	46	17	12032
+N-COVID-19 Knowledge Graph-126	VIM	182	75	white	rectangle	gene	0.5	black	46	17	12692
+N-COVID-19 Knowledge Graph-127	XBP1	11	84	white	rectangle	gene	0.5	black	46	17	12801
+N-COVID-19 Knowledge Graph-128	ERO1A	108	95	white	rectangle	gene	0.5	black	46	17	13280
+N-COVID-19 Knowledge Graph-129	ACE2	80	108	white	rectangle	gene	0.5	black	46	17	13557
+N-COVID-19 Knowledge Graph-13 14	viral replication complex R1AB_CVHSA	2	71	white	rectangle	gene,gene	0.5	black	46	17	0019034,/,P0C6X7
+N-COVID-19 Knowledge Graph-130	ACE2	78	136	white	rectangle	gene	0.5	black	46	17	13557
+N-COVID-19 Knowledge Graph-131	ACE2	76	135	white	rectangle	gene	0.5	black	46	17	13557
+N-COVID-19 Knowledge Graph-132	PPP1R15A	92	93	white	rectangle	gene	0.5	black	46	17	14375
+N-COVID-19 Knowledge Graph-133	CASP1	83	98	white	rectangle	gene	0.5	black	46	17	1499
+N-COVID-19 Knowledge Graph-134	MBTPS2	154	36	white	rectangle	gene	0.5	black	46	17	15455
+N-COVID-19 Knowledge Graph-135	MBTPS1	155	31	white	rectangle	gene	0.5	black	46	17	15456
+N-COVID-19 Knowledge Graph-136	IL1F10	81	94	white	rectangle	gene	0.5	black	46	17	15552
+N-COVID-19 Knowledge Graph-137	IL37	86	82	white	rectangle	gene	0.5	black	46	17	15563
+N-COVID-19 Knowledge Graph-138	TLR7	95	53	white	rectangle	gene	0.5	black	46	17	15631
+N-COVID-19 Knowledge Graph-139	TLR8	99	54	white	rectangle	gene	0.5	black	46	17	15632
+N-COVID-19 Knowledge Graph-140	TLR9	98	53	white	rectangle	gene	0.5	black	46	17	15633
+N-COVID-19 Knowledge Graph-141	TRIB3	106	91	white	rectangle	gene	0.5	black	46	17	16228
+N-COVID-19 Knowledge Graph-142	TICAM1	96	57	white	rectangle	gene	0.5	black	46	17	18348
+N-COVID-19 Knowledge Graph-143	RNF41	69	56	white	rectangle	gene	0.5	black	46	17	18401
+N-COVID-19 Knowledge Graph-144	IFIH1	97	54	white	rectangle	gene	0.5	black	46	17	18873
+N-COVID-19 Knowledge Graph-145	EDEM1	6	84	white	rectangle	gene	0.5	black	46	17	18967
+N-COVID-19 Knowledge Graph-146	CASP12	60	100	white	rectangle	gene	0.5	black	46	17	19004
+N-COVID-19 Knowledge Graph-147	DDX58	97	56	white	rectangle	gene	0.5	black	46	17	19102
+N-COVID-19 Knowledge Graph-151	CGAS	99	57	white	rectangle	gene	0.5	black	46	17	21367
+N-COVID-19 Knowledge Graph-152	TMPRSS11D	82	146	white	rectangle	gene	0.5	black	46	17	24059
+N-COVID-19 Knowledge Graph-153	EIF2AK1	96	98	white	rectangle	gene	0.5	black	46	17	24921
+N-COVID-19 Knowledge Graph-154	CTSL	57	163	white	rectangle	gene	0.5	black	46	17	2537
+N-COVID-19 Knowledge Graph-155	CUL2	5	44	white	rectangle	gene	0.5	black	46	17	2552
+N-COVID-19 Knowledge Graph-158	DDIT3	102	96	white	rectangle	gene	0.5	black	46	17	2726
+N-COVID-19 Knowledge Graph-159	MAVS	95	54	white	rectangle	gene	0.5	black	46	17	29233
+N-COVID-19 Knowledge Graph-160	LARP1	112	178	white	rectangle	gene	0.5	black	46	17	29531
+N-COVID-19 Knowledge Graph-161	DNM1L	95	43	white	rectangle	gene	0.5	black	46	17	2973
+N-COVID-19 Knowledge Graph-162	DNM1L	94	40	white	rectangle	gene	0.5	black	46	17	2973
+N-COVID-19 Knowledge Graph-164	G3BP1	0	100	white	rectangle	gene	0.5	black	46	17	30292
+N-COVID-19 Knowledge Graph-165	DUSP1	158	65	white	rectangle	gene	0.5	black	46	17	3064
+N-COVID-19 Knowledge Graph-167	EIF2A	93	105	white	rectangle	gene	0.5	black	46	17	3254
+N-COVID-19 Knowledge Graph-168	EIF2AK3	100	93	white	rectangle	gene	0.5	black	46	17	3255
+N-COVID-19 Knowledge Graph-169	EIF2S1	142	150	white	rectangle	gene	0.5	black	46	17	3265
+N-COVID-19 Knowledge Graph-17 18	nsp5a EIF2AK2	96	108	white	rectangle	gene,gene	0.5	black	46	17	9437
+N-COVID-19 Knowledge Graph-170	EIF2S1	98	96	white	rectangle	gene	0.5	black	46	17	3265
+N-COVID-19 Knowledge Graph-171	EIF4A1	0	102	white	rectangle	gene	0.5	black	46	17	3282
+N-COVID-19 Knowledge Graph-173	ERN1	76	96	white	rectangle	gene	0.5	black	46	17	3449
+N-COVID-19 Knowledge Graph-174	ERN1	71	97	white	rectangle	gene	0.5	black	46	17	3449
+N-COVID-19 Knowledge Graph-175	FGA	108	107	white	rectangle	gene	0.5	black	46	17	3661
+N-COVID-19 Knowledge Graph-176	FGB	107	103	white	rectangle	gene	0.5	black	46	17	3662
+N-COVID-19 Knowledge Graph-177	FGG	102	108	white	rectangle	gene	0.5	black	46	17	3694
+N-COVID-19 Knowledge Graph-178	AKT1	71	94	white	rectangle	gene	0.5	black	46	17	391
+N-COVID-19 Knowledge Graph-179	MTOR	111	180	white	rectangle	gene	0.5	black	46	17	3942
+N-COVID-19 Knowledge Graph-180	GFAP	182	78	white	rectangle	gene	0.5	black	46	17	4235
+N-COVID-19 Knowledge Graph-181	GPT	76	112	white	rectangle	gene	0.5	black	46	17	4552
+N-COVID-19 Knowledge Graph-182	HAS2	83	89	white	rectangle	gene	0.5	black	46	17	4819
+N-COVID-19 Knowledge Graph-183	HDAC2	166	61	white	rectangle	gene	0.5	black	46	17	4853
+N-COVID-19 Knowledge Graph-185	HSPA5	108	102	white	rectangle	gene	0.5	black	46	17	5238
+N-COVID-19 Knowledge Graph-186	HSPB1	175	80	white	rectangle	gene	0.5	black	46	17	5246
+N-COVID-19 Knowledge Graph-187	HYAL1	79	86	white	rectangle	gene	0.5	black	46	17	5320
+N-COVID-19 Knowledge Graph-188	IFNA1	108	53	white	rectangle	gene	0.5	black	46	17	5417
+N-COVID-19 Knowledge Graph-189	IFNAR1	107	106	white	rectangle	gene	0.5	black	46	17	5432
+N-COVID-19 Knowledge Graph-19 20	43740568 BSG	26	22	white	rectangle	gene,gene	0.5	black	46	17	1116
+N-COVID-19 Knowledge Graph-190	IFNAR1	101	110	white	rectangle	gene	0.5	black	46	17	5432
+N-COVID-19 Knowledge Graph-191	IFNAR1	106	109	white	rectangle	gene	0.5	black	46	17	5432
+N-COVID-19 Knowledge Graph-192	IFNB1	84	49	white	rectangle	gene	0.5	black	46	17	5434
+N-COVID-19 Knowledge Graph-193	IFNB1	96	48	white	rectangle	gene	0.5	black	46	17	5434
+N-COVID-19 Knowledge Graph-194	IFNG	107	51	white	rectangle	gene	0.5	black	46	17	5438
+N-COVID-19 Knowledge Graph-195	ATG5	90	40	white	rectangle	gene	0.5	black	46	17	589
+N-COVID-19 Knowledge Graph-196	IL1B	87	95	white	rectangle	gene	0.5	black	46	17	5992
+N-COVID-19 Knowledge Graph-197	IL6	84	94	white	rectangle	gene	0.5	black	46	17	6018
+N-COVID-19 Knowledge Graph-201	IRF3	78	55	white	rectangle	gene	0.5	black	46	17	6118
+N-COVID-19 Knowledge Graph-202	IRF3	90	50	white	rectangle	gene	0.5	black	46	17	6118
+N-COVID-19 Knowledge Graph-203	IRF7	80	47	white	rectangle	gene	0.5	black	46	17	6122
+N-COVID-19 Knowledge Graph-204	NAE1	6	42	white	rectangle	gene	0.5	black	46	17	621
+N-COVID-19 Knowledge Graph-205	LY6E	165	130	white	rectangle	gene	0.5	black	46	17	6727
+N-COVID-19 Knowledge Graph-206	MAP1LC3A	92	39	white	rectangle	gene	0.5	black	46	17	6838
+N-COVID-19 Knowledge Graph-207	MAP3K7	88	91	white	rectangle	gene	0.5	black	46	17	6859
+N-COVID-19 Knowledge Graph-208	MAPK1	108	93	white	rectangle	gene	0.5	black	46	17	6871
+N-COVID-19 Knowledge Graph-209	MAPK1	160	67	white	rectangle	gene	0.5	black	46	17	6871
+N-COVID-19 Knowledge Graph-210	MAPK14	160	70	white	rectangle	gene	0.5	black	46	17	6876
+N-COVID-19 Knowledge Graph-212	MAPK3	178	75	white	rectangle	gene	0.5	black	46	17	6877
+N-COVID-19 Knowledge Graph-213	MAPK8	56	102	white	rectangle	gene	0.5	black	46	17	6881
+N-COVID-19 Knowledge Graph-214	MAPK8	72	99	white	rectangle	gene	0.5	black	46	17	6881
+N-COVID-19 Knowledge Graph-215	MAPK8	158	68	white	rectangle	gene	0.5	black	46	17	6881
+N-COVID-19 Knowledge Graph-217	MCL1	108	86	white	rectangle	gene	0.5	black	46	17	6943
+N-COVID-19 Knowledge Graph-218	MYD88	88	64	white	rectangle	gene	0.5	black	46	17	7562
+N-COVID-19 Knowledge Graph-219	NFKBIA	144	148	white	rectangle	gene	0.5	black	46	17	7797
+N-COVID-19 Knowledge Graph-220	NFKBIA	147	147	white	rectangle	gene	0.5	black	46	17	7797
+N-COVID-19 Knowledge Graph-221	ATF3	160	61	white	rectangle	gene	0.5	black	46	17	785
+N-COVID-19 Knowledge Graph-223	ATF4	104	100	white	rectangle	gene	0.5	black	46	17	786
+N-COVID-19 Knowledge Graph-224	ATF6	103	90	white	rectangle	gene	0.5	black	46	17	791
+N-COVID-19 Knowledge Graph-225	ATF6	156	33	white	rectangle	gene	0.5	black	46	17	791
+N-COVID-19 Knowledge Graph-226	FURIN	79	189	white	rectangle	gene	0.5	black	46	17	8568
+N-COVID-19 Knowledge Graph-228	PRKAA1	82	78	white	rectangle	gene	0.5	black	46	17	9376
+N-COVID-19 Knowledge Graph-229	EIF2AK2	96	102	white	rectangle	gene	0.5	black	46	17	9437
+N-COVID-19 Knowledge Graph-230	DNAJC3	17	84	white	rectangle	gene	0.5	black	46	17	9439
+N-COVID-19 Knowledge Graph-231	BCL2	105	93	white	rectangle	gene	0.5	black	46	17	990
+N-COVID-19 Knowledge Graph-232	BCL2L11	107	96	white	rectangle	gene	0.5	black	46	17	994
+N-COVID-19 Knowledge Graph-233	tryptase Clara	79	146	white	rectangle	gene	0.5	black	46	17	C075431
+N-COVID-19 Knowledge Graph-235	Interferon Type I	85	61	white	rectangle	gene	0.5	black	46	17	D007370
+N-COVID-19 Knowledge Graph-237	Proteins	9	47	white	rectangle	gene	0.5	black	46	17	D011506
+N-COVID-19 Knowledge Graph-238	Viral Envelope Proteins	62	0	white	rectangle	gene	0.5	black	46	17	D014759
+N-COVID-19 Knowledge Graph-239	Viral Matrix Proteins	140	166	white	rectangle	gene	0.5	black	46	17	D014763
+N-COVID-19 Knowledge Graph-241	Spike Glycoprotein, Coronavirus	175	115	white	rectangle	gene	0.5	black	46	17	D064370
+N-COVID-19 Knowledge Graph-242	Spike Glycoprotein, Coronavirus	57	161	white	rectangle	gene	0.5	black	46	17	D064370
+N-COVID-19 Knowledge Graph-243	Tnf	14	109	white	rectangle	gene	0.5	black	46	17	104798
+N-COVID-19 Knowledge Graph-245	Ace2	82	159	white	rectangle	gene	0.5	black	46	17	1917258
+N-COVID-19 Knowledge Graph-246	Arg1	14	105	white	rectangle	gene	0.5	black	46	17	88070
+N-COVID-19 Knowledge Graph-247	Dpp4	17	107	white	rectangle	gene	0.5	black	46	17	94919
+N-COVID-19 Knowledge Graph-249	Il6	21	105	white	rectangle	gene	0.5	black	46	17	96559
+N-COVID-19 Knowledge Graph-25 26	956533 RNA, Double-Stranded	92	107	white	rectangle	gene,gene	0.5	black	46	17	D012330
+N-COVID-19 Knowledge Graph-252	A0A0D3MU52_9BETC	43	54	white	rectangle	gene	0.5	black	46	17	A0A0D3MU52
+N-COVID-19 Knowledge Graph-253	A0A0D9R1K1_CHLSB	49	153	white	rectangle	gene	0.5	black	46	17	A0A0D9R1K1
+N-COVID-19 Knowledge Graph-256	A0A0D9RBG0_CHLSB	43	154	white	rectangle	gene	0.5	black	46	17	A0A0D9RBG0
+N-COVID-19 Knowledge Graph-257	A0A0D9RCP6_CHLSB	43	157	white	rectangle	gene	0.5	black	46	17	A0A0D9RCP6
+N-COVID-19 Knowledge Graph-258	A0A0D9RCS6_CHLSB	48	147	white	rectangle	gene	0.5	black	46	17	A0A0D9RCS6
+N-COVID-19 Knowledge Graph-259	A0A0D9REG4_CHLSB	107	112	white	rectangle	gene	0.5	black	46	17	A0A0D9REG4
+N-COVID-19 Knowledge Graph-261	A0A0D9RP74_CHLSB	104	110	white	rectangle	gene	0.5	black	46	17	A0A0D9RP74
+N-COVID-19 Knowledge Graph-263	A0A0D9RUU7_CHLSB	80	156	white	rectangle	gene	0.5	black	46	17	A0A0D9RUU7
+N-COVID-19 Knowledge Graph-264	A0A0D9S017_CHLSB	50	149	white	rectangle	gene	0.5	black	46	17	A0A0D9S017
+N-COVID-19 Knowledge Graph-265	A0A0D9S1P0_CHLSB	109	105	white	rectangle	gene	0.5	black	46	17	A0A0D9S1P0
+N-COVID-19 Knowledge Graph-266	A0A0D9S2F1_CHLSB	10	121	white	rectangle	gene	0.5	black	46	17	A0A0D9S2F1
+N-COVID-19 Knowledge Graph-267	A0A0D9S8I4_CHLSB	108	112	white	rectangle	gene	0.5	black	46	17	A0A0D9S8I4
+N-COVID-19 Knowledge Graph-269	A0A0D9SAF4_CHLSB	40	161	white	rectangle	gene	0.5	black	46	17	A0A0D9SAF4
+N-COVID-19 Knowledge Graph-27 28	E BRD2	172	102	white	rectangle	gene,gene	0.5	black	46	17	1103
+N-COVID-19 Knowledge Graph-271	G4XXN2_CHLAE	109	104	white	rectangle	gene	0.5	black	46	17	G4XXN2
+N-COVID-19 Knowledge Graph-274	ORF4B_CVEMC	78	50	white	rectangle	gene	0.5	black	46	17	K9N643
+N-COVID-19 Knowledge Graph-275	M2_I34A1	83	92	white	rectangle	gene	0.5	black	46	17	P06821
+N-COVID-19 Knowledge Graph-278	R1AB_CVHSA	46	46	white	rectangle	gene	0.5	black	46	17	P0C6X7
+N-COVID-19 Knowledge Graph-279	R1AB_CVHSA	176	73	white	rectangle	gene	0.5	black	46	17	P0C6X7
+N-COVID-19 Knowledge Graph-280	R1AB_CVHSA	159	139	white	rectangle	gene	0.5	black	46	17	P0C6X7
+N-COVID-19 Knowledge Graph-282	R1AB_CVHSA	177	77	white	rectangle	gene	0.5	black	46	17	P0C6X7
+N-COVID-19 Knowledge Graph-283	R1AB_CVHSA	163	143	white	rectangle	gene	0.5	black	46	17	P0C6X7
+N-COVID-19 Knowledge Graph-284	R1AB_CVHSA	1	69	white	rectangle	gene	0.5	black	46	17	P0C6X7
+N-COVID-19 Knowledge Graph-286	SPIKE_CVH22	163	130	white	rectangle	gene	0.5	black	46	17	P15423
+N-COVID-19 Knowledge Graph-287	SPIKE_CVHSA	81	152	white	rectangle	gene	0.5	black	46	17	P59594
+N-COVID-19 Knowledge Graph-288	SPIKE_CVHSA	80	143	white	rectangle	gene	0.5	black	46	17	P59594
+N-COVID-19 Knowledge Graph-289	NCAP_CVHSA	47	151	white	rectangle	gene	0.5	black	46	17	P59595
+N-COVID-19 Knowledge Graph-29 30	E BRD4	38	22	white	rectangle	gene,gene	0.5	black	46	17	13575
+N-COVID-19 Knowledge Graph-290	AP3A_CVHSA	102	104	white	rectangle	gene	0.5	black	46	17	P59632
+N-COVID-19 Knowledge Graph-292	AP3A_CVHSA	105	107	white	rectangle	gene	0.5	black	46	17	P59632
+N-COVID-19 Knowledge Graph-295	AP3A_CVHSA	111	115	white	rectangle	gene	0.5	black	46	17	P59632
+N-COVID-19 Knowledge Graph-296	AP3A_CVHSA	108	117	white	rectangle	gene	0.5	black	46	17	P59632
+N-COVID-19 Knowledge Graph-297	AP3A_CVHSA	9	59	white	rectangle	gene	0.5	black	46	17	P59632
+N-COVID-19 Knowledge Graph-299	AP3A_CVHSA	110	116	white	rectangle	gene	0.5	black	46	17	P59632
+N-COVID-19 Knowledge Graph-3 4	lopinavir 3.4.22.69	13	143	white	rectangle	gene,gene	0.5	black	46	17	31781,/,3.4.22.69
+N-COVID-19 Knowledge Graph-300	ORF9B_CVHSA	91	46	white	rectangle	gene	0.5	black	46	17	P59636
+N-COVID-19 Knowledge Graph-301	VEMP_CVHSA	82	96	white	rectangle	gene	0.5	black	46	17	P59637
+N-COVID-19 Knowledge Graph-305	Q19QW2_CVHSA	74	54	white	rectangle	gene	0.5	black	46	17	Q19QW2
+N-COVID-19 Knowledge Graph-306	Q19QW5_CVHSA	105	4	white	rectangle	gene	0.5	black	46	17	Q19QW5
+N-COVID-19 Knowledge Graph-308	POLG_EMCVR	85	99	white	rectangle	gene	0.5	black	46	17	Q66765
+N-COVID-19 Knowledge Graph-309	Q6S8E2_CVHSA	75	51	white	rectangle	gene	0.5	black	46	17	Q6S8E2
+N-COVID-19 Knowledge Graph-310	R9UNW8_9BETC	54	54	white	rectangle	gene	0.5	black	46	17	R9UNW8
+N-COVID-19 Knowledge Graph-34 35	ORF1ab HDAC2	164	59	white	rectangle	gene,gene	0.5	black	46	17	4853
+N-COVID-19 Knowledge Graph-36 37	ORF1ab RNF41	69	54	white	rectangle	gene,gene	0.5	black	46	17	18401
+N-COVID-19 Knowledge Graph-42 43	S ACE2	79	120	white	rectangle	gene,gene	0.5	black	46	17	13557
+N-COVID-19 Knowledge Graph-5 6	ritonavir 3.4.22.69	123	10	white	rectangle	gene,gene	0.5	black	46	17	45409,/,3.4.22.69
+N-COVID-19 Knowledge Graph-66 67	Histones BRD2	167	101	white	rectangle	gene,gene	0.5	black	46	17	864,/,1103
+N-COVID-19 Knowledge Graph-68 69	Histones BRD4	39	25	white	rectangle	gene,gene	0.5	black	46	17	864,/,13575
+N-COVID-19 Knowledge Graph-7 8	ritonavir 3.4.22.69	17	137	white	rectangle	gene,gene	0.5	black	46	17	45409,/,3.4.22.69
+N-COVID-19 Knowledge Graph-74 75	CLEC4M Spike Glycoprotein, Coronavirus	180	117	white	rectangle	gene,gene	0.5	black	46	17	13523,/,D064370
+N-COVID-19 Knowledge Graph-76 77	ACE2 Spike Glycoprotein, Coronavirus	173	112	white	rectangle	gene,gene	0.5	black	46	17	13557,/,D064370
+N-COVID-19 Knowledge Graph-80 81	CANX Spike Glycoprotein, Coronavirus	175	119	white	rectangle	gene,gene	0.5	black	46	17	1473,/,D064370
+N-COVID-19 Knowledge Graph-84 85	CD209 Spike Glycoprotein, Coronavirus	171	115	white	rectangle	gene,gene	0.5	black	46	17	1641,/,D064370
+N-COVID-19 Knowledge Graph-88 89	EIF2AK2 RNA, Double-Stranded	94	108	white	rectangle	gene,gene	0.5	black	46	17	9437,/,D012330
+N-COVID-19 Knowledge Graph-90 91	Immunoglobulin G SPIKE_CVHSA	83	156	white	rectangle	gene,gene	0.5	black	46	17	D007074,/,P59594
+N-COVID-19 Knowledge Graph-92 93	Ace2 SPIKE_CVHSA	82	164	white	rectangle	gene,gene	0.5	black	46	17	1917258,/,P59594
+N-COVID-19 Knowledge Graph-94 95	A0A0D9RKI4_CHLSB NCAP_CVHSA	6	122	white	rectangle	gene,gene	0.5	black	46	17	A0A0D9RKI4,/,P59595
+N-COVID-19 Knowledge Graph-96 97	AP3A_CVHSA AP3A_CVHSA	11	59	white	rectangle	gene,gene	0.5	black	46	17	P59632,/,P59632
+N-COVID-19 Knowledge Graph-99	3.2.1.20	174	122	white	rectangle	gene	0.5	black	46	17	3.2.1.20

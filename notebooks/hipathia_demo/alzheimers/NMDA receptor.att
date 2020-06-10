@@ -1,9 +1,0 @@
-ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
-N-NMDA receptor-1	Glutamate ionotropic receptor NMDA type subunits	4788	7171	white	rectangle	gene	0.5	black	46	17	1201
-N-NMDA receptor-10	APP	23442	17793	white	rectangle	gene	0.5	black	46	17	620
-N-NMDA receptor-12	RELN	37689	16279	white	rectangle	gene	0.5	black	46	17	9957
-N-NMDA receptor-2	ADAM10	2050	0	white	rectangle	gene	0.5	black	46	17	188
-N-NMDA receptor-3	ADAM17	0	13169	white	rectangle	gene	0.5	black	46	17	195
-N-NMDA receptor-4	ADAM9	12376	8349	white	rectangle	gene	0.5	black	46	17	216
-N-NMDA receptor-7	GRIN2A	44877	16811	white	rectangle	gene	0.5	black	46	17	4585
-N-NMDA receptor-9	GRIN2B	30468	16100	white	rectangle	gene	0.5	black	46	17	4586

@@ -1,0 +1,78 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Tumor necrosis factor subgraph-1 2	TNFRSF10B TNFSF10	11	77	white	rectangle	gene,gene	0.5	black	46	17	11905,/,11925
+N-Tumor necrosis factor subgraph-12 13 14	CASP8 FADD PTPN13	3	69	white	rectangle	gene,gene,gene	0.5	black	46	17	1509,/,3573,/,9646
+N-Tumor necrosis factor subgraph-15 16	NFKB1 NFKB2	145	39	white	rectangle	gene,gene	0.5	black	46	17	7794,/,7795
+N-Tumor necrosis factor subgraph-19 20	Tnf Tnfrsf1a	71	0	white	rectangle	gene,gene	0.5	black	46	17	104798,/,1314884
+N-Tumor necrosis factor subgraph-21	JNK	34	20	white	rectangle	gene	0.5	black	46	17	JNK
+N-Tumor necrosis factor subgraph-22	M10 matrix metallopeptidases	170	59	white	rectangle	gene	0.5	black	46	17	891
+N-Tumor necrosis factor subgraph-23	SCAF11	164	89	white	rectangle	gene	0.5	black	46	17	10784
+N-Tumor necrosis factor subgraph-24	SHC1	39	16	white	rectangle	gene	0.5	black	46	17	10840
+N-Tumor necrosis factor subgraph-25	TGFB1	59	44	white	rectangle	gene	0.5	black	46	17	11766
+N-Tumor necrosis factor subgraph-26	THBS1	60	135	white	rectangle	gene	0.5	black	46	17	11785
+N-Tumor necrosis factor subgraph-27	TNF	66	137	white	rectangle	gene	0.5	black	46	17	11892
+N-Tumor necrosis factor subgraph-28	TNFRSF25	52	188	white	rectangle	gene	0.5	black	46	17	11910
+N-Tumor necrosis factor subgraph-30	FAS	169	133	white	rectangle	gene	0.5	black	46	17	11920
+N-Tumor necrosis factor subgraph-31	FASLG	169	64	white	rectangle	gene	0.5	black	46	17	11936
+N-Tumor necrosis factor subgraph-32	TP53	9	60	white	rectangle	gene	0.5	black	46	17	11998
+N-Tumor necrosis factor subgraph-33	TTR	54	113	white	rectangle	gene	0.5	black	46	17	12405
+N-Tumor necrosis factor subgraph-34	GABRQ	55	136	white	rectangle	gene	0.5	black	46	17	14454
+N-Tumor necrosis factor subgraph-35	CASP1	149	89	white	rectangle	gene	0.5	black	46	17	1499
+N-Tumor necrosis factor subgraph-36	CASP8	8	71	white	rectangle	gene	0.5	black	46	17	1509
+N-Tumor necrosis factor subgraph-37	SHC4	28	14	white	rectangle	gene	0.5	black	46	17	16743
+N-Tumor necrosis factor subgraph-38	CD47	54	139	white	rectangle	gene	0.5	black	46	17	1682
+N-Tumor necrosis factor subgraph-39	CDKN1A	174	132	white	rectangle	gene	0.5	black	46	17	1784
+N-Tumor necrosis factor subgraph-40	TNFRSF12A	54	181	white	rectangle	gene	0.5	black	46	17	18152
+N-Tumor necrosis factor subgraph-41	SHC3	32	11	white	rectangle	gene	0.5	black	46	17	18181
+N-Tumor necrosis factor subgraph-42	CLU	63	40	white	rectangle	gene	0.5	black	46	17	2095
+N-Tumor necrosis factor subgraph-43	CTSB	157	89	white	rectangle	gene	0.5	black	46	17	2527
+N-Tumor necrosis factor subgraph-44	CTSD	162	130	white	rectangle	gene	0.5	black	46	17	2529
+N-Tumor necrosis factor subgraph-45	CYP27B1	69	127	white	rectangle	gene	0.5	black	46	17	2606
+N-Tumor necrosis factor subgraph-46	PIK3R5	28	20	white	rectangle	gene	0.5	black	46	17	30035
+N-Tumor necrosis factor subgraph-47	EIF2S1	19	63	white	rectangle	gene	0.5	black	46	17	3265
+N-Tumor necrosis factor subgraph-49	FADD	47	49	white	rectangle	gene	0.5	black	46	17	3573
+N-Tumor necrosis factor subgraph-5 6	CD40 CD40LG	61	131	white	rectangle	gene,gene	0.5	black	46	17	11919,/,11935
+N-Tumor necrosis factor subgraph-50	ALB	49	115	white	rectangle	gene	0.5	black	46	17	399
+N-Tumor necrosis factor subgraph-51	GABBR1	74	146	white	rectangle	gene	0.5	black	46	17	4070
+N-Tumor necrosis factor subgraph-52	GABRA1	72	138	white	rectangle	gene	0.5	black	46	17	4075
+N-Tumor necrosis factor subgraph-53	GABRA2	71	143	white	rectangle	gene	0.5	black	46	17	4076
+N-Tumor necrosis factor subgraph-54	GABRA3	71	132	white	rectangle	gene	0.5	black	46	17	4077
+N-Tumor necrosis factor subgraph-55	GABRA4	72	128	white	rectangle	gene	0.5	black	46	17	4078
+N-Tumor necrosis factor subgraph-56	GABRA5	76	140	white	rectangle	gene	0.5	black	46	17	4079
+N-Tumor necrosis factor subgraph-57	GABRA6	67	150	white	rectangle	gene	0.5	black	46	17	4080
+N-Tumor necrosis factor subgraph-58	GABRB1	66	130	white	rectangle	gene	0.5	black	46	17	4081
+N-Tumor necrosis factor subgraph-59	GABRB2	57	130	white	rectangle	gene	0.5	black	46	17	4082
+N-Tumor necrosis factor subgraph-60	GABRB3	75	131	white	rectangle	gene	0.5	black	46	17	4083
+N-Tumor necrosis factor subgraph-61	GABRD	57	146	white	rectangle	gene	0.5	black	46	17	4084
+N-Tumor necrosis factor subgraph-62	GABRE	62	127	white	rectangle	gene	0.5	black	46	17	4085
+N-Tumor necrosis factor subgraph-63	GABRG1	65	144	white	rectangle	gene	0.5	black	46	17	4086
+N-Tumor necrosis factor subgraph-64	GABRG2	60	149	white	rectangle	gene	0.5	black	46	17	4087
+N-Tumor necrosis factor subgraph-65	GABRG3	55	133	white	rectangle	gene	0.5	black	46	17	4088
+N-Tumor necrosis factor subgraph-66	GABRP	76	143	white	rectangle	gene	0.5	black	46	17	4089
+N-Tumor necrosis factor subgraph-67	GNRH1	61	145	white	rectangle	gene	0.5	black	46	17	4419
+N-Tumor necrosis factor subgraph-68	GRB2	38	27	white	rectangle	gene	0.5	black	46	17	4566
+N-Tumor necrosis factor subgraph-69	GRIA1	68	146	white	rectangle	gene	0.5	black	46	17	4571
+N-Tumor necrosis factor subgraph-70	GRIN2B	60	142	white	rectangle	gene	0.5	black	46	17	4586
+N-Tumor necrosis factor subgraph-71	IFNG	64	149	white	rectangle	gene	0.5	black	46	17	5438
+N-Tumor necrosis factor subgraph-72	IGF1	57	122	white	rectangle	gene	0.5	black	46	17	5464
+N-Tumor necrosis factor subgraph-73	IL10	57	139	white	rectangle	gene	0.5	black	46	17	5962
+N-Tumor necrosis factor subgraph-74	IL1A	89	131	white	rectangle	gene	0.5	black	46	17	5991
+N-Tumor necrosis factor subgraph-75	IL1B	90	134	white	rectangle	gene	0.5	black	46	17	5992
+N-Tumor necrosis factor subgraph-76	IL6	94	139	white	rectangle	gene	0.5	black	46	17	6018
+N-Tumor necrosis factor subgraph-77	APP	55	143	white	rectangle	gene	0.5	black	46	17	620
+N-Tumor necrosis factor subgraph-78	APP	53	47	white	rectangle	gene	0.5	black	46	17	620
+N-Tumor necrosis factor subgraph-79	MAPK8	171	68	white	rectangle	gene	0.5	black	46	17	6881
+N-Tumor necrosis factor subgraph-80	NFKB1	81	133	white	rectangle	gene	0.5	black	46	17	7794
+N-Tumor necrosis factor subgraph-81	NFKB2	84	136	white	rectangle	gene	0.5	black	46	17	7795
+N-Tumor necrosis factor subgraph-82	OGG1	66	126	white	rectangle	gene	0.5	black	46	17	8125
+N-Tumor necrosis factor subgraph-83	PAFAH2	75	135	white	rectangle	gene	0.5	black	46	17	8579
+N-Tumor necrosis factor subgraph-84	PPARG	71	148	white	rectangle	gene	0.5	black	46	17	9236
+N-Tumor necrosis factor subgraph-85	BACE1	141	38	white	rectangle	gene	0.5	black	46	17	933
+N-Tumor necrosis factor subgraph-86	EIF2AK2	14	66	white	rectangle	gene	0.5	black	46	17	9437
+N-Tumor necrosis factor subgraph-87	EIF2AK2	49	42	white	rectangle	gene	0.5	black	46	17	9437
+N-Tumor necrosis factor subgraph-88	Tnf	102	20	white	rectangle	gene	0.5	black	46	17	104798
+N-Tumor necrosis factor subgraph-89	Bace1	108	16	white	rectangle	gene	0.5	black	46	17	1346542
+N-Tumor necrosis factor subgraph-9 10 11	TRADD CASP8 FADD	0	72	white	rectangle	gene,gene,gene	0.5	black	46	17	12030,/,1509,/,3573
+N-Tumor necrosis factor subgraph-90	Eif2ak2	103	15	white	rectangle	gene	0.5	black	46	17	1353449
+N-Tumor necrosis factor subgraph-91	Cysltr1	98	15	white	rectangle	gene	0.5	black	46	17	1926218
+N-Tumor necrosis factor subgraph-92	App	98	27	white	rectangle	gene	0.5	black	46	17	88059
+N-Tumor necrosis factor subgraph-95	Lcn2	71	6	white	rectangle	gene	0.5	black	46	17	96757

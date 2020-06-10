@@ -1,0 +1,12 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Response to oxidative stress-14	HDAC1	74	115	white	rectangle	gene	0.5	black	46	17	4852
+N-Response to oxidative stress-16	APP	173	115	white	rectangle	gene	0.5	black	46	17	620
+N-Response to oxidative stress-17	MAPK14	59	91	white	rectangle	gene	0.5	black	46	17	6876
+N-Response to oxidative stress-18	MAPK3	0	137	white	rectangle	gene	0.5	black	46	17	6877
+N-Response to oxidative stress-19	NFE2L2	67	103	white	rectangle	gene	0.5	black	46	17	7782
+N-Response to oxidative stress-20	BACE1	6	149	white	rectangle	gene	0.5	black	46	17	933
+N-Response to oxidative stress-21	PRKCD	101	14	white	rectangle	gene	0.5	black	46	17	9399
+N-Response to oxidative stress-22	PRKCD	102	0	white	rectangle	gene	0.5	black	46	17	9399
+N-Response to oxidative stress-5	ERK	3	164	white	rectangle	gene	0.5	black	46	17	ERK
+N-Response to oxidative stress-8	SYP	181	101	white	rectangle	gene	0.5	black	46	17	11506
+N-Response to oxidative stress-9	THBS1	176	107	white	rectangle	gene	0.5	black	46	17	11785

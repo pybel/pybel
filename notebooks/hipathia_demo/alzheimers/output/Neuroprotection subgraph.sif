@@ -1,0 +1,7 @@
+0	1	2
+N-Neuroprotection subgraph-7	inhibition	N-Neuroprotection subgraph-2
+N-Neuroprotection subgraph-3	activation	N-Neuroprotection subgraph-1
+N-Neuroprotection subgraph-3	activation	N-Neuroprotection subgraph-1
+N-Neuroprotection subgraph-8	activation	N-Neuroprotection subgraph-7
+N-Neuroprotection subgraph-8	activation	N-Neuroprotection subgraph-7
+N-Neuroprotection subgraph-4	inhibition	N-Neuroprotection subgraph-7

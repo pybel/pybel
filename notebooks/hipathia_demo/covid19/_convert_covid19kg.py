@@ -5,6 +5,9 @@
 import os
 from urllib.request import urlretrieve
 
+import click
+from pyobo.cli_utils import verbose_option
+
 import pybel
 import pybel.ground
 
@@ -13,6 +16,8 @@ URL = 'https://github.com/covid19kg/covid19kg/raw/master/covid19kg/_cache.bel.no
 PATH = os.path.join(HERE, 'covid19.bel.nodelink.json')
 
 
+@click.command()
+@verbose_option
 def main():
     """Convert the COVID-19 graph to Hipathia."""
     if not os.path.exists(PATH):
@@ -20,7 +25,7 @@ def main():
 
     graph = pybel.load(PATH)
     graph = pybel.ground.ground_graph(graph)
-    pybel.to_hipathia(graph, os.path.dirname(__file__), layout='neato')
+    pybel.to_hipathia(graph, HERE)
 
 
 if __name__ == '__main__':

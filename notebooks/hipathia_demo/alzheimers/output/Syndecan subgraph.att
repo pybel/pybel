@@ -1,0 +1,13 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Syndecan subgraph-1 2	deoxyribonucleic acid poly(ethylene imine)	142	122	white	rectangle	gene,gene	0.5	black	46	17	16991,/,53231
+N-Syndecan subgraph-10 11	SDC4 PRKCA	19	167	white	rectangle	gene,gene	0.5	black	46	17	10661,/,9393
+N-Syndecan subgraph-12	MMP	36	22	white	rectangle	gene	0.5	black	46	17	MMP
+N-Syndecan subgraph-13	PKC	174	102	white	rectangle	gene	0.5	black	46	17	PKC
+N-Syndecan subgraph-14	ADAM metallopeptidase domain containing	50	0	white	rectangle	gene	0.5	black	46	17	47
+N-Syndecan subgraph-16	SDC1	128	117	white	rectangle	gene	0.5	black	46	17	10658
+N-Syndecan subgraph-17	SDC1	40	8	white	rectangle	gene	0.5	black	46	17	10658
+N-Syndecan subgraph-18	SDC2	159	112	white	rectangle	gene	0.5	black	46	17	10659
+N-Syndecan subgraph-19	SDC4	0	149	white	rectangle	gene	0.5	black	46	17	10661
+N-Syndecan subgraph-20	PRKCA	6	161	white	rectangle	gene	0.5	black	46	17	9393
+N-Syndecan subgraph-3 4 5	deoxyribonucleic acid poly(ethylene imine) SDC2	188	96	white	rectangle	gene,gene,gene	0.5	black	46	17	16991,/,53231,/,10659
+N-Syndecan subgraph-8 9	SDC1 SDC2	135	137	white	rectangle	gene,gene	0.5	black	46	17	10658,/,10659

@@ -1,0 +1,16 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Cell cycle subgraph-1 2	EFNB2 EPHB2	179	110	white	rectangle	gene,gene	0.5	black	46	17	3227,/,3393
+N-Cell cycle subgraph-10	CSK	41	185	white	rectangle	gene	0.5	black	46	17	2444
+N-Cell cycle subgraph-11	EFNB2	42	175	white	rectangle	gene	0.5	black	46	17	3227
+N-Cell cycle subgraph-12	EFNB2	172	103	white	rectangle	gene	0.5	black	46	17	3227
+N-Cell cycle subgraph-13	AKT1	24	64	white	rectangle	gene	0.5	black	46	17	391
+N-Cell cycle subgraph-14	MAPT	137	47	white	rectangle	gene	0.5	black	46	17	6893
+N-Cell cycle subgraph-15	ABL1	129	54	white	rectangle	gene	0.5	black	46	17	76
+N-Cell cycle subgraph-16	PSEN1	33	181	white	rectangle	gene	0.5	black	46	17	9508
+N-Cell cycle subgraph-17	RB1	10	77	white	rectangle	gene	0.5	black	46	17	9884
+N-Cell cycle subgraph-18	RB1	0	58	white	rectangle	gene	0.5	black	46	17	9884
+N-Cell cycle subgraph-3	BDNF	76	0	white	rectangle	gene	0.5	black	46	17	1033
+N-Cell cycle subgraph-4	CAST	122	175	white	rectangle	gene	0.5	black	46	17	1515
+N-Cell cycle subgraph-5	CCND1	11	65	white	rectangle	gene	0.5	black	46	17	1582
+N-Cell cycle subgraph-8	CPEB1	76	11	white	rectangle	gene	0.5	black	46	17	21744
+N-Cell cycle subgraph-9	CREB1	132	172	white	rectangle	gene	0.5	black	46	17	2345

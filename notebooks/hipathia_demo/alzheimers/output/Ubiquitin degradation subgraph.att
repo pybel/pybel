@@ -1,0 +1,31 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Ubiquitin degradation subgraph-1 2	STUB1 NQO1	130	17	white	rectangle	gene,gene	0.5	black	46	17	11427,/,2874
+N-Ubiquitin degradation subgraph-12 13	APP NAE1	0	31	white	rectangle	gene,gene	0.5	black	46	17	620,/,621
+N-Ubiquitin degradation subgraph-14	CUL	0	50	white	rectangle	gene	0.5	black	46	17	CUL
+N-Ubiquitin degradation subgraph-15	HSPA	107	157	white	rectangle	gene	0.5	black	46	17	HSPA
+N-Ubiquitin degradation subgraph-16	TP53	9	34	white	rectangle	gene	0.5	black	46	17	11998
+N-Ubiquitin degradation subgraph-17	VLDLR	182	122	white	rectangle	gene	0.5	black	46	17	12698
+N-Ubiquitin degradation subgraph-18	FBXL2	83	88	white	rectangle	gene	0.5	black	46	17	13598
+N-Ubiquitin degradation subgraph-19	CDKN1B	150	19	white	rectangle	gene	0.5	black	46	17	1785
+N-Ubiquitin degradation subgraph-20	MYLIP	177	115	white	rectangle	gene	0.5	black	46	17	21155
+N-Ubiquitin degradation subgraph-21	DAB1	30	117	white	rectangle	gene	0.5	black	46	17	2661
+N-Ubiquitin degradation subgraph-22	NQO1	130	0	white	rectangle	gene	0.5	black	46	17	2874
+N-Ubiquitin degradation subgraph-23	NQO1	130	8	white	rectangle	gene	0.5	black	46	17	2874
+N-Ubiquitin degradation subgraph-24	APP	88	76	white	rectangle	gene	0.5	black	46	17	620
+N-Ubiquitin degradation subgraph-25	APP	95	93	white	rectangle	gene	0.5	black	46	17	620
+N-Ubiquitin degradation subgraph-26	APP	91	85	white	rectangle	gene	0.5	black	46	17	620
+N-Ubiquitin degradation subgraph-28	LDLR	186	111	white	rectangle	gene	0.5	black	46	17	6547
+N-Ubiquitin degradation subgraph-29	LRP8	159	117	white	rectangle	gene	0.5	black	46	17	6700
+N-Ubiquitin degradation subgraph-3 4	UBA3 NAE1	0	38	white	rectangle	gene,gene	0.5	black	46	17	12470,/,621
+N-Ubiquitin degradation subgraph-30	LRP8	169	117	white	rectangle	gene	0.5	black	46	17	6700
+N-Ubiquitin degradation subgraph-31	MAPT	100	162	white	rectangle	gene	0.5	black	46	17	6893
+N-Ubiquitin degradation subgraph-32	MDM2	16	41	white	rectangle	gene	0.5	black	46	17	6973
+N-Ubiquitin degradation subgraph-33	NEDD8	8	44	white	rectangle	gene	0.5	black	46	17	7732
+N-Ubiquitin degradation subgraph-34	NR1H2	24	123	white	rectangle	gene	0.5	black	46	17	7965
+N-Ubiquitin degradation subgraph-35	NR1H3	24	112	white	rectangle	gene	0.5	black	46	17	7966
+N-Ubiquitin degradation subgraph-36	PPARG	99	81	white	rectangle	gene	0.5	black	46	17	9236
+N-Ubiquitin degradation subgraph-37	BAG1	96	152	white	rectangle	gene	0.5	black	46	17	937
+N-Ubiquitin degradation subgraph-38	RB1	158	14	white	rectangle	gene	0.5	black	46	17	9884
+N-Ubiquitin degradation subgraph-5 6	UBE2M NEDD8	10	53	white	rectangle	gene,gene	0.5	black	46	17	12491,/,7732
+N-Ubiquitin degradation subgraph-7 8	VLDLR RELN	19	118	white	rectangle	gene,gene	0.5	black	46	17	12698,/,9957
+N-Ubiquitin degradation subgraph-9 10 11	HSPA8 MAPT BAG1	100	172	white	rectangle	gene,gene,gene	0.5	black	46	17	5241,/,6893,/,937

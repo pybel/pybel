@@ -1,9 +1,0 @@
-ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
-N-miRNA subgraph-1 2	Cd40 Cd40lg	0	8063	white	rectangle	gene,gene	0.5	black	46	17	88336,/,88337
-N-miRNA subgraph-10	MAPT	24657	14000	white	rectangle	gene	0.5	black	46	17	6893
-N-miRNA subgraph-13	Mapt	7120	7000	white	rectangle	gene	0.5	black	46	17	97180
-N-miRNA subgraph-3	TGFB1	13336	1063	white	rectangle	gene	0.5	black	46	17	11766
-N-miRNA subgraph-5	SIRT1	24536	22064	white	rectangle	gene	0.5	black	46	17	14929
-N-miRNA subgraph-6	ADAM10	31657	21000	white	rectangle	gene	0.5	black	46	17	188
-N-miRNA subgraph-8	SMAD2	20457	0	white	rectangle	gene	0.5	black	46	17	6768
-N-miRNA subgraph-9	MAPK3	17536	15063	white	rectangle	gene	0.5	black	46	17	6877

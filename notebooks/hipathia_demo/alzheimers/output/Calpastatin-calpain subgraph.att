@@ -1,0 +1,16 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Calpastatin-calpain subgraph-1	CDK5R1 p25	63	74	white	rectangle	gene	0.5	black	46	17	CONSO00172
+N-Calpastatin-calpain subgraph-10	APP	0	46	white	rectangle	gene	0.5	black	46	17	620
+N-Calpastatin-calpain subgraph-11	MAPK1	9	56	white	rectangle	gene	0.5	black	46	17	6871
+N-Calpastatin-calpain subgraph-12	MAPT	38	49	white	rectangle	gene	0.5	black	46	17	6893
+N-Calpastatin-calpain subgraph-13	BACE1	2	34	white	rectangle	gene	0.5	black	46	17	933
+N-Calpastatin-calpain subgraph-14	PSEN1	158	7	white	rectangle	gene	0.5	black	46	17	9508
+N-Calpastatin-calpain subgraph-15	PSEN2	164	11	white	rectangle	gene	0.5	black	46	17	9509
+N-Calpastatin-calpain subgraph-2	AKT	57	24	white	rectangle	gene	0.5	black	46	17	AKT
+N-Calpastatin-calpain subgraph-3	CAPN	51	81	white	rectangle	gene	0.5	black	46	17	CAPN
+N-Calpastatin-calpain subgraph-4	CAPN1	49	35	white	rectangle	gene	0.5	black	46	17	1476
+N-Calpastatin-calpain subgraph-5	CAPN2	152	2	white	rectangle	gene	0.5	black	46	17	1479
+N-Calpastatin-calpain subgraph-6	CAST	16	43	white	rectangle	gene	0.5	black	46	17	1515
+N-Calpastatin-calpain subgraph-7	CDK5	51	66	white	rectangle	gene	0.5	black	46	17	1774
+N-Calpastatin-calpain subgraph-8	CREB1	14	28	white	rectangle	gene	0.5	black	46	17	2345
+N-Calpastatin-calpain subgraph-9	APP	139	0	white	rectangle	gene	0.5	black	46	17	620

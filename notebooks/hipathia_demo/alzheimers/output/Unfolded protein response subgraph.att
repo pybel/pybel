@@ -1,0 +1,21 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Unfolded protein response subgraph-1 2	XBP1 INS	162	7	white	rectangle	gene,gene	0.5	black	46	17	12801,/,6081
+N-Unfolded protein response subgraph-10	SYVN1	194	21	white	rectangle	gene	0.5	black	46	17	20738
+N-Unfolded protein response subgraph-12	EIF2A	14	26	white	rectangle	gene	0.5	black	46	17	3254
+N-Unfolded protein response subgraph-13	EIF2AK3	33	27	white	rectangle	gene	0.5	black	46	17	3255
+N-Unfolded protein response subgraph-14	EIF2S1	119	131	white	rectangle	gene	0.5	black	46	17	3265
+N-Unfolded protein response subgraph-15	ERN1	44	28	white	rectangle	gene	0.5	black	46	17	3449
+N-Unfolded protein response subgraph-16	APP	184	36	white	rectangle	gene	0.5	black	46	17	620
+N-Unfolded protein response subgraph-17	APP	198	32	white	rectangle	gene	0.5	black	46	17	620
+N-Unfolded protein response subgraph-18	ATF4	41	0	white	rectangle	gene	0.5	black	46	17	786
+N-Unfolded protein response subgraph-19	ATF6	50	30	white	rectangle	gene	0.5	black	46	17	791
+N-Unfolded protein response subgraph-20	BACE1	0	26	white	rectangle	gene	0.5	black	46	17	933
+N-Unfolded protein response subgraph-21	EIF2AK2	119	119	white	rectangle	gene	0.5	black	46	17	9437
+N-Unfolded protein response subgraph-22	PSEN1	42	16	white	rectangle	gene	0.5	black	46	17	9508
+N-Unfolded protein response subgraph-23	PSEN1	49	22	white	rectangle	gene	0.5	black	46	17	9508
+N-Unfolded protein response subgraph-24	PSEN2	38	36	white	rectangle	gene	0.5	black	46	17	9509
+N-Unfolded protein response subgraph-25	PSEN2	45	38	white	rectangle	gene	0.5	black	46	17	9509
+N-Unfolded protein response subgraph-3	RYR3	169	49	white	rectangle	gene	0.5	black	46	17	10485
+N-Unfolded protein response subgraph-5	TP53	120	107	white	rectangle	gene	0.5	black	46	17	11998
+N-Unfolded protein response subgraph-6	XBP1	169	35	white	rectangle	gene	0.5	black	46	17	12801
+N-Unfolded protein response subgraph-9	ADAM10	163	20	white	rectangle	gene	0.5	black	46	17	188

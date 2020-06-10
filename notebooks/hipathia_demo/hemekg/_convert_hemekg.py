@@ -5,6 +5,9 @@
 import os
 from urllib.request import urlretrieve
 
+import click
+from pyobo.cli_utils import verbose_option
+
 import pybel
 import pybel.ground
 
@@ -13,6 +16,8 @@ URL = 'https://github.com/hemekg/hemekg/raw/master/hemekg/_cache.bel.nodelink.js
 PATH = os.path.join(HERE, 'hemekg.bel.nodelink.json')
 
 
+@click.command()
+@verbose_option
 def main():
     """Convert the HemeKG graph to Hipathia."""
     if not os.path.exists(PATH):
@@ -20,7 +25,7 @@ def main():
 
     graph = pybel.load(PATH)
     graph = pybel.ground.ground_graph(graph)
-    pybel.to_hipathia(graph, os.path.dirname(__file__))
+    pybel.to_hipathia(graph, HERE)
 
 
 if __name__ == '__main__':

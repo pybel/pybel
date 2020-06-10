@@ -1,0 +1,18 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Mast cell activation-2.0-Hs-1	BTK	75	53	white	rectangle	gene	0.5	black	46	17	1133
+N-Mast cell activation-2.0-Hs-10	INPP5D	76	1	white	rectangle	gene	0.5	black	46	17	6079
+N-Mast cell activation-2.0-Hs-11	KIT	62	44	white	rectangle	gene	0.5	black	46	17	6342
+N-Mast cell activation-2.0-Hs-12	KITLG	53	29	white	rectangle	gene	0.5	black	46	17	6343
+N-Mast cell activation-2.0-Hs-13	LYN	85	19	white	rectangle	gene	0.5	black	46	17	6735
+N-Mast cell activation-2.0-Hs-14	MAPK1	113	20	white	rectangle	gene	0.5	black	46	17	6871
+N-Mast cell activation-2.0-Hs-15	PIK3CD	66	59	white	rectangle	gene	0.5	black	46	17	8977
+N-Mast cell activation-2.0-Hs-16	PLA2G4A	155	35	white	rectangle	gene	0.5	black	46	17	9035
+N-Mast cell activation-2.0-Hs-17	PLA2G5	137	25	white	rectangle	gene	0.5	black	46	17	9038
+N-Mast cell activation-2.0-Hs-2	STAT6	17	89	white	rectangle	gene	0.5	black	46	17	11368
+N-Mast cell activation-2.0-Hs-21	PTPN6	38	66	white	rectangle	gene	0.5	black	46	17	9658
+N-Mast cell activation-2.0-Hs-23	BCL2L1	0	83	white	rectangle	gene	0.5	black	46	17	992
+N-Mast cell activation-2.0-Hs-4	TLR2	168	46	white	rectangle	gene	0.5	black	46	17	11848
+N-Mast cell activation-2.0-Hs-5	FCER1A	1	98	white	rectangle	gene	0.5	black	46	17	3609
+N-Mast cell activation-2.0-Hs-7	IL4	10	132	white	rectangle	gene	0.5	black	46	17	6014
+N-Mast cell activation-2.0-Hs-8	IL4R	14	114	white	rectangle	gene	0.5	black	46	17	6015
+N-Mast cell activation-2.0-Hs-9	INPP5D	91	0	white	rectangle	gene	0.5	black	46	17	6079

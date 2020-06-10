@@ -1,7 +1,0 @@
-ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
-N-Endothelin subgraph-1	ECE2	11707	0	white	rectangle	gene	0.5	black	46	17	13275
-N-Endothelin subgraph-2	ECE1	10627	13256	white	rectangle	gene	0.5	black	46	17	3146
-N-Endothelin subgraph-3	EDN1	14741	6918	white	rectangle	gene	0.5	black	46	17	3176
-N-Endothelin subgraph-4	F2	22315	7608	white	rectangle	gene	0.5	black	46	17	3535
-N-Endothelin subgraph-5	IDE	0	5779	white	rectangle	gene	0.5	black	46	17	5381
-N-Endothelin subgraph-6	APP	7589	6336	white	rectangle	gene	0.5	black	46	17	620

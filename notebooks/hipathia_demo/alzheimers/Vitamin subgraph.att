@@ -1,4 +1,0 @@
-ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
-N-Vitamin subgraph-2	TNF	0	12547	white	rectangle	gene	0.5	black	46	17	11892
-N-Vitamin subgraph-3	CYP27B1	4401	6815	white	rectangle	gene	0.5	black	46	17	2606
-N-Vitamin subgraph-4	IFNG	6812	0	white	rectangle	gene	0.5	black	46	17	5438

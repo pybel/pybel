@@ -1,9 +1,0 @@
-ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
-N-Cytokine signaling subgraph-10	MAPKAPK2	0	9064	white	rectangle	gene	0.5	black	46	17	6887
-N-Cytokine signaling subgraph-11	MOK	28766	23464	white	rectangle	gene	0.5	black	46	17	9833
-N-Cytokine signaling subgraph-4	CCR7	29078	14400	white	rectangle	gene	0.5	black	46	17	1608
-N-Cytokine signaling subgraph-5	TREM2	21958	15463	white	rectangle	gene	0.5	black	46	17	17761
-N-Cytokine signaling subgraph-6	CSF1	35888	22400	white	rectangle	gene	0.5	black	46	17	2432
-N-Cytokine signaling subgraph-7	CSF2	24279	0	white	rectangle	gene	0.5	black	46	17	2434
-N-Cytokine signaling subgraph-8	AGER	17158	1063	white	rectangle	gene	0.5	black	46	17	320
-N-Cytokine signaling subgraph-9	MAPK14	7121	8000	white	rectangle	gene	0.5	black	46	17	6876

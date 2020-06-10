@@ -1,0 +1,6 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Albumin subgraph-1 2	copper(2+) APP	0	90	white	rectangle	gene,gene	0.5	black	46	17	29036,/,620
+N-Albumin subgraph-3	TNF	147	0	white	rectangle	gene	0.5	black	46	17	11892
+N-Albumin subgraph-4	TTR	172	88	white	rectangle	gene	0.5	black	46	17	12405
+N-Albumin subgraph-5	ALB	56	73	white	rectangle	gene	0.5	black	46	17	399
+N-Albumin subgraph-7	IGF1	122	54	white	rectangle	gene	0.5	black	46	17	5464

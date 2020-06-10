@@ -1,6 +1,0 @@
-ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
-N-Metabolism of steroid hormones subgraph-3	TNF	0	12547	white	rectangle	gene	0.5	black	46	17	11892
-N-Metabolism of steroid hormones subgraph-4	CYP27B1	4402	6815	white	rectangle	gene	0.5	black	46	17	2606
-N-Metabolism of steroid hormones subgraph-5	HSD17B10	39621	17500	white	rectangle	gene	0.5	black	46	17	4800
-N-Metabolism of steroid hormones subgraph-6	IFNG	6813	0	white	rectangle	gene	0.5	black	46	17	5438
-N-Metabolism of steroid hormones subgraph-7	APP	32500	18564	white	rectangle	gene	0.5	black	46	17	620

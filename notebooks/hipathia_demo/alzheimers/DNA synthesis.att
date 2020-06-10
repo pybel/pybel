@@ -1,9 +1,0 @@
-ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
-N-DNA synthesis-1 2 3	DOCK3 MAP3K5 RAC1	24438	23621	white	rectangle	gene,gene,gene	0.5	black	46	17	2989,/,6857,/,9801
-N-DNA synthesis-10	PSEN2	22042	16800	white	rectangle	gene	0.5	black	46	17	9509
-N-DNA synthesis-4	JUN	2631	0	white	rectangle	gene	0.5	black	46	17	6204
-N-DNA synthesis-5	MAPK14	5900	8754	white	rectangle	gene	0.5	black	46	17	6876
-N-DNA synthesis-6	MAPK9	1123	5865	white	rectangle	gene	0.5	black	46	17	6886
-N-DNA synthesis-7	MAPT	10513	4939	white	rectangle	gene	0.5	black	46	17	6893
-N-DNA synthesis-8	ATF2	0	13244	white	rectangle	gene	0.5	black	46	17	784
-N-DNA synthesis-9	PSEN1	28827	29363	white	rectangle	gene	0.5	black	46	17	9508

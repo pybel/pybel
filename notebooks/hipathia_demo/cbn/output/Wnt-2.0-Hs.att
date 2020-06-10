@@ -1,0 +1,34 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Wnt-2.0-Hs-1	WNT Family	48	169	white	rectangle	gene	0.5	black	46	17	15983
+N-Wnt-2.0-Hs-10	WNT3A	47	150	white	rectangle	gene	0.5	black	46	17	15983
+N-Wnt-2.0-Hs-12	DKKL1	1	62	white	rectangle	gene	0.5	black	46	17	16528
+N-Wnt-2.0-Hs-15	WIF1	55	176	white	rectangle	gene	0.5	black	46	17	18081
+N-Wnt-2.0-Hs-16	CTNNB1	143	113	white	rectangle	gene	0.5	black	46	17	2514
+N-Wnt-2.0-Hs-17	CTNNB1	150	106	white	rectangle	gene	0.5	black	46	17	2514
+N-Wnt-2.0-Hs-18	CTNNB1	133	118	white	rectangle	gene	0.5	black	46	17	2514
+N-Wnt-2.0-Hs-19	CTNNB1	137	106	white	rectangle	gene	0.5	black	46	17	2514
+N-Wnt-2.0-Hs-2	CCL2	115	1	white	rectangle	gene	0.5	black	46	17	10618
+N-Wnt-2.0-Hs-20	CTNNB1	135	113	white	rectangle	gene	0.5	black	46	17	2514
+N-Wnt-2.0-Hs-21	CTNNB1	139	120	white	rectangle	gene	0.5	black	46	17	2514
+N-Wnt-2.0-Hs-22	CTNNB1	165	119	white	rectangle	gene	0.5	black	46	17	2514
+N-Wnt-2.0-Hs-23	DKK1	16	69	white	rectangle	gene	0.5	black	46	17	2891
+N-Wnt-2.0-Hs-24	DKK2	0	70	white	rectangle	gene	0.5	black	46	17	2892
+N-Wnt-2.0-Hs-25	DKK3	8	75	white	rectangle	gene	0.5	black	46	17	2893
+N-Wnt-2.0-Hs-26	DKK4	9	59	white	rectangle	gene	0.5	black	46	17	2894
+N-Wnt-2.0-Hs-28	FGF10	161	42	white	rectangle	gene	0.5	black	46	17	3666
+N-Wnt-2.0-Hs-3	CCL5	116	14	white	rectangle	gene	0.5	black	46	17	10632
+N-Wnt-2.0-Hs-30	FZD2	42	163	white	rectangle	gene	0.5	black	46	17	4040
+N-Wnt-2.0-Hs-31	FZD3	37	146	white	rectangle	gene	0.5	black	46	17	4041
+N-Wnt-2.0-Hs-32	GATA6	45	180	white	rectangle	gene	0.5	black	46	17	4174
+N-Wnt-2.0-Hs-33	CXCL8	105	0	white	rectangle	gene	0.5	black	46	17	6025
+N-Wnt-2.0-Hs-34	LRP5	9	67	white	rectangle	gene	0.5	black	46	17	6697
+N-Wnt-2.0-Hs-35	LRP6	6	69	white	rectangle	gene	0.5	black	46	17	6698
+N-Wnt-2.0-Hs-36	MAP3K7	171	160	white	rectangle	gene	0.5	black	46	17	6859
+N-Wnt-2.0-Hs-37	MYC	162	36	white	rectangle	gene	0.5	black	46	17	7553
+N-Wnt-2.0-Hs-39	PTN	156	117	white	rectangle	gene	0.5	black	46	17	9630
+N-Wnt-2.0-Hs-4	TGFB1	165	163	white	rectangle	gene	0.5	black	46	17	11766
+N-Wnt-2.0-Hs-40	Idiopathic Pulmonary Fibrosis	40	156	white	rectangle	gene	0.5	black	46	17	D054990
+N-Wnt-2.0-Hs-5	VEGFA	105	19	white	rectangle	gene	0.5	black	46	17	12680
+N-Wnt-2.0-Hs-6	WNT1	31	163	white	rectangle	gene	0.5	black	46	17	12774
+N-Wnt-2.0-Hs-7	WNT4	109	9	white	rectangle	gene	0.5	black	46	17	12783
+N-Wnt-2.0-Hs-8	WNT7B	29	154	white	rectangle	gene	0.5	black	46	17	12787

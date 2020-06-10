@@ -1,8 +1,0 @@
-ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
-N-ATP binding cassette transport subgraph-1	ABCA1	12231	0	white	rectangle	gene	0.5	black	46	17	29
-N-ATP binding cassette transport subgraph-11	BACE1	38367	22400	white	rectangle	gene	0.5	black	46	17	933
-N-ATP binding cassette transport subgraph-12	Abcc1	0	5180	white	rectangle	gene	0.5	black	46	17	102676
-N-ATP binding cassette transport subgraph-2	ABCA2	40763	29220	white	rectangle	gene	0.5	black	46	17	32
-N-ATP binding cassette transport subgraph-3	ABCA7	10571	13218	white	rectangle	gene	0.5	black	46	17	37
-N-ATP binding cassette transport subgraph-8	APP	45153	34963	white	rectangle	gene	0.5	black	46	17	620
-N-ATP binding cassette transport subgraph-9	APP	7619	6134	white	rectangle	gene	0.5	black	46	17	620

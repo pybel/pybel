@@ -1,0 +1,22 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-ADAM Metallopeptidase subgraph-1 2	XBP1 INS	103	124	white	rectangle	gene,gene	0.5	black	46	17	12801,/,6081
+N-ADAM Metallopeptidase subgraph-10	CLSTN2	29	128	white	rectangle	gene	0.5	black	46	17	17448
+N-ADAM Metallopeptidase subgraph-11	CLSTN3	36	149	white	rectangle	gene	0.5	black	46	17	18371
+N-ADAM Metallopeptidase subgraph-12	ADAM10	52	109	white	rectangle	gene	0.5	black	46	17	188
+N-ADAM Metallopeptidase subgraph-13	ADAM17	58	129	white	rectangle	gene	0.5	black	46	17	195
+N-ADAM Metallopeptidase subgraph-14	ADAM19	67	0	white	rectangle	gene	0.5	black	46	17	197
+N-ADAM Metallopeptidase subgraph-15	ADAM9	75	195	white	rectangle	gene	0.5	black	46	17	216
+N-ADAM Metallopeptidase subgraph-16	IGF1	0	113	white	rectangle	gene	0.5	black	46	17	5464
+N-ADAM Metallopeptidase subgraph-17	IL1B	62	69	white	rectangle	gene	0.5	black	46	17	5992
+N-ADAM Metallopeptidase subgraph-18	APP	73	158	white	rectangle	gene	0.5	black	46	17	620
+N-ADAM Metallopeptidase subgraph-19	APP	84	26	white	rectangle	gene	0.5	black	46	17	620
+N-ADAM Metallopeptidase subgraph-20	APP	91	67	white	rectangle	gene	0.5	black	46	17	620
+N-ADAM Metallopeptidase subgraph-21	JUN	21	76	white	rectangle	gene	0.5	black	46	17	6204
+N-ADAM Metallopeptidase subgraph-22	BACE1	134	45	white	rectangle	gene	0.5	black	46	17	933
+N-ADAM Metallopeptidase subgraph-3	sAPP-beta	36	27	white	rectangle	gene	0.5	black	46	17	CONSO00042
+N-ADAM Metallopeptidase subgraph-4	sAPP-alpha	66	50	white	rectangle	gene	0.5	black	46	17	CONSO00067
+N-ADAM Metallopeptidase subgraph-5	Glutamate ionotropic receptor NMDA type subunits	57	162	white	rectangle	gene	0.5	black	46	17	1201
+N-ADAM Metallopeptidase subgraph-6	TIMP1	5	139	white	rectangle	gene	0.5	black	46	17	11820
+N-ADAM Metallopeptidase subgraph-7	XBP1	4	91	white	rectangle	gene	0.5	black	46	17	12801
+N-ADAM Metallopeptidase subgraph-8	SIRT1	95	100	white	rectangle	gene	0.5	black	46	17	14929
+N-ADAM Metallopeptidase subgraph-9	CLSTN1	81	133	white	rectangle	gene	0.5	black	46	17	17447

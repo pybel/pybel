@@ -1,0 +1,19 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-JAK-STAT signaling subgraph-1	sAPP-alpha	76	184	white	rectangle	gene	0.5	black	46	17	CONSO00067
+N-JAK-STAT signaling subgraph-10	FOS	167	97	white	rectangle	gene	0.5	black	46	17	3796
+N-JAK-STAT signaling subgraph-11	HSPA1A	53	0	white	rectangle	gene	0.5	black	46	17	5232
+N-JAK-STAT signaling subgraph-13	JAK2	158	90	white	rectangle	gene	0.5	black	46	17	6192
+N-JAK-STAT signaling subgraph-14	APP	158	102	white	rectangle	gene	0.5	black	46	17	620
+N-JAK-STAT signaling subgraph-15	PIK3R1	68	84	white	rectangle	gene	0.5	black	46	17	8979
+N-JAK-STAT signaling subgraph-16	BACE1	0	49	white	rectangle	gene	0.5	black	46	17	933
+N-JAK-STAT signaling subgraph-17	PRKCA	70	103	white	rectangle	gene	0.5	black	46	17	9393
+N-JAK-STAT signaling subgraph-18	PRKCD	61	4	white	rectangle	gene	0.5	black	46	17	9399
+N-JAK-STAT signaling subgraph-19	RB1	0	109	white	rectangle	gene	0.5	black	46	17	9884
+N-JAK-STAT signaling subgraph-2	ERK	0	41	white	rectangle	gene	0.5	black	46	17	ERK
+N-JAK-STAT signaling subgraph-3	Notch	78	194	white	rectangle	gene	0.5	black	46	17	Notch
+N-JAK-STAT signaling subgraph-4	p38	1	118	white	rectangle	gene	0.5	black	46	17	p38
+N-JAK-STAT signaling subgraph-5	STAT1	74	93	white	rectangle	gene	0.5	black	46	17	11362
+N-JAK-STAT signaling subgraph-6	STAT3	158	115	white	rectangle	gene	0.5	black	46	17	11364
+N-JAK-STAT signaling subgraph-7	STAT3	70	192	white	rectangle	gene	0.5	black	46	17	11364
+N-JAK-STAT signaling subgraph-8	CAMK2A	85	90	white	rectangle	gene	0.5	black	46	17	1460
+N-JAK-STAT signaling subgraph-9	CHI3L1	161	126	white	rectangle	gene	0.5	black	46	17	1932

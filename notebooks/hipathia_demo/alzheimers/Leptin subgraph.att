@@ -1,4 +1,0 @@
-ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
-N-Leptin subgraph-1	GSK3B	3658	0	white	rectangle	gene	0.5	black	46	17	4617
-N-Leptin subgraph-2	LEP	0	6193	white	rectangle	gene	0.5	black	46	17	6553
-N-Leptin subgraph-3	MAPT	7220	6240	white	rectangle	gene	0.5	black	46	17	6893

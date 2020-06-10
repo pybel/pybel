@@ -1,5 +1,0 @@
-0	1	2
-N-Albumin subgraph-3	inhibition	N-Albumin subgraph-7
-N-Albumin subgraph-5	inhibition	N-Albumin subgraph-1 2
-N-Albumin subgraph-7	activation	N-Albumin subgraph-5
-N-Albumin subgraph-7	activation	N-Albumin subgraph-4

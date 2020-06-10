@@ -1,9 +1,0 @@
-ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
-N-Response DNA damage-1	TP53	26020	0	white	rectangle	gene	0.5	black	46	17	11998
-N-Response DNA damage-2	BBC3	12230	8400	white	rectangle	gene	0.5	black	46	17	17868
-N-Response DNA damage-3	DDIT3	7619	14534	white	rectangle	gene	0.5	black	46	17	2726
-N-Response DNA damage-4	KAT5	36521	27300	white	rectangle	gene	0.5	black	46	17	5275
-N-Response DNA damage-5	APP	29400	28364	white	rectangle	gene	0.5	black	46	17	620
-N-Response DNA damage-6	ATM	18900	1063	white	rectangle	gene	0.5	black	46	17	795
-N-Response DNA damage-7	PSEN1	0	13580	white	rectangle	gene	0.5	black	46	17	9508
-N-Response DNA damage-8	BCL2L11	10571	21618	white	rectangle	gene	0.5	black	46	17	994

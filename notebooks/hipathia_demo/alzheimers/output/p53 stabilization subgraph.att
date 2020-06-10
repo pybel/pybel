@@ -1,0 +1,9 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-p53 stabilization subgraph-10	EIF2AK2	0	4	white	rectangle	gene	0.5	black	46	17	9437
+N-p53 stabilization subgraph-11	Amyloidogenic glycoprotein, intracellular domain, conserved site	116	150	white	rectangle	gene	0.5	black	46	17	IPR019745
+N-p53 stabilization subgraph-3	TP53	93	156	white	rectangle	gene	0.5	black	46	17	11998
+N-p53 stabilization subgraph-4	TP53	19	12	white	rectangle	gene	0.5	black	46	17	11998
+N-p53 stabilization subgraph-5	CDK5R1	35	0	white	rectangle	gene	0.5	black	46	17	1775
+N-p53 stabilization subgraph-6	CLU	99	180	white	rectangle	gene	0.5	black	46	17	2095
+N-p53 stabilization subgraph-7	CTSD	91	134	white	rectangle	gene	0.5	black	46	17	2529
+N-p53 stabilization subgraph-8	NOX4	70	160	white	rectangle	gene	0.5	black	46	17	7891

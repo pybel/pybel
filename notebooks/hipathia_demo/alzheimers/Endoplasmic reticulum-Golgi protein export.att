@@ -1,9 +1,0 @@
-ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
-N-Endoplasmic reticulum-Golgi protein export-1	VPS35	0	20670	white	rectangle	gene	0.5	black	46	17	13487
-N-Endoplasmic reticulum-Golgi protein export-2	CST3	42121	27500	white	rectangle	gene	0.5	black	46	17	2475
-N-Endoplasmic reticulum-Golgi protein export-3	CST3	35000	28564	white	rectangle	gene	0.5	black	46	17	2475
-N-Endoplasmic reticulum-Golgi protein export-4	ERN1	49621	0	white	rectangle	gene	0.5	black	46	17	3449
-N-Endoplasmic reticulum-Golgi protein export-5	APP	4788	14671	white	rectangle	gene	0.5	black	46	17	620
-N-Endoplasmic reticulum-Golgi protein export-6	APP	2051	7500	white	rectangle	gene	0.5	black	46	17	620
-N-Endoplasmic reticulum-Golgi protein export-7	APP	12376	15849	white	rectangle	gene	0.5	black	46	17	620
-N-Endoplasmic reticulum-Golgi protein export-8	PSEN1	42500	1063	white	rectangle	gene	0.5	black	46	17	9508

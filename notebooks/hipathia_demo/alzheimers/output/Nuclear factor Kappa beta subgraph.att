@@ -1,0 +1,35 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Nuclear factor Kappa beta subgraph-1 2	APBA2 NFKB1	0	59	white	rectangle	gene,gene	0.5	black	46	17	579,/,7794
+N-Nuclear factor Kappa beta subgraph-10	CCL3	35	83	white	rectangle	gene	0.5	black	46	17	10627
+N-Nuclear factor Kappa beta subgraph-11	CCL5	24	73	white	rectangle	gene	0.5	black	46	17	10632
+N-Nuclear factor Kappa beta subgraph-12	CXCL10	29	82	white	rectangle	gene	0.5	black	46	17	10637
+N-Nuclear factor Kappa beta subgraph-13	CXCL12	136	9	white	rectangle	gene	0.5	black	46	17	10672
+N-Nuclear factor Kappa beta subgraph-14	TLR4	26	78	white	rectangle	gene	0.5	black	46	17	11850
+N-Nuclear factor Kappa beta subgraph-15	TNF	43	55	white	rectangle	gene	0.5	black	46	17	11892
+N-Nuclear factor Kappa beta subgraph-17	C5	28	60	white	rectangle	gene	0.5	black	46	17	1331
+N-Nuclear factor Kappa beta subgraph-18	CHI3L1	55	59	white	rectangle	gene	0.5	black	46	17	1932
+N-Nuclear factor Kappa beta subgraph-19	AGER	45	69	white	rectangle	gene	0.5	black	46	17	320
+N-Nuclear factor Kappa beta subgraph-21	IL1A	46	74	white	rectangle	gene	0.5	black	46	17	5991
+N-Nuclear factor Kappa beta subgraph-22	IL1B	51	70	white	rectangle	gene	0.5	black	46	17	5992
+N-Nuclear factor Kappa beta subgraph-23	IL1RN	25	67	white	rectangle	gene	0.5	black	46	17	6000
+N-Nuclear factor Kappa beta subgraph-24	IL6	58	51	white	rectangle	gene	0.5	black	46	17	6018
+N-Nuclear factor Kappa beta subgraph-25	APP	46	58	white	rectangle	gene	0.5	black	46	17	620
+N-Nuclear factor Kappa beta subgraph-26	APP	13	56	white	rectangle	gene	0.5	black	46	17	620
+N-Nuclear factor Kappa beta subgraph-27	NFKB1	38	69	white	rectangle	gene	0.5	black	46	17	7794
+N-Nuclear factor Kappa beta subgraph-28	NFKB2	50	64	white	rectangle	gene	0.5	black	46	17	7795
+N-Nuclear factor Kappa beta subgraph-29	NFKBIA	146	11	white	rectangle	gene	0.5	black	46	17	7797
+N-Nuclear factor Kappa beta subgraph-3 4	NFKB1 NFKB2	65	90	white	rectangle	gene,gene	0.5	black	46	17	7794,/,7795
+N-Nuclear factor Kappa beta subgraph-30	BACE1	54	80	white	rectangle	gene	0.5	black	46	17	933
+N-Nuclear factor Kappa beta subgraph-31	PSEN1	41	63	white	rectangle	gene	0.5	black	46	17	9508
+N-Nuclear factor Kappa beta subgraph-32	PSEN2	39	58	white	rectangle	gene	0.5	black	46	17	9509
+N-Nuclear factor Kappa beta subgraph-33	PTGS2	153	14	white	rectangle	gene	0.5	black	46	17	9605
+N-Nuclear factor Kappa beta subgraph-34	RELA	58	94	white	rectangle	gene	0.5	black	46	17	9955
+N-Nuclear factor Kappa beta subgraph-35	RELB	57	70	white	rectangle	gene	0.5	black	46	17	9956
+N-Nuclear factor Kappa beta subgraph-36	Rela	130	8	white	rectangle	gene	0.5	black	46	17	103290
+N-Nuclear factor Kappa beta subgraph-37	Nfkbib	0	53	white	rectangle	gene	0.5	black	46	17	104752
+N-Nuclear factor Kappa beta subgraph-38	Eif2ak2	3	47	white	rectangle	gene	0.5	black	46	17	1353449
+N-Nuclear factor Kappa beta subgraph-39	Cysltr1	134	0	white	rectangle	gene	0.5	black	46	17	1926218
+N-Nuclear factor Kappa beta subgraph-40	Nfkb1	8	43	white	rectangle	gene	0.5	black	46	17	97312
+N-Nuclear factor Kappa beta subgraph-5 6	NFKB1 RELB	68	51	white	rectangle	gene,gene	0.5	black	46	17	7794,/,9956
+N-Nuclear factor Kappa beta subgraph-7 8	NFKB2 RELB	72	73	white	rectangle	gene,gene	0.5	black	46	17	7795,/,9956
+N-Nuclear factor Kappa beta subgraph-9	amyloid-beta	40	84	white	rectangle	gene	0.5	black	46	17	64645
