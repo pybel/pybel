@@ -773,10 +773,10 @@ class TestRelations(TestTokenParserBase):
 
         sub = named_complex_abundance('FPLX', 'C1')
         self.assert_has_node(sub)
-        child_1 = hgnc('C1QB')
+        child_1 = hgnc(name='C1QB')
         self.assert_has_node(child_1)
         self.assert_has_edge(child_1, sub, **{RELATION: PART_OF})
-        child_2 = hgnc('C1S')
+        child_2 = hgnc(name='C1S')
         self.assert_has_node(child_2)
         self.assert_has_edge(child_2, sub, **{RELATION: PART_OF})
 

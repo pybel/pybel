@@ -6,9 +6,9 @@ from abc import ABC, abstractmethod
 from typing import Dict, Tuple
 
 from ...constants import (
-    ACTIVITY, ASSOCIATION, CAUSES_NO_CHANGE, CORRELATIVE_RELATIONS, DECREASES, DEGRADATION, DIRECTLY_DECREASES,
-    DIRECTLY_INCREASES, EQUIVALENT_TO, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A, MODIFIER,
-    OBJECT, PART_OF, REGULATES, RELATION,
+    ACTIVITY, ASSOCIATION, CAUSAL_DECREASE_RELATIONS, CAUSAL_INCREASE_RELATIONS, CAUSAL_RELATIONS, CAUSES_NO_CHANGE,
+    CORRELATIVE_RELATIONS, DECREASES, DEGRADATION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO, HAS_PRODUCT,
+    HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A, MODIFIER, OBJECT, PART_OF, REGULATES, RELATION,
 )
 from ...dsl import (
     Abundance, BaseAbundance, BaseEntity, BiologicalProcess, CentralDogma, ComplexAbundance, Gene, MicroRna,
@@ -108,6 +108,23 @@ class PartOfNamedComplexConverter(_PartOfConverter):
 
     subject_type = Protein
     object_type = NamedComplexAbundance
+
+
+class ProcessCausalConverter(SimpleConverter, SimpleTypedPredicate):
+    """Converts BEL statements like ``bp(X) increases/decreases bp(Y)``."""
+
+    subject_type = BiologicalProcess
+    relations = CAUSAL_RELATIONS
+    object_type = BiologicalProcess
+
+    @classmethod
+    def predicate(cls, u, v, key, edge_data) -> bool:
+        """Test a BEL edge has a given relation."""
+        return (
+            isinstance(u, cls.subject_type)
+            and edge_data[RELATION] in cls.relations
+            and isinstance(v, cls.object_type)
+        )
 
 
 class SubprocessPartOfBiologicalProcessConverter(_PartOfConverter):
@@ -313,21 +330,21 @@ class RegulatesDegradationConverter(TypedConverter):
 
 
 class IncreasesDegradationConverter(RegulatesDegradationConverter):
-    """Converts BEL statements like ``A(B) -> def(C(D))``."""
+    """Converts BEL statements like ``A(B) -> deg(C(D))``."""
 
     relation = INCREASES
     target_relation = 'decreasesAmountOf'
 
 
 class DecreasesDegradationConverter(RegulatesDegradationConverter):
-    """Converts BEL statements like ``A(B) -| def(C(D))``."""
+    """Converts BEL statements like ``A(B) -| deg(C(D))``."""
 
     relation = DECREASES
     target_relation = 'increasesAmountOf'
 
 
 class NoChangeDegradationConverter(RegulatesDegradationConverter):
-    """Converts BEL statements like ``A(B) cnc def(C(D))``."""
+    """Converts BEL statements like ``A(B) cnc deg(C(D))``."""
 
     relation = CAUSES_NO_CHANGE
     target_relation = 'notRegulatesAmountOf'
@@ -465,3 +482,76 @@ class TranscriptionFactorForConverter(Converter):
             return False
 
         return gene == v.get_gene()
+
+
+class BindsProteinConverter(Converter):
+    """Converts ``x(B) => complex(p(A), x(B))```."""
+
+    @staticmethod
+    def predicate(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> bool:
+        """Test a BEL edge."""
+        return (
+            edge_data[RELATION] == DIRECTLY_INCREASES
+            and isinstance(v, ComplexAbundance)
+            and len(v.members) == 2
+            and u in v.members
+            and isinstance([m for m in v.members if m != u][0], Protein)
+        )
+
+    @staticmethod
+    def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
+        """Convert a binds protein factor for edge."""
+        g = [m for m in v.members if m != u][0]
+        return _safe_label(u), 'bindsToProtein', _safe_label(g)
+
+
+class BindsGeneConverter(Converter):
+    """Converts ``p(B) directlyIncreases complex(g(A), p(B))```."""
+
+    @staticmethod
+    def predicate(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> bool:
+        """Test a BEL edge."""
+        return (
+            isinstance(u, Protein)
+            and edge_data[RELATION] == DIRECTLY_INCREASES
+            and isinstance(v, ComplexAbundance)
+            and len(v.members) == 2
+            and u in v.members
+            and isinstance([m for m in v.members if m != u][0], Gene)
+        )
+
+    @staticmethod
+    def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
+        """Convert a transcription factor for edge."""
+        g = [m for m in v.members if m != u][0]
+        return _safe_label(u), 'bindsToGene', _safe_label(g)
+
+
+class ProteinRegulatesComplex(Converter):
+    """Converts ``p(B) directlyIncreases complex(x(X), y(Y))```."""
+
+    @staticmethod
+    def predicate(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> bool:
+        """Test a BEL edge."""
+        return (
+            isinstance(u, Protein)
+            and isinstance(v, ComplexAbundance)
+            and u not in v.members
+            and edge_data[RELATION] in CAUSAL_RELATIONS
+            and edge_data[RELATION] != CAUSES_NO_CHANGE
+        )
+
+    @staticmethod
+    def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
+        """Convert a transcription factor for edge."""
+        relation = edge_data[RELATION]
+        if relation in CAUSAL_INCREASE_RELATIONS:
+            relation = 'increasesAmountOf'
+        elif relation in CAUSAL_DECREASE_RELATIONS:
+            relation = 'decreasesAmountOf'
+        elif relation == REGULATES:
+            relation = 'regulatesAmountOf'
+        else:
+            raise ValueError('invalid relation type')
+
+        return _safe_label(u), relation, _safe_label(v)

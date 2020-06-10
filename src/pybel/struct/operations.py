@@ -51,8 +51,8 @@ def left_full_join(g, h) -> None:
     Example usage:
 
     >>> import pybel
-    >>> g = pybel.from_path('...')
-    >>> h = pybel.from_path('...')
+    >>> g = pybel.from_bel_script('...')
+    >>> h = pybel.from_bel_script('...')
     >>> left_full_join(g, h)
     """
     g.add_nodes_from(
@@ -85,8 +85,8 @@ def left_outer_join(g, h) -> None:
     Example usage:
 
     >>> import pybel
-    >>> g = pybel.from_path('...')
-    >>> h = pybel.from_path('...')
+    >>> g = pybel.from_bel_script('...')
+    >>> h = pybel.from_bel_script('...')
     >>> left_outer_join(g, h)
     """
     g_nodes = set(g)
@@ -123,9 +123,9 @@ def union(graphs, use_tqdm: bool = False):
     Example usage:
 
     >>> import pybel
-    >>> g = pybel.from_path('...')
-    >>> h = pybel.from_path('...')
-    >>> k = pybel.from_path('...')
+    >>> g = pybel.from_bel_script('...')
+    >>> h = pybel.from_bel_script('...')
+    >>> k = pybel.from_bel_script('...')
     >>> merged = union([g, h, k])
     """
     it = iter(graphs)
@@ -155,7 +155,8 @@ def union(graphs, use_tqdm: bool = False):
 def left_node_intersection_join(g, h):
     """Take the intersection over two graphs.
 
-    This intersection of two graphs is defined by the union of the sub-graphs induced over the intersection of their nodes
+    This intersection of two graphs is defined by the union of the
+    sub-graphs induced over the intersection of their nodes
 
     :param BELGraph g: A BEL graph
     :param BELGraph h: A BEL graph
@@ -164,8 +165,8 @@ def left_node_intersection_join(g, h):
     Example usage:
 
     >>> import pybel
-    >>> g = pybel.from_path('...')
-    >>> h = pybel.from_path('...')
+    >>> g = pybel.from_bel_script('...')
+    >>> h = pybel.from_bel_script('...')
     >>> merged = left_node_intersection_join(g, h)
     """
     intersecting = set(g).intersection(set(h))
@@ -190,9 +191,9 @@ def node_intersection(graphs):
     Example usage:
 
     >>> import pybel
-    >>> g = pybel.from_path('...')
-    >>> h = pybel.from_path('...')
-    >>> k = pybel.from_path('...')
+    >>> g = pybel.from_bel_script('...')
+    >>> h = pybel.from_bel_script('...')
+    >>> k = pybel.from_bel_script('...')
     >>> merged = node_intersection([g, h, k])
     """
     graphs = tuple(graphs)

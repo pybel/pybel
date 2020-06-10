@@ -6,7 +6,7 @@ import bz2
 import json
 import logging
 import os
-from typing import Any, Mapping, Set, Union
+from typing import Any, Mapping, Set, Tuple, Union
 from urllib.request import urlretrieve
 
 from tqdm import tqdm
@@ -76,7 +76,7 @@ def from_hetionet_json(
     edges = hetionet_dict['edges']
 
     if use_tqdm:
-        edges = tqdm(edges, desc='Converting Hetionet')
+        edges = tqdm(edges, desc='Converting Hetionet', unit_scale=True)
         it_logger = edges.write
     else:
         it_logger = logger.info
@@ -87,13 +87,18 @@ def from_hetionet_json(
     return graph
 
 
-def _get_node(edge, key, kind_identifier_to_name):
+def _get_node(edge, key, kind_identifier_to_name) -> Union[Tuple[None, None, None, None], Tuple[str, str, str, str]]:
     node_type, node_identifier = edge[key]
-    if node_type not in DSL_MAP:
-        return None, None, None
+    namespace = DSL_MAP.get(node_type)
+    if namespace is None:
+        return None, None, None, None
     node_name = kind_identifier_to_name[node_type, node_identifier]
     node_identifier = str(node_identifier)
-    return node_type, node_identifier, node_name
+
+    if node_identifier.lower().startswith(namespace):
+        node_identifier = node_identifier[1 + len(namespace):]  # remove redundant prefix
+
+    return node_type, namespace, node_identifier, node_name
 
 
 def _add_edge(  # noqa: C901
@@ -102,8 +107,8 @@ def _add_edge(  # noqa: C901
     kind_identifier_to_name,
     it_logger,
 ) -> Union[None, str, Set[str]]:
-    source_type, source_identifier, source_name = _get_node(edge, 'source_id', kind_identifier_to_name)
-    target_type, target_identifier, target_name = _get_node(edge, 'target_id', kind_identifier_to_name)
+    source_type, source_ns, source_identifier, source_name = _get_node(edge, 'source_id', kind_identifier_to_name)
+    target_type, target_ns, target_identifier, target_name = _get_node(edge, 'target_id', kind_identifier_to_name)
     if source_type is None or target_type is None:
         return
 
@@ -150,8 +155,8 @@ def _add_edge(  # noqa: C901
         for citation in citations:
             key = f(
                 graph,
-                h_dsl(namespace=DSL_MAP[_h_type], identifier=source_identifier, name=source_name),
-                t_dsl(namespace=DSL_MAP[_t_type], identifier=target_identifier, name=target_name),
+                h_dsl(namespace=source_ns, identifier=source_identifier, name=source_name),
+                t_dsl(namespace=target_ns, identifier=target_identifier, name=target_name),
                 citation=citation, evidence='', annotations=annotations,
             )
             rv.add(key)
@@ -161,8 +166,8 @@ def _add_edge(  # noqa: C901
         if source_type == _h_type and kind == _r and target_type == _t_type:
             return f(
                 graph,
-                h_dsl(namespace=DSL_MAP[_h_type], identifier=source_identifier, name=source_name),
-                t_dsl(namespace=DSL_MAP[_t_type], identifier=target_identifier, name=target_name),
+                h_dsl(namespace=source_ns, identifier=source_identifier, name=source_name),
+                t_dsl(namespace=target_ns, identifier=target_identifier, name=target_name),
             )
 
     def _check(_source_type: str, _kind: str, _target_type: str) -> bool:

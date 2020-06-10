@@ -23,6 +23,8 @@ ignore =
     S311
     # Complains about pickles
     S301, S403
+    # Redefinition in CLI
+    F811
 exclude =
     .tox,
     .git,

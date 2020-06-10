@@ -1,11 +1,19 @@
 PyBEL |zenodo| |build| |windows_build| |coverage| |documentation|
 =================================================================
 `PyBEL <http://pybel.readthedocs.io>`_ is a pure Python package for parsing and handling biological networks encoded in
-the `Biological Expression Language <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_
-(BEL). It also facilitates data interchange between common formats and databases such as
-`NetworkX <http://networkx.github.io/>`_, JSON, JGIF, CSV, SIF, `Cytoscape <http://www.cytoscape.org/>`_,
-`CX <http://www.home.ndexbio.org/data-model/>`_, `NDEx <https://github.com/pybel/pybel2cx>`_, SQL, and
-`Neo4J <https://neo4j.com>`_.
+the `Biological Expression Language <https://biological-expression-language.github.io/>`_
+(BEL).
+
+It facilitates data interchange between data formats like `NetworkX <http://networkx.github.io/>`_,
+Node-Link JSON, `JGIF <https://github.com/jsongraph/json-graph-specification>`_, CSV, SIF,
+`Cytoscape <http://www.cytoscape.org/>`_, `CX <http://www.home.ndexbio.org/data-model/>`_,
+`INDRA <https://github.com/sorgerlab/indra>`_, and `GraphDati <https://github.com/graphdati/schemas>`_; database systems
+like SQL and `Neo4J <https://neo4j.com>`_; and web services like `NDEx <https://github.com/pybel/pybel2cx>`_,
+`BioDati Studio <https://biodati.com/>`_, and `BEL Commons <https://bel-commons-dev.scai.fraunhofer.de>`_. It also
+provides exports for analytical tools like `HiPathia <http://hipathia.babelomics.org/>`_,
+`Drug2ways <https://github.com/drug2ways/>`_ and `SPIA <https://bioconductor.org/packages/release/bioc/html/SPIA.html>`_;
+machine learning tools like `PyKEEN <https://github.com/smartdataanalytics/biokeen>`_ and
+`OpenBioLink <https://github.com/OpenBioLink/OpenBioLink#biological-expression-language-bel-writer>`_; and others.
 
 Its companion package, `PyBEL Tools <http://pybel-tools.readthedocs.io/>`_, contains a
 suite of functions and pipelines for analyzing the resulting biological networks.
@@ -46,8 +54,8 @@ Getting Started
 More examples can be found in the `documentation <http://pybel.readthedocs.io>`_ and in the
 `PyBEL Notebooks <https://github.com/pybel/pybel-notebooks>`_ repository.
 
-Compiling a BEL Graph
-~~~~~~~~~~~~~~~~~~~~~
+Compiling and Saving a BEL Graph
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This example illustrates how the a BEL document from the `Human Brain Pharmacome
 <https://raw.githubusercontent.com/pharmacome/knowledge>`_ project can be loaded from GitHub.
 
@@ -57,8 +65,47 @@ This example illustrates how the a BEL document from the `Human Brain Pharmacome
    >>> url = 'https://raw.githubusercontent.com/pharmacome/knowledge/master/hbp_knowledge/proteostasis/kim2013.bel'
    >>> graph = pybel.from_url(url)
 
-PyBEL can handle `BEL 1.0 <http://openbel.org/language/version_1.0/bel_specification_version_1.0.html>`_
-and `BEL 2.0+ <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html>`_ simultaneously.
+PyBEL can handle `BEL 1.0 <https://github.com/OpenBEL/language/raw/master/docs/version_1.0/bel_specification_version_1.0.pdf>`_
+and `BEL 2.0+ <https://github.com/OpenBEL/language/raw/master/docs/version_2.0/bel_specification_version_2.0.pdf>`_
+simultaneously.
+
+After you have a BEL graph, there are numerous ways to save it. The ``pybel.dump`` function knows
+how to output it in many formats based on the file extension you give. For all of the possibilities,
+check the `I/O documentation <https://pybel.readthedocs.io/en/latest/reference/io.html>`_.
+
+.. code-block:: python
+
+   >>> import pybel
+   >>> graph = ...
+   >>> # write as BEL
+   >>> pybel.dump(graph, 'my_graph.bel')
+   >>> # write as Node-Link JSON for network viewers like D3
+   >>> pybel.dump(graph, 'my_graph.bel.nodelink.json')
+   >>> # write as GraphDati JSON for BioDati
+   >>> pybel.dump(graph, 'my_graph.bel.graphdati.json')
+   >>> # write as CX JSON for NDEx
+   >>> pybel.dump(graph, 'my_graph.bel.cx.json')
+
+Grounding the Graph
+~~~~~~~~~~~~~~~~~~~
+Not all BEL graphs contain both the name and identifier for each entity. Some even use non-standard prefixes
+(also called **namespaces** in BEL). Usually, BEL graphs are validated against controlled vocabularies,
+so the following demo shows how to add the corresponding identifiers to all nodes.
+
+.. code-block:: python
+
+    from urllib.request import urlretrieve
+
+    url = 'https://github.com/cthoyt/selventa-knowledge/blob/master/selventa_knowledge/large_corpus.bel.nodelink.json.gz'
+    urlretrieve(url, 'large_corpus.bel.nodelink.json.gz')
+
+    import pybel
+    graph = pybel.load('large_corpus.bel.nodelink.json.gz')
+
+    import pybel.grounding
+    grounded_graph = pybel.grounding.ground(graph)
+
+Note: you have to install ``pyobo`` for this to work and be running Python 3.7+.
 
 Displaying a BEL Graph in Jupyter
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -95,6 +142,7 @@ Supporters
 ~~~~~~~~~~
 This project has been supported by several organizations:
 
+- `Enveda Therapeutics <https://envedatherapeutics.com/>`_
 - `University of Bonn <https://www.uni-bonn.de>`_
 - `Bonn Aachen International Center for IT <http://www.b-it-center.de>`_
 - `Fraunhofer Institute for Algorithms and Scientific Computing <https://www.scai.fraunhofer.de>`_
@@ -105,8 +153,8 @@ Logo
 ~~~~
 The PyBEL `logo <https://github.com/pybel/pybel-art>`_ was designed by `Scott Colby <https://github.com/scolby33>`_.
 
-.. |build| image:: https://travis-ci.org/pybel/pybel.svg?branch=develop
-    :target: https://travis-ci.org/pybel/pybel
+.. |build| image:: https://travis-ci.com/pybel/pybel.svg?branch=develop
+    :target: https://travis-ci.com/pybel/pybel
     :alt: Development Build Status
 
 .. |windows_build| image:: https://ci.appveyor.com/api/projects/status/v22l3ymg3bdq525d/branch/develop?svg=true

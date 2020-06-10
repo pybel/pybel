@@ -5,6 +5,65 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+Unreleased
+----------
+Added
+~~~~~
+- Importer from `EMMAA <https://emmaa.indra.bio>`_ (https://github.com/pybel/pybel/pull/432)
+- I/O for Amazon S3 (https://github.com/pybel/pybel/pull/431)
+- Add TSV exporter converter for protein binds gene (d7d12878)
+- Add identifier-based entity remapper (ba8aa933)
+
+Changed
+~~~~~~~
+- Updated default BEL Commons instance from https://bel-commons.scai.fraunhofer.de to
+  https://bel-commons-dev.scai.fraunhofer.de
+
+`0.14.9 <https://github.com/pybel/pybel/compare/v0.14.8...v0.14.9>`_ - 2020-04-25
+---------------------------------------------------------------------------------
+Changed
+~~~~~~~
+- Updated GraphDati and BioDati exports (https://github.com/pybel/pybel/commit/c9f95344b72ff86239c8987d6b534000ba509a1f)
+- Refactoring of ``pybel.struct.filters`` and ``pybel.struct.mutation`` - some imports might have to be updated
+
+Added
+~~~~~
+- Importer from `Fraunhofer OrientDB <http://graphstore.scai.fraunhofer.de>`_ (https://github.com/pybel/pybel/pull/429)
+- Exporter for `SPIA <https://bioconductor.org/packages/release/bioc/html/SPIA.html>`_ analytical tool (https://github.com/pybel/pybel/pull/430)
+
+`0.14.8 <https://github.com/pybel/pybel/compare/v0.14.7...v0.14.8>`_ - 2020-04-24
+---------------------------------------------------------------------------------
+Changed
+~~~~~~~
+- ``pybel.post_graphdati()`` has been renamed to ``pybel.to_biodati()``
+- ``pybel.to_web()`` has been renamed to ``pybel.to_bel_commons()``
+- ``pybel.from_web()`` has been renamed to ``pybel.from_bel_commons()``
+
+Added
+~~~~~
+- Content importers from GraphDati format with ``pybel.from_graphdati()`` and ``pybel.from_graphdati()``
+  and enable usage of respective extensions ``*.bel.graphdati.json`` and ``*.bel.graphdati.json.gz`` with
+  ``pybel.load()`` (https://github.com/pybel/pybel/pull/425)
+- Content importer from BioDati with ``pybel.from_biodati()`` (https://github.com/pybel/pybel/pull/425)
+- Add direct function for loading CBN files (so you don't have to load the JSON first) with
+  ``pybel.from_cbn_jgif_file()``
+- Added ``pybel.grounding.ground()`` function that uses the unlisted Python 3.7+ dependency, ``pyobo```
+  to ground/normalize entities in a given BEL graph. This also takes care of upgrading legacy namespace
+  names and mapping SCOMP/SFAM via FamPlex. (https://github.com/pybel/pybel/pull/426)
+
+`0.14.7 <https://github.com/pybel/pybel/compare/v0.14.6...v0.14.7>`_ - 2020-04-16
+---------------------------------------------------------------------------------
+Added
+~~~~~
+- Support for transcription factor relationships in TSV (machine learning) output
+
+Fixed
+~~~~~
+- Fixed incorrect parsing of OBO-style identifiers (https://github.com/pybel/pybel/pull/421)
+- Make sure pop() works in translocations (https://github.com/pybel/pybel/pull/421)
+- None and non-empty string checks in DSL (3156d519)
+- Fixed Jupyter export (the interface changed in Jinja2; d6e7e619)
+
 `0.14.6 <https://github.com/pybel/pybel/compare/v0.14.5...v0.14.6>`_ - 2020-04-01
 ---------------------------------------------------------------------------------
 Added

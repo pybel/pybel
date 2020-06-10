@@ -4,7 +4,7 @@
 
 import networkx as nx
 
-from ..filters import filter_edges
+from ..filters.edge_filters import filter_edges
 from ..filters.typing import EdgePredicates
 from ..pipeline import in_place_transformation, transformation, uni_in_place_transformation
 from ..utils import update_metadata, update_node_helper

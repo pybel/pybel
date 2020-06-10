@@ -11,9 +11,9 @@ from pybel.testing.mocks import mock_bel_resources
 from pybel.testing.utils import make_dummy_annotations, make_dummy_namespaces, n
 from tests.constants import test_citation_dict, test_evidence_text
 
-yfg1 = hgnc(name='YFG1')
-yfg2 = hgnc(name='YFG1')
-yfg3 = hgnc(name='YFG3')
+yfg1 = hgnc(identifier='1', name='YFG1')
+yfg2 = hgnc(identifier='2', name='YFG1')
+yfg3 = hgnc(identifier='3', name='YFG3')
 
 
 def make_increase_edge(u, v):

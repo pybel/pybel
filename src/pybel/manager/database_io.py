@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 def to_database(
     graph,
     manager: Optional[Manager] = None,
-    use_tqdm: bool = False,
+    use_tqdm: bool = True,
 ):
     """Store a graph in a database.
 

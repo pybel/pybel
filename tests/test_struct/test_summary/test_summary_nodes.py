@@ -11,7 +11,7 @@ from pybel.dsl import fusion_range, pathology, protein, protein_fusion
 from pybel.examples import egf_graph, sialic_acid_graph
 from pybel.struct.summary.node_summary import (
     count_functions, count_names_by_namespace, count_namespaces, count_pathologies, count_variants, get_functions,
-    get_names_by_namespace, get_namespaces, get_top_hubs, get_top_pathologies,
+    get_names, get_names_by_namespace, get_namespaces, get_top_hubs, get_top_pathologies,
 )
 from pybel.testing.utils import n
 
@@ -24,7 +24,7 @@ class TestSummary(unittest.TestCase):
         result = {
             PROTEIN: 7,
             COMPLEX: 1,
-            ABUNDANCE: 1
+            ABUNDANCE: 1,
         }
 
         self.assertEqual(set(result), get_functions(sialic_acid_graph))
@@ -35,35 +35,23 @@ class TestSummary(unittest.TestCase):
         result = {
             PROTEIN: 10,
             COMPLEX: 1,
-            BIOPROCESS: 1
+            BIOPROCESS: 1,
         }
 
         self.assertEqual(set(result), get_functions(egf_graph))
         self.assertEqual(result, count_functions(egf_graph))
 
-    def test_namespaces_sialic(self):
+    def test_summarize_sialic(self):
         """Test getting and counting namespaces' contents on the sialic acid graph."""
-        result = {
-            'HGNC': 7,
-            'CHEBI': 1,
+        namespace_result = {
+            'hgnc': 8,
+            'chebi': 2,
+            'bel': 3,
         }
+        self.assertEqual(set(namespace_result), get_namespaces(sialic_acid_graph))
+        self.assertEqual(Counter(namespace_result), count_namespaces(sialic_acid_graph))
 
-        self.assertEqual(set(result), get_namespaces(sialic_acid_graph))
-        self.assertEqual(Counter(result), count_namespaces(sialic_acid_graph))
-
-    def test_namespaces_egf(self):
-        """Test getting and counting namespaces' contents on the EGF graph."""
-        result = {
-            'HGNC': 10,
-            'GO': 1,
-        }
-
-        self.assertEqual(set(result), get_namespaces(egf_graph))
-        self.assertEqual(Counter(result), count_namespaces(egf_graph))
-
-    def test_names_sialic(self):
-        """Test getting and counting names by namespace."""
-        result = {
+        hgnc_result = {
             'CD33': 3,  # once as reference, once in complex, and once as variant
             'TYROBP': 1,
             'SYK': 1,
@@ -71,9 +59,28 @@ class TestSummary(unittest.TestCase):
             'PTPN11': 1,
             'TREM2': 1,
         }
+        chebi_result = {
+            'sialic acid': 2,
+        }
+        names = get_names(sialic_acid_graph)
+        self.assertEqual(set(namespace_result), set(names))
+        self.assertEqual(set(hgnc_result), names['hgnc'])
+        self.assertEqual(set(chebi_result), names['chebi'])
+        self.assertEqual(set(hgnc_result), get_names_by_namespace(sialic_acid_graph, 'hgnc'))
+        self.assertEqual(set(chebi_result), get_names_by_namespace(sialic_acid_graph, 'chebi'))
+        self.assertEqual(hgnc_result, dict(count_names_by_namespace(sialic_acid_graph, 'hgnc')))
+        self.assertEqual(chebi_result, dict(count_names_by_namespace(sialic_acid_graph, 'chebi')))
 
-        self.assertEqual(set(result), get_names_by_namespace(sialic_acid_graph, 'HGNC'))
-        self.assertEqual(result, dict(count_names_by_namespace(sialic_acid_graph, 'HGNC')))
+    def test_namespaces_egf(self):
+        """Test getting and counting namespaces' contents on the EGF graph."""
+        result = {
+            'hgnc': 15,
+            'go': 3,
+            'bel': 4,
+        }
+
+        self.assertEqual(set(result), get_namespaces(egf_graph))
+        self.assertEqual(Counter(result), count_namespaces(egf_graph))
 
     def test_names_fusions(self):
         """Test that names inside fusions are still found by the iterator."""

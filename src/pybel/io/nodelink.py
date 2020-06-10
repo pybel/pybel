@@ -4,6 +4,7 @@
 
 import gzip
 import json
+from io import BytesIO
 from itertools import chain, count
 from operator import methodcaller
 from typing import Any, Mapping, TextIO, Union
@@ -11,9 +12,12 @@ from typing import Any, Mapping, TextIO, Union
 from networkx.utils import open_file
 
 from .utils import ensure_version
-from ..constants import FUSION, GRAPH_ANNOTATION_LIST, MEMBERS, PARTNER_3P, PARTNER_5P, PRODUCTS, REACTANTS
+from ..constants import (
+    FUSION, GRAPH_ANNOTATION_LIST, MEMBERS, OBJECT, PARTNER_3P, PARTNER_5P, PRODUCTS, REACTANTS, SUBJECT,
+)
 from ..dsl import BaseEntity
 from ..struct import BELGraph
+from ..struct.graph import _handle_modifier
 from ..tokens import parse_result_to_dsl
 from ..utils import hash_edge, tokenize_version
 
@@ -26,6 +30,8 @@ __all__ = [
     'from_nodelink_file',
     'from_nodelink_gz',
     'from_nodelink_jsons',
+    'to_nodelink_gz_io',
+    'from_nodelink_gz_io',
 ]
 
 
@@ -168,6 +174,29 @@ def _from_nodelink_json_helper(data: Mapping[str, Any]) -> BELGraph:
             for k, v in data.items()
             if k not in {'source', 'target', 'key'}
         }
+        for side in (SUBJECT, OBJECT):
+            side_data = edge_data.get(side)
+            if side_data:
+                _handle_modifier(side_data)
+
         graph.add_edge(u, v, key=hash_edge(u, v, edge_data), **edge_data)
 
     return graph
+
+
+def to_nodelink_gz_io(graph: BELGraph) -> BytesIO:
+    """Get a BEL graph as a compressed BytesIO."""
+    bytes_io = BytesIO()
+    with gzip.GzipFile(fileobj=bytes_io, mode='w') as file:
+        s = to_nodelink_jsons(graph)
+        file.write(s.encode('utf-8'))
+    bytes_io.seek(0)
+    return bytes_io
+
+
+def from_nodelink_gz_io(bytes_io: BytesIO) -> BELGraph:
+    """Get BEL from gzipped nodelink JSON."""
+    with gzip.GzipFile(fileobj=bytes_io, mode='r') as file:
+        s = file.read()
+    j = s.decode('utf-8')
+    return from_nodelink_jsons(j)

@@ -13,62 +13,23 @@ A general use for a node predicate is to use the built-in :func:`filter` in code
 
 from typing import Iterable, Set
 
-from .typing import NodePredicate, NodePredicates
-from ..graph import BELGraph
+from .node_predicate_builders import function_inclusion_filter_builder, namespace_inclusion_builder
+from .node_predicates import concatenate_node_predicates
+from .typing import NodePredicates
 from ...dsl import BaseEntity
+from ...typing import Strings
 
 __all__ = [
-    'invert_node_predicate',
-    'concatenate_node_predicates',
     'filter_nodes',
     'get_nodes',
     'count_passed_node_filter',
+    'summarize_node_filter',
+    'get_nodes_by_function',
+    'get_nodes_by_namespace',
 ]
 
 
-def invert_node_predicate(node_predicate: NodePredicate) -> NodePredicate:  # noqa: D202
-    """Build a node predicate that is the inverse of the given node predicate."""
-
-    def inverse_predicate(graph: BELGraph, node: BaseEntity) -> bool:
-        """Return the inverse of the enclosed node predicate applied to the graph and node."""
-        return not node_predicate(graph, node)
-
-    return inverse_predicate
-
-
-def concatenate_node_predicates(node_predicates: NodePredicates) -> NodePredicate:
-    """Concatenate multiple node predicates to a new predicate that requires all predicates to be met.
-
-    Example usage:
-
-    >>> from pybel.dsl import protein, gene
-    >>> from pybel.struct.filters.node_predicates import not_pathology, node_exclusion_predicate_builder
-    >>> app_protein = protein(name='APP', namespace='HGNC')
-    >>> app_gene = gene(name='APP', namespace='HGNC')
-    >>> app_predicate = node_exclusion_predicate_builder([app_protein, app_gene])
-    >>> my_predicate = concatenate_node_predicates([not_pathology, app_predicate])
-    """
-    # If a predicate outside a list is given, just return it
-    if not isinstance(node_predicates, Iterable):
-        return node_predicates
-
-    node_predicates = tuple(node_predicates)
-
-    # If only one predicate is given, don't bother wrapping it
-    if 1 == len(node_predicates):
-        return node_predicates[0]
-
-    def concatenated_node_predicate(graph: BELGraph, node: BaseEntity) -> bool:
-        """Pass only for a nodes that pass all enclosed predicates."""
-        return all(
-            node_predicate(graph, node)
-            for node_predicate in node_predicates
-        )
-
-    return concatenated_node_predicate
-
-
-def filter_nodes(graph: BELGraph, node_predicates: NodePredicates) -> Iterable[BaseEntity]:
+def filter_nodes(graph, node_predicates: NodePredicates) -> Iterable[BaseEntity]:
     """Apply a set of predicates to the nodes iterator of a BEL graph."""
     concatenated_predicate = concatenate_node_predicates(node_predicates=node_predicates)
     for node in graph:
@@ -76,11 +37,31 @@ def filter_nodes(graph: BELGraph, node_predicates: NodePredicates) -> Iterable[B
             yield node
 
 
-def get_nodes(graph: BELGraph, node_predicates: NodePredicates) -> Set[BaseEntity]:
+def get_nodes(graph, node_predicates: NodePredicates) -> Set[BaseEntity]:
     """Get the set of all nodes that pass the predicates."""
     return set(filter_nodes(graph, node_predicates=node_predicates))
 
 
-def count_passed_node_filter(graph: BELGraph, node_predicates: NodePredicates) -> int:
+def count_passed_node_filter(graph, node_predicates: NodePredicates) -> int:
     """Count how many nodes pass a given set of node predicates."""
     return sum(1 for _ in filter_nodes(graph, node_predicates=node_predicates))
+
+
+def summarize_node_filter(graph, node_filters: NodePredicates) -> None:
+    """Print a summary of the number of nodes passing a given set of filters.
+
+    :param graph: A BEL graph
+    :param node_filters: A node filter or list/tuple of node filters
+    """
+    passed = count_passed_node_filter(graph, node_filters)
+    print('{}/{} nodes passed'.format(passed, graph.number_of_nodes()))
+
+
+def get_nodes_by_function(graph, func: Strings) -> Set[BaseEntity]:
+    """Get all nodes with the given function(s)."""
+    return get_nodes(graph, function_inclusion_filter_builder(func))
+
+
+def get_nodes_by_namespace(graph, namespaces: Strings) -> Set[BaseEntity]:
+    """Get all nodes identified by the given namespace(s)."""
+    return get_nodes(graph, namespace_inclusion_builder(namespaces))

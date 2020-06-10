@@ -6,7 +6,7 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import (
-    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_IDENTIFIER, CITATION_DB,
+    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_DB, CITATION_IDENTIFIER,
     CITATION_TYPE_ONLINE, CITATION_TYPE_PUBMED, DECREASES, DEGRADATION, DIRECTLY_DECREASES, DIRECTLY_INCREASES,
     EVIDENCE, GMOD, INCREASES, LOCATION, MODIFIER, OBJECT, POLAR_RELATIONS, POSITIVE_CORRELATION, RELATION, SUBJECT,
     TRANSLOCATION,
@@ -15,6 +15,7 @@ from pybel.dsl import (
     abundance, activity, degradation, fragment, gene, gmod, hgvs, pmod, protein, secretion, translocation,
 )
 from pybel.language import Entity
+from pybel.struct.filters import false_node_predicate, true_node_predicate
 from pybel.struct.filters.edge_predicate_builders import build_relation_predicate
 from pybel.struct.filters.edge_predicates import (
     edge_has_activity, edge_has_annotation, edge_has_degradation,
@@ -22,10 +23,9 @@ from pybel.struct.filters.edge_predicates import (
     is_causal_relation, is_direct_causal_relation,
 )
 from pybel.struct.filters.node_predicates import (
-    has_activity, has_causal_in_edges, has_causal_out_edges, has_fragment,
-    has_gene_modification, has_hgvs, has_protein_modification, has_variant, is_abundance, is_causal_central,
-    is_causal_sink, is_causal_source, is_degraded, is_gene, is_pathology, is_protein, is_translocated,
-    keep_node_permissive, node_exclusion_predicate_builder, node_inclusion_predicate_builder, not_pathology,
+    has_activity, has_causal_in_edges, has_causal_out_edges, has_fragment, has_gene_modification, has_hgvs,
+    has_protein_modification, has_variant, is_abundance, is_causal_central, is_causal_sink, is_causal_source,
+    is_degraded, is_gene, is_pathology, is_protein, is_translocated, none_of, not_pathology, one_of,
 )
 from pybel.testing.utils import n
 
@@ -42,13 +42,15 @@ class TestNodePredicates(unittest.TestCase):
 
     def test_none_data(self):
         """Test permissive node predicate with a node data dictionary."""
-        self.assertTrue(keep_node_permissive(p1))
+        self.assertTrue(true_node_predicate(p1))
+        self.assertFalse(false_node_predicate(p1))
 
     def test_none(self):
         """Test permissive node predicate with graph and tuple."""
         g = BELGraph()
         g.add_node_from_data(p1)
-        self.assertTrue(keep_node_permissive(g, p1))
+        self.assertTrue(true_node_predicate(g, p1))
+        self.assertFalse(false_node_predicate(g, p1))
 
     def test_p1_data_variants(self):
         """Test node predicates on BRAF."""
@@ -269,19 +271,19 @@ class TestNodePredicates(unittest.TestCase):
         g.add_node_from_data(v)
         g.add_node_from_data(w)
 
-        f = node_exclusion_predicate_builder([u])
+        f = none_of([u])
 
         self.assertFalse(f(u))
         self.assertTrue(f(v))
         self.assertTrue(f(w))
 
-        f = node_exclusion_predicate_builder([u, v])
+        f = none_of([u, v])
 
         self.assertFalse(f(u))
         self.assertFalse(f(v))
         self.assertTrue(f(w))
 
-        f = node_exclusion_predicate_builder([])
+        f = none_of([])
 
         self.assertTrue(f(u))
         self.assertTrue(f(v))
@@ -298,19 +300,19 @@ class TestNodePredicates(unittest.TestCase):
         g.add_node_from_data(v)
         g.add_node_from_data(w)
 
-        f = node_exclusion_predicate_builder([u])
+        f = none_of([u])
 
         self.assertFalse(f(g, u))
         self.assertTrue(f(g, v))
         self.assertTrue(f(g, w))
 
-        f = node_exclusion_predicate_builder([u, v])
+        f = none_of([u, v])
 
         self.assertFalse(f(g, u))
         self.assertFalse(f(g, v))
         self.assertTrue(f(g, w))
 
-        f = node_exclusion_predicate_builder([])
+        f = none_of([])
 
         self.assertTrue(f(g, u))
         self.assertTrue(f(g, v))
@@ -327,19 +329,19 @@ class TestNodePredicates(unittest.TestCase):
         g.add_node_from_data(v)
         g.add_node_from_data(w)
 
-        f = node_inclusion_predicate_builder([u])
+        f = one_of([u])
 
         self.assertTrue(f(u))
         self.assertFalse(f(v))
         self.assertFalse(f(w))
 
-        f = node_inclusion_predicate_builder([u, v])
+        f = one_of([u, v])
 
         self.assertTrue(f(u))
         self.assertTrue(f(v))
         self.assertFalse(f(w))
 
-        f = node_inclusion_predicate_builder([])
+        f = one_of([])
 
         self.assertFalse(f(u))
         self.assertFalse(f(v))
@@ -348,27 +350,27 @@ class TestNodePredicates(unittest.TestCase):
     def test_node_inclusion_tuples(self):
         g = BELGraph()
 
-        u=protein(name='S100b', namespace='MGI')
-        v=abundance(name='nitric oxide', namespace='CHEBI')
+        u = protein(name='S100b', namespace='MGI')
+        v = abundance(name='nitric oxide', namespace='CHEBI')
         w = abundance(name='cortisol', namespace='CHEBI', identifier='17650')
 
         g.add_node_from_data(u)
         g.add_node_from_data(v)
         g.add_node_from_data(w)
 
-        f = node_inclusion_predicate_builder([u])
+        f = one_of([u])
 
         self.assertTrue(f(g, u))
         self.assertFalse(f(g, v))
         self.assertFalse(f(g, w))
 
-        f = node_inclusion_predicate_builder([u, v])
+        f = one_of([u, v])
 
         self.assertTrue(f(g, u))
         self.assertTrue(f(g, v))
         self.assertFalse(f(g, w))
 
-        f = node_inclusion_predicate_builder([])
+        f = one_of([])
 
         self.assertFalse(f(g, u))
         self.assertFalse(f(g, v))

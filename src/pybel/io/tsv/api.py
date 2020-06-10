@@ -82,7 +82,13 @@ def get_triples(graph: BELGraph, use_tqdm: bool = False, raise_on_none: bool = F
     it = graph.edges(keys=True)
 
     if use_tqdm:
-        it = tqdm(it, total=graph.number_of_edges(), desc='Preparing TSV')
+        it = tqdm(
+            it,
+            total=graph.number_of_edges(),
+            desc='Preparing TSV for {}'.format(graph),
+            unit_scale=True,
+            unit='edge',
+        )
 
     triples = (
         get_triple(graph, u, v, key)
@@ -131,6 +137,7 @@ def get_triple(
         converters.DrugIndicationConverter,
         converters.DrugSideEffectConverter,
         converters.RegulatesAmountConverter,
+        converters.ProcessCausalConverter,
         converters.IncreasesAmountConverter,
         converters.DecreasesAmountConverter,
         converters.NoChangeAmountConverter,
@@ -146,6 +153,9 @@ def get_triple(
         converters.RegulatesDegradationConverter,
         converters.NoChangeDegradationConverter,
         converters.TranscriptionFactorForConverter,
+        converters.BindsGeneConverter,
+        converters.BindsProteinConverter,
+        converters.ProteinRegulatesComplex,
     ]
 
     for converter in _converters:

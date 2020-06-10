@@ -14,18 +14,20 @@ import networkx as nx
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
 from ..canonicalize import edge_to_bel
 from ..constants import (
-    ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_DB, CITATION_IDENTIFIER,
-    CITATION_TYPE_PUBMED, CONCEPT, CORRELATION, DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES,
-    EQUIVALENT_TO, EVIDENCE, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL,
+    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_DB, CITATION_IDENTIFIER,
+    CITATION_TYPE_PUBMED, CORRELATION, DECREASES, DEGRADATION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT,
+    EQUIVALENT_TO, EVIDENCE, FROM_LOC, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL,
     GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION, HAS_PRODUCT,
-    HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A, MEMBERS, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT,
-    METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAMESPACE,
-    NEGATIVE_CORRELATION, NO_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, PRODUCTS, REACTANTS,
-    REGULATES, RELATION, SUBJECT, TRANSCRIBED_TO, TRANSLATED_TO, VARIANTS,
+    HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A, LOCATION, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT,
+    METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, MODIFIER,
+    NEGATIVE_CORRELATION, NO_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, REGULATES, RELATION,
+    SUBJECT, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION,
 )
 from ..dsl import (
-    BaseAbundance, BaseEntity, ComplexAbundance, Gene, MicroRna, Protein, ProteinModification, Reaction, Rna, activity,
+    BaseAbundance, BaseConcept, BaseEntity, CentralDogma, ComplexAbundance, Gene, ListAbundance, MicroRna, Protein,
+    ProteinModification, Reaction, Rna, activity,
 )
+from ..language import Entity
 from ..parser.exc import BELParserWarning
 from ..typing import EdgeData
 from ..utils import CitationDict, citation_dict, hash_edge
@@ -315,8 +317,12 @@ class BELGraph(nx.MultiDiGraph):
                 yield data[CITATION][CITATION_DB], data[CITATION][CITATION_IDENTIFIER]
 
     def number_of_authors(self) -> int:
-        """Return the number of citations contained within the graph."""
-        return len(set(self._iterate_authors()))
+        """Return the number of authors contained within the graph."""
+        return len(self.get_authors())
+
+    def get_authors(self) -> Set[str]:
+        """Get the authors for the citations in the graph."""
+        return set(self._iterate_authors())
 
     def _iterate_authors(self) -> Iterable[str]:
         return chain.from_iterable(
@@ -351,7 +357,7 @@ class BELGraph(nx.MultiDiGraph):
 
         return self._help_add_edge_helper(u, v, attr)
 
-    def _help_add_edge_helper(self, u: BaseEntity, v: BaseEntity, attr: Mapping) -> str:
+    def _help_add_edge_helper(self, u: BaseEntity, v: BaseEntity, attr: Mapping[str, Any]) -> str:
         key = hash_edge(u, v, attr)
 
         if not self.has_edge(u, v, key):
@@ -426,8 +432,8 @@ class BELGraph(nx.MultiDiGraph):
         evidence: str,
         citation: Union[str, Tuple[str, str], CitationDict],
         annotations: Optional[AnnotationsHint] = None,
-        subject_modifier: Optional[Mapping] = None,
-        object_modifier: Optional[Mapping] = None,
+        subject_modifier: Optional[Mapping[str, Any]] = None,
+        object_modifier: Optional[Mapping[str, Any]] = None,
         **attr
     ) -> str:
         """Add a qualified edge.
@@ -464,8 +470,8 @@ class BELGraph(nx.MultiDiGraph):
         evidence: str,
         citation: Union[str, Tuple[str, str], CitationDict],
         annotations: Optional[AnnotationsHint] = None,
-        subject_modifier: Optional[Mapping] = None,
-        object_modifier: Optional[Mapping] = None,
+        subject_modifier: Optional[Mapping[str, Any]] = None,
+        object_modifier: Optional[Mapping[str, Any]] = None,
         **attr
     ):
         attr.update({
@@ -478,10 +484,10 @@ class BELGraph(nx.MultiDiGraph):
             attr[ANNOTATIONS] = _clean_annotations(annotations)
 
         if subject_modifier:
-            attr[SUBJECT] = subject_modifier
+            attr[SUBJECT] = _handle_modifier(subject_modifier)
 
         if object_modifier:
-            attr[OBJECT] = object_modifier
+            attr[OBJECT] = _handle_modifier(object_modifier)
 
         return attr
 
@@ -607,18 +613,18 @@ class BELGraph(nx.MultiDiGraph):
 
         self.add_node(node)
 
-        if VARIANTS in node:
+        if isinstance(node, CentralDogma) and node.variants:
             self.add_has_variant(node.get_parent(), node)
 
-        elif MEMBERS in node:
-            for member in node[MEMBERS]:
+        elif isinstance(node, ListAbundance):
+            for member in node.members:
                 self.add_part_of(member, node)
 
-        elif PRODUCTS in node and REACTANTS in node:
-            for reactant_tokens in node[REACTANTS]:
-                self.add_has_reactant(node, reactant_tokens)
-            for product_tokens in node[PRODUCTS]:
-                self.add_has_product(node, product_tokens)
+        elif isinstance(node, Reaction):
+            for reactant in node.reactants:
+                self.add_has_reactant(node, reactant)
+            for product in node.products:
+                self.add_has_product(node, product)
 
     def add_reaction(
         self,
@@ -765,7 +771,7 @@ class BELGraph(nx.MultiDiGraph):
         v: BaseEntity,
         edge_data: EdgeData,
         sep: Optional[str] = None,
-        use_identifiers: bool = False,
+        use_identifiers: bool = True,
     ) -> str:
         """Serialize a pair of nodes and related edge data as a BEL relation."""
         return edge_to_bel(u, v, data=edge_data, sep=sep, use_identifiers=use_identifiers)
@@ -807,7 +813,7 @@ class BELGraph(nx.MultiDiGraph):
 
         Might have cross references in future.
         """
-        return CONCEPT in node and node[CONCEPT][NAMESPACE] == namespace
+        return isinstance(node, BaseConcept) and node.namespace.lower() == namespace.lower()
 
     def node_has_namespace(self, node: BaseEntity, namespace: str) -> bool:
         """Check if the node have the given namespace.
@@ -858,6 +864,27 @@ def _clean_annotations(annotations_dict: AnnotationsHint) -> AnnotationsDict:
         )
         for key, values in annotations_dict.items()
     }
+
+
+def _handle_modifier(side_data: Dict[str, Any]) -> Mapping[str, Any]:
+    modifier = side_data.get(MODIFIER)
+    effect = side_data.get(EFFECT)
+
+    if modifier == ACTIVITY:
+        if effect is not None:
+            side_data[EFFECT] = Entity(**effect)
+    elif modifier == TRANSLOCATION:
+        if effect is not None:
+            effect[FROM_LOC] = Entity(**effect[FROM_LOC])
+            effect[TO_LOC] = Entity(**effect[TO_LOC])
+    elif modifier == DEGRADATION or modifier is None:
+        pass
+    else:
+        raise ValueError('invalid modifier: {}'.format(modifier))
+
+    if LOCATION in side_data:
+        side_data[LOCATION] = Entity(**side_data[LOCATION])
+    return side_data
 
 
 def _handle_citation(citation: Union[str, Tuple[str, str], CitationDict]) -> CitationDict:

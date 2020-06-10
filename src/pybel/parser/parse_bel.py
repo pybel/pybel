@@ -287,6 +287,7 @@ class BELParser(BaseParser):
 
             self.concept_parser = ConceptParser(
                 allow_naked_names=allow_naked_names,
+                skip_validation=skip_validation,
             )
         else:
             self.control_parser = ControlParser(
@@ -303,6 +304,7 @@ class BELParser(BaseParser):
                 namespace_to_pattern=namespace_to_pattern,
                 #
                 allow_naked_names=allow_naked_names,
+                skip_validation=skip_validation,
             )
 
         self.control_parser.get_line_number = self.get_line_number
@@ -804,7 +806,7 @@ class BELParser(BaseParser):
                     ae: True
                     for ae in annotation_entry
                 }
-                if isinstance(annotation_entry, set) else
+                if isinstance(annotation_entry, (set, list)) else
                 {
                     annotation_entry: True,
                 }

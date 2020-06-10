@@ -4,19 +4,20 @@
 
 import os
 
-from jinja2 import Environment, FileSystemLoader
-
 __all__ = [
     'build_template_environment',
     'build_template_renderer',
 ]
 
 
-def build_template_environment(here: str) -> Environment:
+def build_template_environment(here: str):
     """Build a custom templating environment so Flask apps can get data from lots of different places.
 
     :param here: Give this the result of :code:`os.path.dirname(os.path.abspath(__file__))`
+    :rtype: jinja2.Environment
     """
+    from jinja2 import Environment, FileSystemLoader
+
     loader = FileSystemLoader(os.path.join(here, 'templates'))
     environment = Environment(
         autoescape=True,

@@ -4,7 +4,7 @@
 
 from typing import Iterable
 
-from ...filters.node_selection import get_nodes_by_function
+from ...filters.node_filters import get_nodes_by_function
 from ...pipeline.decorators import in_place_transformation
 from ....constants import GENE, RELATION, RNA, TRANSCRIBED_TO, TRANSLATED_TO
 from ....dsl import BaseEntity

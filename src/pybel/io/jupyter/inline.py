@@ -5,8 +5,6 @@
 from random import sample
 from typing import Mapping, Optional
 
-from IPython.display import Javascript
-
 from .constants import DEFAULT_COLOR_MAP
 from ..jinja_utils import build_template_renderer
 from ..nodelink import to_nodelink_jsons
@@ -20,9 +18,6 @@ __all__ = [
 DEFAULT_WIDTH = 1000
 DEFAULT_HEIGHT = 650
 
-#: Renders templates from pybel.io.jupyter.templates folder
-render_template = build_template_renderer(__file__)
-
 
 def _generate_id() -> str:
     """Generate a random string of letters."""
@@ -34,7 +29,7 @@ def to_jupyter(
     width: int = DEFAULT_WIDTH,
     height: int = DEFAULT_HEIGHT,
     color_map: Optional[Mapping[str, str]] = None,
-) -> Javascript:
+):
     """Display a BEL graph inline in a Jupyter notebook.
 
     To use successfully, make run as the last statement in a cell inside a Jupyter notebook.
@@ -47,6 +42,8 @@ def to_jupyter(
     :return: An IPython notebook Javascript object
     :rtype: :class:`IPython.display.Javascript`
     """
+    from IPython.display import Javascript
+
     return Javascript(to_jupyter_str(
         graph,
         width=width,
@@ -72,6 +69,9 @@ def to_jupyter_str(
     """
     gjson = to_nodelink_jsons(graph)
     chart_id = _generate_id()
+
+    #: Renders templates from pybel.io.jupyter.templates folder
+    render_template = build_template_renderer(__file__)
 
     return render_template(
         'pybel_jupyter.js',

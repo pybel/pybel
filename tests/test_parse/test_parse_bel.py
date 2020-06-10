@@ -2006,7 +2006,7 @@ class TestTransformation(TestTokenParserBase):
         statement = 'rxn(reactants(p(HGNC:APP)), products(p(HGNC:APP, frag(672_713))))'
         self.parser.transformation.parseString(statement)
 
-        app = hgnc('APP')
+        app = hgnc(name='APP')
         self.assertIn(app, self.graph)
 
         amyloid_beta_42 = app.with_variants(Fragment(start=672, stop=713))

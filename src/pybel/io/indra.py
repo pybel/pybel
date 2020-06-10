@@ -77,6 +77,9 @@ def from_indra_statements(
     """
     from indra.assemblers.pybel import PybelAssembler
 
+    if authors is None:
+        authors = 'INDRA'
+
     pba = PybelAssembler(
         stmts=stmts,
         name=name,

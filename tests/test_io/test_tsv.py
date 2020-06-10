@@ -11,9 +11,10 @@ from pybel.constants import (
     NEGATIVE_CORRELATION, OBJECT, PART_OF, POSITIVE_CORRELATION, REGULATES, RELATION,
 )
 from pybel.dsl import (
-    Abundance, BaseEntity, BiologicalProcess, ComplexAbundance, Gene, MicroRna, NamedComplexAbundance, Pathology,
+    Abundance, BaseEntity, BiologicalProcess, ComplexAbundance, MicroRna, NamedComplexAbundance, Pathology,
     Population, Protein, Rna, activity,
 )
+from pybel.io.tsv import converters as tsvc
 from pybel.io.tsv.api import get_triple
 from pybel.io.tsv.converters import (
     AbundanceDirectlyDecreasesProteinActivityConverter, AbundanceDirectlyIncreasesProteinActivityConverter,
@@ -51,13 +52,21 @@ nca1 = NamedComplexAbundance('FPLX', '1')
 pop1 = Population('taxonomy', '1')
 
 p2 = Protein('HGNC', identifier='9236')
-g3 = Gene('HGNC', identifier='9212')
-r3 = g3.get_rna()
+p3 = Protein('HGNC', identifier='9212')
+r3 = p3.get_rna()
+g3 = r3.get_gene()
+
 c1 = ComplexAbundance([p2, g3])
+c2 = ComplexAbundance([p1, p2])
+c3 = ComplexAbundance([a1, p2])
 
 converters_true_list = [
     (PartOfNamedComplexConverter, p1, nca1, _rel(PART_OF), ('HGNC:1', 'partOf', 'FPLX:1')),
     (SubprocessPartOfBiologicalProcessConverter, b1, b2, _rel(PART_OF), ('GO:1', 'partOf', 'GO:2')),
+    (tsvc.ProcessCausalConverter, b1, b2, _rel(INCREASES), ('GO:1', INCREASES, 'GO:2')),
+    (tsvc.ProcessCausalConverter, b1, b2, _rel(DECREASES), ('GO:1', DECREASES, 'GO:2')),
+    (tsvc.ProcessCausalConverter, b1, b2, _rel(DIRECTLY_INCREASES), ('GO:1', DIRECTLY_INCREASES, 'GO:2')),
+    (tsvc.ProcessCausalConverter, b1, b2, _rel(DIRECTLY_DECREASES), ('GO:1', DIRECTLY_DECREASES, 'GO:2')),
     (AssociationConverter, r1, r2, _rel(ASSOCIATION), ('HGNC:1', 'association', 'HGNC:2')),
     (AssociationConverter, r1, r2, _assoc('similarity'), ('HGNC:1', 'similarity', 'HGNC:2')),
     (CorrelationConverter, r1, r2, _rel(POSITIVE_CORRELATION), ('HGNC:1', 'positiveCorrelation', 'HGNC:2')),
@@ -100,6 +109,34 @@ converters_true_list = [
     (
         TranscriptionFactorForConverter, c1, r3, _rel(DIRECTLY_DECREASES),
         ('HGNC:9236', DIRECTLY_DECREASES, 'HGNC:9212'),
+    ),
+    (
+        tsvc.BindsGeneConverter, p2, c1, _rel(DIRECTLY_INCREASES),
+        (p2.curie, 'bindsToGene', g3.curie),
+    ),
+    (
+        tsvc.BindsProteinConverter, p1, c2, _rel(DIRECTLY_INCREASES),
+        (p1.curie, 'bindsToProtein', p2.curie),
+    ),
+    (
+        tsvc.BindsProteinConverter, a1, c3, _rel(DIRECTLY_INCREASES),
+        (a1.curie, 'bindsToProtein', p2.curie),
+    ),
+    (
+        tsvc.ProteinRegulatesComplex, p3, c2, _rel(DIRECTLY_INCREASES),
+        (p3.curie, 'increasesAmountOf', str(c2)),
+    ),
+    (
+        tsvc.ProteinRegulatesComplex, p3, c2, _rel(DIRECTLY_DECREASES),
+        (p3.curie, 'decreasesAmountOf', str(c2)),
+    ),
+    (
+        tsvc.ProteinRegulatesComplex, p3, c2, _rel(DECREASES),
+        (p3.curie, 'decreasesAmountOf', str(c2)),
+    ),
+    (
+        tsvc.ProteinRegulatesComplex, p3, c2, _rel(INCREASES),
+        (p3.curie, 'increasesAmountOf', str(c2)),
     ),
 ]
 

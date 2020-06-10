@@ -22,9 +22,4 @@ def part_has_modifier(edge_data: EdgeData, part: str, modifier: str) -> bool:
     if part_data is None:
         return False
 
-    found_modifier = part_data.get(MODIFIER)
-
-    if found_modifier is None:
-        return False
-
-    return found_modifier == modifier
+    return part_data.get(MODIFIER) == modifier
