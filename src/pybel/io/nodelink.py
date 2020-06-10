@@ -174,6 +174,7 @@ def _from_nodelink_json_helper(data: Mapping[str, Any]) -> BELGraph:
             for k, v in data.items()
             if k not in {'source', 'target', 'key'}
         }
+
         for side in (SUBJECT, OBJECT):
             side_data = edge_data.get(side)
             if side_data:
