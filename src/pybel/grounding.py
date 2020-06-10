@@ -56,7 +56,7 @@ from typing import Any, Mapping, Tuple, Union
 
 from protmapper.uniprot_client import get_id_from_mnemonic, get_mnemonic
 from pyobo.extract import get_id_name_mapping, get_name_id_mapping
-from pyobo.getters import NoOboFoundry, MissingOboBuild
+from pyobo.getters import MissingOboBuild, NoOboFoundry
 from pyobo.identifier_utils import SYNONYM_TO_KEY, normalize_prefix
 from pyobo.xrefdb.sources.famplex import get_remapping
 from tqdm import tqdm
