@@ -24,21 +24,25 @@ jobs:
       env: TOXENV=pyroma
     - name: "Check static typing with MyPy"
       env: TOXENV=mypy
+
     # docs stage
+    - stage: docs
     - name: "Check RST conformity with doc8"
       env: TOXENV=doc8
     - name: "Check README.rst"
       env: TOXENV=readme
     - name: "Check documentation build with Sphinx"
       env: TOXENV=docs
+
+    # test stage
     - stage: test
-      name: "Python 3.8 tests with MySQL"
+      name: "Tests with MySQL"
       env: TOXENV=py DB=mysql PYBEL_TEST_CONNECTOR=mysqlclient PYBEL_TEST_CONNECTION=mysql+mysqldb://travis@localhost/test?charset=utf8
-    - name: "Python 3.8 tests with PostgreSQL"
+    - name: "Tests with PostgreSQL"
       env: TOXENV=py DB=postgresql PYBEL_TEST_CONNECTOR=psycopg2-binary PYBEL_TEST_CONNECTION=postgresql+psycopg2://travis@localhost/tests
-    - name: "Python 3.8 tests with SQLite"
+    - name: "Tests with SQLite"
       env: TOXENV=py DB=sqlite
-    - name: "Python 3.5 tests with SQLite"
+    - name: "Tests with legacy Python (3.5)"
       python: 3.5
       env: TOXENV=py DB=sqlite
 
