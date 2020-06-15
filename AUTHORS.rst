@@ -16,3 +16,4 @@ Contributors
 - `Nicola Soranzo <https://github.com/nsoranzo>`_
 - `Steffen Möller <https://github.com/smoe>`_
 - `tehw0lf <https://github.com/tehw0lf>`_
+- `Jeremy Zucker <https://github.com/djinnome>`_
