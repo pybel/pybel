@@ -1,6 +1,6 @@
-sudo: true
 cache: pip
 dist: xenial
+os: linux
 
 services:
   - mysql
@@ -35,10 +35,6 @@ jobs:
       python: 3.5
       env: TOXENV=py DB=sqlite
 
-
-matrix:
-  allow_failures:
-    - env: TOXENV=mypy
 
 install:
   - sh -c 'if [ "$TOXENV" = "py" ]; then pip install tox codecov; else pip install tox; fi'
