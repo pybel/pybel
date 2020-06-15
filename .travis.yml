@@ -9,36 +9,36 @@ services:
 language: python
 
 python:
-  - 3.7
+  - 3.8
   - 3.5
-
-stages:
-  - lint
-  - docs
-  - test
-
-env:
-  - TOXENV=py DB=mysql PYBEL_TEST_CONNECTOR=mysqlclient
-    PYBEL_TEST_CONNECTION=mysql+mysqldb://travis@localhost/test?charset=utf8
-
-  - TOXENV=py DB=postgresql PYBEL_TEST_CONNECTOR=psycopg2-binary
-    PYBEL_TEST_CONNECTION=postgresql+psycopg2://travis@localhost/tests
-
-  - TOXENV=py DB=sqlite
 
 jobs:
   include:
     # lint stage
     - stage: lint
+      python: 3.8
       env: TOXENV=manifest
     - env: TOXENV=flake8
     - env: TOXENV=pyroma
     - env: TOXENV=mypy
     # docs stage
     - stage: docs
+      python: 3.8
       env: TOXENV=doc8
     - env: TOXENV=readme
     - env: TOXENV=docs
+    - stage: test
+      name: "MySQL"
+      python: 3.8
+      env: TOXENV=py DB=mysql PYBEL_TEST_CONNECTOR=mysqlclient PYBEL_TEST_CONNECTION=mysql+mysqldb://travis@localhost/test?charset=utf8
+    - name: "PostgreSQL"
+      env: TOXENV=py DB=postgresql PYBEL_TEST_CONNECTOR=psycopg2-binary PYBEL_TEST_CONNECTION=postgresql+psycopg2://travis@localhost/tests
+    - name: "SQLite"
+      env: TOXENV=py DB=sqlite
+    - name: "Old Python with SQLite"
+      python: 3.5
+      env: TOXENV=py DB=sqlite
+
 
 matrix:
   allow_failures:
