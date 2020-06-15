@@ -101,7 +101,6 @@ PyBEL is tested on Python 3.5+ on Mac OS and Linux using
    :name: project
 
    meta/references
-   meta/roadmap
    meta/postmortem
    meta/technology
 
