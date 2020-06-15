@@ -256,6 +256,8 @@ CITATION = 'citation'
 EVIDENCE = 'evidence'
 #: The key for an internal edge data dictionary for the annotations dictionary
 ANNOTATIONS = 'annotations'
+#: The key for free annotations
+FREE_ANNOTATIONS = 'free_annotations'
 #: The key for an internal edge data dictionary for the subject modifier dictionary
 SUBJECT = 'subject'
 #: The key for an internal edge data dictionary for the object modifier dictionary
@@ -551,9 +553,6 @@ BELNS_ENCODING_STR = ''.join(sorted(belns_encodings))
 PYBEL_REMOTE_HOST = 'PYBEL_REMOTE_HOST'
 PYBEL_REMOTE_USER = 'PYBEL_REMOTE_USER'
 PYBEL_REMOTE_PASSWORD = 'PYBEL_REMOTE_PASSWORD'  # noqa: S105
-
-#: The default location of PyBEL Web
-DEFAULT_SERVICE_URL = 'https://bel-commons-dev.scai.fraunhofer.de'
 
 PYBEL_PUBMED = '29048466'
 SET_CITATION_FMT = 'SET Citation = {{"{}", "{}"}}'

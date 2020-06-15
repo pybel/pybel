@@ -1,0 +1,15 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Cholesterol metabolism subgraph-13	DHCR24	108	85	white	rectangle	gene	0.5	black	46	17	2859
+N-Cholesterol metabolism subgraph-14	ABCA7	111	111	white	rectangle	gene	0.5	black	46	17	37
+N-Cholesterol metabolism subgraph-17	APP	89	128	white	rectangle	gene	0.5	black	46	17	620
+N-Cholesterol metabolism subgraph-18	APP	67	98	white	rectangle	gene	0.5	black	46	17	620
+N-Cholesterol metabolism subgraph-19	LDLR	94	64	white	rectangle	gene	0.5	black	46	17	6547
+N-Cholesterol metabolism subgraph-20	MAPT	31	129	white	rectangle	gene	0.5	black	46	17	6893
+N-Cholesterol metabolism subgraph-21	MAPT	26	110	white	rectangle	gene	0.5	black	46	17	6893
+N-Cholesterol metabolism subgraph-22	MAPT	77	157	white	rectangle	gene	0.5	black	46	17	6893
+N-Cholesterol metabolism subgraph-23	MAPT	19	91	white	rectangle	gene	0.5	black	46	17	6893
+N-Cholesterol metabolism subgraph-25	PRKAA1	86	198	white	rectangle	gene	0.5	black	46	17	9376
+N-Cholesterol metabolism subgraph-3	CAMK	47	0	white	rectangle	gene	0.5	black	46	17	CAMK
+N-Cholesterol metabolism subgraph-4	PRKAC	0	117	white	rectangle	gene	0.5	black	46	17	PRKAC
+N-Cholesterol metabolism subgraph-5	PRKAC	57	63	white	rectangle	gene	0.5	black	46	17	PRKAC
+N-Cholesterol metabolism subgraph-6	STK11	55	41	white	rectangle	gene	0.5	black	46	17	11389

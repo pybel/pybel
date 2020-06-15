@@ -1,0 +1,27 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Wnt signaling subgraph-1 2	TCF_LEF CTNNBIP1	119	2	white	rectangle	gene,gene	0.5	black	46	17	TCF_LEF,/,16913
+N-Wnt signaling subgraph-10	S100B	40	16	white	rectangle	gene	0.5	black	46	17	10500
+N-Wnt signaling subgraph-11	BTRC	80	35	white	rectangle	gene	0.5	black	46	17	1144
+N-Wnt signaling subgraph-13	CTNNBIP1	95	23	white	rectangle	gene	0.5	black	46	17	16913
+N-Wnt signaling subgraph-14	CTNNBIP1	86	87	white	rectangle	gene	0.5	black	46	17	16913
+N-Wnt signaling subgraph-15	CDK5	95	61	white	rectangle	gene	0.5	black	46	17	1774
+N-Wnt signaling subgraph-17	CSNK1A1	79	65	white	rectangle	gene	0.5	black	46	17	2451
+N-Wnt signaling subgraph-18	CSNK1E	184	41	white	rectangle	gene	0.5	black	46	17	2453
+N-Wnt signaling subgraph-19	CSNK2A1	160	40	white	rectangle	gene	0.5	black	46	17	2457
+N-Wnt signaling subgraph-20	CTNNB1	60	24	white	rectangle	gene	0.5	black	46	17	2514
+N-Wnt signaling subgraph-21	CTNNB1	86	57	white	rectangle	gene	0.5	black	46	17	2514
+N-Wnt signaling subgraph-22	CTNNB1	50	26	white	rectangle	gene	0.5	black	46	17	2514
+N-Wnt signaling subgraph-23	CTNNB1	66	16	white	rectangle	gene	0.5	black	46	17	2514
+N-Wnt signaling subgraph-24	CTNNB1	55	33	white	rectangle	gene	0.5	black	46	17	2514
+N-Wnt signaling subgraph-25	CTNNB1	57	13	white	rectangle	gene	0.5	black	46	17	2514
+N-Wnt signaling subgraph-26	DKK1	35	6	white	rectangle	gene	0.5	black	46	17	2891
+N-Wnt signaling subgraph-28	GSK3B	90	77	white	rectangle	gene	0.5	black	46	17	4617
+N-Wnt signaling subgraph-29	GSK3B	24	14	white	rectangle	gene	0.5	black	46	17	4617
+N-Wnt signaling subgraph-3 4 5 6 7	AXIN CSNK1A1 CTNNB1 GSK3B APC	98	90	white	rectangle	gene,gene,gene,gene,gene	0.5	black	46	17	AXIN,/,2451,/,2514,/,4617,/,583
+N-Wnt signaling subgraph-30	LRP6	121	11	white	rectangle	gene	0.5	black	46	17	6698
+N-Wnt signaling subgraph-31	MAPT	10	13	white	rectangle	gene	0.5	black	46	17	6893
+N-Wnt signaling subgraph-32	PPP2CA	0	14	white	rectangle	gene	0.5	black	46	17	9299
+N-Wnt signaling subgraph-35	PSEN2	173	41	white	rectangle	gene	0.5	black	46	17	9509
+N-Wnt signaling subgraph-36	Amyloidogenic glycoprotein, intracellular domain, conserved site	110	0	white	rectangle	gene	0.5	black	46	17	IPR019745
+N-Wnt signaling subgraph-8	AXIN	103	101	white	rectangle	gene	0.5	black	46	17	AXIN
+N-Wnt signaling subgraph-9	Wnt	110	11	white	rectangle	gene	0.5	black	46	17	Wnt

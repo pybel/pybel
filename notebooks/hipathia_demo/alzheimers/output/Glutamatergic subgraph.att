@@ -1,0 +1,39 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Glutamatergic subgraph-1	sAPP-alpha	17	135	white	rectangle	gene	0.5	black	46	17	CONSO00067
+N-Glutamatergic subgraph-10	ADAM10	145	57	white	rectangle	gene	0.5	black	46	17	188
+N-Glutamatergic subgraph-12	ADAM17	148	56	white	rectangle	gene	0.5	black	46	17	195
+N-Glutamatergic subgraph-13	ADAM9	147	59	white	rectangle	gene	0.5	black	46	17	216
+N-Glutamatergic subgraph-14	ITGB1BP1	81	92	white	rectangle	gene	0.5	black	46	17	23927
+N-Glutamatergic subgraph-15	DNM1	93	48	white	rectangle	gene	0.5	black	46	17	2972
+N-Glutamatergic subgraph-16	DNM2	103	51	white	rectangle	gene	0.5	black	46	17	2974
+N-Glutamatergic subgraph-17	GRIA1	104	38	white	rectangle	gene	0.5	black	46	17	4571
+N-Glutamatergic subgraph-18	GRIA2	73	86	white	rectangle	gene	0.5	black	46	17	4572
+N-Glutamatergic subgraph-19	GRIA3	77	113	white	rectangle	gene	0.5	black	46	17	4573
+N-Glutamatergic subgraph-2	Glutamate ionotropic receptor NMDA type subunits	142	65	white	rectangle	gene	0.5	black	46	17	1201
+N-Glutamatergic subgraph-21	GRIN2A	155	62	white	rectangle	gene	0.5	black	46	17	4585
+N-Glutamatergic subgraph-22	GRIN2A	86	114	white	rectangle	gene	0.5	black	46	17	4585
+N-Glutamatergic subgraph-23	GRIN2B	135	43	white	rectangle	gene	0.5	black	46	17	4586
+N-Glutamatergic subgraph-24	GRIN2C	153	51	white	rectangle	gene	0.5	black	46	17	4587
+N-Glutamatergic subgraph-25	GRIN2D	147	67	white	rectangle	gene	0.5	black	46	17	4588
+N-Glutamatergic subgraph-26	GRINA	19	149	white	rectangle	gene	0.5	black	46	17	4589
+N-Glutamatergic subgraph-29	APP	85	83	white	rectangle	gene	0.5	black	46	17	620
+N-Glutamatergic subgraph-3	SH3GLB2	97	50	white	rectangle	gene	0.5	black	46	17	10834
+N-Glutamatergic subgraph-31	ARC	93	62	white	rectangle	gene	0.5	black	46	17	648
+N-Glutamatergic subgraph-32	PDE2A	25	137	white	rectangle	gene	0.5	black	46	17	8777
+N-Glutamatergic subgraph-33	BACE1	82	63	white	rectangle	gene	0.5	black	46	17	933
+N-Glutamatergic subgraph-34	RELN	83	102	white	rectangle	gene	0.5	black	46	17	9957
+N-Glutamatergic subgraph-35	metabotropic quisqualate receptor	129	16	white	rectangle	gene	0.5	black	46	17	C073111
+N-Glutamatergic subgraph-36	NMDA receptor A1	103	17	white	rectangle	gene	0.5	black	46	17	C101911
+N-Glutamatergic subgraph-37	NR2A NMDA receptor	109	17	white	rectangle	gene	0.5	black	46	17	C120997
+N-Glutamatergic subgraph-38	NR2B NMDA receptor	108	5	white	rectangle	gene	0.5	black	46	17	C121001
+N-Glutamatergic subgraph-39	NR1 NMDA receptor	122	3	white	rectangle	gene	0.5	black	46	17	C409466
+N-Glutamatergic subgraph-4	SLC1A2	7	1	white	rectangle	gene	0.5	black	46	17	10940
+N-Glutamatergic subgraph-40	NR2C NMDA receptor	114	2	white	rectangle	gene	0.5	black	46	17	C432823
+N-Glutamatergic subgraph-41	NR2D NMDA receptor	128	9	white	rectangle	gene	0.5	black	46	17	C464436
+N-Glutamatergic subgraph-42	NR3A NMDA receptor	117	8	white	rectangle	gene	0.5	black	46	17	C464437
+N-Glutamatergic subgraph-43	NR3B NMDA receptor	104	10	white	rectangle	gene	0.5	black	46	17	C501155
+N-Glutamatergic subgraph-5	SOD1	0	0	white	rectangle	gene	0.5	black	46	17	11179
+N-Glutamatergic subgraph-6	TNF	117	19	white	rectangle	gene	0.5	black	46	17	11892
+N-Glutamatergic subgraph-7	SKAP1	25	154	white	rectangle	gene	0.5	black	46	17	15605
+N-Glutamatergic subgraph-8	GRIN3A	156	56	white	rectangle	gene	0.5	black	46	17	16767
+N-Glutamatergic subgraph-9	GRIN3B	152	66	white	rectangle	gene	0.5	black	46	17	16768

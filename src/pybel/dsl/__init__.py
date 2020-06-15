@@ -19,8 +19,8 @@ from .exc import InferCentralDogmaException, ListAbundanceEmptyException, PyBELD
 from .namespaces import chebi, hgnc, mirbase
 from .node_classes import (
     Abundance, BaseAbundance, BaseConcept, BaseEntity, BiologicalProcess, CentralDogma, ComplexAbundance,
-    CompositeAbundance, Entity, EnumeratedFusionRange, Fragment, FusionBase, FusionRangeBase, Gene, GeneFusion,
-    GeneModification, Hgvs, HgvsReference, HgvsUnspecified, ListAbundance, MicroRna, MissingFusionRange,
+    CompositeAbundance, Entity, EntityVariant, EnumeratedFusionRange, Fragment, FusionBase, FusionRangeBase, Gene,
+    GeneFusion, GeneModification, Hgvs, HgvsReference, HgvsUnspecified, ListAbundance, MicroRna, MissingFusionRange,
     NamedComplexAbundance, Pathology, Population, Protein, ProteinFusion, ProteinModification, ProteinSubstitution,
     Reaction, Rna, RnaFusion, Transcribable, Variant,
 )

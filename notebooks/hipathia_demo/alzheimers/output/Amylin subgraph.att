@@ -1,0 +1,6 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Amylin subgraph-1 2	IAPP RAMP1	35	0	white	rectangle	gene,gene	0.5	black	46	17	5329,/,9843
+N-Amylin subgraph-3 4	IAPP RAMP2	0	21	white	rectangle	gene,gene	0.5	black	46	17	5329,/,9844
+N-Amylin subgraph-5 6	IAPP RAMP3	179	85	white	rectangle	gene,gene	0.5	black	46	17	5329,/,9845
+N-Amylin subgraph-7	IAPP	20	14	white	rectangle	gene	0.5	black	46	17	5329
+N-Amylin subgraph-8	RAMP3	162	77	white	rectangle	gene	0.5	black	46	17	9845

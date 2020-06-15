@@ -2,6 +2,7 @@
 
 """Functions for enriching the origins of Proteins, RNAs, and miRNAs."""
 
+from ...graph import BELGraph
 from ...pipeline import in_place_transformation
 from ....constants import FUNCTION, FUSION, MIRNA, RNA, VARIANTS
 from ....dsl import Protein
@@ -14,10 +15,10 @@ __all__ = [
 
 
 @in_place_transformation
-def enrich_proteins_with_rnas(graph) -> None:
+def enrich_proteins_with_rnas(graph: BELGraph) -> None:
     """Add the corresponding RNA node for each protein node and connect them with a translation edge.
 
-    :param pybel.BELGraph graph: A BEL graph
+    :param graph: A BEL graph
     """
     for protein_node in list(graph):
         if not isinstance(protein_node, Protein):
@@ -31,10 +32,10 @@ def enrich_proteins_with_rnas(graph) -> None:
 
 
 @in_place_transformation
-def enrich_rnas_with_genes(graph) -> None:
+def enrich_rnas_with_genes(graph: BELGraph) -> None:
     """Add the corresponding gene node for each RNA/miRNA node and connect them with a transcription edge.
 
-    :param pybel.BELGraph graph: A BEL graph
+    :param graph: A BEL graph
     """
     for rna_node in list(graph):
         if rna_node[FUNCTION] not in {MIRNA, RNA} or FUSION in rna_node or VARIANTS in rna_node:
@@ -45,10 +46,10 @@ def enrich_rnas_with_genes(graph) -> None:
 
 
 @in_place_transformation
-def enrich_protein_and_rna_origins(graph) -> None:
+def enrich_protein_and_rna_origins(graph: BELGraph) -> None:
     """Add the corresponding RNA for each protein then the corresponding gene for each RNA/miRNA.
 
-    :param pybel.BELGraph graph: A BEL graph
+    :param graph: A BEL graph
     """
     enrich_proteins_with_rnas(graph)
     enrich_rnas_with_genes(graph)

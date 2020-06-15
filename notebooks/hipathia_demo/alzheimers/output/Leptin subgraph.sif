@@ -1,0 +1,4 @@
+0	1	2
+N-Leptin subgraph-2	inhibition	N-Leptin subgraph-3
+N-Leptin subgraph-2	inhibition	N-Leptin subgraph-1
+N-Leptin subgraph-1	activation	N-Leptin subgraph-3

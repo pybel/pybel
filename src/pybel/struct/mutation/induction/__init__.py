@@ -11,12 +11,4 @@ from .random_subgraph import *
 from .upstream import *
 from .utils import *
 
-__all__ = (
-    annotations.__all__
-    + citation.__all__
-    + neighborhood.__all__
-    + paths.__all__
-    + random_subgraph.__all__
-    + upstream.__all__
-    + utils.__all__
-)
+__all__ = [k for k in locals() if not k.startswith('_')]

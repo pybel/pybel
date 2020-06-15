@@ -11,7 +11,7 @@ from pybel.constants import (
 from pybel.dsl import protein
 from pybel.examples import sialic_acid_graph
 from pybel.struct.mutation import (
-    add_annotation_value, remove_annotation_value, remove_citation_metadata, strip_annotations,
+    add_annotation_value, remove_annotation_value, remove_extra_citation_metadata, strip_annotations,
 )
 from pybel.testing.utils import n
 
@@ -110,7 +110,7 @@ class TestMetadata(unittest.TestCase):
             },
         )
 
-        remove_citation_metadata(graph)
+        remove_extra_citation_metadata(graph)
 
         self.assertNotIn(CITATION, graph[x][y][k0])
 

@@ -1,0 +1,66 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Nerve growth factor subgraph-1 2	BDNF NTRK2	100	126	white	rectangle	gene,gene	0.5	black	46	17	1033,/,8032
+N-Nerve growth factor subgraph-11 12	SHC2 APP	49	116	white	rectangle	gene,gene	0.5	black	46	17	29869,/,620
+N-Nerve growth factor subgraph-13 14 15	PIK3R5 GSK3A PDPK1	115	27	white	rectangle	gene,gene,gene	0.5	black	46	17	30035,/,4616,/,8816
+N-Nerve growth factor subgraph-16 17 18	PIK3R5 GSK3B PDPK1	122	17	white	rectangle	gene,gene,gene	0.5	black	46	17	30035,/,4617,/,8816
+N-Nerve growth factor subgraph-19 20	GRB2 APP	47	116	white	rectangle	gene,gene	0.5	black	46	17	4566,/,620
+N-Nerve growth factor subgraph-21 22	IKBKB NGFR	113	119	white	rectangle	gene,gene	0.5	black	46	17	5960,/,7809
+N-Nerve growth factor subgraph-23 24	APP NTRK1	142	132	white	rectangle	gene,gene	0.5	black	46	17	620,/,8031
+N-Nerve growth factor subgraph-25 26	APP NGFR	123	129	white	rectangle	gene,gene	0.5	black	46	17	620,/,7809
+N-Nerve growth factor subgraph-27 28	NGF NGFR	128	127	white	rectangle	gene,gene	0.5	black	46	17	7808,/,7809
+N-Nerve growth factor subgraph-29	AKT	127	144	white	rectangle	gene	0.5	black	46	17	AKT
+N-Nerve growth factor subgraph-3 4	TUBA4A DPYSL2	7	98	white	rectangle	gene,gene	0.5	black	46	17	12407,/,3014
+N-Nerve growth factor subgraph-30	ERK	47	118	white	rectangle	gene	0.5	black	46	17	ERK
+N-Nerve growth factor subgraph-31	MEK	43	118	white	rectangle	gene	0.5	black	46	17	MEK
+N-Nerve growth factor subgraph-32	RAF	46	122	white	rectangle	gene	0.5	black	46	17	RAF
+N-Nerve growth factor subgraph-33	RAS	45	112	white	rectangle	gene	0.5	black	46	17	RAS
+N-Nerve growth factor subgraph-34	BDNF	103	133	white	rectangle	gene	0.5	black	46	17	1033
+N-Nerve growth factor subgraph-35	SEMA3A	3	124	white	rectangle	gene	0.5	black	46	17	10723
+N-Nerve growth factor subgraph-36	ACHE	129	145	white	rectangle	gene	0.5	black	46	17	108
+N-Nerve growth factor subgraph-37	SOS1	51	120	white	rectangle	gene	0.5	black	46	17	11187
+N-Nerve growth factor subgraph-38	SOS2	50	112	white	rectangle	gene	0.5	black	46	17	11188
+N-Nerve growth factor subgraph-39	SQSTM1	140	120	white	rectangle	gene	0.5	black	46	17	11280
+N-Nerve growth factor subgraph-40	TRAF6	129	122	white	rectangle	gene	0.5	black	46	17	12036
+N-Nerve growth factor subgraph-41	UCHL1	105	129	white	rectangle	gene	0.5	black	46	17	12513
+N-Nerve growth factor subgraph-42	GAB2	97	4	white	rectangle	gene	0.5	black	46	17	14458
+N-Nerve growth factor subgraph-43	GAB2	64	28	white	rectangle	gene	0.5	black	46	17	14458
+N-Nerve growth factor subgraph-44	CASP3	163	53	white	rectangle	gene	0.5	black	46	17	1504
+N-Nerve growth factor subgraph-45	CD274	99	141	white	rectangle	gene	0.5	black	46	17	17635
+N-Nerve growth factor subgraph-46	SIT1	69	23	white	rectangle	gene	0.5	black	46	17	17710
+N-Nerve growth factor subgraph-47	CDK5	9	112	white	rectangle	gene	0.5	black	46	17	1774
+N-Nerve growth factor subgraph-48	DPYSL2	7	122	white	rectangle	gene	0.5	black	46	17	3014
+N-Nerve growth factor subgraph-49	DPYSL2	12	103	white	rectangle	gene	0.5	black	46	17	3014
+N-Nerve growth factor subgraph-5 6	GAB2 PTK2	96	10	white	rectangle	gene,gene	0.5	black	46	17	14458,/,9611
+N-Nerve growth factor subgraph-50	DPYSL2	4	109	white	rectangle	gene	0.5	black	46	17	3014
+N-Nerve growth factor subgraph-51	GCG	144	124	white	rectangle	gene	0.5	black	46	17	4191
+N-Nerve growth factor subgraph-52	GDNF	160	59	white	rectangle	gene	0.5	black	46	17	4232
+N-Nerve growth factor subgraph-53	GRB2	29	44	white	rectangle	gene	0.5	black	46	17	4566
+N-Nerve growth factor subgraph-54	GSK3A	0	124	white	rectangle	gene	0.5	black	46	17	4616
+N-Nerve growth factor subgraph-55	GSK3B	12	126	white	rectangle	gene	0.5	black	46	17	4617
+N-Nerve growth factor subgraph-56	IGF1	118	22	white	rectangle	gene	0.5	black	46	17	5464
+N-Nerve growth factor subgraph-57	APBB1	106	94	white	rectangle	gene	0.5	black	46	17	581
+N-Nerve growth factor subgraph-58	APP	140	123	white	rectangle	gene	0.5	black	46	17	620
+N-Nerve growth factor subgraph-59	APP	100	106	white	rectangle	gene	0.5	black	46	17	620
+N-Nerve growth factor subgraph-60	APP	107	122	white	rectangle	gene	0.5	black	46	17	620
+N-Nerve growth factor subgraph-61	APP	140	134	white	rectangle	gene	0.5	black	46	17	620
+N-Nerve growth factor subgraph-62	MMP9	145	129	white	rectangle	gene	0.5	black	46	17	7176
+N-Nerve growth factor subgraph-63	NFKB1	108	112	white	rectangle	gene	0.5	black	46	17	7794
+N-Nerve growth factor subgraph-64	NGF	135	127	white	rectangle	gene	0.5	black	46	17	7808
+N-Nerve growth factor subgraph-65	NGFR	104	101	white	rectangle	gene	0.5	black	46	17	7809
+N-Nerve growth factor subgraph-66	NGFR	121	124	white	rectangle	gene	0.5	black	46	17	7809
+N-Nerve growth factor subgraph-67	NOS2	101	95	white	rectangle	gene	0.5	black	46	17	7873
+N-Nerve growth factor subgraph-68	NTRK1	131	138	white	rectangle	gene	0.5	black	46	17	8031
+N-Nerve growth factor subgraph-69	NTRK2	100	122	white	rectangle	gene	0.5	black	46	17	8032
+N-Nerve growth factor subgraph-7 8	GAB2 PTK7	100	0	white	rectangle	gene,gene	0.5	black	46	17	14458,/,9618
+N-Nerve growth factor subgraph-70	PDPK1	27	40	white	rectangle	gene	0.5	black	46	17	8816
+N-Nerve growth factor subgraph-71	PIK3R2	60	22	white	rectangle	gene	0.5	black	46	17	8980
+N-Nerve growth factor subgraph-72	BACE1	102	114	white	rectangle	gene	0.5	black	46	17	933
+N-Nerve growth factor subgraph-73	BAX	157	54	white	rectangle	gene	0.5	black	46	17	959
+N-Nerve growth factor subgraph-74	PTK2	66	34	white	rectangle	gene	0.5	black	46	17	9611
+N-Nerve growth factor subgraph-75	PTK7	67	25	white	rectangle	gene	0.5	black	46	17	9618
+N-Nerve growth factor subgraph-76	BCL2	164	64	white	rectangle	gene	0.5	black	46	17	990
+N-Nerve growth factor subgraph-77	BCL2L1	164	60	white	rectangle	gene	0.5	black	46	17	992
+N-Nerve growth factor subgraph-79	Amyloidogenic glycoprotein, intracellular domain, conserved site	6	129	white	rectangle	gene	0.5	black	46	17	IPR019745
+N-Nerve growth factor subgraph-80	Cdk5	144	190	white	rectangle	gene	0.5	black	46	17	101765
+N-Nerve growth factor subgraph-81	Gsk3b	147	189	white	rectangle	gene	0.5	black	46	17	1861437
+N-Nerve growth factor subgraph-82	App	142	191	white	rectangle	gene	0.5	black	46	17	88059

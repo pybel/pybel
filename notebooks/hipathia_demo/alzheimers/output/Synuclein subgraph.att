@@ -1,0 +1,12 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Synuclein subgraph-1 2	SNCA AGRN	95	94	white	rectangle	gene,gene	0.5	black	46	17	11138,/,329
+N-Synuclein subgraph-10	AGRN	62	130	white	rectangle	gene	0.5	black	46	17	329
+N-Synuclein subgraph-11	GRK5	0	0	white	rectangle	gene	0.5	black	46	17	4544
+N-Synuclein subgraph-12	GSK3B	114	164	white	rectangle	gene	0.5	black	46	17	4617
+N-Synuclein subgraph-13	IL1B	66	103	white	rectangle	gene	0.5	black	46	17	5992
+N-Synuclein subgraph-15	MAPT	101	143	white	rectangle	gene	0.5	black	46	17	6893
+N-Synuclein subgraph-3 4 5	SNCA GSK3B MAPT	98	162	white	rectangle	gene,gene,gene	0.5	black	46	17	11138,/,4617,/,6893
+N-Synuclein subgraph-6	HSPA	105	124	white	rectangle	gene	0.5	black	46	17	HSPA
+N-Synuclein subgraph-7	SNCA	85	118	white	rectangle	gene	0.5	black	46	17	11138
+N-Synuclein subgraph-8	SNCA	12	18	white	rectangle	gene	0.5	black	46	17	11138
+N-Synuclein subgraph-9	GRK2	28	40	white	rectangle	gene	0.5	black	46	17	289

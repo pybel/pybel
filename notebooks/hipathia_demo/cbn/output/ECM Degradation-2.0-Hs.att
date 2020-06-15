@@ -1,0 +1,30 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-ECM Degradation-2.0-Hs-1 2	ITGA2 ITGB1	106	38	white	rectangle	gene,gene	0.5	black	46	17	6137,/,6153
+N-ECM Degradation-2.0-Hs-10	TIMP3	164	63	white	rectangle	gene	0.5	black	46	17	11822
+N-ECM Degradation-2.0-Hs-11	TIMP4	171	56	white	rectangle	gene	0.5	black	46	17	11823
+N-ECM Degradation-2.0-Hs-12	TNF	80	56	white	rectangle	gene	0.5	black	46	17	11892
+N-ECM Degradation-2.0-Hs-13	SIRT1	28	75	white	rectangle	gene	0.5	black	46	17	14929
+N-ECM Degradation-2.0-Hs-14	COL1A1	60	13	white	rectangle	gene	0.5	black	46	17	2197
+N-ECM Degradation-2.0-Hs-15	COL1A2	74	0	white	rectangle	gene	0.5	black	46	17	2198
+N-ECM Degradation-2.0-Hs-16	COL2A1	56	21	white	rectangle	gene	0.5	black	46	17	2200
+N-ECM Degradation-2.0-Hs-17	COL3A1	66	5	white	rectangle	gene	0.5	black	46	17	2201
+N-ECM Degradation-2.0-Hs-18	COL4A1	173	45	white	rectangle	gene	0.5	black	46	17	2202
+N-ECM Degradation-2.0-Hs-19	COL4A2	157	90	white	rectangle	gene	0.5	black	46	17	2203
+N-ECM Degradation-2.0-Hs-21	ELANE	110	104	white	rectangle	gene	0.5	black	46	17	3309
+N-ECM Degradation-2.0-Hs-22	ELN	107	73	white	rectangle	gene	0.5	black	46	17	3327
+N-ECM Degradation-2.0-Hs-23	FN1	101	75	white	rectangle	gene	0.5	black	46	17	3778
+N-ECM Degradation-2.0-Hs-24	IL1B	66	93	white	rectangle	gene	0.5	black	46	17	5992
+N-ECM Degradation-2.0-Hs-25	MMP1	76	17	white	rectangle	gene	0.5	black	46	17	7155
+N-ECM Degradation-2.0-Hs-26	MMP12	84	80	white	rectangle	gene	0.5	black	46	17	7158
+N-ECM Degradation-2.0-Hs-27	MMP14	85	31	white	rectangle	gene	0.5	black	46	17	7160
+N-ECM Degradation-2.0-Hs-28	MMP2	141	63	white	rectangle	gene	0.5	black	46	17	7166
+N-ECM Degradation-2.0-Hs-29	MMP3	82	102	white	rectangle	gene	0.5	black	46	17	7173
+N-ECM Degradation-2.0-Hs-3 4	ITGAV ITGB3	170	81	white	rectangle	gene,gene	0.5	black	46	17	6150,/,6156
+N-ECM Degradation-2.0-Hs-30	MMP7	114	45	white	rectangle	gene	0.5	black	46	17	7174
+N-ECM Degradation-2.0-Hs-31	MMP8	50	0	white	rectangle	gene	0.5	black	46	17	7175
+N-ECM Degradation-2.0-Hs-32	MMP9	68	68	white	rectangle	gene	0.5	black	46	17	7176
+N-ECM Degradation-2.0-Hs-33	SERPINA1	114	135	white	rectangle	gene	0.5	black	46	17	8941
+N-ECM Degradation-2.0-Hs-5	MMP	158	42	white	rectangle	gene	0.5	black	46	17	MMP
+N-ECM Degradation-2.0-Hs-7	TIMP1	92	40	white	rectangle	gene	0.5	black	46	17	11820
+N-ECM Degradation-2.0-Hs-8	TIMP1	0	79	white	rectangle	gene	0.5	black	46	17	11820
+N-ECM Degradation-2.0-Hs-9	TIMP2	129	39	white	rectangle	gene	0.5	black	46	17	11821

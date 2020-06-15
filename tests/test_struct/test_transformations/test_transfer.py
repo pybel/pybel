@@ -9,7 +9,7 @@ from pybel.examples.statin_example import (
     synthetic_statin,
 )
 from pybel.struct.mutation import infer_child_relations
-from pybel.struct.mutation.transfer import iter_children
+from pybel.struct.mutation.inference.transfer import iter_children
 
 
 class TestTransfer(unittest.TestCase):

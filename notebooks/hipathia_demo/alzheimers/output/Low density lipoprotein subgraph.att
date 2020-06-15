@@ -1,0 +1,52 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Low density lipoprotein subgraph-1 2	ROCK2 SORL1	44	14	white	rectangle	gene,gene	0.5	black	46	17	10252,/,11185
+N-Low density lipoprotein subgraph-11 12 13	APBA1 APP LRP8	135	4	white	rectangle	gene,gene,gene	0.5	black	46	17	578,/,620,/,6700
+N-Low density lipoprotein subgraph-14 15	APBA1 ARL3	103	154	white	rectangle	gene,gene	0.5	black	46	17	578,/,694
+N-Low density lipoprotein subgraph-16 17 18	APBA2 APP LRP8	127	18	white	rectangle	gene,gene,gene	0.5	black	46	17	579,/,620,/,6700
+N-Low density lipoprotein subgraph-19 20	APBA2 ARL3	106	139	white	rectangle	gene,gene	0.5	black	46	17	579,/,694
+N-Low density lipoprotein subgraph-21 22 23	APBA3 APP LRP8	138	15	white	rectangle	gene,gene,gene	0.5	black	46	17	580,/,620,/,6700
+N-Low density lipoprotein subgraph-24 25	APBA3 ARL3	94	149	white	rectangle	gene,gene	0.5	black	46	17	580,/,694
+N-Low density lipoprotein subgraph-26 27 28	APBB1 APP LRP1	98	153	white	rectangle	gene,gene,gene	0.5	black	46	17	581,/,620,/,6692
+N-Low density lipoprotein subgraph-29 30 31	APBB1 APP LRP2	107	144	white	rectangle	gene,gene,gene	0.5	black	46	17	581,/,620,/,6694
+N-Low density lipoprotein subgraph-3 4	VLDLR RELN	47	137	white	rectangle	gene,gene	0.5	black	46	17	12698,/,9957
+N-Low density lipoprotein subgraph-32 33	APOE APP	40	39	white	rectangle	gene,gene	0.5	black	46	17	613,/,620
+N-Low density lipoprotein subgraph-34 35	APOE LDLR	95	108	white	rectangle	gene,gene	0.5	black	46	17	613,/,6547
+N-Low density lipoprotein subgraph-36 37	APOE LRP1	128	147	white	rectangle	gene,gene	0.5	black	46	17	613,/,6692
+N-Low density lipoprotein subgraph-38 39	APOE LRP8	132	11	white	rectangle	gene,gene	0.5	black	46	17	613,/,6700
+N-Low density lipoprotein subgraph-40 41	APP LRP1	134	152	white	rectangle	gene,gene	0.5	black	46	17	620,/,6692
+N-Low density lipoprotein subgraph-42 43	APP LDLR	109	120	white	rectangle	gene,gene	0.5	black	46	17	620,/,6547
+N-Low density lipoprotein subgraph-44 45	APP LRP1	132	134	white	rectangle	gene,gene	0.5	black	46	17	620,/,6692
+N-Low density lipoprotein subgraph-46 47	LRP8 RELN	25	56	white	rectangle	gene,gene	0.5	black	46	17	6700,/,9957
+N-Low density lipoprotein subgraph-48	YENPTY endocytosis motif (APP)	100	123	white	rectangle	gene	0.5	black	46	17	CONSO00041
+N-Low density lipoprotein subgraph-49	sAPP-alpha	47	21	white	rectangle	gene	0.5	black	46	17	CONSO00067
+N-Low density lipoprotein subgraph-5 6	CDK5 CDK5R1	0	141	white	rectangle	gene,gene	0.5	black	46	17	1774,/,1775
+N-Low density lipoprotein subgraph-50	NCOA	70	94	white	rectangle	gene	0.5	black	46	17	NCOA
+N-Low density lipoprotein subgraph-51	SRC	17	58	white	rectangle	gene	0.5	black	46	17	SRC
+N-Low density lipoprotein subgraph-52	Glutamate ionotropic receptor NMDA type subunits	9	56	white	rectangle	gene	0.5	black	46	17	1201
+N-Low density lipoprotein subgraph-54	SORL1	102	136	white	rectangle	gene	0.5	black	46	17	11185
+N-Low density lipoprotein subgraph-55	SORL1	93	4	white	rectangle	gene	0.5	black	46	17	11185
+N-Low density lipoprotein subgraph-56	VLDLR	95	93	white	rectangle	gene	0.5	black	46	17	12698
+N-Low density lipoprotein subgraph-57	SORCS1	100	129	white	rectangle	gene	0.5	black	46	17	16697
+N-Low density lipoprotein subgraph-58	MYLIP	92	102	white	rectangle	gene	0.5	black	46	17	21155
+N-Low density lipoprotein subgraph-60	DAB1	143	158	white	rectangle	gene	0.5	black	46	17	2661
+N-Low density lipoprotein subgraph-61	DAB1	55	124	white	rectangle	gene	0.5	black	46	17	2661
+N-Low density lipoprotein subgraph-62	IAPP	6	139	white	rectangle	gene	0.5	black	46	17	5329
+N-Low density lipoprotein subgraph-63	IGF1	186	96	white	rectangle	gene	0.5	black	46	17	5464
+N-Low density lipoprotein subgraph-64	APBB1	137	161	white	rectangle	gene	0.5	black	46	17	581
+N-Low density lipoprotein subgraph-65	APOE	32	51	white	rectangle	gene	0.5	black	46	17	613
+N-Low density lipoprotein subgraph-67	APP	102	144	white	rectangle	gene	0.5	black	46	17	620
+N-Low density lipoprotein subgraph-68	APP	107	129	white	rectangle	gene	0.5	black	46	17	620
+N-Low density lipoprotein subgraph-69	LDLR	100	114	white	rectangle	gene	0.5	black	46	17	6547
+N-Low density lipoprotein subgraph-7 8	AGRN LRP4	168	57	white	rectangle	gene,gene	0.5	black	46	17	329,/,6696
+N-Low density lipoprotein subgraph-70	LRP1	125	140	white	rectangle	gene	0.5	black	46	17	6692
+N-Low density lipoprotein subgraph-71	LRP1B	37	45	white	rectangle	gene	0.5	black	46	17	6693
+N-Low density lipoprotein subgraph-73	LRP8	69	103	white	rectangle	gene	0.5	black	46	17	6700
+N-Low density lipoprotein subgraph-74	LRP8	81	100	white	rectangle	gene	0.5	black	46	17	6700
+N-Low density lipoprotein subgraph-75	A2M	135	138	white	rectangle	gene	0.5	black	46	17	7
+N-Low density lipoprotein subgraph-76	MUSK	174	54	white	rectangle	gene	0.5	black	46	17	7525
+N-Low density lipoprotein subgraph-77	NR1H2	52	132	white	rectangle	gene	0.5	black	46	17	7965
+N-Low density lipoprotein subgraph-78	NR1H3	48	130	white	rectangle	gene	0.5	black	46	17	7966
+N-Low density lipoprotein subgraph-79	SERPINE1	134	144	white	rectangle	gene	0.5	black	46	17	8583
+N-Low density lipoprotein subgraph-82	PRKCA	95	0	white	rectangle	gene	0.5	black	46	17	9393
+N-Low density lipoprotein subgraph-83	RELN	62	113	white	rectangle	gene	0.5	black	46	17	9957
+N-Low density lipoprotein subgraph-9 10	IGF1 LRP2	193	95	white	rectangle	gene,gene	0.5	black	46	17	5464,/,6694

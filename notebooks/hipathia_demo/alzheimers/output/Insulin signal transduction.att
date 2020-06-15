@@ -1,0 +1,106 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Insulin signal transduction-1 2	IRS GRB2	109	79	white	rectangle	gene,gene	0.5	black	46	17	IRS,/,4566
+N-Insulin signal transduction-10 11 12	PIK3R5 GSK3A PDPK1	94	72	white	rectangle	gene,gene,gene	0.5	black	46	17	30035,/,4616,/,8816
+N-Insulin signal transduction-100	IAPP	51	196	white	rectangle	gene	0.5	black	46	17	5329
+N-Insulin signal transduction-101	IDE	125	90	white	rectangle	gene	0.5	black	46	17	5381
+N-Insulin signal transduction-102	IDE	131	95	white	rectangle	gene	0.5	black	46	17	5381
+N-Insulin signal transduction-103	IGF1	100	79	white	rectangle	gene	0.5	black	46	17	5464
+N-Insulin signal transduction-104	IGF1R	107	71	white	rectangle	gene	0.5	black	46	17	5465
+N-Insulin signal transduction-105	IL4	119	85	white	rectangle	gene	0.5	black	46	17	6014
+N-Insulin signal transduction-106	INS	122	79	white	rectangle	gene	0.5	black	46	17	6081
+N-Insulin signal transduction-107	INSR	124	62	white	rectangle	gene	0.5	black	46	17	6091
+N-Insulin signal transduction-108	IRS1	128	34	white	rectangle	gene	0.5	black	46	17	6125
+N-Insulin signal transduction-109	IRS1	126	47	white	rectangle	gene	0.5	black	46	17	6125
+N-Insulin signal transduction-110	IRS1	129	26	white	rectangle	gene	0.5	black	46	17	6125
+N-Insulin signal transduction-111	IRS1	126	27	white	rectangle	gene	0.5	black	46	17	6125
+N-Insulin signal transduction-112	IRS1	101	91	white	rectangle	gene	0.5	black	46	17	6125
+N-Insulin signal transduction-113	IRS1	85	151	white	rectangle	gene	0.5	black	46	17	6125
+N-Insulin signal transduction-114	IRS2	133	46	white	rectangle	gene	0.5	black	46	17	6126
+N-Insulin signal transduction-115	IRS2	129	53	white	rectangle	gene	0.5	black	46	17	6126
+N-Insulin signal transduction-116	IRS2	100	93	white	rectangle	gene	0.5	black	46	17	6126
+N-Insulin signal transduction-117	IRS2	71	156	white	rectangle	gene	0.5	black	46	17	6126
+N-Insulin signal transduction-118	IRS4	105	80	white	rectangle	gene	0.5	black	46	17	6128
+N-Insulin signal transduction-119	IRS4	113	70	white	rectangle	gene	0.5	black	46	17	6128
+N-Insulin signal transduction-120	IRS4	65	135	white	rectangle	gene	0.5	black	46	17	6128
+N-Insulin signal transduction-121	APP	130	78	white	rectangle	gene	0.5	black	46	17	620
+N-Insulin signal transduction-122	APP	112	91	white	rectangle	gene	0.5	black	46	17	620
+N-Insulin signal transduction-123	MAPK8	132	28	white	rectangle	gene	0.5	black	46	17	6881
+N-Insulin signal transduction-124	MAPT	151	85	white	rectangle	gene	0.5	black	46	17	6893
+N-Insulin signal transduction-125	MAPT	139	81	white	rectangle	gene	0.5	black	46	17	6893
+N-Insulin signal transduction-127	OGT	159	86	white	rectangle	gene	0.5	black	46	17	8127
+N-Insulin signal transduction-128	PDK1	139	51	white	rectangle	gene	0.5	black	46	17	8809
+N-Insulin signal transduction-129	PDPK1	96	93	white	rectangle	gene	0.5	black	46	17	8816
+N-Insulin signal transduction-13 14 15	PIK3R5 GSK3B PDPK1	100	69	white	rectangle	gene,gene,gene	0.5	black	46	17	30035,/,4617,/,8816
+N-Insulin signal transduction-132	PPP2CA	103	108	white	rectangle	gene	0.5	black	46	17	9299
+N-Insulin signal transduction-134	BAD	73	122	white	rectangle	gene	0.5	black	46	17	936
+N-Insulin signal transduction-135	RAF1	89	80	white	rectangle	gene	0.5	black	46	17	9829
+N-Insulin signal transduction-138	Chrna3	21	100	white	rectangle	gene	0.5	black	46	17	2345
+N-Insulin signal transduction-139	Chrna4	2	99	white	rectangle	gene	0.5	black	46	17	2346
+N-Insulin signal transduction-140	Chrna5	5	105	white	rectangle	gene	0.5	black	46	17	2347
+N-Insulin signal transduction-141	Chrna7	13	102	white	rectangle	gene	0.5	black	46	17	2348
+N-Insulin signal transduction-142	Chrnb2	0	98	white	rectangle	gene	0.5	black	46	17	2350
+N-Insulin signal transduction-143	Chrnb4	13	96	white	rectangle	gene	0.5	black	46	17	2351
+N-Insulin signal transduction-144	Ins2	8	99	white	rectangle	gene	0.5	black	46	17	2916
+N-Insulin signal transduction-145	Chrna10	3	103	white	rectangle	gene	0.5	black	46	17	620142
+N-Insulin signal transduction-146	Chrna2	0	102	white	rectangle	gene	0.5	black	46	17	621533
+N-Insulin signal transduction-147	Chrna9	1	94	white	rectangle	gene	0.5	black	46	17	621534
+N-Insulin signal transduction-148	Chrnb3	6	92	white	rectangle	gene	0.5	black	46	17	621544
+N-Insulin signal transduction-149	Chrna6	4	94	white	rectangle	gene	0.5	black	46	17	69281
+N-Insulin signal transduction-16 17	GAB1 GRB2	109	78	white	rectangle	gene,gene	0.5	black	46	17	4066,/,4566
+N-Insulin signal transduction-18 19	GRB2 IRS1	91	152	white	rectangle	gene,gene	0.5	black	46	17	4566,/,6125
+N-Insulin signal transduction-20 21	GRB2 IRS2	75	160	white	rectangle	gene,gene	0.5	black	46	17	4566,/,6126
+N-Insulin signal transduction-22 23	GRB2 IRS4	60	128	white	rectangle	gene,gene	0.5	black	46	17	4566,/,6128
+N-Insulin signal transduction-24 25	GSK3B PPP2CA	130	75	white	rectangle	gene,gene	0.5	black	46	17	4617,/,9299
+N-Insulin signal transduction-26 27 28	IGF1 IGF1R INSR	115	191	white	rectangle	gene,gene,gene	0.5	black	46	17	5464,/,5465,/,6091
+N-Insulin signal transduction-29 30	IGF1 INSR	103	100	white	rectangle	gene,gene	0.5	black	46	17	5464,/,6091
+N-Insulin signal transduction-3 4 5	SOS1 GAB1 GRB2	98	79	white	rectangle	gene,gene,gene	0.5	black	46	17	11187,/,4066,/,4566
+N-Insulin signal transduction-31 32	IGF1 LRP2	92	75	white	rectangle	gene,gene	0.5	black	46	17	5464,/,6694
+N-Insulin signal transduction-33 34 35	IGF1R IGF2 INSR	116	181	white	rectangle	gene,gene,gene	0.5	black	46	17	5465,/,5466,/,6091
+N-Insulin signal transduction-36 37 38	IGF1R INS INSR	120	194	white	rectangle	gene,gene,gene	0.5	black	46	17	5465,/,6081,/,6091
+N-Insulin signal transduction-39 40	IGF1R INSR	117	187	white	rectangle	gene,gene	0.5	black	46	17	5465,/,6091
+N-Insulin signal transduction-41 42	IGF1R INSR	74	145	white	rectangle	gene,gene	0.5	black	46	17	5465,/,6091
+N-Insulin signal transduction-43 44	INS INSR	119	94	white	rectangle	gene,gene	0.5	black	46	17	6081,/,6091
+N-Insulin signal transduction-45 46	INSR APP	132	56	white	rectangle	gene,gene	0.5	black	46	17	6091,/,620
+N-Insulin signal transduction-47 48	IRS1 PIK3R1	84	157	white	rectangle	gene,gene	0.5	black	46	17	6125,/,8979
+N-Insulin signal transduction-49 50	IRS1 PIK3R2	90	155	white	rectangle	gene,gene	0.5	black	46	17	6125,/,8980
+N-Insulin signal transduction-51 52	IRS1 PTPN11	88	157	white	rectangle	gene,gene	0.5	black	46	17	6125,/,9644
+N-Insulin signal transduction-53 54	IRS2 PIK3R1	72	162	white	rectangle	gene,gene	0.5	black	46	17	6126,/,8979
+N-Insulin signal transduction-55 56	IRS2 PIK3R2	68	162	white	rectangle	gene,gene	0.5	black	46	17	6126,/,8980
+N-Insulin signal transduction-57 58	IRS2 PTPN11	65	160	white	rectangle	gene,gene	0.5	black	46	17	6126,/,9644
+N-Insulin signal transduction-59 60	IRS4 PIK3R1	62	130	white	rectangle	gene,gene	0.5	black	46	17	6128,/,8979
+N-Insulin signal transduction-6 7	CDK5 CDK5R1	53	192	white	rectangle	gene,gene	0.5	black	46	17	1774,/,1775
+N-Insulin signal transduction-61 62	IRS4 PIK3R2	58	136	white	rectangle	gene,gene	0.5	black	46	17	6128,/,8980
+N-Insulin signal transduction-63 64	IRS4 PTPN11	58	131	white	rectangle	gene,gene	0.5	black	46	17	6128,/,9644
+N-Insulin signal transduction-65	sAPP-alpha	86	61	white	rectangle	gene	0.5	black	46	17	CONSO00067
+N-Insulin signal transduction-66	PI3K_p110	95	75	white	rectangle	gene	0.5	black	46	17	PI3K_p110
+N-Insulin signal transduction-67	AKT	79	119	white	rectangle	gene	0.5	black	46	17	AKT
+N-Insulin signal transduction-68	ERK	50	3	white	rectangle	gene	0.5	black	46	17	ERK
+N-Insulin signal transduction-70	IRS	52	0	white	rectangle	gene	0.5	black	46	17	IRS
+N-Insulin signal transduction-71	JNK	99	97	white	rectangle	gene	0.5	black	46	17	JNK
+N-Insulin signal transduction-72	RAS	88	77	white	rectangle	gene	0.5	black	46	17	RAS
+N-Insulin signal transduction-73	Glutamate ionotropic receptor NMDA type subunits	125	72	white	rectangle	gene	0.5	black	46	17	1201
+N-Insulin signal transduction-74	SHC1	110	98	white	rectangle	gene	0.5	black	46	17	10840
+N-Insulin signal transduction-75	SLC2A4	129	81	white	rectangle	gene	0.5	black	46	17	11009
+N-Insulin signal transduction-76	TNF	102	71	white	rectangle	gene	0.5	black	46	17	11892
+N-Insulin signal transduction-77	TTR	96	70	white	rectangle	gene	0.5	black	46	17	12405
+N-Insulin signal transduction-78	SLC2A8	128	73	white	rectangle	gene	0.5	black	46	17	13812
+N-Insulin signal transduction-79	CAPN1	147	78	white	rectangle	gene	0.5	black	46	17	1476
+N-Insulin signal transduction-8 9	ADD3 INS	153	185	white	rectangle	gene,gene	0.5	black	46	17	245,/,6081
+N-Insulin signal transduction-80	SHC4	108	99	white	rectangle	gene	0.5	black	46	17	16743
+N-Insulin signal transduction-81	SHC3	110	100	white	rectangle	gene	0.5	black	46	17	18181
+N-Insulin signal transduction-82	ADAM10	91	68	white	rectangle	gene	0.5	black	46	17	188
+N-Insulin signal transduction-83	ADD3	149	180	white	rectangle	gene	0.5	black	46	17	245
+N-Insulin signal transduction-84	IL34	135	93	white	rectangle	gene	0.5	black	46	17	28529
+N-Insulin signal transduction-85	SHC2	108	96	white	rectangle	gene	0.5	black	46	17	29869
+N-Insulin signal transduction-86	PIK3R5	89	100	white	rectangle	gene	0.5	black	46	17	30035
+N-Insulin signal transduction-87	ECE1	117	96	white	rectangle	gene	0.5	black	46	17	3146
+N-Insulin signal transduction-89	FOXO3	98	72	white	rectangle	gene	0.5	black	46	17	3821
+N-Insulin signal transduction-90	ALB	93	79	white	rectangle	gene	0.5	black	46	17	399
+N-Insulin signal transduction-91	GCG	147	82	white	rectangle	gene	0.5	black	46	17	4191
+N-Insulin signal transduction-92	GRB2	97	90	white	rectangle	gene	0.5	black	46	17	4566
+N-Insulin signal transduction-93	GSK3A	94	95	white	rectangle	gene	0.5	black	46	17	4616
+N-Insulin signal transduction-94	GSK3A	77	125	white	rectangle	gene	0.5	black	46	17	4616
+N-Insulin signal transduction-95	GSK3B	94	101	white	rectangle	gene	0.5	black	46	17	4617
+N-Insulin signal transduction-96	GSK3B	86	111	white	rectangle	gene	0.5	black	46	17	4617
+N-Insulin signal transduction-97	HMOX1	142	94	white	rectangle	gene	0.5	black	46	17	5013
+N-Insulin signal transduction-99	HSPA1B	117	99	white	rectangle	gene	0.5	black	46	17	5233

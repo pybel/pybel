@@ -153,9 +153,13 @@ def edge_has_annotation(edge_data: EdgeData, key: str) -> Optional[Any]:
     For example, it might be useful to print all edges that are annotated with 'Subgraph':
 
     >>> from pybel.examples import sialic_acid_graph
-    >>> for u, v, data in sialic_acid_graph.edges(data=True):
-    >>>     if edge_has_annotation(data, 'Species')
-    >>>         print(u, v, data)
+    >>> from pybel.examples.sialic_acid_example import sialic_acid_cd33_complex, cd33
+    >>> edges = {
+    ...     (u, v)
+    ...     for u, v, data in sialic_acid_graph.edges(data=True)
+    ...     if edge_has_annotation(data, 'Species')
+    ... }
+    >>> assert (sialic_acid_cd33_complex, cd33) in edges
     """
     annotations = edge_data.get(ANNOTATIONS)
 

@@ -1,0 +1,19 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Peroxisome proliferator activated receptor subgraph-10	APP	60	67	white	rectangle	gene	0.5	black	46	17	620
+N-Peroxisome proliferator activated receptor subgraph-11	MYD88	38	10	white	rectangle	gene	0.5	black	46	17	7562
+N-Peroxisome proliferator activated receptor subgraph-12	NOS2	0	46	white	rectangle	gene	0.5	black	46	17	7873
+N-Peroxisome proliferator activated receptor subgraph-15	PPARG	37	39	white	rectangle	gene	0.5	black	46	17	9236
+N-Peroxisome proliferator activated receptor subgraph-16	BACE1	23	0	white	rectangle	gene	0.5	black	46	17	933
+N-Peroxisome proliferator activated receptor subgraph-18	Cdh2	159	114	white	rectangle	gene	0.5	black	46	17	88355
+N-Peroxisome proliferator activated receptor subgraph-19	Gfap	70	121	white	rectangle	gene	0.5	black	46	17	95697
+N-Peroxisome proliferator activated receptor subgraph-2	TLR2	27	70	white	rectangle	gene	0.5	black	46	17	11848
+N-Peroxisome proliferator activated receptor subgraph-20	Pparg	126	112	white	rectangle	gene	0.5	black	46	17	97747
+N-Peroxisome proliferator activated receptor subgraph-21	Ptgs2	94	114	white	rectangle	gene	0.5	black	46	17	97798
+N-Peroxisome proliferator activated receptor subgraph-22	Bax	147	139	white	rectangle	gene	0.5	black	46	17	99702
+N-Peroxisome proliferator activated receptor subgraph-3	TNF	0	28	white	rectangle	gene	0.5	black	46	17	11892
+N-Peroxisome proliferator activated receptor subgraph-4	IL23A	53	0	white	rectangle	gene	0.5	black	46	17	15488
+N-Peroxisome proliferator activated receptor subgraph-5	CD14	69	37	white	rectangle	gene	0.5	black	46	17	1628
+N-Peroxisome proliferator activated receptor subgraph-6	CTNNB1	67	16	white	rectangle	gene	0.5	black	46	17	2514
+N-Peroxisome proliferator activated receptor subgraph-7	IL12B	9	13	white	rectangle	gene	0.5	black	46	17	5970
+N-Peroxisome proliferator activated receptor subgraph-8	IL6	8	62	white	rectangle	gene	0.5	black	46	17	6018
+N-Peroxisome proliferator activated receptor subgraph-9	APP	78	87	white	rectangle	gene	0.5	black	46	17	620
