@@ -16,7 +16,7 @@ jobs:
   include:
     # lint stage
     - stage: lint
-      name: "Check manifest"
+      name: "Check MANIFEST.in"
       env: TOXENV=manifest
     - name: "Check code quality with Flake8"
       env: TOXENV=flake8
