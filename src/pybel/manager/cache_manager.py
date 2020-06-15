@@ -462,7 +462,7 @@ class NetworkManager(NamespaceManager):
                         ne1.c.network_id != ne2.c.network_id,
                     ),
                 )
-                .filter(
+                .filter(  # noqa: E131
                     and_(
                         ne1.c.network_id == network.id,
                         ne2.c.edge_id == None,  # noqa: E711
