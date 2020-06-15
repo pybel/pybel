@@ -7,34 +7,40 @@ services:
   - postgresql
 
 language: python
+python: '3.8'
+
 
 jobs:
+  allow_failures:
+    - env: TOXENV=mypy
   include:
     # lint stage
     - stage: lint
-      python: 3.8
+      name: "Check manifest"
       env: TOXENV=manifest
-    - env: TOXENV=flake8
-    - env: TOXENV=pyroma
-    - env: TOXENV=mypy
+    - name: "Check code quality with Flake8"
+      env: TOXENV=flake8
+    - name: "Check package metadata with Pyroma"
+      env: TOXENV=pyroma
+    - name: "Check static typing with MyPy"
+      env: TOXENV=mypy
     # docs stage
-    - stage: docs
-      python: 3.8
+    - name: "Check RST conformity with doc8"
       env: TOXENV=doc8
-    - env: TOXENV=readme
-    - env: TOXENV=docs
+    - name: "Check README.rst"
+      env: TOXENV=readme
+    - name: "Check documentation build with Sphinx"
+      env: TOXENV=docs
     - stage: test
-      name: "MySQL"
-      python: 3.8
+      name: "Python 3.8 tests with MySQL"
       env: TOXENV=py DB=mysql PYBEL_TEST_CONNECTOR=mysqlclient PYBEL_TEST_CONNECTION=mysql+mysqldb://travis@localhost/test?charset=utf8
-    - name: "PostgreSQL"
+    - name: "Python 3.8 tests with PostgreSQL"
       env: TOXENV=py DB=postgresql PYBEL_TEST_CONNECTOR=psycopg2-binary PYBEL_TEST_CONNECTION=postgresql+psycopg2://travis@localhost/tests
-    - name: "SQLite"
+    - name: "Python 3.8 tests with SQLite"
       env: TOXENV=py DB=sqlite
-    - name: "Old Python with SQLite"
+    - name: "Python 3.5 tests with SQLite"
       python: 3.5
       env: TOXENV=py DB=sqlite
-
 
 install:
   - sh -c 'if [ "$TOXENV" = "py" ]; then pip install tox codecov; else pip install tox; fi'
