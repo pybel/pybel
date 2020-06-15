@@ -27,7 +27,7 @@ jobs:
 
     # docs stage
     - stage: docs
-    - name: "Check RST conformity with doc8"
+      name: "Check RST conformity with doc8"
       env: TOXENV=doc8
     - name: "Check README.rst"
       env: TOXENV=readme
