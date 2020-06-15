@@ -138,16 +138,20 @@ involved.
 
 Acknowledgements
 ----------------
-Supporters
-~~~~~~~~~~
-This project has been supported by several organizations:
+Funding
+~~~~~~~
+The development of PyBEL has been funded by several projects/organizations:
 
 - `Enveda Therapeutics <https://envedatherapeutics.com/>`_
 - `University of Bonn <https://www.uni-bonn.de>`_
-- `Bonn Aachen International Center for IT <http://www.b-it-center.de>`_
-- `Fraunhofer Institute for Algorithms and Scientific Computing <https://www.scai.fraunhofer.de>`_
 - `Fraunhofer Center for Machine Learning <https://www.cit.fraunhofer.de/de/zentren/maschinelles-lernen.html>`_
 - `The Cytoscape Consortium <https://cytoscape.org/>`_
+- The `European Union <https://europa.eu>`_, `European Federation of Pharmaceutical Industries and Associations
+  (EFPIA) <https://www.efpia.eu/>`_, and `Innovative Medicines Initiative <https://www.imi.europa.eu>`_ Joint
+  Undertaking under `AETIONOMY <https://www.aetionomy.eu/>`_ [grant number 115568], resources of which
+  are composed of financial contribution from the European Union's Seventh Framework Programme (FP7/2007-2013) and
+  EFPIA companies in kind contribution.
+- `Fraunhofer Institute for Algorithms and Scientific Computing (SCAI) <https://www.scai.fraunhofer.de>`_
 
 Logo
 ~~~~
