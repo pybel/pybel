@@ -1,0 +1,3 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Glutathione reductase subgraph-1	ACHE	0	199	white	rectangle	gene	0.5	black	46	17	108
+N-Glutathione reductase subgraph-3	GSS	109	0	white	rectangle	gene	0.5	black	46	17	4624

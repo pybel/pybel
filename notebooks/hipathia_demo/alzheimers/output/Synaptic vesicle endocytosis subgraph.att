@@ -1,0 +1,7 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Synaptic vesicle endocytosis subgraph-1 2	STXBP1 DYRK1A	12	161	white	rectangle	gene,gene	0.5	black	46	17	11444,/,3091
+N-Synaptic vesicle endocytosis subgraph-11	STXBP1	0	150	white	rectangle	gene	0.5	black	46	17	11444
+N-Synaptic vesicle endocytosis subgraph-12	DNM1	67	16	white	rectangle	gene	0.5	black	46	17	2972
+N-Synaptic vesicle endocytosis subgraph-13	DNM2	91	11	white	rectangle	gene	0.5	black	46	17	2974
+N-Synaptic vesicle endocytosis subgraph-14	GRIA1	76	0	white	rectangle	gene	0.5	black	46	17	4571
+N-Synaptic vesicle endocytosis subgraph-16	ARC	83	27	white	rectangle	gene	0.5	black	46	17	648

@@ -1,0 +1,44 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-NFE2L2 Signaling-2.0-Hs-1 2	SQSTM1 KEAP1	82	137	white	rectangle	gene,gene	0.5	black	46	17	11280,/,23177
+N-NFE2L2 Signaling-2.0-Hs-11 12	Bach1 Maff	62	16	white	rectangle	gene,gene	0.5	black	46	17	894680,/,96910
+N-NFE2L2 Signaling-2.0-Hs-13	PI3K_p110	115	10	white	rectangle	gene	0.5	black	46	17	PI3K_p110
+N-NFE2L2 Signaling-2.0-Hs-14	PKC	69	125	white	rectangle	gene	0.5	black	46	17	PKC
+N-NFE2L2 Signaling-2.0-Hs-15	p38	76	135	white	rectangle	gene	0.5	black	46	17	p38
+N-NFE2L2 Signaling-2.0-Hs-16	SOD1	82	113	white	rectangle	gene	0.5	black	46	17	11179
+N-NFE2L2 Signaling-2.0-Hs-17	TXNRD1	96	176	white	rectangle	gene	0.5	black	46	17	12437
+N-NFE2L2 Signaling-2.0-Hs-18	SRXN1	85	107	white	rectangle	gene	0.5	black	46	17	16132
+N-NFE2L2 Signaling-2.0-Hs-19	PARK7	85	121	white	rectangle	gene	0.5	black	46	17	16369
+N-NFE2L2 Signaling-2.0-Hs-20	KEAP1	76	109	white	rectangle	gene	0.5	black	46	17	23177
+N-NFE2L2 Signaling-2.0-Hs-21	CSNK2A1	99	119	white	rectangle	gene	0.5	black	46	17	2457
+N-NFE2L2 Signaling-2.0-Hs-22	NQO1	74	0	white	rectangle	gene	0.5	black	46	17	2874
+N-NFE2L2 Signaling-2.0-Hs-23	GADD45GIP1	97	115	white	rectangle	gene	0.5	black	46	17	29996
+N-NFE2L2 Signaling-2.0-Hs-24	EIF2AK3	173	80	white	rectangle	gene	0.5	black	46	17	3255
+N-NFE2L2 Signaling-2.0-Hs-25	AHR	94	106	white	rectangle	gene	0.5	black	46	17	348
+N-NFE2L2 Signaling-2.0-Hs-26	FYN	115	92	white	rectangle	gene	0.5	black	46	17	4037
+N-NFE2L2 Signaling-2.0-Hs-27	FYN	125	83	white	rectangle	gene	0.5	black	46	17	4037
+N-NFE2L2 Signaling-2.0-Hs-28	GCLM	80	8	white	rectangle	gene	0.5	black	46	17	4312
+N-NFE2L2 Signaling-2.0-Hs-29	GSK3B	133	77	white	rectangle	gene	0.5	black	46	17	4617
+N-NFE2L2 Signaling-2.0-Hs-3 4 5 6	KEAP1 CUL3 NFE2L2 RBX1	86	91	white	rectangle	gene,gene,gene,gene	0.5	black	46	17	23177,/,2553,/,7782,/,9928
+N-NFE2L2 Signaling-2.0-Hs-30	GSK3B	140	72	white	rectangle	gene	0.5	black	46	17	4617
+N-NFE2L2 Signaling-2.0-Hs-31	HMMR	50	22	white	rectangle	gene	0.5	black	46	17	5012
+N-NFE2L2 Signaling-2.0-Hs-32	HMOX1	64	13	white	rectangle	gene	0.5	black	46	17	5013
+N-NFE2L2 Signaling-2.0-Hs-33	IKBKB	67	106	white	rectangle	gene	0.5	black	46	17	5960
+N-NFE2L2 Signaling-2.0-Hs-34	KRAS	121	19	white	rectangle	gene	0.5	black	46	17	6407
+N-NFE2L2 Signaling-2.0-Hs-35	MAPK1	99	111	white	rectangle	gene	0.5	black	46	17	6871
+N-NFE2L2 Signaling-2.0-Hs-36	MAPK11	5	41	white	rectangle	gene	0.5	black	46	17	6873
+N-NFE2L2 Signaling-2.0-Hs-37	MAPK12	0	34	white	rectangle	gene	0.5	black	46	17	6874
+N-NFE2L2 Signaling-2.0-Hs-38	MAPK13	18	39	white	rectangle	gene	0.5	black	46	17	6875
+N-NFE2L2 Signaling-2.0-Hs-39	MAPK14	5	29	white	rectangle	gene	0.5	black	46	17	6876
+N-NFE2L2 Signaling-2.0-Hs-40	MAPK3	91	123	white	rectangle	gene	0.5	black	46	17	6877
+N-NFE2L2 Signaling-2.0-Hs-41	NFE2L1	73	8	white	rectangle	gene	0.5	black	46	17	7781
+N-NFE2L2 Signaling-2.0-Hs-42	NFE2L2	89	113	white	rectangle	gene	0.5	black	46	17	7782
+N-NFE2L2 Signaling-2.0-Hs-43	NFE2L2	172	85	white	rectangle	gene	0.5	black	46	17	7782
+N-NFE2L2 Signaling-2.0-Hs-44	NFE2L2	8	36	white	rectangle	gene	0.5	black	46	17	7782
+N-NFE2L2 Signaling-2.0-Hs-45	NFE2L2	78	120	white	rectangle	gene	0.5	black	46	17	7782
+N-NFE2L2 Signaling-2.0-Hs-46	NFE2L2	103	101	white	rectangle	gene	0.5	black	46	17	7782
+N-NFE2L2 Signaling-2.0-Hs-47	NFE2L2	87	100	white	rectangle	gene	0.5	black	46	17	7782
+N-NFE2L2 Signaling-2.0-Hs-48	BACH1	57	19	white	rectangle	gene	0.5	black	46	17	935
+N-NFE2L2 Signaling-2.0-Hs-49	PRKCI	95	121	white	rectangle	gene	0.5	black	46	17	9404
+N-NFE2L2 Signaling-2.0-Hs-50	PTGS2	116	16	white	rectangle	gene	0.5	black	46	17	9605
+N-NFE2L2 Signaling-2.0-Hs-7 8	KEAP1 NFE2L2	82	126	white	rectangle	gene,gene	0.5	black	46	17	23177,/,7782
+N-NFE2L2 Signaling-2.0-Hs-9 10	MAFG NFE2L2	60	5	white	rectangle	gene,gene	0.5	black	46	17	6781,/,7782

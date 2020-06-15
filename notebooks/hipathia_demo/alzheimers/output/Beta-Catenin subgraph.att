@@ -1,0 +1,23 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Beta-Catenin subgraph-1 2 3 4 5	AXIN CSNK1A1 CTNNB1 GSK3B APC	87	62	white	rectangle	gene,gene,gene,gene,gene	0.5	black	46	17	AXIN,/,2451,/,2514,/,4617,/,583
+N-Beta-Catenin subgraph-10 11	CDH13 PSEN1	0	102	white	rectangle	gene,gene	0.5	black	46	17	1753,/,9508
+N-Beta-Catenin subgraph-12 13 14	CDH2 CTNNB1 PSEN1	101	16	white	rectangle	gene,gene,gene	0.5	black	46	17	1759,/,2514,/,9508
+N-Beta-Catenin subgraph-15 16	CTNNB1 PSEN1	129	80	white	rectangle	gene,gene	0.5	black	46	17	2514,/,9508
+N-Beta-Catenin subgraph-17 18 19	CTNNB1 PSEN1 PSEN2	129	48	white	rectangle	gene,gene,gene	0.5	black	46	17	2514,/,9508,/,9509
+N-Beta-Catenin subgraph-20 21	CTNND2 PSEN1	120	11	white	rectangle	gene,gene	0.5	black	46	17	2516,/,9508
+N-Beta-Catenin subgraph-22	AXIN	78	72	white	rectangle	gene	0.5	black	46	17	AXIN
+N-Beta-Catenin subgraph-23	CTNNBIP1	95	34	white	rectangle	gene	0.5	black	46	17	16913
+N-Beta-Catenin subgraph-24	CDK5	123	84	white	rectangle	gene	0.5	black	46	17	1774
+N-Beta-Catenin subgraph-25	CSNK1A1	110	84	white	rectangle	gene	0.5	black	46	17	2451
+N-Beta-Catenin subgraph-26	CTNNB1	115	49	white	rectangle	gene	0.5	black	46	17	2514
+N-Beta-Catenin subgraph-27	CTNNB1	115	70	white	rectangle	gene	0.5	black	46	17	2514
+N-Beta-Catenin subgraph-28	CTNNB1	74	63	white	rectangle	gene	0.5	black	46	17	2514
+N-Beta-Catenin subgraph-29	GSK3B	109	65	white	rectangle	gene	0.5	black	46	17	4617
+N-Beta-Catenin subgraph-30	PPARG	121	40	white	rectangle	gene	0.5	black	46	17	9236
+N-Beta-Catenin subgraph-31	PSEN1	109	27	white	rectangle	gene	0.5	black	46	17	9508
+N-Beta-Catenin subgraph-32	PSEN1	118	77	white	rectangle	gene	0.5	black	46	17	9508
+N-Beta-Catenin subgraph-33	PSEN1	124	71	white	rectangle	gene	0.5	black	46	17	9508
+N-Beta-Catenin subgraph-34	PSEN1	127	0	white	rectangle	gene	0.5	black	46	17	9508
+N-Beta-Catenin subgraph-35	Amyloidogenic glycoprotein, intracellular domain, conserved site	87	47	white	rectangle	gene	0.5	black	46	17	IPR019745
+N-Beta-Catenin subgraph-6 7	TCF4 PSEN1	110	14	white	rectangle	gene,gene	0.5	black	46	17	11634,/,9508
+N-Beta-Catenin subgraph-8 9	CDH13 CTNND1	9	98	white	rectangle	gene,gene	0.5	black	46	17	1753,/,2515

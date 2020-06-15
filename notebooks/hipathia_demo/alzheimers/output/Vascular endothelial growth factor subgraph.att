@@ -1,0 +1,25 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Vascular endothelial growth factor subgraph-1 2	GAB2 PTK2	0	55	white	rectangle	gene,gene	0.5	black	46	17	14458,/,9611
+N-Vascular endothelial growth factor subgraph-10	CASR	6	158	white	rectangle	gene	0.5	black	46	17	1514
+N-Vascular endothelial growth factor subgraph-11	SIT1	149	153	white	rectangle	gene	0.5	black	46	17	17710
+N-Vascular endothelial growth factor subgraph-12	ADAM10	140	70	white	rectangle	gene	0.5	black	46	17	188
+N-Vascular endothelial growth factor subgraph-13	ADAM17	132	57	white	rectangle	gene	0.5	black	46	17	195
+N-Vascular endothelial growth factor subgraph-14	ADAM9	149	55	white	rectangle	gene	0.5	black	46	17	216
+N-Vascular endothelial growth factor subgraph-15	APBA2	99	186	white	rectangle	gene	0.5	black	46	17	579
+N-Vascular endothelial growth factor subgraph-16	APP	12	151	white	rectangle	gene	0.5	black	46	17	620
+N-Vascular endothelial growth factor subgraph-17	APP	36	80	white	rectangle	gene	0.5	black	46	17	620
+N-Vascular endothelial growth factor subgraph-18	APP	32	65	white	rectangle	gene	0.5	black	46	17	620
+N-Vascular endothelial growth factor subgraph-19	APP	46	66	white	rectangle	gene	0.5	black	46	17	620
+N-Vascular endothelial growth factor subgraph-20	PIK3R2	152	141	white	rectangle	gene	0.5	black	46	17	8980
+N-Vascular endothelial growth factor subgraph-21	PRKCB	23	164	white	rectangle	gene	0.5	black	46	17	9395
+N-Vascular endothelial growth factor subgraph-22	PRKCD	90	9	white	rectangle	gene	0.5	black	46	17	9399
+N-Vascular endothelial growth factor subgraph-23	PRKCD	91	0	white	rectangle	gene	0.5	black	46	17	9399
+N-Vascular endothelial growth factor subgraph-24	PRKCH	141	61	white	rectangle	gene	0.5	black	46	17	9403
+N-Vascular endothelial growth factor subgraph-25	PRKD1	39	71	white	rectangle	gene	0.5	black	46	17	9407
+N-Vascular endothelial growth factor subgraph-26	PTK2	136	135	white	rectangle	gene	0.5	black	46	17	9611
+N-Vascular endothelial growth factor subgraph-27	PTK7	132	147	white	rectangle	gene	0.5	black	46	17	9618
+N-Vascular endothelial growth factor subgraph-3 4	GAB2 PTK7	1	38	white	rectangle	gene,gene	0.5	black	46	17	14458,/,9618
+N-Vascular endothelial growth factor subgraph-5	SRC	99	176	white	rectangle	gene	0.5	black	46	17	11283
+N-Vascular endothelial growth factor subgraph-6	VEGFA	15	159	white	rectangle	gene	0.5	black	46	17	12680
+N-Vascular endothelial growth factor subgraph-7	GAB2	2	46	white	rectangle	gene	0.5	black	46	17	14458
+N-Vascular endothelial growth factor subgraph-8	GAB2	142	144	white	rectangle	gene	0.5	black	46	17	14458

@@ -1,0 +1,23 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Endosomal lysosomal subgraph-13 14	APOE LRP8	48	54	white	rectangle	gene,gene	0.5	black	46	17	613,/,6700
+N-Endosomal lysosomal subgraph-15 16	APP LDLR	57	138	white	rectangle	gene,gene	0.5	black	46	17	620,/,6547
+N-Endosomal lysosomal subgraph-17	YENPTY endocytosis motif (APP)	73	159	white	rectangle	gene	0.5	black	46	17	CONSO00041
+N-Endosomal lysosomal subgraph-19	TGFB1	130	140	white	rectangle	gene	0.5	black	46	17	11766
+N-Endosomal lysosomal subgraph-20	TP53	139	152	white	rectangle	gene	0.5	black	46	17	11998
+N-Endosomal lysosomal subgraph-21	VPS35	37	98	white	rectangle	gene	0.5	black	46	17	13487
+N-Endosomal lysosomal subgraph-24	GGA3	0	23	white	rectangle	gene	0.5	black	46	17	17079
+N-Endosomal lysosomal subgraph-25	GGA1	15	0	white	rectangle	gene	0.5	black	46	17	17842
+N-Endosomal lysosomal subgraph-26	CLU	114	156	white	rectangle	gene	0.5	black	46	17	2095
+N-Endosomal lysosomal subgraph-27	CTSD	69	84	white	rectangle	gene	0.5	black	46	17	2529
+N-Endosomal lysosomal subgraph-28	DKK1	97	148	white	rectangle	gene	0.5	black	46	17	2891
+N-Endosomal lysosomal subgraph-29	IL1A	127	179	white	rectangle	gene	0.5	black	46	17	5991
+N-Endosomal lysosomal subgraph-30	IL1B	112	181	white	rectangle	gene	0.5	black	46	17	5992
+N-Endosomal lysosomal subgraph-31	APP	58	96	white	rectangle	gene	0.5	black	46	17	620
+N-Endosomal lysosomal subgraph-32	APP	78	137	white	rectangle	gene	0.5	black	46	17	620
+N-Endosomal lysosomal subgraph-33	LDLR	59	154	white	rectangle	gene	0.5	black	46	17	6547
+N-Endosomal lysosomal subgraph-34	LRP2	137	167	white	rectangle	gene	0.5	black	46	17	6694
+N-Endosomal lysosomal subgraph-35	LRP8	67	52	white	rectangle	gene	0.5	black	46	17	6700
+N-Endosomal lysosomal subgraph-36	BACE1	21	22	white	rectangle	gene	0.5	black	46	17	933
+N-Endosomal lysosomal subgraph-37	BACE1	26	0	white	rectangle	gene	0.5	black	46	17	933
+N-Endosomal lysosomal subgraph-38	BACE1	0	12	white	rectangle	gene	0.5	black	46	17	933
+N-Endosomal lysosomal subgraph-39	BACE2	65	38	white	rectangle	gene	0.5	black	46	17	934

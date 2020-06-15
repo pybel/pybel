@@ -1,0 +1,13 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-CRH subgraph-1 2	Crhr1 Crh	106	67	white	rectangle	gene,gene	0.5	black	46	17	61276,/,620505
+N-CRH subgraph-10	Mapt	116	163	white	rectangle	gene	0.5	black	46	17	69329
+N-CRH subgraph-11	Mapk1	142	102	white	rectangle	gene	0.5	black	46	17	70500
+N-CRH subgraph-12	Crhr2	0	185	white	rectangle	gene	0.5	black	46	17	70547
+N-CRH subgraph-13	Gsk3b	141	138	white	rectangle	gene	0.5	black	46	17	70982
+N-CRH subgraph-3	CRH	45	0	white	rectangle	gene	0.5	black	46	17	2355
+N-CRH subgraph-4	CRHR1	13	31	white	rectangle	gene	0.5	black	46	17	2357
+N-CRH subgraph-5	APP	60	49	white	rectangle	gene	0.5	black	46	17	620
+N-CRH subgraph-6	Crhr1	93	116	white	rectangle	gene	0.5	black	46	17	61276
+N-CRH subgraph-7	Crh	96	29	white	rectangle	gene	0.5	black	46	17	620505
+N-CRH subgraph-8	Mapk8	38	154	white	rectangle	gene	0.5	black	46	17	621506
+N-CRH subgraph-9	Cdk5r1	81	160	white	rectangle	gene	0.5	black	46	17	629472

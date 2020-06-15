@@ -1,0 +1,10 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-RhoA subgraph-1 2	ROCK2 SORL1	169	127	white	rectangle	gene,gene	0.5	black	46	17	10252,/,11185
+N-RhoA subgraph-10	RHOA	30	121	white	rectangle	gene	0.5	black	46	17	667
+N-RhoA subgraph-11	RHOB	20	98	white	rectangle	gene	0.5	black	46	17	668
+N-RhoA subgraph-12	RHOC	9	129	white	rectangle	gene	0.5	black	46	17	669
+N-RhoA subgraph-13	RHOG	0	109	white	rectangle	gene	0.5	black	46	17	672
+N-RhoA subgraph-6	sAPP-alpha	158	132	white	rectangle	gene	0.5	black	46	17	CONSO00067
+N-RhoA subgraph-7	ROCK2	114	9	white	rectangle	gene	0.5	black	46	17	10252
+N-RhoA subgraph-8	SORL1	106	0	white	rectangle	gene	0.5	black	46	17	11185
+N-RhoA subgraph-9	ARHGEF5	16	113	white	rectangle	gene	0.5	black	46	17	13209

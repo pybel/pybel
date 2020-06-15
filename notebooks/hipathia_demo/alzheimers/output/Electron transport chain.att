@@ -1,0 +1,24 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Electron transport chain-10	COX4I2	163	16	white	rectangle	gene	0.5	black	46	17	16232
+N-Electron transport chain-11	CDK5R1	108	89	white	rectangle	gene	0.5	black	46	17	1775
+N-Electron transport chain-12	CYCS	10	98	white	rectangle	gene	0.5	black	46	17	19986
+N-Electron transport chain-13	COX4I1	157	14	white	rectangle	gene	0.5	black	46	17	2265
+N-Electron transport chain-14	COX5B	158	0	white	rectangle	gene	0.5	black	46	17	2269
+N-Electron transport chain-16	APP	164	7	white	rectangle	gene	0.5	black	46	17	620
+N-Electron transport chain-17	APP	153	10	white	rectangle	gene	0.5	black	46	17	620
+N-Electron transport chain-21	BCL2	18	93	white	rectangle	gene	0.5	black	46	17	990
+N-Electron transport chain-22	Xiap	100	104	white	rectangle	gene	0.5	black	46	17	107572
+N-Electron transport chain-23	Casp3	111	103	white	rectangle	gene	0.5	black	46	17	107739
+N-Electron transport chain-24	Bad	145	128	white	rectangle	gene	0.5	black	46	17	1096330
+N-Electron transport chain-25	Casp9	106	111	white	rectangle	gene	0.5	black	46	17	1277950
+N-Electron transport chain-26	Retn	122	108	white	rectangle	gene	0.5	black	46	17	1888506
+N-Electron transport chain-27	Afap1	111	133	white	rectangle	gene	0.5	black	46	17	1917542
+N-Electron transport chain-28	Bcl2	134	112	white	rectangle	gene	0.5	black	46	17	88138
+N-Electron transport chain-29	Bcl2l1	137	136	white	rectangle	gene	0.5	black	46	17	88139
+N-Electron transport chain-30	Cycs	117	120	white	rectangle	gene	0.5	black	46	17	88578
+N-Electron transport chain-31	Sod1	131	123	white	rectangle	gene	0.5	black	46	17	98351
+N-Electron transport chain-32	Bax	121	114	white	rectangle	gene	0.5	black	46	17	99702
+N-Electron transport chain-4 5	CYCS APAF1	0	103	white	rectangle	gene,gene	0.5	black	46	17	19986,/,576
+N-Electron transport chain-7	SOD1	10	109	white	rectangle	gene	0.5	black	46	17	11179
+N-Electron transport chain-8	CASP3	9	85	white	rectangle	gene	0.5	black	46	17	1504
+N-Electron transport chain-9	CASP9	0	96	white	rectangle	gene	0.5	black	46	17	1511

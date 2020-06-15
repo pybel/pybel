@@ -1,0 +1,13 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-mTOR signaling subgraph-10	MAPT	166	123	white	rectangle	gene	0.5	black	46	17	6893
+N-mTOR signaling subgraph-11	MAPT	176	91	white	rectangle	gene	0.5	black	46	17	6893
+N-mTOR signaling subgraph-12	MAPT	156	100	white	rectangle	gene	0.5	black	46	17	6893
+N-mTOR signaling subgraph-13	Atg5	0	141	white	rectangle	gene	0.5	black	46	17	1277186
+N-mTOR signaling subgraph-14	Atg12	20	146	white	rectangle	gene	0.5	black	46	17	1914776
+N-mTOR signaling subgraph-15	Map1lc3a	2	120	white	rectangle	gene	0.5	black	46	17	1915661
+N-mTOR signaling subgraph-16	Mtor	14	131	white	rectangle	gene	0.5	black	46	17	1928394
+N-mTOR signaling subgraph-17	Ctsb	29	121	white	rectangle	gene	0.5	black	46	17	88561
+N-mTOR signaling subgraph-5	RPS6KB1	169	107	white	rectangle	gene	0.5	black	46	17	10436
+N-mTOR signaling subgraph-6	RRAGC	58	0	white	rectangle	gene	0.5	black	46	17	19902
+N-mTOR signaling subgraph-7	MTOR	46	1	white	rectangle	gene	0.5	black	46	17	3942
+N-mTOR signaling subgraph-9	MAPT	184	113	white	rectangle	gene	0.5	black	46	17	6893

@@ -1,0 +1,92 @@
+0	1	2
+N-Nerve growth factor subgraph-66	activation	N-Nerve growth factor subgraph-21 22
+N-Nerve growth factor subgraph-29	inhibition	N-Nerve growth factor subgraph-36
+N-Nerve growth factor subgraph-11 12	activation	N-Nerve growth factor subgraph-37
+N-Nerve growth factor subgraph-11 12	activation	N-Nerve growth factor subgraph-38
+N-Nerve growth factor subgraph-11 12	activation	N-Nerve growth factor subgraph-33
+N-Nerve growth factor subgraph-11 12	activation	N-Nerve growth factor subgraph-32
+N-Nerve growth factor subgraph-11 12	activation	N-Nerve growth factor subgraph-31
+N-Nerve growth factor subgraph-59	activation	N-Nerve growth factor subgraph-65
+N-Nerve growth factor subgraph-40	activation	N-Nerve growth factor subgraph-64
+N-Nerve growth factor subgraph-40	activation	N-Nerve growth factor subgraph-64
+N-Nerve growth factor subgraph-40	activation	N-Nerve growth factor subgraph-66
+N-Nerve growth factor subgraph-40	activation	N-Nerve growth factor subgraph-66
+N-Nerve growth factor subgraph-43	activation	N-Nerve growth factor subgraph-71
+N-Nerve growth factor subgraph-43	activation	N-Nerve growth factor subgraph-46
+N-Nerve growth factor subgraph-74	activation	N-Nerve growth factor subgraph-43
+N-Nerve growth factor subgraph-33	activation	N-Nerve growth factor subgraph-30
+N-Nerve growth factor subgraph-31	activation	N-Nerve growth factor subgraph-30
+N-Nerve growth factor subgraph-52	inhibition	N-Nerve growth factor subgraph-76
+N-Nerve growth factor subgraph-52	activation	N-Nerve growth factor subgraph-77
+N-Nerve growth factor subgraph-52	activation	N-Nerve growth factor subgraph-44
+N-Nerve growth factor subgraph-52	inhibition	N-Nerve growth factor subgraph-73
+N-Nerve growth factor subgraph-56	activation	N-Nerve growth factor subgraph-13 14 15
+N-Nerve growth factor subgraph-56	activation	N-Nerve growth factor subgraph-16 17 18
+N-Nerve growth factor subgraph-61	activation	N-Nerve growth factor subgraph-23 24
+N-Nerve growth factor subgraph-1 2	activation	N-Nerve growth factor subgraph-69
+N-Nerve growth factor subgraph-1 2	activation	N-Nerve growth factor subgraph-69
+N-Nerve growth factor subgraph-21 22	activation	N-Nerve growth factor subgraph-63
+N-Nerve growth factor subgraph-21 22	activation	N-Nerve growth factor subgraph-63
+N-Nerve growth factor subgraph-79	activation	N-Nerve growth factor subgraph-48
+N-Nerve growth factor subgraph-7 8	activation	N-Nerve growth factor subgraph-42
+N-Nerve growth factor subgraph-35	activation	N-Nerve growth factor subgraph-48
+N-Nerve growth factor subgraph-41	activation	N-Nerve growth factor subgraph-34
+N-Nerve growth factor subgraph-25 26	inhibition	N-Nerve growth factor subgraph-27 28
+N-Nerve growth factor subgraph-25 26	inhibition	N-Nerve growth factor subgraph-66
+N-Nerve growth factor subgraph-47	activation	N-Nerve growth factor subgraph-49
+N-Nerve growth factor subgraph-47	activation	N-Nerve growth factor subgraph-49
+N-Nerve growth factor subgraph-47	activation	N-Nerve growth factor subgraph-50
+N-Nerve growth factor subgraph-47	activation	N-Nerve growth factor subgraph-48
+N-Nerve growth factor subgraph-47	activation	N-Nerve growth factor subgraph-48
+N-Nerve growth factor subgraph-47	activation	N-Nerve growth factor subgraph-48
+N-Nerve growth factor subgraph-64	activation	N-Nerve growth factor subgraph-27 28
+N-Nerve growth factor subgraph-64	activation	N-Nerve growth factor subgraph-68
+N-Nerve growth factor subgraph-64	activation	N-Nerve growth factor subgraph-58
+N-Nerve growth factor subgraph-64	activation	N-Nerve growth factor subgraph-66
+N-Nerve growth factor subgraph-64	activation	N-Nerve growth factor subgraph-66
+N-Nerve growth factor subgraph-64	activation	N-Nerve growth factor subgraph-61
+N-Nerve growth factor subgraph-64	activation	N-Nerve growth factor subgraph-23 24
+N-Nerve growth factor subgraph-55	activation	N-Nerve growth factor subgraph-48
+N-Nerve growth factor subgraph-55	activation	N-Nerve growth factor subgraph-48
+N-Nerve growth factor subgraph-55	activation	N-Nerve growth factor subgraph-48
+N-Nerve growth factor subgraph-55	activation	N-Nerve growth factor subgraph-48
+N-Nerve growth factor subgraph-51	inhibition	N-Nerve growth factor subgraph-64
+N-Nerve growth factor subgraph-51	inhibition	N-Nerve growth factor subgraph-58
+N-Nerve growth factor subgraph-54	activation	N-Nerve growth factor subgraph-48
+N-Nerve growth factor subgraph-34	activation	N-Nerve growth factor subgraph-45
+N-Nerve growth factor subgraph-81	activation	N-Nerve growth factor subgraph-82
+N-Nerve growth factor subgraph-19 20	activation	N-Nerve growth factor subgraph-37
+N-Nerve growth factor subgraph-19 20	activation	N-Nerve growth factor subgraph-38
+N-Nerve growth factor subgraph-19 20	activation	N-Nerve growth factor subgraph-33
+N-Nerve growth factor subgraph-19 20	activation	N-Nerve growth factor subgraph-32
+N-Nerve growth factor subgraph-19 20	activation	N-Nerve growth factor subgraph-31
+N-Nerve growth factor subgraph-53	activation	N-Nerve growth factor subgraph-70
+N-Nerve growth factor subgraph-5 6	activation	N-Nerve growth factor subgraph-42
+N-Nerve growth factor subgraph-27 28	activation	N-Nerve growth factor subgraph-66
+N-Nerve growth factor subgraph-27 28	activation	N-Nerve growth factor subgraph-64
+N-Nerve growth factor subgraph-80	activation	N-Nerve growth factor subgraph-82
+N-Nerve growth factor subgraph-60	inhibition	N-Nerve growth factor subgraph-41
+N-Nerve growth factor subgraph-60	inhibition	N-Nerve growth factor subgraph-69
+N-Nerve growth factor subgraph-60	inhibition	N-Nerve growth factor subgraph-34
+N-Nerve growth factor subgraph-60	inhibition	N-Nerve growth factor subgraph-34
+N-Nerve growth factor subgraph-60	activation	N-Nerve growth factor subgraph-34
+N-Nerve growth factor subgraph-60	inhibition	N-Nerve growth factor subgraph-1 2
+N-Nerve growth factor subgraph-60	inhibition	N-Nerve growth factor subgraph-66
+N-Nerve growth factor subgraph-60	inhibition	N-Nerve growth factor subgraph-63
+N-Nerve growth factor subgraph-60	inhibition	N-Nerve growth factor subgraph-21 22
+N-Nerve growth factor subgraph-37	activation	N-Nerve growth factor subgraph-30
+N-Nerve growth factor subgraph-32	activation	N-Nerve growth factor subgraph-30
+N-Nerve growth factor subgraph-65	inhibition	N-Nerve growth factor subgraph-57
+N-Nerve growth factor subgraph-65	activation	N-Nerve growth factor subgraph-67
+N-Nerve growth factor subgraph-65	activation	N-Nerve growth factor subgraph-63
+N-Nerve growth factor subgraph-65	activation	N-Nerve growth factor subgraph-63
+N-Nerve growth factor subgraph-62	activation	N-Nerve growth factor subgraph-64
+N-Nerve growth factor subgraph-49	inhibition	N-Nerve growth factor subgraph-3 4
+N-Nerve growth factor subgraph-75	activation	N-Nerve growth factor subgraph-43
+N-Nerve growth factor subgraph-68	activation	N-Nerve growth factor subgraph-29
+N-Nerve growth factor subgraph-68	inhibition	N-Nerve growth factor subgraph-36
+N-Nerve growth factor subgraph-39	activation	N-Nerve growth factor subgraph-64
+N-Nerve growth factor subgraph-39	activation	N-Nerve growth factor subgraph-64
+N-Nerve growth factor subgraph-72	activation	N-Nerve growth factor subgraph-60
+N-Nerve growth factor subgraph-72	activation	N-Nerve growth factor subgraph-59
+N-Nerve growth factor subgraph-38	activation	N-Nerve growth factor subgraph-30

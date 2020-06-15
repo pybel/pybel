@@ -1,0 +1,16 @@
+0	1	2
+N-Sphingolipid metabolic subgraph-20	activation	N-Sphingolipid metabolic subgraph-18
+N-Sphingolipid metabolic subgraph-3 4	inhibition	N-Sphingolipid metabolic subgraph-8
+N-Sphingolipid metabolic subgraph-5	activation	N-Sphingolipid metabolic subgraph-12
+N-Sphingolipid metabolic subgraph-19	activation	N-Sphingolipid metabolic subgraph-15
+N-Sphingolipid metabolic subgraph-15	activation	N-Sphingolipid metabolic subgraph-1 2
+N-Sphingolipid metabolic subgraph-15	inhibition	N-Sphingolipid metabolic subgraph-8
+N-Sphingolipid metabolic subgraph-17	activation	N-Sphingolipid metabolic subgraph-15
+N-Sphingolipid metabolic subgraph-16	activation	N-Sphingolipid metabolic subgraph-15
+N-Sphingolipid metabolic subgraph-18	activation	N-Sphingolipid metabolic subgraph-15
+N-Sphingolipid metabolic subgraph-7	activation	N-Sphingolipid metabolic subgraph-15
+N-Sphingolipid metabolic subgraph-12	activation	N-Sphingolipid metabolic subgraph-7
+N-Sphingolipid metabolic subgraph-12	activation	N-Sphingolipid metabolic subgraph-15
+N-Sphingolipid metabolic subgraph-6	activation	N-Sphingolipid metabolic subgraph-16
+N-Sphingolipid metabolic subgraph-6	activation	N-Sphingolipid metabolic subgraph-19
+N-Sphingolipid metabolic subgraph-6	activation	N-Sphingolipid metabolic subgraph-17
