@@ -8,10 +8,6 @@ services:
 
 language: python
 
-python:
-  - 3.8
-  - 3.5
-
 jobs:
   include:
     # lint stage
