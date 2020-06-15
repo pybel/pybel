@@ -43,12 +43,14 @@ PyBEL is tested on Python 3.5+ on Mac OS and Linux using
 
    reference/struct/datamodel
    reference/struct/examples
-   reference/struct/summary
-   reference/struct/operators
    reference/struct/filters
-   reference/struct/transformations
+   reference/struct/getters
    reference/struct/grouping
+   reference/struct/mutation
+   reference/struct/operators
    reference/struct/pipeline
+   reference/struct/query
+   reference/struct/summary
 
 .. toctree::
    :maxdepth: 2
