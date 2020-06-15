@@ -4,15 +4,16 @@
 
 from typing import Iterable, List
 
-from ...constants import ANNOTATIONS, CAUSAL_RELATIONS, CITATION, EVIDENCE, IS_A, OBJECT, RELATION, SUBJECT
-from ...dsl import BaseEntity
+from ...graph import BELGraph
+from ....constants import ANNOTATIONS, CAUSAL_RELATIONS, CITATION, EVIDENCE, IS_A, OBJECT, RELATION, SUBJECT
+from ....dsl import BaseEntity
 
 __all__ = [
     'infer_child_relations',
 ]
 
 
-def iter_children(graph, node: BaseEntity) -> Iterable[BaseEntity]:
+def iter_children(graph: BELGraph, node: BaseEntity) -> Iterable[BaseEntity]:
     """Iterate over children of the node."""
     return (
         node
@@ -21,7 +22,7 @@ def iter_children(graph, node: BaseEntity) -> Iterable[BaseEntity]:
     )
 
 
-def transfer_causal_edges(graph, source: BaseEntity, target: BaseEntity) -> Iterable[str]:
+def transfer_causal_edges(graph: BELGraph, source: BaseEntity, target: BaseEntity) -> Iterable[str]:
     """Transfer causal edges that the source has to the target and yield the resulting hashes."""
     for _, v, data in graph.out_edges(source, data=True):
         if data[RELATION] not in CAUSAL_RELATIONS:
@@ -54,12 +55,12 @@ def transfer_causal_edges(graph, source: BaseEntity, target: BaseEntity) -> Iter
         )
 
 
-def infer_child_relations(graph, node: BaseEntity) -> List[str]:
+def infer_child_relations(graph: BELGraph, node: BaseEntity) -> List[str]:
     """Propagate causal relations to children."""
     return list(_infer_child_relations_iter(graph, node))
 
 
-def _infer_child_relations_iter(graph, node: BaseEntity) -> Iterable[str]:
+def _infer_child_relations_iter(graph: BELGraph, node: BaseEntity) -> Iterable[str]:
     """Propagate causal relations to children."""
     for child in iter_children(graph, node):
         yield from transfer_causal_edges(graph, node, child)

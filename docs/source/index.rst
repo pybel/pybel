@@ -21,8 +21,9 @@ PyBEL is tested on Python 3.5+ on Mac OS and Linux using
 
 .. seealso::
 
-    - Specified by `BEL 1.0 <http://openbel.org/language/web/version_1.0/bel_specification_version_1.0.html>`_ and
-      `BEL 2.0 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html>`_
+    - Specified by `BEL 1.0 <https://github.com/OpenBEL/language/raw/master/docs/version_1.0/bel_specification_version_1.0.pdf>`_,
+      `BEL 2.0 <https://github.com/OpenBEL/language/raw/master/docs/version_2.0/bel_specification_version_2.0.pdf>`_, and
+      `BEL 2.0+ <https://biological-expression-language.github.io>`_
     - Documented on `Read the Docs <http://pybel.readthedocs.io/>`_
     - Versioned on `GitHub <https://github.com/pybel/pybel>`_
     - Tested on `Travis CI <https://travis-ci.org/pybel/pybel>`_
@@ -44,13 +45,25 @@ PyBEL is tested on Python 3.5+ on Mac OS and Linux using
    reference/struct/datamodel
    reference/struct/examples
    reference/struct/filters
-   reference/struct/getters
    reference/struct/grouping
-   reference/struct/mutation
    reference/struct/operators
    reference/struct/pipeline
    reference/struct/query
    reference/struct/summary
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Mutations
+   :name: mutations
+
+   reference/mutations/mutations
+   reference/mutations/collapse
+   reference/mutations/deletion
+   reference/mutations/expansion
+   reference/mutations/induction
+   reference/mutations/induction_expansion
+   reference/mutations/inference
+   reference/mutations/metadata
 
 .. toctree::
    :maxdepth: 2

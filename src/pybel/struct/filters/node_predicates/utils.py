@@ -54,12 +54,19 @@ def concatenate_node_predicates(node_predicates: NodePredicates) -> NodePredicat
 
     Example usage:
 
-    >>> from pybel.dsl import protein, gene
-    >>> from pybel.struct.filters import not_pathology, node_exclusion_predicate_builder
-    >>> app_protein = protein(name='APP', namespace='HGNC')
-    >>> app_gene = gene(name='APP', namespace='HGNC')
-    >>> app_predicate = node_exclusion_predicate_builder([app_protein, app_gene])
-    >>> my_predicate = concatenate_node_predicates([not_pathology, app_predicate])
+    >>> from pybel import BELGraph
+    >>> from pybel.dsl import Protein
+    >>> from pybel.struct.filters import not_gene, not_rna
+    >>> app_protein = Protein(name='APP', namespace='hgnc', identifier='620')
+    >>> app_rna = app_protein.get_rna()
+    >>> app_gene = app_rna.get_gene()
+    >>> graph = BELGraph()
+    >>> _ = graph.add_transcription(app_gene, app_rna)
+    >>> _ = graph.add_translation(app_rna, app_protein)
+    >>> node_predicate = concatenate_node_predicates([not_rna, not_gene])
+    >>> assert node_predicate(graph, app_protein)
+    >>> assert not node_predicate(graph, app_rna)
+    >>> assert not node_predicate(graph, app_gene)
     """
     # If a predicate outside a list is given, just return it
     if not isinstance(node_predicates, Iterable):
