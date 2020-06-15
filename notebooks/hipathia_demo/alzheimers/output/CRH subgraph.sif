@@ -1,0 +1,15 @@
+0	1	2
+N-CRH subgraph-6	activation	N-CRH subgraph-1 2
+N-CRH subgraph-6	activation	N-CRH subgraph-10
+N-CRH subgraph-6	activation	N-CRH subgraph-10
+N-CRH subgraph-6	activation	N-CRH subgraph-10
+N-CRH subgraph-6	activation	N-CRH subgraph-13
+N-CRH subgraph-6	activation	N-CRH subgraph-11
+N-CRH subgraph-6	activation	N-CRH subgraph-9
+N-CRH subgraph-6	activation	N-CRH subgraph-8
+N-CRH subgraph-12	inhibition	N-CRH subgraph-8
+N-CRH subgraph-5	activation	N-CRH subgraph-6
+N-CRH subgraph-5	activation	N-CRH subgraph-4
+N-CRH subgraph-3	activation	N-CRH subgraph-5
+N-CRH subgraph-7	activation	N-CRH subgraph-1 2
+N-CRH subgraph-7	activation	N-CRH subgraph-5

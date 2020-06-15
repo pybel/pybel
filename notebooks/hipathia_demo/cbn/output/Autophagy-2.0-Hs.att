@@ -1,0 +1,42 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Autophagy-2.0-Hs-1 2	BECN1 PIK3C3	163	116	white	rectangle	gene,gene	0.5	black	46	17	1034,/,8974
+N-Autophagy-2.0-Hs-10	HDAC	129	88	white	rectangle	gene	0.5	black	46	17	HDAC
+N-Autophagy-2.0-Hs-11	RHEB	69	64	white	rectangle	gene	0.5	black	46	17	10011
+N-Autophagy-2.0-Hs-13	RPS6KB1	53	90	white	rectangle	gene	0.5	black	46	17	10436
+N-Autophagy-2.0-Hs-14	RPS6KB1	45	85	white	rectangle	gene	0.5	black	46	17	10436
+N-Autophagy-2.0-Hs-15	RPS6KB1	49	99	white	rectangle	gene	0.5	black	46	17	10436
+N-Autophagy-2.0-Hs-16	RPS6KB1	61	77	white	rectangle	gene	0.5	black	46	17	10436
+N-Autophagy-2.0-Hs-17	RPS6KB1	56	97	white	rectangle	gene	0.5	black	46	17	10436
+N-Autophagy-2.0-Hs-18	RPS6KB1	44	93	white	rectangle	gene	0.5	black	46	17	10436
+N-Autophagy-2.0-Hs-19	SH3GLB1	127	0	white	rectangle	gene	0.5	black	46	17	10833
+N-Autophagy-2.0-Hs-22	SQSTM1	107	81	white	rectangle	gene	0.5	black	46	17	11280
+N-Autophagy-2.0-Hs-24	TLR4	108	88	white	rectangle	gene	0.5	black	46	17	11850
+N-Autophagy-2.0-Hs-26	TSC2	77	51	white	rectangle	gene	0.5	black	46	17	12363
+N-Autophagy-2.0-Hs-27	TSC2	89	44	white	rectangle	gene	0.5	black	46	17	12363
+N-Autophagy-2.0-Hs-28	TSC2	108	34	white	rectangle	gene	0.5	black	46	17	12363
+N-Autophagy-2.0-Hs-3 4	BECN1 BCL2	162	108	white	rectangle	gene,gene	0.5	black	46	17	1034,/,990
+N-Autophagy-2.0-Hs-30	UVRAG	171	119	white	rectangle	gene	0.5	black	46	17	12640
+N-Autophagy-2.0-Hs-31	MAP1LC3B	112	97	white	rectangle	gene	0.5	black	46	17	13352
+N-Autophagy-2.0-Hs-33	SIRT1	69	164	white	rectangle	gene	0.5	black	46	17	14929
+N-Autophagy-2.0-Hs-34	CAV1	112	106	white	rectangle	gene	0.5	black	46	17	1527
+N-Autophagy-2.0-Hs-38	EIF2AK4	0	106	white	rectangle	gene	0.5	black	46	17	19687
+N-Autophagy-2.0-Hs-40	EIF2AK1	1	113	white	rectangle	gene	0.5	black	46	17	24921
+N-Autophagy-2.0-Hs-42	PARP1	73	169	white	rectangle	gene	0.5	black	46	17	270
+N-Autophagy-2.0-Hs-43	E2F4	119	103	white	rectangle	gene	0.5	black	46	17	3118
+N-Autophagy-2.0-Hs-44	EGR1	122	92	white	rectangle	gene	0.5	black	46	17	3238
+N-Autophagy-2.0-Hs-45	EIF2S1	9	107	white	rectangle	gene	0.5	black	46	17	3265
+N-Autophagy-2.0-Hs-46	EIF4EBP1	111	184	white	rectangle	gene	0.5	black	46	17	3288
+N-Autophagy-2.0-Hs-47	EIF4EBP1	151	179	white	rectangle	gene	0.5	black	46	17	3288
+N-Autophagy-2.0-Hs-48	EIF4G1	111	192	white	rectangle	gene	0.5	black	46	17	3296
+N-Autophagy-2.0-Hs-49	FOXO3	106	102	white	rectangle	gene	0.5	black	46	17	3821
+N-Autophagy-2.0-Hs-5 6	SH3GLB1 UVRAG	156	118	white	rectangle	gene,gene	0.5	black	46	17	10833,/,12640
+N-Autophagy-2.0-Hs-50	AKT1	100	39	white	rectangle	gene	0.5	black	46	17	391
+N-Autophagy-2.0-Hs-56	PDPK1	69	32	white	rectangle	gene	0.5	black	46	17	8816
+N-Autophagy-2.0-Hs-57	PIK3C3	124	4	white	rectangle	gene	0.5	black	46	17	8974
+N-Autophagy-2.0-Hs-58	PRKAA1	184	72	white	rectangle	gene	0.5	black	46	17	9376
+N-Autophagy-2.0-Hs-59	PRKAA1	181	68	white	rectangle	gene	0.5	black	46	17	9376
+N-Autophagy-2.0-Hs-60	PRKAA2	10	30	white	rectangle	gene	0.5	black	46	17	9377
+N-Autophagy-2.0-Hs-61	PRKAA2	7	35	white	rectangle	gene	0.5	black	46	17	9377
+N-Autophagy-2.0-Hs-62	EIF2AK2	22	103	white	rectangle	gene	0.5	black	46	17	9437
+N-Autophagy-2.0-Hs-7 8	EIF4E EIF4EBP1	156	183	white	rectangle	gene,gene	0.5	black	46	17	3287,/,3288
+N-Autophagy-2.0-Hs-9	AKT	73	40	white	rectangle	gene	0.5	black	46	17	AKT

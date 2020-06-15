@@ -1,0 +1,14 @@
+0	1	2
+N-Synuclein subgraph-6	inhibition	N-Synuclein subgraph-15
+N-Synuclein subgraph-6	inhibition	N-Synuclein subgraph-7
+N-Synuclein subgraph-10	activation	N-Synuclein subgraph-7
+N-Synuclein subgraph-3 4 5	activation	N-Synuclein subgraph-15
+N-Synuclein subgraph-3 4 5	activation	N-Synuclein subgraph-12
+N-Synuclein subgraph-7	activation	N-Synuclein subgraph-13
+N-Synuclein subgraph-7	activation	N-Synuclein subgraph-15
+N-Synuclein subgraph-1 2	activation	N-Synuclein subgraph-7
+N-Synuclein subgraph-9	activation	N-Synuclein subgraph-8
+N-Synuclein subgraph-9	activation	N-Synuclein subgraph-8
+N-Synuclein subgraph-11	activation	N-Synuclein subgraph-8
+N-Synuclein subgraph-11	activation	N-Synuclein subgraph-8
+N-Synuclein subgraph-12	activation	N-Synuclein subgraph-15

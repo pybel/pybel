@@ -1,0 +1,84 @@
+0	1	2
+N-MAPK-JNK subgraph-57	activation	N-MAPK-JNK subgraph-65
+N-MAPK-JNK subgraph-57	activation	N-MAPK-JNK subgraph-65
+N-MAPK-JNK subgraph-57	activation	N-MAPK-JNK subgraph-65
+N-MAPK-JNK subgraph-57	activation	N-MAPK-JNK subgraph-65
+N-MAPK-JNK subgraph-57	activation	N-MAPK-JNK subgraph-69
+N-MAPK-JNK subgraph-57	activation	N-MAPK-JNK subgraph-70
+N-MAPK-JNK subgraph-57	activation	N-MAPK-JNK subgraph-66
+N-MAPK-JNK subgraph-57	activation	N-MAPK-JNK subgraph-67
+N-MAPK-JNK subgraph-57	activation	N-MAPK-JNK subgraph-68
+N-MAPK-JNK subgraph-57	activation	N-MAPK-JNK subgraph-51
+N-MAPK-JNK subgraph-57	activation	N-MAPK-JNK subgraph-71
+N-MAPK-JNK subgraph-9 10	activation	N-MAPK-JNK subgraph-44
+N-MAPK-JNK subgraph-74	activation	N-MAPK-JNK subgraph-11 12
+N-MAPK-JNK subgraph-19	activation	N-MAPK-JNK subgraph-49
+N-MAPK-JNK subgraph-19	inhibition	N-MAPK-JNK subgraph-9 10
+N-MAPK-JNK subgraph-19	activation	N-MAPK-JNK subgraph-47
+N-MAPK-JNK subgraph-53	activation	N-MAPK-JNK subgraph-69
+N-MAPK-JNK subgraph-53	activation	N-MAPK-JNK subgraph-70
+N-MAPK-JNK subgraph-53	activation	N-MAPK-JNK subgraph-66
+N-MAPK-JNK subgraph-53	activation	N-MAPK-JNK subgraph-67
+N-MAPK-JNK subgraph-53	activation	N-MAPK-JNK subgraph-68
+N-MAPK-JNK subgraph-53	activation	N-MAPK-JNK subgraph-49
+N-MAPK-JNK subgraph-46	activation	N-MAPK-JNK subgraph-59
+N-MAPK-JNK subgraph-31	activation	N-MAPK-JNK subgraph-52
+N-MAPK-JNK subgraph-76	activation	N-MAPK-JNK subgraph-33
+N-MAPK-JNK subgraph-16	inhibition	N-MAPK-JNK subgraph-52
+N-MAPK-JNK subgraph-62	activation	N-MAPK-JNK subgraph-65
+N-MAPK-JNK subgraph-62	activation	N-MAPK-JNK subgraph-51
+N-MAPK-JNK subgraph-62	activation	N-MAPK-JNK subgraph-71
+N-MAPK-JNK subgraph-62	activation	N-MAPK-JNK subgraph-68
+N-MAPK-JNK subgraph-60	activation	N-MAPK-JNK subgraph-59
+N-MAPK-JNK subgraph-21	activation	N-MAPK-JNK subgraph-51
+N-MAPK-JNK subgraph-36	activation	N-MAPK-JNK subgraph-52
+N-MAPK-JNK subgraph-15	activation	N-MAPK-JNK subgraph-51
+N-MAPK-JNK subgraph-61	activation	N-MAPK-JNK subgraph-48
+N-MAPK-JNK subgraph-3 4 5	activation	N-MAPK-JNK subgraph-34
+N-MAPK-JNK subgraph-24	activation	N-MAPK-JNK subgraph-23
+N-MAPK-JNK subgraph-56	inhibition	N-MAPK-JNK subgraph-54
+N-MAPK-JNK subgraph-56	inhibition	N-MAPK-JNK subgraph-63
+N-MAPK-JNK subgraph-26	activation	N-MAPK-JNK subgraph-44
+N-MAPK-JNK subgraph-54	activation	N-MAPK-JNK subgraph-68
+N-MAPK-JNK subgraph-54	activation	N-MAPK-JNK subgraph-68
+N-MAPK-JNK subgraph-54	activation	N-MAPK-JNK subgraph-69
+N-MAPK-JNK subgraph-54	activation	N-MAPK-JNK subgraph-70
+N-MAPK-JNK subgraph-54	activation	N-MAPK-JNK subgraph-66
+N-MAPK-JNK subgraph-54	activation	N-MAPK-JNK subgraph-67
+N-MAPK-JNK subgraph-54	activation	N-MAPK-JNK subgraph-65
+N-MAPK-JNK subgraph-75	activation	N-MAPK-JNK subgraph-27
+N-MAPK-JNK subgraph-34	inhibition	N-MAPK-JNK subgraph-55
+N-MAPK-JNK subgraph-34	activation	N-MAPK-JNK subgraph-50
+N-MAPK-JNK subgraph-39	activation	N-MAPK-JNK subgraph-65
+N-MAPK-JNK subgraph-39	activation	N-MAPK-JNK subgraph-65
+N-MAPK-JNK subgraph-32	activation	N-MAPK-JNK subgraph-27
+N-MAPK-JNK subgraph-17	activation	N-MAPK-JNK subgraph-45
+N-MAPK-JNK subgraph-40	activation	N-MAPK-JNK subgraph-43
+N-MAPK-JNK subgraph-40	activation	N-MAPK-JNK subgraph-28
+N-MAPK-JNK subgraph-40	activation	N-MAPK-JNK subgraph-1 2
+N-MAPK-JNK subgraph-22	inhibition	N-MAPK-JNK subgraph-52
+N-MAPK-JNK subgraph-44	inhibition	N-MAPK-JNK subgraph-6 7 8
+N-MAPK-JNK subgraph-13 14	activation	N-MAPK-JNK subgraph-35
+N-MAPK-JNK subgraph-64	activation	N-MAPK-JNK subgraph-58
+N-MAPK-JNK subgraph-20	activation	N-MAPK-JNK subgraph-19
+N-MAPK-JNK subgraph-28	activation	N-MAPK-JNK subgraph-1 2
+N-MAPK-JNK subgraph-77	activation	N-MAPK-JNK subgraph-78
+N-MAPK-JNK subgraph-52	activation	N-MAPK-JNK subgraph-24
+N-MAPK-JNK subgraph-52	activation	N-MAPK-JNK subgraph-20
+N-MAPK-JNK subgraph-73	activation	N-MAPK-JNK subgraph-27
+N-MAPK-JNK subgraph-49	activation	N-MAPK-JNK subgraph-47
+N-MAPK-JNK subgraph-18	inhibition	N-MAPK-JNK subgraph-52
+N-MAPK-JNK subgraph-30	activation	N-MAPK-JNK subgraph-52
+N-MAPK-JNK subgraph-6 7 8	activation	N-MAPK-JNK subgraph-59
+N-MAPK-JNK subgraph-37	activation	N-MAPK-JNK subgraph-60
+N-MAPK-JNK subgraph-72	activation	N-MAPK-JNK subgraph-44
+N-MAPK-JNK subgraph-59	activation	N-MAPK-JNK subgraph-65
+N-MAPK-JNK subgraph-59	activation	N-MAPK-JNK subgraph-65
+N-MAPK-JNK subgraph-59	activation	N-MAPK-JNK subgraph-65
+N-MAPK-JNK subgraph-59	activation	N-MAPK-JNK subgraph-65
+N-MAPK-JNK subgraph-59	activation	N-MAPK-JNK subgraph-51
+N-MAPK-JNK subgraph-59	activation	N-MAPK-JNK subgraph-29
+N-MAPK-JNK subgraph-59	activation	N-MAPK-JNK subgraph-48
+N-MAPK-JNK subgraph-59	activation	N-MAPK-JNK subgraph-42
+N-MAPK-JNK subgraph-59	activation	N-MAPK-JNK subgraph-41
+N-MAPK-JNK subgraph-59	activation	N-MAPK-JNK subgraph-25

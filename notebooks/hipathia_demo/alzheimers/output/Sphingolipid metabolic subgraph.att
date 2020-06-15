@@ -1,0 +1,14 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Sphingolipid metabolic subgraph-1 2	N-acetyl-alpha-neuraminyl-(2->3)-beta-D-galactosyl-(1->4)-beta-D-glucose APP	30	117	white	rectangle	gene,gene	0.5	black	46	17	59226,/,620
+N-Sphingolipid metabolic subgraph-12	STK11	66	142	white	rectangle	gene	0.5	black	46	17	11389
+N-Sphingolipid metabolic subgraph-15	APP	58	86	white	rectangle	gene	0.5	black	46	17	620
+N-Sphingolipid metabolic subgraph-16	MAPT	25	65	white	rectangle	gene	0.5	black	46	17	6893
+N-Sphingolipid metabolic subgraph-17	MAPT	33	45	white	rectangle	gene	0.5	black	46	17	6893
+N-Sphingolipid metabolic subgraph-18	MAPT	114	89	white	rectangle	gene	0.5	black	46	17	6893
+N-Sphingolipid metabolic subgraph-19	MAPT	10	80	white	rectangle	gene	0.5	black	46	17	6893
+N-Sphingolipid metabolic subgraph-20	PRKAA1	156	93	white	rectangle	gene	0.5	black	46	17	9376
+N-Sphingolipid metabolic subgraph-3 4	APBB1 Amyloidogenic glycoprotein, intracellular domain, conserved site	106	0	white	rectangle	gene,gene	0.5	black	46	17	581,/,IPR019745
+N-Sphingolipid metabolic subgraph-5	CAMK	68	185	white	rectangle	gene	0.5	black	46	17	CAMK
+N-Sphingolipid metabolic subgraph-6	PRKAC	0	49	white	rectangle	gene	0.5	black	46	17	PRKAC
+N-Sphingolipid metabolic subgraph-7	PRKAC	76	119	white	rectangle	gene	0.5	black	46	17	PRKAC
+N-Sphingolipid metabolic subgraph-8	ST8SIA1	87	37	white	rectangle	gene	0.5	black	46	17	10869

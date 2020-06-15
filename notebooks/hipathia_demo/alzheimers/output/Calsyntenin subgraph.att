@@ -1,0 +1,10 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Calsyntenin subgraph-1 2	CLSTN1 KLC1	144	25	white	rectangle	gene,gene	0.5	black	46	17	17447,/,6387
+N-Calsyntenin subgraph-10	BACE1	3	60	white	rectangle	gene	0.5	black	46	17	933
+N-Calsyntenin subgraph-3	CLSTN1	44	95	white	rectangle	gene	0.5	black	46	17	17447
+N-Calsyntenin subgraph-4	CLSTN2	0	184	white	rectangle	gene	0.5	black	46	17	17448
+N-Calsyntenin subgraph-5	CLSTN3	51	187	white	rectangle	gene	0.5	black	46	17	18371
+N-Calsyntenin subgraph-6	ADAM10	16	149	white	rectangle	gene	0.5	black	46	17	188
+N-Calsyntenin subgraph-7	ADAM17	41	153	white	rectangle	gene	0.5	black	46	17	195
+N-Calsyntenin subgraph-8	APP	97	44	white	rectangle	gene	0.5	black	46	17	620
+N-Calsyntenin subgraph-9	KLC1	122	0	white	rectangle	gene	0.5	black	46	17	6387

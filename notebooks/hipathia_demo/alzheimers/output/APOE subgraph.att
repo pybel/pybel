@@ -1,0 +1,29 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-APOE subgraph-1 2 3	APBA1 APP LRP8	129	0	white	rectangle	gene,gene,gene	0.5	black	46	17	578,/,620,/,6700
+N-APOE subgraph-10 11	APOE APP	0	88	white	rectangle	gene,gene	0.5	black	46	17	613,/,620
+N-APOE subgraph-12 13	APOE APP	75	42	white	rectangle	gene,gene	0.5	black	46	17	613,/,620
+N-APOE subgraph-14 15	APOE LDLR	49	22	white	rectangle	gene,gene	0.5	black	46	17	613,/,6547
+N-APOE subgraph-16 17	APOE LRP1	100	133	white	rectangle	gene,gene	0.5	black	46	17	613,/,6692
+N-APOE subgraph-18 19	APOE LRP8	124	11	white	rectangle	gene,gene	0.5	black	46	17	613,/,6700
+N-APOE subgraph-22	ERK	95	33	white	rectangle	gene	0.5	black	46	17	ERK
+N-APOE subgraph-23	JNK	89	25	white	rectangle	gene	0.5	black	46	17	JNK
+N-APOE subgraph-25	CASR	89	46	white	rectangle	gene	0.5	black	46	17	1514
+N-APOE subgraph-26	DAB1	81	18	white	rectangle	gene	0.5	black	46	17	2661
+N-APOE subgraph-30	IL1B	95	41	white	rectangle	gene	0.5	black	46	17	5992
+N-APOE subgraph-31	APOA2	73	55	white	rectangle	gene	0.5	black	46	17	601
+N-APOE subgraph-33	APOE	85	34	white	rectangle	gene	0.5	black	46	17	613
+N-APOE subgraph-34	APOE	68	30	white	rectangle	gene	0.5	black	46	17	613
+N-APOE subgraph-35	APOE	70	19	white	rectangle	gene	0.5	black	46	17	613
+N-APOE subgraph-36	APP	102	18	white	rectangle	gene	0.5	black	46	17	620
+N-APOE subgraph-37	APP	66	51	white	rectangle	gene	0.5	black	46	17	620
+N-APOE subgraph-38	APP	0	94	white	rectangle	gene	0.5	black	46	17	620
+N-APOE subgraph-39	APP	78	27	white	rectangle	gene	0.5	black	46	17	620
+N-APOE subgraph-4 5 6	APBA2 APP LRP8	136	16	white	rectangle	gene,gene,gene	0.5	black	46	17	579,/,620,/,6700
+N-APOE subgraph-40	LDLR	61	24	white	rectangle	gene	0.5	black	46	17	6547
+N-APOE subgraph-41	LRP1	95	137	white	rectangle	gene	0.5	black	46	17	6692
+N-APOE subgraph-42	LRP1B	81	44	white	rectangle	gene	0.5	black	46	17	6693
+N-APOE subgraph-43	LRP8	136	9	white	rectangle	gene	0.5	black	46	17	6700
+N-APOE subgraph-44	BACE1	130	19	white	rectangle	gene	0.5	black	46	17	933
+N-APOE subgraph-45	BACE2	134	3	white	rectangle	gene	0.5	black	46	17	934
+N-APOE subgraph-46	RELN	77	6	white	rectangle	gene	0.5	black	46	17	9957
+N-APOE subgraph-7 8 9	APBA3 APP LRP8	122	0	white	rectangle	gene,gene,gene	0.5	black	46	17	580,/,620,/,6700

@@ -1,0 +1,24 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Apoptosis signaling subgraph-10 11 12	CASP8 FADD PTPN13	171	72	white	rectangle	gene,gene,gene	0.5	black	46	17	1509,/,3573,/,9646
+N-Apoptosis signaling subgraph-15 16	APBB2 Amyloidogenic glycoprotein, intracellular domain, conserved site	66	162	white	rectangle	gene,gene	0.5	black	46	17	582,/,IPR019745
+N-Apoptosis signaling subgraph-18	CREB	33	43	white	rectangle	gene	0.5	black	46	17	CREB
+N-Apoptosis signaling subgraph-21	Notch	152	126	white	rectangle	gene	0.5	black	46	17	Notch
+N-Apoptosis signaling subgraph-22	TNF	64	6	white	rectangle	gene	0.5	black	46	17	11892
+N-Apoptosis signaling subgraph-23	TP53	106	85	white	rectangle	gene	0.5	black	46	17	11998
+N-Apoptosis signaling subgraph-25	WWOX	30	37	white	rectangle	gene	0.5	black	46	17	12799
+N-Apoptosis signaling subgraph-26	RBPJL	148	131	white	rectangle	gene	0.5	black	46	17	13761
+N-Apoptosis signaling subgraph-28	CASP8	180	71	white	rectangle	gene	0.5	black	46	17	1509
+N-Apoptosis signaling subgraph-32	CTNNB1	61	157	white	rectangle	gene	0.5	black	46	17	2514
+N-Apoptosis signaling subgraph-34	CTSD	102	92	white	rectangle	gene	0.5	black	46	17	2529
+N-Apoptosis signaling subgraph-41	GDNF	8	73	white	rectangle	gene	0.5	black	46	17	4232
+N-Apoptosis signaling subgraph-43	KAT5	2	126	white	rectangle	gene	0.5	black	46	17	5275
+N-Apoptosis signaling subgraph-44	APP	4	119	white	rectangle	gene	0.5	black	46	17	620
+N-Apoptosis signaling subgraph-47	MAPT	120	3	white	rectangle	gene	0.5	black	46	17	6893
+N-Apoptosis signaling subgraph-48	ABL1	125	0	white	rectangle	gene	0.5	black	46	17	76
+N-Apoptosis signaling subgraph-51	PAFAH2	66	14	white	rectangle	gene	0.5	black	46	17	8579
+N-Apoptosis signaling subgraph-58	BCL2	0	71	white	rectangle	gene	0.5	black	46	17	990
+N-Apoptosis signaling subgraph-59	BCL2L1	17	76	white	rectangle	gene	0.5	black	46	17	992
+N-Apoptosis signaling subgraph-60	Amyloidogenic glycoprotein, intracellular domain, conserved site	110	78	white	rectangle	gene	0.5	black	46	17	IPR019745
+N-Apoptosis signaling subgraph-62	Cdh2	125	170	white	rectangle	gene	0.5	black	46	17	88355
+N-Apoptosis signaling subgraph-64	Pparg	132	171	white	rectangle	gene	0.5	black	46	17	97747
+N-Apoptosis signaling subgraph-7 8 9	TRADD CASP8 FADD	187	75	white	rectangle	gene,gene,gene	0.5	black	46	17	12030,/,1509,/,3573

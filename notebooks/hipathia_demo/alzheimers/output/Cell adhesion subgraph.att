@@ -1,0 +1,15 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Cell adhesion subgraph-1 2	SDC1 ITGA5	91	10	white	rectangle	gene,gene	0.5	black	46	17	10658,/,6141
+N-Cell adhesion subgraph-10	TNF	141	122	white	rectangle	gene	0.5	black	46	17	11892
+N-Cell adhesion subgraph-11	SIRT1	9	50	white	rectangle	gene	0.5	black	46	17	14929
+N-Cell adhesion subgraph-12	CD44	71	70	white	rectangle	gene	0.5	black	46	17	1681
+N-Cell adhesion subgraph-13	CDH2	54	84	white	rectangle	gene	0.5	black	46	17	1759
+N-Cell adhesion subgraph-14	ADAM10	62	181	white	rectangle	gene	0.5	black	46	17	188
+N-Cell adhesion subgraph-15	CHI3L1	98	1	white	rectangle	gene	0.5	black	46	17	1932
+N-Cell adhesion subgraph-17	APP	138	142	white	rectangle	gene	0.5	black	46	17	620
+N-Cell adhesion subgraph-18	PSEN1	63	77	white	rectangle	gene	0.5	black	46	17	9508
+N-Cell adhesion subgraph-19	RARB	0	51	white	rectangle	gene	0.5	black	46	17	9865
+N-Cell adhesion subgraph-3 4	SDC1 ITGB3	109	0	white	rectangle	gene,gene	0.5	black	46	17	10658,/,6156
+N-Cell adhesion subgraph-7	Notch	67	190	white	rectangle	gene	0.5	black	46	17	Notch
+N-Cell adhesion subgraph-8	SYP	148	144	white	rectangle	gene	0.5	black	46	17	11506
+N-Cell adhesion subgraph-9	THBS1	143	133	white	rectangle	gene	0.5	black	46	17	11785

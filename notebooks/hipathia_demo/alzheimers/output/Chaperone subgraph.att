@@ -1,0 +1,30 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Chaperone subgraph-1 2	HSPA BAG2	47	41	white	rectangle	gene,gene	0.5	black	46	17	HSPA,/,938
+N-Chaperone subgraph-10	HSPA	49	30	white	rectangle	gene	0.5	black	46	17	HSPA
+N-Chaperone subgraph-11	BDNF	75	130	white	rectangle	gene	0.5	black	46	17	1033
+N-Chaperone subgraph-12	SOD1	100	134	white	rectangle	gene	0.5	black	46	17	11179
+N-Chaperone subgraph-13	TGFBR1	134	6	white	rectangle	gene	0.5	black	46	17	11772
+N-Chaperone subgraph-14	CASP9	0	46	white	rectangle	gene	0.5	black	46	17	1511
+N-Chaperone subgraph-15	CCR2	129	3	white	rectangle	gene	0.5	black	46	17	1603
+N-Chaperone subgraph-16	CDC37	67	39	white	rectangle	gene	0.5	black	46	17	1735
+N-Chaperone subgraph-17	CDK5	76	41	white	rectangle	gene	0.5	black	46	17	1774
+N-Chaperone subgraph-19	HSPB6	139	2	white	rectangle	gene	0.5	black	46	17	26511
+N-Chaperone subgraph-20	HSPB8	85	144	white	rectangle	gene	0.5	black	46	17	30171
+N-Chaperone subgraph-21	AKT1	71	30	white	rectangle	gene	0.5	black	46	17	391
+N-Chaperone subgraph-22	GSK3B	180	75	white	rectangle	gene	0.5	black	46	17	4617
+N-Chaperone subgraph-23	HSF1	190	73	white	rectangle	gene	0.5	black	46	17	5224
+N-Chaperone subgraph-24	HSPA1B	5	40	white	rectangle	gene	0.5	black	46	17	5233
+N-Chaperone subgraph-25	HSPB2	134	0	white	rectangle	gene	0.5	black	46	17	5247
+N-Chaperone subgraph-26	HSPB3	129	13	white	rectangle	gene	0.5	black	46	17	5248
+N-Chaperone subgraph-27	HSPD1	3	53	white	rectangle	gene	0.5	black	46	17	5261
+N-Chaperone subgraph-28	IFNG	62	132	white	rectangle	gene	0.5	black	46	17	5438
+N-Chaperone subgraph-29	IL1B	68	125	white	rectangle	gene	0.5	black	46	17	5992
+N-Chaperone subgraph-30	CXCL8	138	9	white	rectangle	gene	0.5	black	46	17	6025
+N-Chaperone subgraph-31	APP	89	134	white	rectangle	gene	0.5	black	46	17	620
+N-Chaperone subgraph-32	MAPT	56	38	white	rectangle	gene	0.5	black	46	17	6893
+N-Chaperone subgraph-33	MYC	183	82	white	rectangle	gene	0.5	black	46	17	7553
+N-Chaperone subgraph-34	Atf4	99	146	white	rectangle	gene	0.5	black	46	17	88096
+N-Chaperone subgraph-35	Hspa5	96	141	white	rectangle	gene	0.5	black	46	17	95835
+N-Chaperone subgraph-5 6	HSPB8 BAG3	94	126	white	rectangle	gene,gene	0.5	black	46	17	30171,/,939
+N-Chaperone subgraph-7 8	APP LAMP2	53	136	white	rectangle	gene,gene	0.5	black	46	17	620,/,6501
+N-Chaperone subgraph-9	HSP90	61	44	white	rectangle	gene	0.5	black	46	17	HSP90

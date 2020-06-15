@@ -1,0 +1,123 @@
+0	1	2
+N-MAPK-ERK subgraph-10 11 12	activation	N-MAPK-ERK subgraph-52
+N-MAPK-ERK subgraph-10 11 12	activation	N-MAPK-ERK subgraph-104
+N-MAPK-ERK subgraph-79	activation	N-MAPK-ERK subgraph-78
+N-MAPK-ERK subgraph-73	inhibition	N-MAPK-ERK subgraph-72
+N-MAPK-ERK subgraph-109	activation	N-MAPK-ERK subgraph-108
+N-MAPK-ERK subgraph-17 18	activation	N-MAPK-ERK subgraph-105
+N-MAPK-ERK subgraph-17 18	activation	N-MAPK-ERK subgraph-104
+N-MAPK-ERK subgraph-17 18	activation	N-MAPK-ERK subgraph-62
+N-MAPK-ERK subgraph-39	activation	N-MAPK-ERK subgraph-73
+N-MAPK-ERK subgraph-39	activation	N-MAPK-ERK subgraph-71
+N-MAPK-ERK subgraph-39	inhibition	N-MAPK-ERK subgraph-100
+N-MAPK-ERK subgraph-98	activation	N-MAPK-ERK subgraph-34 35
+N-MAPK-ERK subgraph-95	inhibition	N-MAPK-ERK subgraph-86
+N-MAPK-ERK subgraph-49	activation	N-MAPK-ERK subgraph-68
+N-MAPK-ERK subgraph-49	activation	N-MAPK-ERK subgraph-42
+N-MAPK-ERK subgraph-40	activation	N-MAPK-ERK subgraph-43
+N-MAPK-ERK subgraph-42	activation	N-MAPK-ERK subgraph-41
+N-MAPK-ERK subgraph-5 6 7	activation	N-MAPK-ERK subgraph-44
+N-MAPK-ERK subgraph-5 6 7	activation	N-MAPK-ERK subgraph-44
+N-MAPK-ERK subgraph-8 9	activation	N-MAPK-ERK subgraph-44
+N-MAPK-ERK subgraph-8 9	activation	N-MAPK-ERK subgraph-44
+N-MAPK-ERK subgraph-15 16	activation	N-MAPK-ERK subgraph-44
+N-MAPK-ERK subgraph-52	activation	N-MAPK-ERK subgraph-44
+N-MAPK-ERK subgraph-52	activation	N-MAPK-ERK subgraph-90
+N-MAPK-ERK subgraph-50	activation	N-MAPK-ERK subgraph-44
+N-MAPK-ERK subgraph-50	activation	N-MAPK-ERK subgraph-44
+N-MAPK-ERK subgraph-50	activation	N-MAPK-ERK subgraph-47
+N-MAPK-ERK subgraph-74	activation	N-MAPK-ERK subgraph-75
+N-MAPK-ERK subgraph-74	activation	N-MAPK-ERK subgraph-1 2
+N-MAPK-ERK subgraph-74	activation	N-MAPK-ERK subgraph-25 26
+N-MAPK-ERK subgraph-88	activation	N-MAPK-ERK subgraph-8 9
+N-MAPK-ERK subgraph-88	activation	N-MAPK-ERK subgraph-27 28
+N-MAPK-ERK subgraph-19 20 21	activation	N-MAPK-ERK subgraph-58
+N-MAPK-ERK subgraph-19 20 21	activation	N-MAPK-ERK subgraph-59
+N-MAPK-ERK subgraph-63	inhibition	N-MAPK-ERK subgraph-13 14
+N-MAPK-ERK subgraph-101	activation	N-MAPK-ERK subgraph-43
+N-MAPK-ERK subgraph-101	activation	N-MAPK-ERK subgraph-42
+N-MAPK-ERK subgraph-104	activation	N-MAPK-ERK subgraph-91
+N-MAPK-ERK subgraph-104	activation	N-MAPK-ERK subgraph-93
+N-MAPK-ERK subgraph-104	activation	N-MAPK-ERK subgraph-44
+N-MAPK-ERK subgraph-36 37	activation	N-MAPK-ERK subgraph-44
+N-MAPK-ERK subgraph-36 37	activation	N-MAPK-ERK subgraph-44
+N-MAPK-ERK subgraph-102	activation	N-MAPK-ERK subgraph-64
+N-MAPK-ERK subgraph-68	activation	N-MAPK-ERK subgraph-67
+N-MAPK-ERK subgraph-56	activation	N-MAPK-ERK subgraph-65
+N-MAPK-ERK subgraph-76	activation	N-MAPK-ERK subgraph-77
+N-MAPK-ERK subgraph-76	activation	N-MAPK-ERK subgraph-1 2
+N-MAPK-ERK subgraph-76	activation	N-MAPK-ERK subgraph-25 26
+N-MAPK-ERK subgraph-61	activation	N-MAPK-ERK subgraph-91
+N-MAPK-ERK subgraph-60	activation	N-MAPK-ERK subgraph-42
+N-MAPK-ERK subgraph-77	activation	N-MAPK-ERK subgraph-79
+N-MAPK-ERK subgraph-77	activation	N-MAPK-ERK subgraph-81
+N-MAPK-ERK subgraph-77	activation	N-MAPK-ERK subgraph-83
+N-MAPK-ERK subgraph-87	activation	N-MAPK-ERK subgraph-8 9
+N-MAPK-ERK subgraph-87	activation	N-MAPK-ERK subgraph-19 20 21
+N-MAPK-ERK subgraph-108	activation	N-MAPK-ERK subgraph-53
+N-MAPK-ERK subgraph-111	activation	N-MAPK-ERK subgraph-108
+N-MAPK-ERK subgraph-111	activation	N-MAPK-ERK subgraph-108
+N-MAPK-ERK subgraph-111	activation	N-MAPK-ERK subgraph-53
+N-MAPK-ERK subgraph-111	activation	N-MAPK-ERK subgraph-109
+N-MAPK-ERK subgraph-32 33	activation	N-MAPK-ERK subgraph-50
+N-MAPK-ERK subgraph-29 30 31	activation	N-MAPK-ERK subgraph-44
+N-MAPK-ERK subgraph-53	activation	N-MAPK-ERK subgraph-107
+N-MAPK-ERK subgraph-53	activation	N-MAPK-ERK subgraph-106
+N-MAPK-ERK subgraph-44	activation	N-MAPK-ERK subgraph-99
+N-MAPK-ERK subgraph-44	activation	N-MAPK-ERK subgraph-96
+N-MAPK-ERK subgraph-44	activation	N-MAPK-ERK subgraph-96
+N-MAPK-ERK subgraph-44	activation	N-MAPK-ERK subgraph-96
+N-MAPK-ERK subgraph-44	activation	N-MAPK-ERK subgraph-96
+N-MAPK-ERK subgraph-44	activation	N-MAPK-ERK subgraph-43
+N-MAPK-ERK subgraph-44	activation	N-MAPK-ERK subgraph-41
+N-MAPK-ERK subgraph-44	activation	N-MAPK-ERK subgraph-97
+N-MAPK-ERK subgraph-44	activation	N-MAPK-ERK subgraph-69
+N-MAPK-ERK subgraph-44	activation	N-MAPK-ERK subgraph-90
+N-MAPK-ERK subgraph-44	activation	N-MAPK-ERK subgraph-68
+N-MAPK-ERK subgraph-44	activation	N-MAPK-ERK subgraph-55
+N-MAPK-ERK subgraph-44	activation	N-MAPK-ERK subgraph-56
+N-MAPK-ERK subgraph-44	activation	N-MAPK-ERK subgraph-42
+N-MAPK-ERK subgraph-86	inhibition	N-MAPK-ERK subgraph-63
+N-MAPK-ERK subgraph-86	activation	N-MAPK-ERK subgraph-92
+N-MAPK-ERK subgraph-86	activation	N-MAPK-ERK subgraph-96
+N-MAPK-ERK subgraph-86	activation	N-MAPK-ERK subgraph-42
+N-MAPK-ERK subgraph-93	activation	N-MAPK-ERK subgraph-99
+N-MAPK-ERK subgraph-58	activation	N-MAPK-ERK subgraph-44
+N-MAPK-ERK subgraph-58	activation	N-MAPK-ERK subgraph-91
+N-MAPK-ERK subgraph-58	activation	N-MAPK-ERK subgraph-93
+N-MAPK-ERK subgraph-105	activation	N-MAPK-ERK subgraph-91
+N-MAPK-ERK subgraph-105	activation	N-MAPK-ERK subgraph-93
+N-MAPK-ERK subgraph-81	activation	N-MAPK-ERK subgraph-80
+N-MAPK-ERK subgraph-82	activation	N-MAPK-ERK subgraph-70
+N-MAPK-ERK subgraph-46	activation	N-MAPK-ERK subgraph-44
+N-MAPK-ERK subgraph-51	activation	N-MAPK-ERK subgraph-44
+N-MAPK-ERK subgraph-1 2	activation	N-MAPK-ERK subgraph-10 11 12
+N-MAPK-ERK subgraph-25 26	activation	N-MAPK-ERK subgraph-10 11 12
+N-MAPK-ERK subgraph-47	activation	N-MAPK-ERK subgraph-44
+N-MAPK-ERK subgraph-84	activation	N-MAPK-ERK subgraph-44
+N-MAPK-ERK subgraph-84	inhibition	N-MAPK-ERK subgraph-49
+N-MAPK-ERK subgraph-75	activation	N-MAPK-ERK subgraph-83
+N-MAPK-ERK subgraph-103	activation	N-MAPK-ERK subgraph-70
+N-MAPK-ERK subgraph-89	inhibition	N-MAPK-ERK subgraph-64
+N-MAPK-ERK subgraph-110	activation	N-MAPK-ERK subgraph-54
+N-MAPK-ERK subgraph-3 4	activation	N-MAPK-ERK subgraph-50
+N-MAPK-ERK subgraph-48	activation	N-MAPK-ERK subgraph-44
+N-MAPK-ERK subgraph-83	activation	N-MAPK-ERK subgraph-82
+N-MAPK-ERK subgraph-38	inhibition	N-MAPK-ERK subgraph-44
+N-MAPK-ERK subgraph-55	activation	N-MAPK-ERK subgraph-43
+N-MAPK-ERK subgraph-62	activation	N-MAPK-ERK subgraph-91
+N-MAPK-ERK subgraph-62	activation	N-MAPK-ERK subgraph-93
+N-MAPK-ERK subgraph-92	inhibition	N-MAPK-ERK subgraph-63
+N-MAPK-ERK subgraph-94	activation	N-MAPK-ERK subgraph-90
+N-MAPK-ERK subgraph-59	activation	N-MAPK-ERK subgraph-44
+N-MAPK-ERK subgraph-59	activation	N-MAPK-ERK subgraph-91
+N-MAPK-ERK subgraph-59	activation	N-MAPK-ERK subgraph-93
+N-MAPK-ERK subgraph-57	activation	N-MAPK-ERK subgraph-43
+N-MAPK-ERK subgraph-22 23 24	activation	N-MAPK-ERK subgraph-58
+N-MAPK-ERK subgraph-22 23 24	activation	N-MAPK-ERK subgraph-59
+N-MAPK-ERK subgraph-22 23 24	activation	N-MAPK-ERK subgraph-52
+N-MAPK-ERK subgraph-22 23 24	activation	N-MAPK-ERK subgraph-51
+N-MAPK-ERK subgraph-22 23 24	activation	N-MAPK-ERK subgraph-50
+N-MAPK-ERK subgraph-27 28	activation	N-MAPK-ERK subgraph-105
+N-MAPK-ERK subgraph-27 28	activation	N-MAPK-ERK subgraph-104
+N-MAPK-ERK subgraph-27 28	activation	N-MAPK-ERK subgraph-62

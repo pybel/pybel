@@ -1,0 +1,4 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Hypoxia response subgraph-1	HIF1A	0	0	white	rectangle	gene	0.5	black	46	17	4910
+N-Hypoxia response subgraph-2	APP	199	32	white	rectangle	gene	0.5	black	46	17	620
+N-Hypoxia response subgraph-3	BACE1	99	16	white	rectangle	gene	0.5	black	46	17	933

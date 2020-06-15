@@ -1,0 +1,68 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Caspase subgraph-1 2	TNFRSF10B TNFSF10	79	69	white	rectangle	gene,gene	0.5	black	46	17	11905,/,11925
+N-Caspase subgraph-14 15 16	CASP8 FADD PTPN13	75	69	white	rectangle	gene,gene,gene	0.5	black	46	17	1509,/,3573,/,9646
+N-Caspase subgraph-17 18	CYCS APAF1	50	115	white	rectangle	gene,gene	0.5	black	46	17	19986,/,576
+N-Caspase subgraph-19	AKT	62	138	white	rectangle	gene	0.5	black	46	17	AKT
+N-Caspase subgraph-20	Caspase	86	179	white	rectangle	gene	0.5	black	46	17	Caspase
+N-Caspase subgraph-21	GSK3	93	0	white	rectangle	gene	0.5	black	46	17	GSK3
+N-Caspase subgraph-22	GSK3	84	3	white	rectangle	gene	0.5	black	46	17	GSK3
+N-Caspase subgraph-24	Caspases	150	8	white	rectangle	gene	0.5	black	46	17	468
+N-Caspase subgraph-25	BID	99	92	white	rectangle	gene	0.5	black	46	17	1050
+N-Caspase subgraph-26	SCAF11	96	98	white	rectangle	gene	0.5	black	46	17	10784
+N-Caspase subgraph-27	ACHE	86	184	white	rectangle	gene	0.5	black	46	17	108
+N-Caspase subgraph-28	SNCA	112	119	white	rectangle	gene	0.5	black	46	17	11138
+N-Caspase subgraph-29	SOD1	42	112	white	rectangle	gene	0.5	black	46	17	11179
+N-Caspase subgraph-30	TGFB1	86	82	white	rectangle	gene	0.5	black	46	17	11766
+N-Caspase subgraph-32	HTRA2	175	114	white	rectangle	gene	0.5	black	46	17	14348
+N-Caspase subgraph-33	SLC25A21	146	14	white	rectangle	gene	0.5	black	46	17	14411
+N-Caspase subgraph-34	CASP1	101	103	white	rectangle	gene	0.5	black	46	17	1499
+N-Caspase subgraph-36	CASP3	49	90	white	rectangle	gene	0.5	black	46	17	1504
+N-Caspase subgraph-37	CASP4	41	100	white	rectangle	gene	0.5	black	46	17	1505
+N-Caspase subgraph-38	CASP6	57	91	white	rectangle	gene	0.5	black	46	17	1507
+N-Caspase subgraph-39	CASP7	27	86	white	rectangle	gene	0.5	black	46	17	1508
+N-Caspase subgraph-40	CASP8	75	77	white	rectangle	gene	0.5	black	46	17	1509
+N-Caspase subgraph-41	CASP9	52	121	white	rectangle	gene	0.5	black	46	17	1511
+N-Caspase subgraph-42	CASP9	59	131	white	rectangle	gene	0.5	black	46	17	1511
+N-Caspase subgraph-43	NLRP3	116	115	white	rectangle	gene	0.5	black	46	17	16400
+N-Caspase subgraph-44	CDK5R1	148	56	white	rectangle	gene	0.5	black	46	17	1775
+N-Caspase subgraph-45	CDKN1A	42	90	white	rectangle	gene	0.5	black	46	17	1784
+N-Caspase subgraph-46	CYCS	48	106	white	rectangle	gene	0.5	black	46	17	19986
+N-Caspase subgraph-47	CST3	84	86	white	rectangle	gene	0.5	black	46	17	2475
+N-Caspase subgraph-48	CTSB	91	93	white	rectangle	gene	0.5	black	46	17	2527
+N-Caspase subgraph-49	CTSL	48	81	white	rectangle	gene	0.5	black	46	17	2537
+N-Caspase subgraph-5 6 7	TRADD CASP8 FADD	81	73	white	rectangle	gene,gene,gene	0.5	black	46	17	12030,/,1509,/,3573
+N-Caspase subgraph-50	GDNF	40	85	white	rectangle	gene	0.5	black	46	17	4232
+N-Caspase subgraph-51	HSPA1B	53	128	white	rectangle	gene	0.5	black	46	17	5233
+N-Caspase subgraph-52	HSPD1	48	128	white	rectangle	gene	0.5	black	46	17	5261
+N-Caspase subgraph-53	XIAP	169	110	white	rectangle	gene	0.5	black	46	17	592
+N-Caspase subgraph-54	IL1B	109	112	white	rectangle	gene	0.5	black	46	17	5992
+N-Caspase subgraph-55	APP	61	83	white	rectangle	gene	0.5	black	46	17	620
+N-Caspase subgraph-56	APP	48	155	white	rectangle	gene	0.5	black	46	17	620
+N-Caspase subgraph-57	APP	79	87	white	rectangle	gene	0.5	black	46	17	620
+N-Caspase subgraph-58	APP	65	88	white	rectangle	gene	0.5	black	46	17	620
+N-Caspase subgraph-59	APP	59	75	white	rectangle	gene	0.5	black	46	17	620
+N-Caspase subgraph-60	MAPT	49	95	white	rectangle	gene	0.5	black	46	17	6893
+N-Caspase subgraph-61	NFKB1	50	150	white	rectangle	gene	0.5	black	46	17	7794
+N-Caspase subgraph-62	NGF	87	191	white	rectangle	gene	0.5	black	46	17	7808
+N-Caspase subgraph-63	PDCD1	36	88	white	rectangle	gene	0.5	black	46	17	8760
+N-Caspase subgraph-64	PTPA	45	85	white	rectangle	gene	0.5	black	46	17	9308
+N-Caspase subgraph-65	PRKCD	89	1	white	rectangle	gene	0.5	black	46	17	9399
+N-Caspase subgraph-66	EIF2AK2	72	71	white	rectangle	gene	0.5	black	46	17	9437
+N-Caspase subgraph-67	BAX	32	79	white	rectangle	gene	0.5	black	46	17	959
+N-Caspase subgraph-68	BCL2	43	96	white	rectangle	gene	0.5	black	46	17	990
+N-Caspase subgraph-69	BCL2L1	36	76	white	rectangle	gene	0.5	black	46	17	992
+N-Caspase subgraph-70	Xiap	157	60	white	rectangle	gene	0.5	black	46	17	107572
+N-Caspase subgraph-71	Casp3	151	63	white	rectangle	gene	0.5	black	46	17	107739
+N-Caspase subgraph-72	Bad	159	85	white	rectangle	gene	0.5	black	46	17	1096330
+N-Caspase subgraph-73	Casp9	156	65	white	rectangle	gene	0.5	black	46	17	1277950
+N-Caspase subgraph-74	Retn	151	70	white	rectangle	gene	0.5	black	46	17	1888506
+N-Caspase subgraph-75	Afap1	165	73	white	rectangle	gene	0.5	black	46	17	1917542
+N-Caspase subgraph-76	Cysltr1	153	55	white	rectangle	gene	0.5	black	46	17	1926218
+N-Caspase subgraph-77	Bcl2	150	77	white	rectangle	gene	0.5	black	46	17	88138
+N-Caspase subgraph-78	Bcl2l1	154	88	white	rectangle	gene	0.5	black	46	17	88139
+N-Caspase subgraph-79	Cycs	156	73	white	rectangle	gene	0.5	black	46	17	88578
+N-Caspase subgraph-8 9	TNFRSF21 APP	59	97	white	rectangle	gene,gene	0.5	black	46	17	13469,/,620
+N-Caspase subgraph-80	Sod1	152	81	white	rectangle	gene	0.5	black	46	17	98351
+N-Caspase subgraph-81	Bax	151	72	white	rectangle	gene	0.5	black	46	17	99702
+N-Caspase subgraph-82	Casp3	3	145	white	rectangle	gene	0.5	black	46	17	2275
+N-Caspase subgraph-83	Casp9	0	142	white	rectangle	gene	0.5	black	46	17	61867

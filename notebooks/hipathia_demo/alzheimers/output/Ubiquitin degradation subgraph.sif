@@ -1,0 +1,27 @@
+0	1	2
+N-Ubiquitin degradation subgraph-15	activation	N-Ubiquitin degradation subgraph-31
+N-Ubiquitin degradation subgraph-18	activation	N-Ubiquitin degradation subgraph-26
+N-Ubiquitin degradation subgraph-3 4	activation	N-Ubiquitin degradation subgraph-33
+N-Ubiquitin degradation subgraph-34	inhibition	N-Ubiquitin degradation subgraph-7 8
+N-Ubiquitin degradation subgraph-34	inhibition	N-Ubiquitin degradation subgraph-21
+N-Ubiquitin degradation subgraph-12 13	activation	N-Ubiquitin degradation subgraph-3 4
+N-Ubiquitin degradation subgraph-20	activation	N-Ubiquitin degradation subgraph-28
+N-Ubiquitin degradation subgraph-20	activation	N-Ubiquitin degradation subgraph-17
+N-Ubiquitin degradation subgraph-20	activation	N-Ubiquitin degradation subgraph-30
+N-Ubiquitin degradation subgraph-30	activation	N-Ubiquitin degradation subgraph-29
+N-Ubiquitin degradation subgraph-35	inhibition	N-Ubiquitin degradation subgraph-7 8
+N-Ubiquitin degradation subgraph-35	inhibition	N-Ubiquitin degradation subgraph-21
+N-Ubiquitin degradation subgraph-26	activation	N-Ubiquitin degradation subgraph-24
+N-Ubiquitin degradation subgraph-26	inhibition	N-Ubiquitin degradation subgraph-25
+N-Ubiquitin degradation subgraph-9 10 11	inhibition	N-Ubiquitin degradation subgraph-31
+N-Ubiquitin degradation subgraph-1 2	activation	N-Ubiquitin degradation subgraph-23
+N-Ubiquitin degradation subgraph-37	inhibition	N-Ubiquitin degradation subgraph-31
+N-Ubiquitin degradation subgraph-37	inhibition	N-Ubiquitin degradation subgraph-31
+N-Ubiquitin degradation subgraph-36	activation	N-Ubiquitin degradation subgraph-26
+N-Ubiquitin degradation subgraph-36	activation	N-Ubiquitin degradation subgraph-26
+N-Ubiquitin degradation subgraph-33	activation	N-Ubiquitin degradation subgraph-5 6
+N-Ubiquitin degradation subgraph-33	activation	N-Ubiquitin degradation subgraph-32
+N-Ubiquitin degradation subgraph-33	activation	N-Ubiquitin degradation subgraph-16
+N-Ubiquitin degradation subgraph-33	activation	N-Ubiquitin degradation subgraph-14
+N-Ubiquitin degradation subgraph-23	activation	N-Ubiquitin degradation subgraph-22
+N-Ubiquitin degradation subgraph-38	activation	N-Ubiquitin degradation subgraph-19
