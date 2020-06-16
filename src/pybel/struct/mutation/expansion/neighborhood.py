@@ -6,7 +6,7 @@ from typing import Iterable
 
 from ...filters.node_predicates import is_pathology
 from ...pipeline import uni_in_place_transformation
-from ...utils import update_metadata, update_node_helper
+from ...utils import update_metadata
 from ....dsl import BaseEntity
 
 __all__ = [
@@ -40,7 +40,6 @@ def expand_node_predecessors(universe, graph, node: BaseEntity) -> None:
         if successor not in skip_successors
     )
 
-    update_node_helper(universe, graph)
     update_metadata(universe, graph)
 
 
@@ -66,7 +65,6 @@ def expand_node_successors(universe, graph, node: BaseEntity) -> None:
         if predecessor not in skip_predecessors
     )
 
-    update_node_helper(universe, graph)
     update_metadata(universe, graph)
 
 

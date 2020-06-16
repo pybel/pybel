@@ -53,6 +53,21 @@ Graph
     .. automethod:: __and__
     .. automethod:: __iand__
 
+
+Dispatches
+~~~~~~~~~~
+Dispatches are classes that enable easy access to summary, mutation, and other functions
+that consume graphs directly through the :class:`pybel.BELGraph` interface.
+
+.. autoclass:: pybel.struct.graph.CountDispatch
+    :members:
+
+.. autoclass:: pybel.struct.graph.InduceDispatch
+    :members:
+
+.. autoclass:: pybel.struct.graph.PlotDispatch
+    :members:
+
 Nodes
 -----
 Nodes (or *entities*) in a :class:`pybel.BELGraph` represent physical entities' abundances. Most contain information

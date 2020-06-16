@@ -3,6 +3,7 @@
 """Contains the main data structure for PyBEL."""
 
 import logging
+import warnings
 from collections import defaultdict
 from copy import deepcopy
 from functools import partialmethod
@@ -111,6 +112,32 @@ class BELGraph(nx.MultiDiGraph):
 
         if path:
             self.path = path
+
+        self._count = CountDispatch(self)
+        self._induce = InduceDispatch(self)
+        self._plot = PlotDispatch(self)
+
+    @property
+    def count(self) -> 'CountDispatch':  # noqa: D401
+        """A dispatch to count functions.
+
+        Can be used like this:
+
+        >>> from pybel.examples import sialic_acid_graph
+        >>> sialic_acid_graph.count.functions()
+        Counter({'Protein': 7, 'Complex': 1, 'Abundance': 1})
+        """
+        return self._count
+
+    @property
+    def induce(self) -> 'InduceDispatch':  # noqa: D401
+        """A dispatch to mutate the graph."""
+        return self._induce
+
+    @property
+    def plot(self) -> 'PlotDispatch':  # noqa: D401
+        """A dispatch to plot the graph using :mod:`matplotlib` and :mod:`seaborn`."""
+        return self._plot
 
     @property
     def path(self) -> Optional[str]:  # noqa: D401
@@ -665,8 +692,7 @@ class BELGraph(nx.MultiDiGraph):
     def __add__(self, other: 'BELGraph') -> 'BELGraph':
         """Copy this graph and join it with another graph with it using :func:`pybel.struct.left_full_join`.
 
-        :param BELGraph other: Another BEL graph
-        :rtype: BELGraph
+        :param other: Another BEL graph
 
         Example usage:
 
@@ -685,8 +711,7 @@ class BELGraph(nx.MultiDiGraph):
     def __iadd__(self, other: 'BELGraph') -> 'BELGraph':
         """Join another graph into this one, in-place, using :func:`pybel.struct.left_full_join`.
 
-        :param BELGraph other: Another BEL graph
-        :rtype: BELGraph
+        :param other: Another BEL graph
 
         Example usage:
 
@@ -706,8 +731,7 @@ class BELGraph(nx.MultiDiGraph):
 
         Uses :func:`pybel.struct.left_outer_join`.
 
-        :param BELGraph other: Another BEL graph
-        :rtype: BELGraph
+        :param other: Another BEL graph
 
         Example usage:
 
@@ -726,8 +750,7 @@ class BELGraph(nx.MultiDiGraph):
     def __iand__(self, other: 'BELGraph') -> 'BELGraph':
         """Join another graph into this one, in-place, using :func:`pybel.struct.left_outer_join`.
 
-        :param BELGraph other: Another BEL graph
-        :rtype: BELGraph
+        :param other: Another BEL graph
 
         Example usage:
 
@@ -745,8 +768,7 @@ class BELGraph(nx.MultiDiGraph):
     def __xor__(self, other: 'BELGraph') -> 'BELGraph':
         """Join this graph with another using :func:`pybel.struct.left_node_intersection_join`.
 
-        :param BELGraph other: Another BEL graph
-        :rtype: BELGraph
+        :param other: Another BEL graph
 
         Example usage:
 
@@ -763,6 +785,7 @@ class BELGraph(nx.MultiDiGraph):
     @staticmethod
     def node_to_bel(n: BaseEntity) -> str:
         """Serialize a node as BEL."""
+        warnings.warn('use node.as_bel()', DeprecationWarning)
         return n.as_bel()
 
     @staticmethod
@@ -900,3 +923,71 @@ def _handle_citation(citation: Union[str, Tuple[str, str], CitationDict]) -> Cit
         raise ValueError('citation was None')
     else:
         raise TypeError('citation is the wrong type: {}'.format(citation))
+
+
+class Dispatch:
+    def __init__(self, graph: BELGraph):
+        self.graph = graph
+
+
+class CountDispatch(Dispatch):
+    """A dispatch for count functions that can be found at :data:`pybel.BELGraph.count`."""
+
+    def functions(self):
+        """Count the functions in a graph.
+
+        >>> from pybel.examples import sialic_acid_graph
+        >>> sialic_acid_graph.count.functions()
+        Counter({'Protein': 7, 'Complex': 1, 'Abundance': 1})
+        """
+        from .summary import count_functions
+        return count_functions(self.graph)
+
+    def namespaces(self):
+        from .summary import count_namespaces
+        return count_namespaces(self.graph)
+
+    def pathologies(self):
+        from .summary import count_pathologies
+        return count_pathologies(self.graph)
+
+    def annotations(self):
+        from .summary import count_annotations
+        return count_annotations(self.graph)
+
+    def variants(self):
+        from .summary import count_variants
+        return count_variants(self.graph)
+
+    def relations(self):
+        from .summary import count_relations
+        return count_relations(self.graph)
+
+    def error_types(self):
+        from .summary import count_error_types
+        return count_error_types(self.graph)
+
+    def names_by_namespace(self, namespace: str):
+        from .summary import count_names_by_namespace
+        return count_names_by_namespace(self.graph, namespace=namespace)
+
+
+class PlotDispatch(Dispatch):
+    """A dispatch for count functions that can be found at :data:`pybel.BELGraph.plot`."""
+
+
+class InduceDispatch(Dispatch):
+    """A dispatch for count functions that can be found at :data:`pybel.BELGraph.induce`."""
+
+    def neighborhood(self, nodes: Iterable[BaseEntity]) -> Optional[BELGraph]:
+        """Induce a subgraph around the neighborhood."""
+        from .mutation import get_subgraph_by_neighborhood
+        return get_subgraph_by_neighborhood(self.graph, nodes)
+
+    def random(self, **kwargs) -> Optional[BELGraph]:
+        from .mutation import get_random_subgraph
+        return get_random_subgraph(self.graph, **kwargs)
+
+    def annotation(self, prefix: str, identifier: str) -> Optional[BELGraph]:
+        from .mutation import get_subgraph_by_annotation_value
+        return get_subgraph_by_annotation_value(self.graph, prefix, identifier)

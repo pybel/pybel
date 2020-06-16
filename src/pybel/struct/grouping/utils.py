@@ -2,7 +2,9 @@
 
 """Utility functions for grouping sub-graphs."""
 
-from ..utils import update_metadata, update_node_helper
+import warnings
+
+from ..utils import update_metadata
 
 __all__ = [
     'cleanup',
@@ -15,6 +17,6 @@ def cleanup(graph, subgraphs):
     :type graph: pybel.BELGraph
     :type subgraphs: dict[Any,pybel.BELGraph]
     """
+    warnings.warn('Will be removed before next release', DeprecationWarning)
     for subgraph in subgraphs.values():
-        update_node_helper(graph, subgraph)
         update_metadata(graph, subgraph)

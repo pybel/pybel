@@ -9,8 +9,9 @@ from operator import itemgetter
 from typing import Any, Iterable, Mapping, Optional, Set, Tuple
 
 from ..utils import remove_isolated_nodes
+from ...graph import BELGraph
 from ...pipeline import transformation
-from ...utils import update_metadata, update_node_helper
+from ...utils import update_metadata
 from ....dsl import BaseEntity
 
 __all__ = [
@@ -22,10 +23,10 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-def _random_edge_iterator(graph, n_edges: int) -> Iterable[Tuple[BaseEntity, BaseEntity, int, Mapping]]:
+def _random_edge_iterator(graph: BELGraph, n_edges: int) -> Iterable[Tuple[BaseEntity, BaseEntity, int, Mapping]]:
     """Get a random set of edges from the graph and randomly samples a key from each.
 
-    :type graph: pybel.BELGraph
+    :param graph: A BEL graph
     :param n_edges: Number of edges to randomly select from the given graph
     """
     edges = list(graph.edges())
@@ -37,7 +38,7 @@ def _random_edge_iterator(graph, n_edges: int) -> Iterable[Tuple[BaseEntity, Bas
 
 
 @transformation
-def get_graph_with_random_edges(graph, n_edges: int):
+def get_graph_with_random_edges(graph: BELGraph, n_edges: int) -> BELGraph:
     """Build a new graph from a seeding of edges.
 
     :type graph: pybel.BELGraph
@@ -48,7 +49,6 @@ def get_graph_with_random_edges(graph, n_edges: int):
     result.add_edges_from(_random_edge_iterator(graph, n_edges))
 
     update_metadata(graph, result)
-    update_node_helper(graph, result)
     return result
 
 
@@ -170,17 +170,22 @@ def _helper(
 
 
 @transformation
-def get_random_subgraph(graph, number_edges=None, number_seed_edges=None, seed=None, invert_degrees=None):
+def get_random_subgraph(
+    graph: BELGraph,
+    number_edges: Optional[int] = None,
+    number_seed_edges: Optional[int] = None,
+    seed: Optional[int] = None,
+    invert_degrees: Optional[bool] = None,
+) -> BELGraph:
     """Generate a random subgraph based on weighted random walks from random seed edges.
 
     :type graph: pybel.BELGraph graph
-    :param Optional[int] number_edges: Maximum number of edges. Defaults to
+    :param number_edges: Maximum number of edges. Defaults to
      :data:`pybel_tools.constants.SAMPLE_RANDOM_EDGE_COUNT` (250).
-    :param Optional[int] number_seed_edges: Number of nodes to start with (which likely results in different components
+    :param number_seed_edges: Number of nodes to start with (which likely results in different components
      in large graphs). Defaults to :data:`SAMPLE_RANDOM_EDGE_SEED_COUNT` (5).
-    :param Optional[int] seed: A seed for the random state
-    :param Optional[bool] invert_degrees: Should the degrees be inverted? Defaults to true.
-    :rtype: pybel.BELGraph
+    :param seed: A seed for the random state
+    :param invert_degrees: Should the degrees be inverted? Defaults to true.
     """
     if number_edges is None:
         number_edges = SAMPLE_RANDOM_EDGE_COUNT
@@ -217,7 +222,6 @@ def get_random_subgraph(graph, number_edges=None, number_seed_edges=None, seed=N
     remove_isolated_nodes(result)
 
     # update metadata
-    update_node_helper(graph, result)
     update_metadata(graph, result)
 
     return result

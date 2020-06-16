@@ -7,7 +7,7 @@ from typing import Iterable
 import networkx as nx
 from tqdm import tqdm
 
-from .utils import update_metadata, update_node_helper
+from .utils import update_metadata
 from ..dsl import BaseEntity
 
 __all__ = [
@@ -67,7 +67,6 @@ def left_full_join(g, h) -> None:
     )
 
     update_metadata(h, g)
-    update_node_helper(h, g)
     g.warnings.extend(h.warnings)
 
 

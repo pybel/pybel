@@ -7,7 +7,7 @@ import networkx as nx
 from ..filters.edge_filters import filter_edges
 from ..filters.typing import EdgePredicates
 from ..pipeline import in_place_transformation, transformation, uni_in_place_transformation
-from ..utils import update_metadata, update_node_helper
+from ..utils import update_metadata
 
 __all__ = [
     'remove_isolated_nodes',
@@ -54,6 +54,5 @@ def expand_by_edge_filter(source, target, edge_predicates: EdgePredicates):
         for u, v, k in filter_edges(source, edge_predicates=edge_predicates)
     )
 
-    update_node_helper(source, target)
     update_metadata(source, target)
     # TODO smarter ways of ensuring metadata
