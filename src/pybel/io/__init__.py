@@ -39,6 +39,7 @@ from .nodelink import (
     to_nodelink_file, to_nodelink_gz, to_nodelink_jsons,
 )
 from .pynpa import to_npa_dfs, to_npa_directory
+from .rdf import to_rdf, to_rdflib
 from .spia import to_spia_dfs, to_spia_excel, to_spia_tsvs
 from .tsv import to_edgelist, to_tsv
 from .umbrella_nodelink import to_umbrella_nodelink, to_umbrella_nodelink_file, to_umbrella_nodelink_gz
