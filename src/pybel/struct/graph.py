@@ -113,10 +113,19 @@ class BELGraph(nx.MultiDiGraph):
         if path:
             self.path = path
 
+        #: A refernce to the parent graph
+        self.parent = None
         self._count = CountDispatch(self)
+        self._expand = ExpandDispatch(self)
         self._induce = InduceDispatch(self)
         self._plot = PlotDispatch(self)
         self._summary = SummaryDispatch(self)
+
+    def child(self) -> 'BELGraph':
+        """Create an empty graph with a "parent" reference back to this one."""
+        rv = BELGraph()
+        rv.parent = self
+        return rv
 
     @property
     def count(self) -> 'CountDispatch':  # noqa: D401
@@ -134,6 +143,11 @@ class BELGraph(nx.MultiDiGraph):
     def summary(self) -> 'SummaryDispatch':  # noqa: D401
         """A dispatch to summarize the graph."""
         return self._summary
+
+    @property
+    def expand(self) -> 'ExpandDispatch':  # noqa: D401
+        """A dispatch to expand the graph w.r.t. its parent."""
+        return self._expand
 
     @property
     def induce(self) -> 'InduceDispatch':  # noqa: D401
@@ -702,10 +716,8 @@ class BELGraph(nx.MultiDiGraph):
 
         Example usage:
 
-        >>> import pybel
-        >>> g = pybel.from_bel_script('...')
-        >>> h = pybel.from_bel_script('...')
-        >>> k = g + h
+        >>> from pybel.examples import ras_tloc_graph, braf_graph
+        >>> k = ras_tloc_graph + braf_graph
         """
         if not isinstance(other, BELGraph):
             raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
@@ -721,10 +733,8 @@ class BELGraph(nx.MultiDiGraph):
 
         Example usage:
 
-        >>> import pybel
-        >>> g = pybel.from_bel_script('...')
-        >>> h = pybel.from_bel_script('...')
-        >>> g += h
+        >>> from pybel.examples import ras_tloc_graph, braf_graph
+        >>> ras_tloc_graph += braf_graph
         """
         if not isinstance(other, BELGraph):
             raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
@@ -741,10 +751,8 @@ class BELGraph(nx.MultiDiGraph):
 
         Example usage:
 
-        >>> import pybel
-        >>> g = pybel.from_bel_script('...')
-        >>> h = pybel.from_bel_script('...')
-        >>> k = g & h
+        >>> from pybel.examples import ras_tloc_graph, braf_graph
+        >>> k = ras_tloc_graph & braf_graph
         """
         if not isinstance(other, BELGraph):
             raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
@@ -760,10 +768,8 @@ class BELGraph(nx.MultiDiGraph):
 
         Example usage:
 
-        >>> import pybel
-        >>> g = pybel.from_bel_script('...')
-        >>> h = pybel.from_bel_script('...')
-        >>> g &= h
+        >>> from pybel.examples import ras_tloc_graph, braf_graph
+        >>> ras_tloc_graph &= braf_graph
         """
         if not isinstance(other, BELGraph):
             raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
@@ -778,10 +784,8 @@ class BELGraph(nx.MultiDiGraph):
 
         Example usage:
 
-        >>> import pybel
-        >>> g = pybel.from_bel_script('...')
-        >>> h = pybel.from_bel_script('...')
-        >>> k = g ^ h
+        >>> from pybel.examples import ras_tloc_graph, braf_graph
+        >>> k = ras_tloc_graph ^ braf_graph
         """
         if not isinstance(other, BELGraph):
             raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
@@ -1030,8 +1034,42 @@ class PlotDispatch(Dispatch):
     """A dispatch for count functions that can be found at :data:`pybel.BELGraph.plot`."""
 
 
+class ExpandDispatch(Dispatch):
+    """A dispatch for count functions that can be found at :data:`pybel.BELGraph.expand`."""
+
+    @property
+    def parent(self):
+        if not self.graph.parent:
+            raise RuntimeError('Can not use expand dispatch on graph without a parent')
+        return self.graph.parent
+
+    def neighborhood(self, node: BaseEntity) -> BELGraph:
+        """Expand around the neighborhood of a given node.
+
+        >>> from pybel.examples import braf_graph
+        >>> from pybel.dsl import Protein
+        >>> thpo = Protein(namespace='HGNC', name='THPO', identifier='11795')
+        >>> braf = Protein(namespace='HGNC', name='BRAF', identifier='1097')
+        >>> raf1 = Protein(namespace='HGNC', name='RAF1', identifier='9829')
+        >>> elk1 = Protein(namespace='HGNC', name='ELK1', identifier='3321')
+        >>> subgraph_1 = braf_graph.induce.paths([braf, elk1])
+        >>> assert thpo not in subgraph_1 and raf1 not in subgraph_1
+        >>> subgraph_2 = subgraph_1.expand.neighborhood(braf)
+        >>> assert thpo in subgraph_2 and raf1 not in subgraph_2
+        """
+        from .mutation import expand_node_neighborhood
+        cp = self.graph.copy()
+        expand_node_neighborhood(universe=self.parent, graph=cp, node=node)
+        return cp
+
+
 class InduceDispatch(Dispatch):
     """A dispatch for count functions that can be found at :data:`pybel.BELGraph.induce`."""
+
+    def paths(self, nodes: Iterable[BaseEntity]) -> Optional[BELGraph]:
+        """Induce a subgraph on shortest paths between the nodes."""
+        from .mutation import get_subgraph_by_all_shortest_paths
+        return get_subgraph_by_all_shortest_paths(self.graph, nodes)
 
     def neighborhood(self, nodes: Iterable[BaseEntity]) -> Optional[BELGraph]:
         """Induce a subgraph around the neighborhood."""

@@ -9,12 +9,12 @@ from typing import Optional, TextIO
 
 import pandas as pd
 from humanize import intword
-from pyobo.io_utils import multidict
 from tabulate import tabulate
 
 from ..graph import BELGraph
 from ...constants import CITATION, CITATION_DB, CITATION_IDENTIFIER, RELATION, TWO_WAY_RELATIONS
 from ...dsl import BaseConcept
+from ...utils import multidict
 
 logger = logging.getLogger(__name__)
 

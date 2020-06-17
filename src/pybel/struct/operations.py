@@ -28,18 +28,18 @@ def subgraph(graph, nodes: Iterable[BaseEntity]):
     sg = graph.subgraph(nodes)
 
     # see implementation for .copy()
-    result = graph.__class__()
-    result.graph.update(sg.graph)
+    rv = graph.child()
+    rv.graph.update(sg.graph)
 
     for node, data in sg.nodes(data=True):
-        result.add_node(node, **data)
+        rv.add_node(node, **data)
 
-    result.add_edges_from(
+    rv.add_edges_from(
         (u, v, key, datadict.copy())
         for u, v, key, datadict in sg.edges(keys=True, data=True)
     )
 
-    return result
+    return rv
 
 
 def left_full_join(g, h) -> None:

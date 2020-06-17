@@ -5,6 +5,7 @@
 from typing import Iterable
 
 from ...filters.node_predicates import is_pathology
+from ...graph import BELGraph
 from ...pipeline import uni_in_place_transformation
 from ...utils import update_metadata
 from ....dsl import BaseEntity
@@ -19,11 +20,11 @@ __all__ = [
 
 
 @uni_in_place_transformation
-def expand_node_predecessors(universe, graph, node: BaseEntity) -> None:
+def expand_node_predecessors(universe: BELGraph, graph: BELGraph, node: BaseEntity):
     """Expand around the predecessors of the given node in the result graph.
 
-    :param pybel.BELGraph universe: The graph containing the stuff to add
-    :param pybel.BELGraph graph: The graph to add stuff to
+    :param universe: The graph containing the stuff to add
+    :param graph: The graph to add stuff to
     :param node: A BEL node
     """
     skip_successors = set()
@@ -39,7 +40,6 @@ def expand_node_predecessors(universe, graph, node: BaseEntity) -> None:
         for source, successor, key, data in universe.out_edges(node, data=True, keys=True)
         if successor not in skip_successors
     )
-
     update_metadata(universe, graph)
 
 

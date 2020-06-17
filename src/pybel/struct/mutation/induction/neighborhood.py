@@ -30,7 +30,7 @@ def get_subgraph_by_neighborhood(graph: BELGraph, nodes: Iterable[BaseEntity]) -
     if not any(node in graph for node in node_set):
         return
 
-    rv = graph.__class__()
+    rv = graph.child()
     rv.add_edges_from(
         itt.chain(
             graph.in_edges(nodes, keys=True, data=True),

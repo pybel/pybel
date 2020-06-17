@@ -41,15 +41,14 @@ def _random_edge_iterator(graph: BELGraph, n_edges: int) -> Iterable[Tuple[BaseE
 def get_graph_with_random_edges(graph: BELGraph, n_edges: int) -> BELGraph:
     """Build a new graph from a seeding of edges.
 
-    :type graph: pybel.BELGraph
+    :param graph: A BEL graph
     :param n_edges: Number of edges to randomly select from the given graph
-    :rtype: pybel.BELGraph
     """
-    result = graph.__class__()
-    result.add_edges_from(_random_edge_iterator(graph, n_edges))
+    rv = graph.child()
+    rv.add_edges_from(_random_edge_iterator(graph, n_edges))
 
-    update_metadata(graph, result)
-    return result
+    update_metadata(graph, rv)
+    return rv
 
 
 #: How many edges should be sampled from a graph that's still reasonable to display
