@@ -116,6 +116,7 @@ class BELGraph(nx.MultiDiGraph):
         self._count = CountDispatch(self)
         self._induce = InduceDispatch(self)
         self._plot = PlotDispatch(self)
+        self._summary = SummaryDispatch(self)
 
     @property
     def count(self) -> 'CountDispatch':  # noqa: D401
@@ -128,6 +129,11 @@ class BELGraph(nx.MultiDiGraph):
         Counter({'Protein': 7, 'Complex': 1, 'Abundance': 1})
         """
         return self._count
+
+    @property
+    def summary(self) -> 'SummaryDispatch':  # noqa: D401
+        """A dispatch to summarize the graph."""
+        return self._summary
 
     @property
     def induce(self) -> 'InduceDispatch':  # noqa: D401
@@ -850,31 +856,23 @@ class BELGraph(nx.MultiDiGraph):
 
     def _describe_list(self) -> List[Tuple[str, float]]:
         """Return useful information about the graph as a list of tuples."""
-        number_nodes = self.number_of_nodes()
-        return [
-            ('Number of Nodes', number_nodes),
-            ('Number of Edges', self.number_of_edges()),
-            ('Number of Citations', self.number_of_citations()),
-            ('Number of Authors', self.number_of_authors()),
-            ('Network Density', '{:.2E}'.format(nx.density(self))),
-            ('Number of Components', nx.number_weakly_connected_components(self)),
-            ('Number of Warnings', self.number_of_warnings()),
-        ]
+        warnings.warn('use graph.summary.list()', DeprecationWarning)
+        return self.summary.list()
 
     def summary_dict(self) -> Mapping[str, float]:
         """Return a dictionary that summarizes the graph."""
-        return dict(self._describe_list())
+        warnings.warn('use graph.summary.dict()', DeprecationWarning)
+        return self.summary.dict()
 
     def summary_str(self) -> str:
         """Return a string that summarizes the graph."""
-        return '{}\n'.format(self) + '\n'.join(
-            '{}: {}'.format(label, value)
-            for label, value in self._describe_list()
-        )
+        warnings.warn('use graph.summary.str()', DeprecationWarning)
+        return self.summary.str()
 
     def summarize(self, file: Optional[TextIO] = None) -> None:
         """Print a summary of the graph."""
-        print(self.summary_str(), file=file)
+        warnings.warn('use graph.summary()', DeprecationWarning)
+        self.summary()
 
 
 def _clean_annotations(annotations_dict: AnnotationsHint) -> AnnotationsDict:
@@ -970,6 +968,62 @@ class CountDispatch(Dispatch):
     def names_by_namespace(self, namespace: str):
         from .summary import count_names_by_namespace
         return count_names_by_namespace(self.graph, namespace=namespace)
+
+
+class SummaryDispatch(Dispatch):
+    def __call__(self, file: Optional[TextIO] = None) -> None:
+        self.functions(file=file)
+        print('', file=file)
+        self.namespaces(file=file)
+        print('', file=file)
+        self.edges(file=file)
+        print('', file=file)
+        self.citations(file=file)
+        print('', file=file)
+        self.statistics(file=file)
+
+    def statistics(self, file: Optional[TextIO] = None) -> None:
+        print(self.str(), file=file)
+
+    def functions(self, file: Optional[TextIO] = None) -> None:
+        from .summary.supersummary import functions
+        functions(self.graph, file=file)
+
+    def namespaces(self, file: Optional[TextIO] = None) -> None:
+        from .summary.supersummary import namespaces
+        namespaces(self.graph, file=file)
+
+    def edges(self, file: Optional[TextIO] = None) -> None:
+        from .summary.supersummary import edges
+        edges(self.graph, file=file)
+
+    def citations(self, n: Optional[int] = 15, file: Optional[TextIO] = None) -> None:
+        from .summary.supersummary import citations
+        citations(self.graph, n=n, file=file)
+
+    def dict(self) -> Mapping[str, float]:
+        """Return a dictionary that summarizes the graph."""
+        return dict(self.graph._describe_list())
+
+    def str(self) -> str:
+        """Return a string that summarizes the graph."""
+        return '{}\n'.format(self) + '\n'.join(
+            '{}: {}'.format(label, value)
+            for label, value in self.graph._describe_list()
+        )
+
+    def list(self) -> List[Tuple[str, float]]:
+        """Return a list of tuples that summarize the graph."""
+        number_nodes = self.graph.number_of_nodes()
+        return [
+            ('Number of Nodes', number_nodes),
+            ('Number of Edges', self.graph.number_of_edges()),
+            ('Number of Citations', self.graph.number_of_citations()),
+            ('Number of Authors', self.graph.number_of_authors()),
+            ('Network Density', '{:.2E}'.format(nx.density(self))),
+            ('Number of Components', nx.number_weakly_connected_components(self)),
+            ('Number of Warnings', self.graph.number_of_warnings()),
+        ]
 
 
 class PlotDispatch(Dispatch):
