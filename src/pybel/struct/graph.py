@@ -4,7 +4,7 @@
 
 import logging
 import warnings
-from collections import defaultdict
+from collections import Counter, defaultdict
 from copy import deepcopy
 from functools import partialmethod
 from itertools import chain
@@ -356,12 +356,7 @@ class BELGraph(nx.MultiDiGraph):
 
     def number_of_citations(self) -> int:
         """Return the number of citations contained within the graph."""
-        return len(set(self._iterate_citations()))
-
-    def _iterate_citations(self) -> Iterable[Tuple[str, str]]:
-        for _, _, data in self.edges(data=True):
-            if CITATION in data:
-                yield data[CITATION][CITATION_DB], data[CITATION][CITATION_IDENTIFIER]
+        return len(set(_iterate_citations(self)))
 
     def number_of_authors(self) -> int:
         """Return the number of authors contained within the graph."""
@@ -369,14 +364,7 @@ class BELGraph(nx.MultiDiGraph):
 
     def get_authors(self) -> Set[str]:
         """Get the authors for the citations in the graph."""
-        return set(self._iterate_authors())
-
-    def _iterate_authors(self) -> Iterable[str]:
-        return chain.from_iterable(
-            data[CITATION][CITATION_AUTHORS]
-            for _, _, data in self.edges(data=True)
-            if CITATION in data and CITATION_AUTHORS in data[CITATION]
-        )
+        return set(self.count.authors())
 
     def __str__(self):
         return '{} v{}'.format(self.name, self.version)
@@ -973,6 +961,27 @@ class CountDispatch(Dispatch):
         from .summary import count_names_by_namespace
         return count_names_by_namespace(self.graph, namespace=namespace)
 
+    def modifications(self):
+        from .summary.node_summary import count_modifications
+        return count_modifications(self.graph)
+
+    def authors(self):
+        return Counter(_iterate_authors(self.graph))
+
+
+def _iterate_citations(graph: BELGraph) -> Iterable[Tuple[str, str]]:
+    for _, _, data in graph.edges(data=True):
+        if CITATION in data:
+            yield data[CITATION][CITATION_DB], data[CITATION][CITATION_IDENTIFIER]
+
+
+def _iterate_authors(graph: BELGraph) -> Iterable[str]:
+    return chain.from_iterable(
+        data[CITATION][CITATION_AUTHORS]
+        for _, _, data in graph.edges(data=True)
+        if CITATION in data and CITATION_AUTHORS in data[CITATION]
+    )
+
 
 class SummaryDispatch(Dispatch):
     def __call__(self, file: Optional[TextIO] = None) -> None:
@@ -1007,13 +1016,13 @@ class SummaryDispatch(Dispatch):
 
     def dict(self) -> Mapping[str, float]:
         """Return a dictionary that summarizes the graph."""
-        return dict(self.graph._describe_list())
+        return dict(self.list())
 
     def str(self) -> str:
         """Return a string that summarizes the graph."""
         return '{}\n'.format(self) + '\n'.join(
             '{}: {}'.format(label, value)
-            for label, value in self.graph._describe_list()
+            for label, value in self.list()
         )
 
     def list(self) -> List[Tuple[str, float]]:
@@ -1032,6 +1041,12 @@ class SummaryDispatch(Dispatch):
 
 class PlotDispatch(Dispatch):
     """A dispatch for count functions that can be found at :data:`pybel.BELGraph.plot`."""
+
+    def summary(self, save: Optional[str] = None, **kwargs):
+        from pybel_tools.summary.visualization import plot_summary
+        fig, axes = plot_summary(self.graph, **kwargs)
+        if save:
+            fig.save(save)
 
 
 class ExpandDispatch(Dispatch):
@@ -1060,6 +1075,18 @@ class ExpandDispatch(Dispatch):
         from .mutation import expand_node_neighborhood
         cp = self.graph.copy()
         expand_node_neighborhood(universe=self.parent, graph=cp, node=node)
+        return cp
+
+    def periphery(self, **kwargs):
+        from pybel_tools.mutation.expansion import expand_periphery
+        cp = self.graph.copy()
+        expand_periphery(universe=self.parent, graph=cp, **kwargs)
+        return cp
+
+    def internal(self, **kwargs):
+        from pybel_tools.mutation.expansion import expand_internal
+        cp = self.graph.copy()
+        expand_internal(universe=self.parent, graph=cp, **kwargs)
         return cp
 
 

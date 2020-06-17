@@ -14,7 +14,7 @@ from pybel.struct.filters.edge_predicate_builders import (
     _annotation_dict_all_filter, _annotation_dict_any_filter, build_annotation_dict_all_filter,
     build_annotation_dict_any_filter,
 )
-from pybel.struct.filters.edge_predicates import keep_edge_permissive
+from pybel.struct.filters.edge_predicates import true_edge_predicate
 from pybel.struct.filters.node_predicates import true_node_predicate
 from pybel.struct.filters.typing import EdgeIterator
 from pybel.testing.utils import n
@@ -75,11 +75,11 @@ class TestNodeFilters(unittest.TestCase):
         self.assertEqual({(1, 2)}, edges)
 
     def test_keep_edge_permissive(self):
-        edges = make_edge_iterator_set(filter_edges(self.graph, keep_edge_permissive))
+        edges = make_edge_iterator_set(filter_edges(self.graph, true_edge_predicate))
         self.assertEqual({(1, 2)}, edges)
 
     def test_keep_edge_unpermissive(self):
-        keep_edge_restrictive = invert_edge_predicate(keep_edge_permissive)
+        keep_edge_restrictive = invert_edge_predicate(true_edge_predicate)
         edges = make_edge_iterator_set(filter_edges(self.graph, keep_edge_restrictive))
         self.assertEqual(set(), edges)
 
@@ -88,7 +88,7 @@ class TestNodeFilters(unittest.TestCase):
         self.assertEqual(({(1, 2)}), edges)
 
     def test_concatenate_single_edge_filter(self):
-        edges = make_edge_iterator_set(filter_edges(self.graph, [keep_edge_permissive]))
+        edges = make_edge_iterator_set(filter_edges(self.graph, [true_edge_predicate]))
         self.assertEqual({(1, 2)}, edges)
 
     def test_concatenate_multiple_edge_filter(self):

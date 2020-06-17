@@ -4,6 +4,7 @@
 
 from typing import Any, Callable, Iterable, List, Union
 
+from .node_predicates import concatenate_node_predicates, invert_node_predicate
 from .typing import NodePredicate
 from ..graph import BELGraph
 from ...constants import CONCEPT, NAME
@@ -12,6 +13,7 @@ from ...typing import Strings
 
 __all__ = [
     'function_inclusion_filter_builder',
+    'function_exclusion_filter_builder',
     'data_missing_key_builder',
     'build_node_data_search',
     'build_node_graph_data_search',
@@ -57,6 +59,14 @@ def _collection_function_inclusion_builder(funcs: Iterable[str]) -> NodePredicat
         return node.function in funcs
 
     return functions_inclusion_filter
+
+
+def function_exclusion_filter_builder(func: Strings) -> NodePredicate:
+    """Build a filter that fails on nodes of the given function(s).
+
+    :param func: A BEL Function or list/set/tuple of BEL functions
+    """
+    return invert_node_predicate(function_inclusion_filter_builder(func))
 
 
 def data_missing_key_builder(key: str) -> NodePredicate:  # noqa: D202
