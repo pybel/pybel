@@ -65,6 +65,12 @@ that consume graphs directly through the :class:`pybel.BELGraph` interface.
 .. autoclass:: pybel.struct.graph.InduceDispatch
     :members:
 
+.. autoclass:: pybel.struct.graph.SummaryDispatch
+    :members:
+
+.. autoclass:: pybel.struct.graph.ExpandDispatch
+    :members:
+
 .. autoclass:: pybel.struct.graph.PlotDispatch
     :members:
 

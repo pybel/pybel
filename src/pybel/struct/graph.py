@@ -923,7 +923,7 @@ class Dispatch:
 class CountDispatch(Dispatch):
     """A dispatch for count functions that can be found at :data:`pybel.BELGraph.count`."""
 
-    def functions(self):
+    def functions(self) -> Counter:
         """Count the functions in a graph.
 
         >>> from pybel.examples import sialic_acid_graph
@@ -933,39 +933,47 @@ class CountDispatch(Dispatch):
         from .summary import count_functions
         return count_functions(self.graph)
 
-    def namespaces(self):
+    def namespaces(self) -> Counter:
+        """Return a counter of namespaces' occurrences in nodes in the graph."""
         from .summary import count_namespaces
         return count_namespaces(self.graph)
 
-    def pathologies(self):
+    def pathologies(self) -> Counter:
+        """Return a counter of pathologies' occurrences in edges in the graph."""
         from .summary import count_pathologies
         return count_pathologies(self.graph)
 
-    def annotations(self):
+    def annotations(self) -> Counter:
+        """Return a counter of annotations' occurrences in edges in the graph."""
         from .summary import count_annotations
         return count_annotations(self.graph)
 
-    def variants(self):
+    def variants(self) -> Counter:
+        """Return a counter of variants' occurrences in nodes in the graph."""
         from .summary import count_variants
         return count_variants(self.graph)
 
-    def relations(self):
+    def relations(self) -> Counter:
+        """Return a counter of relations' occurrences in edges in the graph."""
         from .summary import count_relations
         return count_relations(self.graph)
 
-    def error_types(self):
+    def error_types(self) -> Counter:
+        """Return a counter of error types' occurrences in BEL script underlying the graph."""
         from .summary import count_error_types
         return count_error_types(self.graph)
 
-    def names_by_namespace(self, namespace: str):
+    def names_by_namespace(self, namespace: str) -> Counter:
         from .summary import count_names_by_namespace
         return count_names_by_namespace(self.graph, namespace=namespace)
 
-    def modifications(self):
+    def modifications(self) -> Counter:
+        """Return a counter of relation modifications' occurrences (activity, translocation, etc.) in the graph."""
         from .summary.node_summary import count_modifications
         return count_modifications(self.graph)
 
-    def authors(self):
+    def authors(self) -> Counter:
+        """Return a counter of the number of edges to which each author contributed in the graph."""
         return Counter(_iterate_authors(self.graph))
 
 
@@ -995,22 +1003,27 @@ class SummaryDispatch(Dispatch):
         print('', file=file)
         self.statistics(file=file)
 
-    def statistics(self, file: Optional[TextIO] = None) -> None:
+    def statistics(self, file: Optional[TextIO] = None):
+        """Print summary statistics on the graph."""
         print(self.str(), file=file)
 
-    def functions(self, file: Optional[TextIO] = None) -> None:
+    def functions(self, file: Optional[TextIO] = None):
+        """Print a summary of the nodes' functions in the graph."""
         from .summary.supersummary import functions
         functions(self.graph, file=file)
 
-    def namespaces(self, file: Optional[TextIO] = None) -> None:
+    def namespaces(self, file: Optional[TextIO] = None):
+        """Print a summary of the nodes' namespaces in the graph."""
         from .summary.supersummary import namespaces
         namespaces(self.graph, file=file)
 
-    def edges(self, file: Optional[TextIO] = None) -> None:
+    def edges(self, file: Optional[TextIO] = None):
+        """Print a summary of the edges' types in the graph."""
         from .summary.supersummary import edges
         edges(self.graph, file=file)
 
-    def citations(self, n: Optional[int] = 15, file: Optional[TextIO] = None) -> None:
+    def citations(self, n: Optional[int] = 15, file: Optional[TextIO] = None):
+        """Print a summary of the top citations' frequencies in the graph."""
         from .summary.supersummary import citations
         citations(self.graph, n=n, file=file)
 
@@ -1043,6 +1056,7 @@ class PlotDispatch(Dispatch):
     """A dispatch for count functions that can be found at :data:`pybel.BELGraph.plot`."""
 
     def summary(self, save: Optional[str] = None, **kwargs):
+        """Plot a summary of the graph's nodes and edges using :mod:`matplotlib`."""
         from pybel_tools.summary.visualization import plot_summary
         fig, axes = plot_summary(self.graph, **kwargs)
         if save:
@@ -1078,12 +1092,14 @@ class ExpandDispatch(Dispatch):
         return cp
 
     def periphery(self, **kwargs):
+        """Expand around the periphery of the graph w.r.t. its parent graph."""
         from pybel_tools.mutation.expansion import expand_periphery
         cp = self.graph.copy()
         expand_periphery(universe=self.parent, graph=cp, **kwargs)
         return cp
 
     def internal(self, **kwargs):
+        """Expand missing edges between nodes in the graph w.r.t. its parent graph."""
         from pybel_tools.mutation.expansion import expand_internal
         cp = self.graph.copy()
         expand_internal(universe=self.parent, graph=cp, **kwargs)
@@ -1104,9 +1120,11 @@ class InduceDispatch(Dispatch):
         return get_subgraph_by_neighborhood(self.graph, nodes)
 
     def random(self, **kwargs) -> Optional[BELGraph]:
+        """Induce a random subgraph."""
         from .mutation import get_random_subgraph
         return get_random_subgraph(self.graph, **kwargs)
 
     def annotation(self, prefix: str, identifier: str) -> Optional[BELGraph]:
+        """Induce a subgraph on edges with the given annotation."""
         from .mutation import get_subgraph_by_annotation_value
         return get_subgraph_by_annotation_value(self.graph, prefix, identifier)
