@@ -505,6 +505,25 @@ class BindsProteinConverter(Converter):
         return _safe_label(u), 'bindsToProtein', _safe_label(g)
 
 
+class HomomultimerConverter(Converter):
+    """Converts ``p(A) directlyIncreases complex(p(A), p(A))```."""
+
+    @staticmethod
+    def predicate(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> bool:
+        """Test a BEL edge."""
+        return (
+            isinstance(u, Protein)
+            and edge_data[RELATION] == DIRECTLY_INCREASES
+            and isinstance(v, ComplexAbundance)
+            and all(member == u for member in v.members)
+        )
+
+    @staticmethod
+    def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
+        """Convert a homomultimer formation."""
+        return _safe_label(u), 'bindsToProtein', _safe_label(u)
+
+
 class BindsGeneConverter(Converter):
     """Converts ``p(B) directlyIncreases complex(g(A), p(B))```."""
 

@@ -59,6 +59,8 @@ g3 = r3.get_gene()
 c1 = ComplexAbundance([p2, g3])
 c2 = ComplexAbundance([p1, p2])
 c3 = ComplexAbundance([a1, p2])
+p1_homodimer = ComplexAbundance([p1, p1])
+p1_homotrimer = ComplexAbundance([p1, p1, p1])
 
 converters_true_list = [
     (PartOfNamedComplexConverter, p1, nca1, _rel(PART_OF), ('HGNC:1', 'partOf', 'FPLX:1')),
@@ -121,6 +123,14 @@ converters_true_list = [
     (
         tsvc.BindsProteinConverter, a1, c3, _rel(DIRECTLY_INCREASES),
         (a1.curie, 'bindsToProtein', p2.curie),
+    ),
+    (
+        tsvc.HomomultimerConverter, p1, p1_homodimer, _rel(DIRECTLY_INCREASES),
+        (p1.curie, 'bindsToProtein', p1.curie),
+    ),
+    (
+        tsvc.HomomultimerConverter, p1, p1_homotrimer, _rel(DIRECTLY_INCREASES),
+        (p1.curie, 'bindsToProtein', p1.curie),
     ),
     (
         tsvc.ProteinRegulatesComplex, p3, c2, _rel(DIRECTLY_INCREASES),

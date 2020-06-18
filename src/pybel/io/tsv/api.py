@@ -153,6 +153,7 @@ def get_triple(
         converters.RegulatesDegradationConverter,
         converters.NoChangeDegradationConverter,
         converters.TranscriptionFactorForConverter,
+        converters.HomomultimerConverter,
         converters.BindsGeneConverter,
         converters.BindsProteinConverter,
         converters.ProteinRegulatesComplex,
