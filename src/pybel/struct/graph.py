@@ -1046,8 +1046,8 @@ class SummaryDispatch(Dispatch):
             ('Number of Edges', self.graph.number_of_edges()),
             ('Number of Citations', self.graph.number_of_citations()),
             ('Number of Authors', self.graph.number_of_authors()),
-            ('Network Density', '{:.2E}'.format(nx.density(self))),
-            ('Number of Components', nx.number_weakly_connected_components(self)),
+            ('Network Density', '{:.2E}'.format(nx.density(self.graph))),
+            ('Number of Components', nx.number_weakly_connected_components(self.graph)),
             ('Number of Warnings', self.graph.number_of_warnings()),
         ]
 
