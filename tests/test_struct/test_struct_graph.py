@@ -3,6 +3,7 @@
 """Tests for data structures in PyBEL."""
 
 import os
+import random
 import tempfile
 import unittest
 from io import StringIO
@@ -80,26 +81,54 @@ class TestStruct(unittest.TestCase):
 
     def test_add_simple(self):
         """Test that a simple node can be added, but not duplicated."""
-        graph = BELGraph(name='Test', version='0.0.0')
-
-        namespace, name = n(), n()
-
-        graph.add_node_from_data(protein(namespace=namespace, name=name))
+        graph = BELGraph()
+        node = protein(namespace='TEST', name='YFG')
+        graph.add_node_from_data(node)
         self.assertEqual(1, graph.number_of_nodes())
 
-        graph.add_node_from_data(protein(namespace=namespace, name=name))
-        self.assertEqual(1, graph.number_of_nodes())
+        graph.add_node_from_data(node)
+        self.assertEqual(1, graph.number_of_nodes(), msg='should not add same node again')
 
+    def test_summarize(self):
+        """Test summarizing a graph."""
         sio = StringIO()
-        graph.summarize(file=sio)
-        test_str = """Test v0.0.0
-Number of Nodes: 1
-Number of Edges: 0
-Number of Citations: 0
-Number of Authors: 0
-Network Density: 0.00E+00
-Number of Components: 1
-Number of Warnings: 0"""
+
+        random.seed(5)
+        pybel.examples.sialic_acid_graph.summarize(file=sio)
+        test_str = """---------------------  -----------------
+Name                   Sialic Acid Graph
+Version                1.0.0
+Number of Nodes        9
+Number of Namespaces   3
+Number of Edges        11
+Number of Annotations  2
+Number of Citations    1
+Number of Authors      0
+Network Density        1.53E-01
+Number of Components   1
+Number of Warnings     0
+---------------------  -----------------
+
+Type (9)      Count  Example
+----------  -------  ------------------------------------------------------------
+Protein           7  p(hgnc:11491 ! SYK)
+Complex           1  complex(a(chebi:26667 ! "sialic acid"), p(hgnc:1659 ! CD33))
+Abundance         1  a(chebi:26667 ! "sialic acid")
+
+Namespace (2)      Count  Example
+---------------  -------  ------------------------------
+hgnc                   7  p(hgnc:12449 ! TYROBP)
+chebi                  1  a(chebi:26667 ! "sialic acid")
+
+Edge Type (7)                        Count  Example
+---------------------------------  -------  --------------------------------------------------------------------------------------------------
+Protein increases Protein                3  act(p(hgnc:11491 ! SYK)) increases act(p(hgnc:17761 ! TREM2))
+Protein directlyIncreases Protein        2  act(p(hgnc:1659 ! CD33, pmod(Ph))) directlyIncreases act(p(hgnc:9658 ! PTPN6), ma(phos))
+Protein directlyDecreases Protein        2  act(p(hgnc:9658 ! PTPN6)) directlyDecreases act(p(hgnc:11491 ! SYK))
+Complex increases Protein                1  complex(a(chebi:26667 ! "sialic acid"), p(hgnc:1659 ! CD33)) increases act(p(hgnc:1659 ! CD33))
+Abundance partOf Complex                 1  a(chebi:26667 ! "sialic acid") partOf complex(a(chebi:26667 ! "sialic acid"), p(hgnc:1659 ! CD33))
+Protein partOf Complex                   1  p(hgnc:1659 ! CD33) partOf complex(a(chebi:26667 ! "sialic acid"), p(hgnc:1659 ! CD33))
+Protein hasVariant Protein               1  p(hgnc:1659 ! CD33) hasVariant p(hgnc:1659 ! CD33, pmod(Ph))"""
         self.assertEqual(test_str.strip(), sio.getvalue().strip())
 
     def test_citation_type_error(self):

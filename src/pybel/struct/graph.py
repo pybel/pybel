@@ -11,6 +11,7 @@ from itertools import chain
 from typing import Any, Dict, Hashable, Iterable, List, Mapping, Optional, Set, TextIO, Tuple, Union
 
 import networkx as nx
+from tabulate import tabulate
 
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
 from ..canonicalize import edge_to_bel
@@ -356,7 +357,7 @@ class BELGraph(nx.MultiDiGraph):
 
     def number_of_citations(self) -> int:
         """Return the number of citations contained within the graph."""
-        return len(set(_iterate_citations(self)))
+        return self.count.citations()
 
     def number_of_authors(self) -> int:
         """Return the number of authors contained within the graph."""
@@ -864,7 +865,7 @@ class BELGraph(nx.MultiDiGraph):
     def summarize(self, file: Optional[TextIO] = None) -> None:
         """Print a summary of the graph."""
         warnings.warn('use graph.summary()', DeprecationWarning)
-        self.summary()
+        self.summary(file=file)
 
 
 def _clean_annotations(annotations_dict: AnnotationsHint) -> AnnotationsDict:
@@ -976,6 +977,10 @@ class CountDispatch(Dispatch):
         """Return a counter of the number of edges to which each author contributed in the graph."""
         return Counter(_iterate_authors(self.graph))
 
+    def citations(self) -> int:
+        """Return the number of citations."""
+        return len(set(_iterate_citations(self.graph)))
+
 
 def _iterate_citations(graph: BELGraph) -> Iterable[Tuple[str, str]]:
     for _, _, data in graph.edges(data=True):
@@ -992,16 +997,15 @@ def _iterate_authors(graph: BELGraph) -> Iterable[str]:
 
 
 class SummaryDispatch(Dispatch):
-    def __call__(self, file: Optional[TextIO] = None) -> None:
+    def __call__(self, file: Optional[TextIO] = None, examples: bool = True) -> None:
+        self.statistics(file=file)
+        print('', file=file)
         self.functions(file=file)
         print('', file=file)
         self.namespaces(file=file)
         print('', file=file)
-        self.edges(file=file)
+        self.edges(file=file, examples=examples)
         print('', file=file)
-        self.citations(file=file)
-        print('', file=file)
-        self.statistics(file=file)
 
     def statistics(self, file: Optional[TextIO] = None):
         """Print summary statistics on the graph."""
@@ -1017,10 +1021,10 @@ class SummaryDispatch(Dispatch):
         from .summary.supersummary import namespaces
         namespaces(self.graph, file=file)
 
-    def edges(self, file: Optional[TextIO] = None):
+    def edges(self, file: Optional[TextIO] = None, examples: bool = True):
         """Print a summary of the edges' types in the graph."""
         from .summary.supersummary import edges
-        edges(self.graph, file=file)
+        edges(self.graph, file=file, examples=examples)
 
     def citations(self, n: Optional[int] = 15, file: Optional[TextIO] = None):
         """Print a summary of the top citations' frequencies in the graph."""
@@ -1033,17 +1037,18 @@ class SummaryDispatch(Dispatch):
 
     def str(self) -> str:
         """Return a string that summarizes the graph."""
-        return '{}\n'.format(self) + '\n'.join(
-            '{}: {}'.format(label, value)
-            for label, value in self.list()
-        )
+        return tabulate(self.list())
 
     def list(self) -> List[Tuple[str, float]]:
         """Return a list of tuples that summarize the graph."""
         number_nodes = self.graph.number_of_nodes()
         return [
+            ('Name', self.graph.name),
+            ('Version', self.graph.version),
             ('Number of Nodes', number_nodes),
+            ('Number of Namespaces', len(self.graph.count.namespaces())),
             ('Number of Edges', self.graph.number_of_edges()),
+            ('Number of Annotations', len(self.graph.count.annotations())),
             ('Number of Citations', self.graph.number_of_citations()),
             ('Number of Authors', self.graph.number_of_authors()),
             ('Network Density', '{:.2E}'.format(nx.density(self.graph))),
@@ -1067,7 +1072,8 @@ class ExpandDispatch(Dispatch):
     """A dispatch for count functions that can be found at :data:`pybel.BELGraph.expand`."""
 
     @property
-    def parent(self):
+    def parent(self) -> BELGraph:
+        """Get the parent BEL graph."""
         if not self.graph.parent:
             raise RuntimeError('Can not use expand dispatch on graph without a parent')
         return self.graph.parent

@@ -35,8 +35,9 @@ def function_table_df(graph: BELGraph) -> pd.DataFrame:
 def functions(graph, file: Optional[TextIO] = None):
     """Print a summary of the functions in the graph."""
     df = function_table_df(graph)
-    print('{} Node Count: {}'.format(graph, intword(graph.number_of_nodes())))
-    print(tabulate(df.values, headers=df.columns), file=file)
+    headers = list(df.columns)
+    headers[0] += ' ({})'.format(intword(graph.number_of_nodes()))
+    print(tabulate(df.values, headers=headers), file=file)
 
 
 def namespaces_table_df(graph: BELGraph) -> pd.DataFrame:
@@ -55,8 +56,9 @@ def namespaces_table_df(graph: BELGraph) -> pd.DataFrame:
 def namespaces(graph: BELGraph, file: Optional[TextIO] = None) -> None:
     """Print a summary of the namespaces in the graph."""
     df = namespaces_table_df(graph)
-    print('{} Namespace Count: {}'.format(graph, len(df.index)))
-    print(tabulate(df.values, headers=df.columns), file=file)
+    headers = list(df.columns)
+    headers[0] += ' ({})'.format(len(df.index))
+    print(tabulate(df.values, headers=headers), file=file)
 
 
 def edge_table_df(graph: BELGraph, *, examples: bool = True, minimum: Optional[int] = None) -> pd.DataFrame:
@@ -91,8 +93,9 @@ def edges(
 ) -> None:
     """Print a summary of the edges in the graph."""
     df = edge_table_df(graph, examples=examples, minimum=minimum)
-    print('{} Edge Count: {} in {} types'.format(graph, graph.number_of_edges(), len(df.index)))
-    print(tabulate(df.values, headers=df.columns), file=file)
+    headers = list(df.columns)
+    headers[0] += ' ({})'.format(intword(len(df.index)))
+    print(tabulate(df.values, headers=headers), file=file)
 
 
 def citations(graph: BELGraph, n: Optional[int] = 15, file: Optional[TextIO] = None) -> None:
