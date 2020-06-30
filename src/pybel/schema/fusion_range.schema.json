@@ -1,0 +1,25 @@
+{
+    "$schema": "https://json-schema.org/draft/2019-09/schema#",
+    "title": "BEL FusionRange Node",
+    "description": "Schema to validate JSON files describing a BEL FusionRange object",
+    "type": "object",
+    "properties": {
+        "reference": {
+            "description": "The reference code",
+            "type": "string"
+        },
+        "left": {
+            "description": "The start position",
+            "type": ["string", "integer"]
+        },
+        "right": {
+            "description": "The stop position",
+            "type": ["string", "integer"]
+        },
+        "missing": {"const": "?"}
+    },
+    "oneOf": [
+        {"required": ["reference", "left", "right"]},
+        {"required": ["missing"]}
+    ]
+}

@@ -1,0 +1,20 @@
+{
+    "$schema": "https://json-schema.org/draft/2019-09/schema#",
+    "title": "BEL BaseAbundance Node",
+    "description": "Schema to validate JSON files containing a BaseAbundance (or subclass) node.",
+    "type": "object",
+    "properties": {
+        "function": {"enum": ["Abundance", "Protein", "Gene", "miRNA", "RNA"]},
+        "concept": {"$ref": "entity.schema.json"},
+        "xrefs": {
+            "description": "An optional list of extra identifiers for the node.",
+            "type": "array",
+            "items": {"$ref": "entity.schema.json"}
+        },
+        "variants": {
+            "type": "array",
+            "items": {"$ref": "variant.schema.json"}
+        }
+    },
+    "required": ["function", "concept"]
+}
