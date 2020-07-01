@@ -867,6 +867,11 @@ class BELGraph(nx.MultiDiGraph):
         warnings.warn('use graph.summary()', DeprecationWarning)
         self.summary(file=file)
 
+    def ground(self, **kwargs) -> 'BELGraph':
+        """Ground this graph."""
+        from ..grounding import ground
+        return ground(self, **kwargs)
+
 
 def _clean_annotations(annotations_dict: AnnotationsHint) -> AnnotationsDict:
     """Fix the formatting of annotation dict."""
