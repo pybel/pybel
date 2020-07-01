@@ -4,8 +4,9 @@
 
 import logging
 from collections import defaultdict
+from typing import Mapping, Optional
 
-from .utils import cleanup
+from ..graph import BELGraph
 from ...constants import ANNOTATIONS
 
 __all__ = [
@@ -15,8 +16,8 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-def _get_subgraphs_by_annotation_disregard_undefined(graph, annotation):
-    result = defaultdict(graph.__class__)
+def _get_subgraphs_by_annotation_disregard_undefined(graph: BELGraph, annotation: str) -> Mapping[str, BELGraph]:
+    result = defaultdict(graph.child)
 
     for source, target, key, data in graph.edges(keys=True, data=True):
         annotation_dict = data.get(ANNOTATIONS)
@@ -33,8 +34,12 @@ def _get_subgraphs_by_annotation_disregard_undefined(graph, annotation):
     return dict(result)
 
 
-def _get_subgraphs_by_annotation_keep_undefined(graph, annotation, sentinel):
-    result = defaultdict(graph.__class__)
+def _get_subgraphs_by_annotation_keep_undefined(
+    graph: BELGraph,
+    annotation: str,
+    sentinel: Optional[str],
+) -> Mapping[str, BELGraph]:
+    result = defaultdict(graph.child)
 
     for source, target, key, data in graph.edges(keys=True, data=True):
         annotation_dict = data.get(ANNOTATIONS)
@@ -48,19 +53,20 @@ def _get_subgraphs_by_annotation_keep_undefined(graph, annotation, sentinel):
     return dict(result)
 
 
-def get_subgraphs_by_annotation(graph, annotation, sentinel=None):
+def get_subgraphs_by_annotation(
+    graph: BELGraph,
+    annotation: str,
+    sentinel: Optional[str] = None,
+) -> Mapping[str, BELGraph]:
     """Stratify the given graph into sub-graphs based on the values for edges' annotations.
 
-    :param pybel.BELGraph graph: A BEL graph
-    :param str annotation: The annotation to group by
-    :param Optional[str] sentinel: The value to stick unannotated edges into. If none, does not keep undefined.
-    :rtype: dict[str,pybel.BELGraph]
+    :param graph: A BEL graph
+    :param annotation: The annotation to group by
+    :param sentinel: The value to stick unannotated edges into. If none, does not keep undefined.
     """
     if sentinel is not None:
         subgraphs = _get_subgraphs_by_annotation_keep_undefined(graph, annotation, sentinel)
     else:
         subgraphs = _get_subgraphs_by_annotation_disregard_undefined(graph, annotation)
-
-    cleanup(graph, subgraphs)
 
     return subgraphs

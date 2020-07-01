@@ -18,7 +18,8 @@ from ...typing import EdgeData
 
 __all__ = [
     'edge_predicate',
-    'keep_edge_permissive',
+    'true_edge_predicate',
+    'false_edge_predicate',
     'has_provenance',
     'has_pubmed',
     'has_authors',
@@ -57,13 +58,14 @@ def edge_predicate(func: DictEdgePredicate) -> EdgePredicate:  # noqa: D202
     return _wrapped
 
 
-def keep_edge_permissive(*args, **kwargs) -> bool:
-    """Return true for all edges.
-
-    :param dict data: A PyBEL edge data dictionary from a :class:`pybel.BELGraph`
-    :return: Always returns :code:`True`
-    """
+def true_edge_predicate(graph: BELGraph, u: BaseEntity, v: BaseEntity, k: str) -> bool:
+    """Return true for all edges."""
     return True
+
+
+def false_edge_predicate(graph: BELGraph, u: BaseEntity, v: BaseEntity, k: str) -> bool:
+    """Return false for all edges."""
+    return False
 
 
 @edge_predicate

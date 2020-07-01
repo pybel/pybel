@@ -2,7 +2,6 @@
 
 """This module contains functions that mutate or make transformations on a network."""
 
-from pybel.struct.mutation.inference.transfer import *
 from . import collapse, deletion, expansion, induction, induction_expansion, inference, metadata, utils
 from .collapse import *
 from .deletion import *
@@ -11,6 +10,7 @@ from .induction import *
 from .induction_expansion import *
 from .inference import *
 from .inference import transfer
+from .inference.transfer import *
 from .metadata import *
 from .utils import *
 
