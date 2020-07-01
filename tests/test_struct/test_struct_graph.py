@@ -94,7 +94,7 @@ class TestStruct(unittest.TestCase):
         sio = StringIO()
 
         random.seed(5)
-        pybel.examples.sialic_acid_graph.summary(file=sio)
+        pybel.examples.sialic_acid_graph.summary(file=sio, examples=False)
         test_str = """---------------------  -----------------
 Name                   Sialic Acid Graph
 Version                1.0.0
@@ -109,26 +109,26 @@ Number of Components   1
 Number of Warnings     0
 ---------------------  -----------------
 
-Type (3)      Count  Example
-----------  -------  ------------------------------------------------------------
-Protein           7  p(hgnc:11491 ! SYK)
-Complex           1  complex(a(chebi:26667 ! "sialic acid"), p(hgnc:1659 ! CD33))
-Abundance         1  a(chebi:26667 ! "sialic acid")
+Type (3)      Count
+----------  -------
+Protein           7
+Complex           1
+Abundance         1
 
-Namespace (2)      Count  Example
----------------  -------  ------------------------------
-hgnc                   7  p(hgnc:12449 ! TYROBP)
-chebi                  1  a(chebi:26667 ! "sialic acid")
+Namespace (2)      Count
+---------------  -------
+hgnc                   7
+chebi                  1
 
-Edge Type (7)                        Count  Example
----------------------------------  -------  --------------------------------------------------------------------------------------------------
-Protein increases Protein                3  act(p(hgnc:11491 ! SYK)) increases act(p(hgnc:17761 ! TREM2))
-Protein directlyIncreases Protein        2  act(p(hgnc:1659 ! CD33, pmod(Ph))) directlyIncreases act(p(hgnc:9658 ! PTPN6), ma(phos))
-Protein directlyDecreases Protein        2  act(p(hgnc:9658 ! PTPN6)) directlyDecreases act(p(hgnc:11491 ! SYK))
-Complex increases Protein                1  complex(a(chebi:26667 ! "sialic acid"), p(hgnc:1659 ! CD33)) increases act(p(hgnc:1659 ! CD33))
-Abundance partOf Complex                 1  a(chebi:26667 ! "sialic acid") partOf complex(a(chebi:26667 ! "sialic acid"), p(hgnc:1659 ! CD33))
-Protein partOf Complex                   1  p(hgnc:1659 ! CD33) partOf complex(a(chebi:26667 ! "sialic acid"), p(hgnc:1659 ! CD33))
-Protein hasVariant Protein               1  p(hgnc:1659 ! CD33) hasVariant p(hgnc:1659 ! CD33, pmod(Ph))"""
+Edge Type (7)                        Count
+---------------------------------  -------
+Protein increases Protein                3
+Protein directlyIncreases Protein        2
+Protein directlyDecreases Protein        2
+Complex increases Protein                1
+Abundance partOf Complex                 1
+Protein partOf Complex                   1
+Protein hasVariant Protein               1"""
         self.assertEqual(test_str.strip(), sio.getvalue().strip())
 
     def test_citation_type_error(self):

@@ -1007,9 +1007,9 @@ class SummaryDispatch(Dispatch):
     def __call__(self, file: Optional[TextIO] = None, examples: bool = True) -> None:
         self.statistics(file=file)
         print('', file=file)
-        self.nodes(file=file)
+        self.nodes(file=file, examples=examples)
         print('', file=file)
-        self.namespaces(file=file)
+        self.namespaces(file=file, examples=examples)
         print('', file=file)
         self.edges(file=file, examples=examples)
         print('', file=file)
