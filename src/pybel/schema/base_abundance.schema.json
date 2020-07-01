@@ -4,7 +4,7 @@
     "description": "Schema to validate JSON files containing a BaseAbundance (or subclass) node.",
     "type": "object",
     "properties": {
-        "function": {"enum": ["Abundance", "Protein", "Gene", "miRNA", "RNA"]},
+        "function": {"description": "The function of the node."},
         "concept": {"$ref": "entity.schema.json"},
         "xrefs": {
             "description": "An optional list of extra identifiers for the node.",
@@ -16,5 +16,5 @@
             "items": {"$ref": "variant.schema.json"}
         }
     },
-    "required": ["function", "concept"]
+    "required": ["function"]
 }
