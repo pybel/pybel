@@ -7,14 +7,13 @@ import typing
 from collections import Counter, defaultdict
 from typing import Any, Iterable, List, Mapping, Optional, Set, Tuple
 
-from ..filters.node_predicates import has_variant
+from ..filters import get_nodes, has_activity, has_variant, is_degraded, is_translocated
 from ..graph import BELGraph
 from ...constants import (
     ACTIVITY, CONCEPT, EFFECT, FROM_LOC, FUSION, KIND, LOCATION, MEMBERS, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P,
     PARTNER_5P, SUBJECT, TO_LOC, TRANSLOCATION, VARIANTS,
 )
-from ...dsl import BaseConcept, BaseEntity, CentralDogma, FusionBase, ListAbundance, Pathology, Reaction
-from ...dsl.node_classes import EntityVariant
+from ...dsl import BaseConcept, BaseEntity, CentralDogma, EntityVariant, FusionBase, ListAbundance, Pathology, Reaction
 from ...language import Entity
 
 __all__ = [
@@ -352,3 +351,36 @@ def node_is_grounded(node: BaseEntity) -> bool:
         entity.identifier is not None and entity.name is not None
         for entity in iterate_node_entities(node)
     )
+
+
+def get_degradations(graph: BELGraph) -> Set[BaseEntity]:
+    """Get all nodes that are degraded."""
+    return get_nodes(graph, is_degraded)
+
+
+def get_activities(graph: BELGraph) -> Set[BaseEntity]:
+    """Get all nodes that have molecular activities."""
+    return get_nodes(graph, has_activity)
+
+
+def get_translocated(graph: BELGraph) -> Set[BaseEntity]:
+    """Get all nodes that are translocated."""
+    return get_nodes(graph, is_translocated)
+
+
+def count_modifications(graph: BELGraph) -> Counter:
+    """Get a modifications count dictionary."""
+    return Counter(remove_falsy_values({
+        'Translocations': len(get_translocated(graph)),
+        'Degradations': len(get_degradations(graph)),
+        'Molecular Activities': len(get_activities(graph)),
+    }))
+
+
+def remove_falsy_values(counter: Mapping[Any, int]) -> Mapping[Any, int]:
+    """Remove all values that are zero."""
+    return {
+        label: count
+        for label, count in counter.items()
+        if count
+    }

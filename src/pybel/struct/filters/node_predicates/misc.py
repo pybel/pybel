@@ -6,6 +6,7 @@ from typing import Iterable, Type
 
 from .utils import node_predicate
 from ..typing import NodePredicate
+from ...graph import BELGraph
 from ....constants import PART_OF, RELATION
 from ....dsl import BaseEntity, ListAbundance
 
@@ -41,7 +42,7 @@ def one_of(nodes: Iterable[BaseEntity]) -> NodePredicate:
 
 
 def is_isolated_list_abundance(
-    graph,
+    graph: BELGraph,
     node: BaseEntity,
     cls: Type[ListAbundance] = ListAbundance,
 ) -> bool:

@@ -23,15 +23,10 @@ class TestLeftFullJoin(unittest.TestCase):
         g = BELGraph()
         g.add_increases(p1, p2, citation='PMID1', evidence='Evidence 1')
 
-        self.tag = 'EXTRANEOUS'
-        self.tag_value = 'MOST DEFINITELY'
-
         h = BELGraph()
         h.add_increases(p1, p2, citation='PMID1', evidence='Evidence 1')
         h.add_increases(p1, p2, citation='PMID2', evidence='Evidence 2')
         h.add_increases(p1, p3, citation='PMID1', evidence='Evidence 3')
-        h.nodes[p1][self.tag] = self.tag_value
-        h.nodes[p3][self.tag] = self.tag_value
 
         self.g = g
         self.h = h
@@ -54,12 +49,6 @@ class TestLeftFullJoin(unittest.TestCase):
 
         :param j: The resulting graph from G += H
         """
-        self.assertIn(self.tag, j.nodes[p1])
-        self.assertNotIn(self.tag, j.nodes[p2])
-        self.assertIn(self.tag, j.nodes[p3])
-        self.assertEqual(self.tag_value, j.nodes[p1][self.tag])
-        self.assertEqual(self.tag_value, j.nodes[p3][self.tag])
-
         self.assertEqual(3, j.number_of_nodes())
         self.assertEqual(3, j.number_of_edges(), msg="G edges:\n{}".format('\n'.join(map(str, j.edges(data=True)))))
 
@@ -262,7 +251,3 @@ class TestInnerJoin(unittest.TestCase):
     def test_intersection_trivial(self):
         res = node_intersection([self.g])
         self.assertEqual(self.g, res)
-
-
-if __name__ == '__main__':
-    unittest.main()

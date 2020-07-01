@@ -298,7 +298,7 @@ def _main():
     """Run with python -m pybel.io.graphdati."""
     network_id = '01E46GDFQAGK5W8EFS9S9WMH12'
     graph = from_biodati(network_id=network_id)
-    graph.summarize()
+    graph.summary()
 
 
 if __name__ == '__main__':

@@ -6,10 +6,11 @@ import hashlib
 import json
 import logging
 import pickle
+import typing
 from collections import defaultdict
 from collections.abc import Iterable, MutableMapping
 from datetime import datetime
-from typing import Any, Mapping, Optional, Tuple
+from typing import Any, List, Mapping, Optional, Tuple, TypeVar
 
 from .constants import (
     ACTIVITY, CITATION, CITATION_DB, CITATION_DB_NAME, CITATION_IDENTIFIER, DEGRADATION, EFFECT, EVIDENCE, FROM_LOC,
@@ -317,3 +318,15 @@ class CitationDict(dict):
 
     def __hash__(self):
         return hash((self[CITATION_DB], self[CITATION_IDENTIFIER]))
+
+
+X = TypeVar('X')
+Y = TypeVar('Y')
+
+
+def multidict(pairs: typing.Iterable[Tuple[X, Y]]) -> Mapping[X, List[Y]]:
+    """Accumulate a multidict from a list of pairs."""
+    rv = defaultdict(list)
+    for key, value in pairs:
+        rv[key].append(value)
+    return dict(rv)
