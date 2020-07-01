@@ -19,10 +19,12 @@ from ...utils import multidict
 logger = logging.getLogger(__name__)
 
 
-def function_table_df(graph: BELGraph) -> pd.DataFrame:
+def function_table_df(graph: BELGraph, examples: bool = True) -> pd.DataFrame:
     """Create a dataframe describing the functions in the graph."""
     function_mapping = multidict((node.function, node) for node in graph)
     function_c = Counter({function: len(nodes) for function, nodes in function_mapping.items()})
+    if not examples:
+        return pd.DataFrame(function_c.most_common(), columns=['Type', 'Count'])
     return pd.DataFrame(
         [
             (function, count, random.choice(function_mapping[function]))  # noqa:S311
@@ -32,18 +34,20 @@ def function_table_df(graph: BELGraph) -> pd.DataFrame:
     )
 
 
-def functions(graph, file: Optional[TextIO] = None):
+def functions(graph, file: Optional[TextIO] = None, examples: bool = True):
     """Print a summary of the functions in the graph."""
-    df = function_table_df(graph)
+    df = function_table_df(graph, examples=examples)
     headers = list(df.columns)
-    headers[0] += ' ({})'.format(intword(graph.number_of_nodes()))
+    headers[0] += ' ({})'.format(len(df.index))
     print(tabulate(df.values, headers=headers), file=file)
 
 
-def namespaces_table_df(graph: BELGraph) -> pd.DataFrame:
+def namespaces_table_df(graph: BELGraph, examples: bool = True) -> pd.DataFrame:
     """Create a dataframe describing the namespaces in the graph."""
     namespace_mapping = multidict((node.namespace, node) for node in graph if isinstance(node, BaseConcept))
     namespace_c = Counter({namespace: len(nodes) for namespace, nodes in namespace_mapping.items()})
+    if not examples:
+        return pd.DataFrame(namespace_c.most_common(), columns=['Namespace', 'Count'])
     return pd.DataFrame(
         [
             (namespace, count, random.choice(namespace_mapping[namespace]))  # noqa:S311
@@ -53,9 +57,9 @@ def namespaces_table_df(graph: BELGraph) -> pd.DataFrame:
     )
 
 
-def namespaces(graph: BELGraph, file: Optional[TextIO] = None) -> None:
+def namespaces(graph: BELGraph, file: Optional[TextIO] = None, examples: bool = True) -> None:
     """Print a summary of the namespaces in the graph."""
-    df = namespaces_table_df(graph)
+    df = namespaces_table_df(graph, examples=examples)
     headers = list(df.columns)
     headers[0] += ' ({})'.format(len(df.index))
     print(tabulate(df.values, headers=headers), file=file)

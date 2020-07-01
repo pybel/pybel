@@ -1002,10 +1002,12 @@ def _iterate_authors(graph: BELGraph) -> Iterable[str]:
 
 
 class SummaryDispatch(Dispatch):
+    """A dispatch for summary printing functions that can be found at :data:`pybel.BELGraph.summary`."""
+
     def __call__(self, file: Optional[TextIO] = None, examples: bool = True) -> None:
         self.statistics(file=file)
         print('', file=file)
-        self.functions(file=file)
+        self.nodes(file=file)
         print('', file=file)
         self.namespaces(file=file)
         print('', file=file)
@@ -1016,15 +1018,15 @@ class SummaryDispatch(Dispatch):
         """Print summary statistics on the graph."""
         print(self.str(), file=file)
 
-    def functions(self, file: Optional[TextIO] = None):
+    def nodes(self, file: Optional[TextIO] = None, examples: bool = True):
         """Print a summary of the nodes' functions in the graph."""
         from .summary.supersummary import functions
-        functions(self.graph, file=file)
+        functions(self.graph, file=file, examples=examples)
 
-    def namespaces(self, file: Optional[TextIO] = None):
+    def namespaces(self, file: Optional[TextIO] = None, examples: bool = True):
         """Print a summary of the nodes' namespaces in the graph."""
         from .summary.supersummary import namespaces
-        namespaces(self.graph, file=file)
+        namespaces(self.graph, file=file, examples=examples)
 
     def edges(self, file: Optional[TextIO] = None, examples: bool = True):
         """Print a summary of the edges' types in the graph."""
@@ -1118,7 +1120,7 @@ class ExpandDispatch(Dispatch):
 
 
 class InduceDispatch(Dispatch):
-    """A dispatch for count functions that can be found at :data:`pybel.BELGraph.induce`."""
+    """A dispatch for induction functions that can be found at :data:`pybel.BELGraph.induce`."""
 
     def paths(self, nodes: Iterable[BaseEntity]) -> Optional[BELGraph]:
         """Induce a subgraph on shortest paths between the nodes."""

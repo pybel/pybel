@@ -94,7 +94,7 @@ class TestStruct(unittest.TestCase):
         sio = StringIO()
 
         random.seed(5)
-        pybel.examples.sialic_acid_graph.summarize(file=sio)
+        pybel.examples.sialic_acid_graph.summary(file=sio)
         test_str = """---------------------  -----------------
 Name                   Sialic Acid Graph
 Version                1.0.0
@@ -109,7 +109,7 @@ Number of Components   1
 Number of Warnings     0
 ---------------------  -----------------
 
-Type (9)      Count  Example
+Type (3)      Count  Example
 ----------  -------  ------------------------------------------------------------
 Protein           7  p(hgnc:11491 ! SYK)
 Complex           1  complex(a(chebi:26667 ! "sialic acid"), p(hgnc:1659 ! CD33))
