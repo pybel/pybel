@@ -3,8 +3,6 @@ environment:
   matrix:
     - PYTHON: "C:\\Python36"
     - PYTHON: "C:\\Python36-x64"
-    - PYTHON: "C:\\Python35"
-    - PYTHON: "C:\\Python35-x64"
 
 # See: https://help.appveyor.com/discussions/problems/12705-custom-build-script-script-mode
 build: off
