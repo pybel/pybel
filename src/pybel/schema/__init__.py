@@ -76,6 +76,6 @@ def is_valid_node(node: Mapping[str, Any]) -> bool:
     try:
         _validator(filename).validate(node)
         return True
-    except jsonschema.ValidationError as err:
+    except jsonschema.exceptions.ValidationError as err:
         print(err)
         return False
