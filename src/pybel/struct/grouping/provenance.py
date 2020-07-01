@@ -18,7 +18,7 @@ def get_subgraphs_by_citation(graph):
     :type graph: pybel.BELGraph
     :rtype: dict[tuple[str,str],pybel.BELGraph]
     """
-    rv = defaultdict(graph.__class__)
+    rv = defaultdict(graph.child)
 
     for u, v, key, data in graph.edges(keys=True, data=True):
         if CITATION not in data:
@@ -26,7 +26,5 @@ def get_subgraphs_by_citation(graph):
         dk = data[CITATION][CITATION_DB], data[CITATION][CITATION_IDENTIFIER]
 
         rv[dk].add_edge(u, v, key=key, **data)
-
-    cleanup(graph, rv)
 
     return dict(rv)

@@ -46,8 +46,6 @@ def get_graph_with_random_edges(graph: BELGraph, n_edges: int) -> BELGraph:
     """
     rv = graph.child()
     rv.add_edges_from(_random_edge_iterator(graph, n_edges))
-
-    update_metadata(graph, rv)
     return rv
 
 
@@ -219,8 +217,5 @@ def get_random_subgraph(
 
     logger.debug('removing isolated nodes')
     remove_isolated_nodes(result)
-
-    # update metadata
-    update_metadata(graph, result)
 
     return result

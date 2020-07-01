@@ -14,6 +14,7 @@ import networkx as nx
 from tabulate import tabulate
 
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
+from .utils import update_metadata
 from ..canonicalize import edge_to_bel
 from ..constants import (
     ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_DB, CITATION_IDENTIFIER,
@@ -126,6 +127,7 @@ class BELGraph(nx.MultiDiGraph):
         """Create an empty graph with a "parent" reference back to this one."""
         rv = BELGraph()
         rv.parent = self
+        update_metadata(source=self, target=rv)
         return rv
 
     @property

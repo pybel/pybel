@@ -37,7 +37,4 @@ def get_subgraph_by_neighborhood(graph: BELGraph, nodes: Iterable[BaseEntity]) -
             graph.out_edges(nodes, keys=True, data=True),
         ),
     )
-
-    update_metadata(graph, rv)
-
     return rv
