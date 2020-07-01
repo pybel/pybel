@@ -3,6 +3,7 @@
 """Validation for PyBEL data."""
 
 import json
+import logging
 import os
 from typing import Any, Mapping, Optional, Tuple
 
@@ -10,57 +11,21 @@ import jsonschema
 
 __all__ = ['is_valid_node']
 
+logger = logging.getLogger(__name__)
+
 HERE = os.path.abspath(os.path.dirname(__file__))
+SCHEMA_PATH = os.path.join(HERE, "node.schema.json")
 
+# Load the top level schema
+with open(SCHEMA_PATH) as json_schema:
+    SCHEMA = json.load(json_schema)
 
-def _load_schema(filename: str) -> Mapping[str, Any]:
-    """
-    Load a schema from its filename.
-
-    :param filename: The relative path to the schema, e.g. "variant.schema.json"
-    """
-    path = os.path.join(HERE, filename)
-    with open(path) as json_schema:
-        schema = json.load(json_schema)
-    return schema
-
-
-def _validator(filename: str) -> jsonschema.Draft7Validator:
-    """
-    Return a validator that checks against a given schema.
-
-    :param filename: The relative path to the schema, e.g. "variant.schema.json"
-    """
-    schema = _load_schema(filename)
-    # To use schemas from other files, jsonschema needs to know where the references point to, so
-    # create a resolver that directs any references (like "fusion.schema.json") to the schema's dir
-    schema_uri = 'file://' + HERE + '/'
-    resolver = jsonschema.RefResolver(base_uri=schema_uri, referrer=__file__)
-    return jsonschema.Draft7Validator(schema, resolver=resolver)
-
-
-def _get_schema(node: Mapping[str, Any]) -> Tuple[str, bool]:
-    """
-    Get the filename for the appropriate schema for a given node.
-
-    :return: The filename for the schema and an error bool.
-    """
-    err = False
-    filename = ""
-    # Check if the node is a subclass of FusionBase
-    if 'fusion' in node.keys():
-        filename = 'fusion.schema.json'
-    # Check if the "function" is present (if not, the node is invalid)
-    elif 'function' in node.keys():
-        if node['function'] == 'Reaction':
-            filename = 'reaction.schema.json'
-        elif node['function'] in ['Complex', 'Composite']:
-            filename = 'list_abundance.schema.json'
-        else:
-            filename = 'base_abundance.schema.json'
-    else:
-        err = True
-    return filename, err
+# To use schemas from other files, jsonschema needs to know where the references point to, so
+# create a resolver that directs any references (like "fusion.schema.json") to the schema's dir
+schema_uri = 'file://' + HERE + '/'
+resolver = jsonschema.RefResolver(base_uri=schema_uri, referrer=__file__)
+# Define a validator that checks against the top-level schema
+validator = jsonschema.Draft7Validator(SCHEMA, resolver=resolver)
 
 
 def is_valid_node(node: Mapping[str, Any]) -> bool:
@@ -70,12 +35,9 @@ def is_valid_node(node: Mapping[str, Any]) -> bool:
     :param node: A dict representing a PyBEL node.
     :return: if the node is valid
     """
-    filename, err = _get_schema(node)
-    if err:
-        return False
     try:
-        _validator(filename).validate(node)
+        validator.validate(node)
         return True
     except jsonschema.exceptions.ValidationError as err:
-        print(err)
+        logger.info(err)
         return False

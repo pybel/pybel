@@ -4,8 +4,8 @@
 
 import unittest
 
-from pybel.schema import is_valid_node
 import pybel.dsl
+from pybel.schema import is_valid_node
 from pybel.testing.utils import n
 
 
@@ -30,6 +30,7 @@ VALID_ABUNDANCE = {
 }
 
 NAMESPACE, NAME, IDENTIFIER = n(), n(), n()
+
 
 def build_abundance(variant_dict):
     """Return an abundance dict with the given variant."""
@@ -56,8 +57,9 @@ class TestSchema(unittest.TestCase):
         protein_mod = pybel.dsl.ProteinModification(NAME, code='Abc', position=1,
                                                     namespace=NAMESPACE, identifier=IDENTIFIER)
         fragment = pybel.dsl.Fragment(1, 2)
-        node = lambda variant: pybel.dsl.Gene(NAMESPACE, name=NAME,
-                                              identifier=IDENTIFIER, variants=[variant])
+
+        def node(variant):
+            return pybel.dsl.Gene(NAMESPACE, name=NAME, identifier=IDENTIFIER, variants=[variant])
         self.assertTrue(is_valid_node(node(protein_mod)))
         self.assertTrue(is_valid_node(node(gene_mod)))
         self.assertTrue(is_valid_node(node(protein_sub)))
