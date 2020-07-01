@@ -2,8 +2,8 @@
 
 """Validation for PyBEL data."""
 
-import os
 import json
+import os
 from typing import Any, Mapping, Optional, Tuple
 
 import jsonschema
