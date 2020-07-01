@@ -146,6 +146,13 @@ def _augment_node(node: BaseEntity) -> BaseEntity:
     return rv
 
 
+def _fix_annotation_list(graph: BELGraph):
+    graph.graph[GRAPH_ANNOTATION_LIST] = {
+        keyword: set(values)
+        for keyword, values in graph.graph.get(GRAPH_ANNOTATION_LIST, {}).items()
+    }
+
+
 def _from_nodelink_json_helper(data: Mapping[str, Any]) -> BELGraph:
     """Return graph from node-link data format.
 
@@ -153,10 +160,7 @@ def _from_nodelink_json_helper(data: Mapping[str, Any]) -> BELGraph:
     """
     graph = BELGraph()
     graph.graph = data.get('graph', {})
-    graph.graph[GRAPH_ANNOTATION_LIST] = {
-        keyword: set(values)
-        for keyword, values in graph.graph.get(GRAPH_ANNOTATION_LIST, {}).items()
-    }
+    _fix_annotation_list(graph)
 
     mapping = []
 

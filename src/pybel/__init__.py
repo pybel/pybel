@@ -36,6 +36,7 @@ from .io.nodelink import (
     to_nodelink_file, to_nodelink_gz, to_nodelink_jsons,
 )
 from .io.pynpa import to_npa_dfs, to_npa_directory
+from .io.sbel import from_sbel, from_sbel_file, from_sbel_gz, to_sbel, to_sbel_file, to_sbel_gz
 from .io.spia import to_spia_dfs, to_spia_excel, to_spia_tsvs
 from .io.tsv import to_edgelist, to_tsv
 from .io.umbrella_nodelink import to_umbrella_nodelink, to_umbrella_nodelink_file, to_umbrella_nodelink_gz
