@@ -91,6 +91,7 @@ class TestStruct(unittest.TestCase):
 
     def test_summarize(self):
         """Test summarizing a graph."""
+        self.maxDiff = None
         sio = StringIO()
 
         random.seed(5)
