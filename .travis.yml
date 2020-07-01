@@ -42,8 +42,8 @@ jobs:
       env: TOXENV=py DB=postgresql PYBEL_TEST_CONNECTOR=psycopg2-binary PYBEL_TEST_CONNECTION=postgresql+psycopg2://travis@localhost/tests
     - name: "Tests with SQLite"
       env: TOXENV=py DB=sqlite
-    - name: "Tests with legacy Python (3.5)"
-      python: 3.5
+    - name: "Tests with legacy Python (3.6)"
+      python: 3.6
       env: TOXENV=py DB=sqlite
 
 install:

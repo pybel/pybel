@@ -46,9 +46,6 @@ or from the latest code on `GitHub <https://github.com/pybel/pybel>`_ with:
 See the `installation documentation <https://pybel.readthedocs.io/en/latest/introduction/installation.html>`_ for more advanced
 instructions. Also, check the change log at `CHANGELOG.rst <https://github.com/pybel/pybel/blob/master/CHANGELOG.rst>`_.
 
-Note: while PyBEL works on the most recent versions of Python 3.5, it does not work on 3.5.3 or below due to changes
-in the ``typing`` module.
-
 Getting Started
 ---------------
 More examples can be found in the `documentation <http://pybel.readthedocs.io>`_ and in the
