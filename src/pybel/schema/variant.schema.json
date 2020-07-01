@@ -33,5 +33,31 @@
         "type": ["number", "string"]
       }
     },
-    "required": ["kind"]
+    "required": ["kind"],
+    "allOf": [
+      {
+        "if": {
+          "properties": {"kind": {"const": "pmod"}}
+        },
+        "then": {
+          "required": ["code", "pos"]
+        }
+      },
+      {
+        "if": {
+          "properties": {"kind": {"const": "frag"}}
+        },
+        "then": {
+          "required": ["start", "stop"]
+        }
+      },
+      {
+        "if": {
+          "properties": {"kind": {"const": "hgvs"}}
+        },
+        "then": {
+          "required": ["hgvs"]
+        }
+      }
+    ]
 }

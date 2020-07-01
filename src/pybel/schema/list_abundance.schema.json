@@ -20,5 +20,15 @@
             "items": {"$ref": "variant.schema.json"}
         }
     },
-    "required": ["function", "concept"]
+    "if": {
+        "properties": {
+            "function": {"const": "Complex"}
+        }
+    },
+    "then": {
+        "required": ["function", "concept"]
+    },
+    "else": {
+        "required": ["function"]
+    }
 }
