@@ -127,6 +127,8 @@ The number of nodes of each type can be summarized with ``BELGraph.summary.nodes
 
 The number of nodes with each namespace can be summarized with ``BELGraph.summary.namespaces()`` as in:
 
+.. code-block:: python
+
     >>> graph.summary.namespaces(examples=False)
     Namespace (4)      Count
     ---------------  -------
