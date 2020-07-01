@@ -3,15 +3,18 @@
 """Contains the main data structure for PyBEL."""
 
 import logging
-from collections import defaultdict
+import warnings
+from collections import Counter, defaultdict
 from copy import deepcopy
 from functools import partialmethod
 from itertools import chain
 from typing import Any, Dict, Hashable, Iterable, List, Mapping, Optional, Set, TextIO, Tuple, Union
 
 import networkx as nx
+from tabulate import tabulate
 
 from .operations import left_full_join, left_node_intersection_join, left_outer_join
+from .utils import update_metadata
 from ..canonicalize import edge_to_bel
 from ..constants import (
     ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_DB, CITATION_IDENTIFIER,
@@ -111,6 +114,53 @@ class BELGraph(nx.MultiDiGraph):
 
         if path:
             self.path = path
+
+        #: A refernce to the parent graph
+        self.parent = None
+        self._count = CountDispatch(self)
+        self._expand = ExpandDispatch(self)
+        self._induce = InduceDispatch(self)
+        self._plot = PlotDispatch(self)
+        self._summary = SummaryDispatch(self)
+
+    def child(self) -> 'BELGraph':
+        """Create an empty graph with a "parent" reference back to this one."""
+        rv = BELGraph()
+        rv.parent = self
+        update_metadata(source=self, target=rv)
+        return rv
+
+    @property
+    def count(self) -> 'CountDispatch':  # noqa: D401
+        """A dispatch to count functions.
+
+        Can be used like this:
+
+        >>> from pybel.examples import sialic_acid_graph
+        >>> sialic_acid_graph.count.functions()
+        Counter({'Protein': 7, 'Complex': 1, 'Abundance': 1})
+        """
+        return self._count
+
+    @property
+    def summary(self) -> 'SummaryDispatch':  # noqa: D401
+        """A dispatch to summarize the graph."""
+        return self._summary
+
+    @property
+    def expand(self) -> 'ExpandDispatch':  # noqa: D401
+        """A dispatch to expand the graph w.r.t. its parent."""
+        return self._expand
+
+    @property
+    def induce(self) -> 'InduceDispatch':  # noqa: D401
+        """A dispatch to mutate the graph."""
+        return self._induce
+
+    @property
+    def plot(self) -> 'PlotDispatch':  # noqa: D401
+        """A dispatch to plot the graph using :mod:`matplotlib` and :mod:`seaborn`."""
+        return self._plot
 
     @property
     def path(self) -> Optional[str]:  # noqa: D401
@@ -309,12 +359,7 @@ class BELGraph(nx.MultiDiGraph):
 
     def number_of_citations(self) -> int:
         """Return the number of citations contained within the graph."""
-        return len(set(self._iterate_citations()))
-
-    def _iterate_citations(self) -> Iterable[Tuple[str, str]]:
-        for _, _, data in self.edges(data=True):
-            if CITATION in data:
-                yield data[CITATION][CITATION_DB], data[CITATION][CITATION_IDENTIFIER]
+        return self.count.citations()
 
     def number_of_authors(self) -> int:
         """Return the number of authors contained within the graph."""
@@ -322,14 +367,7 @@ class BELGraph(nx.MultiDiGraph):
 
     def get_authors(self) -> Set[str]:
         """Get the authors for the citations in the graph."""
-        return set(self._iterate_authors())
-
-    def _iterate_authors(self) -> Iterable[str]:
-        return chain.from_iterable(
-            data[CITATION][CITATION_AUTHORS]
-            for _, _, data in self.edges(data=True)
-            if CITATION in data and CITATION_AUTHORS in data[CITATION]
-        )
+        return set(self.count.authors())
 
     def __str__(self):
         return '{} v{}'.format(self.name, self.version)
@@ -665,15 +703,12 @@ class BELGraph(nx.MultiDiGraph):
     def __add__(self, other: 'BELGraph') -> 'BELGraph':
         """Copy this graph and join it with another graph with it using :func:`pybel.struct.left_full_join`.
 
-        :param BELGraph other: Another BEL graph
-        :rtype: BELGraph
+        :param other: Another BEL graph
 
         Example usage:
 
-        >>> import pybel
-        >>> g = pybel.from_bel_script('...')
-        >>> h = pybel.from_bel_script('...')
-        >>> k = g + h
+        >>> from pybel.examples import ras_tloc_graph, braf_graph
+        >>> k = ras_tloc_graph + braf_graph
         """
         if not isinstance(other, BELGraph):
             raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
@@ -685,15 +720,12 @@ class BELGraph(nx.MultiDiGraph):
     def __iadd__(self, other: 'BELGraph') -> 'BELGraph':
         """Join another graph into this one, in-place, using :func:`pybel.struct.left_full_join`.
 
-        :param BELGraph other: Another BEL graph
-        :rtype: BELGraph
+        :param other: Another BEL graph
 
         Example usage:
 
-        >>> import pybel
-        >>> g = pybel.from_bel_script('...')
-        >>> h = pybel.from_bel_script('...')
-        >>> g += h
+        >>> from pybel.examples import ras_tloc_graph, braf_graph
+        >>> ras_tloc_graph += braf_graph
         """
         if not isinstance(other, BELGraph):
             raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
@@ -706,15 +738,12 @@ class BELGraph(nx.MultiDiGraph):
 
         Uses :func:`pybel.struct.left_outer_join`.
 
-        :param BELGraph other: Another BEL graph
-        :rtype: BELGraph
+        :param other: Another BEL graph
 
         Example usage:
 
-        >>> import pybel
-        >>> g = pybel.from_bel_script('...')
-        >>> h = pybel.from_bel_script('...')
-        >>> k = g & h
+        >>> from pybel.examples import ras_tloc_graph, braf_graph
+        >>> k = ras_tloc_graph & braf_graph
         """
         if not isinstance(other, BELGraph):
             raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
@@ -726,15 +755,12 @@ class BELGraph(nx.MultiDiGraph):
     def __iand__(self, other: 'BELGraph') -> 'BELGraph':
         """Join another graph into this one, in-place, using :func:`pybel.struct.left_outer_join`.
 
-        :param BELGraph other: Another BEL graph
-        :rtype: BELGraph
+        :param other: Another BEL graph
 
         Example usage:
 
-        >>> import pybel
-        >>> g = pybel.from_bel_script('...')
-        >>> h = pybel.from_bel_script('...')
-        >>> g &= h
+        >>> from pybel.examples import ras_tloc_graph, braf_graph
+        >>> ras_tloc_graph &= braf_graph
         """
         if not isinstance(other, BELGraph):
             raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
@@ -745,15 +771,12 @@ class BELGraph(nx.MultiDiGraph):
     def __xor__(self, other: 'BELGraph') -> 'BELGraph':
         """Join this graph with another using :func:`pybel.struct.left_node_intersection_join`.
 
-        :param BELGraph other: Another BEL graph
-        :rtype: BELGraph
+        :param other: Another BEL graph
 
         Example usage:
 
-        >>> import pybel
-        >>> g = pybel.from_bel_script('...')
-        >>> h = pybel.from_bel_script('...')
-        >>> k = g ^ h
+        >>> from pybel.examples import ras_tloc_graph, braf_graph
+        >>> k = ras_tloc_graph ^ braf_graph
         """
         if not isinstance(other, BELGraph):
             raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
@@ -763,6 +786,7 @@ class BELGraph(nx.MultiDiGraph):
     @staticmethod
     def node_to_bel(n: BaseEntity) -> str:
         """Serialize a node as BEL."""
+        warnings.warn('use node.as_bel()', DeprecationWarning)
         return n.as_bel()
 
     @staticmethod
@@ -827,31 +851,28 @@ class BELGraph(nx.MultiDiGraph):
 
     def _describe_list(self) -> List[Tuple[str, float]]:
         """Return useful information about the graph as a list of tuples."""
-        number_nodes = self.number_of_nodes()
-        return [
-            ('Number of Nodes', number_nodes),
-            ('Number of Edges', self.number_of_edges()),
-            ('Number of Citations', self.number_of_citations()),
-            ('Number of Authors', self.number_of_authors()),
-            ('Network Density', '{:.2E}'.format(nx.density(self))),
-            ('Number of Components', nx.number_weakly_connected_components(self)),
-            ('Number of Warnings', self.number_of_warnings()),
-        ]
+        warnings.warn('use graph.summary.list()', DeprecationWarning)
+        return self.summary.list()
 
     def summary_dict(self) -> Mapping[str, float]:
         """Return a dictionary that summarizes the graph."""
-        return dict(self._describe_list())
+        warnings.warn('use graph.summary.dict()', DeprecationWarning)
+        return self.summary.dict()
 
     def summary_str(self) -> str:
         """Return a string that summarizes the graph."""
-        return '{}\n'.format(self) + '\n'.join(
-            '{}: {}'.format(label, value)
-            for label, value in self._describe_list()
-        )
+        warnings.warn('use graph.summary.str()', DeprecationWarning)
+        return self.summary.str()
 
     def summarize(self, file: Optional[TextIO] = None) -> None:
         """Print a summary of the graph."""
-        print(self.summary_str(), file=file)
+        warnings.warn('use graph.summary()', DeprecationWarning)
+        self.summary(file=file)
+
+    def ground(self, **kwargs) -> 'BELGraph':
+        """Ground this graph."""
+        from ..grounding import ground
+        return ground(self, **kwargs)
 
 
 def _clean_annotations(annotations_dict: AnnotationsHint) -> AnnotationsDict:
@@ -900,3 +921,225 @@ def _handle_citation(citation: Union[str, Tuple[str, str], CitationDict]) -> Cit
         raise ValueError('citation was None')
     else:
         raise TypeError('citation is the wrong type: {}'.format(citation))
+
+
+class Dispatch:
+    def __init__(self, graph: BELGraph):
+        self.graph = graph
+
+
+class CountDispatch(Dispatch):
+    """A dispatch for count functions that can be found at :data:`pybel.BELGraph.count`."""
+
+    def functions(self) -> Counter:
+        """Count the functions in a graph.
+
+        >>> from pybel.examples import sialic_acid_graph
+        >>> sialic_acid_graph.count.functions()
+        Counter({'Protein': 7, 'Complex': 1, 'Abundance': 1})
+        """
+        from .summary import count_functions
+        return count_functions(self.graph)
+
+    def namespaces(self) -> Counter:
+        """Return a counter of namespaces' occurrences in nodes in the graph."""
+        from .summary import count_namespaces
+        return count_namespaces(self.graph)
+
+    def pathologies(self) -> Counter:
+        """Return a counter of pathologies' occurrences in edges in the graph."""
+        from .summary import count_pathologies
+        return count_pathologies(self.graph)
+
+    def annotations(self) -> Counter:
+        """Return a counter of annotations' occurrences in edges in the graph."""
+        from .summary import count_annotations
+        return count_annotations(self.graph)
+
+    def variants(self) -> Counter:
+        """Return a counter of variants' occurrences in nodes in the graph."""
+        from .summary import count_variants
+        return count_variants(self.graph)
+
+    def relations(self) -> Counter:
+        """Return a counter of relations' occurrences in edges in the graph."""
+        from .summary import count_relations
+        return count_relations(self.graph)
+
+    def error_types(self) -> Counter:
+        """Return a counter of error types' occurrences in BEL script underlying the graph."""
+        from .summary import count_error_types
+        return count_error_types(self.graph)
+
+    def names_by_namespace(self, namespace: str) -> Counter:
+        from .summary import count_names_by_namespace
+        return count_names_by_namespace(self.graph, namespace=namespace)
+
+    def modifications(self) -> Counter:
+        """Return a counter of relation modifications' occurrences (activity, translocation, etc.) in the graph."""
+        from .summary.node_summary import count_modifications
+        return count_modifications(self.graph)
+
+    def authors(self) -> Counter:
+        """Return a counter of the number of edges to which each author contributed in the graph."""
+        return Counter(_iterate_authors(self.graph))
+
+    def citations(self) -> int:
+        """Return the number of citations."""
+        return len(set(_iterate_citations(self.graph)))
+
+
+def _iterate_citations(graph: BELGraph) -> Iterable[Tuple[str, str]]:
+    for _, _, data in graph.edges(data=True):
+        if CITATION in data:
+            yield data[CITATION][CITATION_DB], data[CITATION][CITATION_IDENTIFIER]
+
+
+def _iterate_authors(graph: BELGraph) -> Iterable[str]:
+    return chain.from_iterable(
+        data[CITATION][CITATION_AUTHORS]
+        for _, _, data in graph.edges(data=True)
+        if CITATION in data and CITATION_AUTHORS in data[CITATION]
+    )
+
+
+class SummaryDispatch(Dispatch):
+    """A dispatch for summary printing functions that can be found at :data:`pybel.BELGraph.summary`."""
+
+    def __call__(self, file: Optional[TextIO] = None, examples: bool = True) -> None:
+        self.statistics(file=file)
+        print('', file=file)
+        self.nodes(file=file, examples=examples)
+        print('', file=file)
+        self.namespaces(file=file, examples=examples)
+        print('', file=file)
+        self.edges(file=file, examples=examples)
+        print('', file=file)
+
+    def statistics(self, file: Optional[TextIO] = None):
+        """Print summary statistics on the graph."""
+        print(self.str(), file=file)
+
+    def nodes(self, file: Optional[TextIO] = None, examples: bool = True):
+        """Print a summary of the nodes' functions in the graph."""
+        from .summary.supersummary import functions
+        functions(self.graph, file=file, examples=examples)
+
+    def namespaces(self, file: Optional[TextIO] = None, examples: bool = True):
+        """Print a summary of the nodes' namespaces in the graph."""
+        from .summary.supersummary import namespaces
+        namespaces(self.graph, file=file, examples=examples)
+
+    def edges(self, file: Optional[TextIO] = None, examples: bool = True):
+        """Print a summary of the edges' types in the graph."""
+        from .summary.supersummary import edges
+        edges(self.graph, file=file, examples=examples)
+
+    def citations(self, n: Optional[int] = 15, file: Optional[TextIO] = None):
+        """Print a summary of the top citations' frequencies in the graph."""
+        from .summary.supersummary import citations
+        citations(self.graph, n=n, file=file)
+
+    def dict(self) -> Mapping[str, float]:
+        """Return a dictionary that summarizes the graph."""
+        return dict(self.list())
+
+    def str(self) -> str:
+        """Return a string that summarizes the graph."""
+        return tabulate(self.list())
+
+    def list(self) -> List[Tuple[str, float]]:
+        """Return a list of tuples that summarize the graph."""
+        number_nodes = self.graph.number_of_nodes()
+        return [
+            ('Name', self.graph.name),
+            ('Version', self.graph.version),
+            ('Number of Nodes', number_nodes),
+            ('Number of Namespaces', len(self.graph.count.namespaces())),
+            ('Number of Edges', self.graph.number_of_edges()),
+            ('Number of Annotations', len(self.graph.count.annotations())),
+            ('Number of Citations', self.graph.number_of_citations()),
+            ('Number of Authors', self.graph.number_of_authors()),
+            ('Network Density', '{:.2E}'.format(nx.density(self.graph))),
+            ('Number of Components', nx.number_weakly_connected_components(self.graph)),
+            ('Number of Warnings', self.graph.number_of_warnings()),
+        ]
+
+
+class PlotDispatch(Dispatch):
+    """A dispatch for count functions that can be found at :data:`pybel.BELGraph.plot`."""
+
+    def summary(self, save: Optional[str] = None, **kwargs):
+        """Plot a summary of the graph's nodes and edges using :mod:`matplotlib`."""
+        from pybel_tools.summary.visualization import plot_summary
+        fig, axes = plot_summary(self.graph, **kwargs)
+        if save:
+            fig.save(save)
+
+
+class ExpandDispatch(Dispatch):
+    """A dispatch for count functions that can be found at :data:`pybel.BELGraph.expand`."""
+
+    @property
+    def parent(self) -> BELGraph:
+        """Get the parent BEL graph."""
+        if not self.graph.parent:
+            raise RuntimeError('Can not use expand dispatch on graph without a parent')
+        return self.graph.parent
+
+    def neighborhood(self, node: BaseEntity) -> BELGraph:
+        """Expand around the neighborhood of a given node.
+
+        >>> from pybel.examples import braf_graph
+        >>> from pybel.dsl import Protein
+        >>> thpo = Protein(namespace='HGNC', name='THPO', identifier='11795')
+        >>> braf = Protein(namespace='HGNC', name='BRAF', identifier='1097')
+        >>> raf1 = Protein(namespace='HGNC', name='RAF1', identifier='9829')
+        >>> elk1 = Protein(namespace='HGNC', name='ELK1', identifier='3321')
+        >>> subgraph_1 = braf_graph.induce.paths([braf, elk1])
+        >>> assert thpo not in subgraph_1 and raf1 not in subgraph_1
+        >>> subgraph_2 = subgraph_1.expand.neighborhood(braf)
+        >>> assert thpo in subgraph_2 and raf1 not in subgraph_2
+        """
+        from .mutation import expand_node_neighborhood
+        cp = self.graph.copy()
+        expand_node_neighborhood(universe=self.parent, graph=cp, node=node)
+        return cp
+
+    def periphery(self, **kwargs):
+        """Expand around the periphery of the graph w.r.t. its parent graph."""
+        from pybel_tools.mutation.expansion import expand_periphery
+        cp = self.graph.copy()
+        expand_periphery(universe=self.parent, graph=cp, **kwargs)
+        return cp
+
+    def internal(self, **kwargs):
+        """Expand missing edges between nodes in the graph w.r.t. its parent graph."""
+        from pybel_tools.mutation.expansion import expand_internal
+        cp = self.graph.copy()
+        expand_internal(universe=self.parent, graph=cp, **kwargs)
+        return cp
+
+
+class InduceDispatch(Dispatch):
+    """A dispatch for induction functions that can be found at :data:`pybel.BELGraph.induce`."""
+
+    def paths(self, nodes: Iterable[BaseEntity]) -> Optional[BELGraph]:
+        """Induce a subgraph on shortest paths between the nodes."""
+        from .mutation import get_subgraph_by_all_shortest_paths
+        return get_subgraph_by_all_shortest_paths(self.graph, nodes)
+
+    def neighborhood(self, nodes: Iterable[BaseEntity]) -> Optional[BELGraph]:
+        """Induce a subgraph around the neighborhood."""
+        from .mutation import get_subgraph_by_neighborhood
+        return get_subgraph_by_neighborhood(self.graph, nodes)
+
+    def random(self, **kwargs) -> Optional[BELGraph]:
+        """Induce a random subgraph."""
+        from .mutation import get_random_subgraph
+        return get_random_subgraph(self.graph, **kwargs)
+
+    def annotation(self, prefix: str, identifier: str) -> Optional[BELGraph]:
+        """Induce a subgraph on edges with the given annotation."""
+        from .mutation import get_subgraph_by_annotation_value
+        return get_subgraph_by_annotation_value(self.graph, prefix, identifier)

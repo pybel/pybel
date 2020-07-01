@@ -4,7 +4,8 @@
 
 from typing import Iterable, Mapping
 
-from .edge_predicates import edge_predicate, has_authors, has_pubmed, keep_edge_permissive
+from .edge_filters import invert_edge_predicate
+from .edge_predicates import edge_predicate, has_authors, has_pubmed, true_edge_predicate
 from .typing import EdgePredicate
 from ..graph import BELGraph
 from ...constants import ANNOTATIONS, CAUSAL_RELATIONS, CITATION, CITATION_AUTHORS, CITATION_IDENTIFIER, RELATION
@@ -12,12 +13,14 @@ from ...dsl import BaseEntity
 from ...typing import EdgeData, Strings
 
 __all__ = [
+    'build_pmid_exclusion_filter',
     'build_annotation_dict_all_filter',
     'build_annotation_dict_any_filter',
     'build_upstream_edge_predicate',
     'build_downstream_edge_predicate',
     'build_relation_predicate',
     'build_pmid_inclusion_filter',
+    'build_pmid_exclusion_filter',
     'build_author_inclusion_filter',
 ]
 
@@ -53,7 +56,7 @@ def build_annotation_dict_all_filter(annotations: Mapping[str, Iterable[str]]) -
     :param annotations: The annotation query dict to match
     """
     if not annotations:
-        return keep_edge_permissive
+        return true_edge_predicate
 
     @edge_predicate
     def annotation_dict_all_filter(edge_data: EdgeData) -> bool:
@@ -88,7 +91,7 @@ def build_annotation_dict_any_filter(annotations: Mapping[str, Iterable[str]]) -
     :param annotations: The annotation query dict to match
     """
     if not annotations:
-        return keep_edge_permissive
+        return true_edge_predicate
 
     @edge_predicate
     def annotation_dict_any_filter(edge_data: EdgeData) -> bool:
@@ -165,6 +168,14 @@ def build_pmid_inclusion_filter(pmids: Strings) -> EdgePredicate:
         raise TypeError
 
     return pmid_inclusion_filter
+
+
+def build_pmid_exclusion_filter(pmids: Strings) -> EdgePredicate:
+    """Fail for edges with citations whose references are one of the given PubMed identifiers.
+
+    :param pmids: A PubMed identifier or list of PubMed identifiers to filter against
+    """
+    return invert_edge_predicate(build_pmid_inclusion_filter(pmids))
 
 
 def build_author_inclusion_filter(authors: Strings) -> EdgePredicate:

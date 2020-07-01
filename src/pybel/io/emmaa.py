@@ -50,6 +50,9 @@ def from_emmaa(model: str, *, date: Optional[str] = None) -> BELGraph:
         covid19_emmaa_graph = pybel.from_emmaa('covid19', '2020-04-23-17-44-57')
         covid19_emmaa_graph.summarize()
     """
+    if date is None:
+        date = _get_latest_date(model)
+
     statements = get_statements_from_emmaa(model=model, date=date)
     return from_indra_statements(statements, name=model, version=date)
 
