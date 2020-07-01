@@ -58,12 +58,19 @@ class TestSchema(unittest.TestCase):
                                                     namespace=NAMESPACE, identifier=IDENTIFIER)
         fragment = pybel.dsl.Fragment(1, 2)
 
-        def node(variant):
-            return pybel.dsl.Gene(NAMESPACE, name=NAME, identifier=IDENTIFIER, variants=[variant])
-        self.assertTrue(is_valid_node(node(protein_mod)))
-        self.assertTrue(is_valid_node(node(gene_mod)))
-        self.assertTrue(is_valid_node(node(protein_sub)))
-        self.assertTrue(is_valid_node(node(fragment)))
+        node = pybel.dsl.Gene(NAMESPACE, name=NAME, identifier=IDENTIFIER)
+
+        gmod = node.with_variants(gene_mod)
+        self.assertTrue(is_valid_node(gmod))
+
+        psub = node.with_variants(protein_sub)
+        self.assertTrue(is_valid_node(psub))
+
+        pmod = node.with_variants(protein_mod)
+        self.assertTrue(is_valid_node(pmod))
+
+        frag = node.with_variants(fragment)
+        self.assertTrue(is_valid_node(frag))
 
     def test_fusions(self):
         """Test validating fusion nodes."""
