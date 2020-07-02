@@ -6,37 +6,10 @@ import unittest
 
 import pybel.dsl
 from pybel.schema import is_valid_node
-from pybel.testing.utils import n
-
-
-VALID_ENTITY = {
-    "namespace": "",
-    "name": "",
-    "identifier": ""
-}
-
-VALID_VARIANT = {
-    "kind": "",
-    "concept": VALID_ENTITY,
-    "code": "",
-    "pos": 0
-}
-
-VALID_ABUNDANCE = {
-    "function": "",
-    "concept": VALID_ENTITY,
-    "xrefs": [VALID_ENTITY, VALID_ENTITY],
-    "variants": [VALID_VARIANT, VALID_VARIANT]
-}
-
-NAMESPACE, NAME, IDENTIFIER = n(), n(), n()
-
-
-def build_abundance(variant_dict):
-    """Return an abundance dict with the given variant."""
-    abundance = VALID_ABUNDANCE.copy()
-    abundance["variants"] = [variant_dict, variant_dict]
-    return abundance
+from tests.schema_constants import (
+    NAMESPACE, NAME, IDENTIFIER, BLANK_ABUNDANCE,
+    PROTEIN, GENE, PROTEIN_SUB, PROTEIN_MOD, FRAGMENT, GENE_MOD
+)
 
 
 class TestSchema(unittest.TestCase):
@@ -44,33 +17,39 @@ class TestSchema(unittest.TestCase):
 
     def test_pure_abundances(self):
         """Test validating abundance nodes."""
+        self.assertTrue(is_valid_node(PROTEIN))
+        self.assertTrue(is_valid_node(GENE))
+
         abundance = pybel.dsl.Abundance(namespace=NAMESPACE, name=NAME, identifier=IDENTIFIER)
-        protein = pybel.dsl.Protein(namespace=NAMESPACE, name=NAME,
-                                    identifier=IDENTIFIER)
         self.assertTrue(is_valid_node(abundance))
-        self.assertTrue(is_valid_node(protein))
 
     def test_variant_abundances(self):
         """Test validating abundance nodes with variants."""
-        gene_mod = pybel.dsl.GeneModification(NAME, namespace=NAMESPACE, identifier=IDENTIFIER)
-        protein_sub = pybel.dsl.ProteinSubstitution('Abc', 1, 'Def')
-        protein_mod = pybel.dsl.ProteinModification(NAME, code='Abc', position=1,
-                                                    namespace=NAMESPACE, identifier=IDENTIFIER)
-        fragment = pybel.dsl.Fragment(1, 2)
-
-        node = pybel.dsl.Gene(NAMESPACE, name=NAME, identifier=IDENTIFIER)
-
-        gmod = node.with_variants(gene_mod)
+        gmod = GENE.with_variants(GENE_MOD)
         self.assertTrue(is_valid_node(gmod))
 
-        psub = node.with_variants(protein_sub)
+        psub = PROTEIN.with_variants(PROTEIN_SUB)
         self.assertTrue(is_valid_node(psub))
 
-        pmod = node.with_variants(protein_mod)
+        pmod = PROTEIN.with_variants(PROTEIN_MOD)
         self.assertTrue(is_valid_node(pmod))
 
-        frag = node.with_variants(fragment)
+        frag = PROTEIN.with_variants(FRAGMENT)
         self.assertTrue(is_valid_node(frag))
+
+    def test_matching_variants(self):
+        """Test catching invalid abundance/variant pairs, e.g. ProteinModification on a Gene."""
+        invalid_gmod = PROTEIN.with_variants(GENE_MOD)
+        self.assertFalse(is_valid_node(invalid_gmod))
+
+        invalid_psub = GENE.with_variants(PROTEIN_SUB)
+        self.assertFalse(is_valid_node(invalid_psub))
+
+        invalid_pmod = GENE.with_variants(PROTEIN_MOD)
+        self.assertFalse(is_valid_node(invalid_pmod))
+
+        invalid_frag = GENE.with_variants(FRAGMENT)
+        self.assertFalse(is_valid_node(invalid_frag))
 
     def test_fusions(self):
         """Test validating fusion nodes."""
@@ -85,10 +64,9 @@ class TestSchema(unittest.TestCase):
 
     def test_list_abundances(self):
         """Test validating list abundance nodes."""
-        node = pybel.dsl.Gene(namespace=NAMESPACE, name=NAME, identifier=IDENTIFIER)
-        complex_abundance = pybel.dsl.ComplexAbundance([node, node], namespace=NAMESPACE,
+        complex_abundance = pybel.dsl.ComplexAbundance([GENE, PROTEIN], namespace=NAMESPACE,
                                                        name=NAME, identifier=IDENTIFIER)
-        composite_abundance = pybel.dsl.CompositeAbundance([node, complex_abundance])
+        composite_abundance = pybel.dsl.CompositeAbundance([PROTEIN, complex_abundance])
         self.assertTrue(is_valid_node(complex_abundance))
         self.assertTrue(is_valid_node(composite_abundance))
 
@@ -101,47 +79,19 @@ class TestSchema(unittest.TestCase):
 
     def test_invalid_abundances(self):
         """Test that invalid abundances are caught."""
-        missing_fn = VALID_ABUNDANCE.copy()
+        missing_fn = BLANK_ABUNDANCE.copy()
         missing_fn.pop("function")
         self.assertFalse(is_valid_node(missing_fn))
 
-    def test_invalid_pmod(self):
-        """Test that invalid protein modifications are caught."""
-        protein_mod = pybel.dsl.ProteinModification(NAME, code='Abc', position=1,
-                                                    namespace=NAMESPACE, identifier=IDENTIFIER)
-        protein_mod = dict(protein_mod)
-        # Remove the required "code" property
-        missing_code = protein_mod.copy()
-        missing_code.pop("code")
-        node = build_abundance(missing_code)
-        self.assertFalse(is_valid_node(node))
-        # Remove the required "pos" property
-        missing_pos = protein_mod.copy()
-        missing_pos.pop("pos")
-        node = build_abundance(missing_pos)
-        self.assertFalse(is_valid_node(node))
-
-    def test_invalid_frag(self):
-        """Test that invalid fragments are caught."""
-        fragment = dict(pybel.dsl.Fragment(1, 2))
-        # Remove the required "start" property
-        missing_start = fragment.copy()
-        missing_start.pop("start")
-        node = build_abundance(missing_start)
-        self.assertFalse(is_valid_node(node))
-        # Remove the required "stop" property
-        missing_stop = fragment.copy()
-        missing_stop.pop("stop")
-        node = build_abundance(missing_stop)
-        self.assertFalse(is_valid_node(node))
-
     def test_invalid_psub(self):
         """Test that invalid protein substitutions are caught."""
-        protein_sub = dict(pybel.dsl.ProteinSubstitution('Abc', 1, 'Def'))
+        missing_hgvs = dict(PROTEIN_SUB)
         # Remove the required "hgvs" property
-        protein_sub.pop("hgvs")
-        node = build_abundance(protein_sub)
-        self.assertFalse(is_valid_node(node))
+        missing_hgvs.pop("hgvs")
+        protein = BLANK_ABUNDANCE.copy()
+        protein["function"] = "Protein"
+        protein["variants"] = [missing_hgvs]
+        self.assertFalse(is_valid_node(protein))
 
 
 if __name__ == '__main__':
