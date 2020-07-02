@@ -176,7 +176,7 @@ def summarize(graph: BELGraph):
 def _print_summary(graph: BELGraph, ticks: bool = False):
     if not ticks:
         click.secho('Summary', fg='red', bold=True)
-        graph.summary()
+        graph.summarize()
 
     unused_namespaces = get_unused_namespaces(graph)
     if unused_namespaces:

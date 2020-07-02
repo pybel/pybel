@@ -54,15 +54,17 @@ More examples can be found in the `documentation <http://pybel.readthedocs.io>`_
 Compiling and Saving a BEL Graph
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This example illustrates how the a BEL document from the `Human Brain Pharmacome
-<https://raw.githubusercontent.com/pharmacome/knowledge>`_ project can be loaded from GitHub.
+<https://raw.githubusercontent.com/pharmacome/conib>`_ project can be loaded and compiled directly from GitHub.
 
 .. code-block:: python
 
    >>> import pybel
-   >>> url = 'https://raw.githubusercontent.com/pharmacome/knowledge/master/hbp_knowledge/proteostasis/kim2013.bel'
-   >>> graph = pybel.from_url(url)
+   >>> url = 'https://raw.githubusercontent.com/pharmacome/conib/master/hbp_knowledge/proteostasis/kim2013.bel'
+   >>> graph = pybel.from_bel_script_url(url)
 
-PyBEL can handle `BEL 1.0 <https://github.com/OpenBEL/language/raw/master/docs/version_1.0/bel_specification_version_1.0.pdf>`_
+Other functions for loading BEL content from many formats can be found in the
+`I/O documentation <https://pybel.readthedocs.io/en/latest/reference/io.html>`_.
+Note that PyBEL can handle `BEL 1.0 <https://github.com/OpenBEL/language/raw/master/docs/version_1.0/bel_specification_version_1.0.pdf>`_
 and `BEL 2.0+ <https://github.com/OpenBEL/language/raw/master/docs/version_2.0/bel_specification_version_2.0.pdf>`_
 simultaneously.
 
@@ -88,17 +90,17 @@ check the `I/O documentation <https://pybel.readthedocs.io/en/latest/reference/i
 Summarizing the Contents of the Graph
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The ``BELGraph`` object has several "dispatches" which are properties that organize its various functionalities.
-One is the ``BELGraph.summary`` dispatch, which allows for printing summaries to the console.
+One is the ``BELGraph.summarize`` dispatch, which allows for printing summaries to the console.
 
 These examples will use the `RAS Model <https://emmaa.indra.bio/dashboard/rasmodel?tab=model>`_  from EMMAA,
 so you'll have to be sure to ``pip install indra`` first. The graph can be acquired and summarized with
-``BELGraph.summary.statistics()`` as in:
+``BELGraph.summarize.statistics()`` as in:
 
 .. code-block:: python
 
     >>> import pybel
     >>> graph = pybel.from_emmaa('rasmodel', date='2020-05-29-17-31-58')  # Needs
-    >>> graph.summary.statistics()
+    >>> graph.summarize.statistics()
     ---------------------  -------------------
     Name                   rasmodel
     Version                2020-05-29-17-31-58
@@ -113,11 +115,11 @@ so you'll have to be sure to ``pip install indra`` first. The graph can be acqui
     Number of Warnings     0
     ---------------------  -------------------
 
-The number of nodes of each type can be summarized with ``BELGraph.summary.nodes()`` as in:
+The number of nodes of each type can be summarized with ``BELGraph.summarize.nodes()`` as in:
 
 .. code-block:: python
 
-    >>> graph.summary.nodes(examples=False)
+    >>> graph.summarize.nodes(examples=False)
     Type (3)        Count
     ------------  -------
     Protein            97
@@ -125,11 +127,11 @@ The number of nodes of each type can be summarized with ``BELGraph.summary.nodes
     Abundance           2
 
 
-The number of nodes with each namespace can be summarized with ``BELGraph.summary.namespaces()`` as in:
+The number of nodes with each namespace can be summarized with ``BELGraph.summarize.namespaces()`` as in:
 
 .. code-block:: python
 
-    >>> graph.summary.namespaces(examples=False)
+    >>> graph.summarize.namespaces(examples=False)
     Namespace (4)      Count
     ---------------  -------
     HGNC                  94
@@ -137,11 +139,11 @@ The number of nodes with each namespace can be summarized with ``BELGraph.summar
     CHEBI                  1
     TEXT                   1
 
-The edges can be summarized with ``BELGraph.summary.edges()`` as in:
+The edges can be summarized with ``BELGraph.summarize.edges()`` as in:
 
 .. code-block:: python
 
-    >>> graph.summary.edges(examples=False)
+    >>> graph.summarize.edges(examples=False)
     Edge Type (12)                       Count
     ---------------------------------  -------
     Protein increases Protein               64
