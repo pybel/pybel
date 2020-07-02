@@ -30,7 +30,7 @@ from .constants import get_cache_connection
 from .examples import braf_graph, egf_graph, homology_graph, sialic_acid_graph, statin_graph
 from .io import (
     from_bel_script, from_pickle, load, to_bel_commons, to_edgelist, to_graphml, to_gsea, to_neo4j,
-    to_nodelink_file, to_pickle, to_sif, to_tsv,
+    to_nodelink_file, to_pickle, to_sif, to_triples_file,
 )
 from .io.bel_commons_client import _get_host, _get_password, _get_user
 from .manager import Manager
@@ -259,7 +259,7 @@ def serialize(graph: BELGraph, tsv, edgelist, sif, gsea, graphml, nodelink, bel)
     """Serialize a graph to various formats."""
     if tsv:
         logger.info('Outputting TSV to %s', tsv)
-        to_tsv(graph, tsv)
+        to_triples_file(graph, tsv)
 
     if edgelist:
         logger.info('Outputting edgelist to %s', edgelist)

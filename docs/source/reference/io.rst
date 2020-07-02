@@ -208,9 +208,10 @@ PyKEEN
 
 Machine Learning
 ~~~~~~~~~~~~~~~~
-.. automodule:: pybel.io.tsv
+.. automodule:: pybel.io.triples
 
-.. autofunction:: pybel.to_tsv
+.. autofunction:: pybel.to_triples
+.. autofunction:: pybel.to_triples_file
 .. autofunction:: pybel.to_edgelist
 
 Web Services
