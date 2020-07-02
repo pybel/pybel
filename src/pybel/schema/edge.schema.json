@@ -4,26 +4,22 @@
     "description": "Top-level schema to validate JSON files containing an edge.",
     "type": "object",
     "properties": {
-        "subject": {"$ref": "modifier.schema.json"},
+        "source": {"$ref": "base_node.schema.json"},
+        "target": {"$ref": "base_node.schema.json"},
         "relation": {"type": "string"},
-        "object": {"$ref": "modifier.schema.json"},
         "evidence": {"type": "string"},
         "citation": {
             "type": "object",
             "properties": {
-                "citation_type": {},
-                "citation_reference": {},
-                "citation_date": {
-                    "type": "string",
-                    "format": "date"
-                },
-                "citation_authors": {"type": "string"}
-            },
-            "required": ["citation_type", "citation_reference"]
+                "db": {"type": "string"},
+                "db_id": {"type": "string"}
+            }
         },
         "annotations": {
             "type": "object"
-        }
+        },
+        "subject": {"$ref": "modifier.schema.json"},
+        "object": {"$ref": "modifier.schema.json"}
     },
-    "required": ["relation", "evidence", "citation"]
+    "required": ["source", "target", "relation"]
 }

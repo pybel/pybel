@@ -14,7 +14,7 @@
                     "$ref": "entity.schema.json"
                 },
                 {
-                    "$comment": "However, translocation have a slightly different format.",
+                    "$comment": "However, translocations have a slightly different format.",
                     "properties": {
                         "from_loc": {"$ref": "entity.schema.json"},
                         "to_loc": {"$ref": "entity.schema.json"}
@@ -23,7 +23,5 @@
             ]
         },
         "location": {"$ref": "entity.schema.json"}
-
-    },
-    "required": ["relation", "evidence", "citation"]
+    }
 }
