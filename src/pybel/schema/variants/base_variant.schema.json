@@ -4,17 +4,17 @@
     "description": "Basic schema to validate JSON files describing a BEL variant object",
     "type": "object",
     "properties": {
-      "kind": {
-        "description": "The kind of variant",
-        "type": "string"
-      },
       "concept": {
         "description": "Entity description if the variant is a protein or gene modification",
-        "$ref": "entity.schema.json"
+        "$ref": "../entity.schema.json"
       },
       "code": {
         "description": "Amino acid code for the affected residue in a protein modification",
-        "type": "string"
+        "enum": [
+          "Ala", "Arg", "Asn", "Asp", "Cys", "Glu", "Gln",
+          "Gly", "His", "Ile", "Leu", "Lys", "Met", "Phe",
+          "Pro", "Ser", "Thr", "Trp", "Tyr", "Val"
+        ]
       },
       "pos": {
         "description": "Position of the affected residue in a protein modification",
@@ -22,7 +22,9 @@
       },
       "hgvs": {
         "description": "HGVS variant string",
-        "type": "string"
+        "type": "string",
+        "$comment": "Sorry for the ugly regex!",
+        "pattern": "^..((Ala)|(Arg)|(Asn)|(Asp)|(Cys)|(Glu)|(Gln)|(Gly)|(His)|(Ile)|(Leu)|(Lys)|(Met)|(Phe)|(Pro)|(Ser)|(Thr)|(Trp)|(Tyr)|(Val))[0-9]+((Ala)|(Arg)|(Asn)|(Asp)|(Cys)|(Glu)|(Gln)|(Gly)|(His)|(Ile)|(Leu)|(Lys)|(Met)|(Phe)|(Pro)|(Ser)|(Thr)|(Trp)|(Tyr)|(Val))$"
       },
       "start": {
         "description": "Starting position of a protein fragment",
@@ -32,32 +34,5 @@
         "description": "Stopping position of a protein fragment",
         "type": ["number", "string"]
       }
-    },
-    "required": ["kind"],
-    "allOf": [
-      {
-        "if": {
-          "properties": {"kind": {"const": "pmod"}}
-        },
-        "then": {
-          "required": ["code", "pos"]
-        }
-      },
-      {
-        "if": {
-          "properties": {"kind": {"const": "frag"}}
-        },
-        "then": {
-          "required": ["start", "stop"]
-        }
-      },
-      {
-        "if": {
-          "properties": {"kind": {"const": "hgvs"}}
-        },
-        "then": {
-          "required": ["hgvs"]
-        }
-      }
-    ]
+    }
 }
