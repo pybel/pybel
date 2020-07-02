@@ -19,16 +19,5 @@
             "type": "array",
             "items": {"$ref": "variants/base_variant.schema.json"}
         }
-    },
-    "if": {
-        "properties": {
-            "function": {"const": "Complex"}
-        }
-    },
-    "then": {
-        "required": ["function", "concept"]
-    },
-    "else": {
-        "required": ["function"]
     }
 }
