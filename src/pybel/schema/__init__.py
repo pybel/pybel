@@ -5,6 +5,7 @@
 import json
 import logging
 import os
+import pathlib
 from typing import Any, Mapping, Optional, Tuple
 
 import jsonschema
@@ -22,7 +23,7 @@ with open(SCHEMA_PATH) as json_schema:
 
 # To use schemas from other files, jsonschema needs to know where the references point to, so
 # create a resolver that directs any references (like "fusion.schema.json") to the schema's dir
-schema_uri = 'file://' + HERE + '/'
+schema_uri = pathlib.PurePath(__file__).as_uri()
 resolver = jsonschema.RefResolver(base_uri=schema_uri, referrer=__file__)
 # Define a validator that checks against the top-level schema
 validator = jsonschema.Draft7Validator(SCHEMA, resolver=resolver)
