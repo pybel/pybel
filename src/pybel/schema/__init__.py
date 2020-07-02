@@ -28,6 +28,7 @@ RESOLVER = jsonschema.RefResolver(base_uri=schema_uri, referrer=__file__)
 def _build_validator(filename: str) -> jsonschema.Draft7Validator:
     """
     Return a validator that checks against a given schema.
+
     :param filename: The relative path to the schema, e.g. "base_node.schema.json"
     """
     path = os.path.join(HERE, filename)
