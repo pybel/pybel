@@ -108,6 +108,16 @@ class TestSchema(unittest.TestCase):
         protein["variants"] = [missing_hgvs]
         self.assertFalse(is_valid_node(protein))
 
+    def test_invalid_amino(self):
+        """Test that protein variants with invalid amino acid codes are caught."""
+        invalid_psub = dict(PROTEIN_SUB)
+        invalid_psub['hgvs'] = 'p.Aaa0Bbb'
+        self.assertFalse(is_valid_node(invalid_psub))
+
+        invalid_pmod = dict(PROTEIN_MOD)
+        invalid_pmod['code'] = 'Aaa'
+        self.assertFalse(is_valid_node(invalid_pmod))
+
 
 if __name__ == '__main__':
     unittest.main()
