@@ -88,17 +88,17 @@ check the `I/O documentation <https://pybel.readthedocs.io/en/latest/reference/i
 Summarizing the Contents of the Graph
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The ``BELGraph`` object has several "dispatches" which are properties that organize its various functionalities.
-One is the ``BELGraph.summary`` dispatch, which allows for printing summaries to the console.
+One is the ``BELGraph.summarize`` dispatch, which allows for printing summaries to the console.
 
 These examples will use the `RAS Model <https://emmaa.indra.bio/dashboard/rasmodel?tab=model>`_  from EMMAA,
 so you'll have to be sure to ``pip install indra`` first. The graph can be acquired and summarized with
-``BELGraph.summary.statistics()`` as in:
+``BELGraph.summarize.statistics()`` as in:
 
 .. code-block:: python
 
     >>> import pybel
     >>> graph = pybel.from_emmaa('rasmodel', date='2020-05-29-17-31-58')  # Needs
-    >>> graph.summary.statistics()
+    >>> graph.summarize.statistics()
     ---------------------  -------------------
     Name                   rasmodel
     Version                2020-05-29-17-31-58
@@ -113,11 +113,11 @@ so you'll have to be sure to ``pip install indra`` first. The graph can be acqui
     Number of Warnings     0
     ---------------------  -------------------
 
-The number of nodes of each type can be summarized with ``BELGraph.summary.nodes()`` as in:
+The number of nodes of each type can be summarized with ``BELGraph.summarize.nodes()`` as in:
 
 .. code-block:: python
 
-    >>> graph.summary.nodes(examples=False)
+    >>> graph.summarize.nodes(examples=False)
     Type (3)        Count
     ------------  -------
     Protein            97
@@ -125,11 +125,11 @@ The number of nodes of each type can be summarized with ``BELGraph.summary.nodes
     Abundance           2
 
 
-The number of nodes with each namespace can be summarized with ``BELGraph.summary.namespaces()`` as in:
+The number of nodes with each namespace can be summarized with ``BELGraph.summarize.namespaces()`` as in:
 
 .. code-block:: python
 
-    >>> graph.summary.namespaces(examples=False)
+    >>> graph.summarize.namespaces(examples=False)
     Namespace (4)      Count
     ---------------  -------
     HGNC                  94
@@ -137,11 +137,11 @@ The number of nodes with each namespace can be summarized with ``BELGraph.summar
     CHEBI                  1
     TEXT                   1
 
-The edges can be summarized with ``BELGraph.summary.edges()`` as in:
+The edges can be summarized with ``BELGraph.summarize.edges()`` as in:
 
 .. code-block:: python
 
-    >>> graph.summary.edges(examples=False)
+    >>> graph.summarize.edges(examples=False)
     Edge Type (12)                       Count
     ---------------------------------  -------
     Protein increases Protein               64
