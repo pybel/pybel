@@ -104,11 +104,19 @@ class TestExampleInterchange(unittest.TestCase):
         self._help_test_equal(graph)
 
     def test_thorough_sbel_file(self):
-        """Test the round-trip through SBEL."""
+        """Test the round-trip through a SBEL file."""
         sio = StringIO()
         pybel.to_sbel_file(sialic_acid_graph, sio)
         sio.seek(0)
         graph = pybel.from_sbel_file(sio)
+        self._help_test_equal(graph)
+
+    def test_thorough_sbel_gzip_path(self):
+        """Test round trip through a SBEL gzipped file."""
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, 'test.gzip')
+            pybel.to_sbel_gz(sialic_acid_graph, path)
+            graph = pybel.from_sbel_gz(path)
         self._help_test_equal(graph)
 
 
