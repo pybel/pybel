@@ -60,7 +60,7 @@ This example illustrates how the a BEL document from the `Human Brain Pharmacome
 
    >>> import pybel
    >>> url = 'https://raw.githubusercontent.com/pharmacome/knowledge/master/hbp_knowledge/proteostasis/kim2013.bel'
-   >>> graph = pybel.from_url(url)
+   >>> graph = pybel.from_bel_script_url(url)
 
 PyBEL can handle `BEL 1.0 <https://github.com/OpenBEL/language/raw/master/docs/version_1.0/bel_specification_version_1.0.pdf>`_
 and `BEL 2.0+ <https://github.com/OpenBEL/language/raw/master/docs/version_2.0/bel_specification_version_2.0.pdf>`_
