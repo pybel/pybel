@@ -79,8 +79,9 @@ class TestSchema(unittest.TestCase):
 
     def test_list_abundances(self):
         """Test validating list abundance nodes."""
-        complex_abundance = pybel.dsl.ComplexAbundance([GENE, PROTEIN], namespace=NAMESPACE,
-                                                       name=NAME, identifier=IDENTIFIER)
+        complex_abundance = pybel.dsl.ComplexAbundance(
+            [GENE.with_variants(GENE_MOD), PROTEIN.with_variants(PROTEIN_SUB)],
+            namespace=NAMESPACE, name=NAME, identifier=IDENTIFIER)
         composite_abundance = pybel.dsl.CompositeAbundance([PROTEIN, complex_abundance])
         self.assertTrue(is_valid_node(complex_abundance))
         self.assertTrue(is_valid_node(composite_abundance))
@@ -88,7 +89,7 @@ class TestSchema(unittest.TestCase):
     def test_reaction(self):
         """Test validating a reaction node."""
         node = pybel.dsl.Rna(namespace=NAMESPACE, name=NAME, identifier=IDENTIFIER)
-        node_list = [node, node, node]
+        node_list = [node, PROTEIN, GENE]
         rxn = pybel.dsl.Reaction(reactants=node_list, products=node_list)
         self.assertTrue(is_valid_node(rxn))
 
