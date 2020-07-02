@@ -6,7 +6,7 @@
     "properties": {
       "concept": {
         "description": "Entity description if the variant is a protein or gene modification",
-        "$ref": "../entity.schema.json"
+        "$ref": "../../entity.schema.json"
       },
       "code": {
         "description": "Amino acid code for the affected residue in a protein modification",

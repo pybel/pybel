@@ -10,7 +10,7 @@
                 "required": ["fusion"]
             },
             "then": {
-                "$ref": "fusion.schema.json"
+                "$ref": "node_types/fusion.schema.json"
             }
         },
         {
@@ -19,7 +19,7 @@
                 "properties": {"function": {"const": "Reaction"}}
             },
             "then": {
-                "$ref": "reaction.schema.json"
+                "$ref": "node_types/reaction.schema.json"
             }
         },
         {
@@ -28,10 +28,10 @@
                 "properties": {"function": {"enum": ["Complex", "Composite"]}}
             },
             "then": {
-                "$ref": "list_abundance.schema.json"
+                "$ref": "node_types/list_abundance.schema.json"
             },
             "else": {
-                "$ref": "base_abundance.schema.json"
+                "$ref": "node_types/base_abundance.schema.json"
             }
         }
     ]

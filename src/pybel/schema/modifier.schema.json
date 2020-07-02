@@ -1,0 +1,29 @@
+{
+    "$schema": "https://json-schema.org/draft/2019-09/schema#",
+    "title": "BEL Subject/Object Modifier",
+    "description": "Schema to validate JSON files containing a modifier for a subject/object node in an edge.",
+    "type": "object",
+    "properties": {
+        "modifier": {
+            "type": "string"
+        },
+        "effect": {
+            "oneOf": [
+                {
+                    "$comment": "Generally, the effect entry will be a pybel.dsl.Entity.",
+                    "$ref": "entity.schema.json"
+                },
+                {
+                    "$comment": "However, translocation have a slightly different format.",
+                    "properties": {
+                        "from_loc": {"$ref": "entity.schema.json"},
+                        "to_loc": {"$ref": "entity.schema.json"}
+                    }
+                }
+            ]
+        },
+        "location": {"$ref": "entity.schema.json"}
+
+    },
+    "required": ["relation", "evidence", "citation"]
+}

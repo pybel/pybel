@@ -15,7 +15,7 @@ __all__ = ['is_valid_node']
 logger = logging.getLogger(__name__)
 
 HERE = os.path.abspath(os.path.dirname(__file__))
-SCHEMA_PATH = os.path.join(HERE, "node.schema.json")
+SCHEMA_PATH = os.path.join(HERE, "base_node.schema.json")
 
 # Load the top level schema
 with open(SCHEMA_PATH) as json_schema:

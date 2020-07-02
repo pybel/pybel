@@ -5,11 +5,11 @@
     "type": "object",
     "properties": {
         "function": {"description": "The function of the node."},
-        "concept": {"$ref": "entity.schema.json"},
+        "concept": {"$ref": "../entity.schema.json"},
         "xrefs": {
             "description": "An optional list of extra identifiers for the node.",
             "type": "array",
-            "items": {"$ref": "entity.schema.json"}
+            "items": {"$ref": "../entity.schema.json"}
         }
     },
     "allOf": [

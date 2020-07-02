@@ -1,0 +1,29 @@
+{
+    "$schema": "https://json-schema.org/draft/2019-09/schema#",
+    "title": "BEL Edge",
+    "description": "Top-level schema to validate JSON files containing an edge.",
+    "type": "object",
+    "properties": {
+        "subject": {"$ref": "modifier.schema.json"},
+        "relation": {"type": "string"},
+        "object": {"$ref": "modifier.schema.json"},
+        "evidence": {"type": "string"},
+        "citation": {
+            "type": "object",
+            "properties": {
+                "citation_type": {},
+                "citation_reference": {},
+                "citation_date": {
+                    "type": "string",
+                    "format": "date"
+                },
+                "citation_authors": {"type": "string"}
+            },
+            "required": ["citation_type", "citation_reference"]
+        },
+        "annotations": {
+            "type": "object"
+        }
+    },
+    "required": ["relation", "evidence", "citation"]
+}
