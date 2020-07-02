@@ -7,8 +7,8 @@ import unittest
 import pybel.dsl
 from pybel.schema import is_valid_node
 from tests.schema_constants import (
-    NAMESPACE, NAME, IDENTIFIER, BLANK_ABUNDANCE,
-    PROTEIN, GENE, PROTEIN_SUB, PROTEIN_MOD, FRAGMENT, GENE_MOD
+    BLANK_ABUNDANCE, FRAGMENT, GENE, GENE_MOD, IDENTIFIER, NAME,
+    NAMESPACE, PROTEIN, PROTEIN_MOD, PROTEIN_SUB
 )
 
 
