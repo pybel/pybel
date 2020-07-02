@@ -10,6 +10,7 @@ import unittest
 from io import BytesIO, StringIO
 from pathlib import Path
 
+import pybel
 from pybel import (
     BELGraph, from_bel_script, from_bel_script_url, from_bytes, from_nodelink, from_nodelink_file, from_pickle,
     to_bel_script_lines, to_bytes, to_csv, to_graphml, to_gsea, to_nodelink, to_nodelink_file, to_pickle, to_sif,
@@ -94,6 +95,28 @@ class TestExampleInterchange(unittest.TestCase):
         to_nodelink_file(sialic_acid_graph, sio)
         sio.seek(0)
         graph = from_nodelink_file(sio)
+        self._help_test_equal(graph)
+
+    def test_thorough_sbel(self):
+        """Test the round-trip through SBEL."""
+        s = pybel.to_sbel(sialic_acid_graph)
+        graph = pybel.from_sbel(s)
+        self._help_test_equal(graph)
+
+    def test_thorough_sbel_file(self):
+        """Test the round-trip through a SBEL file."""
+        sio = StringIO()
+        pybel.to_sbel_file(sialic_acid_graph, sio)
+        sio.seek(0)
+        graph = pybel.from_sbel_file(sio)
+        self._help_test_equal(graph)
+
+    def test_thorough_sbel_gzip_path(self):
+        """Test round trip through a SBEL gzipped file."""
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, 'test.gzip')
+            pybel.to_sbel_gz(sialic_acid_graph, path)
+            graph = pybel.from_sbel_gz(path)
         self._help_test_equal(graph)
 
 
