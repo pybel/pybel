@@ -96,7 +96,7 @@ class TestStruct(unittest.TestCase):
 
         random.seed(5)
         pybel.examples.sialic_acid_graph.version = '1.0.0'
-        pybel.examples.sialic_acid_graph.summary(file=sio, examples=False)
+        pybel.examples.sialic_acid_graph.summarize(file=sio, examples=False)
         test_str = """---------------------  -----------------
 Name                   Sialic Acid Graph
 Version                1.0.0

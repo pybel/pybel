@@ -121,7 +121,7 @@ class BELGraph(nx.MultiDiGraph):
         self._expand = ExpandDispatch(self)
         self._induce = InduceDispatch(self)
         self._plot = PlotDispatch(self)
-        self._summary = SummaryDispatch(self)
+        self._summary = SummarizeDispatch(self)
 
     def child(self) -> 'BELGraph':
         """Create an empty graph with a "parent" reference back to this one."""
@@ -143,7 +143,7 @@ class BELGraph(nx.MultiDiGraph):
         return self._count
 
     @property
-    def summary(self) -> 'SummaryDispatch':  # noqa: D401
+    def summarize(self) -> 'SummarizeDispatch':  # noqa: D401
         """A dispatch to summarize the graph."""
         return self._summary
 
@@ -852,22 +852,17 @@ class BELGraph(nx.MultiDiGraph):
     def _describe_list(self) -> List[Tuple[str, float]]:
         """Return useful information about the graph as a list of tuples."""
         warnings.warn('use graph.summary.list()', DeprecationWarning)
-        return self.summary.list()
+        return self.summarize.list()
 
     def summary_dict(self) -> Mapping[str, float]:
         """Return a dictionary that summarizes the graph."""
         warnings.warn('use graph.summary.dict()', DeprecationWarning)
-        return self.summary.dict()
+        return self.summarize.dict()
 
     def summary_str(self) -> str:
         """Return a string that summarizes the graph."""
         warnings.warn('use graph.summary.str()', DeprecationWarning)
-        return self.summary.str()
-
-    def summarize(self, file: Optional[TextIO] = None) -> None:
-        """Print a summary of the graph."""
-        warnings.warn('use graph.summary()', DeprecationWarning)
-        self.summary(file=file)
+        return self.summarize.str()
 
     def ground(self, **kwargs) -> 'BELGraph':
         """Ground this graph."""
@@ -1003,8 +998,8 @@ def _iterate_authors(graph: BELGraph) -> Iterable[str]:
     )
 
 
-class SummaryDispatch(Dispatch):
-    """A dispatch for summary printing functions that can be found at :data:`pybel.BELGraph.summary`."""
+class SummarizeDispatch(Dispatch):
+    """A dispatch for summary printing functions that can be found at :data:`pybel.BELGraph.summarize`."""
 
     def __call__(self, file: Optional[TextIO] = None, examples: bool = True) -> None:
         self.statistics(file=file)
