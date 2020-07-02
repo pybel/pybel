@@ -54,15 +54,17 @@ More examples can be found in the `documentation <http://pybel.readthedocs.io>`_
 Compiling and Saving a BEL Graph
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 This example illustrates how the a BEL document from the `Human Brain Pharmacome
-<https://raw.githubusercontent.com/pharmacome/knowledge>`_ project can be loaded from GitHub.
+<https://raw.githubusercontent.com/pharmacome/conib>`_ project can be loaded and compiled directly from GitHub.
 
 .. code-block:: python
 
    >>> import pybel
-   >>> url = 'https://raw.githubusercontent.com/pharmacome/knowledge/master/hbp_knowledge/proteostasis/kim2013.bel'
+   >>> url = 'https://raw.githubusercontent.com/pharmacome/conib/master/hbp_knowledge/proteostasis/kim2013.bel'
    >>> graph = pybel.from_bel_script_url(url)
 
-PyBEL can handle `BEL 1.0 <https://github.com/OpenBEL/language/raw/master/docs/version_1.0/bel_specification_version_1.0.pdf>`_
+Other functions for loading BEL content from many formats can be found in the
+`I/O documentation <https://pybel.readthedocs.io/en/latest/reference/io.html>`_.
+Note that PyBEL can handle `BEL 1.0 <https://github.com/OpenBEL/language/raw/master/docs/version_1.0/bel_specification_version_1.0.pdf>`_
 and `BEL 2.0+ <https://github.com/OpenBEL/language/raw/master/docs/version_2.0/bel_specification_version_2.0.pdf>`_
 simultaneously.
 
