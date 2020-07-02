@@ -78,6 +78,19 @@ Node-Link JSON
 .. autofunction:: pybel.from_nodelink_gz
 .. autofunction:: pybel.to_nodelink_gz
 
+Streamable BEL (JSONL)
+~~~~~~~~~~~~~~~~~~~~~~
+.. automodule:: pybel.io.sbel
+
+.. autofunction:: pybel.from_sbel
+.. autofunction:: pybel.to_sbel
+
+.. autofunction:: pybel.from_sbel_file
+.. autofunction:: pybel.to_sbel_file
+
+.. autofunction:: pybel.from_sbel_gz
+.. autofunction:: pybel.to_sbel_gz
+
 Cyberinfrastructure Exchange
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 .. automodule:: pybel.io.cx
