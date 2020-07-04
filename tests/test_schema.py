@@ -2,10 +2,12 @@
 
 """Tests for the jsonschema node validation."""
 
+import json
+import os
 import unittest
 
 import pybel.dsl
-from pybel.schema import is_valid_node
+from pybel.schema import is_valid_node, is_valid_edge
 from pybel.testing.utils import n
 
 NAMESPACE, NAME, IDENTIFIER = n(), n(), n()
@@ -27,7 +29,7 @@ PROTEIN_MOD = pybel.dsl.ProteinModification(NAME, code='Ala', position=1,
 FRAGMENT = pybel.dsl.Fragment(1, 2)
 
 
-class TestSchema(unittest.TestCase):
+class TestNodeSchema(unittest.TestCase):
     """Tests for the jsonschema node validation."""
 
     def test_pure_abundances(self):
@@ -118,6 +120,19 @@ class TestSchema(unittest.TestCase):
         invalid_pmod = dict(PROTEIN_MOD)
         invalid_pmod['code'] = 'Aaa'
         self.assertFalse(is_valid_node(invalid_pmod))
+
+
+class TestEdgeSchema(unittest.TestCase):
+    """Tests for the jsonschema edge validation."""
+
+    def test_predefined_example(self):
+        """Test a predefined edge example."""
+        here = os.path.abspath(os.path.dirname(__file__))
+        example_file = os.path.join(here, 'example_edge.json')
+        with open(example_file) as example_json:
+            example_edge = json.load(example_json)
+
+        self.assertTrue(is_valid_edge(example_edge))
 
 
 if __name__ == '__main__':
