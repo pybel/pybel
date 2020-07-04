@@ -190,6 +190,20 @@ After installing ``jinja2`` and ``ipython``, BEL graphs can be displayed in Jupy
    >>> from pybel.io.jupyter import to_jupyter
    >>> to_jupyter(sialic_acid_graph)
 
+Using the Parser
+~~~~~~~~~~~~~~~~
+If you don't want to use the `pybel.BELGraph` data structure and just want to turn BEL statements into JSON
+for your own purposes, you can directly use the `pybel.parse()` function.
+
+.. code-block:: python
+
+    >>> import pybel
+    >>> pybel.parse('p(hgnc:123) increases p(hgnc:456)')
+    {'object': {'concept': {'name': '456', 'namespace': 'hgnc'}, 'function': 'Protein'}, 'relation': 'increases', 'subject': {'concept': {'name': '123', 'namespace': 'hgnc'}, 'function': 'Protein'}}
+
+This functionality can also be exposed through a Flask-based web application with ``python -m pybel.apps.parser`` after
+installing ``flask`` with ``pip install flask``.
+
 Using the CLI
 ~~~~~~~~~~~~~
 PyBEL also installs a command line interface with the command :code:`pybel` for simple utilities such as data
