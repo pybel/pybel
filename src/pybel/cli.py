@@ -118,6 +118,14 @@ def main(ctx, connection):
 
 
 @main.command()
+@click.argument('text')
+def parse(text: str):
+    """Parse a single BEL statement and pring JSON output."""
+    from .parser.parse_bel import parse as _parse
+    click.echo(json.dumps(_parse(text)))
+
+
+@main.command()
 @click.argument('path')
 @click.option('--allow-naked-names', is_flag=True, help="Enable lenient parsing for naked names")
 @click.option('--disallow-nested', is_flag=True, help="Disable lenient parsing for nested statements")
