@@ -12,7 +12,7 @@ This module handles parsing control statement, which add annotations and namespa
 import logging
 from typing import Any, Dict, List, Mapping, Optional, Pattern, Set
 
-from pyparsing import And, MatchFirst, ParseResults, Suppress, oneOf, pyparsing_common as ppc
+from pyparsing import And, Keyword, MatchFirst, ParseResults, Suppress, oneOf, pyparsing_common as ppc
 
 from .baseparser import BaseParser
 from .utils import delimited_quoted_list, delimited_unquoted_list, is_int, qid, quote
@@ -32,8 +32,8 @@ __all__ = ['ControlParser']
 
 logger = logging.getLogger(__name__)
 
-set_tag = Suppress(BEL_KEYWORD_SET)
-unset_tag = Suppress(BEL_KEYWORD_UNSET)
+set_tag = Keyword(BEL_KEYWORD_SET)
+unset_tag = Keyword(BEL_KEYWORD_UNSET)
 unset_all = Suppress(BEL_KEYWORD_ALL)
 
 supporting_text_tags = oneOf([BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT])
@@ -111,7 +111,7 @@ class ControlParser(BaseParser):
 
         self.unset_all = unset_all.setParseAction(self.handle_unset_all)
 
-        self.set_statements = set_tag + MatchFirst([
+        self.set_statements = set_tag('action') + MatchFirst([
             self.set_statement_group,
             self.set_citation,
             self.set_evidence,
@@ -119,7 +119,7 @@ class ControlParser(BaseParser):
             self.set_command_list,
         ])
 
-        self.unset_statements = unset_tag + MatchFirst([
+        self.unset_statements = unset_tag('action') + MatchFirst([
             self.unset_all,
             self.unset_citation,
             self.unset_evidence,
