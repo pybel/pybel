@@ -13,7 +13,7 @@ from tabulate import tabulate
 
 from .node_summary import count_namespaces
 from ..graph import BELGraph
-from ...constants import CITATION, CITATION_DB, CITATION_IDENTIFIER, RELATION, TWO_WAY_RELATIONS
+from ...constants import CITATION, IDENTIFIER, NAMESPACE, RELATION, TWO_WAY_RELATIONS
 from ...dsl import BaseConcept
 from ...utils import multidict
 
@@ -110,7 +110,7 @@ def edges(
 def citations(graph: BELGraph, n: Optional[int] = 15, file: Optional[TextIO] = None) -> None:
     """Print a summary of the citations in the graph."""
     edge_mapping = multidict(
-        ((data[CITATION][CITATION_DB], data[CITATION][CITATION_IDENTIFIER]), graph.edge_to_bel(u, v, data))
+        ((data[CITATION][NAMESPACE], data[CITATION][IDENTIFIER]), graph.edge_to_bel(u, v, data))
         for u, v, data in graph.edges(data=True)
         if CITATION in data
     )

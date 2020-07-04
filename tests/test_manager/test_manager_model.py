@@ -7,13 +7,14 @@ import json
 import unittest
 
 from pybel.constants import (
-    CITATION_IDENTIFIER, CITATION_DB_NAME, CITATION_DB, CITATION_TYPE_PUBMED, IDENTIFIER,
+    CITATION_TYPE_PUBMED, IDENTIFIER,
     METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER,
     METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAME, NAMESPACE, NAMESPACE_DOMAIN_OTHER,
 )
+from pybel.language import citation_dict
 from pybel.manager.models import Citation, Namespace, NamespaceEntry, Network
 from pybel.testing.utils import n
-from pybel.utils import citation_dict
+
 
 class TestNetwork(unittest.TestCase):
 
@@ -152,8 +153,8 @@ class TestModels(unittest.TestCase):
             db_id=db_id,
         )
 
-        expected = citation_dict(db=CITATION_TYPE_PUBMED, db_id=db_id)
+        expected = citation_dict(namespace=CITATION_TYPE_PUBMED, identifier=db_id)
         self.assertEqual(expected, model.to_json())
 
-        expected[CITATION_DB_NAME] = model.title = n()
+        expected[NAME] = model.title = n()
         self.assertEqual(expected, model.to_json())

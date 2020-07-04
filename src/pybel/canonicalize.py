@@ -14,10 +14,10 @@ from networkx.utils import open_file
 import bel_resources.constants
 from bel_resources import make_knowledge_header
 from .constants import (
-    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CELL_SURFACE, CITATION, CITATION_DB, CITATION_IDENTIFIER,
-    CITATION_TYPE_PUBMED, DEGRADATION, EFFECT, EVIDENCE, EXTRACELLULAR, FROM_LOC, INTRACELLULAR, LOCATION, MODIFIER,
-    NAME, NAMESPACE, OBJECT, PYBEL_AUTOEVIDENCE, PYBEL_PUBMED, RELATION, SET_CITATION_FMT, SUBJECT, TO_LOC,
-    TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS,
+    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CELL_SURFACE, CITATION, CITATION_TYPE_PUBMED, DEGRADATION, EFFECT,
+    EVIDENCE, EXTRACELLULAR, FROM_LOC, IDENTIFIER, INTRACELLULAR, LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT,
+    PYBEL_AUTOEVIDENCE, PYBEL_PUBMED, RELATION, SET_CITATION_FMT, SUBJECT, TO_LOC, TRANSLOCATION, UNQUALIFIED_EDGES,
+    VARIANTS,
 )
 from .dsl import BaseAbundance, BaseEntity, FusionBase, ListAbundance, Reaction
 from .language import Entity
@@ -190,8 +190,8 @@ def edge_to_bel(
 
 def _sort_qualified_edges_helper(t: EdgeTuple) -> Tuple[str, str, str]:
     return (
-        t[3][CITATION][CITATION_DB],
-        t[3][CITATION][CITATION_IDENTIFIER],
+        t[3][CITATION].namespace,
+        t[3][CITATION].identifier,
         t[3][EVIDENCE],
     )
 
@@ -211,7 +211,7 @@ def sort_qualified_edges(graph) -> Iterable[EdgeTuple]:
 
 def _citation_sort_key(t: EdgeTuple) -> Tuple[str, str]:
     """Make a confusing 4 tuple sortable by citation."""
-    return t[3][CITATION][CITATION_DB], t[3][CITATION][CITATION_IDENTIFIER]
+    return t[3][CITATION].namespace, t[3][CITATION].identifier
 
 
 def _evidence_sort_key(t: EdgeTuple) -> str:

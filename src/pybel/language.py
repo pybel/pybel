@@ -555,3 +555,16 @@ gmod_mappings = {
 
 BEL_DEFAULT_NAMESPACE_VERSION = '2.1.1'
 BEL_DEFAULT_NAMESPACE_URL = 'http://openbel.org/2.1.1.belns'  # just needs something unique... will change later
+
+
+class CitationDict(Entity):
+    """A dictionary describing a citation."""
+
+    def __init__(self, namespace: str, identifier: str, *, name: Optional[str] = None, **kwargs):
+        super().__init__(namespace=namespace, identifier=identifier, name=name)
+        self.update(kwargs)
+
+
+def citation_dict(*, namespace: str, identifier: str, db_name: Optional[str] = None, **kwargs) -> CitationDict:
+    """Make a citation dictionary."""
+    return CitationDict(namespace=namespace, identifier=identifier, name=db_name, **kwargs)

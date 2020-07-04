@@ -9,8 +9,8 @@ from random import randint
 
 from pybel import BELGraph, from_bel_script, from_database, to_database
 from pybel.constants import (
-    ABUNDANCE, BIOPROCESS, CITATION_DB, CITATION_IDENTIFIER, CITATION_TYPE_PUBMED, DECREASES,
-    HAS_PRODUCT, HAS_REACTANT, INCREASES, METADATA_NAME, METADATA_VERSION, MIRNA, PART_OF, PATHOLOGY, PROTEIN, RELATION,
+    ABUNDANCE, BIOPROCESS, CITATION_TYPE_PUBMED, DECREASES, HAS_PRODUCT, HAS_REACTANT, IDENTIFIER, INCREASES,
+    METADATA_NAME, METADATA_VERSION, MIRNA, NAMESPACE, PART_OF, PATHOLOGY, PROTEIN, RELATION,
 )
 from pybel.dsl import (
     BaseEntity, ComplexAbundance, CompositeAbundance, EnumeratedFusionRange, Fragment, Gene, GeneFusion,
@@ -306,7 +306,7 @@ class TestQuery(TemporaryCacheMixin):
         self.assertFalse(rv[0].is_enriched)
 
     def test_query_citaiton_by_reference(self):
-        rv = self.manager.query_citations(db=CITATION_TYPE_PUBMED, db_id=test_citation_dict[CITATION_IDENTIFIER])
+        rv = self.manager.query_citations(db=CITATION_TYPE_PUBMED, db_id=test_citation_dict[IDENTIFIER])
         self.assertEqual(1, len(rv))
         self.assertTrue(rv[0].is_pubmed)
         self.assertFalse(rv[0].is_enriched)
@@ -340,8 +340,8 @@ class TestEnsure(TemporaryCacheMixin):
     def test_get_or_create_citation(self):
         reference = str(randint(1, 1000000))
         citation_dict = {
-            CITATION_DB: CITATION_TYPE_PUBMED,
-            CITATION_IDENTIFIER: reference,
+            NAMESPACE: CITATION_TYPE_PUBMED,
+            IDENTIFIER: reference,
         }
 
         citation = self.manager.get_or_create_citation(**citation_dict)
@@ -359,14 +359,14 @@ class TestEnsure(TemporaryCacheMixin):
         self.assertEqual(citation_dict, citation_reloaded_from_dict.to_json())
 
         citation_reloaded_from_reference = self.manager.get_citation_by_reference(
-            citation_dict[CITATION_DB], citation_dict[CITATION_IDENTIFIER],
+            citation_dict[NAMESPACE], citation_dict[IDENTIFIER],
         )
         self.assertIsNotNone(citation_reloaded_from_reference)
         self.assertEqual(citation_dict, citation_reloaded_from_reference.to_json())
 
     def test_get_or_create_evidence(self):
         citation_db, citation_ref = CITATION_TYPE_PUBMED, str(randint(1, 1000000))
-        basic_citation = self.manager.get_or_create_citation(db=citation_db, db_id=citation_ref)
+        basic_citation = self.manager.get_or_create_citation(namespace=citation_db, identifier=citation_ref)
         utf8_test_evidence = u"Yes, all the information is true! This contains a unicode alpha: α"
 
         evidence = self.manager.get_or_create_evidence(basic_citation, utf8_test_evidence)
@@ -804,8 +804,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         self.assertEqual(2, network.nodes.count(), msg='Missing one or both of the nodes.')
         self.assertEqual(1, network.edges.count(), msg='Missing the edge')
 
-        #edge = network.edges.first()
-        #self.assertEqual(2, edge.properties.count())
+        # edge = network.edges.first()
+        # self.assertEqual(2, edge.properties.count())
 
     @mock_bel_resources
     def test_subject_translocation_custom_to_loc(self, mock):
@@ -999,7 +999,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
          form of Cdc42Hs and weakly activates the JNK family of MAP kinases. PAK4 is a mediator of filopodia
          formation and may play a role in the reorganization of the actin cytoskeleton. Multiple alternatively
          spliced transcript variants encoding distinct isoforms have been found for this gene.""",
-            citation={CITATION_DB: "Online Resource", CITATION_IDENTIFIER: "PAK4 Hs ENTREZ Gene Summary"},
+            citation={NAMESPACE: "Online Resource", IDENTIFIER: "PAK4 Hs ENTREZ Gene Summary"},
             annotations={'Species': '9606'},
             subject_modifier=activity('gtp'),
             object_modifier=activity('kin'),

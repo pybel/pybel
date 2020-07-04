@@ -74,7 +74,7 @@ from typing import List, Optional, Set, Tuple, Union
 import networkx as nx
 import pandas as pd
 
-from ..constants import CAUSAL_INCREASE_RELATIONS, CAUSAL_POLAR_RELATIONS, IS_A, RELATION
+from ..constants import CAUSAL_INCREASE_RELATIONS, CAUSAL_POLAR_RELATIONS, CITATION_TYPE_OTHER, IS_A, RELATION
 from ..dsl import ComplexAbundance, Protein, hgnc
 from ..struct import BELGraph
 
@@ -189,9 +189,9 @@ def from_hipathia_dfs(name: str, att_df: pd.DataFrame, sif_df: pd.DataFrame) -> 
     sif_df['target'] = sif_df['target'].map(_clean_name).map(x.get)
     for source, relation, target in sif_df.values:
         if relation == 'activation':
-            graph.add_increases(source, target, citation='', evidence='')
+            graph.add_increases(source, target, citation=(CITATION_TYPE_OTHER, 'HiPathia'), evidence='')
         elif relation == 'inhibition':
-            graph.add_decreases(source, target, citation='', evidence='')
+            graph.add_decreases(source, target, citation=(CITATION_TYPE_OTHER, 'HiPathia'), evidence='')
         else:
             raise ValueError('unknown relation: {relation}'.format(relation=relation))
 

@@ -11,7 +11,7 @@ from io import StringIO
 import pybel
 import pybel.examples
 from pybel import BELGraph
-from pybel.constants import CITATION_DB, CITATION_IDENTIFIER, CITATION_TYPE_PUBMED
+from pybel.constants import CITATION_TYPE_PUBMED, IDENTIFIER, NAMESPACE
 from pybel.dsl import hgvs, protein
 from pybel.io.api import InvalidExtensionError
 from pybel.testing.utils import n
@@ -181,10 +181,10 @@ class TestGetGraphProperties(unittest.TestCase):
 
         self.assertIsNotNone(citation)
         self.assertIsInstance(citation, dict)
-        self.assertIn(CITATION_DB, citation)
-        self.assertEqual(CITATION_TYPE_PUBMED, citation[CITATION_DB])
-        self.assertIn(CITATION_IDENTIFIER, citation)
-        self.assertEqual(test_pmid, citation[CITATION_IDENTIFIER])
+        self.assertIn(NAMESPACE, citation)
+        self.assertEqual(CITATION_TYPE_PUBMED, citation[NAMESPACE])
+        self.assertIn(IDENTIFIER, citation)
+        self.assertEqual(test_pmid, citation[IDENTIFIER])
 
         evidence = self.graph.get_edge_evidence(test_source, test_target, test_key)
 

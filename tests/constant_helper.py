@@ -11,8 +11,7 @@ from pybel.dsl import (
     Protein, ProteinFusion, ProteinModification, Reaction, Rna, RnaFusion, secretion, translocation,
 )
 from pybel.dsl.namespaces import hgnc
-from pybel.language import activity_mapping, compartment_mapping
-from pybel.utils import citation_dict
+from pybel.language import activity_mapping, citation_dict, compartment_mapping
 
 logger = logging.getLogger(__name__)
 
@@ -37,8 +36,8 @@ expected_test_thorough_metadata = {
     METADATA_CONTACT: "charles.hoyt@scai.fraunhofer.de",
 }
 
-citation_1 = citation_dict(db=CITATION_TYPE_PUBMED, db_id='123455')
-citation_2 = citation_dict(db=CITATION_TYPE_PUBMED, db_id='123456')
+citation_1 = citation_dict(namespace=CITATION_TYPE_PUBMED, identifier='123455')
+citation_2 = citation_dict(namespace=CITATION_TYPE_PUBMED, identifier='123456')
 
 evidence_1 = "Evidence 1"
 dummy_evidence = 'These are mostly made up'

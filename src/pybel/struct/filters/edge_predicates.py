@@ -9,9 +9,8 @@ from .typing import EdgePredicate
 from .utils import part_has_modifier
 from ..graph import BELGraph
 from ...constants import (
-    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSAL_RELATIONS, CITATION, CITATION_AUTHORS, CITATION_DB,
-    CITATION_TYPE_PUBMED, DEGRADATION, DIRECT_CAUSAL_RELATIONS, EVIDENCE, OBJECT, POLAR_RELATIONS, RELATION, SUBJECT,
-    TRANSLOCATION,
+    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSAL_RELATIONS, CITATION, CITATION_AUTHORS, CITATION_TYPE_PUBMED, DEGRADATION,
+    DIRECT_CAUSAL_RELATIONS, EVIDENCE, NAMESPACE, OBJECT, POLAR_RELATIONS, RELATION, SUBJECT, TRANSLOCATION,
 )
 from ...dsl import BaseEntity, BiologicalProcess, Pathology
 from ...typing import EdgeData
@@ -77,7 +76,7 @@ def has_provenance(edge_data: EdgeData) -> bool:
 @edge_predicate
 def has_pubmed(edge_data: EdgeData) -> bool:
     """Check if the edge has a PubMed citation."""
-    return CITATION in edge_data and CITATION_TYPE_PUBMED == edge_data[CITATION][CITATION_DB]
+    return CITATION in edge_data and CITATION_TYPE_PUBMED == edge_data[CITATION][NAMESPACE]
 
 
 @edge_predicate

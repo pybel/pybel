@@ -6,9 +6,7 @@ import string
 import unittest
 
 from pybel import BELGraph
-from pybel.constants import (
-    CITATION_AUTHORS, CITATION_IDENTIFIER, CITATION_DB, CITATION_TYPE_PUBMED,
-)
+from pybel.constants import CITATION_AUTHORS, CITATION_TYPE_PUBMED, IDENTIFIER, NAMESPACE
 from pybel.dsl import BaseEntity, gene, protein, rna
 from pybel.struct.mutation.expansion import expand_upstream_causal
 from pybel.struct.mutation.induction import get_subgraph_by_annotation_value
@@ -248,13 +246,13 @@ class TestEdgePredicateBuilders(TestGraphMixin):
         a1, a2, a3, a4, a5 = n(), n(), n(), n(), n()
 
         c1 = {
-            CITATION_DB: CITATION_TYPE_PUBMED,
-            CITATION_IDENTIFIER: n(),
+            NAMESPACE: CITATION_TYPE_PUBMED,
+            IDENTIFIER: n(),
             CITATION_AUTHORS: [a1, a2, a3]
         }
         c2 = {
-            CITATION_DB: CITATION_TYPE_PUBMED,
-            CITATION_IDENTIFIER: n(),
+            NAMESPACE: CITATION_TYPE_PUBMED,
+            IDENTIFIER: n(),
             CITATION_AUTHORS: [a1, a4]
         }
 
@@ -307,13 +305,13 @@ class TestEdgePredicateBuilders(TestGraphMixin):
         a1, a2, a3, a4 = n(), n(), n(), n()
 
         c1 = {
-            CITATION_DB: CITATION_TYPE_PUBMED,
-            CITATION_IDENTIFIER: n(),
+            NAMESPACE: CITATION_TYPE_PUBMED,
+            IDENTIFIER: n(),
             CITATION_AUTHORS: [a1, a2, a3]
         }
         c2 = {
-            CITATION_DB: CITATION_TYPE_PUBMED,
-            CITATION_IDENTIFIER: n(),
+            NAMESPACE: CITATION_TYPE_PUBMED,
+            IDENTIFIER: n(),
             CITATION_AUTHORS: [a1, a4]
         }
 

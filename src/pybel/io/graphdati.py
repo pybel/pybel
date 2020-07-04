@@ -19,8 +19,8 @@ from tqdm import tqdm
 from .jgif import NAMESPACE_TO_PATTERN
 from ..canonicalize import edge_to_tuple
 from ..constants import (
-    ANNOTATIONS, CITATION, CITATION_DB, CITATION_IDENTIFIER, CITATION_TYPE_PUBMED, CITATION_TYPE_URL, EVIDENCE,
-    RELATION, UNQUALIFIED_EDGES,
+    ANNOTATIONS, CITATION, CITATION_TYPE_PUBMED, CITATION_TYPE_URL, EVIDENCE, IDENTIFIER, NAMESPACE, RELATION,
+    UNQUALIFIED_EDGES,
 )
 from ..parser import BELParser
 from ..struct import BELGraph
@@ -192,7 +192,7 @@ def _get_citation(d):
     if citation is None:
         rv['reference'] = 'Not Available'
     else:
-        rv['database'] = dict(name=citation[CITATION_DB], id=citation[CITATION_IDENTIFIER])
+        rv['database'] = dict(name=citation[NAMESPACE], id=citation[IDENTIFIER])
     return rv
 
 

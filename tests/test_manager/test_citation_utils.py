@@ -84,7 +84,7 @@ class TestCitations(TemporaryCacheMixin):
 
         get_citations_by_pmids(manager=self.manager, pmids=pmids)
 
-        citation = self.manager.get_or_create_citation(db=CITATION_TYPE_PUBMED, db_id='25818332')
+        citation = self.manager.get_or_create_citation(namespace=CITATION_TYPE_PUBMED, identifier='25818332')
         self.assertIsNotNone(citation)
 
     def test_enrich_list_grouped(self):
@@ -101,7 +101,7 @@ class TestCitations(TemporaryCacheMixin):
         self.assertIsNotNone(citation)
 
     def test_enrich_overwrite(self):
-        citation = self.manager.get_or_create_citation(db=CITATION_TYPE_PUBMED, db_id=self.pmid)
+        citation = self.manager.get_or_create_citation(namespace=CITATION_TYPE_PUBMED, identifier=self.pmid)
         self.manager.session.commit()
         self.assertIsNone(citation.date)
         self.assertIsNone(citation.title)

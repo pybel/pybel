@@ -60,13 +60,6 @@ NAMESPACE_DOMAIN_TYPES = {
     NAMESPACE_DOMAIN_OTHER,
 }
 
-#: Represents the key for the citation type in a citation dictionary
-CITATION_DB = 'db'
-#: Represents the key for the citation reference in a citation dictionary
-CITATION_IDENTIFIER = 'db_id'
-
-#: Represents the key for the optional PyBEL citation title entry in a citation dictionary
-CITATION_DB_NAME = 'db_name'
 #: Represents the key for the citation date in a citation dictionary
 CITATION_DATE = 'date'
 #: Represents the key for the citation authors in a citation dictionary

@@ -8,7 +8,7 @@ from pybel.dsl import (
     ComplexAbundance, Protein, abundance, activity, bioprocess, gene, gmod, named_complex_abundance, pathology, pmod,
     protein_fusion, protein_substitution, reaction, rna,
 )
-from pybel.utils import citation_dict
+from pybel.language import citation_dict
 
 example_graph = BELGraph()
 
@@ -115,7 +115,7 @@ a(SCHEM:Kallidin) increases cat(p(HGNC:BDKRB1))
 cat(p(HGNC:BDKRB1)) increases cat(p(SFAM:"PLA2 Family"))
 """
 
-c4 = citation_dict(db=CITATION_TYPE_OTHER, db_id='Genstruct Reference')
+c4 = citation_dict(namespace=CITATION_TYPE_OTHER, identifier='Genstruct Reference')
 e4 = '% Entrez Gene summary: Rat: SUMMARY: precursor protein of kinin which is found in plasma; cysteine protease inhibitor and a major acute phase reactant [RGD] OMIM summary: (summary is not available from this source) kininogens; Endogenous peptides present in most body fluids. Certain enzymes convert them to active kinins which are involved in inflammation, blood clotting, complement reactions, etc. Kininogens belong to the cystatin superfamily. They are cysteine proteinase inhibitors. High-molecular-weight kininogen (hmwk) is split by plasma kallikrein to produce bradykinin. Low-molecular-weight kininogen (lmwk) is split by tissue kallikrein to produce kallidin. kinins; Inflammatory mediators that cause dilation of blood vessels and altered vascular permeability.  Kinins are small peptides produced from kininogen by kallikrein and are broken down by kininases. Act on phospholipase and increase arachidonic acid release and thus prostaglandin (PGE2) production. bradykinin; Vasoactive nonapeptide (RPPGFSPFR) formed by action of proteases on kininogens. Very similar to kallidin (which has the same sequence but with an additional N terminal lysine). Bradykinin is a very potent vasodilator and increases permeability of post capillary venules, it acts on endothelial cells to activate phospholipase A2. It is also spasmogenic for some smooth muscle and will cause pain. kallidin; Decapeptide (lysyl bradykinin, amino acid sequence KRPPGFSPFR) produced in kidney. Like bradykinin, an inflammatory mediator (a kinin), causes dilation of renal blood vessels and increased water excretion.'
 e4 = str(hash(e4))
 

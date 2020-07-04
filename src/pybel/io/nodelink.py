@@ -13,9 +13,10 @@ from networkx.utils import open_file
 
 from .utils import ensure_version
 from ..constants import (
-    FUSION, GRAPH_ANNOTATION_LIST, MEMBERS, OBJECT, PARTNER_3P, PARTNER_5P, PRODUCTS, REACTANTS, SUBJECT,
+    CITATION, FUSION, GRAPH_ANNOTATION_LIST, MEMBERS, OBJECT, PARTNER_3P, PARTNER_5P, PRODUCTS, REACTANTS, SUBJECT,
 )
 from ..dsl import BaseEntity
+from ..language import CitationDict
 from ..struct import BELGraph
 from ..struct.graph import _handle_modifier
 from ..tokens import parse_result_to_dsl
@@ -183,6 +184,9 @@ def _from_nodelink_json_helper(data: Mapping[str, Any]) -> BELGraph:
             side_data = edge_data.get(side)
             if side_data:
                 _handle_modifier(side_data)
+
+        if CITATION in edge_data:
+            edge_data[CITATION] = CitationDict(**edge_data[CITATION])
 
         graph.add_edge(u, v, key=hash_edge(u, v, edge_data), **edge_data)
 

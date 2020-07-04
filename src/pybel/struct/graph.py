@@ -17,23 +17,23 @@ from .operations import left_full_join, left_node_intersection_join, left_outer_
 from .utils import update_metadata
 from ..canonicalize import edge_to_bel
 from ..constants import (
-    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_DB, CITATION_IDENTIFIER,
-    CITATION_TYPE_PUBMED, CORRELATION, DECREASES, DEGRADATION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT,
-    EQUIVALENT_TO, EVIDENCE, FROM_LOC, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL,
-    GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION, HAS_PRODUCT,
-    HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A, LOCATION, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT,
-    METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, MODIFIER,
-    NEGATIVE_CORRELATION, NO_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, REGULATES, RELATION,
-    SUBJECT, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION,
+    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_TYPE_PUBMED, CORRELATION,
+    DECREASES, DEGRADATION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE, FROM_LOC,
+    GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN,
+    GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, IDENTIFIER, INCREASES,
+    IS_A, LOCATION, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER,
+    METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, MODIFIER, NAMESPACE, NEGATIVE_CORRELATION, NO_CORRELATION,
+    OBJECT, ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, REGULATES, RELATION, SUBJECT, TO_LOC, TRANSCRIBED_TO,
+    TRANSLATED_TO, TRANSLOCATION,
 )
 from ..dsl import (
     BaseAbundance, BaseConcept, BaseEntity, CentralDogma, ComplexAbundance, Gene, ListAbundance, MicroRna, Protein,
     ProteinModification, Reaction, Rna, activity,
 )
 from ..exceptions import BELParserWarning
-from ..language import Entity
+from ..language import CitationDict, Entity, citation_dict
 from ..typing import EdgeData
-from ..utils import CitationDict, citation_dict, hash_edge
+from ..utils import hash_edge
 from ..version import get_version
 
 __all__ = [
@@ -905,9 +905,9 @@ def _handle_modifier(side_data: Dict[str, Any]) -> Mapping[str, Any]:
 
 def _handle_citation(citation: Union[str, Tuple[str, str], CitationDict]) -> CitationDict:
     if isinstance(citation, str):
-        return citation_dict(db=CITATION_TYPE_PUBMED, db_id=citation)
+        return citation_dict(namespace=CITATION_TYPE_PUBMED, identifier=citation)
     elif isinstance(citation, tuple):
-        return citation_dict(db=citation[0], db_id=citation[1])
+        return citation_dict(namespace=citation[0], identifier=citation[1])
     elif isinstance(citation, CitationDict):
         return citation
     elif isinstance(citation, dict):
@@ -915,7 +915,7 @@ def _handle_citation(citation: Union[str, Tuple[str, str], CitationDict]) -> Cit
     elif citation is None:
         raise ValueError('citation was None')
     else:
-        raise TypeError('citation is the wrong type: {}'.format(citation))
+        raise TypeError(f'citation is the wrong type: {citation}')
 
 
 class Dispatch:
@@ -987,7 +987,7 @@ class CountDispatch(Dispatch):
 def _iterate_citations(graph: BELGraph) -> Iterable[Tuple[str, str]]:
     for _, _, data in graph.edges(data=True):
         if CITATION in data:
-            yield data[CITATION][CITATION_DB], data[CITATION][CITATION_IDENTIFIER]
+            yield data[CITATION][NAMESPACE], data[CITATION][IDENTIFIER]
 
 
 def _iterate_authors(graph: BELGraph) -> Iterable[str]:

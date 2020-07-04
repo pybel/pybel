@@ -6,7 +6,7 @@ import logging
 
 from ..graph import BELGraph
 from ..pipeline import in_place_transformation
-from ...constants import ANNOTATIONS, CITATION, CITATION_DB, CITATION_IDENTIFIER
+from ...constants import ANNOTATIONS, CITATION, IDENTIFIER, NAMESPACE
 
 __all__ = [
     'strip_annotations',
@@ -76,7 +76,7 @@ def remove_annotation_value(graph: BELGraph, annotation: str, value: str) -> Non
         del graph[u][v][k][ANNOTATIONS][annotation][value]
 
 
-_CITATION_KEEP_KEYS = {CITATION_IDENTIFIER, CITATION_DB}
+_CITATION_KEEP_KEYS = {IDENTIFIER, NAMESPACE}
 
 
 @in_place_transformation

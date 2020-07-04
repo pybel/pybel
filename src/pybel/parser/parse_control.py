@@ -10,7 +10,7 @@ This module handles parsing control statement, which add annotations and namespa
 """
 
 import logging
-from typing import Dict, List, Mapping, Optional, Pattern, Set
+from typing import Any, Dict, List, Mapping, Optional, Pattern, Set
 
 from pyparsing import And, MatchFirst, ParseResults, Suppress, oneOf, pyparsing_common as ppc
 
@@ -26,7 +26,7 @@ from ..exceptions import (
     InvalidPubMedIdentifierWarning, MissingAnnotationKeyWarning, MissingAnnotationRegexWarning,
     MissingCitationException, UndefinedAnnotationWarning,
 )
-from ..utils import CitationDict, citation_dict
+from ..language import CitationDict
 
 __all__ = ['ControlParser']
 
@@ -340,7 +340,7 @@ class ControlParser(BaseParser):
         self.clear()
         return tokens
 
-    def get_annotations(self) -> Dict:
+    def get_annotations(self) -> Dict[str, Any]:
         """Get the current annotations."""
         return {
             EVIDENCE: self.evidence,
@@ -348,9 +348,12 @@ class ControlParser(BaseParser):
             ANNOTATIONS: self.annotations.copy(),
         }
 
-    def get_citation(self) -> CitationDict:
+    def get_citation(self) -> Optional[CitationDict]:
         """Get the citation dictionary."""
-        return citation_dict(db=self.citation_db, db_id=self.citation_db_id)
+        return (
+            CitationDict(namespace=self.citation_db, identifier=self.citation_db_id)
+            if self.citation_db and self.citation_db_id else None
+        )
 
     def get_missing_required_annotations(self) -> List[str]:
         """Return missing required annotations."""

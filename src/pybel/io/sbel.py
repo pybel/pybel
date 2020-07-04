@@ -9,7 +9,8 @@ from typing import Any, Iterable, List, TextIO, Union
 from networkx.utils import open_file
 
 from .nodelink import _augment_node, _fix_annotation_list
-from ..constants import OBJECT, SUBJECT
+from ..constants import CITATION, OBJECT, SUBJECT
+from ..language import CitationDict
 from ..struct.graph import BELGraph, _handle_modifier
 from ..tokens import parse_result_to_dsl
 from ..utils import hash_edge
@@ -101,6 +102,8 @@ def add_sbel(graph: BELGraph, it: Iterable[SBEL]) -> None:
             side_data = edge_data.get(side)
             if side_data:
                 _handle_modifier(side_data)
+        if CITATION in edge_data:
+            edge_data[CITATION] = CitationDict(**edge_data[CITATION])
         graph.add_edge(u, v, key=hash_edge(u, v, edge_data), **edge_data)
 
 

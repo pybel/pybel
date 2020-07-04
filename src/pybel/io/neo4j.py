@@ -5,8 +5,7 @@
 from tqdm import tqdm
 
 from ..constants import (
-    ANNOTATIONS, CITATION, CITATION_DB, CITATION_IDENTIFIER, EVIDENCE, FUSION, MEMBERS, NAMESPACE, OBJECT, RELATION,
-    SUBJECT, VARIANTS,
+    ANNOTATIONS, CITATION, EVIDENCE, FUSION, IDENTIFIER, MEMBERS, NAMESPACE, OBJECT, RELATION, SUBJECT, VARIANTS,
 )
 from ..utils import flatten_dict
 
@@ -81,7 +80,7 @@ def to_neo4j(graph, neo_connection, use_tqdm: bool = False):
 
         citation = d.pop(CITATION, None)
         if citation:
-            attrs[CITATION] = '{}:{}'.format(citation[CITATION_DB], citation[CITATION_IDENTIFIER])
+            attrs[CITATION] = citation.curie
 
         if EVIDENCE in d:
             attrs[EVIDENCE] = d[EVIDENCE]
