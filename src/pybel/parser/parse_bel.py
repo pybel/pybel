@@ -970,7 +970,7 @@ def modifier_po_to_dict(tokens):
 
 @lru_cache()
 def _default_parser():
-    return BELParser(skip_validation=True)
+    return BELParser(skip_validation=True, citation_clearing=False)
 
 
 @lru_cache()
