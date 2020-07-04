@@ -11,6 +11,7 @@ from pybel.dsl import (
     Protein, ProteinFusion, ProteinModification, Reaction, Rna, RnaFusion, secretion, translocation,
 )
 from pybel.dsl.namespaces import hgnc
+from pybel.language import activity_mapping, compartment_mapping
 from pybel.utils import citation_dict
 
 logger = logging.getLogger(__name__)
@@ -315,7 +316,7 @@ BEL_THOROUGH_EDGES = [
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
-        SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
+        SUBJECT: {MODIFIER: ACTIVITY, EFFECT: activity_mapping['kin']},
     }),
     (akt1, Rna('HGNC', 'CFTR', variants=Hgvs('r.1653_1655delcuu')), {
         EVIDENCE: dummy_evidence,
@@ -329,10 +330,7 @@ BEL_THOROUGH_EDGES = [
         RELATION: INCREASES,
         SUBJECT: {
             MODIFIER: ACTIVITY,
-            EFFECT: {
-                NAMESPACE: BEL_DEFAULT_NAMESPACE,
-                NAME: 'cat'
-            }
+            EFFECT: activity_mapping['cat'],
         },
         OBJECT: {MODIFIER: DEGRADATION},
     }),
@@ -342,12 +340,9 @@ BEL_THOROUGH_EDGES = [
         RELATION: INCREASES,
         SUBJECT: {
             MODIFIER: ACTIVITY,
-            EFFECT: {NAME: 'kin', NAMESPACE: BEL_DEFAULT_NAMESPACE}
+            EFFECT: activity_mapping['kin'],
         },
-        OBJECT: translocation(
-            {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'intracellular'},
-            {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'extracellular space'}
-        ),
+        OBJECT: secretion(),
     }),
     (Gene('HGNC', 'AKT1', variants=Hgvs('c.308G>A')), tmprss2_erg_gene_fusion, {
         EVIDENCE: dummy_evidence,
@@ -604,7 +599,7 @@ BEL_THOROUGH_EDGES = [
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: RATE_LIMITING_STEP_OF,
-        SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'cat'}},
+        SUBJECT: {MODIFIER: ACTIVITY, EFFECT: activity_mapping['cat']},
     }),
     (Gene('HGNC', 'APP', variants=Hgvs('c.275341G>C')), Pathology('MESHD', 'Alzheimer Disease'),
      {
@@ -617,21 +612,21 @@ BEL_THOROUGH_EDGES = [
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: REGULATES,
-        SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: BEL_DEFAULT_NAMESPACE}},
-        OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: BEL_DEFAULT_NAMESPACE}},
+        SUBJECT: {MODIFIER: ACTIVITY, EFFECT: activity_mapping['pep']},
+        OBJECT: {MODIFIER: ACTIVITY, EFFECT: activity_mapping['pep']},
     }),
     (Protein('HGNC', 'GSK3B', variants=ProteinModification('Ph', 'Ser', 9)), Protein('HGNC', 'GSK3B'), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: POSITIVE_CORRELATION,
-        OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
+        OBJECT: {MODIFIER: ACTIVITY, EFFECT: activity_mapping['kin']},
     }),
 
     (Protein('HGNC', 'GSK3B'), Protein('HGNC', 'GSK3B', variants=ProteinModification('Ph', 'Ser', 9)), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: POSITIVE_CORRELATION,
-        SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
+        SUBJECT: {MODIFIER: ACTIVITY, EFFECT: activity_mapping['kin']},
     }),
 
     (Reaction(
@@ -729,8 +724,8 @@ BEL_THOROUGH_EDGES = [
          OBJECT: {
              MODIFIER: TRANSLOCATION,
              EFFECT: {
-                 FROM_LOC: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'intracellular'},
-                 TO_LOC: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'cell surface'}
+                 FROM_LOC: compartment_mapping['intracellular'],
+                 TO_LOC: compartment_mapping['cell surface'],
              }
          },
      }),

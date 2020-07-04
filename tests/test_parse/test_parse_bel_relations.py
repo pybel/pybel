@@ -15,16 +15,16 @@ from pybel.constants import (
     FROM_LOC, FUNCTION, GENE, GMOD, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, INCREASES, IS_A, KIND, LOCATION,
     MEMBERS, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, NO_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, PATHOLOGY,
     POSITIVE_CORRELATION, PRODUCTS, PROTEIN, RATE_LIMITING_STEP_OF, REACTANTS, REACTION, REGULATES, RELATION, RNA,
-    SUBJECT, SUBPROCESS_OF, TARGET, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, VARIANTS,
+    SUBJECT, SUBPROCESS_OF, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, VARIANTS,
 )
 from pybel.dsl import (
     ComplexAbundance, Pathology, Protein, Rna, abundance, activity, bioprocess, complex_abundance, composite_abundance,
     gene, gmod, hgvs, named_complex_abundance, pmod, protein, reaction, rna,
 )
 from pybel.dsl.namespaces import hgnc
-from pybel.language import Entity
+from pybel.exceptions import MissingNamespaceNameWarning, NestedRelationWarning, UndefinedNamespaceWarning
+from pybel.language import Entity, activity_mapping
 from pybel.parser import BELParser
-from pybel.parser.exc import MissingNamespaceNameWarning, NestedRelationWarning, UndefinedNamespaceWarning
 from tests.constants import TestTokenParserBase, test_citation_dict, test_evidence_text
 
 logger = logging.getLogger(__name__)
@@ -151,7 +151,7 @@ class TestRelations(TestTokenParserBase):
                         CONCEPT: {
                             NAMESPACE: BEL_DEFAULT_NAMESPACE,
                             NAME: 'Me',
-                        },
+                        }
                     },
                 ],
             },
@@ -189,12 +189,10 @@ class TestRelations(TestTokenParserBase):
             },
             RELATION: DIRECTLY_INCREASES,
             OBJECT: {
-                TARGET: {
-                    FUNCTION: ABUNDANCE,
-                    CONCEPT: {
-                        NAMESPACE: 'CHEBI',
-                        NAME: 'calcium(2+)',
-                    },
+                FUNCTION: ABUNDANCE,
+                CONCEPT: {
+                    NAMESPACE: 'CHEBI',
+                    NAME: 'calcium(2+)',
                 },
                 MODIFIER: TRANSLOCATION,
                 EFFECT: {
@@ -235,18 +233,13 @@ class TestRelations(TestTokenParserBase):
         expected_dict = {
             SUBJECT: {
                 MODIFIER: ACTIVITY,
-                TARGET: {
-                    FUNCTION: PROTEIN,
-                    CONCEPT: {
-                        NAMESPACE: 'FPLX',
-                        NAME: 'CAPN',
-                    },
-                    LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}
+                FUNCTION: PROTEIN,
+                CONCEPT: {
+                    NAMESPACE: 'FPLX',
+                    NAME: 'CAPN',
                 },
-                EFFECT: {
-                    NAME: 'pep',
-                    NAMESPACE: BEL_DEFAULT_NAMESPACE
-                },
+                LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'},
+                EFFECT: activity_mapping['pep'],
             },
             RELATION: DECREASES,
             OBJECT: {
@@ -292,10 +285,7 @@ class TestRelations(TestTokenParserBase):
             RELATION: DECREASES,
             SUBJECT: {
                 MODIFIER: ACTIVITY,
-                EFFECT: {
-                    NAME: 'pep',
-                    NAMESPACE: BEL_DEFAULT_NAMESPACE,
-                },
+                EFFECT: activity_mapping['pep'],
                 LOCATION: {
                     NAMESPACE: 'GO',
                     NAME: 'intracellular',
@@ -418,17 +408,12 @@ class TestRelations(TestTokenParserBase):
         expected_dict = {
             SUBJECT: {
                 MODIFIER: ACTIVITY,
-                TARGET: {
-                    FUNCTION: PROTEIN,
-                    CONCEPT: {
-                        NAMESPACE: 'HGNC',
-                        NAME: 'HMGCR',
-                    },
+                FUNCTION: PROTEIN,
+                CONCEPT: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'HMGCR',
                 },
-                EFFECT: {
-                    NAME: 'cat',
-                    NAMESPACE: BEL_DEFAULT_NAMESPACE
-                },
+                EFFECT: activity_mapping['cat'],
             },
             RELATION: RATE_LIMITING_STEP_OF,
             OBJECT: {
@@ -502,37 +487,27 @@ class TestRelations(TestTokenParserBase):
         expected_dict = {
             SUBJECT: {
                 MODIFIER: ACTIVITY,
-                EFFECT: {
-                    NAME: 'pep',
-                    NAMESPACE: BEL_DEFAULT_NAMESPACE
-                },
-                TARGET: {
-                    FUNCTION: COMPLEX,
-                    MEMBERS: [
-                        {
-                            FUNCTION: PROTEIN,
-                            CONCEPT: {NAMESPACE: 'HGNC', NAME: 'F3'}
-                        },
-                        {
-                            FUNCTION: PROTEIN,
-                            CONCEPT: {NAMESPACE: 'HGNC', NAME: 'F7'}
-                        },
-                    ]
-                }
+                EFFECT: activity_mapping['pep'],
+                FUNCTION: COMPLEX,
+                MEMBERS: [
+                    {
+                        FUNCTION: PROTEIN,
+                        CONCEPT: {NAMESPACE: 'HGNC', NAME: 'F3'}
+                    },
+                    {
+                        FUNCTION: PROTEIN,
+                        CONCEPT: {NAMESPACE: 'HGNC', NAME: 'F7'}
+                    },
+                ],
             },
             RELATION: REGULATES,
             OBJECT: {
                 MODIFIER: ACTIVITY,
-                EFFECT: {
-                    NAME: 'pep',
-                    NAMESPACE: BEL_DEFAULT_NAMESPACE
-                },
-                TARGET: {
-                    FUNCTION: PROTEIN,
-                    CONCEPT: {
-                        NAMESPACE: 'HGNC',
-                        NAME: 'F9',
-                    },
+                EFFECT: activity_mapping['pep'],
+                FUNCTION: PROTEIN,
+                CONCEPT: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'F9',
                 },
             },
         }
@@ -587,16 +562,11 @@ class TestRelations(TestTokenParserBase):
         expected_dict = {
             SUBJECT: {
                 MODIFIER: ACTIVITY,
-                EFFECT: {
-                    NAME: 'kin',
-                    NAMESPACE: BEL_DEFAULT_NAMESPACE
-                },
-                TARGET: {
-                    FUNCTION: PROTEIN,
-                    CONCEPT: {
-                        NAMESPACE: 'FPLX',
-                        NAME: 'GSK3',
-                    },
+                EFFECT: activity_mapping['kin'],
+                FUNCTION: PROTEIN,
+                CONCEPT: {
+                    NAMESPACE: 'FPLX',
+                    NAME: 'GSK3',
                 },
             },
             RELATION: NEGATIVE_CORRELATION,
@@ -639,17 +609,12 @@ class TestRelations(TestTokenParserBase):
             RELATION: POSITIVE_CORRELATION,
             OBJECT: {
                 MODIFIER: ACTIVITY,
-                TARGET: {
-                    FUNCTION: PROTEIN,
-                    CONCEPT: {
-                        NAMESPACE: 'HGNC',
-                        NAME: 'GSK3B',
-                    },
+                FUNCTION: PROTEIN,
+                CONCEPT: {
+                    NAMESPACE: 'HGNC',
+                    NAME: 'GSK3B',
                 },
-                EFFECT: {
-                    NAME: 'kin',
-                    NAMESPACE: BEL_DEFAULT_NAMESPACE
-                }
+                EFFECT: activity_mapping['kin'],
             },
         }
         self.assertEqual(expected_dict, result.asDict())

@@ -6,7 +6,7 @@ import unittest
 from collections import Counter
 
 from pybel import BELGraph
-from pybel.constants import ABUNDANCE, BIOPROCESS, COMPLEX, PROTEIN
+from pybel.constants import ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, PROTEIN
 from pybel.dsl import fusion_range, pathology, protein, protein_fusion
 from pybel.examples import egf_graph, sialic_acid_graph
 from pybel.struct.summary.node_summary import (
@@ -46,7 +46,8 @@ class TestSummary(unittest.TestCase):
         namespace_result = {
             'hgnc': 8,
             'chebi': 2,
-            'bel': 3,
+            BEL_DEFAULT_NAMESPACE: 1,
+            'go': 2
         }
         self.assertEqual(set(namespace_result), get_namespaces(sialic_acid_graph))
         self.assertEqual(Counter(namespace_result), count_namespaces(sialic_acid_graph))
@@ -75,8 +76,7 @@ class TestSummary(unittest.TestCase):
         """Test getting and counting namespaces' contents on the EGF graph."""
         result = {
             'hgnc': 15,
-            'go': 3,
-            'bel': 4,
+            'go': 7,
         }
 
         self.assertEqual(set(result), get_namespaces(egf_graph))

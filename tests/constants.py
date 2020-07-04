@@ -16,7 +16,7 @@ from pybel.constants import (
 )
 from pybel.dsl import BaseEntity, ComplexAbundance, Pathology, Protein
 from pybel.dsl.namespaces import hgnc
-from pybel.parser.exc import (
+from pybel.exceptions import (
     BELParserWarning, BELSyntaxError, IllegalAnnotationValueWarning, InvalidCitationLengthException,
     InvalidCitationType, InvalidFunctionSemantic, InvalidPubMedIdentifierWarning, MalformedTranslocationWarning,
     MissingAnnotationKeyWarning, MissingAnnotationRegexWarning, MissingCitationException, MissingMetadataException,

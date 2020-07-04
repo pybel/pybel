@@ -9,7 +9,7 @@ from typing import Iterable, List, Mapping, Set
 from ..filters.edge_predicates import edge_has_annotation
 from ..graph import BELGraph, WarningTuple
 from ...constants import ANNOTATIONS
-from ...parser.exc import BELSyntaxError, MissingNamespaceNameWarning, MissingNamespaceRegexWarning, NakedNameWarning
+from ...exceptions import BELSyntaxError, MissingNamespaceNameWarning, MissingNamespaceRegexWarning, NakedNameWarning
 
 __all__ = [
     'get_syntax_errors',

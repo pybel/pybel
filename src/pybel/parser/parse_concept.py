@@ -3,6 +3,7 @@
 """A module holding the :class:`IdentifierParser`."""
 
 import logging
+import re
 from collections import defaultdict
 from typing import Mapping, Optional, Pattern, Set
 
@@ -10,12 +11,12 @@ from pyparsing import ParseResults, Suppress
 
 from .baseparser import BaseParser
 from .constants import NamespaceTermEncodingMapping
-from .exc import (
+from .utils import quote, word
+from ..constants import DIRTY, IDENTIFIER, NAME, NAMESPACE
+from ..exceptions import (
     MissingDefaultNameWarning, MissingNamespaceNameWarning, MissingNamespaceRegexWarning, NakedNameWarning,
     UndefinedNamespaceWarning,
 )
-from .utils import quote, word
-from ..constants import DIRTY, IDENTIFIER, NAME, NAMESPACE
 
 __all__ = [
     'ConceptParser',
@@ -37,6 +38,7 @@ class ConceptParser(BaseParser):
         default_namespace: Optional[Set[str]] = None,
         allow_naked_names: bool = False,
         skip_validation: bool = False,
+        ensure_go: bool = True,
     ) -> None:
         """Initialize the concept parser.
 
@@ -73,6 +75,9 @@ class ConceptParser(BaseParser):
             self.identifier_qualified.setParseAction(self.handle_identifier_qualified)
 
         self.namespace_to_pattern = namespace_to_pattern or {}
+        if ensure_go and 'go' not in self.namespace_to_name_to_encoding:
+            self.namespace_to_pattern['go'] = re.compile(r'^\d+$')
+
         self.default_namespace = set(default_namespace) if default_namespace is not None else None
         self.allow_naked_names = allow_naked_names
 

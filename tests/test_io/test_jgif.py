@@ -9,10 +9,14 @@ import unittest
 
 from pybel import from_cbn_jgif, to_jgif
 from pybel.constants import (
-    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_IDENTIFIER, CITATION_DB, CITATION_TYPE_OTHER,
-    CITATION_TYPE_PUBMED, DECREASES, DIRECTLY_INCREASES, EFFECT, EVIDENCE, MODIFIER, NAME, NAMESPACE, OBJECT, RELATION,
+    ACTIVITY, ANNOTATIONS, CITATION, CITATION_DB, CITATION_IDENTIFIER, CITATION_TYPE_OTHER, CITATION_TYPE_PUBMED,
+    DECREASES, DIRECTLY_INCREASES, EFFECT, EVIDENCE, MODIFIER, OBJECT, RELATION,
 )
-from pybel.dsl import Abundance, BiologicalProcess, ComplexAbundance, NamedComplexAbundance, Pathology, Protein, ProteinModification
+from pybel.dsl import (
+    Abundance, BiologicalProcess, ComplexAbundance, NamedComplexAbundance, Pathology, Protein,
+    ProteinModification,
+)
+from pybel.language import activity_mapping
 from pybel.testing.constants import test_jgif_path
 from tests.constants import TestGraphMixin
 
@@ -83,7 +87,7 @@ jgif_expected_edges = [
             CITATION_DB: CITATION_TYPE_PUBMED,
             CITATION_IDENTIFIER: '12483215'
         },
-        OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'phos'}},
+        OBJECT: {MODIFIER: ACTIVITY, EFFECT: activity_mapping['phos']},
         ANNOTATIONS: {
             'Species': {'10116': True},
             'Cell': {'neuron': True}
@@ -108,7 +112,7 @@ jgif_expected_edges = [
             CITATION_DB: CITATION_TYPE_OTHER,
             CITATION_IDENTIFIER: "20335267"
         },
-        OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'cat'}},
+        OBJECT: {MODIFIER: ACTIVITY, EFFECT: activity_mapping['cat']},
         ANNOTATIONS: {
             'Tissue': {'lung': True}
         }

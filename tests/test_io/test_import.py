@@ -21,13 +21,13 @@ from pybel.constants import (
 )
 from pybel.dsl import BaseEntity, Gene, Protein
 from pybel.examples.sialic_acid_example import sialic_acid_graph
+from pybel.exceptions import (
+    BELSyntaxError, InvalidFunctionSemantic, MissingCitationException, MissingNamespaceRegexWarning,
+)
 from pybel.io.exc import ImportVersionWarning, import_version_message_fmt
 from pybel.io.line_utils import parse_lines
 from pybel.io.nodelink import from_nodelink_jsons, to_nodelink_jsons
 from pybel.parser import BELParser
-from pybel.parser.exc import (
-    BELSyntaxError, InvalidFunctionSemantic, MissingCitationException, MissingNamespaceRegexWarning,
-)
 from pybel.struct.summary import get_syntax_errors
 from pybel.testing.cases import TemporaryCacheClsMixin, TemporaryCacheMixin
 from pybel.testing.constants import (

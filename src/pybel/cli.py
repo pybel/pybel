@@ -28,6 +28,7 @@ from tqdm import tqdm
 from .canonicalize import to_bel_script
 from .constants import get_cache_connection
 from .examples import braf_graph, egf_graph, homology_graph, sialic_acid_graph, statin_graph
+from .exceptions import BELParserWarning
 from .io import (
     from_bel_script, from_pickle, load, to_bel_commons, to_edgelist, to_graphml, to_gsea, to_neo4j,
     to_nodelink_file, to_pickle, to_sif, to_triples_file,
@@ -36,7 +37,6 @@ from .io.bel_commons_client import _get_host, _get_password, _get_user
 from .manager import Manager
 from .manager.database_io import to_database
 from .manager.models import Edge, Namespace, Node
-from .parser.exc import BELParserWarning
 from .struct import get_unused_annotations, get_unused_list_annotation_values, get_unused_namespaces
 from .struct.graph import BELGraph, WarningTuple
 from .utils import get_corresponding_pickle_path

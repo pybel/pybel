@@ -41,6 +41,7 @@ from .io.spia import to_spia_dfs, to_spia_excel, to_spia_tsvs
 from .io.triples import to_edgelist, to_triples, to_triples_file
 from .io.umbrella_nodelink import to_umbrella_nodelink, to_umbrella_nodelink_file, to_umbrella_nodelink_gz
 from .manager import Manager, from_database, to_database
+from .parser.parse_bel import parse
 from .struct import BELGraph, Pipeline, Query
 from .struct.operations import union
 from .version import get_version

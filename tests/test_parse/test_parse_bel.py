@@ -8,11 +8,11 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import (
-    ABUNDANCE, ACTIVITY, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, CONCEPT, DEGRADATION,
+    ABUNDANCE, ACTIVITY, BIOPROCESS, CELL_SECRETION, CELL_SURFACE_EXPRESSION, COMPLEX, COMPOSITE, CONCEPT, DEGRADATION,
     DIRECTLY_INCREASES, DIRTY, EFFECT, FRAGMENT, FROM_LOC, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE,
     FUSION_START, FUSION_STOP, GENE, HAS_VARIANT, HGVS, IDENTIFIER, KIND, LOCATION, MEMBERS, MIRNA, MODIFIER, NAME,
     NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PART_OF, PATHOLOGY, POPULATION, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P,
-    REACTANTS, REACTION, RELATION, RNA, SUBJECT, TARGET, TO_LOC, TRANSLOCATION, VARIANTS,
+    REACTANTS, REACTION, RELATION, RNA, SUBJECT, TO_LOC, TRANSLOCATION, VARIANTS,
 )
 from pybel.dsl import (
     Fragment, Population, abundance, bioprocess, cell_surface_expression, complex_abundance, composite_abundance,
@@ -20,9 +20,9 @@ from pybel.dsl import (
     protein_fusion, reaction, rna, rna_fusion, secretion, translocation,
 )
 from pybel.dsl.namespaces import hgnc
-from pybel.language import Entity
+from pybel.exceptions import MalformedTranslocationWarning
+from pybel.language import Entity, activity_mapping
 from pybel.parser import BELParser
-from pybel.parser.exc import MalformedTranslocationWarning
 from pybel.parser.parse_bel import modifier_po_to_dict
 from tests.constants import TestTokenParserBase, assert_has_edge, assert_has_node, update_provenance
 
@@ -1540,7 +1540,7 @@ class TestActivity(TestTokenParserBase):
         statement = 'act(p(HGNC:AKT1))'
         result = self.parser.activity.parseString(statement)
 
-        expected_result = [ACTIVITY, [PROTEIN, ['HGNC', 'AKT1']]]
+        expected_result = [ACTIVITY, PROTEIN, ['HGNC', 'AKT1']]
         self.assertEqual(expected_result, result.asList())
 
         mod = modifier_po_to_dict(result)
@@ -1556,16 +1556,11 @@ class TestActivity(TestTokenParserBase):
 
         expected_dict = {
             MODIFIER: ACTIVITY,
-            EFFECT: {
-                NAME: 'kin',
-                NAMESPACE: BEL_DEFAULT_NAMESPACE,
-            },
-            TARGET: {
-                FUNCTION: PROTEIN,
-                CONCEPT: {
-                    NAMESPACE: 'HGNC',
-                    NAME: 'AKT1',
-                },
+            EFFECT: activity_mapping['kin'],
+            FUNCTION: PROTEIN,
+            CONCEPT: {
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1',
             },
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1573,10 +1568,7 @@ class TestActivity(TestTokenParserBase):
         mod = modifier_po_to_dict(result)
         expected_mod = {
             MODIFIER: ACTIVITY,
-            EFFECT: {
-                NAME: 'kin',
-                NAMESPACE: BEL_DEFAULT_NAMESPACE,
-            },
+            EFFECT: activity_mapping['kin'],
         }
         self.assertEqual(expected_mod, mod)
 
@@ -1587,16 +1579,11 @@ class TestActivity(TestTokenParserBase):
 
         expected_dict = {
             MODIFIER: ACTIVITY,
-            EFFECT: {
-                NAME: 'cat',
-                NAMESPACE: BEL_DEFAULT_NAMESPACE
-            },
-            TARGET: {
-                FUNCTION: PROTEIN,
-                CONCEPT: {
-                    NAMESPACE: 'HGNC',
-                    NAME: 'AKT1',
-                },
+            EFFECT: activity_mapping['cat'],
+            FUNCTION: PROTEIN,
+            CONCEPT: {
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1',
             },
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1604,10 +1591,7 @@ class TestActivity(TestTokenParserBase):
         mod = modifier_po_to_dict(result)
         expected_mod = {
             MODIFIER: ACTIVITY,
-            EFFECT: {
-                NAME: 'cat',
-                NAMESPACE: BEL_DEFAULT_NAMESPACE
-            },
+            EFFECT: activity_mapping['cat'],
         }
         self.assertEqual(expected_mod, mod)
 
@@ -1620,14 +1604,12 @@ class TestActivity(TestTokenParserBase):
             MODIFIER: ACTIVITY,
             EFFECT: {
                 NAMESPACE: 'GO',
-                NAME: 'catalytic activity'
+                NAME: 'catalytic activity',
             },
-            TARGET: {
-                FUNCTION: PROTEIN,
-                CONCEPT: {
-                    NAMESPACE: 'HGNC',
-                    NAME: 'AKT1',
-                },
+            FUNCTION: PROTEIN,
+            CONCEPT: {
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1',
             },
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1649,16 +1631,11 @@ class TestActivity(TestTokenParserBase):
 
         expected_dict = {
             MODIFIER: ACTIVITY,
-            EFFECT: {
-                NAME: 'kin',
-                NAMESPACE: BEL_DEFAULT_NAMESPACE
-            },
-            TARGET: {
-                FUNCTION: PROTEIN,
-                CONCEPT: {
-                    NAMESPACE: 'HGNC',
-                    NAME: 'AKT1',
-                },
+            EFFECT: activity_mapping['kin'],
+            FUNCTION: PROTEIN,
+            CONCEPT: {
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1',
             },
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1666,10 +1643,7 @@ class TestActivity(TestTokenParserBase):
         mod = modifier_po_to_dict(result)
         expected_mod = {
             MODIFIER: ACTIVITY,
-            EFFECT: {
-                NAME: 'kin',
-                NAMESPACE: BEL_DEFAULT_NAMESPACE
-            },
+            EFFECT: activity_mapping['kin'],
         }
         self.assertEqual(expected_mod, mod)
 
@@ -1723,12 +1697,10 @@ class TestTranslocationPermissive(unittest.TestCase):
 
         expected_dict = {
             MODIFIER: TRANSLOCATION,
-            TARGET: {
-                FUNCTION: PROTEIN,
-                CONCEPT: {
-                    NAMESPACE: 'HGNC',
-                    NAME: 'EGFR',
-                },
+            FUNCTION: PROTEIN,
+            CONCEPT: {
+                NAMESPACE: 'HGNC',
+                NAME: 'EGFR',
             },
         }
 
@@ -1763,12 +1735,10 @@ class TestTranslocationPermissive(unittest.TestCase):
             },
             RELATION: DIRECTLY_INCREASES,
             OBJECT: {
-                TARGET: {
-                    FUNCTION: ABUNDANCE,
-                    CONCEPT: {
-                        NAMESPACE: 'CHEBI',
-                        NAME: 'calcium(2+)',
-                    },
+                FUNCTION: ABUNDANCE,
+                CONCEPT: {
+                    NAMESPACE: 'CHEBI',
+                    NAME: 'calcium(2+)',
                 },
                 MODIFIER: TRANSLOCATION,
             }
@@ -1801,17 +1771,15 @@ class TestTransformation(TestTokenParserBase):
         statement = 'deg(p(HGNC:AKT1))'
         result = self.parser.transformation.parseString(statement)
 
-        expected_result = [DEGRADATION, [PROTEIN, ['HGNC', 'AKT1']]]
+        expected_result = [DEGRADATION, PROTEIN, ['HGNC', 'AKT1']]
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
             MODIFIER: DEGRADATION,
-            TARGET: {
-                FUNCTION: PROTEIN,
-                CONCEPT: {
-                    NAMESPACE: 'HGNC',
-                    NAME: 'AKT1',
-                },
+            FUNCTION: PROTEIN,
+            CONCEPT: {
+                NAMESPACE: 'HGNC',
+                NAME: 'AKT1',
             },
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1829,12 +1797,10 @@ class TestTransformation(TestTokenParserBase):
 
         expected_dict = {
             MODIFIER: DEGRADATION,
-            TARGET: {
-                FUNCTION: PROTEIN,
-                CONCEPT: {
-                    NAMESPACE: 'HGNC',
-                    NAME: 'EGFR',
-                },
+            FUNCTION: PROTEIN,
+            CONCEPT: {
+                NAMESPACE: 'HGNC',
+                NAME: 'EGFR',
             },
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1855,12 +1821,10 @@ class TestTransformation(TestTokenParserBase):
 
         expected_dict = {
             MODIFIER: TRANSLOCATION,
-            TARGET: {
-                FUNCTION: PROTEIN,
-                CONCEPT: {
-                    NAMESPACE: 'HGNC',
-                    NAME: 'EGFR',
-                },
+            FUNCTION: PROTEIN,
+            CONCEPT: {
+                NAMESPACE: 'HGNC',
+                NAME: 'EGFR',
             },
             EFFECT: {
                 FROM_LOC: {NAMESPACE: 'GO', NAME: 'cell surface', },
@@ -1888,12 +1852,10 @@ class TestTransformation(TestTokenParserBase):
 
         expected_dict = {
             MODIFIER: TRANSLOCATION,
-            TARGET: {
-                FUNCTION: PROTEIN,
-                CONCEPT: {
-                    NAMESPACE: 'HGNC',
-                    NAME: 'EGFR',
-                },
+            FUNCTION: PROTEIN,
+            CONCEPT: {
+                NAMESPACE: 'HGNC',
+                NAME: 'EGFR',
             },
             EFFECT: {
                 FROM_LOC: {NAMESPACE: 'GO', NAME: 'cell surface'},
@@ -1926,7 +1888,7 @@ class TestTransformation(TestTokenParserBase):
         statement = 'sec(p(HGNC:EGFR))'
         result = self.parser.transformation.parseString(statement)
 
-        expected_result = ['CellSecretion', [PROTEIN, ['HGNC', 'EGFR']]]
+        expected_result = [CELL_SECRETION, PROTEIN, ['HGNC', 'EGFR']]
         self.assertEqual(expected_result, result.asList())
 
         mod = modifier_po_to_dict(result)
@@ -1941,7 +1903,7 @@ class TestTransformation(TestTokenParserBase):
         statement = 'surf(p(HGNC:EGFR))'
         result = self.parser.transformation.parseString(statement)
 
-        expected_result = ['CellSurfaceExpression', [PROTEIN, ['HGNC', 'EGFR']]]
+        expected_result = [CELL_SURFACE_EXPRESSION, PROTEIN, ['HGNC', 'EGFR']]
         self.assertEqual(expected_result, result.asList())
 
         expected_mod = cell_surface_expression()

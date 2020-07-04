@@ -30,8 +30,8 @@ from ..dsl import (
     BaseAbundance, BaseConcept, BaseEntity, CentralDogma, ComplexAbundance, Gene, ListAbundance, MicroRna, Protein,
     ProteinModification, Reaction, Rna, activity,
 )
+from ..exceptions import BELParserWarning
 from ..language import Entity
-from ..parser.exc import BELParserWarning
 from ..typing import EdgeData
 from ..utils import CitationDict, citation_dict, hash_edge
 from ..version import get_version

@@ -6,6 +6,7 @@ import gzip
 import itertools as itt
 import logging
 import time
+import warnings
 from typing import Iterable, List, Mapping, Optional, TextIO, Tuple, Union
 
 from networkx.utils import open_file
@@ -19,6 +20,7 @@ from .constants import (
     TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS,
 )
 from .dsl import BaseAbundance, BaseEntity, FusionBase, ListAbundance, Reaction
+from .language import Entity
 from .typing import EdgeData
 from .utils import ensure_quotes
 from .version import VERSION
@@ -118,46 +120,35 @@ def _decanonicalize_edge_node(
         return node_str
 
     if DEGRADATION == modifier:
-        return "deg({})".format(node_str)
+        warnings.warn('degradation is deprecated', DeprecationWarning)
+        return f'deg({node_str})'
 
     effect = node_edge_data.get(EFFECT)
 
     if ACTIVITY == modifier:
         if effect is None:
-            return "act({})".format(node_str)
-
-        if effect[NAMESPACE] == BEL_DEFAULT_NAMESPACE:
-            return "act({}, ma({}))".format(node_str, effect[NAME])
-
-        return "act({}, ma({}:{}))".format(node_str, effect[NAMESPACE], ensure_quotes(effect[NAME]))
+            return f'act({node_str})'
+        return f'act({node_str}, ma({effect}))'
 
     if TRANSLOCATION == modifier:
         if effect is None:
-            return 'tloc({})'.format(node_str)
+            return f'tloc({node_str})'
 
-        to_loc_data = effect[TO_LOC]
-        from_loc_data = effect[FROM_LOC]
+        to_loc_data: Entity = effect[TO_LOC]
+        from_loc_data: Entity = effect[FROM_LOC]
 
         if from_loc_data[NAMESPACE] == BEL_DEFAULT_NAMESPACE and from_loc_data[NAME] == INTRACELLULAR:
             if to_loc_data[NAMESPACE] == BEL_DEFAULT_NAMESPACE and to_loc_data[NAME] == EXTRACELLULAR:
-                return 'sec({})'.format(node_str)
+                warnings.warn('deprecated output of BEL default namespace', DeprecationWarning)
+                return f'sec({node_str})'
             if to_loc_data[NAMESPACE] == BEL_DEFAULT_NAMESPACE and to_loc_data[NAME] == CELL_SURFACE:
-                return 'surf({})'.format(node_str)
+                warnings.warn('deprecated output of BEL default namespace', DeprecationWarning)
+                return f'surf({node_str})'
+            raise ValueError
 
-        from_loc = _get_tloc_terminal('fromLoc', from_loc_data)
-        to_loc = _get_tloc_terminal('toLoc', to_loc_data)
-
-        return "tloc({}, {}, {})".format(node_str, from_loc, to_loc)
+        return f"tloc({node_str}, fromLoc({from_loc_data}), toLoc({to_loc_data}))"
 
     raise ValueError('invalid modifier: {}'.format(modifier))
-
-
-def _get_tloc_terminal(side, data):
-    return "{}({}:{})".format(
-        side,
-        data[NAMESPACE],
-        ensure_quotes(data[NAME]),
-    )
 
 
 def edge_to_tuple(

@@ -15,16 +15,16 @@ from typing import Dict, List, Mapping, Optional, Pattern, Set
 from pyparsing import And, MatchFirst, ParseResults, Suppress, oneOf, pyparsing_common as ppc
 
 from .baseparser import BaseParser
-from .exc import (
-    CitationTooLongException, CitationTooShortException, IllegalAnnotationValueWarning, InvalidCitationType,
-    InvalidPubMedIdentifierWarning, MissingAnnotationKeyWarning, MissingAnnotationRegexWarning,
-    MissingCitationException, UndefinedAnnotationWarning,
-)
 from .utils import delimited_quoted_list, delimited_unquoted_list, is_int, qid, quote
 from ..constants import (
     ANNOTATIONS, BEL_KEYWORD_ALL, BEL_KEYWORD_CITATION, BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SET,
     BEL_KEYWORD_STATEMENT_GROUP, BEL_KEYWORD_SUPPORT, BEL_KEYWORD_UNSET, CITATION, CITATION_TYPES, CITATION_TYPE_PUBMED,
     EVIDENCE,
+)
+from ..exceptions import (
+    CitationTooLongException, CitationTooShortException, IllegalAnnotationValueWarning, InvalidCitationType,
+    InvalidPubMedIdentifierWarning, MissingAnnotationKeyWarning, MissingAnnotationRegexWarning,
+    MissingCitationException, UndefinedAnnotationWarning,
 )
 from ..utils import CitationDict, citation_dict
 

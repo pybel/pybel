@@ -23,8 +23,8 @@ from ..constants import (
     ANNOTATIONS, CITATION, EVIDENCE, METADATA_AUTHORS, METADATA_CONTACT,
     METADATA_INSERT_KEYS, METADATA_LICENSES, RELATION, UNQUALIFIED_EDGES,
 )
+from ..exceptions import NakedNameWarning, UndefinedNamespaceWarning
 from ..parser import BELParser
-from ..parser.exc import NakedNameWarning, UndefinedNamespaceWarning
 from ..struct import BELGraph
 from ..version import get_version
 

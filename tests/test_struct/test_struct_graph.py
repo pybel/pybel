@@ -101,7 +101,7 @@ class TestStruct(unittest.TestCase):
 Name                   Sialic Acid Graph
 Version                1.0.0
 Number of Nodes        9
-Number of Namespaces   3
+Number of Namespaces   4
 Number of Edges        11
 Number of Annotations  2
 Number of Citations    1
@@ -117,10 +117,12 @@ Protein           7
 Complex           1
 Abundance         1
 
-Namespace (2)      Count
+Namespace (4)      Count
 ---------------  -------
-hgnc                   7
-chebi                  1
+hgnc                   8
+chebi                  2
+go                     2
+bel                    1
 
 Edge Type (7)                        Count
 ---------------------------------  -------

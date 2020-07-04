@@ -88,7 +88,6 @@ CITATION_LAST_AUTHOR = 'last'
 
 MODIFIER = 'modifier'
 EFFECT = 'effect'
-TARGET = 'target'
 FROM_LOC = 'fromLoc'
 TO_LOC = 'toLoc'
 

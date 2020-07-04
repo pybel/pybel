@@ -6,12 +6,12 @@ import unittest
 from random import randint
 
 from pybel.constants import (ANNOTATIONS, CITATION, CITATION_DB, CITATION_IDENTIFIER, CITATION_TYPE_PUBMED, EVIDENCE)
-from pybel.parser import ControlParser
-from pybel.parser.exc import (
+from pybel.exceptions import (
     CitationTooLongException, CitationTooShortException, IllegalAnnotationValueWarning, InvalidCitationType,
     InvalidPubMedIdentifierWarning, MissingAnnotationKeyWarning, MissingAnnotationRegexWarning,
     UndefinedAnnotationWarning,
 )
+from pybel.parser import ControlParser
 from pybel.parser.parse_control import set_citation_stub
 from pybel.testing.utils import n
 from tests.constants import SET_CITATION_TEST, test_citation_dict
