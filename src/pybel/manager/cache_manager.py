@@ -6,7 +6,6 @@ Under the hood, PyBEL caches namespace and annotation files for quick recall on 
 enable this option, but can specify a database location if they choose.
 """
 
-import json
 import logging
 import time
 from itertools import chain
@@ -29,8 +28,8 @@ from .models import (
 from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, update_insert_values
 from ..constants import (
-    ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_DB, CITATION_IDENTIFIER, CITATION_TYPE_PUBMED, EVIDENCE,
-    METADATA_INSERT_KEYS, OBJECT, RELATION, SUBJECT, UNQUALIFIED_EDGES, belns_encodings, get_cache_connection,
+    ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_TYPE_PUBMED, EVIDENCE, IDENTIFIER, METADATA_INSERT_KEYS,
+    NAMESPACE, RELATION, SOURCE_MODIFIER, TARGET_MODIFIER, UNQUALIFIED_EDGES, belns_encodings, get_cache_connection,
 )
 from ..dsl import BaseConcept, BaseEntity
 from ..language import (
@@ -712,7 +711,7 @@ class InsertManager(NamespaceManager, LookupManager):
             elif EVIDENCE not in data or CITATION not in data:
                 continue
 
-            elif CITATION_DB not in data[CITATION] or CITATION_IDENTIFIER not in data[CITATION]:
+            elif NAMESPACE not in data[CITATION] or IDENTIFIER not in data[CITATION]:
                 continue
 
             else:
@@ -777,8 +776,8 @@ class InsertManager(NamespaceManager, LookupManager):
         """Add a qualified edge to the network."""
         citation_dict = data[CITATION]
         citation = self.get_or_create_citation(
-            db=citation_dict[CITATION_DB],
-            db_id=citation_dict[CITATION_IDENTIFIER],
+            namespace=citation_dict[NAMESPACE],
+            identifier=citation_dict[IDENTIFIER],
         )
         evidence = self.get_or_create_evidence(citation, data[EVIDENCE])
         annotations = self._get_annotation_entries_from_data(graph, data)
@@ -925,9 +924,9 @@ class InsertManager(NamespaceManager, LookupManager):
 
         edge = Edge(
             source=source,
-            source_modifier=data.get(SUBJECT),
+            source_modifier=data.get(SOURCE_MODIFIER),
             target=target,
-            target_modifier=data.get(OBJECT),
+            target_modifier=data.get(TARGET_MODIFIER),
             relation=relation,
             bel=bel,
             md5=md5,
@@ -946,30 +945,30 @@ class InsertManager(NamespaceManager, LookupManager):
     def get_or_create_citation(
         self,
         *,
-        db_id: str,
-        db: Optional[str] = None
+        identifier: str,
+        namespace: Optional[str] = None,
     ) -> Citation:
         """Create a citation if it does not exist, or return it if it does.
 
-        :param db_id: Identifier of the given citation (e.g. PubMed id)
-        :param db: Citation type (defaults to PubMed)
+        :param identifier: Identifier of the given citation (e.g. PubMed id)
+        :param namespace: Citation type (defaults to PubMed)
         """
-        if db is None:
-            db = CITATION_TYPE_PUBMED
+        if namespace is None:
+            namespace = CITATION_TYPE_PUBMED
 
-        citation_curie = '{}:{}'.format(db, db_id)
+        citation_curie = f'{namespace}:{identifier}'
         if citation_curie in self.curie_to_citation:
             citation = self.curie_to_citation[citation_curie]
             self.session.add(citation)
             return citation
 
-        citation = self.get_citation_by_reference(db, db_id)
+        citation = self.get_citation_by_reference(namespace, identifier)
 
         if citation is not None:
             self.curie_to_citation[citation_curie] = citation
             return citation
 
-        self.curie_to_citation[citation_curie] = citation = Citation(db=db, db_id=db_id)
+        self.curie_to_citation[citation_curie] = citation = Citation(db=namespace, db_id=identifier)
         self.session.add(citation)
         return citation
 

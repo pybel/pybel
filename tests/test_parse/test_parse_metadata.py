@@ -9,10 +9,10 @@ import unittest
 from pathlib import Path
 
 from bel_resources.constants import ANNOTATION_URL_FMT, NAMESPACE_URL_FMT
-from pybel.parser import MetadataParser
-from pybel.parser.exc import (
+from pybel.exceptions import (
     InvalidMetadataException, RedefinedAnnotationError, RedefinedNamespaceError, VersionFormatWarning,
 )
+from pybel.parser import MetadataParser
 from pybel.resources import HGNC_URL
 from pybel.testing.cases import FleetingTemporaryCacheMixin
 from pybel.testing.constants import test_an_1, test_ns_1
@@ -20,7 +20,6 @@ from pybel.testing.mocks import mock_bel_resources
 from tests.constants import HGNC_KEYWORD, MESH_DISEASES_KEYWORD, MESH_DISEASES_URL, help_check_hgnc
 
 logging.getLogger("requests").setLevel(logging.WARNING)
-
 
 LOCAL_TEST_PATH = os.path.expanduser("~/dev/pybel/src/pybel/testing/resources/belns/hgnc-names.belns")
 
@@ -56,7 +55,6 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
     @mock_bel_resources
     def test_annotation_name_persistience_1(self, mock_get):
         """Test that an annotation defined by a URL can't be overwritten by a definition by a list."""
-
         s = ANNOTATION_URL_FMT.format(MESH_DISEASES_KEYWORD, MESH_DISEASES_URL)
         self.parser.parseString(s)
         self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotation_to_term)

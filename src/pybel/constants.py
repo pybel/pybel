@@ -60,13 +60,6 @@ NAMESPACE_DOMAIN_TYPES = {
     NAMESPACE_DOMAIN_OTHER,
 }
 
-#: Represents the key for the citation type in a citation dictionary
-CITATION_DB = 'db'
-#: Represents the key for the citation reference in a citation dictionary
-CITATION_IDENTIFIER = 'db_id'
-
-#: Represents the key for the optional PyBEL citation title entry in a citation dictionary
-CITATION_DB_NAME = 'db_name'
 #: Represents the key for the citation date in a citation dictionary
 CITATION_DATE = 'date'
 #: Represents the key for the citation authors in a citation dictionary
@@ -88,7 +81,6 @@ CITATION_LAST_AUTHOR = 'last'
 
 MODIFIER = 'modifier'
 EFFECT = 'effect'
-TARGET = 'target'
 FROM_LOC = 'fromLoc'
 TO_LOC = 'toLoc'
 
@@ -258,10 +250,12 @@ EVIDENCE = 'evidence'
 ANNOTATIONS = 'annotations'
 #: The key for free annotations
 FREE_ANNOTATIONS = 'free_annotations'
-#: The key for an internal edge data dictionary for the subject modifier dictionary
-SUBJECT = 'subject'
-#: The key for an internal edge data dictionary for the object modifier dictionary
-OBJECT = 'object'
+SOURCE = 'source'
+TARGET = 'target'
+#: The key for an internal edge data dictionary for the source modifier dictionary
+SOURCE_MODIFIER = 'source_modifier'
+#: The key for an internal edge data dictionary for the target modifier dictionary
+TARGET_MODIFIER = 'target_modifier'
 #: The key or an internal edge data dictionary for the line number
 LINE = 'line'
 #: The key representing the hash of the other
@@ -273,8 +267,8 @@ PYBEL_EDGE_DATA_KEYS = {
     CITATION,
     EVIDENCE,
     ANNOTATIONS,
-    SUBJECT,
-    OBJECT,
+    SOURCE_MODIFIER,
+    TARGET_MODIFIER,
 }
 
 #: The group of all PyBEL-specific keys for edge data dictionaries, not used for hashing.

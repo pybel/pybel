@@ -10,6 +10,7 @@ import pandas as pd
 from pybel import BELGraph
 from pybel.dsl import ComplexAbundance, Protein
 from pybel.io.hipathia import ATT_COLS, to_hipathia_dfs
+from pybel.testing.utils import n
 
 PROTEIN_NAMESPACE = 'ncbigene'
 FAMILY_NAMESPACE = 'hipathia.family'
@@ -40,7 +41,7 @@ class TestExportHipathia(unittest.TestCase):
 
     def test_protein_activates_protein(self):
         """Test conversion of ``p(A) -> p(D)``."""
-        self.graph.add_increases(a, d, citation='', evidence='')
+        self.graph.add_increases(a, d, citation=n(), evidence='')
 
         att_df, sif_df = self._get_dfs()
 
@@ -64,7 +65,7 @@ class TestExportHipathia(unittest.TestCase):
 
     def test_protein_activates_family(self):
         """Test conversion of ``p(A) -> p(B); p(B1) isA p(B); p(B2) isA p(B)``."""
-        self.graph.add_increases(a, b_family, citation='', evidence='')
+        self.graph.add_increases(a, b_family, citation=n(), evidence=n())
         self.graph.add_is_a(b1, b_family)
         self.graph.add_is_a(b2, b_family)
 
@@ -90,7 +91,7 @@ class TestExportHipathia(unittest.TestCase):
 
     def test_protein_activates_complex_proteins(self):
         """Test conversion of ``p(A) -> complex(p(E), p(F))``."""
-        self.graph.add_increases(a, e_f, citation='', evidence='')
+        self.graph.add_increases(a, e_f, citation=n(), evidence='')
 
         att_df, sif_df = self._get_dfs()
 
@@ -115,7 +116,7 @@ class TestExportHipathia(unittest.TestCase):
 
     def test_protein_activates_complex_mixed(self):
         """Test conversion of ``p(A) -> complex(p(E), p(B))`` when b is a family."""
-        self.graph.add_increases(a, e_f, citation='', evidence='')
+        self.graph.add_increases(a, e_f, citation=n(), evidence='')
 
         att_df, sif_df = self._get_dfs()
 

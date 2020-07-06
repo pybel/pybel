@@ -27,7 +27,7 @@ from typing import Any, Mapping, TextIO, Union
 from networkx.utils import open_file
 
 from ..canonicalize import _decanonicalize_edge_node, edge_to_tuple
-from ..constants import GRAPH_ANNOTATION_LIST, OBJECT, SUBJECT
+from ..constants import GRAPH_ANNOTATION_LIST, SOURCE_MODIFIER, TARGET_MODIFIER
 from ..struct import BELGraph
 
 __all__ = [
@@ -62,8 +62,8 @@ def to_umbrella_nodelink(graph: BELGraph) -> Mapping[str, Any]:
                 chain(
                     data.copy().items(),
                     [
-                        ('source', mapping[_decanonicalize_edge_node(u, data, node_position=SUBJECT)]),
-                        ('target', mapping[_decanonicalize_edge_node(v, data, node_position=OBJECT)]),
+                        ('source', mapping[_decanonicalize_edge_node(u, data, node_position=SOURCE_MODIFIER)]),
+                        ('target', mapping[_decanonicalize_edge_node(v, data, node_position=TARGET_MODIFIER)]),
                         ('key', key),
                     ],
                 ),

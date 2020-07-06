@@ -13,12 +13,13 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import backref, relationship
 
 from ..constants import (
-    CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_DB, CITATION_DB_NAME, CITATION_FIRST_AUTHOR,
-    CITATION_IDENTIFIER, CITATION_JOURNAL, CITATION_LAST_AUTHOR, CITATION_PAGES, CITATION_TYPE_PUBMED, CITATION_VOLUME,
-    EVIDENCE, IDENTIFIER, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION,
-    METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAME, NAMESPACE,
+    CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR, CITATION_JOURNAL, CITATION_LAST_AUTHOR,
+    CITATION_PAGES, CITATION_TYPE_PUBMED, CITATION_VOLUME, EVIDENCE, IDENTIFIER, METADATA_AUTHORS, METADATA_CONTACT,
+    METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION,
+    NAME, NAMESPACE,
 )
 from ..io.gpickle import from_bytes, to_bytes
+from ..language import Entity
 from ..tokens import parse_result_to_dsl
 
 __all__ = [
@@ -441,16 +442,13 @@ class Citation(Base):
         :param bool include_id: If true, includes the model identifier
         :return: Citation dictionary for the recreation of a :class:`BELGraph`.
         """
-        result = {
-            CITATION_DB: self.db,
-            CITATION_IDENTIFIER: self.db_id,
-        }
+        result = Entity(namespace=self.db, identifier=self.db_id)
 
         if include_id:
             result['id'] = self.id
 
         if self.title:
-            result[CITATION_DB_NAME] = self.title
+            result[NAME] = self.title
 
         if self.journal:
             result[CITATION_JOURNAL] = self.journal

@@ -11,7 +11,7 @@ from typing import Dict, Iterable, List, Optional, Set, Tuple, Union
 
 import requests
 
-from ..constants import CITATION, CITATION_IDENTIFIER, CITATION_TYPE_PUBMED
+from ..constants import CITATION, CITATION_TYPE_PUBMED, IDENTIFIER
 from ..struct.filters import filter_edges
 from ..struct.filters.edge_predicates import has_pubmed
 from ..struct.summary.provenance import get_pubmed_identifiers
@@ -159,7 +159,7 @@ def get_citations_by_pmids(
     unenriched_pmids = {}
 
     for pmid in pmids:
-        citation = manager.get_or_create_citation(db=CITATION_TYPE_PUBMED, db_id=pmid)
+        citation = manager.get_or_create_citation(namespace=CITATION_TYPE_PUBMED, identifier=pmid)
 
         if not citation.is_enriched:
             unenriched_pmids[pmid] = citation
@@ -232,7 +232,7 @@ def enrich_pubmed_citations(
     pmid_data, errors = get_citations_by_pmids(manager, pmids=pmids, group_size=group_size, sleep_time=sleep_time)
 
     for u, v, k in filter_edges(graph, has_pubmed):
-        pmid = graph[u][v][k][CITATION][CITATION_IDENTIFIER].strip()
+        pmid = graph[u][v][k][CITATION][IDENTIFIER].strip()
 
         if pmid not in pmid_data:
             logger.warning('Missing data for PubMed identifier: %s', pmid)

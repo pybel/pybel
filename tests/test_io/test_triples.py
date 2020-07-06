@@ -8,7 +8,7 @@ from typing import Tuple, Type
 from pybel import BELGraph
 from pybel.constants import (
     ASSOCIATION, DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO, INCREASES, IS_A,
-    NEGATIVE_CORRELATION, OBJECT, PART_OF, POSITIVE_CORRELATION, REGULATES, RELATION,
+    NEGATIVE_CORRELATION, TARGET_MODIFIER, PART_OF, POSITIVE_CORRELATION, REGULATES, RELATION,
 )
 from pybel.dsl import (
     Abundance, BaseEntity, BiologicalProcess, ComplexAbundance, MicroRna, NamedComplexAbundance, Pathology,
@@ -32,7 +32,7 @@ def _rel(x):
 
 
 def _rela(x, y=None):
-    return {RELATION: x, OBJECT: activity(y)}
+    return {RELATION: x, TARGET_MODIFIER: activity(y)}
 
 
 def _assoc(y):

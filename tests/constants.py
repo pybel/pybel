@@ -10,13 +10,13 @@ from json import dumps
 from pybel import BELGraph
 from pybel.canonicalize import edge_to_bel
 from pybel.constants import (
-    ANNOTATIONS, ASSOCIATION, CITATION, CITATION_DB, CITATION_IDENTIFIER, CITATION_TYPE_PUBMED, DECREASES,
-    DIRECTLY_DECREASES, EVIDENCE, INCREASES, METADATA_AUTHORS, METADATA_DESCRIPTION, METADATA_LICENSES, METADATA_NAME,
-    METADATA_VERSION, PART_OF, RELATION,
+    ANNOTATIONS, ASSOCIATION, CITATION, CITATION_TYPE_PUBMED, DECREASES, DIRECTLY_DECREASES, EVIDENCE, IDENTIFIER,
+    INCREASES, METADATA_AUTHORS, METADATA_DESCRIPTION, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAMESPACE,
+    PART_OF, RELATION,
 )
 from pybel.dsl import BaseEntity, ComplexAbundance, Pathology, Protein
 from pybel.dsl.namespaces import hgnc
-from pybel.parser.exc import (
+from pybel.exceptions import (
     BELParserWarning, BELSyntaxError, IllegalAnnotationValueWarning, InvalidCitationLengthException,
     InvalidCitationType, InvalidFunctionSemantic, InvalidPubMedIdentifierWarning, MalformedTranslocationWarning,
     MissingAnnotationKeyWarning, MissingAnnotationRegexWarning, MissingCitationException, MissingMetadataException,
@@ -27,7 +27,8 @@ from pybel.parser.exc import (
 from pybel.parser.parse_bel import BELParser
 from pybel.parser.parse_control import ControlParser
 from pybel.testing.constants import test_bel_thorough
-from pybel.utils import citation_dict, subdict_matches
+from pybel.utils import subdict_matches
+from pybel.language import citation_dict
 from tests.constant_helper import (
     BEL_THOROUGH_EDGES, BEL_THOROUGH_NODES, citation_1, evidence_1, expected_test_simple_metadata,
     expected_test_thorough_metadata,
@@ -38,11 +39,11 @@ logger = logging.getLogger(__name__)
 OPENBEL_DOMAIN = 'http://resources.openbel.org'
 OPENBEL_ANNOTATION_RESOURCES = OPENBEL_DOMAIN + '/belframework/20150611/annotation/'
 
-test_citation_dict = citation_dict(db=CITATION_TYPE_PUBMED, db_id='1235813')
+test_citation_dict = citation_dict(namespace=CITATION_TYPE_PUBMED, identifier='1235813')
 
-SET_CITATION_TEST = 'SET Citation = {{"{db}", "{db_id}"}}'.format(**test_citation_dict)
+SET_CITATION_TEST = f'SET Citation = {{"{test_citation_dict.namespace}", "{test_citation_dict.identifier}"}}'
 test_evidence_text = 'I read it on Twitter'
-test_set_evidence = 'SET Evidence = "{}"'.format(test_evidence_text)
+test_set_evidence = f'SET Evidence = "{test_evidence_text}"'
 
 HGNC_KEYWORD = 'HGNC'
 MESH_DISEASES_KEYWORD = 'MeSHDisease'
@@ -56,8 +57,8 @@ casp8 = hgnc(name='CASP8')
 
 def update_provenance(control_parser: ControlParser) -> None:
     """Put a default evidence and citation in a BEL parser."""
-    control_parser.citation_db = test_citation_dict[CITATION_DB]
-    control_parser.citation_db_id = test_citation_dict[CITATION_IDENTIFIER]
+    control_parser.citation_db = test_citation_dict.namespace
+    control_parser.citation_db_id = test_citation_dict.identifier
     control_parser.evidence = test_evidence_text
 
 
@@ -248,13 +249,13 @@ class BelReconstitutionMixin(TestGraphMixin):
         self.assertIn(casp8, graph)
 
         bel_simple_citation_1 = {
-            CITATION_IDENTIFIER: "123455",
-            CITATION_DB: CITATION_TYPE_PUBMED,
+            IDENTIFIER: "123455",
+            NAMESPACE: CITATION_TYPE_PUBMED,
         }
 
         bel_simple_citation_2 = {
-            CITATION_IDENTIFIER: "123456",
-            CITATION_DB: CITATION_TYPE_PUBMED,
+            IDENTIFIER: "123456",
+            NAMESPACE: CITATION_TYPE_PUBMED,
         }
 
         evidence_1_extra = "Evidence 1 w extra notes"

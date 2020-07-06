@@ -5,7 +5,10 @@
 from typing import Iterable, List
 
 from ...graph import BELGraph
-from ....constants import ANNOTATIONS, CAUSAL_RELATIONS, CITATION, EVIDENCE, IS_A, OBJECT, RELATION, SUBJECT
+from ....constants import (
+    ANNOTATIONS, CAUSAL_RELATIONS, CITATION, EVIDENCE, IS_A, RELATION, SOURCE_MODIFIER,
+    TARGET_MODIFIER,
+)
 from ....dsl import BaseEntity
 
 __all__ = [
@@ -35,8 +38,8 @@ def transfer_causal_edges(graph: BELGraph, source: BaseEntity, target: BaseEntit
             evidence=data[EVIDENCE],
             citation=data[CITATION],
             annotations=data.get(ANNOTATIONS),
-            subject_modifier=data.get(SUBJECT),
-            object_modifier=data.get(OBJECT),
+            source_modifier=data.get(SOURCE_MODIFIER),
+            target_modifier=data.get(TARGET_MODIFIER),
         )
 
     for u, _, data in graph.in_edges(source, data=True):
@@ -50,8 +53,8 @@ def transfer_causal_edges(graph: BELGraph, source: BaseEntity, target: BaseEntit
             evidence=data[EVIDENCE],
             citation=data[CITATION],
             annotations=data.get(ANNOTATIONS),
-            subject_modifier=data.get(SUBJECT),
-            object_modifier=data.get(OBJECT),
+            source_modifier=data.get(SOURCE_MODIFIER),
+            target_modifier=data.get(TARGET_MODIFIER),
         )
 
 

@@ -6,7 +6,7 @@ from typing import Iterable, Set
 
 from ..filters.edge_predicates import has_pubmed
 from ..graph import BELGraph
-from ...constants import CITATION, CITATION_IDENTIFIER
+from ...constants import CITATION, IDENTIFIER
 
 __all__ = [
     'iterate_pubmed_identifiers',
@@ -21,7 +21,7 @@ def iterate_pubmed_identifiers(graph: BELGraph) -> Iterable[str]:
     :return: An iterator over the PubMed identifiers in the graph
     """
     return (
-        data[CITATION][CITATION_IDENTIFIER].strip()
+        data[CITATION][IDENTIFIER].strip()
         for _, _, data in graph.edges(data=True)
         if has_pubmed(data)
     )

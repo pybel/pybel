@@ -4,8 +4,8 @@ import re
 import unittest
 
 from pybel.constants import DIRTY
+from pybel.exceptions import MissingNamespaceRegexWarning, NakedNameWarning
 from pybel.parser import ConceptParser
-from pybel.parser.exc import MissingNamespaceRegexWarning, NakedNameWarning
 
 
 class _ParserMixin(unittest.TestCase):
