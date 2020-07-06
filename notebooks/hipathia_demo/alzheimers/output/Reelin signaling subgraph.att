@@ -1,0 +1,20 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Reelin signaling subgraph-1 2	DAB2 APP	72	195	white	rectangle	gene,gene	0.5	black	46	17	2662,/,620
+N-Reelin signaling subgraph-10	SRC	11	112	white	rectangle	gene	0.5	black	46	17	SRC
+N-Reelin signaling subgraph-11	Glutamate ionotropic receptor NMDA type subunits	0	116	white	rectangle	gene	0.5	black	46	17	1201
+N-Reelin signaling subgraph-12	ITGB1BP1	110	72	white	rectangle	gene	0.5	black	46	17	23927
+N-Reelin signaling subgraph-13	DAB1	87	0	white	rectangle	gene	0.5	black	46	17	2661
+N-Reelin signaling subgraph-14	DAB1	61	97	white	rectangle	gene	0.5	black	46	17	2661
+N-Reelin signaling subgraph-15	GRIA3	87	81	white	rectangle	gene	0.5	black	46	17	4573
+N-Reelin signaling subgraph-16	GRIN2A	71	86	white	rectangle	gene	0.5	black	46	17	4585
+N-Reelin signaling subgraph-17	GRIN2A	77	78	white	rectangle	gene	0.5	black	46	17	4585
+N-Reelin signaling subgraph-18	GRIN2B	79	102	white	rectangle	gene	0.5	black	46	17	4586
+N-Reelin signaling subgraph-19	APOE	42	103	white	rectangle	gene	0.5	black	46	17	613
+N-Reelin signaling subgraph-21	APP	101	82	white	rectangle	gene	0.5	black	46	17	620
+N-Reelin signaling subgraph-22	APP	72	184	white	rectangle	gene	0.5	black	46	17	620
+N-Reelin signaling subgraph-23	LRP8	93	105	white	rectangle	gene	0.5	black	46	17	6700
+N-Reelin signaling subgraph-24	RELN	82	91	white	rectangle	gene	0.5	black	46	17	9957
+N-Reelin signaling subgraph-3 4	APP LRP1	95	3	white	rectangle	gene,gene	0.5	black	46	17	620,/,6692
+N-Reelin signaling subgraph-5 6	APP RELN	115	82	white	rectangle	gene,gene	0.5	black	46	17	620,/,9957
+N-Reelin signaling subgraph-7 8	LRP8 RELN	25	108	white	rectangle	gene,gene	0.5	black	46	17	6700,/,9957
+N-Reelin signaling subgraph-9	NCOA	102	115	white	rectangle	gene	0.5	black	46	17	NCOA

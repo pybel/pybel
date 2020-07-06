@@ -54,6 +54,7 @@ import unittest
 from collections import defaultdict
 from typing import Any, Mapping, Tuple, Union
 
+import pyobo
 from protmapper.uniprot_client import get_id_from_mnemonic, get_mnemonic
 from pyobo.extract import get_id_name_mapping, get_name_id_mapping
 from pyobo.getters import MissingOboBuild, NoOboFoundry
@@ -62,8 +63,9 @@ from pyobo.xrefdb.sources.famplex import get_remapping
 from tqdm import tqdm
 
 from pybel.constants import (
-    ACTIVITY, ANNOTATIONS, CONCEPT, EFFECT, FROM_LOC, FUSION, GMOD, IDENTIFIER, KIND, LOCATION, MEMBERS, MODIFIER, NAME,
-    NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PMOD, PRODUCTS, REACTANTS, SUBJECT, TO_LOC, TRANSLOCATION, VARIANTS,
+    ACTIVITY, ANNOTATIONS, CONCEPT, EFFECT, FREE_ANNOTATIONS, FROM_LOC, FUSION, GMOD, IDENTIFIER, KIND, LOCATION,
+    MEMBERS, MODIFIER, NAME, NAMESPACE, PARTNER_3P, PARTNER_5P, PMOD, PRODUCTS, REACTANTS, SOURCE_MODIFIER,
+    TARGET_MODIFIER, TO_LOC, TRANSLOCATION, VARIANTS,
 )
 from pybel.dsl import BaseConcept
 from pybel.io import from_nodelink, to_nodelink
@@ -152,8 +154,8 @@ def ground_nodelink(graph_nodelink_dict) -> None:
     name = graph_nodelink_dict.get('graph', {}).get('name', 'graph')
 
     for data in tqdm(graph_nodelink_dict['links'], desc='grounding edges in {}'.format(name)):
-        _process_edge_side(data.get(SUBJECT))
-        _process_edge_side(data.get(OBJECT))
+        _process_edge_side(data.get(SOURCE_MODIFIER))
+        _process_edge_side(data.get(TARGET_MODIFIER))
         if ANNOTATIONS in data:
             _process_annotations(data)
 
@@ -168,63 +170,78 @@ _BEL_ANNOTATION_PREFIX_MAP = {
     'Disease': 'doid',
     'Cell': 'cl',
 }
+_BEL_ANNOTATION_PREFIX_CATEGORY_MAP = {
+    'MeSHDisease': 'Disease',
+    'MeSHAnatomy': 'Anatomy',
+}
+
 _UNHANDLED_ANNOTATION = set()
 
 
-def _process_findable_annotations(x, y, prefix, names):
-    name_id = get_name_id_mapping(prefix)
-    for name, polarity in names.items():
-        identifier = name_id.get(name)
-        if identifier:
-            x.append((Entity(namespace=prefix, identifier=identifier, name=name), polarity))
-        else:
-            y.append((prefix, name, polarity))
+def _process_annotations(data, remove_ungrounded: bool = False) -> None:
+    """Process the annotations in a PyBEL edge data dictionary."""
+    grounded_category_curie_polarity = []
+    ungrounded_category_name_polarity = []
 
-
-def _process_annotations(data, add_free_annotations: bool = False):
-    x = []
-    y = []
-
-    for prefix, names in data[ANNOTATIONS].items():
-        if prefix == 'CellLine':
-            efo_name_to_id = get_name_id_mapping('efo')
-            # clo_name_to_id = get_name_id_mapping('clo')  # FIXME implement CLO import
+    for category, names in data[ANNOTATIONS].items():
+        if category == 'CellLine':
+            _namespaces = [
+                'efo',
+                # 'clo',  # FIXME implement CLO import and add here
+            ]
             for name, polarity in names.items():
-                prefix, identifier = 'efo', efo_name_to_id.get(name)
-                # if identifier is None:
-                #     prefix, identifier = 'clo', clo_name_to_id.get(name)
-                if identifier is not None:
-                    x.append((Entity(namespace=prefix, identifier=identifier, name=name), polarity))
+                g_prefix, g_identifier, g_name = pyobo.ground(_namespaces, name)
+                if g_prefix and g_identifier:
+                    grounded_category_curie_polarity.append((
+                        category, Entity(namespace=g_prefix, identifier=g_identifier, name=g_name), polarity,
+                    ))
                 else:
-                    y.append((prefix, identifier, polarity))
+                    ungrounded_category_name_polarity.append((category, name, polarity))
 
-        elif prefix in _BEL_ANNOTATION_PREFIX_MAP:
-            prefix = _BEL_ANNOTATION_PREFIX_MAP[prefix]
-            _process_findable_annotations(x, y, prefix, names)
+        elif category in _BEL_ANNOTATION_PREFIX_MAP:
+            norm_prefix = _BEL_ANNOTATION_PREFIX_MAP[category]
+            norm_category = _BEL_ANNOTATION_PREFIX_CATEGORY_MAP.get(category, category)
+            for name, polarity in names.items():
+                _, identifier, _ = pyobo.ground(norm_prefix, name)
+                if identifier:
+                    grounded_category_curie_polarity.append((
+                        norm_category, Entity(namespace=norm_prefix, identifier=identifier, name=name), polarity,
+                    ))
+                else:
+                    ungrounded_category_name_polarity.append((norm_category, name, polarity))
 
-        elif normalize_prefix(prefix):
-            prefix_norm = normalize_prefix(prefix)
-            _process_findable_annotations(x, y, prefix_norm, names)
+        elif normalize_prefix(category):
+            norm_prefix = normalize_prefix(category)
+            for name, polarity in names.items():
+                _, identifier, _ = pyobo.ground(norm_prefix, name)
+                if identifier:
+                    grounded_category_curie_polarity.append((
+                        category, Entity(namespace=norm_prefix, identifier=identifier, name=name), polarity,
+                    ))
+                else:
+                    ungrounded_category_name_polarity.append((category, name, polarity))
 
         else:
-            if prefix not in _UNHANDLED_ANNOTATION:
-                logger.warning('unhandled annotation: %s', prefix)
-                _UNHANDLED_ANNOTATION.add(prefix)
+            if category not in _UNHANDLED_ANNOTATION:
+                logger.warning('unhandled annotation: %s', category)
+                _UNHANDLED_ANNOTATION.add(category)
 
             if isinstance(names, dict):
                 for name, polarity in names.items():
-                    y.append((prefix, name, polarity))
+                    ungrounded_category_name_polarity.append((category, name, polarity))
             else:
-                y.append((prefix, names, True))
+                ungrounded_category_name_polarity.append((category, names, True))
 
     data[ANNOTATIONS] = defaultdict(dict)
-    for entity, polarity in x:
-        data[ANNOTATIONS][entity.namespace][entity.identifier] = polarity
+    for category, entity, polarity in grounded_category_curie_polarity:
+        data[ANNOTATIONS][category][entity.curie] = polarity
+    data[ANNOTATIONS] = dict(data[ANNOTATIONS])
 
-    if add_free_annotations:
-        data['free_annotations'] = defaultdict(dict)
-        for prefix, name, polarity in y:
-            data['free_annotations'][prefix][name] = polarity
+    if not remove_ungrounded and ungrounded_category_name_polarity:
+        data[FREE_ANNOTATIONS] = defaultdict(dict)
+        for category, name, polarity in ungrounded_category_name_polarity:
+            data[FREE_ANNOTATIONS][category][name] = polarity
+        data[FREE_ANNOTATIONS] = dict(data[FREE_ANNOTATIONS])
 
 
 def _process_edge_side(side_data) -> bool:
@@ -408,7 +425,7 @@ def _handle_name_and_not_identifier(*, concept, prefix, name, node=None) -> bool
     try:
         id_name_mapping = get_name_id_mapping(prefix)
     except (NoOboFoundry, MissingOboBuild) as e:
-        logger.warning('could not get namespace %s', prefix, e)
+        logger.warning('could not get namespace %s - %s', prefix, e)
         return False
 
     if id_name_mapping is None:
@@ -627,4 +644,71 @@ class TestGround(unittest.TestCase):
                 _process_node(result)
                 self.assertEqual(expected, result)
 
-# TODO look up members when checking a named complex, protein family, or pathway
+    def test_process_annotations(self):
+        """Test processing annotations data."""
+        r = [
+            (
+                'Test Upgrade MeSH disease, MeSH anatomy, and species',
+                {  # Expected
+                    ANNOTATIONS: {
+                        'Disease': {'mesh:D010300': True},
+                        'Anatomy': {'mesh:D013378': True},
+                        'Species': {'ncbitaxon:9606': True},
+                    },
+                },
+                {  # Original
+                    ANNOTATIONS: {
+                        'MeSHDisease': {'Parkinson Disease': True},
+                        'MeSHAnatomy': {'Substantia Nigra': True},
+                        'Species': {'Homo sapiens': True},
+                    },
+                },
+            ),
+            (
+                'When the name of the annotation does not need to be mapped',
+                {
+                    ANNOTATIONS: {
+                        'Disease': {'doid:14330': True},
+                        'Cell': {'cl:0000030': True},
+                    },
+                },
+                {
+                    ANNOTATIONS: {
+                        'Disease': {"Parkinson's disease": True},
+                        'Cell': {'glioblast': True},
+                    },
+                },
+            ),
+            (
+                'Check unmappable disease',
+                {
+                    ANNOTATIONS: {},
+                    FREE_ANNOTATIONS: {
+                        'Disease': {"Failure": True},
+                    }
+                },
+                {
+                    ANNOTATIONS: {
+                        'Disease': {"Failure": True},
+                    },
+                },
+            ),
+            (
+                'Check unhandled annotation',
+                {
+                    ANNOTATIONS: {},
+                    FREE_ANNOTATIONS: {
+                        'Custom Annotation': {"Custom Value": True},
+                    }
+                },
+                {
+                    ANNOTATIONS: {
+                        'Custom Annotation': {"Custom Value": True},
+                    },
+                },
+            ),
+        ]
+        for name, expected_data, data in r:
+            with self.subTest(name=name):
+                _process_annotations(data)
+                self.assertEqual(expected_data, data)

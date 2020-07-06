@@ -3,14 +3,17 @@
 import os
 import re
 import sys
+import warnings
+
+from sphinx.deprecation import RemovedInSphinx40Warning
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-import os
-import sys
 sys.path.insert(0, os.path.abspath('../../src'))
+
+# Suppress sphinx warnings. Will deal with it in 40
+warnings.filterwarnings('ignore', category=RemovedInSphinx40Warning)
 
 # -- General configuration ------------------------------------------------
 
@@ -49,7 +52,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'PyBEL'
-copyright = '2016-2019, Charles Tapley Hoyt'
+copyright = '2016-2020, Charles Tapley Hoyt'
 author = 'Charles Tapley Hoyt'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -58,7 +61,7 @@ author = 'Charles Tapley Hoyt'
 #
 
 # The full version, including alpha/beta/rc tags.
-release = '0.14.10-dev'
+release = '0.14.11-dev'
 
 # The short X.Y version.
 parsed_version = re.match(

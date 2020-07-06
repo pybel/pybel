@@ -4,8 +4,8 @@
 
 from pyparsing import Keyword, MatchFirst, oneOf
 
-from ..exc import PlaceholderAminoAcidWarning
 from ... import language
+from ...exceptions import PlaceholderAminoAcidWarning
 
 aa_single = oneOf(list(language.amino_acid_dict.keys()))
 aa_single.setParseAction(lambda s, l, t: [language.amino_acid_dict[t[0]]])

@@ -1,0 +1,14 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-TGF-Beta subgraph-1	TGFB	15	67	white	rectangle	gene	0.5	black	46	17	TGFB
+N-TGF-Beta subgraph-10	HSPB3	130	28	white	rectangle	gene	0.5	black	46	17	5248
+N-TGF-Beta subgraph-11	APP	28	77	white	rectangle	gene	0.5	black	46	17	620
+N-TGF-Beta subgraph-12	SMAD2	50	6	white	rectangle	gene	0.5	black	46	17	6768
+N-TGF-Beta subgraph-13	Mmp2	0	81	white	rectangle	gene	0.5	black	46	17	97009
+N-TGF-Beta subgraph-2	TGFB1	35	18	white	rectangle	gene	0.5	black	46	17	11766
+N-TGF-Beta subgraph-3	TGFB2	34	62	white	rectangle	gene	0.5	black	46	17	11768
+N-TGF-Beta subgraph-4	TGFB3	8	37	white	rectangle	gene	0.5	black	46	17	11769
+N-TGF-Beta subgraph-5	TGFBR1	149	23	white	rectangle	gene	0.5	black	46	17	11772
+N-TGF-Beta subgraph-6	CLU	30	0	white	rectangle	gene	0.5	black	46	17	2095
+N-TGF-Beta subgraph-7	HSPB6	152	7	white	rectangle	gene	0.5	black	46	17	26511
+N-TGF-Beta subgraph-8	IL34	25	44	white	rectangle	gene	0.5	black	46	17	28529
+N-TGF-Beta subgraph-9	HSPB2	163	32	white	rectangle	gene	0.5	black	46	17	5247

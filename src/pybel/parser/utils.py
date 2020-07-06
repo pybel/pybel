@@ -11,7 +11,7 @@ from pyparsing import (
     removeQuotes, replaceWith,
 )
 
-from ..constants import OBJECT, RELATION, SUBJECT
+from ..constants import RELATION, SOURCE, TARGET
 
 logger = logging.getLogger('pybel')
 
@@ -77,4 +77,4 @@ def one_of_tags(
 
 def triple(subject, relation, obj) -> ParserElement:
     """Build a simple triple in PyParsing that has a ``subject relation object`` format."""
-    return And([Group(subject)(SUBJECT), relation(RELATION), Group(obj)(OBJECT)])
+    return And([Group(subject)(SOURCE), relation(RELATION), Group(obj)(TARGET)])

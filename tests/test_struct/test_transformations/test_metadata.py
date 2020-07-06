@@ -6,12 +6,12 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import (
-    ANNOTATIONS, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_IDENTIFIER, CITATION_DB, CITATION_TYPE_PUBMED,
+    ANNOTATIONS, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_TYPE_PUBMED, IDENTIFIER, NAMESPACE,
 )
 from pybel.dsl import protein
 from pybel.examples import sialic_acid_graph
 from pybel.struct.mutation import (
-    add_annotation_value, remove_annotation_value, remove_citation_metadata, strip_annotations,
+    add_annotation_value, remove_annotation_value, remove_extra_citation_metadata, strip_annotations,
 )
 from pybel.testing.utils import n
 
@@ -100,8 +100,8 @@ class TestMetadata(unittest.TestCase):
             x,
             y,
             citation={
-                CITATION_DB: CITATION_TYPE_PUBMED,
-                CITATION_IDENTIFIER: '12345678',
+                NAMESPACE: CITATION_TYPE_PUBMED,
+                IDENTIFIER: '12345678',
                 CITATION_DATE: '2018-12-10',
             },
             evidence='Fake',
@@ -110,13 +110,13 @@ class TestMetadata(unittest.TestCase):
             },
         )
 
-        remove_citation_metadata(graph)
+        remove_extra_citation_metadata(graph)
 
         self.assertNotIn(CITATION, graph[x][y][k0])
 
         for k in k1, k2:
             self.assertIn(CITATION, graph[x][y][k])
-            self.assertIn(CITATION_DB, graph[x][y][k][CITATION])
-            self.assertIn(CITATION_IDENTIFIER, graph[x][y][k][CITATION])
+            self.assertIn(NAMESPACE, graph[x][y][k][CITATION])
+            self.assertIn(IDENTIFIER, graph[x][y][k][CITATION])
             self.assertNotIn(CITATION_DATE, graph[x][y][k][CITATION])
             self.assertNotIn(CITATION_AUTHORS, graph[x][y][k][CITATION])

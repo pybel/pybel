@@ -2,6 +2,7 @@
 
 """Predicates for checking nodes' variants."""
 
+from functools import wraps
 from typing import Tuple, Type, Union
 
 from .utils import node_predicate
@@ -25,14 +26,19 @@ def has_variant(node: BaseEntity) -> bool:
 
 def _variant_checker(variant_cls: Union[Type[Variant], Tuple[Type[Variant], ...]]) -> NodePredicate:
     @node_predicate
-    def _node_has_variant(node: BaseEntity) -> bool:
-        """Return true if the node has at least one of the given variant."""
-        return isinstance(node, CentralDogma) and node.variants and any(
-            isinstance(variant, variant_cls)
-            for variant in node.variants
-        )
+    @wraps(node_has_variant)
+    def _rv(node: BaseEntity):
+        return node_has_variant(node, variant_cls)
 
-    return _node_has_variant
+    return _rv
+
+
+def node_has_variant(node: BaseEntity, variant_cls) -> bool:
+    """Return true if the node has at least one of the given variant."""
+    return isinstance(node, CentralDogma) and node.variants and any(
+        isinstance(variant, variant_cls)
+        for variant in node.variants
+    )
 
 
 has_protein_modification = _variant_checker(ProteinModification)

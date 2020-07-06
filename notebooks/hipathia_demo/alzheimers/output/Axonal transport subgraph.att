@@ -1,0 +1,24 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Axonal transport subgraph-1 2	BDNF NTRK2	182	114	white	rectangle	gene,gene	0.5	black	46	17	1033,/,8032
+N-Axonal transport subgraph-10 11	APBB1 KLC1	122	114	white	rectangle	gene,gene	0.5	black	46	17	581,/,6387
+N-Axonal transport subgraph-12 13	MAPK8IP1 Amyloidogenic glycoprotein, intracellular domain, conserved site	39	0	white	rectangle	gene,gene	0.5	black	46	17	6882,/,IPR019745
+N-Axonal transport subgraph-14 15	MAPK8IP2 Amyloidogenic glycoprotein, intracellular domain, conserved site	50	21	white	rectangle	gene,gene	0.5	black	46	17	6883,/,IPR019745
+N-Axonal transport subgraph-16 17	MAPK8IP3 Amyloidogenic glycoprotein, intracellular domain, conserved site	34	10	white	rectangle	gene,gene	0.5	black	46	17	6884,/,IPR019745
+N-Axonal transport subgraph-18	BDNF	110	124	white	rectangle	gene	0.5	black	46	17	1033
+N-Axonal transport subgraph-19	TPK1	0	103	white	rectangle	gene	0.5	black	46	17	17358
+N-Axonal transport subgraph-20	CLSTN1	50	163	white	rectangle	gene	0.5	black	46	17	17447
+N-Axonal transport subgraph-21	CDK5	19	105	white	rectangle	gene	0.5	black	46	17	1774
+N-Axonal transport subgraph-22	ADAM10	59	163	white	rectangle	gene	0.5	black	46	17	188
+N-Axonal transport subgraph-23	CPEB1	110	134	white	rectangle	gene	0.5	black	46	17	21744
+N-Axonal transport subgraph-24	APP	112	111	white	rectangle	gene	0.5	black	46	17	620
+N-Axonal transport subgraph-26	APP	44	10	white	rectangle	gene	0.5	black	46	17	620
+N-Axonal transport subgraph-27	KLC1	154	20	white	rectangle	gene	0.5	black	46	17	6387
+N-Axonal transport subgraph-28	MAPK1	50	1	white	rectangle	gene	0.5	black	46	17	6871
+N-Axonal transport subgraph-29	MAPK8	117	89	white	rectangle	gene	0.5	black	46	17	6881
+N-Axonal transport subgraph-3 4	CLSTN1 KLC1	103	110	white	rectangle	gene,gene	0.5	black	46	17	17447,/,6387
+N-Axonal transport subgraph-30	MAPT	148	26	white	rectangle	gene	0.5	black	46	17	6893
+N-Axonal transport subgraph-31	MAPT	9	104	white	rectangle	gene	0.5	black	46	17	6893
+N-Axonal transport subgraph-32	NEFL	29	105	white	rectangle	gene	0.5	black	46	17	7739
+N-Axonal transport subgraph-33	NTRK2	181	106	white	rectangle	gene	0.5	black	46	17	8032
+N-Axonal transport subgraph-34	BACE1	43	168	white	rectangle	gene	0.5	black	46	17	933
+N-Axonal transport subgraph-7 8 9	APBB1 APP KLC1	114	98	white	rectangle	gene,gene,gene	0.5	black	46	17	581,/,620,/,6387

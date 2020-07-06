@@ -1,0 +1,32 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-GABA subgraph-15	EGR1	133	138	white	rectangle	gene	0.5	black	46	17	3238
+N-GABA subgraph-16	GABBR1	14	74	white	rectangle	gene	0.5	black	46	17	4070
+N-GABA subgraph-17	GABRA1	17	49	white	rectangle	gene	0.5	black	46	17	4075
+N-GABA subgraph-18	GABRA2	8	46	white	rectangle	gene	0.5	black	46	17	4076
+N-GABA subgraph-19	GABRA3	3	57	white	rectangle	gene	0.5	black	46	17	4077
+N-GABA subgraph-2	TNF	19	62	white	rectangle	gene	0.5	black	46	17	11892
+N-GABA subgraph-20	GABRA4	23	75	white	rectangle	gene	0.5	black	46	17	4078
+N-GABA subgraph-21	GABRA5	30	70	white	rectangle	gene	0.5	black	46	17	4079
+N-GABA subgraph-22	GABRA6	27	81	white	rectangle	gene	0.5	black	46	17	4080
+N-GABA subgraph-23	GABRB1	10	54	white	rectangle	gene	0.5	black	46	17	4081
+N-GABA subgraph-24	GABRB2	2	51	white	rectangle	gene	0.5	black	46	17	4082
+N-GABA subgraph-25	GABRB3	23	43	white	rectangle	gene	0.5	black	46	17	4083
+N-GABA subgraph-26	GABRD	8	66	white	rectangle	gene	0.5	black	46	17	4084
+N-GABA subgraph-27	GABRE	7	78	white	rectangle	gene	0.5	black	46	17	4085
+N-GABA subgraph-28	GABRG1	34	76	white	rectangle	gene	0.5	black	46	17	4086
+N-GABA subgraph-29	GABRG2	24	51	white	rectangle	gene	0.5	black	46	17	4087
+N-GABA subgraph-30	GABRG3	13	81	white	rectangle	gene	0.5	black	46	17	4088
+N-GABA subgraph-31	GABRP	31	62	white	rectangle	gene	0.5	black	46	17	4089
+N-GABA subgraph-34	GRIN2B	129	0	white	rectangle	gene	0.5	black	46	17	4586
+N-GABA subgraph-35	APP	120	5	white	rectangle	gene	0.5	black	46	17	620
+N-GABA subgraph-36	PSEN2	132	146	white	rectangle	gene	0.5	black	46	17	9509
+N-GABA subgraph-37	metabotropic quisqualate receptor	15	42	white	rectangle	gene	0.5	black	46	17	C073111
+N-GABA subgraph-38	NMDA receptor A1	0	68	white	rectangle	gene	0.5	black	46	17	C101911
+N-GABA subgraph-39	NR2A NMDA receptor	4	73	white	rectangle	gene	0.5	black	46	17	C120997
+N-GABA subgraph-40	NR2B NMDA receptor	31	46	white	rectangle	gene	0.5	black	46	17	C121001
+N-GABA subgraph-41	NR1 NMDA receptor	0	61	white	rectangle	gene	0.5	black	46	17	C409466
+N-GABA subgraph-42	NR2C NMDA receptor	20	82	white	rectangle	gene	0.5	black	46	17	C432823
+N-GABA subgraph-43	NR2D NMDA receptor	38	69	white	rectangle	gene	0.5	black	46	17	C464436
+N-GABA subgraph-44	NR3A NMDA receptor	38	55	white	rectangle	gene	0.5	black	46	17	C464437
+N-GABA subgraph-45	NR3B NMDA receptor	38	62	white	rectangle	gene	0.5	black	46	17	C501155
+N-GABA subgraph-5	GABRQ	32	53	white	rectangle	gene	0.5	black	46	17	14454

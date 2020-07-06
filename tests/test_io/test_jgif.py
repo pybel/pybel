@@ -9,10 +9,14 @@ import unittest
 
 from pybel import from_cbn_jgif, to_jgif
 from pybel.constants import (
-    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_IDENTIFIER, CITATION_DB, CITATION_TYPE_OTHER,
-    CITATION_TYPE_PUBMED, DECREASES, DIRECTLY_INCREASES, EFFECT, EVIDENCE, MODIFIER, NAME, NAMESPACE, OBJECT, RELATION,
+    ACTIVITY, ANNOTATIONS, CITATION, CITATION_TYPE_OTHER, CITATION_TYPE_PUBMED, DECREASES, DIRECTLY_INCREASES, EFFECT,
+    EVIDENCE, IDENTIFIER, MODIFIER, NAMESPACE, TARGET_MODIFIER, RELATION,
 )
-from pybel.dsl import Abundance, BiologicalProcess, ComplexAbundance, NamedComplexAbundance, Pathology, Protein, ProteinModification
+from pybel.dsl import (
+    Abundance, BiologicalProcess, ComplexAbundance, NamedComplexAbundance, Pathology, Protein,
+    ProteinModification,
+)
+from pybel.language import activity_mapping
 from pybel.testing.constants import test_jgif_path
 from tests.constants import TestGraphMixin
 
@@ -80,10 +84,10 @@ jgif_expected_edges = [
         RELATION: DIRECTLY_INCREASES,
         EVIDENCE: 'NMDA-mediated influx of calcium led to activated of the calcium-dependent phosphatase calcineurin and the subsequent dephosphorylation and activation of the protein-tyrosine phosphatase STEP',
         CITATION: {
-            CITATION_DB: CITATION_TYPE_PUBMED,
-            CITATION_IDENTIFIER: '12483215'
+            NAMESPACE: CITATION_TYPE_PUBMED,
+            IDENTIFIER: '12483215'
         },
-        OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'phos'}},
+        TARGET_MODIFIER: {MODIFIER: ACTIVITY, EFFECT: activity_mapping['phos']},
         ANNOTATIONS: {
             'Species': {'10116': True},
             'Cell': {'neuron': True}
@@ -93,8 +97,8 @@ jgif_expected_edges = [
         RELATION: DECREASES,
         EVIDENCE: "\"These data suggested that FOXO3 downregulates the accumulation of CD8 T cells in tissue specific fashion during an acute LCMV [lymphocytic choriomeningitis virus] infection.\" (p. 3)",
         CITATION: {
-            CITATION_DB: CITATION_TYPE_OTHER,
-            CITATION_IDENTIFIER: "22359505"
+            NAMESPACE: CITATION_TYPE_OTHER,
+            IDENTIFIER: "22359505"
         },
         ANNOTATIONS: {
             'Species': {'10090': True},
@@ -105,10 +109,10 @@ jgif_expected_edges = [
         RELATION: DIRECTLY_INCREASES,
         EVIDENCE: "IL-15 utilizes ... the common cytokine receptor γ-chain (CD132) for signal transduction in lymphocytes",
         CITATION: {
-            CITATION_DB: CITATION_TYPE_OTHER,
-            CITATION_IDENTIFIER: "20335267"
+            NAMESPACE: CITATION_TYPE_OTHER,
+            IDENTIFIER: "20335267"
         },
-        OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'cat'}},
+        TARGET_MODIFIER: {MODIFIER: ACTIVITY, EFFECT: activity_mapping['cat']},
         ANNOTATIONS: {
             'Tissue': {'lung': True}
         }

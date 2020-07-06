@@ -1,0 +1,6 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Disaccharide metabolism subgraph-1	TPK1	46	22	white	rectangle	gene	0.5	black	46	17	17358
+N-Disaccharide metabolism subgraph-2	MAPT	153	74	white	rectangle	gene	0.5	black	46	17	6893
+N-Disaccharide metabolism subgraph-3	MAPT	100	48	white	rectangle	gene	0.5	black	46	17	6893
+N-Disaccharide metabolism subgraph-4	OGT	199	97	white	rectangle	gene	0.5	black	46	17	8127
+N-Disaccharide metabolism subgraph-5	PDHA1	0	0	white	rectangle	gene	0.5	black	46	17	8806

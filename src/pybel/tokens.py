@@ -6,9 +6,8 @@ from typing import List
 
 from .constants import (
     CONCEPT, FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_START, FRAGMENT_STOP, FUNCTION, FUSION, FUSION_MISSING,
-    FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, HGVS, IDENTIFIER, KIND, MEMBERS, MODIFIER, NAME, NAMESPACE,
-    PARTNER_3P, PARTNER_5P, PMOD, PMOD_CODE, PMOD_POSITION, PRODUCTS, RANGE_3P, RANGE_5P, REACTANTS, REACTION, TARGET,
-    VARIANTS, XREFS,
+    FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, HGVS, IDENTIFIER, KIND, MEMBERS, NAME, NAMESPACE, PARTNER_3P,
+    PARTNER_5P, PMOD, PMOD_CODE, PMOD_POSITION, PRODUCTS, RANGE_3P, RANGE_5P, REACTANTS, REACTION, VARIANTS, XREFS,
 )
 from .dsl import (
     BaseAbundance, BaseEntity, CentralDogma, EnumeratedFusionRange, FUNC_TO_DSL, FUNC_TO_FUSION_DSL, FUNC_TO_LIST_DSL,
@@ -26,10 +25,9 @@ def parse_result_to_dsl(tokens) -> BaseEntity:
 
     :type tokens: dict or pyparsing.ParseResults
     """
-    if MODIFIER in tokens:
-        return parse_result_to_dsl(tokens[TARGET])
-
-    elif REACTION == tokens[FUNCTION]:
+    # if MODIFIER in tokens:
+    #     return parse_result_to_dsl(tokens[TARGET])
+    if REACTION == tokens[FUNCTION]:
         return _reaction_po_to_dict(tokens)
 
     elif VARIANTS in tokens:

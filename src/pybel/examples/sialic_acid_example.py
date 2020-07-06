@@ -95,7 +95,7 @@ sialic_acid_graph.add_increases(
     citation=citation,
     annotations={'Species': '9606', 'Confidence': 'High'},
     evidence=evidence_1,
-    object_modifier=activity(),
+    target_modifier=activity(),
 )
 
 sialic_acid_graph.add_increases(
@@ -104,7 +104,7 @@ sialic_acid_graph.add_increases(
     citation=citation,
     annotations={'Species': '9606', 'Confidence': 'High'},
     evidence=evidence_1,
-    subject_modifier=activity(),
+    source_modifier=activity(),
 )
 
 sialic_acid_graph.add_directly_increases(
@@ -113,8 +113,8 @@ sialic_acid_graph.add_directly_increases(
     citation=citation,
     evidence=evidence_1,
     annotations={'Species': '9606', 'Confidence': 'High'},
-    subject_modifier=activity(),
-    object_modifier=activity('phos'),
+    source_modifier=activity(),
+    target_modifier=activity('phos'),
 )
 
 sialic_acid_graph.add_directly_increases(
@@ -123,8 +123,8 @@ sialic_acid_graph.add_directly_increases(
     citation=citation,
     evidence=evidence_1,
     annotations={'Species': '9606', 'Confidence': 'High'},
-    subject_modifier=activity(),
-    object_modifier=activity('phos'),
+    source_modifier=activity(),
+    target_modifier=activity('phos'),
 )
 
 sialic_acid_graph.add_directly_decreases(
@@ -133,8 +133,8 @@ sialic_acid_graph.add_directly_decreases(
     citation=citation,
     evidence=evidence_2,
     annotations={'Species': '9606', 'Confidence': 'High'},
-    subject_modifier=activity(),
-    object_modifier=activity(),
+    source_modifier=activity(),
+    target_modifier=activity(),
 )
 
 sialic_acid_graph.add_directly_decreases(
@@ -143,8 +143,8 @@ sialic_acid_graph.add_directly_decreases(
     citation=citation,
     evidence=evidence_2,
     annotations={'Species': '9606', 'Confidence': 'High'},
-    subject_modifier=activity(),
-    object_modifier=activity(),
+    source_modifier=activity(),
+    target_modifier=activity(),
 )
 
 sialic_acid_graph.add_increases(
@@ -153,8 +153,8 @@ sialic_acid_graph.add_increases(
     citation=citation,
     evidence=evidence_2,
     annotations={'Species': '9606', 'Confidence': 'Low'},
-    subject_modifier=activity(),
-    object_modifier=activity(),
+    source_modifier=activity(),
+    target_modifier=activity(),
 )
 
 sialic_acid_graph.add_increases(
@@ -163,6 +163,6 @@ sialic_acid_graph.add_increases(
     citation=citation,
     evidence=evidence_2,
     annotations={'Species': '9606', 'Confidence': 'Low'},
-    subject_modifier=activity(),
-    object_modifier=activity(),
+    source_modifier=activity(),
+    target_modifier=activity(),
 )

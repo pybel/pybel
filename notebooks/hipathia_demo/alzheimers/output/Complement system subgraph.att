@@ -1,0 +1,10 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Complement system subgraph-10	APP	89	150	white	rectangle	gene	0.5	black	46	17	620
+N-Complement system subgraph-11	APP	75	164	white	rectangle	gene	0.5	black	46	17	620
+N-Complement system subgraph-12	NFKB1	140	37	white	rectangle	gene	0.5	black	46	17	7794
+N-Complement system subgraph-3	CCL2	15	0	white	rectangle	gene	0.5	black	46	17	10618
+N-Complement system subgraph-4	C5	158	32	white	rectangle	gene	0.5	black	46	17	1331
+N-Complement system subgraph-5	CASP3	58	167	white	rectangle	gene	0.5	black	46	17	1504
+N-Complement system subgraph-6	CCR2	0	3	white	rectangle	gene	0.5	black	46	17	1603
+N-Complement system subgraph-8	IL1B	176	42	white	rectangle	gene	0.5	black	46	17	5992
+N-Complement system subgraph-9	IL6	161	12	white	rectangle	gene	0.5	black	46	17	6018

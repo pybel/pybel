@@ -1,0 +1,26 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-CREB subgraph-1 2	SHC1 APP	121	41	white	rectangle	gene,gene	0.5	black	46	17	10840,/,620
+N-CREB subgraph-10	CREB	103	48	white	rectangle	gene	0.5	black	46	17	CREB
+N-CREB subgraph-11	CREB	31	109	white	rectangle	gene	0.5	black	46	17	CREB
+N-CREB subgraph-12	CREB	103	28	white	rectangle	gene	0.5	black	46	17	CREB
+N-CREB subgraph-13	ERK	103	37	white	rectangle	gene	0.5	black	46	17	ERK
+N-CREB subgraph-14	RPS6KA1	96	16	white	rectangle	gene	0.5	black	46	17	10430
+N-CREB subgraph-15	RPS6KA3	97	23	white	rectangle	gene	0.5	black	46	17	10432
+N-CREB subgraph-16	RPS6KA5	78	17	white	rectangle	gene	0.5	black	46	17	10434
+N-CREB subgraph-17	WWOX	110	58	white	rectangle	gene	0.5	black	46	17	12799
+N-CREB subgraph-19	CAST	116	145	white	rectangle	gene	0.5	black	46	17	1515
+N-CREB subgraph-21	CREB3L4	6	0	white	rectangle	gene	0.5	black	46	17	18854
+N-CREB subgraph-22	CREB1	122	141	white	rectangle	gene	0.5	black	46	17	2345
+N-CREB subgraph-23	CREB1	91	21	white	rectangle	gene	0.5	black	46	17	2345
+N-CREB subgraph-25	ALOX5	103	61	white	rectangle	gene	0.5	black	46	17	435
+N-CREB subgraph-26	GSK3B	0	3	white	rectangle	gene	0.5	black	46	17	4617
+N-CREB subgraph-27	APP	95	58	white	rectangle	gene	0.5	black	46	17	620
+N-CREB subgraph-28	APP	136	45	white	rectangle	gene	0.5	black	46	17	620
+N-CREB subgraph-29	PRKACA	91	29	white	rectangle	gene	0.5	black	46	17	9380
+N-CREB subgraph-3 4	SHC3 APP	93	43	white	rectangle	gene,gene	0.5	black	46	17	18181,/,620
+N-CREB subgraph-30	PRKACB	83	10	white	rectangle	gene	0.5	black	46	17	9381
+N-CREB subgraph-31	PRKCA	116	17	white	rectangle	gene	0.5	black	46	17	9393
+N-CREB subgraph-5 6	GRB2 APP	147	47	white	rectangle	gene,gene	0.5	black	46	17	4566,/,620
+N-CREB subgraph-7	calcium ion	125	8	white	rectangle	gene	0.5	black	46	17	39124
+N-CREB subgraph-8	AKT	26	104	white	rectangle	gene	0.5	black	46	17	AKT
+N-CREB subgraph-9	CAMK	101	18	white	rectangle	gene	0.5	black	46	17	CAMK

@@ -9,8 +9,8 @@ from .typing import EdgePredicate
 from .utils import part_has_modifier
 from ..graph import BELGraph
 from ...constants import (
-    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSAL_RELATIONS, CITATION, CITATION_AUTHORS, CITATION_DB,
-    CITATION_TYPE_PUBMED, DEGRADATION, DIRECT_CAUSAL_RELATIONS, EVIDENCE, OBJECT, POLAR_RELATIONS, RELATION, SUBJECT,
+    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSAL_RELATIONS, CITATION, CITATION_AUTHORS, CITATION_TYPE_PUBMED, DEGRADATION,
+    DIRECT_CAUSAL_RELATIONS, EVIDENCE, NAMESPACE, POLAR_RELATIONS, RELATION, SOURCE_MODIFIER, TARGET_MODIFIER,
     TRANSLOCATION,
 )
 from ...dsl import BaseEntity, BiologicalProcess, Pathology
@@ -18,7 +18,8 @@ from ...typing import EdgeData
 
 __all__ = [
     'edge_predicate',
-    'keep_edge_permissive',
+    'true_edge_predicate',
+    'false_edge_predicate',
     'has_provenance',
     'has_pubmed',
     'has_authors',
@@ -57,13 +58,14 @@ def edge_predicate(func: DictEdgePredicate) -> EdgePredicate:  # noqa: D202
     return _wrapped
 
 
-def keep_edge_permissive(*args, **kwargs) -> bool:
-    """Return true for all edges.
-
-    :param dict data: A PyBEL edge data dictionary from a :class:`pybel.BELGraph`
-    :return: Always returns :code:`True`
-    """
+def true_edge_predicate(graph: BELGraph, u: BaseEntity, v: BaseEntity, k: str) -> bool:
+    """Return true for all edges."""
     return True
+
+
+def false_edge_predicate(graph: BELGraph, u: BaseEntity, v: BaseEntity, k: str) -> bool:
+    """Return false for all edges."""
+    return False
 
 
 @edge_predicate
@@ -75,7 +77,7 @@ def has_provenance(edge_data: EdgeData) -> bool:
 @edge_predicate
 def has_pubmed(edge_data: EdgeData) -> bool:
     """Check if the edge has a PubMed citation."""
-    return CITATION in edge_data and CITATION_TYPE_PUBMED == edge_data[CITATION][CITATION_DB]
+    return CITATION in edge_data and CITATION_TYPE_PUBMED == edge_data[CITATION][NAMESPACE]
 
 
 @edge_predicate
@@ -122,7 +124,10 @@ def _has_modifier(edge_data: EdgeData, modifier: str) -> bool:
                         :data:`pybel.constants.DEGRADATION`, or :data:`pybel.constants.TRANSLOCATION`.
     :return: Does either the subject or object have the given modifier
     """
-    return part_has_modifier(edge_data, SUBJECT, modifier) or part_has_modifier(edge_data, OBJECT, modifier)
+    return (
+        part_has_modifier(edge_data, SOURCE_MODIFIER, modifier)
+        or part_has_modifier(edge_data, TARGET_MODIFIER, modifier)
+    )
 
 
 @edge_predicate
@@ -153,9 +158,13 @@ def edge_has_annotation(edge_data: EdgeData, key: str) -> Optional[Any]:
     For example, it might be useful to print all edges that are annotated with 'Subgraph':
 
     >>> from pybel.examples import sialic_acid_graph
-    >>> for u, v, data in sialic_acid_graph.edges(data=True):
-    >>>     if edge_has_annotation(data, 'Species')
-    >>>         print(u, v, data)
+    >>> from pybel.examples.sialic_acid_example import sialic_acid_cd33_complex, cd33
+    >>> edges = {
+    ...     (u, v)
+    ...     for u, v, data in sialic_acid_graph.edges(data=True)
+    ...     if edge_has_annotation(data, 'Species')
+    ... }
+    >>> assert (sialic_acid_cd33_complex, cd33) in edges
     """
     annotations = edge_data.get(ANNOTATIONS)
 

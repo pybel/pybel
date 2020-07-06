@@ -1,0 +1,82 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Regulation of actin cytoskeleton subgraph-1 2	IRS GRB2	86	151	white	rectangle	gene,gene	0.5	black	46	17	IRS,/,4566
+N-Regulation of actin cytoskeleton subgraph-100	PIK3R1	28	121	white	rectangle	gene	0.5	black	46	17	8979
+N-Regulation of actin cytoskeleton subgraph-101	PIK3R2	50	11	white	rectangle	gene	0.5	black	46	17	8980
+N-Regulation of actin cytoskeleton subgraph-102	BACE1	106	49	white	rectangle	gene	0.5	black	46	17	933
+N-Regulation of actin cytoskeleton subgraph-103	PSEN1	196	100	white	rectangle	gene	0.5	black	46	17	9508
+N-Regulation of actin cytoskeleton subgraph-104	PTK2	57	27	white	rectangle	gene	0.5	black	46	17	9611
+N-Regulation of actin cytoskeleton subgraph-105	PTK7	45	12	white	rectangle	gene	0.5	black	46	17	9618
+N-Regulation of actin cytoskeleton subgraph-106	RAC1	90	40	white	rectangle	gene	0.5	black	46	17	9801
+N-Regulation of actin cytoskeleton subgraph-107	RAF1	101	136	white	rectangle	gene	0.5	black	46	17	9829
+N-Regulation of actin cytoskeleton subgraph-109	Amyloidogenic glycoprotein, intracellular domain, conserved site	77	127	white	rectangle	gene	0.5	black	46	17	IPR019745
+N-Regulation of actin cytoskeleton subgraph-11 12	TUBA4A DPYSL2	110	156	white	rectangle	gene,gene	0.5	black	46	17	12407,/,3014
+N-Regulation of actin cytoskeleton subgraph-13 14	GAB2 PTK2	45	159	white	rectangle	gene,gene	0.5	black	46	17	14458,/,9611
+N-Regulation of actin cytoskeleton subgraph-15 16	GAB2 PTK7	42	170	white	rectangle	gene,gene	0.5	black	46	17	14458,/,9618
+N-Regulation of actin cytoskeleton subgraph-17 18 19	PIK3R5 GSK3A PDPK1	180	42	white	rectangle	gene,gene,gene	0.5	black	46	17	30035,/,4616,/,8816
+N-Regulation of actin cytoskeleton subgraph-20 21 22	PIK3R5 GSK3B PDPK1	180	35	white	rectangle	gene,gene,gene	0.5	black	46	17	30035,/,4617,/,8816
+N-Regulation of actin cytoskeleton subgraph-23 24	GAB1 GRB2	82	149	white	rectangle	gene,gene	0.5	black	46	17	4066,/,4566
+N-Regulation of actin cytoskeleton subgraph-25 26	IRS1 PIK3R1	163	89	white	rectangle	gene,gene	0.5	black	46	17	6125,/,8979
+N-Regulation of actin cytoskeleton subgraph-27 28	IRS1 PIK3R2	172	94	white	rectangle	gene,gene	0.5	black	46	17	6125,/,8980
+N-Regulation of actin cytoskeleton subgraph-29 30	IRS2 PIK3R1	110	8	white	rectangle	gene,gene	0.5	black	46	17	6126,/,8979
+N-Regulation of actin cytoskeleton subgraph-31 32	IRS2 PIK3R2	111	11	white	rectangle	gene,gene	0.5	black	46	17	6126,/,8980
+N-Regulation of actin cytoskeleton subgraph-33 34	IRS4 PIK3R1	44	78	white	rectangle	gene,gene	0.5	black	46	17	6128,/,8979
+N-Regulation of actin cytoskeleton subgraph-35 36	IRS4 PIK3R2	43	69	white	rectangle	gene,gene	0.5	black	46	17	6128,/,8980
+N-Regulation of actin cytoskeleton subgraph-37 38	PRKCA RAF1	123	132	white	rectangle	gene,gene	0.5	black	46	17	9393,/,9829
+N-Regulation of actin cytoskeleton subgraph-39	CDK5R1 p25	139	0	white	rectangle	gene	0.5	black	46	17	CONSO00172
+N-Regulation of actin cytoskeleton subgraph-40	CREB	31	37	white	rectangle	gene	0.5	black	46	17	CREB
+N-Regulation of actin cytoskeleton subgraph-41	ERK	115	132	white	rectangle	gene	0.5	black	46	17	ERK
+N-Regulation of actin cytoskeleton subgraph-43	JNK	105	125	white	rectangle	gene	0.5	black	46	17	JNK
+N-Regulation of actin cytoskeleton subgraph-44	RAS	80	145	white	rectangle	gene	0.5	black	46	17	RAS
+N-Regulation of actin cytoskeleton subgraph-45	ROCK2	2	96	white	rectangle	gene	0.5	black	46	17	10252
+N-Regulation of actin cytoskeleton subgraph-46	SEMA3A	81	134	white	rectangle	gene	0.5	black	46	17	10723
+N-Regulation of actin cytoskeleton subgraph-47	SH3GLB2	109	38	white	rectangle	gene	0.5	black	46	17	10834
+N-Regulation of actin cytoskeleton subgraph-48	SHC1	111	122	white	rectangle	gene	0.5	black	46	17	10840
+N-Regulation of actin cytoskeleton subgraph-49	SORL1	0	100	white	rectangle	gene	0.5	black	46	17	11185
+N-Regulation of actin cytoskeleton subgraph-50	SOS1	122	128	white	rectangle	gene	0.5	black	46	17	11187
+N-Regulation of actin cytoskeleton subgraph-51	SOS2	121	137	white	rectangle	gene	0.5	black	46	17	11188
+N-Regulation of actin cytoskeleton subgraph-52	TAGLN	71	123	white	rectangle	gene	0.5	black	46	17	11553
+N-Regulation of actin cytoskeleton subgraph-53	TIMP1	180	69	white	rectangle	gene	0.5	black	46	17	11820
+N-Regulation of actin cytoskeleton subgraph-55	ACTA2	70	127	white	rectangle	gene	0.5	black	46	17	130
+N-Regulation of actin cytoskeleton subgraph-56	GAB2	41	165	white	rectangle	gene	0.5	black	46	17	14458
+N-Regulation of actin cytoskeleton subgraph-57	GAB2	50	18	white	rectangle	gene	0.5	black	46	17	14458
+N-Regulation of actin cytoskeleton subgraph-58	SHC4	108	130	white	rectangle	gene	0.5	black	46	17	16743
+N-Regulation of actin cytoskeleton subgraph-59	SIT1	55	15	white	rectangle	gene	0.5	black	46	17	17710
+N-Regulation of actin cytoskeleton subgraph-6 7 8	SOS1 GAB1 GRB2	88	143	white	rectangle	gene,gene,gene	0.5	black	46	17	11187,/,4066,/,4566
+N-Regulation of actin cytoskeleton subgraph-60	CDK5	95	144	white	rectangle	gene	0.5	black	46	17	1774
+N-Regulation of actin cytoskeleton subgraph-61	CDK5	94	37	white	rectangle	gene	0.5	black	46	17	1774
+N-Regulation of actin cytoskeleton subgraph-62	CDK5R1	136	5	white	rectangle	gene	0.5	black	46	17	1775
+N-Regulation of actin cytoskeleton subgraph-63	SHC3	111	128	white	rectangle	gene	0.5	black	46	17	18181
+N-Regulation of actin cytoskeleton subgraph-64	CFL1	168	130	white	rectangle	gene	0.5	black	46	17	1874
+N-Regulation of actin cytoskeleton subgraph-66	CRK	44	16	white	rectangle	gene	0.5	black	46	17	2362
+N-Regulation of actin cytoskeleton subgraph-67	DNM1	112	44	white	rectangle	gene	0.5	black	46	17	2972
+N-Regulation of actin cytoskeleton subgraph-68	DNM2	110	41	white	rectangle	gene	0.5	black	46	17	2974
+N-Regulation of actin cytoskeleton subgraph-70	PIK3R5	98	128	white	rectangle	gene	0.5	black	46	17	30035
+N-Regulation of actin cytoskeleton subgraph-71	DPYSL2	88	132	white	rectangle	gene	0.5	black	46	17	3014
+N-Regulation of actin cytoskeleton subgraph-72	DPYSL2	103	152	white	rectangle	gene	0.5	black	46	17	3014
+N-Regulation of actin cytoskeleton subgraph-73	DPYSL2	95	153	white	rectangle	gene	0.5	black	46	17	3014
+N-Regulation of actin cytoskeleton subgraph-74	EDN1	169	75	white	rectangle	gene	0.5	black	46	17	3176
+N-Regulation of actin cytoskeleton subgraph-76	F2	175	73	white	rectangle	gene	0.5	black	46	17	3535
+N-Regulation of actin cytoskeleton subgraph-77	FGF1	77	17	white	rectangle	gene	0.5	black	46	17	3665
+N-Regulation of actin cytoskeleton subgraph-78	FGFR2	80	14	white	rectangle	gene	0.5	black	46	17	3689
+N-Regulation of actin cytoskeleton subgraph-79	GRB2	99	125	white	rectangle	gene	0.5	black	46	17	4566
+N-Regulation of actin cytoskeleton subgraph-80	GRIA1	114	40	white	rectangle	gene	0.5	black	46	17	4571
+N-Regulation of actin cytoskeleton subgraph-81	GSK3A	95	124	white	rectangle	gene	0.5	black	46	17	4616
+N-Regulation of actin cytoskeleton subgraph-82	GSK3B	93	126	white	rectangle	gene	0.5	black	46	17	4617
+N-Regulation of actin cytoskeleton subgraph-83	IGF1	183	38	white	rectangle	gene	0.5	black	46	17	5464
+N-Regulation of actin cytoskeleton subgraph-84	IRS1	101	120	white	rectangle	gene	0.5	black	46	17	6125
+N-Regulation of actin cytoskeleton subgraph-85	IRS1	167	92	white	rectangle	gene	0.5	black	46	17	6125
+N-Regulation of actin cytoskeleton subgraph-86	IRS2	97	122	white	rectangle	gene	0.5	black	46	17	6126
+N-Regulation of actin cytoskeleton subgraph-87	IRS2	107	9	white	rectangle	gene	0.5	black	46	17	6126
+N-Regulation of actin cytoskeleton subgraph-88	IRS4	43	74	white	rectangle	gene	0.5	black	46	17	6128
+N-Regulation of actin cytoskeleton subgraph-89	ITGB1	163	127	white	rectangle	gene	0.5	black	46	17	6153
+N-Regulation of actin cytoskeleton subgraph-9 10	TCF4 PSEN1	198	103	white	rectangle	gene,gene	0.5	black	46	17	11634,/,9508
+N-Regulation of actin cytoskeleton subgraph-90	APP	96	43	white	rectangle	gene	0.5	black	46	17	620
+N-Regulation of actin cytoskeleton subgraph-91	ARC	105	44	white	rectangle	gene	0.5	black	46	17	648
+N-Regulation of actin cytoskeleton subgraph-92	MAP2K1	33	34	white	rectangle	gene	0.5	black	46	17	6840
+N-Regulation of actin cytoskeleton subgraph-93	MAPK1	91	46	white	rectangle	gene	0.5	black	46	17	6871
+N-Regulation of actin cytoskeleton subgraph-94	MAPT	182	74	white	rectangle	gene	0.5	black	46	17	6893
+N-Regulation of actin cytoskeleton subgraph-95	MAPT	173	68	white	rectangle	gene	0.5	black	46	17	6893
+N-Regulation of actin cytoskeleton subgraph-96	NRAS	96	134	white	rectangle	gene	0.5	black	46	17	7989
+N-Regulation of actin cytoskeleton subgraph-97	PDPK1	97	119	white	rectangle	gene	0.5	black	46	17	8816
+N-Regulation of actin cytoskeleton subgraph-98	PIK3CA	29	126	white	rectangle	gene	0.5	black	46	17	8975
+N-Regulation of actin cytoskeleton subgraph-99	PIK3CB	23	120	white	rectangle	gene	0.5	black	46	17	8976

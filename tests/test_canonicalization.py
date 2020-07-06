@@ -150,14 +150,14 @@ class TestCanonicalizeEdge(unittest.TestCase):
     def get_data(self, k):
         return self.g[self.u][self.v][k]
 
-    def add_edge(self, subject_modifier=None, object_modifier=None, annotations=None):
+    def add_edge(self, source_modifier=None, target_modifier=None, annotations=None):
         key = self.g.add_increases(
             self.u,
             self.v,
             evidence=n(),
             citation=n(),
-            subject_modifier=subject_modifier,
-            object_modifier=object_modifier,
+            source_modifier=source_modifier,
+            target_modifier=target_modifier,
             annotations=annotations,
         )
 
@@ -165,7 +165,7 @@ class TestCanonicalizeEdge(unittest.TestCase):
 
     def test_failure(self):
         with self.assertRaises(ValueError):
-            self.add_edge(subject_modifier={MODIFIER: 'nope'})
+            self.add_edge(source_modifier={MODIFIER: 'nope'})
 
     def test_canonicalize_edge_info(self):
         c1 = self.add_edge(
@@ -181,11 +181,11 @@ class TestCanonicalizeEdge(unittest.TestCase):
         )
 
         c3 = self.add_edge(
-            subject_modifier=activity('tport'),
+            source_modifier=activity('tport'),
         )
 
         c4 = self.add_edge(
-            subject_modifier=activity('tport', namespace=BEL_DEFAULT_NAMESPACE),
+            source_modifier=activity('tport', namespace=BEL_DEFAULT_NAMESPACE),
         )
 
         self.assertEqual(c1, c2)
@@ -195,40 +195,40 @@ class TestCanonicalizeEdge(unittest.TestCase):
     def test_subject_degradation_location(self):
         self.assertEqual(
             self.add_edge(
-                subject_modifier=degradation()
+                source_modifier=degradation()
             ),
             self.add_edge(
-                subject_modifier=degradation()
+                source_modifier=degradation()
             )
         )
 
         self.assertEqual(
             self.add_edge(
-                subject_modifier=degradation(location=Entity(name='somewhere', namespace='GO'))
+                source_modifier=degradation(location=Entity(name='somewhere', namespace='GO'))
             ),
             self.add_edge(
-                subject_modifier=degradation(location=Entity(name='somewhere', namespace='GO'))
+                source_modifier=degradation(location=Entity(name='somewhere', namespace='GO'))
             )
         )
 
         self.assertNotEqual(
             self.add_edge(
-                subject_modifier=degradation()
+                source_modifier=degradation()
             ),
             self.add_edge(
-                subject_modifier=degradation(location=Entity(name='somewhere', namespace='GO'))
+                source_modifier=degradation(location=Entity(name='somewhere', namespace='GO'))
             )
         )
 
     def test_translocation(self):
         self.assertEqual(
-            self.add_edge(subject_modifier=secretion()),
-            self.add_edge(subject_modifier=secretion()),
+            self.add_edge(source_modifier=secretion()),
+            self.add_edge(source_modifier=secretion()),
         )
 
         self.assertEqual(
-            self.add_edge(subject_modifier=secretion()),
-            self.add_edge(subject_modifier=translocation(INTRACELLULAR, EXTRACELLULAR)),
+            self.add_edge(source_modifier=secretion()),
+            self.add_edge(source_modifier=translocation(INTRACELLULAR, EXTRACELLULAR)),
         )
 
 

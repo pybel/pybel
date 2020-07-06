@@ -1,0 +1,11 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Retinoblastoma subgraph-1	p38	13	101	white	rectangle	gene	0.5	black	46	17	p38
+N-Retinoblastoma subgraph-10	RB1	7	0	white	rectangle	gene	0.5	black	46	17	9884
+N-Retinoblastoma subgraph-2	CCND1	15	136	white	rectangle	gene	0.5	black	46	17	1582
+N-Retinoblastoma subgraph-3	CDK5R1	31	114	white	rectangle	gene	0.5	black	46	17	1775
+N-Retinoblastoma subgraph-4	CDKN1B	0	115	white	rectangle	gene	0.5	black	46	17	1785
+N-Retinoblastoma subgraph-5	APP	17	4	white	rectangle	gene	0.5	black	46	17	620
+N-Retinoblastoma subgraph-6	MAPT	130	29	white	rectangle	gene	0.5	black	46	17	6893
+N-Retinoblastoma subgraph-7	PPP2CA	138	38	white	rectangle	gene	0.5	black	46	17	9299
+N-Retinoblastoma subgraph-8	RB1	14	152	white	rectangle	gene	0.5	black	46	17	9884
+N-Retinoblastoma subgraph-9	RB1	16	117	white	rectangle	gene	0.5	black	46	17	9884

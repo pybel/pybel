@@ -10,30 +10,30 @@ This module handles parsing control statement, which add annotations and namespa
 """
 
 import logging
-from typing import Dict, List, Mapping, Optional, Pattern, Set
+from typing import Any, Dict, List, Mapping, Optional, Pattern, Set
 
-from pyparsing import And, MatchFirst, ParseResults, Suppress, oneOf, pyparsing_common as ppc
+from pyparsing import And, Keyword, MatchFirst, ParseResults, Suppress, oneOf, pyparsing_common as ppc
 
 from .baseparser import BaseParser
-from .exc import (
-    CitationTooLongException, CitationTooShortException, IllegalAnnotationValueWarning, InvalidCitationType,
-    InvalidPubMedIdentifierWarning, MissingAnnotationKeyWarning, MissingAnnotationRegexWarning,
-    MissingCitationException, UndefinedAnnotationWarning,
-)
 from .utils import delimited_quoted_list, delimited_unquoted_list, is_int, qid, quote
 from ..constants import (
     ANNOTATIONS, BEL_KEYWORD_ALL, BEL_KEYWORD_CITATION, BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SET,
     BEL_KEYWORD_STATEMENT_GROUP, BEL_KEYWORD_SUPPORT, BEL_KEYWORD_UNSET, CITATION, CITATION_TYPES, CITATION_TYPE_PUBMED,
     EVIDENCE,
 )
-from ..utils import CitationDict, citation_dict
+from ..exceptions import (
+    CitationTooLongException, CitationTooShortException, IllegalAnnotationValueWarning, InvalidCitationType,
+    InvalidPubMedIdentifierWarning, MissingAnnotationKeyWarning, MissingAnnotationRegexWarning,
+    MissingCitationException, UndefinedAnnotationWarning,
+)
+from ..language import CitationDict
 
 __all__ = ['ControlParser']
 
 logger = logging.getLogger(__name__)
 
-set_tag = Suppress(BEL_KEYWORD_SET)
-unset_tag = Suppress(BEL_KEYWORD_UNSET)
+set_tag = Keyword(BEL_KEYWORD_SET)
+unset_tag = Keyword(BEL_KEYWORD_UNSET)
 unset_all = Suppress(BEL_KEYWORD_ALL)
 
 supporting_text_tags = oneOf([BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT])
@@ -111,7 +111,7 @@ class ControlParser(BaseParser):
 
         self.unset_all = unset_all.setParseAction(self.handle_unset_all)
 
-        self.set_statements = set_tag + MatchFirst([
+        self.set_statements = set_tag('action') + MatchFirst([
             self.set_statement_group,
             self.set_citation,
             self.set_evidence,
@@ -119,7 +119,7 @@ class ControlParser(BaseParser):
             self.set_command_list,
         ])
 
-        self.unset_statements = unset_tag + MatchFirst([
+        self.unset_statements = unset_tag('action') + MatchFirst([
             self.unset_all,
             self.unset_citation,
             self.unset_evidence,
@@ -340,7 +340,7 @@ class ControlParser(BaseParser):
         self.clear()
         return tokens
 
-    def get_annotations(self) -> Dict:
+    def get_annotations(self) -> Dict[str, Any]:
         """Get the current annotations."""
         return {
             EVIDENCE: self.evidence,
@@ -348,9 +348,12 @@ class ControlParser(BaseParser):
             ANNOTATIONS: self.annotations.copy(),
         }
 
-    def get_citation(self) -> CitationDict:
+    def get_citation(self) -> Optional[CitationDict]:
         """Get the citation dictionary."""
-        return citation_dict(db=self.citation_db, db_id=self.citation_db_id)
+        return (
+            CitationDict(namespace=self.citation_db, identifier=self.citation_db_id)
+            if self.citation_db and self.citation_db_id else None
+        )
 
     def get_missing_required_annotations(self) -> List[str]:
         """Return missing required annotations."""

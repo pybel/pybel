@@ -1,0 +1,75 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Cyclin-CDK subgraph-1 2	microtubule MAPT	103	67	white	rectangle	gene,gene	0.5	black	46	17	0005874,/,6893
+N-Cyclin-CDK subgraph-14 15	CTNNB1 PSEN1	103	115	white	rectangle	gene,gene	0.5	black	46	17	2514,/,9508
+N-Cyclin-CDK subgraph-16 17	Stxbp1 Stx1a	27	146	white	rectangle	gene,gene	0.5	black	46	17	107363,/,109355
+N-Cyclin-CDK subgraph-18	CDK5R1 p25	97	85	white	rectangle	gene	0.5	black	46	17	CONSO00172
+N-Cyclin-CDK subgraph-19	Histone_H1	144	76	white	rectangle	gene	0.5	black	46	17	Histone_H1
+N-Cyclin-CDK subgraph-20	CAPN	112	108	white	rectangle	gene	0.5	black	46	17	CAPN
+N-Cyclin-CDK subgraph-21	MEF2	74	60	white	rectangle	gene	0.5	black	46	17	MEF2
+N-Cyclin-CDK subgraph-22	MEF2	80	69	white	rectangle	gene	0.5	black	46	17	MEF2
+N-Cyclin-CDK subgraph-23	FAS	196	123	white	rectangle	gene	0.5	black	46	17	11920
+N-Cyclin-CDK subgraph-24	TP53	80	76	white	rectangle	gene	0.5	black	46	17	11998
+N-Cyclin-CDK subgraph-3 4	CDK5R1 p25 CDK5	100	66	white	rectangle	gene,gene	0.5	black	46	17	CONSO00172,/,1774
+N-Cyclin-CDK subgraph-33	CASP3	191	130	white	rectangle	gene	0.5	black	46	17	1504
+N-Cyclin-CDK subgraph-34	CDC37	114	111	white	rectangle	gene	0.5	black	46	17	1735
+N-Cyclin-CDK subgraph-35	CDK2	96	66	white	rectangle	gene	0.5	black	46	17	1771
+N-Cyclin-CDK subgraph-36	CDK5	103	100	white	rectangle	gene	0.5	black	46	17	1774
+N-Cyclin-CDK subgraph-37	CDK5	0	125	white	rectangle	gene	0.5	black	46	17	1774
+N-Cyclin-CDK subgraph-38	CDK5R1	88	81	white	rectangle	gene	0.5	black	46	17	1775
+N-Cyclin-CDK subgraph-39	CDKN1A	197	127	white	rectangle	gene	0.5	black	46	17	1784
+N-Cyclin-CDK subgraph-40	CDKN1B	61	66	white	rectangle	gene	0.5	black	46	17	1785
+N-Cyclin-CDK subgraph-41	CTNNB1	105	93	white	rectangle	gene	0.5	black	46	17	2514
+N-Cyclin-CDK subgraph-42	DPYSL2	110	112	white	rectangle	gene	0.5	black	46	17	3014
+N-Cyclin-CDK subgraph-43	DPYSL2	97	113	white	rectangle	gene	0.5	black	46	17	3014
+N-Cyclin-CDK subgraph-44	DPYSL2	96	92	white	rectangle	gene	0.5	black	46	17	3014
+N-Cyclin-CDK subgraph-45	EGR1	92	97	white	rectangle	gene	0.5	black	46	17	3238
+N-Cyclin-CDK subgraph-46	GOLGA2	100	92	white	rectangle	gene	0.5	black	46	17	4425
+N-Cyclin-CDK subgraph-47	GSK3B	93	68	white	rectangle	gene	0.5	black	46	17	4617
+N-Cyclin-CDK subgraph-48	IAPP	146	80	white	rectangle	gene	0.5	black	46	17	5329
+N-Cyclin-CDK subgraph-49	APP	8	126	white	rectangle	gene	0.5	black	46	17	620
+N-Cyclin-CDK subgraph-5 6	CDK5 CDK5R1	136	83	white	rectangle	gene,gene	0.5	black	46	17	1774,/,1775
+N-Cyclin-CDK subgraph-51	APP	117	102	white	rectangle	gene	0.5	black	46	17	620
+N-Cyclin-CDK subgraph-52	JUN	113	98	white	rectangle	gene	0.5	black	46	17	6204
+N-Cyclin-CDK subgraph-53	JUN	100	74	white	rectangle	gene	0.5	black	46	17	6204
+N-Cyclin-CDK subgraph-54	LMNA	109	115	white	rectangle	gene	0.5	black	46	17	6636
+N-Cyclin-CDK subgraph-55	LMNB1	91	103	white	rectangle	gene	0.5	black	46	17	6637
+N-Cyclin-CDK subgraph-56	MAP3K5	198	120	white	rectangle	gene	0.5	black	46	17	6857
+N-Cyclin-CDK subgraph-57	MAPK1	1	130	white	rectangle	gene	0.5	black	46	17	6871
+N-Cyclin-CDK subgraph-58	MAPK10	72	1	white	rectangle	gene	0.5	black	46	17	6872
+N-Cyclin-CDK subgraph-59	MAPK10	91	109	white	rectangle	gene	0.5	black	46	17	6872
+N-Cyclin-CDK subgraph-60	MAPK10	70	7	white	rectangle	gene	0.5	black	46	17	6872
+N-Cyclin-CDK subgraph-61	MAPK9	66	0	white	rectangle	gene	0.5	black	46	17	6886
+N-Cyclin-CDK subgraph-62	MAPT	97	106	white	rectangle	gene	0.5	black	46	17	6893
+N-Cyclin-CDK subgraph-63	MAPT	98	77	white	rectangle	gene	0.5	black	46	17	6893
+N-Cyclin-CDK subgraph-64	MAPT	113	103	white	rectangle	gene	0.5	black	46	17	6893
+N-Cyclin-CDK subgraph-65	MAPT	93	112	white	rectangle	gene	0.5	black	46	17	6893
+N-Cyclin-CDK subgraph-66	MAPT	102	110	white	rectangle	gene	0.5	black	46	17	6893
+N-Cyclin-CDK subgraph-67	MAPT	116	98	white	rectangle	gene	0.5	black	46	17	6893
+N-Cyclin-CDK subgraph-68	MAPT	108	106	white	rectangle	gene	0.5	black	46	17	6893
+N-Cyclin-CDK subgraph-69	MAPT	87	102	white	rectangle	gene	0.5	black	46	17	6893
+N-Cyclin-CDK subgraph-7 8 9	CDK5 CDK5R1 CDK5R2	114	93	white	rectangle	gene,gene,gene	0.5	black	46	17	1774,/,1775,/,1776
+N-Cyclin-CDK subgraph-70	MAPT	103	89	white	rectangle	gene	0.5	black	46	17	6893
+N-Cyclin-CDK subgraph-71	MAPT	99	109	white	rectangle	gene	0.5	black	46	17	6893
+N-Cyclin-CDK subgraph-72	MAPT	109	97	white	rectangle	gene	0.5	black	46	17	6893
+N-Cyclin-CDK subgraph-73	MAPT	93	106	white	rectangle	gene	0.5	black	46	17	6893
+N-Cyclin-CDK subgraph-74	MAPT	101	106	white	rectangle	gene	0.5	black	46	17	6893
+N-Cyclin-CDK subgraph-75	MAPT	99	115	white	rectangle	gene	0.5	black	46	17	6893
+N-Cyclin-CDK subgraph-76	MAPT	95	102	white	rectangle	gene	0.5	black	46	17	6893
+N-Cyclin-CDK subgraph-77	MAPT	108	89	white	rectangle	gene	0.5	black	46	17	6893
+N-Cyclin-CDK subgraph-78	NEFL	116	106	white	rectangle	gene	0.5	black	46	17	7739
+N-Cyclin-CDK subgraph-79	NOS1	110	91	white	rectangle	gene	0.5	black	46	17	7872
+N-Cyclin-CDK subgraph-80	NOS1	93	94	white	rectangle	gene	0.5	black	46	17	7872
+N-Cyclin-CDK subgraph-81	PIN1	110	102	white	rectangle	gene	0.5	black	46	17	8988
+N-Cyclin-CDK subgraph-82	PPP1CA	78	101	white	rectangle	gene	0.5	black	46	17	9281
+N-Cyclin-CDK subgraph-83	PPP1CA	87	99	white	rectangle	gene	0.5	black	46	17	9281
+N-Cyclin-CDK subgraph-84	PPP1R1B	121	91	white	rectangle	gene	0.5	black	46	17	9287
+N-Cyclin-CDK subgraph-85	PPP2CA	106	109	white	rectangle	gene	0.5	black	46	17	9299
+N-Cyclin-CDK subgraph-86	PSEN1	106	113	white	rectangle	gene	0.5	black	46	17	9508
+N-Cyclin-CDK subgraph-87	RB1	73	73	white	rectangle	gene	0.5	black	46	17	9884
+N-Cyclin-CDK subgraph-88	RB1	53	61	white	rectangle	gene	0.5	black	46	17	9884
+N-Cyclin-CDK subgraph-89	Cdk5	26	141	white	rectangle	gene	0.5	black	46	17	101765
+N-Cyclin-CDK subgraph-90	Runx1t1	185	23	white	rectangle	gene	0.5	black	46	17	104793
+N-Cyclin-CDK subgraph-91	Gsk3b	12	154	white	rectangle	gene	0.5	black	46	17	1861437
+N-Cyclin-CDK subgraph-92	Ttbk2	30	133	white	rectangle	gene	0.5	black	46	17	2155779
+N-Cyclin-CDK subgraph-93	App	18	148	white	rectangle	gene	0.5	black	46	17	88059
+N-Cyclin-CDK subgraph-94	Cdk4	186	27	white	rectangle	gene	0.5	black	46	17	88357

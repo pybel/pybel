@@ -1,0 +1,52 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Cell Interaction-2.0-Hs-1 2	CDH1 CTNNB1	166	15	white	rectangle	gene,gene	0.5	black	46	17	1748,/,2514
+N-Cell Interaction-2.0-Hs-11 12	ITGA2 ITGB1	89	71	white	rectangle	gene,gene	0.5	black	46	17	6137,/,6153
+N-Cell Interaction-2.0-Hs-13 14	ITGA3 ITGB1	133	142	white	rectangle	gene,gene	0.5	black	46	17	6139,/,6153
+N-Cell Interaction-2.0-Hs-15 16	ITGA5 ITGB1	74	117	white	rectangle	gene,gene	0.5	black	46	17	6141,/,6153
+N-Cell Interaction-2.0-Hs-17 18	ITGA6 ITGB1	145	160	white	rectangle	gene,gene	0.5	black	46	17	6142,/,6153
+N-Cell Interaction-2.0-Hs-19 20	ITGA6 ITGB4	151	156	white	rectangle	gene,gene	0.5	black	46	17	6142,/,6158
+N-Cell Interaction-2.0-Hs-21 22	ITGAV ITGB3	63	104	white	rectangle	gene,gene	0.5	black	46	17	6150,/,6156
+N-Cell Interaction-2.0-Hs-23 24	ITGAV ITGB6	80	132	white	rectangle	gene,gene	0.5	black	46	17	6150,/,6161
+N-Cell Interaction-2.0-Hs-25 26	ITGAV ITGB8	99	146	white	rectangle	gene,gene	0.5	black	46	17	6150,/,6163
+N-Cell Interaction-2.0-Hs-27	AKT	163	83	white	rectangle	gene	0.5	black	46	17	AKT
+N-Cell Interaction-2.0-Hs-28	AKT	158	87	white	rectangle	gene	0.5	black	46	17	AKT
+N-Cell Interaction-2.0-Hs-29	COL1	82	76	white	rectangle	gene	0.5	black	46	17	COL1
+N-Cell Interaction-2.0-Hs-3 4	CDH1 CTNND1	49	121	white	rectangle	gene,gene	0.5	black	46	17	1748,/,2515
+N-Cell Interaction-2.0-Hs-30	COL4	85	78	white	rectangle	gene	0.5	black	46	17	COL4
+N-Cell Interaction-2.0-Hs-31	GSK3	128	83	white	rectangle	gene	0.5	black	46	17	GSK3
+N-Cell Interaction-2.0-Hs-32	GSK3	139	83	white	rectangle	gene	0.5	black	46	17	GSK3
+N-Cell Interaction-2.0-Hs-33	RAC	55	146	white	rectangle	gene	0.5	black	46	17	RAC
+N-Cell Interaction-2.0-Hs-34	RAS	50	115	white	rectangle	gene	0.5	black	46	17	RAS
+N-Cell Interaction-2.0-Hs-35	SRC	60	119	white	rectangle	gene	0.5	black	46	17	SRC
+N-Cell Interaction-2.0-Hs-36	RPS6KB1	173	83	white	rectangle	gene	0.5	black	46	17	10436
+N-Cell Interaction-2.0-Hs-37	SHC1	67	94	white	rectangle	gene	0.5	black	46	17	10840
+N-Cell Interaction-2.0-Hs-38	TGFB1	84	128	white	rectangle	gene	0.5	black	46	17	11766
+N-Cell Interaction-2.0-Hs-39	YES1	61	96	white	rectangle	gene	0.5	black	46	17	12841
+N-Cell Interaction-2.0-Hs-40	CAV1	69	103	white	rectangle	gene	0.5	black	46	17	1527
+N-Cell Interaction-2.0-Hs-41	CDH1	158	160	white	rectangle	gene	0.5	black	46	17	1748
+N-Cell Interaction-2.0-Hs-42	CDKN2C	116	114	white	rectangle	gene	0.5	black	46	17	1789
+N-Cell Interaction-2.0-Hs-43	CTNNB1	161	22	white	rectangle	gene	0.5	black	46	17	2514
+N-Cell Interaction-2.0-Hs-44	DSG1	7	57	white	rectangle	gene	0.5	black	46	17	3048
+N-Cell Interaction-2.0-Hs-45	DSG2	109	7	white	rectangle	gene	0.5	black	46	17	3049
+N-Cell Interaction-2.0-Hs-46	DSG3	0	64	white	rectangle	gene	0.5	black	46	17	3050
+N-Cell Interaction-2.0-Hs-47	E2F1	108	119	white	rectangle	gene	0.5	black	46	17	3113
+N-Cell Interaction-2.0-Hs-48	AHR	97	124	white	rectangle	gene	0.5	black	46	17	348
+N-Cell Interaction-2.0-Hs-49	FN1	78	124	white	rectangle	gene	0.5	black	46	17	3778
+N-Cell Interaction-2.0-Hs-5 6	CDH1 EGFR	67	28	white	rectangle	gene,gene	0.5	black	46	17	1748,/,3236
+N-Cell Interaction-2.0-Hs-50	ILK	152	83	white	rectangle	gene	0.5	black	46	17	6040
+N-Cell Interaction-2.0-Hs-51	ITGB3	86	137	white	rectangle	gene	0.5	black	46	17	6156
+N-Cell Interaction-2.0-Hs-52	LAMB3	142	152	white	rectangle	gene	0.5	black	46	17	6490
+N-Cell Interaction-2.0-Hs-53	LGALS3	110	0	white	rectangle	gene	0.5	black	46	17	6563
+N-Cell Interaction-2.0-Hs-54	MAPK1	64	19	white	rectangle	gene	0.5	black	46	17	6871
+N-Cell Interaction-2.0-Hs-55	MAPK14	0	57	white	rectangle	gene	0.5	black	46	17	6876
+N-Cell Interaction-2.0-Hs-56	MAPK3	70	37	white	rectangle	gene	0.5	black	46	17	6877
+N-Cell Interaction-2.0-Hs-57	MMP14	93	138	white	rectangle	gene	0.5	black	46	17	7160
+N-Cell Interaction-2.0-Hs-58	PLAUR	68	110	white	rectangle	gene	0.5	black	46	17	9053
+N-Cell Interaction-2.0-Hs-59	PTK2	67	127	white	rectangle	gene	0.5	black	46	17	9611
+N-Cell Interaction-2.0-Hs-60	PTK2	53	133	white	rectangle	gene	0.5	black	46	17	9611
+N-Cell Interaction-2.0-Hs-61	PTPN1	50	143	white	rectangle	gene	0.5	black	46	17	9642
+N-Cell Interaction-2.0-Hs-62	PTPN12	60	146	white	rectangle	gene	0.5	black	46	17	9645
+N-Cell Interaction-2.0-Hs-63	PTPRA	43	137	white	rectangle	gene	0.5	black	46	17	9664
+N-Cell Interaction-2.0-Hs-64	BCAR1	59	136	white	rectangle	gene	0.5	black	46	17	971
+N-Cell Interaction-2.0-Hs-7 8	ILK ITGB1	157	76	white	rectangle	gene,gene	0.5	black	46	17	6040,/,6153
+N-Cell Interaction-2.0-Hs-9 10	ITGA1 ITGB1	78	87	white	rectangle	gene,gene	0.5	black	46	17	6134,/,6153

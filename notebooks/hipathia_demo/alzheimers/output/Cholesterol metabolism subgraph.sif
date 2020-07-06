@@ -1,0 +1,17 @@
+0	1	2
+N-Cholesterol metabolism subgraph-13	inhibition	N-Cholesterol metabolism subgraph-18
+N-Cholesterol metabolism subgraph-3	activation	N-Cholesterol metabolism subgraph-6
+N-Cholesterol metabolism subgraph-18	inhibition	N-Cholesterol metabolism subgraph-19
+N-Cholesterol metabolism subgraph-21	activation	N-Cholesterol metabolism subgraph-18
+N-Cholesterol metabolism subgraph-23	activation	N-Cholesterol metabolism subgraph-18
+N-Cholesterol metabolism subgraph-5	activation	N-Cholesterol metabolism subgraph-18
+N-Cholesterol metabolism subgraph-6	activation	N-Cholesterol metabolism subgraph-5
+N-Cholesterol metabolism subgraph-6	activation	N-Cholesterol metabolism subgraph-18
+N-Cholesterol metabolism subgraph-4	activation	N-Cholesterol metabolism subgraph-20
+N-Cholesterol metabolism subgraph-4	activation	N-Cholesterol metabolism subgraph-23
+N-Cholesterol metabolism subgraph-4	activation	N-Cholesterol metabolism subgraph-21
+N-Cholesterol metabolism subgraph-14	inhibition	N-Cholesterol metabolism subgraph-18
+N-Cholesterol metabolism subgraph-25	activation	N-Cholesterol metabolism subgraph-22
+N-Cholesterol metabolism subgraph-20	activation	N-Cholesterol metabolism subgraph-18
+N-Cholesterol metabolism subgraph-22	activation	N-Cholesterol metabolism subgraph-18
+N-Cholesterol metabolism subgraph-17	activation	N-Cholesterol metabolism subgraph-18

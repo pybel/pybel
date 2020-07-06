@@ -11,7 +11,7 @@ from pybel.dsl import (
     Protein, ProteinFusion, ProteinModification, Reaction, Rna, RnaFusion, secretion, translocation,
 )
 from pybel.dsl.namespaces import hgnc
-from pybel.utils import citation_dict
+from pybel.language import activity_mapping, citation_dict, compartment_mapping
 
 logger = logging.getLogger(__name__)
 
@@ -36,8 +36,8 @@ expected_test_thorough_metadata = {
     METADATA_CONTACT: "charles.hoyt@scai.fraunhofer.de",
 }
 
-citation_1 = citation_dict(db=CITATION_TYPE_PUBMED, db_id='123455')
-citation_2 = citation_dict(db=CITATION_TYPE_PUBMED, db_id='123456')
+citation_1 = citation_dict(namespace=CITATION_TYPE_PUBMED, identifier='123455')
+citation_2 = citation_dict(namespace=CITATION_TYPE_PUBMED, identifier='123456')
 
 evidence_1 = "Evidence 1"
 dummy_evidence = 'These are mostly made up'
@@ -291,8 +291,8 @@ BEL_THOROUGH_EDGES = [
          EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: DIRECTLY_DECREASES,
-         SUBJECT: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
-         OBJECT: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
+         SOURCE_MODIFIER: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
+         TARGET_MODIFIER: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
      }),
     (akt1, Protein('HGNC', 'AKT1', variants=Hgvs('p.Arg1851*')), {
         RELATION: HAS_VARIANT,
@@ -304,7 +304,7 @@ BEL_THOROUGH_EDGES = [
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
-        SUBJECT: {MODIFIER: DEGRADATION},
+        SOURCE_MODIFIER: {MODIFIER: DEGRADATION},
     }),
     (akt1, Protein('HGNC', 'CFTR', variants=Hgvs('p.Gly576Ala')), {
         EVIDENCE: dummy_evidence,
@@ -315,39 +315,33 @@ BEL_THOROUGH_EDGES = [
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
-        SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
+        SOURCE_MODIFIER: {MODIFIER: ACTIVITY, EFFECT: activity_mapping['kin']},
     }),
     (akt1, Rna('HGNC', 'CFTR', variants=Hgvs('r.1653_1655delcuu')), {
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
-        SUBJECT: {MODIFIER: ACTIVITY},
+        SOURCE_MODIFIER: {MODIFIER: ACTIVITY},
     }),
     (akt1, egfr, {
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
-        SUBJECT: {
+        SOURCE_MODIFIER: {
             MODIFIER: ACTIVITY,
-            EFFECT: {
-                NAMESPACE: BEL_DEFAULT_NAMESPACE,
-                NAME: 'cat'
-            }
+            EFFECT: activity_mapping['cat'],
         },
-        OBJECT: {MODIFIER: DEGRADATION},
+        TARGET_MODIFIER: {MODIFIER: DEGRADATION},
     }),
     (akt1, egfr, {
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
-        SUBJECT: {
+        SOURCE_MODIFIER: {
             MODIFIER: ACTIVITY,
-            EFFECT: {NAME: 'kin', NAMESPACE: BEL_DEFAULT_NAMESPACE}
+            EFFECT: activity_mapping['kin'],
         },
-        OBJECT: translocation(
-            {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'intracellular'},
-            {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'extracellular space'}
-        ),
+        TARGET_MODIFIER: secretion(),
     }),
     (Gene('HGNC', 'AKT1', variants=Hgvs('c.308G>A')), tmprss2_erg_gene_fusion, {
         EVIDENCE: dummy_evidence,
@@ -359,7 +353,7 @@ BEL_THOROUGH_EDGES = [
          EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: INCREASES,
-         SUBJECT: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
+         SOURCE_MODIFIER: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
      }),
     (MicroRna('HGNC', 'MIR21'), bcr_jak2_gene_fusion,
      {
@@ -372,7 +366,7 @@ BEL_THOROUGH_EDGES = [
          EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: DECREASES,
-         SUBJECT: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
+         SOURCE_MODIFIER: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
      }),
     (MicroRna('HGNC', 'MIR21'), MicroRna('HGNC', 'MIR21', variants=Hgvs('p.Phe508del')), {
         RELATION: HAS_VARIANT,
@@ -382,7 +376,7 @@ BEL_THOROUGH_EDGES = [
          EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: INCREASES,
-         OBJECT: {MODIFIER: DEGRADATION},
+         TARGET_MODIFIER: {MODIFIER: DEGRADATION},
      }),
     (Gene('HGNC', 'CFTR'), Gene('HGNC', 'CFTR', variants=Hgvs('c.1521_1523delCTT')), {
         RELATION: HAS_VARIANT,
@@ -404,7 +398,7 @@ BEL_THOROUGH_EDGES = [
          EVIDENCE: dummy_evidence,
          CITATION: citation_1,
          RELATION: INCREASES,
-         SUBJECT: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
+         SOURCE_MODIFIER: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
      }),
     (chchd4_aifm1_gene_fusion, tmprss2_erg_protein_fusion, {
         EVIDENCE: dummy_evidence,
@@ -426,7 +420,7 @@ BEL_THOROUGH_EDGES = [
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
-        OBJECT: translocation(INTRACELLULAR, CELL_SURFACE),
+        TARGET_MODIFIER: translocation(INTRACELLULAR, CELL_SURFACE),
     }),
     (cftr, Protein('HGNC', 'CFTR', variants=Hgvs('=')), {
         RELATION: HAS_VARIANT,
@@ -550,13 +544,13 @@ BEL_THOROUGH_EDGES = [
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
-        OBJECT: secretion(),
+        TARGET_MODIFIER: secretion(),
     }),
     (Protein('HGNC', 'MIA', variants=Fragment(1, '?')), egfr, {
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
-        OBJECT: {
+        TARGET_MODIFIER: {
             MODIFIER: TRANSLOCATION,
             EFFECT: {
                 FROM_LOC: {NAMESPACE: 'GO', NAME: 'cell surface'},
@@ -568,7 +562,7 @@ BEL_THOROUGH_EDGES = [
         EVIDENCE: dummy_evidence,
         CITATION: citation_1,
         RELATION: INCREASES,
-        OBJECT: {
+        TARGET_MODIFIER: {
             MODIFIER: TRANSLOCATION, EFFECT: {
                 FROM_LOC: {NAMESPACE: 'GO', NAME: 'cell surface'},
                 TO_LOC: {NAMESPACE: 'GO', NAME: 'endosome'}
@@ -592,19 +586,19 @@ BEL_THOROUGH_EDGES = [
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: DIRECTLY_DECREASES,
-        SUBJECT: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
+        SOURCE_MODIFIER: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
     }),
     (Gene('HGNC', 'CAT'), hydrogen_peroxide, {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: DIRECTLY_DECREASES,
-        SUBJECT: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
+        SOURCE_MODIFIER: {LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}},
     }),
     (Protein('HGNC', 'HMGCR'), BiologicalProcess('GO', 'cholesterol biosynthetic process'), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: RATE_LIMITING_STEP_OF,
-        SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'cat'}},
+        SOURCE_MODIFIER: {MODIFIER: ACTIVITY, EFFECT: activity_mapping['cat']},
     }),
     (Gene('HGNC', 'APP', variants=Hgvs('c.275341G>C')), Pathology('MESHD', 'Alzheimer Disease'),
      {
@@ -617,21 +611,21 @@ BEL_THOROUGH_EDGES = [
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: REGULATES,
-        SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: BEL_DEFAULT_NAMESPACE}},
-        OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAME: 'pep', NAMESPACE: BEL_DEFAULT_NAMESPACE}},
+        SOURCE_MODIFIER: {MODIFIER: ACTIVITY, EFFECT: activity_mapping['pep']},
+        TARGET_MODIFIER: {MODIFIER: ACTIVITY, EFFECT: activity_mapping['pep']},
     }),
     (Protein('HGNC', 'GSK3B', variants=ProteinModification('Ph', 'Ser', 9)), Protein('HGNC', 'GSK3B'), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: POSITIVE_CORRELATION,
-        OBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
+        TARGET_MODIFIER: {MODIFIER: ACTIVITY, EFFECT: activity_mapping['kin']},
     }),
 
     (Protein('HGNC', 'GSK3B'), Protein('HGNC', 'GSK3B', variants=ProteinModification('Ph', 'Ser', 9)), {
         EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
         CITATION: citation_2,
         RELATION: POSITIVE_CORRELATION,
-        SUBJECT: {MODIFIER: ACTIVITY, EFFECT: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'kin'}},
+        SOURCE_MODIFIER: {MODIFIER: ACTIVITY, EFFECT: activity_mapping['kin']},
     }),
 
     (Reaction(
@@ -726,11 +720,11 @@ BEL_THOROUGH_EDGES = [
          EVIDENCE: 'These were all explicitly stated in the BEL 2.0 Specification',
          CITATION: citation_2,
          RELATION: INCREASES,
-         OBJECT: {
+         TARGET_MODIFIER: {
              MODIFIER: TRANSLOCATION,
              EFFECT: {
-                 FROM_LOC: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'intracellular'},
-                 TO_LOC: {NAMESPACE: BEL_DEFAULT_NAMESPACE, NAME: 'cell surface'}
+                 FROM_LOC: compartment_mapping['intracellular'],
+                 TO_LOC: compartment_mapping['cell surface'],
              }
          },
      }),

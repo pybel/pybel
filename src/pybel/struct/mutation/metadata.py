@@ -4,24 +4,25 @@
 
 import logging
 
+from ..graph import BELGraph
 from ..pipeline import in_place_transformation
-from ...constants import ANNOTATIONS, CITATION, CITATION_DB, CITATION_IDENTIFIER
+from ...constants import ANNOTATIONS, CITATION, IDENTIFIER, NAMESPACE
 
 __all__ = [
     'strip_annotations',
     'add_annotation_value',
     'remove_annotation_value',
-    'remove_citation_metadata',
+    'remove_extra_citation_metadata',
 ]
 
 logger = logging.getLogger(__name__)
 
 
 @in_place_transformation
-def strip_annotations(graph) -> None:
+def strip_annotations(graph: BELGraph) -> None:
     """Strip all the annotations from a BEL graph.
 
-    :param pybel.BELGraph graph: A BEL graph
+    :param graph: A BEL graph
     """
     for u, v, k in graph.edges(keys=True):
         if ANNOTATIONS in graph[u][v][k]:
@@ -29,10 +30,10 @@ def strip_annotations(graph) -> None:
 
 
 @in_place_transformation
-def add_annotation_value(graph, annotation: str, value: str, strict: bool = True) -> None:
+def add_annotation_value(graph: BELGraph, annotation: str, value: str, strict: bool = True) -> None:
     """Add the given annotation/value pair to all qualified edges.
 
-    :param pybel.BELGraph graph:
+    :param graph: A BEL graph
     :param annotation:
     :param value:
     :param strict: Should the function ensure the annotation has already been defined?
@@ -51,10 +52,10 @@ def add_annotation_value(graph, annotation: str, value: str, strict: bool = True
 
 
 @in_place_transformation
-def remove_annotation_value(graph, annotation: str, value: str) -> None:
+def remove_annotation_value(graph: BELGraph, annotation: str, value: str) -> None:
     """Remove the given annotation/value pair to all qualified edges.
 
-    :param pybel.BELGraph graph:
+    :param graph: A BEL graph
     :param annotation:
     :param value:
     """
@@ -75,12 +76,12 @@ def remove_annotation_value(graph, annotation: str, value: str) -> None:
         del graph[u][v][k][ANNOTATIONS][annotation][value]
 
 
-_CITATION_KEEP_KEYS = {CITATION_IDENTIFIER, CITATION_DB}
+_CITATION_KEEP_KEYS = {IDENTIFIER, NAMESPACE}
 
 
 @in_place_transformation
-def remove_citation_metadata(graph) -> None:
-    """Remove the metadata associated with a citation.
+def remove_extra_citation_metadata(graph) -> None:
+    """Remove superfluous metadata associated with a citation (that isn't the db/id).
 
     Best practice is to add this information programmatically.
     """

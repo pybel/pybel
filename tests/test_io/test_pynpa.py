@@ -10,6 +10,7 @@ from pybel import BELGraph
 from pybel.dsl import ComplexAbundance, Gene, Protein, Rna
 from pybel.io.pynpa import to_npa_dfs, to_npa_layers
 from pybel.struct.getters import get_tf_pairs
+from pybel.testing.utils import n
 
 g1 = Gene('hgnc', '1')
 r1 = Rna('hgnc', '1')
@@ -27,8 +28,8 @@ class TestPyNPA(unittest.TestCase):
     def setUp(self) -> None:
         """Set up a small test graph."""
         self.graph = BELGraph()
-        self.graph.add_increases(ComplexAbundance([p1, g2]), r2, citation='', evidence='')
-        self.graph.add_increases(p2, p3, citation='', evidence='')
+        self.graph.add_increases(ComplexAbundance([p1, g2]), r2, citation=n(), evidence=n())
+        self.graph.add_increases(p2, p3, citation=n(), evidence=n())
 
     def test_get_tf_pairs(self):
         """Test getting transcription factor-target pairs."""

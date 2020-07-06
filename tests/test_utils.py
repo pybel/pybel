@@ -4,7 +4,7 @@
 
 import unittest
 
-from pybel.parser.exc import PlaceholderAminoAcidWarning
+from pybel.exceptions import PlaceholderAminoAcidWarning
 from pybel.parser.modifiers.constants import amino_acid
 from pybel.parser.utils import nest
 from pybel.utils import expand_dict, flatten_dict, tokenize_version

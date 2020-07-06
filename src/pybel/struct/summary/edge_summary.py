@@ -7,6 +7,7 @@ from random import choice
 from typing import Iterable, Mapping, Set, Tuple
 
 from ..filters.edge_predicates import edge_has_annotation
+from ..graph import BELGraph
 from ...canonicalize import edge_to_bel
 from ...constants import ANNOTATIONS, RELATION
 from ...dsl import BaseEntity
@@ -23,13 +24,14 @@ __all__ = [
     'get_unused_annotations',
     'get_unused_list_annotation_values',
     'get_metaedge_to_key',
+    'iter_sample_metaedges',
 ]
 
 
-def iter_annotation_value_pairs(graph) -> Iterable[Tuple[str, str]]:
+def iter_annotation_value_pairs(graph: BELGraph) -> Iterable[Tuple[str, str]]:
     """Iterate over the key/value pairs, with duplicates, for each annotation used in a BEL graph.
 
-    :param pybel.BELGraph graph: A BEL graph
+    :param graph: A BEL graph
     """
     return (
         (key, value)
@@ -40,11 +42,11 @@ def iter_annotation_value_pairs(graph) -> Iterable[Tuple[str, str]]:
     )
 
 
-def iter_annotation_values(graph, annotation: str) -> Iterable[str]:
+def iter_annotation_values(graph: BELGraph, annotation: str) -> Iterable[str]:
     """Iterate over all of the values for an annotation used in the graph.
 
-    :param pybel.BELGraph graph: A BEL graph
-    :param str annotation: The annotation to grab
+    :param graph: A BEL graph
+    :param annotation: The annotation to grab
     """
     return (
         value
@@ -66,29 +68,29 @@ def _group_dict_set(iterator):
     return dict(d)
 
 
-def get_annotation_values_by_annotation(graph) -> Mapping[str, Set[str]]:
+def get_annotation_values_by_annotation(graph: BELGraph) -> Mapping[str, Set[str]]:
     """Get the set of values for each annotation used in a BEL graph.
 
-    :param pybel.BELGraph graph: A BEL graph
+    :param graph: A BEL graph
     :return: A dictionary of {annotation key: set of annotation values}
     """
     return _group_dict_set(iter_annotation_value_pairs(graph))
 
 
-def get_annotation_values(graph, annotation: str) -> Set[str]:
+def get_annotation_values(graph: BELGraph, annotation: str) -> Set[str]:
     """Get all values for the given annotation.
 
-    :param pybel.BELGraph graph: A BEL graph
+    :param graph: A BEL graph
     :param annotation: The annotation to summarize
     :return: A set of all annotation values
     """
     return set(iter_annotation_values(graph, annotation))
 
 
-def count_relations(graph) -> Counter:
+def count_relations(graph: BELGraph) -> Counter:
     """Return a histogram over all relationships in a graph.
 
-    :param pybel.BELGraph graph: A BEL graph
+    :param graph: A BEL graph
     :return: A Counter from {relation type: frequency}
     """
     return Counter(
@@ -97,37 +99,37 @@ def count_relations(graph) -> Counter:
     )
 
 
-def get_unused_annotations(graph) -> Set[str]:
+def get_unused_annotations(graph: BELGraph) -> Set[str]:
     """Get the set of all annotations that are defined in a graph, but are never used.
 
-    :param pybel.BELGraph graph: A BEL graph
+    :param graph: A BEL graph
     :return: A set of annotations
     """
     return graph.defined_annotation_keywords - get_annotations(graph)
 
 
-def get_annotations(graph) -> Set[str]:
+def get_annotations(graph: BELGraph) -> Set[str]:
     """Get the set of annotations used in the graph.
 
-    :param pybel.BELGraph graph: A BEL graph
+    :param graph: A BEL graph
     :return: A set of annotation keys
     """
     return set(_annotation_iter_helper(graph))
 
 
-def count_annotations(graph) -> Counter:
+def count_annotations(graph: BELGraph) -> Counter:
     """Count how many times each annotation is used in the graph.
 
-    :param pybel.BELGraph graph: A BEL graph
+    :param graph: A BEL graph
     :return: A Counter from {annotation key: frequency}
     """
     return Counter(_annotation_iter_helper(graph))
 
 
-def _annotation_iter_helper(graph) -> Iterable[str]:
+def _annotation_iter_helper(graph: BELGraph) -> Iterable[str]:
     """Iterate over the annotation keys.
 
-    :param pybel.BELGraph graph: A BEL graph
+    :param graph: A BEL graph
     """
     return (
         key
@@ -137,10 +139,10 @@ def _annotation_iter_helper(graph) -> Iterable[str]:
     )
 
 
-def get_unused_list_annotation_values(graph) -> Mapping[str, Set[str]]:
+def get_unused_list_annotation_values(graph: BELGraph) -> Mapping[str, Set[str]]:
     """Get all of the unused values for list annotations.
 
-    :param pybel.BELGraph graph: A BEL graph
+    :param graph: A BEL graph
     :return: A dictionary of {str annotation: set of str values that aren't used}
     """
     result = {}
@@ -152,7 +154,7 @@ def get_unused_list_annotation_values(graph) -> Mapping[str, Set[str]]:
     return result
 
 
-def get_metaedge_to_key(graph) -> Mapping[CanonicalEdge, Set[Tuple[BaseEntity, BaseEntity, str]]]:
+def get_metaedge_to_key(graph: BELGraph) -> Mapping[CanonicalEdge, Set[Tuple[BaseEntity, BaseEntity, str]]]:
     """Get all edge types."""
     rv = defaultdict(set)
     for u, v, k, d in graph.edges(keys=True, data=True):
@@ -161,7 +163,7 @@ def get_metaedge_to_key(graph) -> Mapping[CanonicalEdge, Set[Tuple[BaseEntity, B
     return dict(rv)
 
 
-def iter_sample_metaedges(graph):
+def iter_sample_metaedges(graph: BELGraph):
     """Iterate sampled metaedges."""
     for k, value in get_metaedge_to_key(graph).items():
         u, v, key = choice(list(value))

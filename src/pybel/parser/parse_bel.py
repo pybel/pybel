@@ -7,19 +7,14 @@ This module handles parsing BEL relations and validation of semantics.
 
 import itertools as itt
 import logging
-from typing import Dict, List, Mapping, Optional, Pattern, Set, Union
+from functools import lru_cache
+from typing import Any, Dict, List, Mapping, Optional, Pattern, Set, Union
 
 import pyparsing
-from pyparsing import (
-    Group, Keyword, MatchFirst, ParseResults, StringEnd, Suppress, delimitedList, oneOf, replaceWith,
-)
+from pyparsing import Group, Keyword, MatchFirst, ParseResults, StringEnd, Suppress, delimitedList, oneOf, replaceWith
 
 from .baseparser import BaseParser
 from .constants import NamespaceTermEncodingMapping
-from .exc import (
-    InvalidEntity, InvalidFunctionSemantic, MalformedTranslocationWarning, MissingAnnotationWarning,
-    MissingCitationException, MissingSupportWarning, NestedRelationWarning,
-)
 from .modifiers import (
     get_fragment_language, get_fusion_language, get_gene_modification_language, get_gene_substitution_language,
     get_hgvs_language, get_legacy_fusion_langauge, get_location_language, get_protein_modification_language,
@@ -30,19 +25,25 @@ from .parse_control import ControlParser
 from .utils import WCW, nest, one_of_tags, triple
 from .. import language
 from ..constants import (
-    ABUNDANCE, ACTIVITY, ASSOCIATION, BEL_DEFAULT_NAMESPACE, BINDS, BIOPROCESS, CAUSES_NO_CHANGE, CELL_SECRETION,
-    CELL_SURFACE_EXPRESSION, COMPLEX, COMPOSITE, CONCEPT, CORRELATION, DECREASES, DEGRADATION, DIRECTLY_DECREASES,
-    DIRECTLY_INCREASES, DIRTY, EFFECT, EQUIVALENT_TO, FROM_LOC, FUNCTION, FUSION, GENE, INCREASES, IS_A, LINE, LOCATION,
-    MEMBERS, MIRNA, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, NO_CORRELATION, OBJECT, PART_OF, PATHOLOGY,
-    POPULATION, POSITIVE_CORRELATION, PRODUCTS, PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, TARGET,
-    TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, TWO_WAY_RELATIONS, VARIANTS, belns_encodings,
+    ABUNDANCE, ACTIVITY, ASSOCIATION, BINDS, BIOPROCESS, CAUSES_NO_CHANGE, CELL_SECRETION, CELL_SURFACE_EXPRESSION,
+    COMPLEX, COMPOSITE, CONCEPT, CORRELATION, DECREASES, DEGRADATION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, DIRTY,
+    EFFECT, EQUIVALENT_TO, FROM_LOC, FUNCTION, FUSION, GENE, IDENTIFIER, INCREASES, IS_A, LINE, LOCATION, MEMBERS,
+    MIRNA, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, NO_CORRELATION, PART_OF, PATHOLOGY, POPULATION,
+    POSITIVE_CORRELATION, PRODUCTS, PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SOURCE, TARGET, TO_LOC,
+    TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, TWO_WAY_RELATIONS, VARIANTS, belns_encodings,
 )
-from ..dsl import BaseEntity, cell_surface_expression, secretion
+from ..dsl import BaseEntity
+from ..exceptions import (
+    InvalidEntity, InvalidFunctionSemantic, MalformedTranslocationWarning, MissingAnnotationWarning,
+    MissingCitationException, MissingSupportWarning, NestedRelationWarning,
+)
+from ..struct.graph import BELGraph
 from ..tokens import parse_result_to_dsl
 
 __all__ = [
     'BELParser',
     'modifier_po_to_dict',
+    'parse',
 ]
 
 logger = logging.getLogger('pybel.parser')
@@ -236,7 +237,7 @@ class BELParser(BaseParser):
 
     def __init__(
         self,
-        graph,
+        graph: Optional[BELGraph] = None,
         namespace_to_term_to_encoding: Optional[NamespaceTermEncodingMapping] = None,
         namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
         annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
@@ -252,10 +253,10 @@ class BELParser(BaseParser):
     ) -> None:
         """Build a BEL parser.
 
-        :param pybel.BELGraph graph: The BEL Graph to use to store the network
+        :param graph: The BEL graph to use to store the network
         :param namespace_to_term_to_encoding: A dictionary of {namespace: {name: encoding}}. Delegated to
          :class:`pybel.parser.parse_identifier.IdentifierParser`
-        :param namespace_to_pattern: A dictionary of {namespace: regular expression strings}. Delegated to
+        :param namespace_to_pattern: A dictionary of {namespace: compiled regular expression}. Delegated to
          :class:`pybel.parser.parse_identifier.IdentifierParser`
         :param annotation_to_term: A dictionary of {annotation: set of values}. Delegated to
          :class:`pybel.parser.ControlParser`
@@ -444,11 +445,11 @@ class BELParser(BaseParser):
         self.bp_path.setParseAction(self.check_function_semantics)
 
         self.activity_standard = activity_tag + nest(
-            Group(self.simple_abundance)(TARGET) + pyparsing.Optional(WCW + Group(self.molecular_activity)(EFFECT)),
+            self.simple_abundance + pyparsing.Optional(WCW + Group(self.molecular_activity)(EFFECT)),
         )
 
         activity_legacy_tags = oneOf(language.activities)(MODIFIER)
-        self.activity_legacy = activity_legacy_tags + nest(Group(self.simple_abundance)(TARGET))
+        self.activity_legacy = activity_legacy_tags + nest(self.simple_abundance)
         self.activity_legacy.setParseAction(handle_activity_legacy)
 
         #: `2.3.3 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#Xactivity>`_
@@ -461,24 +462,26 @@ class BELParser(BaseParser):
         from_loc = Suppress(FROM_LOC) + nest(concept(FROM_LOC))
         to_loc = Suppress(TO_LOC) + nest(concept(TO_LOC))
 
-        self.cell_secretion = cell_secretion_tag + nest(Group(self.simple_abundance)(TARGET))
+        self.cell_secretion = cell_secretion_tag + nest(self.simple_abundance)
+        self.cell_secretion.addParseAction(handle_secretion)
 
-        self.cell_surface_expression = cell_surface_expression_tag + nest(Group(self.simple_abundance)(TARGET))
+        self.cell_surface_expression = cell_surface_expression_tag + nest(self.simple_abundance)
+        self.cell_surface_expression.addParseAction(handle_surface_expression)
 
         self.translocation_standard = nest(
-            Group(self.simple_abundance)(TARGET)
+            self.simple_abundance
             + WCW
             + Group(from_loc + WCW + to_loc)(EFFECT),
         )
 
         self.translocation_legacy = nest(
-            Group(self.simple_abundance)(TARGET)
+            self.simple_abundance
             + WCW
             + Group(concept(FROM_LOC) + WCW + concept(TO_LOC))(EFFECT),
         )
 
         self.translocation_legacy.addParseAction(handle_legacy_tloc)
-        self.translocation_unqualified = nest(Group(self.simple_abundance)(TARGET))
+        self.translocation_unqualified = nest(self.simple_abundance)
 
         if self.disallow_unqualified_translocations:
             self.translocation_unqualified.setParseAction(self.handle_translocation_illegal)
@@ -491,7 +494,7 @@ class BELParser(BaseParser):
         ])
 
         #: `2.5.2 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_degradation_deg>`_
-        self.degradation = degradation_tags + nest(Group(self.simple_abundance)(TARGET))
+        self.degradation = degradation_tags + nest(self.simple_abundance)
 
         #: `2.5.3 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_reaction_rxn>`_
         self.reactants = Suppress(REACTANTS) + nest(delimitedList(Group(self.simple_abundance)))
@@ -592,13 +595,15 @@ class BELParser(BaseParser):
             # self.has_variant_relation,
             # self.part_of_reaction,
         ])
-        self.relation.setParseAction(self._handle_relation_harness)
+        if self.graph is not None:
+            self.relation.setParseAction(self._handle_relation_harness)
 
         self.inverted_unqualified_relation = MatchFirst([
             self.has_member,
             self.has_component,
         ])
-        self.inverted_unqualified_relation.setParseAction(self.handle_inverse_unqualified_relation)
+        if self.graph is not None:
+            self.inverted_unqualified_relation.setParseAction(self.handle_inverse_unqualified_relation)
 
         self.normal_unqualified_relation = MatchFirst([
             self.has_member,
@@ -606,7 +611,8 @@ class BELParser(BaseParser):
             self.has_variant_relation,
             self.part_of_reaction,
         ])
-        self.normal_unqualified_relation.setParseAction(self.handle_unqualified_relation)
+        if self.graph is not None:
+            self.normal_unqualified_relation.setParseAction(self.handle_unqualified_relation)
 
         #: 3.1 Causal Relationships - nested.
         causal_relation_tags = MatchFirst([
@@ -622,7 +628,8 @@ class BELParser(BaseParser):
             nest(triple(self.bel_term, causal_relation_tags, self.bel_term)),
         )
 
-        self.nested_causal_relationship.setParseAction(self.handle_nested_relation)
+        if self.graph is not None:
+            self.nested_causal_relationship.setParseAction(self.handle_nested_relation)
 
         # has_members is handled differently from all other relations becuase it gets distrinbuted
         self.relation = MatchFirst([
@@ -633,13 +640,19 @@ class BELParser(BaseParser):
             self.normal_unqualified_relation,
         ])
 
-        self.singleton_term = (self.bel_term + StringEnd()).setParseAction(self.handle_term)
+        self.singleton_term = self.bel_term + StringEnd()
+        if self.graph is not None:
+            self.singleton_term.setParseAction(self.handle_term)
 
         self.statement = self.relation | self.singleton_term
         self.language = self.control_parser.language | self.statement
         self.language.setName('BEL')
 
         super(BELParser, self).__init__(self.language, streamline=autostreamline)
+
+    def parse(self, s: str) -> Mapping[str, Any]:
+        """Parse the string."""
+        return self.parseString(s).asDict()
 
     @property
     def _namespace_dict(self) -> Mapping[str, Mapping[str, str]]:
@@ -657,7 +670,8 @@ class BELParser(BaseParser):
 
     def clear(self):
         """Clear the graph and all control parser data (current citation, annotations, and statement group)."""
-        self.graph.clear()
+        if self.graph is not None:
+            self.graph.clear()
         self.control_parser.clear()
 
     def handle_nested_relation(self, line: str, position: int, tokens: ParseResults):
@@ -672,17 +686,17 @@ class BELParser(BaseParser):
 
         subject_hash = self._handle_relation_checked(
             line, position, {
-                SUBJECT: tokens[SUBJECT],
+                SOURCE: tokens[SOURCE],
                 RELATION: tokens[RELATION],
-                OBJECT: tokens[OBJECT][SUBJECT],
+                TARGET: tokens[TARGET][SOURCE],
             },
         )
 
         object_hash = self._handle_relation_checked(
             line, position, {
-                SUBJECT: tokens[OBJECT][SUBJECT],
-                RELATION: tokens[OBJECT][RELATION],
-                OBJECT: tokens[OBJECT][OBJECT],
+                SOURCE: tokens[TARGET][SOURCE],
+                RELATION: tokens[TARGET][RELATION],
+                TARGET: tokens[TARGET][TARGET],
             },
         )
         self.metagraph.add((subject_hash, object_hash))
@@ -753,7 +767,16 @@ class BELParser(BaseParser):
         """Handle list relations like ``p(X) hasComponents list(p(Y), p(Z), ...)``."""
         return self._handle_list_helper(tokens, PART_OF)
 
-    def _add_qualified_edge_helper(self, *, u, u_modifier, relation, v, v_modifier, annotations) -> str:
+    def _add_qualified_edge_helper(
+        self,
+        *,
+        source,
+        source_modifier,
+        relation,
+        target,
+        target_modifier,
+        annotations,
+    ) -> str:
         """Add a qualified edge from the internal aspects of the parser."""
         m = {
             BINDS: self.graph.add_binds,
@@ -763,39 +786,43 @@ class BELParser(BaseParser):
             evidence=self.control_parser.evidence,
             citation=self.control_parser.get_citation(),
             annotations=annotations,
-            subject_modifier=u_modifier,
-            object_modifier=v_modifier,
+            source_modifier=source_modifier,
+            target_modifier=target_modifier,
             **{LINE: self.get_line_number()},
         )
         if adder is not None:
-            return adder(u=u, v=v, **d)
+            return adder(source=source, target=target, **d)
         else:
-            return self.graph.add_qualified_edge(u=u, v=v, relation=relation, **d)
+            return self.graph.add_qualified_edge(source=source, target=target, relation=relation, **d)
 
-    def _add_qualified_edge(self, *, u, u_modifier, relation, v, v_modifier, annotations) -> str:
+    def _add_qualified_edge(self, *, source, source_modifier, relation, target, target_modifier, annotations) -> str:
         """Add an edge, then adds the opposite direction edge if it should."""
         d = dict(
             relation=relation,
             annotations=annotations,
         )
         if relation in TWO_WAY_RELATIONS:
-            self._add_qualified_edge_helper(u=v, u_modifier=v_modifier, v=u, v_modifier=u_modifier, **d)
-        return self._add_qualified_edge_helper(u=u, u_modifier=u_modifier, v=v, v_modifier=v_modifier, **d)
+            self._add_qualified_edge_helper(
+                source=target, source_modifier=target_modifier, target=source, target_modifier=source_modifier, **d
+            )
+        return self._add_qualified_edge_helper(
+            source=source, source_modifier=source_modifier, target=target, target_modifier=target_modifier, **d
+        )
 
     def _handle_relation(self, tokens: ParseResults) -> str:
         """Handle a relation."""
-        u = self.ensure_node(tokens[SUBJECT])
-        u_modifier = modifier_po_to_dict(tokens[SUBJECT])
+        source = self.ensure_node(tokens[SOURCE])
+        source_modifier = modifier_po_to_dict(tokens[SOURCE])
         relation = tokens[RELATION]
-        v = self.ensure_node(tokens[OBJECT])
-        v_modifier = modifier_po_to_dict(tokens[OBJECT])
+        target = self.ensure_node(tokens[TARGET])
+        target_modifier = modifier_po_to_dict(tokens[TARGET])
 
         annotations = self._get_prepared_annotations()
 
         return self._add_qualified_edge(
-            u=u, u_modifier=u_modifier,
+            source=source, source_modifier=source_modifier,
             relation=relation,
-            v=v, v_modifier=v_modifier,
+            target=target, target_modifier=target_modifier,
             annotations=annotations,
         )
 
@@ -837,25 +864,22 @@ class BELParser(BaseParser):
 
     def handle_unqualified_relation(self, _, __, tokens: ParseResults) -> ParseResults:
         """Handle unqualified relations."""
-        subject_node_dsl = self.ensure_node(tokens[SUBJECT])
-        object_node_dsl = self.ensure_node(tokens[OBJECT])
+        subject_node_dsl = self.ensure_node(tokens[SOURCE])
+        object_node_dsl = self.ensure_node(tokens[TARGET])
         relation = tokens[RELATION]
         self.graph.add_unqualified_edge(subject_node_dsl, object_node_dsl, relation)
         return tokens
 
     def handle_inverse_unqualified_relation(self, _, __, tokens: ParseResults) -> ParseResults:
         """Handle unqualified relations that should go reverse."""
-        u = self.ensure_node(tokens[SUBJECT])
-        v = self.ensure_node(tokens[OBJECT])
+        source = self.ensure_node(tokens[SOURCE])
+        target = self.ensure_node(tokens[TARGET])
         relation = tokens[RELATION]
-        self.graph.add_unqualified_edge(v, u, relation)
+        self.graph.add_unqualified_edge(source=target, target=source, relation=relation)
         return tokens
 
     def ensure_node(self, tokens: ParseResults) -> BaseEntity:
         """Turn parsed tokens into canonical node name and makes sure its in the graph."""
-        if MODIFIER in tokens:
-            return self.ensure_node(tokens[TARGET])
-
         node = parse_result_to_dsl(tokens)
         self.graph.add_node_from_data(node)
         return node
@@ -869,9 +893,11 @@ class BELParser(BaseParser):
 
 def handle_molecular_activity_default(_: str, __: int, tokens: ParseResults) -> ParseResults:
     """Handle a BEL 2.0 style molecular activity with BEL default names."""
-    upgraded = language.activity_labels[tokens[0]]
-    tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
-    tokens[NAME] = upgraded
+    upgraded_cls = language.activity_labels[tokens[0]]
+    upgraded_concept = language.activity_mapping[upgraded_cls]
+    tokens[NAMESPACE] = upgraded_concept.namespace
+    tokens[NAME] = upgraded_concept.name
+    tokens[IDENTIFIER] = upgraded_concept.identifier
     return tokens
 
 
@@ -879,10 +905,7 @@ def handle_activity_legacy(_: str, __: int, tokens: ParseResults) -> ParseResult
     """Handle BEL 1.0 activities."""
     legacy_cls = language.activity_labels[tokens[MODIFIER]]
     tokens[MODIFIER] = ACTIVITY
-    tokens[EFFECT] = {
-        NAME: legacy_cls,
-        NAMESPACE: BEL_DEFAULT_NAMESPACE,
-    }
+    tokens[EFFECT] = language.activity_mapping[legacy_cls]
     logger.log(5, 'upgraded legacy activity to %s', legacy_cls)
     return tokens
 
@@ -890,6 +913,24 @@ def handle_activity_legacy(_: str, __: int, tokens: ParseResults) -> ParseResult
 def handle_legacy_tloc(line: str, position: int, tokens: ParseResults) -> ParseResults:
     """Handle translocations that lack the ``fromLoc`` and ``toLoc`` entries."""
     logger.log(5, 'legacy translocation statement: %s [%d]', line, position)
+    return tokens
+
+
+def handle_secretion(_, __, tokens: ParseResults) -> ParseResults:
+    tokens[MODIFIER] = TRANSLOCATION
+    tokens[EFFECT] = {
+        FROM_LOC: language.intracellular,
+        TO_LOC: language.extracellular,
+    }
+    return tokens
+
+
+def handle_surface_expression(_, __, tokens: ParseResults) -> ParseResults:
+    tokens[MODIFIER] = TRANSLOCATION
+    tokens[EFFECT] = {
+        FROM_LOC: language.intracellular,
+        TO_LOC: language.cell_surface,
+    }
     return tokens
 
 
@@ -907,9 +948,6 @@ def modifier_po_to_dict(tokens):
     if MODIFIER not in tokens:
         return attrs
 
-    if LOCATION in tokens[TARGET]:
-        attrs[LOCATION] = tokens[TARGET][LOCATION].asDict()
-
     if tokens[MODIFIER] == DEGRADATION:
         attrs[MODIFIER] = tokens[MODIFIER]
 
@@ -923,15 +961,42 @@ def modifier_po_to_dict(tokens):
         attrs[MODIFIER] = tokens[MODIFIER]
 
         if EFFECT in tokens:
-            attrs[EFFECT] = tokens[EFFECT].asDict()
+            try:
+                attrs[EFFECT] = tokens[EFFECT].asDict()
+            except AttributeError:  # for when it was auto-upgraded
+                attrs[EFFECT] = dict(tokens[EFFECT])
 
     elif tokens[MODIFIER] == CELL_SECRETION:
-        attrs.update(secretion())
+        attrs[MODIFIER] = TRANSLOCATION
+        attrs[EFFECT] = {
+            FROM_LOC: language.intracellular,
+            TO_LOC: language.extracellular,
+        }
 
     elif tokens[MODIFIER] == CELL_SURFACE_EXPRESSION:
-        attrs.update(cell_surface_expression())
+        attrs[MODIFIER] = TRANSLOCATION
+        attrs[EFFECT] = {
+            FROM_LOC: language.intracellular,
+            TO_LOC: language.cell_surface,
+        }
 
     else:
         raise ValueError('Invalid value for tokens[MODIFIER]: {}'.format(tokens[MODIFIER]))
 
     return attrs
+
+
+@lru_cache()
+def _default_parser():
+    return BELParser(skip_validation=True, citation_clearing=False)
+
+
+@lru_cache()
+def parse(s: str, pprint=False):
+    """Parse a BEL statement (without validation)."""
+    rv = _default_parser().parse(s)
+    if pprint:
+        import json
+        print(json.dumps(rv, indent=2))
+    else:
+        return rv

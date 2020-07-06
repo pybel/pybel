@@ -249,7 +249,7 @@ class TestSpia(unittest.TestCase):
             citation=citation,
             annotations={'Species': '9606', 'Confidence': 'High'},
             evidence=evidence_1,
-            object_modifier=activity()
+            target_modifier=activity(),
         )
 
         spia_dfs = to_spia_dfs(self.sialic_acid_graph)
@@ -266,7 +266,7 @@ class TestSpia(unittest.TestCase):
             citation=citation,
             annotations={'Species': '9606', 'Confidence': 'High'},
             evidence=evidence_1,
-            object_modifier=activity()
+            target_modifier=activity(),
         )
 
         spia_dfs = to_spia_dfs(self.sialic_acid_graph)

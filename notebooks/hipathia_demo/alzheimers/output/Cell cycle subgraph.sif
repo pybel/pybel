@@ -1,0 +1,12 @@
+0	1	2
+N-Cell cycle subgraph-17	activation	N-Cell cycle subgraph-5
+N-Cell cycle subgraph-16	activation	N-Cell cycle subgraph-11
+N-Cell cycle subgraph-16	activation	N-Cell cycle subgraph-11
+N-Cell cycle subgraph-16	inhibition	N-Cell cycle subgraph-10
+N-Cell cycle subgraph-1 2	activation	N-Cell cycle subgraph-12
+N-Cell cycle subgraph-13	inhibition	N-Cell cycle subgraph-5
+N-Cell cycle subgraph-4	activation	N-Cell cycle subgraph-9
+N-Cell cycle subgraph-15	activation	N-Cell cycle subgraph-14
+N-Cell cycle subgraph-11	inhibition	N-Cell cycle subgraph-10
+N-Cell cycle subgraph-8	activation	N-Cell cycle subgraph-3
+N-Cell cycle subgraph-18	inhibition	N-Cell cycle subgraph-5

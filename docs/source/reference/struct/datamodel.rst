@@ -53,19 +53,40 @@ Graph
     .. automethod:: __and__
     .. automethod:: __iand__
 
+
+Dispatches
+~~~~~~~~~~
+Dispatches are classes that enable easy access to summary, mutation, and other functions
+that consume graphs directly through the :class:`pybel.BELGraph` interface.
+
+.. autoclass:: pybel.struct.graph.CountDispatch
+    :members:
+
+.. autoclass:: pybel.struct.graph.InduceDispatch
+    :members:
+
+.. autoclass:: pybel.struct.graph.SummarizeDispatch
+    :members:
+
+.. autoclass:: pybel.struct.graph.ExpandDispatch
+    :members:
+
+.. autoclass:: pybel.struct.graph.PlotDispatch
+    :members:
+
 Nodes
 -----
 Nodes (or *entities*) in a :class:`pybel.BELGraph` represent physical entities' abundances. Most contain information
 about the identifier for the entity using a namespace/name pair. The PyBEL parser converts BEL terms to an internal
 representation using an internal domain specific language (DSL) that allows for writing BEL directly in Python.
 
-For example, after the BEL term :code:`p(HGNC:GSK3B)` is parsed, it is instantiated as a Python object using the
+For example, after the BEL term :code:`p(hgnc:GSK3B)` is parsed, it is instantiated as a Python object using the
 DSL function corresponding to the ``p()`` function in BEL, :class:`pybel.dsl.Protein`, like:
 
 .. code:: python
 
     from pybel.dsl import Protein
-    gsk3b_protein = Protein(namespace='HGNC', name='GSK3B')
+    gsk3b_protein = Protein(namespace='hgnc', name='GSK3B')
 
 :class:`pybel.dsl.Protein`, like the others mentioned before, inherit from :class:`pybel.dsl.BaseEntity`, which itself
 inherits from :class:`dict`. Therefore, the resulting object can be used like a dict that looks like:
@@ -76,7 +97,7 @@ inherits from :class:`dict`. Therefore, the resulting object can be used like a 
 
     {
         FUNCTION: PROTEIN,
-        NAMESPACE: 'HGNC',
+        NAMESPACE: 'hgnc',
         NAME: 'GSK3B',
     }
 
@@ -135,11 +156,11 @@ Variant and Modifications' Parent Relations
 All variants, modifications, fragments, and truncations are connected to their parent entity with an edge having
 the relationship :code:`hasParent`.
 
-For :code:`p(HGNC:GSK3B, var(p.Gly123Arg))`, the following edge is inferred:
+For :code:`p(hgnc:GSK3B, var(p.Gly123Arg))`, the following edge is inferred:
 
 .. code::
 
-    p(HGNC:GSK3B, var(p.Gly123Arg)) hasParent p(HGNC:GSK3B)
+    p(hgnc:GSK3B, var(p.Gly123Arg)) hasParent p(hgnc:GSK3B)
 
 All variants have this relationship to their reference node. BEL does not specify relationships between variants,
 such as the case when a given phosphorylation is necessary to make another one. This knowledge could be encoded
@@ -148,7 +169,7 @@ directly like BEL, since PyBEL does not restrict users from manually asserting u
 List Abundances
 ~~~~~~~~~~~~~~~
 Complexes and composites that are defined by lists. As of version 0.9.0, they contain a list of the data dictionaries
-that describe their members. For example :code:`complex(p(HGNC:FOS), p(HGNC:JUN))` becomes:
+that describe their members. For example :code:`complex(p(hgnc:FOS), p(hgnc:JUN))` becomes:
 
 .. code-block:: python
 
@@ -159,11 +180,11 @@ that describe their members. For example :code:`complex(p(HGNC:FOS), p(HGNC:JUN)
         MEMBERS: [
             {
                 FUNCTION: PROTEIN,
-                NAMESPACE: 'HGNC',
+                NAMESPACE: 'hgnc',
                 NAME: 'FOS',
             }, {
                 FUNCTION: PROTEIN,
-                NAMESPACE: 'HGNC',
+                NAMESPACE: 'hgnc',
                 NAME: 'JUN',
             }
         ]
@@ -173,15 +194,15 @@ The following edges are also inferred:
 
 .. code::
 
-    complex(p(HGNC:FOS), p(HGNC:JUN)) hasMember p(HGNC:FOS)
-    complex(p(HGNC:FOS), p(HGNC:JUN)) hasMember p(HGNC:JUN)
+    complex(p(hgnc:FOS), p(hgnc:JUN)) hasMember p(hgnc:FOS)
+    complex(p(hgnc:FOS), p(hgnc:JUN)) hasMember p(hgnc:JUN)
 
 
 .. seealso::
 
-    BEL 2.0 specification on `complex abundances <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcomplexA>`_
+    BEL 2.0+ Tutorial on `complex abundances <https://biological-expression-language.github.io/entities/physical/#complexes-of-physical-entities>`_
 
-Similarly, :code:`composite(a(CHEBI:malonate), p(HGNC:JUN))` becomes:
+Similarly, :code:`composite(a(CHEBI:malonate), p(hgnc:JUN))` becomes:
 
 .. code-block:: python
 
@@ -196,7 +217,7 @@ Similarly, :code:`composite(a(CHEBI:malonate), p(HGNC:JUN))` becomes:
                 NAME: 'malonate',
             }, {
                 FUNCTION: PROTEIN,
-                NAMESPACE: 'HGNC',
+                NAMESPACE: 'hgnc',
                 NAME: 'JUN',
             }
         ]
@@ -206,8 +227,8 @@ The following edges are inferred:
 
 .. code::
 
-    composite(a(CHEBI:malonate), p(HGNC:JUN)) hasComponent a(CHEBI:malonate)
-    composite(a(CHEBI:malonate), p(HGNC:JUN)) hasComponent p(HGNC:JUN)
+    composite(a(CHEBI:malonate), p(hgnc:JUN)) hasComponent a(CHEBI:malonate)
+    composite(a(CHEBI:malonate), p(hgnc:JUN)) hasComponent p(hgnc:JUN)
 
 
 .. warning::
@@ -219,7 +240,7 @@ The following edges are inferred:
 
 .. seealso::
 
-    BEL 2.0 specification on `composite abundances <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcompositeA>`_
+    BEL 2.0+ Tutorial on `composite abundances <https://biological-expression-language.github.io/entities/reified/#composites>`_
 
 
 Reactions
@@ -288,7 +309,7 @@ The following edges are inferred, where :code:`X` represents the previous reacti
 
 .. seealso::
 
-    BEL 2.0 specification on `reactions <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_reaction_rxn>`_
+    BEL 2.0+ tutorial on `reactions <https://biological-expression-language.github.io/entities/reified/#reactions>`_
 
 
 Edges
@@ -297,8 +318,8 @@ Design Choices
 ~~~~~~~~~~~~~~
 In the OpenBEL Framework, modifiers such as activities (kinaseActivity, etc.) and transformations (translocations,
 degradations, etc.) were represented as their own nodes. In PyBEL, these modifiers are represented as a property
-of the edge. In reality, an edge like :code:`sec(p(HGNC:A)) -> activity(p(HGNC:B), ma(kinaseActivity))` represents
-a connection between :code:`HGNC:A` and :code:`HGNC:B`. Each of these modifiers explains the context of the relationship
+of the edge. In reality, an edge like :code:`sec(p(hgnc:A)) -> activity(p(hgnc:B), ma(kinaseActivity))` represents
+a connection between :code:`hgnc:A` and :code:`hgnc:B`. Each of these modifiers explains the context of the relationship
 between these physical entities. Further, querying a network where these modifiers are part of a relationship
 is much more straightforward. For example, finding all proteins that are upregulated by the kinase activity of another
 protein now can be directly queried by filtering all edges for those with a subject modifier whose modification is
@@ -306,14 +327,14 @@ molecular activity, and whose effect is kinase activity. Having fewer nodes also
 and visual interpretation of a network. The information about the modifier on the subject and activity can be displayed
 as a color coded source and terminus of the connecting edge.
 
-The compiler in OpenBEL framework created nodes for molecular activities like :code:`kin(p(HGNC:YFG))` and induced an
-edge like :code:`p(HGNC:YFG) actsIn kin(p(HGNC:YFG))`. For transformations, a statement like
-:code:`tloc(p(HGNC:YFG), GOCC:intracellular, GOCC:"cell membrane")` also induced
-:code:`tloc(p(HGNC:YFG), GOCC:intracellular, GOCC:"cell membrane") translocates p(HGNC:YFG)`.
+The compiler in OpenBEL framework created nodes for molecular activities like :code:`kin(p(hgnc:YFG))` and induced an
+edge like :code:`p(hgnc:YFG) actsIn kin(p(hgnc:YFG))`. For transformations, a statement like
+:code:`tloc(p(hgnc:YFG), GO:intracellular, GO:"cell membrane")` also induced
+:code:`tloc(p(hgnc:YFG), GO:intracellular, GO:"cell membrane") translocates p(hgnc:YFG)`.
 
 In PyBEL, we recognize that these modifications are actually annotations to the type of relationship between the
-subject's entity and the object's entity. ``p(HGNC:ABC) -> tloc(p(HGNC:YFG), GOCC:intracellular, GOCC:"cell membrane")``
-is about the relationship between :code:`p(HGNC:ABC)` and :code:`p(HGNC:YFG)`, while
+subject's entity and the object's entity. ``p(hgnc:ABC) -> tloc(p(hgnc:YFG), GO:intracellular, GO:"cell membrane")``
+is about the relationship between :code:`p(hgnc:ABC)` and :code:`p(hgnc:YFG)`, while
 the information about the translocation qualifies that the object is undergoing an event, and not just the abundance.
 This is a confusion with the use of :code:`proteinAbundance` as a keyword, and perhaps is why many people prefer to use
 just the keyword :code:`p`
@@ -360,7 +381,7 @@ metadata.
 Activities
 ~~~~~~~~~~
 Modifiers are added to this structure as well. Under this schema,
-:code:`p(HGNC:GSK3B, pmod(P, S, 9)) pos act(p(HGNC:GSK3B), ma(kin))` becomes:
+:code:`p(hgnc:GSK3B, pmod(P, S, 9)) pos act(p(hgnc:GSK3B), ma(kin))` becomes:
 
 .. code-block:: python
 
@@ -381,7 +402,7 @@ Modifiers are added to this structure as well. Under this schema,
     }
 
 Activities without molecular activity annotations do not contain an :data:`pybel.constants.EFFECT` entry: Under this
-schema, :code:`p(HGNC:GSK3B, pmod(P, S, 9)) pos act(p(HGNC:GSK3B))` becomes:
+schema, :code:`p(hgnc:GSK3B, pmod(P, S, 9)) pos act(p(hgnc:GSK3B))` becomes:
 
 .. code-block:: python
 
@@ -404,7 +425,7 @@ Locations
 
 Translocations
 ~~~~~~~~~~~~~~
-Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:YFG2))` becomes:
+Translocations have their own unique syntax. :code:`p(hgnc:YFG1) -> sec(p(hgnc:YFG2))` becomes:
 
 .. code-block:: python
 
@@ -432,12 +453,12 @@ Translocations have their own unique syntax. :code:`p(HGNC:YFG1) -> sec(p(HGNC:Y
 
 .. seealso::
 
-    BEL 2.0 specification on `translocations <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_translocations>`_
+    BEL 2.0+ tutorial on `translocations <https://biological-expression-language.github.io/statements/#translocations>`_
 
 Degradations
 ~~~~~~~~~~~~
 Degradations are more simple, because there's no ::data:`pybel.constants.EFFECT` entry.
-:code:`p(HGNC:YFG1) -> deg(p(HGNC:YFG2))` becomes:
+:code:`p(hgnc:YFG1) -> deg(p(hgnc:YFG2))` becomes:
 
 .. code-block:: python
 
@@ -453,6 +474,15 @@ Degradations are more simple, because there's no ::data:`pybel.constants.EFFECT`
         ANNOTATIONS: { ... },
     }
 
-.. seealso::
+.. warning::
 
-    BEL 2.0 specification on `degradations <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_degradation_deg>`_
+    Degradations only provide syntax sugar and will be automatically upgraded in a future version of PyBEL such that:
+
+    - ``deg(X) -> Y`` is upgraded to ``X -| Y``
+    - ``deg(X) -| Y`` is upgraded to ``X -> Y``
+    - ``deg(X) => Y`` is upgraded to ``X =| Y``
+    - ``deg(X) cnc Y`` is upgraded to ``X cnc Y``
+    - ``X -> deg(Y)`` is upgraded to ``X -| Y``
+    - ``X => deg(Y)`` is upgraded to ``X =| Y``
+    - ``X cnc deg(Y)`` is upgraded to ``X cnc Y``
+    - ``X -| deg(Y)`` is undefined

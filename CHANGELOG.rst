@@ -5,19 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-Unreleased
-----------
+`0.14.10 <https://github.com/pybel/pybel/compare/v0.14.9...v0.14.10>`_ - 2020-06-15
+-----------------------------------------------------------------------------------
 Added
 ~~~~~
 - Importer from `EMMAA <https://emmaa.indra.bio>`_ (https://github.com/pybel/pybel/pull/432)
 - I/O for Amazon S3 (https://github.com/pybel/pybel/pull/431)
-- Add TSV exporter converter for protein binds gene (d7d12878)
+- Improve TSV exporter (d7d12878, 74d51c1c, e1082523, 6ffc1df6)
 - Add identifier-based entity remapper (ba8aa933)
+- Add annotation grounding (https://github.com/pybel/pybel/pull/435, https://github.com/pybel/pybel/pull/443)
+- Add HiPathia export examples (https://github.com/pybel/pybel/pull/422)
 
 Changed
 ~~~~~~~
 - Updated default BEL Commons instance from https://bel-commons.scai.fraunhofer.de to
   https://bel-commons-dev.scai.fraunhofer.de
+- Add more namespaces for JGIF parsing to support CBN and BioDati import (9f74122d and
+  https://github.com/pybel/pybel/pull/435; thanks @djinnome)
+- Make Jupyter notebook export accessible from top level at ``pybel.to_jupyter`` (4d76faad)
+
+Fixed
+~~~~~
+- Fix bug in display of nice labels in Jupyter notebook (775bdc30)
+
+Removed
+~~~~~~~
+- Remove default service URL for BEL Commons exporter. The Fraunhofer instance was taken
+  down (a9a540fb).
 
 `0.14.9 <https://github.com/pybel/pybel/compare/v0.14.8...v0.14.9>`_ - 2020-04-25
 ---------------------------------------------------------------------------------

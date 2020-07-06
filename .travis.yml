@@ -1,48 +1,50 @@
-sudo: true
 cache: pip
 dist: xenial
+os: linux
 
 services:
   - mysql
   - postgresql
 
 language: python
+python: '3.8'
 
-python:
-  - 3.7
-  - 3.5
-
-stages:
-  - lint
-  - docs
-  - test
-
-env:
-  - TOXENV=py DB=mysql PYBEL_TEST_CONNECTOR=mysqlclient
-    PYBEL_TEST_CONNECTION=mysql+mysqldb://travis@localhost/test?charset=utf8
-
-  - TOXENV=py DB=postgresql PYBEL_TEST_CONNECTOR=psycopg2-binary
-    PYBEL_TEST_CONNECTION=postgresql+psycopg2://travis@localhost/tests
-
-  - TOXENV=py DB=sqlite
 
 jobs:
+  allow_failures:
+    - env: TOXENV=mypy
   include:
     # lint stage
     - stage: lint
+      name: "Check MANIFEST.in"
       env: TOXENV=manifest
-    - env: TOXENV=flake8
-    - env: TOXENV=pyroma
-    - env: TOXENV=mypy
+    - name: "Check code quality with Flake8"
+      env: TOXENV=flake8
+    - name: "Check package metadata with Pyroma"
+      env: TOXENV=pyroma
+    - name: "Check static typing with MyPy"
+      env: TOXENV=mypy
+
     # docs stage
     - stage: docs
+      name: "Check RST conformity with doc8"
       env: TOXENV=doc8
-    - env: TOXENV=readme
-    - env: TOXENV=docs
+    - name: "Check README.rst"
+      env: TOXENV=readme
+    - name: "Check documentation build with Sphinx"
+      env: TOXENV=docs
 
-matrix:
-  allow_failures:
-    - env: TOXENV=mypy
+    # test stage
+    - stage: test
+      name: "Tests with MySQL"
+      env: TOXENV=py DB=mysql PYBEL_TEST_CONNECTOR=mysqlclient PYBEL_TEST_CONNECTION=mysql+mysqldb://travis@localhost/test?charset=utf8
+    - name: "Tests with PostgreSQL"
+      env: TOXENV=py DB=postgresql PYBEL_TEST_CONNECTOR=psycopg2-binary PYBEL_TEST_CONNECTION=postgresql+psycopg2://travis@localhost/tests
+    - name: "Tests with SQLite"
+      env: TOXENV=py DB=sqlite
+    - name: "Tests with legacy Python (3.6)"
+      python: 3.6
+      env: TOXENV=py DB=sqlite
 
 install:
   - sh -c 'if [ "$TOXENV" = "py" ]; then pip install tox codecov; else pip install tox; fi'

@@ -10,26 +10,26 @@ import unittest
 from io import BytesIO, StringIO
 from pathlib import Path
 
+import pybel
 from pybel import (
     BELGraph, from_bel_script, from_bel_script_url, from_bytes, from_nodelink, from_nodelink_file, from_pickle,
     to_bel_script_lines, to_bytes, to_csv, to_graphml, to_gsea, to_nodelink, to_nodelink_file, to_pickle, to_sif,
 )
-from pybel.io.line_utils import parse_definitions
 from pybel.config import PYBEL_MINIMUM_IMPORT_VERSION
 from pybel.constants import (
     ANNOTATIONS, CITATION, DECREASES, DIRECTLY_DECREASES, EVIDENCE, GRAPH_PYBEL_VERSION, INCREASES, RELATION,
 )
 from pybel.dsl import BaseEntity, Gene, Protein
 from pybel.examples.sialic_acid_example import sialic_acid_graph
+from pybel.exceptions import (
+    BELSyntaxError, InvalidFunctionSemantic, MissingCitationException, MissingNamespaceRegexWarning,
+)
 from pybel.io.exc import ImportVersionWarning, import_version_message_fmt
 from pybel.io.line_utils import parse_lines
 from pybel.io.nodelink import from_nodelink_jsons, to_nodelink_jsons
 from pybel.parser import BELParser
-from pybel.parser.exc import (
-    BELSyntaxError, InvalidFunctionSemantic, MissingCitationException, MissingNamespaceRegexWarning,
-)
 from pybel.struct.summary import get_syntax_errors
-from pybel.testing.cases import TemporaryCacheClsMixin
+from pybel.testing.cases import TemporaryCacheClsMixin, TemporaryCacheMixin
 from pybel.testing.constants import (
     test_bel_isolated, test_bel_misordered, test_bel_simple, test_bel_slushy, test_bel_thorough, test_bel_with_obo,
 )
@@ -95,6 +95,28 @@ class TestExampleInterchange(unittest.TestCase):
         to_nodelink_file(sialic_acid_graph, sio)
         sio.seek(0)
         graph = from_nodelink_file(sio)
+        self._help_test_equal(graph)
+
+    def test_thorough_sbel(self):
+        """Test the round-trip through SBEL."""
+        s = pybel.to_sbel(sialic_acid_graph)
+        graph = pybel.from_sbel(s)
+        self._help_test_equal(graph)
+
+    def test_thorough_sbel_file(self):
+        """Test the round-trip through a SBEL file."""
+        sio = StringIO()
+        pybel.to_sbel_file(sialic_acid_graph, sio)
+        sio.seek(0)
+        graph = pybel.from_sbel_file(sio)
+        self._help_test_equal(graph)
+
+    def test_thorough_sbel_gzip_path(self):
+        """Test round trip through a SBEL gzipped file."""
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, 'test.gzip')
+            pybel.to_sbel_gz(sialic_acid_graph, path)
+            graph = pybel.from_sbel_gz(path)
         self._help_test_equal(graph)
 
 
@@ -433,12 +455,12 @@ class TestRandom(unittest.TestCase):
             )
 
 
-class TestNomenclature(unittest.TestCase):
+class TestNomenclature(TemporaryCacheMixin):
     """Test that `BEP-0008 nomenclature <http://bep.bel.bio/published/BEP-0008.html>`_ gets validated properly."""
 
     def test_bep_0008(self):
         """Test parsing works right"""
-        graph = from_bel_script(test_bel_with_obo)
+        graph = from_bel_script(test_bel_with_obo, manager=self.manager)
         self.assertIn('hgnc', graph.namespace_pattern)
         self.assertEqual(r'\d+', graph.namespace_pattern['hgnc'])
 

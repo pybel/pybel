@@ -23,8 +23,8 @@ from ..constants import (
     ANNOTATIONS, CITATION, EVIDENCE, METADATA_AUTHORS, METADATA_CONTACT,
     METADATA_INSERT_KEYS, METADATA_LICENSES, RELATION, UNQUALIFIED_EDGES,
 )
+from ..exceptions import NakedNameWarning, UndefinedNamespaceWarning
 from ..parser import BELParser
-from ..parser.exc import NakedNameWarning, UndefinedNamespaceWarning
 from ..struct import BELGraph
 from ..version import get_version
 
@@ -129,6 +129,7 @@ def map_cbn(d):
 
 
 NAMESPACE_URLS = {
+    "TAX": "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/ncbi-taxonomy/ncbi-taxonomy-20200322.belns",
     'HGNC': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/hgnc-human-genes/hgnc-human-genes-20150601.belns',
     'GOBP': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process/go-biological-process-20150601.belns',
     'SFAM': 'https://arty.scai.fraunhofer.de/artifactory/bel/namespace/selventa-protein-families/selventa-protein-families-20150601.belns',

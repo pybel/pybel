@@ -3,9 +3,9 @@
 """Pre-defined predicates for nodes."""
 
 from ..utils import part_has_modifier
-from ....constants import ACTIVITY, DEGRADATION, OBJECT, SUBJECT, TRANSLOCATION
+from ...graph import BELGraph
+from ....constants import ACTIVITY, DEGRADATION, SOURCE_MODIFIER, TARGET_MODIFIER, TRANSLOCATION
 from ....dsl import BaseEntity
-from ....struct.graph import BELGraph
 
 __all__ = [
     'has_edge_modifier',
@@ -28,28 +28,28 @@ def has_edge_modifier(graph: BELGraph, node: BaseEntity, modifier: str) -> bool:
                         :data:`pybel.constants.TRANSLOCATION`
     """
     modifier_in_subject = any(
-        part_has_modifier(d, SUBJECT, modifier)
+        part_has_modifier(d, SOURCE_MODIFIER, modifier)
         for _, _, d in graph.out_edges(node, data=True)
     )
 
     modifier_in_object = any(
-        part_has_modifier(d, OBJECT, modifier)
+        part_has_modifier(d, TARGET_MODIFIER, modifier)
         for _, _, d in graph.in_edges(node, data=True)
     )
 
     return modifier_in_subject or modifier_in_object
 
 
-def has_activity(graph, node: BaseEntity) -> bool:
+def has_activity(graph: BELGraph, node: BaseEntity) -> bool:
     """Return true if over any of the node's edges, it has a molecular activity."""
     return has_edge_modifier(graph, node, ACTIVITY)
 
 
-def is_degraded(graph, node: BaseEntity) -> bool:
+def is_degraded(graph: BELGraph, node: BaseEntity) -> bool:
     """Return true if over any of the node's edges, it is degraded."""
     return has_edge_modifier(graph, node, DEGRADATION)
 
 
-def is_translocated(graph, node: BaseEntity) -> bool:
+def is_translocated(graph: BELGraph, node: BaseEntity) -> bool:
     """Return true if over any of the node's edges, it is translocated."""
     return has_edge_modifier(graph, node, TRANSLOCATION)

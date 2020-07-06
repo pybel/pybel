@@ -6,6 +6,7 @@ import gzip
 import itertools as itt
 import logging
 import time
+import warnings
 from typing import Iterable, List, Mapping, Optional, TextIO, Tuple, Union
 
 from networkx.utils import open_file
@@ -13,12 +14,13 @@ from networkx.utils import open_file
 import bel_resources.constants
 from bel_resources import make_knowledge_header
 from .constants import (
-    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CELL_SURFACE, CITATION, CITATION_DB, CITATION_IDENTIFIER,
-    CITATION_TYPE_PUBMED, DEGRADATION, EFFECT, EVIDENCE, EXTRACELLULAR, FROM_LOC, INTRACELLULAR, LOCATION, MODIFIER,
-    NAME, NAMESPACE, OBJECT, PYBEL_AUTOEVIDENCE, PYBEL_PUBMED, RELATION, SET_CITATION_FMT, SUBJECT, TO_LOC,
-    TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS,
+    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CELL_SURFACE, CITATION, CITATION_TYPE_PUBMED, DEGRADATION, EFFECT,
+    EVIDENCE, EXTRACELLULAR, FROM_LOC, INTRACELLULAR, LOCATION, MODIFIER, NAME, NAMESPACE, PYBEL_AUTOEVIDENCE,
+    PYBEL_PUBMED, RELATION, SET_CITATION_FMT, SOURCE_MODIFIER, TARGET_MODIFIER, TO_LOC, TRANSLOCATION,
+    UNQUALIFIED_EDGES, VARIANTS,
 )
 from .dsl import BaseAbundance, BaseEntity, FusionBase, ListAbundance, Reaction
+from .language import Entity
 from .typing import EdgeData
 from .utils import ensure_quotes
 from .version import VERSION
@@ -118,89 +120,78 @@ def _decanonicalize_edge_node(
         return node_str
 
     if DEGRADATION == modifier:
-        return "deg({})".format(node_str)
+        warnings.warn('degradation is deprecated', DeprecationWarning)
+        return f'deg({node_str})'
 
     effect = node_edge_data.get(EFFECT)
 
     if ACTIVITY == modifier:
         if effect is None:
-            return "act({})".format(node_str)
-
-        if effect[NAMESPACE] == BEL_DEFAULT_NAMESPACE:
-            return "act({}, ma({}))".format(node_str, effect[NAME])
-
-        return "act({}, ma({}:{}))".format(node_str, effect[NAMESPACE], ensure_quotes(effect[NAME]))
+            return f'act({node_str})'
+        return f'act({node_str}, ma({effect}))'
 
     if TRANSLOCATION == modifier:
         if effect is None:
-            return 'tloc({})'.format(node_str)
+            return f'tloc({node_str})'
 
-        to_loc_data = effect[TO_LOC]
-        from_loc_data = effect[FROM_LOC]
+        to_loc_data: Entity = effect[TO_LOC]
+        from_loc_data: Entity = effect[FROM_LOC]
 
         if from_loc_data[NAMESPACE] == BEL_DEFAULT_NAMESPACE and from_loc_data[NAME] == INTRACELLULAR:
             if to_loc_data[NAMESPACE] == BEL_DEFAULT_NAMESPACE and to_loc_data[NAME] == EXTRACELLULAR:
-                return 'sec({})'.format(node_str)
+                warnings.warn('deprecated output of BEL default namespace', DeprecationWarning)
+                return f'sec({node_str})'
             if to_loc_data[NAMESPACE] == BEL_DEFAULT_NAMESPACE and to_loc_data[NAME] == CELL_SURFACE:
-                return 'surf({})'.format(node_str)
+                warnings.warn('deprecated output of BEL default namespace', DeprecationWarning)
+                return f'surf({node_str})'
+            raise ValueError
 
-        from_loc = _get_tloc_terminal('fromLoc', from_loc_data)
-        to_loc = _get_tloc_terminal('toLoc', to_loc_data)
-
-        return "tloc({}, {}, {})".format(node_str, from_loc, to_loc)
+        return f"tloc({node_str}, fromLoc({from_loc_data}), toLoc({to_loc_data}))"
 
     raise ValueError('invalid modifier: {}'.format(modifier))
 
 
-def _get_tloc_terminal(side, data):
-    return "{}({}:{})".format(
-        side,
-        data[NAMESPACE],
-        ensure_quotes(data[NAME]),
-    )
-
-
 def edge_to_tuple(
-    u: BaseEntity,
-    v: BaseEntity,
+    source: BaseEntity,
+    target: BaseEntity,
     data: EdgeData,
     use_identifiers: bool = True,
 ) -> Tuple[str, str, str]:
     """Take two nodes and gives back a BEL string representing the statement.
 
-    :param u: The edge's source's PyBEL node data dictionary
-    :param v: The edge's target's PyBEL node data dictionary
+    :param source: The edge's source's PyBEL node data dictionary
+    :param target: The edge's target's PyBEL node data dictionary
     :param data: The edge's data dictionary
     :param use_identifiers: Enables extended `BEP-0008 <http://bep.bel.bio/published/BEP-0008.html>`_ syntax
     """
-    u_str = _decanonicalize_edge_node(u, data, node_position=SUBJECT, use_identifiers=use_identifiers)
-    v_str = _decanonicalize_edge_node(v, data, node_position=OBJECT, use_identifiers=use_identifiers)
+    u_str = _decanonicalize_edge_node(source, data, node_position=SOURCE_MODIFIER, use_identifiers=use_identifiers)
+    v_str = _decanonicalize_edge_node(target, data, node_position=TARGET_MODIFIER, use_identifiers=use_identifiers)
     return u_str, data[RELATION], v_str
 
 
 def edge_to_bel(
-    u: BaseEntity,
-    v: BaseEntity,
+    source: BaseEntity,
+    target: BaseEntity,
     data: EdgeData,
     sep: Optional[str] = None,
     use_identifiers: bool = True,
 ) -> str:
     """Take two nodes and gives back a BEL string representing the statement.
 
-    :param u: The edge's source's PyBEL node data dictionary
-    :param v: The edge's target's PyBEL node data dictionary
+    :param source: The edge's source's PyBEL node data dictionary
+    :param target: The edge's target's PyBEL node data dictionary
     :param data: The edge's data dictionary
     :param sep: The separator between the source, relation, and target. Defaults to ' '
     :param use_identifiers: Enables extended `BEP-0008 <http://bep.bel.bio/published/BEP-0008.html>`_ syntax
     """
     sep = sep or ' '
-    return sep.join(edge_to_tuple(u=u, v=v, data=data, use_identifiers=use_identifiers))
+    return sep.join(edge_to_tuple(source=source, target=target, data=data, use_identifiers=use_identifiers))
 
 
 def _sort_qualified_edges_helper(t: EdgeTuple) -> Tuple[str, str, str]:
     return (
-        t[3][CITATION][CITATION_DB],
-        t[3][CITATION][CITATION_IDENTIFIER],
+        t[3][CITATION].namespace,
+        t[3][CITATION].identifier,
         t[3][EVIDENCE],
     )
 
@@ -220,7 +211,7 @@ def sort_qualified_edges(graph) -> Iterable[EdgeTuple]:
 
 def _citation_sort_key(t: EdgeTuple) -> Tuple[str, str]:
     """Make a confusing 4 tuple sortable by citation."""
-    return t[3][CITATION][CITATION_DB], t[3][CITATION][CITATION_IDENTIFIER]
+    return t[3][CITATION].namespace, t[3][CITATION].identifier
 
 
 def _evidence_sort_key(t: EdgeTuple) -> str:

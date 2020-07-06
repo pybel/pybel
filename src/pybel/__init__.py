@@ -36,10 +36,12 @@ from .io.nodelink import (
     to_nodelink_file, to_nodelink_gz, to_nodelink_jsons,
 )
 from .io.pynpa import to_npa_dfs, to_npa_directory
+from .io.sbel import from_sbel, from_sbel_file, from_sbel_gz, to_sbel, to_sbel_file, to_sbel_gz
 from .io.spia import to_spia_dfs, to_spia_excel, to_spia_tsvs
-from .io.tsv import to_edgelist, to_tsv
+from .io.triples import to_edgelist, to_triples, to_triples_file
 from .io.umbrella_nodelink import to_umbrella_nodelink, to_umbrella_nodelink_file, to_umbrella_nodelink_gz
 from .manager import Manager, from_database, to_database
+from .parser.parse_bel import parse
 from .struct import BELGraph, Pipeline, Query
 from .struct.operations import union
 from .version import get_version

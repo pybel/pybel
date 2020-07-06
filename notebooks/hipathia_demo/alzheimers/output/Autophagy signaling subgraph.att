@@ -1,0 +1,9 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Autophagy signaling subgraph-10	HSPB8	4	113	white	rectangle	gene	0.5	black	46	17	30171
+N-Autophagy signaling subgraph-11	APP	66	132	white	rectangle	gene	0.5	black	46	17	620
+N-Autophagy signaling subgraph-12	APP	19	129	white	rectangle	gene	0.5	black	46	17	620
+N-Autophagy signaling subgraph-13	MAPK8IP2	0	141	white	rectangle	gene	0.5	black	46	17	6883
+N-Autophagy signaling subgraph-14	BACE1	69	8	white	rectangle	gene	0.5	black	46	17	933
+N-Autophagy signaling subgraph-3 4	RTN4R APP	44	131	white	rectangle	gene,gene	0.5	black	46	17	18601,/,620
+N-Autophagy signaling subgraph-8	RTN3	55	0	white	rectangle	gene	0.5	black	46	17	10469
+N-Autophagy signaling subgraph-9	RTN4R	32	142	white	rectangle	gene	0.5	black	46	17	18601

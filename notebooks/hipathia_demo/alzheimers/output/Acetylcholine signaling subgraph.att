@@ -1,0 +1,25 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Acetylcholine signaling subgraph-1 2	ACHE APP	137	164	white	rectangle	gene,gene	0.5	black	46	17	108,/,620
+N-Acetylcholine signaling subgraph-11	CHRNA1	125	142	white	rectangle	gene	0.5	black	46	17	1955
+N-Acetylcholine signaling subgraph-23	GSS	158	182	white	rectangle	gene	0.5	black	46	17	4624
+N-Acetylcholine signaling subgraph-25	APP	10	151	white	rectangle	gene	0.5	black	46	17	620
+N-Acetylcholine signaling subgraph-26	APP	131	157	white	rectangle	gene	0.5	black	46	17	620
+N-Acetylcholine signaling subgraph-27	NGF	148	186	white	rectangle	gene	0.5	black	46	17	7808
+N-Acetylcholine signaling subgraph-28	PRNP	137	181	white	rectangle	gene	0.5	black	46	17	9449
+N-Acetylcholine signaling subgraph-3	AKT	162	172	white	rectangle	gene	0.5	black	46	17	AKT
+N-Acetylcholine signaling subgraph-30	Chat	117	156	white	rectangle	gene	0.5	black	46	17	88392
+N-Acetylcholine signaling subgraph-31	Chrna3	73	31	white	rectangle	gene	0.5	black	46	17	2345
+N-Acetylcholine signaling subgraph-32	Chrna4	97	20	white	rectangle	gene	0.5	black	46	17	2346
+N-Acetylcholine signaling subgraph-33	Chrna5	92	28	white	rectangle	gene	0.5	black	46	17	2347
+N-Acetylcholine signaling subgraph-34	Chrna7	66	24	white	rectangle	gene	0.5	black	46	17	2348
+N-Acetylcholine signaling subgraph-35	Chrnb2	82	31	white	rectangle	gene	0.5	black	46	17	2350
+N-Acetylcholine signaling subgraph-36	Chrnb4	73	1	white	rectangle	gene	0.5	black	46	17	2351
+N-Acetylcholine signaling subgraph-37	Ins2	80	17	white	rectangle	gene	0.5	black	46	17	2916
+N-Acetylcholine signaling subgraph-38	Chrna10	66	7	white	rectangle	gene	0.5	black	46	17	620142
+N-Acetylcholine signaling subgraph-39	Chrna2	96	10	white	rectangle	gene	0.5	black	46	17	621533
+N-Acetylcholine signaling subgraph-4	Caspase	158	161	white	rectangle	gene	0.5	black	46	17	Caspase
+N-Acetylcholine signaling subgraph-40	Chrna9	63	15	white	rectangle	gene	0.5	black	46	17	621534
+N-Acetylcholine signaling subgraph-41	Chrnb3	82	0	white	rectangle	gene	0.5	black	46	17	621544
+N-Acetylcholine signaling subgraph-42	Chrna6	90	3	white	rectangle	gene	0.5	black	46	17	69281
+N-Acetylcholine signaling subgraph-5	ACHE	146	170	white	rectangle	gene	0.5	black	46	17	108
+N-Acetylcholine signaling subgraph-7	SLC5A7	0	157	white	rectangle	gene	0.5	black	46	17	14025

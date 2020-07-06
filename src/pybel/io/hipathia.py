@@ -68,12 +68,13 @@ import logging
 import os
 from collections import defaultdict
 from itertools import groupby
-from typing import List, Optional, Set, Tuple
+from operator import itemgetter
+from typing import List, Optional, Set, Tuple, Union
 
 import networkx as nx
 import pandas as pd
 
-from ..constants import CAUSAL_INCREASE_RELATIONS, CAUSAL_POLAR_RELATIONS, IS_A, RELATION
+from ..constants import CAUSAL_INCREASE_RELATIONS, CAUSAL_POLAR_RELATIONS, CITATION_TYPE_OTHER, IS_A, RELATION
 from ..dsl import ComplexAbundance, Protein, hgnc
 from ..struct import BELGraph
 
@@ -188,20 +189,27 @@ def from_hipathia_dfs(name: str, att_df: pd.DataFrame, sif_df: pd.DataFrame) -> 
     sif_df['target'] = sif_df['target'].map(_clean_name).map(x.get)
     for source, relation, target in sif_df.values:
         if relation == 'activation':
-            graph.add_increases(source, target, citation='', evidence='')
+            graph.add_increases(source, target, citation=(CITATION_TYPE_OTHER, 'HiPathia'), evidence='')
         elif relation == 'inhibition':
-            graph.add_decreases(source, target, citation='', evidence='')
+            graph.add_decreases(source, target, citation=(CITATION_TYPE_OTHER, 'HiPathia'), evidence='')
         else:
             raise ValueError('unknown relation: {relation}'.format(relation=relation))
 
     return graph
 
 
-def to_hipathia(graph: BELGraph, directory: str) -> None:
+def to_hipathia(
+    graph: BELGraph,
+    directory: str,
+    draw: bool = True,
+) -> None:
     """Export HiPathia artifacts for the graph."""
-    att_df, sif_df = to_hipathia_dfs(graph)
-    att_df.to_csv(os.path.join(directory, '{}.att'.format(graph.name)))
-    sif_df.to_csv(os.path.join(directory, '{}.sif'.format(graph.name)))
+    att_df, sif_df = to_hipathia_dfs(graph, draw_directory=directory if draw else None)
+    if att_df is None and sif_df is None:
+        logger.warning('can not convert graph %s', graph.name)
+        return
+    att_df.to_csv(os.path.join(directory, '{}.att'.format(graph.name)), sep='\t', index=False)
+    sif_df.to_csv(os.path.join(directory, '{}.sif'.format(graph.name)), sep='\t', index=False)
 
 
 def _is_node_family(graph: BELGraph, node: Protein) -> Optional[Set[Protein]]:
@@ -212,13 +220,20 @@ def _is_node_family(graph: BELGraph, node: Protein) -> Optional[Set[Protein]]:
             children.add(child)
 
     if children and not all(isinstance(child, Protein) for child in children):
-        raise ValueError('not all children are proteins?')
+        logger.warning('not all children of {} are proteins: {}'.format(node, children))
+        return
 
     return children
 
 
-def to_hipathia_dfs(graph: BELGraph) -> Tuple[pd.DataFrame, pd.DataFrame]:
+def to_hipathia_dfs(
+    graph: BELGraph,
+    draw_directory: Optional[str] = None,
+) -> Union[Tuple[None, None], Tuple[pd.DataFrame, pd.DataFrame]]:
     """Get the ATT and SIF dataframes.
+
+    :param graph: A BEL graph
+    :param draw_directory: The directory in which a drawing should be output
 
     1. Identify nodes:
        1. Identify all proteins
@@ -230,7 +245,7 @@ def to_hipathia_dfs(graph: BELGraph) -> Tuple[pd.DataFrame, pd.DataFrame]:
     proteins = set()
     families = defaultdict(set)
     complexes = set()
-    for node in graph:
+    for node in sorted(graph, key=str):
         if isinstance(node, Protein):
             children = _is_node_family(graph, node)
             if children:
@@ -240,12 +255,15 @@ def to_hipathia_dfs(graph: BELGraph) -> Tuple[pd.DataFrame, pd.DataFrame]:
         elif isinstance(node, ComplexAbundance) and all(isinstance(m, Protein) for m in node.members):
             complexes.add(node)
 
-    families = {k: sorted(values, key=str) for k, values in families.items()}
+    families = {
+        node: sorted(values, key=str)
+        for node, values in sorted(families.items(), key=itemgetter(0))
+    }
 
-    nodes = proteins.union(families).union(complexes)
+    nodes = sorted(proteins.union(families).union(complexes), key=str)
     new_nodes = set()
     edges = []
-    for u, v, d in graph.out_edges(nodes, data=True):
+    for u, v, _, d in sorted(graph.out_edges(nodes, keys=True, data=True), key=lambda t: (str(t[0]), str(t[1]), t[2])):
         relation = d[RELATION]
         if relation not in CAUSAL_POLAR_RELATIONS:
             continue
@@ -260,43 +278,76 @@ def to_hipathia_dfs(graph: BELGraph) -> Tuple[pd.DataFrame, pd.DataFrame]:
         if node in families:
             i += 1
             k = (i,)
-            a, b = [node.name], [[child.identifier for child in families[node]]]
+            children = families[node]
+            child_identifiers = [child.identifier for child in children]
+            if not all(child_identifiers):
+                logger.warning('not all children were grounded: %s', child_identifiers)
+                continue
+            labels, genes_lists = [node.name], [child_identifiers]
         elif isinstance(node, Protein):
+            if not node.identifier or not node.name:
+                logger.warning('node was not grounded: %s', node)
+                continue
             i += 1
             k = (i,)
-            a, b = [node.name], [[node.identifier]]
+            labels, genes_lists = [node.name], [[node.identifier]]
         elif isinstance(node, ComplexAbundance):
-            k, a, b = [], [], []
+            k, labels, genes_lists = [], [], []
             for member in node.members:
                 i += 1
                 k.append(i)
-                a.append(member.name)
+                labels.append(member.name)
                 if member in families:
-                    b.append([child.identifier for child in families[member]])
+                    children = families[member]
+                    child_identifiers = [child.identifier for child in children]
+                    if not all(child_identifiers):
+                        logger.warning('not all children were grounded: %s', child_identifiers)
+                        continue
+                    genes_lists.append(child_identifiers)
                 else:
-                    b.append([member.identifier])
+                    if not member.identifier:
+                        logger.warning('member was not grounded: %s', member)
+                        continue
+                    genes_lists.append([member.identifier])
             k = tuple(k)
         else:
-            raise ValueError
+            logger.debug('skipping node {}'.format(node))
+            continue
 
         k = 'N-{}-{}'.format(graph.name, ' '.join(map(str, k)))
-        att[k] = a, b
+        att[k] = labels, genes_lists
         dsl_to_k[node] = k
 
     edges = [
         (dsl_to_k[source], relation, dsl_to_k[target])
         for source, relation, target in edges
+        if source in dsl_to_k and target in dsl_to_k
     ]
     sif_df = pd.DataFrame(edges)  # DONE
 
     composite_graph = nx.Graph([(k_source, k_target) for k_source, _, k_target in edges])
-    pos = nx.spring_layout(composite_graph)
+
+    try:
+        from networkx.drawing.nx_agraph import pygraphviz_layout
+        pos = pygraphviz_layout(composite_graph, prog="neato", args='-Gstart=5')
+    except ImportError:
+        logger.warning('could not import pygraphviz. Falling back to force directed')
+        pos = nx.fruchterman_reingold_layout(composite_graph, seed=5)
+
+    if not pos:
+        return None, None
+
+    nx_labels = {}  # from k to label
     min_x = min(x for x, y in pos.values())
     min_y = min(y for x, y in pos.values())
 
     att_rows = []
     for k, (labels, genes_lists) in sorted(att.items()):
-        label = ' '.join(labels)
+        if k not in pos:
+            logger.warning('node not in graph: %s', k)
+            continue
+
+        nx_labels[k] = label = ' '.join(labels)
         types = ','.join(['gene'] * len(labels))
         gene_list = ',/,'.join(
             ','.join(gene_list)
@@ -322,6 +373,17 @@ def to_hipathia_dfs(graph: BELGraph) -> Tuple[pd.DataFrame, pd.DataFrame]:
         'ID', 'label', 'X', 'Y', 'color', 'shape', 'type', 'label.cex', 'label.color', 'width', 'height',
         'genesList'
     ])
+
+    if draw_directory is not None:
+        try:
+            import matplotlib.pyplot as plt
+        except ImportError:
+            logger.warning('could not draw graph because matplotlib is not installed')
+        else:
+            plt.figure(figsize=(20, 20))
+            nx.draw_networkx(composite_graph, pos, labels=nx_labels)
+            plt.axis('off')
+            plt.savefig(os.path.join(draw_directory, '{}.png'.format(graph.name)))
 
     return att_df, sif_df
 

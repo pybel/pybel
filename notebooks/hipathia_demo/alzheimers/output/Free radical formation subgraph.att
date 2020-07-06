@@ -1,0 +1,3 @@
+ID	label	X	Y	color	shape	type	label.cex	label.color	width	height	genesList
+N-Free radical formation subgraph-3	HSD17B10	199	75	white	rectangle	gene	0.5	black	46	17	4800
+N-Free radical formation subgraph-5	APP	0	0	white	rectangle	gene	0.5	black	46	17	620
