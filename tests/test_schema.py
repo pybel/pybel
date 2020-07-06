@@ -124,10 +124,10 @@ class TestNodeSchema(unittest.TestCase):
 
 class TestEdgeSchema(unittest.TestCase):
     """Tests for the jsonschema edge validation."""
-    
+
     @staticmethod
     def _load_example() -> dict:
-        """Load the edge contained in example_edge.json"""
+        """Load the edge contained in example_edge.json."""
         here = os.path.abspath(os.path.dirname(__file__))
         example_file = os.path.join(here, 'example_edge.json')
         with open(example_file) as example_json:
