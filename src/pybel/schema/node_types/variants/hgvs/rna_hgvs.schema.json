@@ -1,0 +1,18 @@
+{
+    "$schema": "https://json-schema.org/draft/2019-09/schema#",
+    "title": "BEL Variant Node",
+    "description": "Schema to validate JSON files describing a RNA HGVS variant.",
+    "type": "object",
+    "allOf": [
+        {
+            "$ref": "base_hgvs.schema.json"
+        },
+        {
+            "properties": {
+                "hgvs": {
+                    "pattern": "^r"
+                }
+            }
+        }
+    ]
+}

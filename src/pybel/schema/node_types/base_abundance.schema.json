@@ -24,7 +24,7 @@
                         "items": {
                             "anyOf": [
                                 {"$ref": "variants/protein_mod.schema.json"},
-                                {"$ref": "variants/protein_sub.schema.json"},
+                                {"$ref": "variants/hgvs/base_hgvs.schema.json"},
                                 {"$ref": "variants/fragment.schema.json"}
                             ]
                         }
