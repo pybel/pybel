@@ -192,7 +192,7 @@ class NamespaceEntry(Base):
         return cls.name.contains(name_query)
 
     def __str__(self):
-        return '[{namespace_id}]{namespace_name}:[{identifier}]{name}'.format(
+        return '[id={namespace_id}] {namespace_name}:{identifier} ! {name}'.format(
             namespace_id=self.namespace.id,
             namespace_name=self.namespace.keyword,
             identifier=self.identifier,

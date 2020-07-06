@@ -44,6 +44,7 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
         """Test that a namespace defined by a URL can't be overwritten by a definition by another URL."""
         s = NAMESPACE_URL_FMT.format(HGNC_KEYWORD, HGNC_URL)
         self.parser.parseString(s)
+        self.parser.ensure_resources()
         help_check_hgnc(self, self.parser.namespace_to_term_to_encoding)
 
         s = NAMESPACE_URL_FMT.format(HGNC_KEYWORD, 'XXXXX')
@@ -57,6 +58,8 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
         """Test that an annotation defined by a URL can't be overwritten by a definition by a list."""
         s = ANNOTATION_URL_FMT.format(MESH_DISEASES_KEYWORD, MESH_DISEASES_URL)
         self.parser.parseString(s)
+        self.parser.ensure_resources()
+
         self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotation_to_term)
 
         s = 'DEFINE ANNOTATION {} AS LIST {{"A","B","C"}}'.format(MESH_DISEASES_KEYWORD)
@@ -95,6 +98,7 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
             'DEFINE ANNOTATION TextLocation AS LIST {"Abstract","Results","Legend","Review"}'
         ]
         self.parser.parse_lines(lines)
+        self.parser.ensure_resources()
 
         self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotation_to_term)
         self.assertIn(HGNC_KEYWORD, self.parser.namespace_to_term_to_encoding)
@@ -128,6 +132,7 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
         """Tests parsing a namespace by file URL"""
         s = NAMESPACE_URL_FMT.format('TESTNS1', test_ns_1)
         self.parser.parseString(s)
+        self.parser.ensure_resources()
 
         expected_values = {
             'TestValue1': {'O'},
@@ -150,6 +155,7 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
         url = Path(test_an_1).as_uri()
         line = ANNOTATION_URL_FMT.format(keyword, url)
         self.parser.parseString(line)
+        self.parser.ensure_resources()
 
         expected_values = {
             'TestAnnot1': 'O',
@@ -159,7 +165,9 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
             'TestAnnot5': 'O'
         }
 
-        self.assertEqual(set(expected_values), self.parser.manager.get_annotation_entry_names(url))
+        annotation = self.parser.manager.get_namespace_by_url(url)
+        self.assertIsNotNone(annotation)
+        self.assertEqual(set(expected_values), {e.name for e in annotation.entries})
 
     def test_parse_annotation_pattern(self):
         s = r'DEFINE ANNOTATION Test AS PATTERN "\w+"'

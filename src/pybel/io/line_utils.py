@@ -225,6 +225,9 @@ def parse_definitions(
 
     logger.info('Finished parsing definitions section in %.02f seconds', time.time() - parse_definitions_start_time)
 
+    metadata_parser.ensure_resources()
+    logger.info('Finished ensuring namespaces in cache')
+
 
 def parse_statements(
     graph: BELGraph,
