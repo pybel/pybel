@@ -1,5 +1,5 @@
 {
-    "subject": {
+    "source": {
         "function": "Protein",
         "concept": {
             "namespace": "HGNC",
@@ -22,7 +22,7 @@
         }
     },
     "relation": "directlyDecreases",
-    "object": {
+    "target": {
         "function": "Protein",
         "concept": {
             "namespace": "HGNC",
