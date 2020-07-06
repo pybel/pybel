@@ -6,7 +6,7 @@ from collections import defaultdict
 from typing import Mapping, Tuple
 
 from ..graph import BELGraph
-from ...constants import CITATION, CITATION_DB, CITATION_IDENTIFIER
+from ...constants import CITATION, IDENTIFIER, NAMESPACE
 
 __all__ = [
     'get_subgraphs_by_citation',
@@ -24,7 +24,7 @@ def get_subgraphs_by_citation(graph: BELGraph) -> Mapping[Tuple[str, str], BELGr
     for u, v, key, data in graph.edges(keys=True, data=True):
         if CITATION not in data:
             continue
-        dk = data[CITATION][CITATION_DB], data[CITATION][CITATION_IDENTIFIER]
+        dk = data[CITATION][NAMESPACE], data[CITATION][IDENTIFIER]
 
         rv[dk].add_edge(u, v, key=key, **data)
 

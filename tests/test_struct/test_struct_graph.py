@@ -11,7 +11,7 @@ from io import StringIO
 import pybel
 import pybel.examples
 from pybel import BELGraph
-from pybel.constants import CITATION_DB, CITATION_IDENTIFIER, CITATION_TYPE_PUBMED
+from pybel.constants import CITATION_TYPE_PUBMED, IDENTIFIER, NAMESPACE
 from pybel.dsl import hgvs, protein
 from pybel.io.api import InvalidExtensionError
 from pybel.testing.utils import n
@@ -101,7 +101,7 @@ class TestStruct(unittest.TestCase):
 Name                   Sialic Acid Graph
 Version                1.0.0
 Number of Nodes        9
-Number of Namespaces   3
+Number of Namespaces   4
 Number of Edges        11
 Number of Annotations  2
 Number of Citations    1
@@ -117,10 +117,12 @@ Protein           7
 Complex           1
 Abundance         1
 
-Namespace (2)      Count
+Namespace (4)      Count
 ---------------  -------
-hgnc                   7
-chebi                  1
+hgnc                   8
+chebi                  2
+go                     2
+bel                    1
 
 Edge Type (7)                        Count
 ---------------------------------  -------
@@ -179,10 +181,10 @@ class TestGetGraphProperties(unittest.TestCase):
 
         self.assertIsNotNone(citation)
         self.assertIsInstance(citation, dict)
-        self.assertIn(CITATION_DB, citation)
-        self.assertEqual(CITATION_TYPE_PUBMED, citation[CITATION_DB])
-        self.assertIn(CITATION_IDENTIFIER, citation)
-        self.assertEqual(test_pmid, citation[CITATION_IDENTIFIER])
+        self.assertIn(NAMESPACE, citation)
+        self.assertEqual(CITATION_TYPE_PUBMED, citation[NAMESPACE])
+        self.assertIn(IDENTIFIER, citation)
+        self.assertEqual(test_pmid, citation[IDENTIFIER])
 
         evidence = self.graph.get_edge_evidence(test_source, test_target, test_key)
 

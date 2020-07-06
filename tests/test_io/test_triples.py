@@ -8,15 +8,15 @@ from typing import Tuple, Type
 from pybel import BELGraph
 from pybel.constants import (
     ASSOCIATION, DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO, INCREASES, IS_A,
-    NEGATIVE_CORRELATION, OBJECT, PART_OF, POSITIVE_CORRELATION, REGULATES, RELATION,
+    NEGATIVE_CORRELATION, TARGET_MODIFIER, PART_OF, POSITIVE_CORRELATION, REGULATES, RELATION,
 )
 from pybel.dsl import (
     Abundance, BaseEntity, BiologicalProcess, ComplexAbundance, MicroRna, NamedComplexAbundance, Pathology,
     Population, Protein, Rna, activity,
 )
-from pybel.io.tsv import converters as tsvc
-from pybel.io.tsv.api import get_triple
-from pybel.io.tsv.converters import (
+from pybel.io.triples import converters as tsvc
+from pybel.io.triples.api import to_triple
+from pybel.io.triples.converters import (
     AbundanceDirectlyDecreasesProteinActivityConverter, AbundanceDirectlyIncreasesProteinActivityConverter,
     AbundancePartOfPopulationConverter, AssociationConverter, Converter, CorrelationConverter, DecreasesAmountConverter,
     DrugIndicationConverter, DrugSideEffectConverter, EquivalenceConverter, IncreasesAmountConverter, IsAConverter,
@@ -32,7 +32,7 @@ def _rel(x):
 
 
 def _rela(x, y=None):
-    return {RELATION: x, OBJECT: activity(y)}
+    return {RELATION: x, TARGET_MODIFIER: activity(y)}
 
 
 def _assoc(y):
@@ -182,7 +182,7 @@ class TestConverters(unittest.TestCase):
         graph.add_edge(u, v, key=key, **edge_data)
         self.assertEqual(
             triple,
-            get_triple(graph, u, v, key),
+            to_triple(graph, u, v, key),
             msg='get_triple failed: {}'.format(converter.__name__),
         )
 

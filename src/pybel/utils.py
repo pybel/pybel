@@ -13,8 +13,8 @@ from datetime import datetime
 from typing import Any, List, Mapping, Optional, Tuple, TypeVar
 
 from .constants import (
-    ACTIVITY, CITATION, CITATION_DB, CITATION_DB_NAME, CITATION_IDENTIFIER, DEGRADATION, EFFECT, EVIDENCE, FROM_LOC,
-    IDENTIFIER, LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT, RELATION, SUBJECT, TO_LOC, TRANSLOCATION,
+    ACTIVITY, CITATION, DEGRADATION, EFFECT, EVIDENCE, FROM_LOC, IDENTIFIER, LOCATION, MODIFIER, NAME, NAMESPACE,
+    RELATION, SOURCE_MODIFIER, TARGET_MODIFIER, TO_LOC, TRANSLOCATION,
 )
 from .typing import EdgeData
 
@@ -138,7 +138,7 @@ def parse_datetime(s: str) -> datetime.date:
 def _get_citation_str(data: Mapping) -> Optional[str]:
     citation = data.get(CITATION)
     if citation is not None:
-        return '{}:{}'.format(citation[CITATION_DB], citation[CITATION_IDENTIFIER])
+        return citation.curie
 
 
 def hash_edge(source, target, edge_data: EdgeData) -> str:
@@ -224,8 +224,8 @@ def canonicalize_edge(edge_data: EdgeData) -> CanonicalEdge:
     """Canonicalize the edge to a tuple based on the relation, subject modifications, and object modifications."""
     return (
         edge_data[RELATION],
-        _canonicalize_edge_modifications(edge_data.get(SUBJECT)),
-        _canonicalize_edge_modifications(edge_data.get(OBJECT)),
+        _canonicalize_edge_modifications(edge_data.get(SOURCE_MODIFIER)),
+        _canonicalize_edge_modifications(edge_data.get(TARGET_MODIFIER)),
     )
 
 
@@ -298,26 +298,6 @@ def get_corresponding_pickle_path(path: str) -> str:
     :param path: A path to a BEL file.
     """
     return '{path}.pickle'.format(path=path)
-
-
-def citation_dict(*, db: str, db_id: str, db_name: Optional[str] = None, **kwargs):
-    """Make a citation dictionary."""
-    return CitationDict(db=db, db_id=db_id, db_name=db_name, **kwargs)
-
-
-class CitationDict(dict):
-    """A dictionary describing a citation."""
-
-    def __init__(self, db: str, db_id: str, *, db_name: Optional[str] = None, **kwargs):
-        super().__init__()
-        self[CITATION_DB] = db
-        self[CITATION_IDENTIFIER] = db_id
-        if db_name is not None:
-            self[CITATION_DB_NAME] = db_name
-        self.update(kwargs)
-
-    def __hash__(self):
-        return hash((self[CITATION_DB], self[CITATION_IDENTIFIER]))
 
 
 X = TypeVar('X')

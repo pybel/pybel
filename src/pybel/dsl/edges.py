@@ -2,13 +2,14 @@
 
 """Internal DSL functions for edges."""
 
+import warnings
 from typing import Dict, Optional, Union
 
 from ..constants import (
     ACTIVITY, BEL_DEFAULT_NAMESPACE, CELL_SURFACE, DEGRADATION, EFFECT, EXTRACELLULAR, FROM_LOC, INTRACELLULAR,
-    LOCATION, MODIFIER, TO_LOC, TRANSLOCATION,
+    LOCATION, MODIFIER, NAME, NAMESPACE, TO_LOC, TRANSLOCATION,
 )
-from ..language import Entity
+from ..language import Entity, activity_mapping, compartment_mapping
 
 __all__ = [
     'activity',
@@ -30,7 +31,7 @@ def _modifier_helper(
     """Make a modifier dictionary.
 
     :param modifier: The name of the modifier
-    :param Optional[dict] location: An entity from :func:`pybel.dsl.entity`
+    :param location: An entity from :func:`pybel.dsl.entity`
     """
     rv = {
         MODIFIER: modifier,
@@ -57,13 +58,16 @@ def activity(
     """
     rv = _modifier_helper(ACTIVITY, location=location)
 
-    if name or (namespace and identifier):
+    if namespace == BEL_DEFAULT_NAMESPACE or (name and not namespace):
+        rv[EFFECT] = activity_mapping[name]
+    elif not name and not namespace and not identifier:
+        pass
+    else:
         rv[EFFECT] = Entity(
-            namespace=(namespace or BEL_DEFAULT_NAMESPACE),
+            namespace=namespace,
             name=name,
             identifier=identifier,
         )
-
     return rv
 
 
@@ -87,15 +91,19 @@ def translocation(
     """
     rv = _modifier_helper(TRANSLOCATION)
     if isinstance(from_loc, str):
-        from_loc = Entity(
-            namespace=BEL_DEFAULT_NAMESPACE,
-            name=from_loc,
-        )
+        from_loc = compartment_mapping[from_loc]
+    elif from_loc[NAMESPACE] == BEL_DEFAULT_NAMESPACE:
+        warnings.warn('Deprecated usage of translocation()')
+        from_loc = compartment_mapping[from_loc[NAME]]
+    if not isinstance(from_loc, Entity):
+        raise TypeError
     if isinstance(to_loc, str):
-        to_loc = Entity(
-            namespace=BEL_DEFAULT_NAMESPACE,
-            name=to_loc,
-        )
+        to_loc = compartment_mapping[to_loc]
+    elif to_loc[NAMESPACE] == BEL_DEFAULT_NAMESPACE:
+        warnings.warn('Deprecated usage of translocation()')
+        to_loc = compartment_mapping[to_loc[NAME]]
+    if not isinstance(to_loc, Entity):
+        raise TypeError
 
     rv[EFFECT] = {
         FROM_LOC: from_loc,
@@ -147,7 +155,7 @@ def location(identifier: Entity) -> LocationDict:
             target,
             citation=...,
             evidence=...,
-            object_modifier=location(entity(namespace='GO', name='cytosol', identifier='GO:0005829')),
+            target_modifier=location(entity(namespace='GO', name='cytosol', identifier='GO:0005829')),
         )
 
     X increases the kinase activity of Y in the cytoplasm. In this case, the :func:`activity` function takes a location as
@@ -167,7 +175,7 @@ def location(identifier: Entity) -> LocationDict:
             target,
             citation=...,
             evidence=...,
-            object_modifier=activity('kin', location=entity(namespace='GO', name='cytosol', identifier='GO:0005829')),
+            target_modifier=activity('kin', location=entity(namespace='GO', name='cytosol', identifier='GO:0005829')),
         )
     """
     return {

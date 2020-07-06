@@ -94,7 +94,7 @@ egf_graph.add_increases(
     evidence='This induction was not seen either when LNCaP cells were treated with flutamide or conditioned medium '
              'were pretreated with antibody to the epidermal growth factor (EGF)',
     annotations={'Species': '9606'},
-    subject_modifier=activity('tscript'),
+    source_modifier=activity('tscript'),
 )
 
 egf_graph.add_decreases(
@@ -122,7 +122,7 @@ egf_graph.add_increases(
     evidence='Although found predominantly in the cytoplasm and, less abundantly, in the nucleus, VCP can be '
              'translocated from the nucleus after stimulation with epidermal growth factor.',
     annotations={'Species': '9606'},
-    object_modifier=translocation(
+    target_modifier=translocation(
         from_loc=nucleus,
         to_loc=cytoplasm,
     ),
@@ -135,8 +135,8 @@ egf_graph.add_increases(
     evidence="Valosin-containing protein (VCP; also known as p97) has been shown to be associated with antiapoptotic"
              " function and metastasis via activation of the nuclear factor-kappaB signaling pathway.",
     annotations={'Species': '9606'},
-    subject_modifier=activity('cat'),
-    object_modifier=activity('tscript'),
+    source_modifier=activity('cat'),
+    target_modifier=activity('tscript'),
 )
 
 egf_graph.add_decreases(
@@ -146,5 +146,5 @@ egf_graph.add_decreases(
     evidence="Valosin-containing protein (VCP; also known as p97) has been shown to be associated with antiapoptotic "
              "function and metastasis via activation of the nuclear factor-kappaB signaling pathway.",
     annotations={'Species': '9606'},
-    subject_modifier=activity('tscript'),
+    source_modifier=activity('tscript'),
 )

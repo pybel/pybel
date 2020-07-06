@@ -91,7 +91,7 @@ class Entity(dict):
         )
 
     def __str__(self):  # noqa: D105
-        return self.curie
+        return self.obo if self.identifier and self.name else self.curie
 
 
 #: A dictionary of activity labels used in the ma() function in activity(p(X), ma(Y))
@@ -149,12 +149,15 @@ activities = list(activity_labels.keys())
 
 cytoplasm = Entity(name='cytoplasm', namespace='go', identifier='0005737')
 nucleus = Entity(name='nucleus', namespace='go', identifier='0005634')
+intracellular = Entity(name='intracellular', namespace='go', identifier='0005622')
+extracellular = Entity(name='extracellular space', namespace='go', identifier='0005615')
+cell_surface = Entity(name='cell surface', namespace='go', identifier='0009986')
 
 #: Maps the default BEL cellular components to Gene Ontology Cellular Components
 compartment_mapping = {
-    INTRACELLULAR: Entity(name='intracellular', namespace='go', identifier='0005622'),
-    EXTRACELLULAR: Entity(name='extracellular space', namespace='go', identifier='0005615'),
-    CELL_SURFACE: Entity(name='cell surface', namespace='go', identifier='0009986'),
+    INTRACELLULAR: intracellular,
+    EXTRACELLULAR: extracellular,
+    CELL_SURFACE: cell_surface,
     'cytoplasm': cytoplasm,
     'nucleus': nucleus,
 }
@@ -552,3 +555,16 @@ gmod_mappings = {
 
 BEL_DEFAULT_NAMESPACE_VERSION = '2.1.1'
 BEL_DEFAULT_NAMESPACE_URL = 'http://openbel.org/2.1.1.belns'  # just needs something unique... will change later
+
+
+class CitationDict(Entity):
+    """A dictionary describing a citation."""
+
+    def __init__(self, namespace: str, identifier: str, *, name: Optional[str] = None, **kwargs):
+        super().__init__(namespace=namespace, identifier=identifier, name=name)
+        self.update(kwargs)
+
+
+def citation_dict(*, namespace: str, identifier: str, db_name: Optional[str] = None, **kwargs) -> CitationDict:
+    """Make a citation dictionary."""
+    return CitationDict(namespace=namespace, identifier=identifier, name=db_name, **kwargs)

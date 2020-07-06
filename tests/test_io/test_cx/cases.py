@@ -7,9 +7,7 @@ import unittest
 from typing import Mapping, Tuple
 
 from pybel import BELGraph, BaseEntity
-from pybel.constants import (
-    ANNOTATIONS, CITATION, CITATION_DB, CITATION_IDENTIFIER, EVIDENCE, OBJECT, RELATION, SUBJECT,
-)
+from pybel.constants import ANNOTATIONS, CITATION, EVIDENCE, IDENTIFIER, NAMESPACE, TARGET_MODIFIER, RELATION, SOURCE_MODIFIER
 from pybel.typing import EdgeData
 
 __all__ = [
@@ -26,7 +24,7 @@ def _edge_to_tuple(u: BaseEntity, v: BaseEntity, edge_data: EdgeData):
     if citation is None:
         citation_hashable = None
     else:
-        citation_hashable = (citation[CITATION_DB], citation[CITATION_IDENTIFIER])
+        citation_hashable = (citation[NAMESPACE], citation[IDENTIFIER])
 
     evidence_hashable = edge_data.get(EVIDENCE)
 
@@ -39,17 +37,17 @@ def _edge_to_tuple(u: BaseEntity, v: BaseEntity, edge_data: EdgeData):
             for key, values in sorted(annotations.items())
         )
 
-    subject = edge_data.get(SUBJECT)
-    if subject is None:
+    source_modifier = edge_data.get(SOURCE_MODIFIER)
+    if source_modifier is None:
         subject_hashable = None
     else:
-        subject_hashable = json.dumps(subject, ensure_ascii=True, sort_keys=True, indent=0)
+        subject_hashable = json.dumps(source_modifier, ensure_ascii=True, sort_keys=True, indent=0)
 
-    obj = edge_data.get(OBJECT)
-    if obj is None:
+    target_modifier = edge_data.get(TARGET_MODIFIER)
+    if target_modifier is None:
         object_hashable = None
     else:
-        object_hashable = json.dumps(obj, ensure_ascii=True, sort_keys=True, indent=0)
+        object_hashable = json.dumps(target_modifier, ensure_ascii=True, sort_keys=True, indent=0)
 
     return (
         u,

@@ -6,9 +6,9 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import (
-    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_DB, CITATION_IDENTIFIER,
-    CITATION_TYPE_ONLINE, CITATION_TYPE_PUBMED, DECREASES, DEGRADATION, DIRECTLY_DECREASES, DIRECTLY_INCREASES,
-    EVIDENCE, GMOD, INCREASES, LOCATION, MODIFIER, OBJECT, POLAR_RELATIONS, POSITIVE_CORRELATION, RELATION, SUBJECT,
+    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_TYPE_ONLINE,
+    CITATION_TYPE_PUBMED, DECREASES, DEGRADATION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EVIDENCE, GMOD, IDENTIFIER,
+    INCREASES, LOCATION, MODIFIER, NAMESPACE, TARGET_MODIFIER, POLAR_RELATIONS, POSITIVE_CORRELATION, RELATION, SOURCE_MODIFIER,
     TRANSLOCATION,
 )
 from pybel.dsl import (
@@ -149,7 +149,7 @@ class TestNodePredicates(unittest.TestCase):
             u,
             v,
             citation={
-                CITATION_DB: CITATION_TYPE_ONLINE, CITATION_IDENTIFIER: 'https://www.ncbi.nlm.nih.gov/gene/3290'
+                NAMESPACE: CITATION_TYPE_ONLINE, IDENTIFIER: 'https://www.ncbi.nlm.nih.gov/gene/3290'
             },
             evidence="Entrez Gene Summary: Human: The protein encoded by this gene is a microsomal enzyme that "
                      "catalyzes the conversion of the stress hormone cortisol to the inactive metabolite cortisone. "
@@ -158,8 +158,8 @@ class TestNodePredicates(unittest.TestCase):
                      "gene has been associated with obesity and insulin resistance in children. Two transcript "
                      "variants encoding the same protein have been found for this gene.",
             annotations={'Species': '9606'},
-            subject_modifier=activity('cat'),
-            object_modifier=degradation()
+            source_modifier=activity('cat'),
+            target_modifier=degradation(),
         )
 
         self.assertFalse(is_translocated(g, u))
@@ -183,7 +183,7 @@ class TestNodePredicates(unittest.TestCase):
             evidence="Although found predominantly in the cytoplasm and, less abundantly, in the nucleus, VCP can be "
                      "translocated from the nucleus after stimulation with epidermal growth factor.",
             annotations={'Species': '9606'},
-            object_modifier=translocation(
+            target_modifier=translocation(
                 from_loc=Entity(namespace='GO', identifier='0005634'),
                 to_loc=Entity(namespace='GO', identifier='0005737'),
             )
@@ -217,7 +217,7 @@ class TestNodePredicates(unittest.TestCase):
                      'expression and cellular infiltration....Recombinant cytokines were used, ... to treat naive '
                      'BALB/c mice.',
             annotations={'Species': '10090', 'MeSH': 'bronchoalveolar lavage fluid'},
-            object_modifier=secretion()
+            target_modifier=secretion(),
         )
 
         self.assertFalse(is_translocated(g, u))
@@ -245,7 +245,7 @@ class TestNodePredicates(unittest.TestCase):
             evidence='S100B protein is also secreted by astrocytes and acts on these cells to stimulate nitric oxide '
                      'secretion in an autocrine manner.',
             annotations={'Species': '10090', 'Cell': 'astrocyte'},
-            subject_modifier=secretion()
+            source_modifier=secretion()
         )
 
         self.assertTrue(is_translocated(g, u))
@@ -419,8 +419,8 @@ class TestEdgePredicate(unittest.TestCase):
         self.assertTrue(has_provenance({CITATION: {}, EVIDENCE: ''}))
 
     def test_has_pubmed(self):
-        self.assertTrue(has_pubmed({CITATION: {CITATION_DB: CITATION_TYPE_PUBMED}}))
-        self.assertFalse(has_pubmed({CITATION: {CITATION_DB: CITATION_TYPE_ONLINE}}))
+        self.assertTrue(has_pubmed({CITATION: {NAMESPACE: CITATION_TYPE_PUBMED}}))
+        self.assertFalse(has_pubmed({CITATION: {NAMESPACE: CITATION_TYPE_ONLINE}}))
         self.assertFalse(has_pubmed({}))
 
     def test_has_authors(self):
@@ -481,37 +481,37 @@ class TestEdgePredicate(unittest.TestCase):
         self.assertTrue(is_increase_or_decrease(g, p3, p4, 0))
 
     def test_has_degradation(self):
-        self.assertTrue(edge_has_degradation({SUBJECT: {MODIFIER: DEGRADATION}}))
-        self.assertTrue(edge_has_degradation({OBJECT: {MODIFIER: DEGRADATION}}))
+        self.assertTrue(edge_has_degradation({SOURCE_MODIFIER: {MODIFIER: DEGRADATION}}))
+        self.assertTrue(edge_has_degradation({TARGET_MODIFIER: {MODIFIER: DEGRADATION}}))
 
-        self.assertFalse(edge_has_degradation({SUBJECT: {MODIFIER: TRANSLOCATION}}))
-        self.assertFalse(edge_has_degradation({SUBJECT: {MODIFIER: ACTIVITY}}))
-        self.assertFalse(edge_has_degradation({SUBJECT: {LOCATION: None}}))
-        self.assertFalse(edge_has_degradation({OBJECT: {MODIFIER: TRANSLOCATION}}))
-        self.assertFalse(edge_has_degradation({OBJECT: {MODIFIER: ACTIVITY}}))
-        self.assertFalse(edge_has_degradation({OBJECT: {LOCATION: None}}))
+        self.assertFalse(edge_has_degradation({SOURCE_MODIFIER: {MODIFIER: TRANSLOCATION}}))
+        self.assertFalse(edge_has_degradation({SOURCE_MODIFIER: {MODIFIER: ACTIVITY}}))
+        self.assertFalse(edge_has_degradation({SOURCE_MODIFIER: {LOCATION: None}}))
+        self.assertFalse(edge_has_degradation({TARGET_MODIFIER: {MODIFIER: TRANSLOCATION}}))
+        self.assertFalse(edge_has_degradation({TARGET_MODIFIER: {MODIFIER: ACTIVITY}}))
+        self.assertFalse(edge_has_degradation({TARGET_MODIFIER: {LOCATION: None}}))
 
     def test_has_translocation(self):
-        self.assertTrue(edge_has_translocation({SUBJECT: {MODIFIER: TRANSLOCATION}}))
-        self.assertTrue(edge_has_translocation({OBJECT: {MODIFIER: TRANSLOCATION}}))
+        self.assertTrue(edge_has_translocation({SOURCE_MODIFIER: {MODIFIER: TRANSLOCATION}}))
+        self.assertTrue(edge_has_translocation({TARGET_MODIFIER: {MODIFIER: TRANSLOCATION}}))
 
-        self.assertFalse(edge_has_translocation({SUBJECT: {MODIFIER: ACTIVITY}}))
-        self.assertFalse(edge_has_translocation({SUBJECT: {LOCATION: None}}))
-        self.assertFalse(edge_has_translocation({SUBJECT: {MODIFIER: DEGRADATION}}))
-        self.assertFalse(edge_has_translocation({OBJECT: {MODIFIER: ACTIVITY}}))
-        self.assertFalse(edge_has_translocation({OBJECT: {LOCATION: None}}))
-        self.assertFalse(edge_has_translocation({OBJECT: {MODIFIER: DEGRADATION}}))
+        self.assertFalse(edge_has_translocation({SOURCE_MODIFIER: {MODIFIER: ACTIVITY}}))
+        self.assertFalse(edge_has_translocation({SOURCE_MODIFIER: {LOCATION: None}}))
+        self.assertFalse(edge_has_translocation({SOURCE_MODIFIER: {MODIFIER: DEGRADATION}}))
+        self.assertFalse(edge_has_translocation({TARGET_MODIFIER: {MODIFIER: ACTIVITY}}))
+        self.assertFalse(edge_has_translocation({TARGET_MODIFIER: {LOCATION: None}}))
+        self.assertFalse(edge_has_translocation({TARGET_MODIFIER: {MODIFIER: DEGRADATION}}))
 
     def test_has_activity(self):
-        self.assertTrue(edge_has_activity({SUBJECT: {MODIFIER: ACTIVITY}}))
-        self.assertTrue(edge_has_activity({OBJECT: {MODIFIER: ACTIVITY}}))
+        self.assertTrue(edge_has_activity({SOURCE_MODIFIER: {MODIFIER: ACTIVITY}}))
+        self.assertTrue(edge_has_activity({TARGET_MODIFIER: {MODIFIER: ACTIVITY}}))
 
-        self.assertFalse(edge_has_activity({SUBJECT: {MODIFIER: TRANSLOCATION}}))
-        self.assertFalse(edge_has_activity({OBJECT: {MODIFIER: TRANSLOCATION}}))
-        self.assertFalse(edge_has_activity({SUBJECT: {LOCATION: None}}))
-        self.assertFalse(edge_has_activity({SUBJECT: {MODIFIER: DEGRADATION}}))
-        self.assertFalse(edge_has_activity({OBJECT: {LOCATION: None}}))
-        self.assertFalse(edge_has_activity({OBJECT: {MODIFIER: DEGRADATION}}))
+        self.assertFalse(edge_has_activity({SOURCE_MODIFIER: {MODIFIER: TRANSLOCATION}}))
+        self.assertFalse(edge_has_activity({TARGET_MODIFIER: {MODIFIER: TRANSLOCATION}}))
+        self.assertFalse(edge_has_activity({SOURCE_MODIFIER: {LOCATION: None}}))
+        self.assertFalse(edge_has_activity({SOURCE_MODIFIER: {MODIFIER: DEGRADATION}}))
+        self.assertFalse(edge_has_activity({TARGET_MODIFIER: {LOCATION: None}}))
+        self.assertFalse(edge_has_activity({TARGET_MODIFIER: {MODIFIER: DEGRADATION}}))
 
     def test_has_annotation(self):
         self.assertFalse(edge_has_annotation({}, 'Subgraph'))

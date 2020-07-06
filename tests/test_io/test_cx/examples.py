@@ -8,7 +8,7 @@ from pybel.dsl import (
     ComplexAbundance, Protein, abundance, activity, bioprocess, gene, gmod, named_complex_abundance, pathology, pmod,
     protein_fusion, protein_substitution, reaction, rna,
 )
-from pybel.utils import citation_dict
+from pybel.language import citation_dict
 
 example_graph = BELGraph()
 
@@ -45,17 +45,17 @@ kin(p(HGNC:PTK2)) increases kin(p(HGNC:MAPK3))
 kin(p(HGNC:PTK2)) increases kin(complex(SCOMP:"p85/p110 PI3Kinase Complex"))
 """
 
-example_graph.add_increases(ptk2, mapk1, evidence=e1, citation=c1, object_modifier=kinase_activity)
-example_graph.add_increases(ptk2_rgb2_sos1, ras_family, evidence=e1, citation=c1, object_modifier=gtp_activity)
-example_graph.add_increases(ras_family, mapk1, evidence=e1, citation=c1, subject_modifier=gtp_activity,
-                            object_modifier=kinase_activity)
-example_graph.add_increases(ptk2, ptk2_rgb2_sos1, evidence=e1, citation=c1, subject_modifier=kinase_activity)
-example_graph.add_increases(ptk2, mapk1, evidence=e1, citation=c1, subject_modifier=kinase_activity,
-                            object_modifier=kinase_activity)
-example_graph.add_increases(ptk2, mapk3, evidence=e1, citation=c1, subject_modifier=kinase_activity,
-                            object_modifier=kinase_activity)
-example_graph.add_increases(ptk2, pi3k_complex, evidence=e1, citation=c1, subject_modifier=kinase_activity,
-                            object_modifier=kinase_activity)
+example_graph.add_increases(ptk2, mapk1, evidence=e1, citation=c1, target_modifier=kinase_activity)
+example_graph.add_increases(ptk2_rgb2_sos1, ras_family, evidence=e1, citation=c1, target_modifier=gtp_activity)
+example_graph.add_increases(ras_family, mapk1, evidence=e1, citation=c1, source_modifier=gtp_activity,
+                            target_modifier=kinase_activity)
+example_graph.add_increases(ptk2, ptk2_rgb2_sos1, evidence=e1, citation=c1, source_modifier=kinase_activity)
+example_graph.add_increases(ptk2, mapk1, evidence=e1, citation=c1, source_modifier=kinase_activity,
+                            target_modifier=kinase_activity)
+example_graph.add_increases(ptk2, mapk3, evidence=e1, citation=c1, source_modifier=kinase_activity,
+                            target_modifier=kinase_activity)
+example_graph.add_increases(ptk2, pi3k_complex, evidence=e1, citation=c1, source_modifier=kinase_activity,
+                            target_modifier=kinase_activity)
 
 """
 SET Evidence=" two common MTHFR polymorphisms, namely 677C>T (Ala222Val) and 1298A>C (Glu429Ala), are known to reduce MTHFR activity. \
@@ -81,8 +81,8 @@ mthfr_a1298c = Protein(namespace='hgnc', name='MTHFR', variants=[protein_substit
 folic_acid = abundance('CHEBI', 'folic acid')
 alzheimer_disease = pathology('MESH', 'Alzheimer Disease')
 
-example_graph.add_decreases(mthfr_c677t, mthfr, citation=c2, evidence=e2, object_modifier=activity())
-example_graph.add_decreases(mthfr_a1298c, mthfr, citation=c2, evidence=e2, object_modifier=activity())
+example_graph.add_decreases(mthfr_c677t, mthfr, citation=c2, evidence=e2, target_modifier=activity())
+example_graph.add_decreases(mthfr_a1298c, mthfr, citation=c2, evidence=e2, target_modifier=activity())
 example_graph.add_negative_correlation(mthfr_c677t, folic_acid, citation=c2, evidence=e2)
 example_graph.add_positive_correlation(mthfr_c677t, alzheimer_disease, citation=c2, evidence=e2)
 
@@ -115,7 +115,7 @@ a(SCHEM:Kallidin) increases cat(p(HGNC:BDKRB1))
 cat(p(HGNC:BDKRB1)) increases cat(p(SFAM:"PLA2 Family"))
 """
 
-c4 = citation_dict(db=CITATION_TYPE_OTHER, db_id='Genstruct Reference')
+c4 = citation_dict(namespace=CITATION_TYPE_OTHER, identifier='Genstruct Reference')
 e4 = '% Entrez Gene summary: Rat: SUMMARY: precursor protein of kinin which is found in plasma; cysteine protease inhibitor and a major acute phase reactant [RGD] OMIM summary: (summary is not available from this source) kininogens; Endogenous peptides present in most body fluids. Certain enzymes convert them to active kinins which are involved in inflammation, blood clotting, complement reactions, etc. Kininogens belong to the cystatin superfamily. They are cysteine proteinase inhibitors. High-molecular-weight kininogen (hmwk) is split by plasma kallikrein to produce bradykinin. Low-molecular-weight kininogen (lmwk) is split by tissue kallikrein to produce kallidin. kinins; Inflammatory mediators that cause dilation of blood vessels and altered vascular permeability.  Kinins are small peptides produced from kininogen by kallikrein and are broken down by kininases. Act on phospholipase and increase arachidonic acid release and thus prostaglandin (PGE2) production. bradykinin; Vasoactive nonapeptide (RPPGFSPFR) formed by action of proteases on kininogens. Very similar to kallidin (which has the same sequence but with an additional N terminal lysine). Bradykinin is a very potent vasodilator and increases permeability of post capillary venules, it acts on endothelial cells to activate phospholipase A2. It is also spasmogenic for some smooth muscle and will cause pain. kallidin; Decapeptide (lysyl bradykinin, amino acid sequence KRPPGFSPFR) produced in kidney. Like bradykinin, an inflammatory mediator (a kinin), causes dilation of renal blood vessels and increased water excretion.'
 e4 = str(hash(e4))
 
@@ -127,9 +127,9 @@ pla2_family = Protein('SFAM', 'PLA2 Family')
 kng1_to_kallidin = reaction(reactants=[kng1], products=[kallidin])
 
 example_graph.add_increases(inflammatory_process, kng1_to_kallidin, citation=c4, evidence=e4)
-example_graph.add_increases(kallidin, bdkrb1, citation=c4, evidence=e4, object_modifier=catalytic_activity)
-example_graph.add_increases(bdkrb1, pla2_family, citation=c4, evidence=e4, subject_modifier=catalytic_activity,
-                            object_modifier=catalytic_activity)
+example_graph.add_increases(kallidin, bdkrb1, citation=c4, evidence=e4, target_modifier=catalytic_activity)
+example_graph.add_increases(bdkrb1, pla2_family, citation=c4, evidence=e4, source_modifier=catalytic_activity,
+                            target_modifier=catalytic_activity)
 
 c5 = '10866298'
 e5 = 'We found that PD180970 inhibited in vivo tyrosine phosphorylation of p210Bcr-Abl (IC50 = 170 nM) and the p210BcrAbl substrates Gab2 and CrkL (IC50 = 80 nM) in human K562 chronic myelogenous leukemic cells. In vitro, PD180970 potently inhibited autophosphorylation of p210Bcr-Abl (IC50 = 5 nM) and the kinase activity of purified recombinant Abl tyrosine kinase (IC50 = 2.2 nM).'
@@ -147,8 +147,12 @@ bcr_abl1_fus = protein_fusion(partner_5p=Protein(namespace='hgnc', name='BCR'),
 crkl_ph = Protein(namespace='hgnc', name='CRKL', variants=[pmod('Ph', 'Tyr')])
 gab2_ph = Protein(namespace='hgnc', name='GAB2', variants=[pmod('Ph', 'Tyr')])
 
-example_graph.add_directly_increases(bcr_abl1_fus, crkl_ph, citation=c5, evidence=e5,
-                                     annotations={'Species': '9606', 'Confidence': 'High'},
-                                     subject_modifier=kinase_activity)
-example_graph.add_directly_increases(bcr_abl1_fus, gab2_ph, citation=c5, evidence=e5, annotations={'Species': '9606'},
-                                     subject_modifier=kinase_activity)
+example_graph.add_directly_increases(
+    bcr_abl1_fus, crkl_ph, citation=c5, evidence=e5,
+    annotations={'Species': '9606', 'Confidence': 'High'},
+    source_modifier=kinase_activity,
+)
+example_graph.add_directly_increases(
+    bcr_abl1_fus, gab2_ph, citation=c5, evidence=e5, annotations={'Species': '9606'},
+    source_modifier=kinase_activity,
+)

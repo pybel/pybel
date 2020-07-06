@@ -10,12 +10,15 @@ from pyparsing import And, MatchFirst, ParseResults, Suppress, Word, pyparsing_c
 
 from .baseparser import BaseParser
 from .constants import NamespaceTermEncodingMapping
-from .exc import InvalidMetadataException, RedefinedAnnotationError, RedefinedNamespaceError, VersionFormatWarning
 from .utils import delimited_quoted_list, qid, quote, word
 from ..constants import (
     BEL_KEYWORD_ANNOTATION, BEL_KEYWORD_AS, BEL_KEYWORD_DEFINE, BEL_KEYWORD_DOCUMENT, BEL_KEYWORD_LIST,
     BEL_KEYWORD_NAMESPACE, BEL_KEYWORD_PATTERN, BEL_KEYWORD_SET, BEL_KEYWORD_URL, DOCUMENT_KEYS, METADATA_VERSION,
     belns_encodings,
+)
+from ..exceptions import (
+    InvalidMetadataException, RedefinedAnnotationError, RedefinedNamespaceError,
+    VersionFormatWarning,
 )
 from ..resources.resources import keyword_to_url
 from ..utils import valid_date_version

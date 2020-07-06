@@ -22,9 +22,17 @@ class TestUmbrellaNodeLinkExporter(unittest.TestCase):
         self.assertEqual(32, len(custom_json_dict['nodes']))
 
         # 3 new nodes are created:
-        self.assertIn("act(p(hgnc:MAPK1), ma(kin))", custom_json_dict['nodes'])
-        self.assertIn("act(p(hgnc:PTK2, pmod(Ph, Tyr, 925)), ma(kin))", custom_json_dict['nodes'])
-        self.assertIn('act(p(fus(hgnc:BCR, "?", hgnc:ABL1, "?")), ma(kin))', custom_json_dict['nodes'])
+        self.assertIn(
+            'act(p(hgnc:MAPK1), ma(go:0016301 ! "kinase activity"))',
+            custom_json_dict['nodes'],
+        )
+        self.assertIn(
+            'act(p(hgnc:PTK2, pmod(Ph, Tyr, 925)), ma(go:0016301 ! "kinase activity"))',
+            custom_json_dict['nodes'])
+        self.assertIn(
+            'act(p(fus(hgnc:BCR, "?", hgnc:ABL1, "?")), ma(go:0016301 ! "kinase activity"))',
+            custom_json_dict['nodes'],
+        )
 
     def test_exporter_edges(self):
         """Test no new edges created."""

@@ -9,8 +9,8 @@ from random import randint
 
 from pybel import BELGraph, from_bel_script, from_database, to_database
 from pybel.constants import (
-    ABUNDANCE, BIOPROCESS, CITATION_DB, CITATION_IDENTIFIER, CITATION_TYPE_PUBMED, DECREASES,
-    HAS_PRODUCT, HAS_REACTANT, INCREASES, METADATA_NAME, METADATA_VERSION, MIRNA, PART_OF, PATHOLOGY, PROTEIN, RELATION,
+    ABUNDANCE, BIOPROCESS, CITATION_TYPE_PUBMED, DECREASES, HAS_PRODUCT, HAS_REACTANT, IDENTIFIER, INCREASES,
+    METADATA_NAME, METADATA_VERSION, MIRNA, NAMESPACE, PART_OF, PATHOLOGY, PROTEIN, RELATION,
 )
 from pybel.dsl import (
     BaseEntity, ComplexAbundance, CompositeAbundance, EnumeratedFusionRange, Fragment, Gene, GeneFusion,
@@ -306,7 +306,7 @@ class TestQuery(TemporaryCacheMixin):
         self.assertFalse(rv[0].is_enriched)
 
     def test_query_citaiton_by_reference(self):
-        rv = self.manager.query_citations(db=CITATION_TYPE_PUBMED, db_id=test_citation_dict[CITATION_IDENTIFIER])
+        rv = self.manager.query_citations(db=CITATION_TYPE_PUBMED, db_id=test_citation_dict[IDENTIFIER])
         self.assertEqual(1, len(rv))
         self.assertTrue(rv[0].is_pubmed)
         self.assertFalse(rv[0].is_enriched)
@@ -340,8 +340,8 @@ class TestEnsure(TemporaryCacheMixin):
     def test_get_or_create_citation(self):
         reference = str(randint(1, 1000000))
         citation_dict = {
-            CITATION_DB: CITATION_TYPE_PUBMED,
-            CITATION_IDENTIFIER: reference,
+            NAMESPACE: CITATION_TYPE_PUBMED,
+            IDENTIFIER: reference,
         }
 
         citation = self.manager.get_or_create_citation(**citation_dict)
@@ -359,14 +359,14 @@ class TestEnsure(TemporaryCacheMixin):
         self.assertEqual(citation_dict, citation_reloaded_from_dict.to_json())
 
         citation_reloaded_from_reference = self.manager.get_citation_by_reference(
-            citation_dict[CITATION_DB], citation_dict[CITATION_IDENTIFIER],
+            citation_dict[NAMESPACE], citation_dict[IDENTIFIER],
         )
         self.assertIsNotNone(citation_reloaded_from_reference)
         self.assertEqual(citation_dict, citation_reloaded_from_reference.to_json())
 
     def test_get_or_create_evidence(self):
         citation_db, citation_ref = CITATION_TYPE_PUBMED, str(randint(1, 1000000))
-        basic_citation = self.manager.get_or_create_citation(db=citation_db, db_id=citation_ref)
+        basic_citation = self.manager.get_or_create_citation(namespace=citation_db, identifier=citation_ref)
         utf8_test_evidence = u"Yes, all the information is true! This contains a unicode alpha: α"
 
         evidence = self.manager.get_or_create_evidence(basic_citation, utf8_test_evidence)
@@ -795,7 +795,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             evidence='In endothelial cells, ET-1 secretion is detectable under basal conditions, whereas thrombin '
                      'induces its secretion.',
             citation='10473669',
-            subject_modifier=secretion()
+            source_modifier=secretion(),
         )
 
         make_dummy_namespaces(self.manager, self.graph)
@@ -804,8 +804,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         self.assertEqual(2, network.nodes.count(), msg='Missing one or both of the nodes.')
         self.assertEqual(1, network.edges.count(), msg='Missing the edge')
 
-        #edge = network.edges.first()
-        #self.assertEqual(2, edge.properties.count())
+        # edge = network.edges.first()
+        # self.assertEqual(2, edge.properties.count())
 
     @mock_bel_resources
     def test_subject_translocation_custom_to_loc(self, mock):
@@ -814,10 +814,10 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             Protein(name='EDN1', namespace='HGNC'),
             evidence='In endothelial cells, ET-1 secretion is detectable under basal conditions, whereas thrombin induces its secretion.',
             citation='10473669',
-            subject_modifier=translocation(
+            source_modifier=translocation(
                 from_loc=Entity(namespace='TEST', name='A'),
                 to_loc=Entity(namespace='GO', name='extracellular space'),
-            )
+            ),
         )
 
         make_dummy_namespaces(self.manager, self.graph)
@@ -839,7 +839,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             Protein(name=p2_name, namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            subject_modifier=activity('kin')
+            source_modifier=activity('kin'),
         )
 
         make_dummy_namespaces(self.manager, self.graph)
@@ -866,7 +866,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             Protein(name=p2_name, namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            subject_modifier=activity(name=dummy_activity_name, namespace=dummy_activity_namespace)
+            source_modifier=activity(name=dummy_activity_name, namespace=dummy_activity_namespace),
         )
 
         make_dummy_namespaces(self.manager, self.graph)
@@ -891,7 +891,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             Protein(name=p2_name, namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            object_modifier=activity('kin')
+            target_modifier=activity('kin')
         )
 
         make_dummy_namespaces(self.manager, self.graph)
@@ -918,7 +918,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             Protein(name=p2_name, namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            object_modifier=activity(name=dummy_activity_name, namespace=dummy_activity_namespace)
+            target_modifier=activity(name=dummy_activity_name, namespace=dummy_activity_namespace)
         )
 
         make_dummy_namespaces(self.manager, self.graph)
@@ -939,7 +939,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             Protein(name='YFG2', namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            subject_modifier=degradation(),
+            source_modifier=degradation(),
         )
         make_dummy_namespaces(self.manager, self.graph)
 
@@ -957,7 +957,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             Protein(name='YFG2', namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            object_modifier=degradation(),
+            target_modifier=degradation(),
         )
         make_dummy_namespaces(self.manager, self.graph)
 
@@ -975,7 +975,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             Protein(name='YFG2', namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            subject_modifier=location(Entity(namespace='GO', name='nucleus', identifier='GO:0005634'))
+            source_modifier=location(Entity(namespace='GO', name='nucleus', identifier='0005634')),
         )
         make_dummy_namespaces(self.manager, self.graph)
 
@@ -999,10 +999,10 @@ class TestReconstituteEdges(TemporaryCacheMixin):
          form of Cdc42Hs and weakly activates the JNK family of MAP kinases. PAK4 is a mediator of filopodia
          formation and may play a role in the reorganization of the actin cytoskeleton. Multiple alternatively
          spliced transcript variants encoding distinct isoforms have been found for this gene.""",
-            citation={CITATION_DB: "Online Resource", CITATION_IDENTIFIER: "PAK4 Hs ENTREZ Gene Summary"},
+            citation={NAMESPACE: "Online Resource", IDENTIFIER: "PAK4 Hs ENTREZ Gene Summary"},
             annotations={'Species': '9606'},
-            subject_modifier=activity('gtp'),
-            object_modifier=activity('kin'),
+            source_modifier=activity('gtp'),
+            target_modifier=activity('kin'),
         )
 
         make_dummy_namespaces(self.manager, self.graph)
@@ -1026,8 +1026,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         MEF2A results in the repression of MEF2A transcriptional activation, a function that requires the
         deacetylase domain of HDAC4.""",
             annotations={'Species': '9606'},
-            subject_modifier=activity('cat', location=Entity(namespace='GO', name='nucleus')),
-            object_modifier=activity('tscript', location=Entity(namespace='GO', name='nucleus'))
+            source_modifier=activity('cat', location=Entity(namespace='GO', name='nucleus')),
+            target_modifier=activity('tscript', location=Entity(namespace='GO', name='nucleus'))
         )
 
         make_dummy_namespaces(self.manager, self.graph)

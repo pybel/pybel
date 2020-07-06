@@ -5,7 +5,7 @@
 import unittest
 
 from pybel import BELGraph
-from pybel.parser.exc import NakedNameWarning, UndefinedAnnotationWarning
+from pybel.exceptions import NakedNameWarning, UndefinedAnnotationWarning
 from pybel.struct.summary import count_error_types, count_naked_names, get_naked_names
 from pybel.testing.utils import n
 

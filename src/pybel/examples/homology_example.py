@@ -89,11 +89,11 @@ homology_graph.add_orthology(human_mapk1_gene, fly_mapk1)
 
 
 homology_graph.add_increases(
-    u=mouse_csf1_protein,
-    v=mouse_mapk1_protein,
+    source=mouse_csf1_protein,
+    target=mouse_mapk1_protein,
     citation='10452980',
     evidence='M-CSF triggers the activation of extracellular signal-regulated protein kinases (ERK)-1/2.',
-    object_modifier=activity('kin'),
+    target_modifier=activity('kin'),
     annotations={'Species': '10090'},
 )
 

@@ -64,8 +64,8 @@ from tqdm import tqdm
 
 from pybel.constants import (
     ACTIVITY, ANNOTATIONS, CONCEPT, EFFECT, FREE_ANNOTATIONS, FROM_LOC, FUSION, GMOD, IDENTIFIER, KIND, LOCATION,
-    MEMBERS, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PMOD, PRODUCTS, REACTANTS, SUBJECT, TO_LOC,
-    TRANSLOCATION, VARIANTS,
+    MEMBERS, MODIFIER, NAME, NAMESPACE, PARTNER_3P, PARTNER_5P, PMOD, PRODUCTS, REACTANTS, SOURCE_MODIFIER,
+    TARGET_MODIFIER, TO_LOC, TRANSLOCATION, VARIANTS,
 )
 from pybel.dsl import BaseConcept
 from pybel.io import from_nodelink, to_nodelink
@@ -154,8 +154,8 @@ def ground_nodelink(graph_nodelink_dict) -> None:
     name = graph_nodelink_dict.get('graph', {}).get('name', 'graph')
 
     for data in tqdm(graph_nodelink_dict['links'], desc='grounding edges in {}'.format(name)):
-        _process_edge_side(data.get(SUBJECT))
-        _process_edge_side(data.get(OBJECT))
+        _process_edge_side(data.get(SOURCE_MODIFIER))
+        _process_edge_side(data.get(TARGET_MODIFIER))
         if ANNOTATIONS in data:
             _process_annotations(data)
 

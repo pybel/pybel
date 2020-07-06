@@ -14,10 +14,10 @@ from ...dsl import BaseEntity
 from ...struct import BELGraph
 
 __all__ = [
-    'to_tsv',
+    'to_triples_file',
     'to_edgelist',
-    'get_triples',
-    'get_triple',
+    'to_triples',
+    'to_triple',
 ]
 
 logger = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ class NoTriplesValueError(ValueError):
 
 
 @open_file(1, mode='w')
-def to_tsv(
+def to_triples_file(
     graph: BELGraph,
     path: Union[str, TextIO],
     *,
@@ -45,7 +45,7 @@ def to_tsv(
     :param raise_on_none: Should an exception be raised if no triples are returned?
     :raises: NoTriplesValueError
     """
-    for h, r, t in get_triples(graph, use_tqdm=use_tqdm, raise_on_none=raise_on_none):
+    for h, r, t in to_triples(graph, use_tqdm=use_tqdm, raise_on_none=raise_on_none):
         print(h, r, t, sep=sep, file=path)
 
 
@@ -67,11 +67,11 @@ def to_edgelist(
     :param raise_on_none: Should an exception be raised if no triples are returned?
     :raises: NoTriplesValueError
     """
-    for h, r, t in get_triples(graph, use_tqdm=use_tqdm, raise_on_none=raise_on_none):
+    for h, r, t in to_triples(graph, use_tqdm=use_tqdm, raise_on_none=raise_on_none):
         print(h, t, json.dumps(dict(relation=r)), sep=sep, file=path)
 
 
-def get_triples(graph: BELGraph, use_tqdm: bool = False, raise_on_none: bool = False) -> List[Tuple[str, str, str]]:
+def to_triples(graph: BELGraph, use_tqdm: bool = False, raise_on_none: bool = False) -> List[Tuple[str, str, str]]:
     """Get a non-redundant list of triples representing the graph.
 
     :param graph: A BEL graph
@@ -91,7 +91,7 @@ def get_triples(graph: BELGraph, use_tqdm: bool = False, raise_on_none: bool = F
         )
 
     triples = (
-        get_triple(graph, u, v, key)
+        to_triple(graph, u, v, key)
         for u, v, key in it
     )
 
@@ -108,7 +108,7 @@ def get_triples(graph: BELGraph, use_tqdm: bool = False, raise_on_none: bool = F
     return rv
 
 
-def get_triple(
+def to_triple(
     graph: BELGraph,
     u: BaseEntity,
     v: BaseEntity,

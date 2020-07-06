@@ -5,13 +5,13 @@ import re
 import unittest
 from random import randint
 
-from pybel.constants import (ANNOTATIONS, CITATION, CITATION_DB, CITATION_IDENTIFIER, CITATION_TYPE_PUBMED, EVIDENCE)
-from pybel.parser import ControlParser
-from pybel.parser.exc import (
+from pybel.constants import ANNOTATIONS, CITATION, CITATION_TYPE_PUBMED, EVIDENCE, IDENTIFIER, NAMESPACE
+from pybel.exceptions import (
     CitationTooLongException, CitationTooShortException, IllegalAnnotationValueWarning, InvalidCitationType,
     InvalidPubMedIdentifierWarning, MissingAnnotationKeyWarning, MissingAnnotationRegexWarning,
     UndefinedAnnotationWarning,
 )
+from pybel.parser import ControlParser
 from pybel.parser.parse_control import set_citation_stub
 from pybel.testing.utils import n
 from tests.constants import SET_CITATION_TEST, test_citation_dict
@@ -176,8 +176,8 @@ class TestParseControl2(TestParseControl):
 
     def test_citation_short(self):
         self.parser.parseString(SET_CITATION_TEST)
-        self.assertEqual(test_citation_dict[CITATION_IDENTIFIER], self.parser.citation_db_id)
-        self.assertEqual(test_citation_dict[CITATION_DB], self.parser.citation_db)
+        self.assertEqual(test_citation_dict[IDENTIFIER], self.parser.citation_db_id)
+        self.assertEqual(test_citation_dict[NAMESPACE], self.parser.citation_db)
 
         expected_annotations = {
             EVIDENCE: None,
@@ -200,8 +200,8 @@ class TestParseControl2(TestParseControl):
             EVIDENCE: None,
             ANNOTATIONS: {},
             CITATION: {
-                CITATION_DB: CITATION_TYPE_PUBMED,
-                CITATION_IDENTIFIER: '12928037',
+                NAMESPACE: CITATION_TYPE_PUBMED,
+                IDENTIFIER: '12928037',
             },
         }
 
@@ -218,8 +218,8 @@ class TestParseControl2(TestParseControl):
             EVIDENCE: None,
             ANNOTATIONS: {},
             CITATION: {
-                CITATION_DB: CITATION_TYPE_PUBMED,
-                CITATION_IDENTIFIER: '12928037',
+                NAMESPACE: CITATION_TYPE_PUBMED,
+                IDENTIFIER: '12928037',
             },
         }
 

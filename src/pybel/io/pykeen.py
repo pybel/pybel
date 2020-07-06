@@ -58,7 +58,7 @@ import numpy as np
 from .bel_commons_client import from_bel_commons
 from .gpickle import from_pickle
 from .nodelink import from_nodelink_file
-from .tsv.api import get_triples
+from .triples import to_triples
 
 __all__ = [
     'get_triples_from_bel',
@@ -107,5 +107,5 @@ def get_triples_from_bel_commons(network_id: str) -> np.ndarray:
 
 def _from_bel(path, bel_importer) -> np.ndarray:
     graph = bel_importer(path)
-    triples = get_triples(graph)
+    triples = to_triples(graph)
     return np.array(triples)

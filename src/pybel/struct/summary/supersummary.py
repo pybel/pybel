@@ -11,8 +11,9 @@ import pandas as pd
 from humanize import intword
 from tabulate import tabulate
 
+from .node_summary import count_namespaces
 from ..graph import BELGraph
-from ...constants import CITATION, CITATION_DB, CITATION_IDENTIFIER, RELATION, TWO_WAY_RELATIONS
+from ...constants import CITATION, IDENTIFIER, NAMESPACE, RELATION, TWO_WAY_RELATIONS
 from ...dsl import BaseConcept
 from ...utils import multidict
 
@@ -45,12 +46,16 @@ def functions(graph, file: Optional[TextIO] = None, examples: bool = True):
 def namespaces_table_df(graph: BELGraph, examples: bool = True) -> pd.DataFrame:
     """Create a dataframe describing the namespaces in the graph."""
     namespace_mapping = multidict((node.namespace, node) for node in graph if isinstance(node, BaseConcept))
-    namespace_c = Counter({namespace: len(nodes) for namespace, nodes in namespace_mapping.items()})
+    namespace_c = count_namespaces(graph)
     if not examples:
         return pd.DataFrame(namespace_c.most_common(), columns=['Namespace', 'Count'])
     return pd.DataFrame(
         [
-            (namespace, count, random.choice(namespace_mapping[namespace]))  # noqa:S311
+            (
+                namespace,
+                count,
+                random.choice(namespace_mapping[namespace]) if namespace in namespace_mapping else '',  # noqa:S311
+            )
             for namespace, count in namespace_c.most_common()
         ],
         columns=['Namespace', 'Count', 'Example'],
@@ -105,7 +110,7 @@ def edges(
 def citations(graph: BELGraph, n: Optional[int] = 15, file: Optional[TextIO] = None) -> None:
     """Print a summary of the citations in the graph."""
     edge_mapping = multidict(
-        ((data[CITATION][CITATION_DB], data[CITATION][CITATION_IDENTIFIER]), graph.edge_to_bel(u, v, data))
+        ((data[CITATION][NAMESPACE], data[CITATION][IDENTIFIER]), graph.edge_to_bel(u, v, data))
         for u, v, data in graph.edges(data=True)
         if CITATION in data
     )
