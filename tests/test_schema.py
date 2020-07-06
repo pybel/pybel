@@ -124,15 +124,41 @@ class TestNodeSchema(unittest.TestCase):
 
 class TestEdgeSchema(unittest.TestCase):
     """Tests for the jsonschema edge validation."""
-
-    def test_predefined_example(self):
-        """Test a predefined edge example."""
+    
+    @staticmethod
+    def _load_example() -> dict:
+        """Load the edge contained in example_edge.json"""
         here = os.path.abspath(os.path.dirname(__file__))
         example_file = os.path.join(here, 'example_edge.json')
         with open(example_file) as example_json:
             example_edge = json.load(example_json)
+        return example_edge
 
-        self.assertTrue(is_valid_edge(example_edge))
+    def test_predefined_example(self):
+        """Test a predefined edge example."""
+        edge = self._load_example()
+
+        self.assertTrue(is_valid_edge(edge))
+
+    def test_missing_information(self):
+        """Test removing information from the predefined edge."""
+        edge = self._load_example()
+
+        missing_source = edge.copy()
+        missing_source.pop('source')
+        self.assertFalse(is_valid_edge(missing_source))
+
+        missing_relation = edge.copy()
+        missing_relation.pop('relation')
+        self.assertFalse(is_valid_edge(missing_relation))
+
+        missing_target = edge.copy()
+        missing_target.pop('target')
+        self.assertFalse(is_valid_edge(missing_target))
+
+        missing_location = edge.copy()
+        missing_location['target']['effect'].pop('fromLoc')
+        self.assertFalse(is_valid_edge(missing_location))
 
 
 if __name__ == '__main__':
