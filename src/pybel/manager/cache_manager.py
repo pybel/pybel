@@ -29,7 +29,7 @@ from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, update_insert_values
 from ..constants import (
     ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_TYPE_PUBMED, EVIDENCE, IDENTIFIER, METADATA_INSERT_KEYS,
-    NAMESPACE, OBJECT, RELATION, SUBJECT, UNQUALIFIED_EDGES, belns_encodings, get_cache_connection,
+    NAMESPACE, RELATION, SOURCE_MODIFIER, TARGET_MODIFIER, UNQUALIFIED_EDGES, belns_encodings, get_cache_connection,
 )
 from ..dsl import BaseConcept, BaseEntity
 from ..language import (
@@ -924,9 +924,9 @@ class InsertManager(NamespaceManager, LookupManager):
 
         edge = Edge(
             source=source,
-            source_modifier=data.get(SUBJECT),
+            source_modifier=data.get(SOURCE_MODIFIER),
             target=target,
-            target_modifier=data.get(OBJECT),
+            target_modifier=data.get(TARGET_MODIFIER),
             relation=relation,
             bel=bel,
             md5=md5,

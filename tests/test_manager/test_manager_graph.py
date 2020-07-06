@@ -795,7 +795,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             evidence='In endothelial cells, ET-1 secretion is detectable under basal conditions, whereas thrombin '
                      'induces its secretion.',
             citation='10473669',
-            subject_modifier=secretion()
+            source_modifier=secretion(),
         )
 
         make_dummy_namespaces(self.manager, self.graph)
@@ -814,10 +814,10 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             Protein(name='EDN1', namespace='HGNC'),
             evidence='In endothelial cells, ET-1 secretion is detectable under basal conditions, whereas thrombin induces its secretion.',
             citation='10473669',
-            subject_modifier=translocation(
+            source_modifier=translocation(
                 from_loc=Entity(namespace='TEST', name='A'),
                 to_loc=Entity(namespace='GO', name='extracellular space'),
-            )
+            ),
         )
 
         make_dummy_namespaces(self.manager, self.graph)
@@ -839,7 +839,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             Protein(name=p2_name, namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            subject_modifier=activity('kin')
+            source_modifier=activity('kin'),
         )
 
         make_dummy_namespaces(self.manager, self.graph)
@@ -866,7 +866,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             Protein(name=p2_name, namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            subject_modifier=activity(name=dummy_activity_name, namespace=dummy_activity_namespace)
+            source_modifier=activity(name=dummy_activity_name, namespace=dummy_activity_namespace),
         )
 
         make_dummy_namespaces(self.manager, self.graph)
@@ -891,7 +891,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             Protein(name=p2_name, namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            object_modifier=activity('kin')
+            target_modifier=activity('kin')
         )
 
         make_dummy_namespaces(self.manager, self.graph)
@@ -918,7 +918,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             Protein(name=p2_name, namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            object_modifier=activity(name=dummy_activity_name, namespace=dummy_activity_namespace)
+            target_modifier=activity(name=dummy_activity_name, namespace=dummy_activity_namespace)
         )
 
         make_dummy_namespaces(self.manager, self.graph)
@@ -939,7 +939,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             Protein(name='YFG2', namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            subject_modifier=degradation(),
+            source_modifier=degradation(),
         )
         make_dummy_namespaces(self.manager, self.graph)
 
@@ -957,7 +957,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             Protein(name='YFG2', namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            object_modifier=degradation(),
+            target_modifier=degradation(),
         )
         make_dummy_namespaces(self.manager, self.graph)
 
@@ -975,7 +975,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
             Protein(name='YFG2', namespace='HGNC'),
             evidence=n(),
             citation=n(),
-            subject_modifier=location(Entity(namespace='GO', name='nucleus', identifier='GO:0005634'))
+            source_modifier=location(Entity(namespace='GO', name='nucleus', identifier='0005634')),
         )
         make_dummy_namespaces(self.manager, self.graph)
 
@@ -1001,8 +1001,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
          spliced transcript variants encoding distinct isoforms have been found for this gene.""",
             citation={NAMESPACE: "Online Resource", IDENTIFIER: "PAK4 Hs ENTREZ Gene Summary"},
             annotations={'Species': '9606'},
-            subject_modifier=activity('gtp'),
-            object_modifier=activity('kin'),
+            source_modifier=activity('gtp'),
+            target_modifier=activity('kin'),
         )
 
         make_dummy_namespaces(self.manager, self.graph)
@@ -1026,8 +1026,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         MEF2A results in the repression of MEF2A transcriptional activation, a function that requires the
         deacetylase domain of HDAC4.""",
             annotations={'Species': '9606'},
-            subject_modifier=activity('cat', location=Entity(namespace='GO', name='nucleus')),
-            object_modifier=activity('tscript', location=Entity(namespace='GO', name='nucleus'))
+            source_modifier=activity('cat', location=Entity(namespace='GO', name='nucleus')),
+            target_modifier=activity('tscript', location=Entity(namespace='GO', name='nucleus'))
         )
 
         make_dummy_namespaces(self.manager, self.graph)

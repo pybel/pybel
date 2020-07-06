@@ -23,8 +23,8 @@ from ..constants import (
     GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, IDENTIFIER, INCREASES,
     IS_A, LOCATION, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER,
     METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, MODIFIER, NAMESPACE, NEGATIVE_CORRELATION, NO_CORRELATION,
-    OBJECT, ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, REGULATES, RELATION, SUBJECT, TO_LOC, TRANSCRIBED_TO,
-    TRANSLATED_TO, TRANSLOCATION,
+    ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, REGULATES, RELATION, SOURCE_MODIFIER, TARGET_MODIFIER, TO_LOC,
+    TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION,
 )
 from ..dsl import (
     BaseAbundance, BaseConcept, BaseEntity, CentralDogma, ComplexAbundance, Gene, ListAbundance, MicroRna, Protein,
@@ -388,31 +388,30 @@ class BELGraph(nx.MultiDiGraph):
             {} if context is None else context,
         ))
 
-    def _help_add_edge(self, u: BaseEntity, v: BaseEntity, attr: Mapping) -> str:
+    def _help_add_edge(self, source: BaseEntity, target: BaseEntity, attr: Mapping) -> str:
         """Help add a pre-built edge."""
-        self.add_node_from_data(u)
-        self.add_node_from_data(v)
+        self.add_node_from_data(source)
+        self.add_node_from_data(target)
+        return self._help_add_edge_helper(source=source, target=target, attr=attr)
 
-        return self._help_add_edge_helper(u, v, attr)
+    def _help_add_edge_helper(self, source: BaseEntity, target: BaseEntity, attr: Mapping[str, Any]) -> str:
+        key = hash_edge(source, target, attr)
 
-    def _help_add_edge_helper(self, u: BaseEntity, v: BaseEntity, attr: Mapping[str, Any]) -> str:
-        key = hash_edge(u, v, attr)
-
-        if not self.has_edge(u, v, key):
-            self.add_edge(u, v, key=key, **attr)
+        if not self.has_edge(source, target, key):
+            self.add_edge(source, target, key=key, **attr)
 
         return key
 
-    def add_unqualified_edge(self, u: BaseEntity, v: BaseEntity, relation: str) -> str:
+    def add_unqualified_edge(self, source: BaseEntity, target: BaseEntity, relation: str) -> str:
         """Add a unique edge that has no annotations.
 
-        :param u: The source node
-        :param v: The target node
+        :param source: The source node
+        :param target: The target node
         :param relation: A relationship label from :mod:`pybel.constants`
         :return: The key for this edge (a unique hash)
         """
         attr = {RELATION: relation}
-        return self._help_add_edge(u, v, attr)
+        return self._help_add_edge(source=source, target=target, attr=attr)
 
     def add_transcription(self, gene: Gene, rna: Union[Rna, MicroRna]) -> str:
         """Add a transcription relation from a gene to an RNA or miRNA node.
@@ -430,15 +429,15 @@ class BELGraph(nx.MultiDiGraph):
         """
         return self.add_unqualified_edge(rna, protein, TRANSLATED_TO)
 
-    def _add_two_way_qualified_edge(self, u: BaseEntity, v: BaseEntity, *args, **kwargs) -> str:
+    def _add_two_way_qualified_edge(self, source: BaseEntity, target: BaseEntity, *args, **kwargs) -> str:
         """Add an qualified edge both ways."""
-        self.add_qualified_edge(u=v, v=u, *args, **kwargs)
-        return self.add_qualified_edge(u=u, v=v, *args, **kwargs)
+        self.add_qualified_edge(source=target, target=source, *args, **kwargs)
+        return self.add_qualified_edge(source=source, target=target, *args, **kwargs)
 
-    def _add_two_way_unqualified_edge(self, u: BaseEntity, v: BaseEntity, *args, **kwargs) -> str:
+    def _add_two_way_unqualified_edge(self, source: BaseEntity, target: BaseEntity, *args, **kwargs) -> str:
         """Add an unqualified edge both ways."""
-        self.add_unqualified_edge(v, u, *args, **kwargs)
-        return self.add_unqualified_edge(u, v, *args, **kwargs)
+        self.add_unqualified_edge(target, source, *args, **kwargs)
+        return self.add_unqualified_edge(source, target, *args, **kwargs)
 
     add_equivalence = partialmethod(_add_two_way_unqualified_edge, relation=EQUIVALENT_TO)
     """Add two equivalence relations for the nodes."""
@@ -463,15 +462,15 @@ class BELGraph(nx.MultiDiGraph):
 
     def add_qualified_edge(
         self,
-        u,
-        v,
+        source: BaseEntity,
+        target: BaseEntity,
         *,
         relation: str,
         evidence: str,
         citation: Union[str, Tuple[str, str], CitationDict],
         annotations: Optional[AnnotationsHint] = None,
-        subject_modifier: Optional[Mapping[str, Any]] = None,
-        object_modifier: Optional[Mapping[str, Any]] = None,
+        source_modifier: Optional[Mapping[str, Any]] = None,
+        target_modifier: Optional[Mapping[str, Any]] = None,
         **attr
     ) -> str:
         """Add a qualified edge.
@@ -479,15 +478,15 @@ class BELGraph(nx.MultiDiGraph):
         Qualified edges have a relation, evidence, citation, and optional annotations, subject modifications,
         and object modifications.
 
-        :param u: The source node
-        :param v: The target node
+        :param source: The source node
+        :param target: The target node
         :param relation: The type of relation this edge represents
         :param evidence: The evidence string from an article
         :param citation: The citation data dictionary for this evidence. If a string is given,
          assumes it's a PubMed identifier and auto-fills the citation type.
         :param annotations: The annotations data dictionary
-        :param subject_modifier: The modifiers (like activity) on the subject node. See data model documentation.
-        :param object_modifier: The modifiers (like activity) on the object node. See data model documentation.
+        :param source_modifier: The modifiers (like activity) on the subject node. See data model documentation.
+        :param target_modifier: The modifiers (like activity) on the object node. See data model documentation.
 
         :return: The hash of the edge
         """
@@ -496,11 +495,11 @@ class BELGraph(nx.MultiDiGraph):
             evidence=evidence,
             citation=citation,
             annotations=annotations,
-            subject_modifier=subject_modifier,
-            object_modifier=object_modifier,
+            source_modifier=source_modifier,
+            target_modifier=target_modifier,
             **attr
         )
-        return self._help_add_edge(u, v, attr)
+        return self._help_add_edge(source=source, target=target, attr=attr)
 
     @staticmethod
     def _build_attr(
@@ -508,8 +507,8 @@ class BELGraph(nx.MultiDiGraph):
         evidence: str,
         citation: Union[str, Tuple[str, str], CitationDict],
         annotations: Optional[AnnotationsHint] = None,
-        subject_modifier: Optional[Mapping[str, Any]] = None,
-        object_modifier: Optional[Mapping[str, Any]] = None,
+        source_modifier: Optional[Dict[str, Any]] = None,
+        target_modifier: Optional[Dict[str, Any]] = None,
         **attr
     ):
         attr.update({
@@ -521,18 +520,18 @@ class BELGraph(nx.MultiDiGraph):
         if annotations:  # clean up annotations
             attr[ANNOTATIONS] = _clean_annotations(annotations)
 
-        if subject_modifier:
-            attr[SUBJECT] = _handle_modifier(subject_modifier)
+        if source_modifier:
+            attr[SOURCE_MODIFIER] = _handle_modifier(source_modifier)
 
-        if object_modifier:
-            attr[OBJECT] = _handle_modifier(object_modifier)
+        if target_modifier:
+            attr[TARGET_MODIFIER] = _handle_modifier(target_modifier)
 
         return attr
 
     def add_binds(
         self,
-        u,
-        v,
+        source: BaseAbundance,
+        target: BaseAbundance,
         *,
         evidence: str,
         citation: Union[str, Tuple[str, str], CitationDict],
@@ -540,10 +539,10 @@ class BELGraph(nx.MultiDiGraph):
         **attr
     ) -> str:
         """Add a "binding" relationship between the two entities such that ``u => complex(u, v)``."""
-        complex_abundance = ComplexAbundance([u, v])
+        complex_abundance = ComplexAbundance([source, target])
         return self.add_directly_increases(
-            u,
-            complex_abundance,
+            source=source,
+            target=complex_abundance,
             citation=citation,
             evidence=evidence,
             annotations=annotations,
@@ -583,50 +582,50 @@ class BELGraph(nx.MultiDiGraph):
     add_causes_no_change = partialmethod(add_qualified_edge, relation=CAUSES_NO_CHANGE)
     """Add a :data:`pybel.constants.CAUSES_NO_CHANGE` relationship with :meth:`add_qualified_edge`."""
 
-    add_inhibits = partialmethod(add_decreases, object_modifier=activity())
+    add_inhibits = partialmethod(add_decreases, target_modifier=activity())
     """Add an "inhibits" relationship.
 
     A more specific version of :meth:`add_decreases` that automatically populates the object modifier with an
     activity."""
 
-    add_directly_inhibits = partialmethod(add_directly_decreases, object_modifier=activity())
+    add_directly_inhibits = partialmethod(add_directly_decreases, target_modifier=activity())
 
-    add_activates = partialmethod(add_increases, object_modifier=activity())
+    add_activates = partialmethod(add_increases, target_modifier=activity())
     """Add an "activates" relationship.
 
     A more specific version of :meth:`add_increases` that automatically populates the object modifier with an
     activity."""
 
-    add_directly_activates = partialmethod(add_directly_increases, object_modifier=activity())
+    add_directly_activates = partialmethod(add_directly_increases, target_modifier=activity())
 
     def _modify(
         self,
         add_edge_fn: str,
         name: str,
-        u,
-        v,
+        source: BaseEntity,
+        target: CentralDogma,
         code: Optional[str] = None,
         position: Optional[int] = None,
         *,
         evidence: str,
         citation: Union[str, Mapping[str, str]],
         annotations: Optional[AnnotationsHint] = None,
-        subject_modifier: Optional[Mapping] = None,
-        object_modifier: Optional[Mapping] = None,
+        source_modifier: Optional[Mapping] = None,
+        target_modifier: Optional[Mapping] = None,
         **attr
     ):
         """Add a simple modification."""
         adder = getattr(self, add_edge_fn)
         return adder(
-            u,
-            v.with_variants(ProteinModification(
+            source=source,
+            target=target.with_variants(ProteinModification(
                 name=name, code=code, position=position,
             )),
             evidence=evidence,
             citation=citation,
             annotations=annotations,
-            subject_modifier=subject_modifier,
-            object_modifier=object_modifier,
+            source_modifier=source_modifier,
+            target_modifier=target_modifier,
             **attr
         )
 
@@ -668,7 +667,7 @@ class BELGraph(nx.MultiDiGraph):
         self,
         reactants: Union[BaseAbundance, Iterable[BaseAbundance]],
         products: Union[BaseAbundance, Iterable[BaseAbundance]],
-    ):
+    ) -> None:
         """Add a reaction directly to the graph."""
         return self.add_node_from_data(Reaction(reactants=reactants, products=products))
 

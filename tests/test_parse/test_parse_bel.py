@@ -11,8 +11,10 @@ from pybel.constants import (
     ABUNDANCE, ACTIVITY, BIOPROCESS, CELL_SECRETION, CELL_SURFACE_EXPRESSION, COMPLEX, COMPOSITE, CONCEPT, DEGRADATION,
     DIRECTLY_INCREASES, DIRTY, EFFECT, FRAGMENT, FROM_LOC, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE,
     FUSION_START, FUSION_STOP, GENE, HAS_VARIANT, HGVS, IDENTIFIER, KIND, LOCATION, MEMBERS, MIRNA, MODIFIER, NAME,
-    NAMESPACE, OBJECT, PARTNER_3P, PARTNER_5P, PART_OF, PATHOLOGY, POPULATION, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P,
-    REACTANTS, REACTION, RELATION, RNA, SUBJECT, TO_LOC, TRANSLOCATION, VARIANTS,
+    NAMESPACE, SOURCE, TARGET, TARGET_MODIFIER, PARTNER_3P, PARTNER_5P, PART_OF, PATHOLOGY, POPULATION, PRODUCTS,
+    PROTEIN,
+    RANGE_3P, RANGE_5P,
+    REACTANTS, REACTION, RELATION, RNA, SOURCE_MODIFIER, TO_LOC, TRANSLOCATION, VARIANTS,
 )
 from pybel.dsl import (
     Fragment, Population, abundance, bioprocess, cell_surface_expression, complex_abundance, composite_abundance,
@@ -1726,7 +1728,7 @@ class TestTranslocationPermissive(unittest.TestCase):
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
-            SUBJECT: {
+            SOURCE: {
                 FUNCTION: ABUNDANCE,
                 CONCEPT: {
                     NAMESPACE: 'CHEBI',
@@ -1734,7 +1736,7 @@ class TestTranslocationPermissive(unittest.TestCase):
                 },
             },
             RELATION: DIRECTLY_INCREASES,
-            OBJECT: {
+            TARGET: {
                 FUNCTION: ABUNDANCE,
                 CONCEPT: {
                     NAMESPACE: 'CHEBI',
@@ -1753,7 +1755,7 @@ class TestTranslocationPermissive(unittest.TestCase):
 
         expected_annotations = {
             RELATION: DIRECTLY_INCREASES,
-            OBJECT: {
+            TARGET_MODIFIER: {
                 MODIFIER: TRANSLOCATION,
             }
         }

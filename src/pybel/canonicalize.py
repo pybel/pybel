@@ -15,9 +15,9 @@ import bel_resources.constants
 from bel_resources import make_knowledge_header
 from .constants import (
     ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CELL_SURFACE, CITATION, CITATION_TYPE_PUBMED, DEGRADATION, EFFECT,
-    EVIDENCE, EXTRACELLULAR, FROM_LOC, IDENTIFIER, INTRACELLULAR, LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT,
-    PYBEL_AUTOEVIDENCE, PYBEL_PUBMED, RELATION, SET_CITATION_FMT, SUBJECT, TO_LOC, TRANSLOCATION, UNQUALIFIED_EDGES,
-    VARIANTS,
+    EVIDENCE, EXTRACELLULAR, FROM_LOC, INTRACELLULAR, LOCATION, MODIFIER, NAME, NAMESPACE, PYBEL_AUTOEVIDENCE,
+    PYBEL_PUBMED, RELATION, SET_CITATION_FMT, SOURCE_MODIFIER, TARGET_MODIFIER, TO_LOC, TRANSLOCATION,
+    UNQUALIFIED_EDGES, VARIANTS,
 )
 from .dsl import BaseAbundance, BaseEntity, FusionBase, ListAbundance, Reaction
 from .language import Entity
@@ -152,40 +152,40 @@ def _decanonicalize_edge_node(
 
 
 def edge_to_tuple(
-    u: BaseEntity,
-    v: BaseEntity,
+    source: BaseEntity,
+    target: BaseEntity,
     data: EdgeData,
     use_identifiers: bool = True,
 ) -> Tuple[str, str, str]:
     """Take two nodes and gives back a BEL string representing the statement.
 
-    :param u: The edge's source's PyBEL node data dictionary
-    :param v: The edge's target's PyBEL node data dictionary
+    :param source: The edge's source's PyBEL node data dictionary
+    :param target: The edge's target's PyBEL node data dictionary
     :param data: The edge's data dictionary
     :param use_identifiers: Enables extended `BEP-0008 <http://bep.bel.bio/published/BEP-0008.html>`_ syntax
     """
-    u_str = _decanonicalize_edge_node(u, data, node_position=SUBJECT, use_identifiers=use_identifiers)
-    v_str = _decanonicalize_edge_node(v, data, node_position=OBJECT, use_identifiers=use_identifiers)
+    u_str = _decanonicalize_edge_node(source, data, node_position=SOURCE_MODIFIER, use_identifiers=use_identifiers)
+    v_str = _decanonicalize_edge_node(target, data, node_position=TARGET_MODIFIER, use_identifiers=use_identifiers)
     return u_str, data[RELATION], v_str
 
 
 def edge_to_bel(
-    u: BaseEntity,
-    v: BaseEntity,
+    source: BaseEntity,
+    target: BaseEntity,
     data: EdgeData,
     sep: Optional[str] = None,
     use_identifiers: bool = True,
 ) -> str:
     """Take two nodes and gives back a BEL string representing the statement.
 
-    :param u: The edge's source's PyBEL node data dictionary
-    :param v: The edge's target's PyBEL node data dictionary
+    :param source: The edge's source's PyBEL node data dictionary
+    :param target: The edge's target's PyBEL node data dictionary
     :param data: The edge's data dictionary
     :param sep: The separator between the source, relation, and target. Defaults to ' '
     :param use_identifiers: Enables extended `BEP-0008 <http://bep.bel.bio/published/BEP-0008.html>`_ syntax
     """
     sep = sep or ' '
-    return sep.join(edge_to_tuple(u=u, v=v, data=data, use_identifiers=use_identifiers))
+    return sep.join(edge_to_tuple(source=source, target=target, data=data, use_identifiers=use_identifiers))
 
 
 def _sort_qualified_edges_helper(t: EdgeTuple) -> Tuple[str, str, str]:

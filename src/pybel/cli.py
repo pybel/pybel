@@ -119,10 +119,11 @@ def main(ctx, connection):
 
 @main.command()
 @click.argument('text')
-def parse(text: str):
+@click.option('--pprint', is_flag=True)
+def parse(text: str, pprint: bool):
     """Parse a single BEL statement and pring JSON output."""
     from .parser.parse_bel import parse as _parse
-    click.echo(json.dumps(_parse(text)))
+    click.echo(json.dumps(_parse(text), indent=2 if pprint else None))
 
 
 @main.command()

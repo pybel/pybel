@@ -28,8 +28,8 @@ from ..constants import (
     ABUNDANCE, ACTIVITY, ASSOCIATION, BINDS, BIOPROCESS, CAUSES_NO_CHANGE, CELL_SECRETION, CELL_SURFACE_EXPRESSION,
     COMPLEX, COMPOSITE, CONCEPT, CORRELATION, DECREASES, DEGRADATION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, DIRTY,
     EFFECT, EQUIVALENT_TO, FROM_LOC, FUNCTION, FUSION, GENE, IDENTIFIER, INCREASES, IS_A, LINE, LOCATION, MEMBERS,
-    MIRNA, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, NO_CORRELATION, OBJECT, PART_OF, PATHOLOGY, POPULATION,
-    POSITIVE_CORRELATION, PRODUCTS, PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SUBJECT, TO_LOC,
+    MIRNA, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, NO_CORRELATION, PART_OF, PATHOLOGY, POPULATION,
+    POSITIVE_CORRELATION, PRODUCTS, PROTEIN, REACTANTS, REACTION, REGULATES, RELATION, RNA, SOURCE, TARGET, TO_LOC,
     TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, TWO_WAY_RELATIONS, VARIANTS, belns_encodings,
 )
 from ..dsl import BaseEntity
@@ -681,17 +681,17 @@ class BELParser(BaseParser):
 
         subject_hash = self._handle_relation_checked(
             line, position, {
-                SUBJECT: tokens[SUBJECT],
+                SOURCE: tokens[SOURCE],
                 RELATION: tokens[RELATION],
-                OBJECT: tokens[OBJECT][SUBJECT],
+                TARGET: tokens[TARGET][SOURCE],
             },
         )
 
         object_hash = self._handle_relation_checked(
             line, position, {
-                SUBJECT: tokens[OBJECT][SUBJECT],
-                RELATION: tokens[OBJECT][RELATION],
-                OBJECT: tokens[OBJECT][OBJECT],
+                SOURCE: tokens[TARGET][SOURCE],
+                RELATION: tokens[TARGET][RELATION],
+                TARGET: tokens[TARGET][TARGET],
             },
         )
         self.metagraph.add((subject_hash, object_hash))
@@ -762,7 +762,16 @@ class BELParser(BaseParser):
         """Handle list relations like ``p(X) hasComponents list(p(Y), p(Z), ...)``."""
         return self._handle_list_helper(tokens, PART_OF)
 
-    def _add_qualified_edge_helper(self, *, u, u_modifier, relation, v, v_modifier, annotations) -> str:
+    def _add_qualified_edge_helper(
+        self,
+        *,
+        source,
+        source_modifier,
+        relation,
+        target,
+        target_modifier,
+        annotations,
+    ) -> str:
         """Add a qualified edge from the internal aspects of the parser."""
         m = {
             BINDS: self.graph.add_binds,
@@ -772,39 +781,43 @@ class BELParser(BaseParser):
             evidence=self.control_parser.evidence,
             citation=self.control_parser.get_citation(),
             annotations=annotations,
-            subject_modifier=u_modifier,
-            object_modifier=v_modifier,
+            source_modifier=source_modifier,
+            target_modifier=target_modifier,
             **{LINE: self.get_line_number()},
         )
         if adder is not None:
-            return adder(u=u, v=v, **d)
+            return adder(source=source, target=target, **d)
         else:
-            return self.graph.add_qualified_edge(u=u, v=v, relation=relation, **d)
+            return self.graph.add_qualified_edge(source=source, target=target, relation=relation, **d)
 
-    def _add_qualified_edge(self, *, u, u_modifier, relation, v, v_modifier, annotations) -> str:
+    def _add_qualified_edge(self, *, source, source_modifier, relation, target, target_modifier, annotations) -> str:
         """Add an edge, then adds the opposite direction edge if it should."""
         d = dict(
             relation=relation,
             annotations=annotations,
         )
         if relation in TWO_WAY_RELATIONS:
-            self._add_qualified_edge_helper(u=v, u_modifier=v_modifier, v=u, v_modifier=u_modifier, **d)
-        return self._add_qualified_edge_helper(u=u, u_modifier=u_modifier, v=v, v_modifier=v_modifier, **d)
+            self._add_qualified_edge_helper(
+                source=target, source_modifier=target_modifier, target=source, target_modifier=source_modifier, **d
+            )
+        return self._add_qualified_edge_helper(
+            source=source, source_modifier=source_modifier, target=target, target_modifier=target_modifier, **d
+        )
 
     def _handle_relation(self, tokens: ParseResults) -> str:
         """Handle a relation."""
-        u = self.ensure_node(tokens[SUBJECT])
-        u_modifier = modifier_po_to_dict(tokens[SUBJECT])
+        source = self.ensure_node(tokens[SOURCE])
+        source_modifier = modifier_po_to_dict(tokens[SOURCE])
         relation = tokens[RELATION]
-        v = self.ensure_node(tokens[OBJECT])
-        v_modifier = modifier_po_to_dict(tokens[OBJECT])
+        target = self.ensure_node(tokens[TARGET])
+        target_modifier = modifier_po_to_dict(tokens[TARGET])
 
         annotations = self._get_prepared_annotations()
 
         return self._add_qualified_edge(
-            u=u, u_modifier=u_modifier,
+            source=source, source_modifier=source_modifier,
             relation=relation,
-            v=v, v_modifier=v_modifier,
+            target=target, target_modifier=target_modifier,
             annotations=annotations,
         )
 
@@ -846,18 +859,18 @@ class BELParser(BaseParser):
 
     def handle_unqualified_relation(self, _, __, tokens: ParseResults) -> ParseResults:
         """Handle unqualified relations."""
-        subject_node_dsl = self.ensure_node(tokens[SUBJECT])
-        object_node_dsl = self.ensure_node(tokens[OBJECT])
+        subject_node_dsl = self.ensure_node(tokens[SOURCE])
+        object_node_dsl = self.ensure_node(tokens[TARGET])
         relation = tokens[RELATION]
         self.graph.add_unqualified_edge(subject_node_dsl, object_node_dsl, relation)
         return tokens
 
     def handle_inverse_unqualified_relation(self, _, __, tokens: ParseResults) -> ParseResults:
         """Handle unqualified relations that should go reverse."""
-        u = self.ensure_node(tokens[SUBJECT])
-        v = self.ensure_node(tokens[OBJECT])
+        source = self.ensure_node(tokens[SOURCE])
+        target = self.ensure_node(tokens[TARGET])
         relation = tokens[RELATION]
-        self.graph.add_unqualified_edge(v, u, relation)
+        self.graph.add_unqualified_edge(source=target, target=source, relation=relation)
         return tokens
 
     def ensure_node(self, tokens: ParseResults) -> BaseEntity:

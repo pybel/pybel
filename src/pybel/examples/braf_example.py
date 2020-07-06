@@ -63,7 +63,7 @@ braf_graph.add_increases(
     braf,
     evidence=evidence,
     citation='11283246',
-    object_modifier=activity(name='kin'),
+    target_modifier=activity(name='kin'),
     annotations={'Species': '9606'},
 )
 
@@ -72,7 +72,7 @@ braf_graph.add_increases(
     raf1,
     evidence=evidence,
     citation='11283246',
-    object_modifier=activity(name='kin'),
+    target_modifier=activity(name='kin'),
     annotations={'Species': '9606'},
 )
 
@@ -81,7 +81,7 @@ braf_graph.add_increases(
     elk1,
     evidence=evidence,
     citation='11283246',
-    subject_modifier=activity(name='kin'),
-    object_modifier=activity(name='tscript'),
+    source_modifier=activity(name='kin'),
+    target_modifier=activity(name='tscript'),
     annotations={'Species': '9606'},
 )

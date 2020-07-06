@@ -10,7 +10,8 @@ from .utils import part_has_modifier
 from ..graph import BELGraph
 from ...constants import (
     ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSAL_RELATIONS, CITATION, CITATION_AUTHORS, CITATION_TYPE_PUBMED, DEGRADATION,
-    DIRECT_CAUSAL_RELATIONS, EVIDENCE, NAMESPACE, OBJECT, POLAR_RELATIONS, RELATION, SUBJECT, TRANSLOCATION,
+    DIRECT_CAUSAL_RELATIONS, EVIDENCE, NAMESPACE, POLAR_RELATIONS, RELATION, SOURCE_MODIFIER, TARGET_MODIFIER,
+    TRANSLOCATION,
 )
 from ...dsl import BaseEntity, BiologicalProcess, Pathology
 from ...typing import EdgeData
@@ -123,7 +124,10 @@ def _has_modifier(edge_data: EdgeData, modifier: str) -> bool:
                         :data:`pybel.constants.DEGRADATION`, or :data:`pybel.constants.TRANSLOCATION`.
     :return: Does either the subject or object have the given modifier
     """
-    return part_has_modifier(edge_data, SUBJECT, modifier) or part_has_modifier(edge_data, OBJECT, modifier)
+    return (
+        part_has_modifier(edge_data, SOURCE_MODIFIER, modifier)
+        or part_has_modifier(edge_data, TARGET_MODIFIER, modifier)
+    )
 
 
 @edge_predicate

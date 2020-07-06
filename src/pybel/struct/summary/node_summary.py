@@ -10,8 +10,8 @@ from typing import Any, Iterable, List, Mapping, Optional, Set, Tuple
 from ..filters import get_nodes, has_activity, has_variant, is_degraded, is_translocated
 from ..graph import BELGraph
 from ...constants import (
-    ACTIVITY, CONCEPT, EFFECT, FROM_LOC, FUSION, KIND, LOCATION, MEMBERS, MODIFIER, NAME, NAMESPACE, OBJECT, PARTNER_3P,
-    PARTNER_5P, SUBJECT, TO_LOC, TRANSLOCATION, VARIANTS,
+    ACTIVITY, CONCEPT, EFFECT, FROM_LOC, FUSION, KIND, LOCATION, MEMBERS, MODIFIER, NAME, NAMESPACE, PARTNER_3P,
+    PARTNER_5P, SOURCE_MODIFIER, TARGET_MODIFIER, TO_LOC, TRANSLOCATION, VARIANTS,
 )
 from ...dsl import BaseConcept, BaseEntity, CentralDogma, EntityVariant, FusionBase, ListAbundance, Pathology, Reaction
 from ...language import Entity
@@ -75,7 +75,7 @@ def _iterate_namespaces(graph: BELGraph) -> Iterable[str]:
 
 
 def _iterate_edge_entities(graph: BELGraph) -> Iterable[Entity]:
-    for ((_, _, data), side) in itt.product(graph.edges(data=True), (SUBJECT, OBJECT)):
+    for ((_, _, data), side) in itt.product(graph.edges(data=True), (SOURCE_MODIFIER, TARGET_MODIFIER)):
         side_data = data.get(side)
         if side_data is None:
             continue
@@ -202,7 +202,7 @@ def _identifier_filtered_iterator(graph) -> Iterable[Tuple[str, str]]:
             for pair in _get_node_names(member):
                 yield pair
 
-    for ((_, _, data), side) in itt.product(graph.edges(data=True), (SUBJECT, OBJECT)):
+    for ((_, _, data), side) in itt.product(graph.edges(data=True), (SOURCE_MODIFIER, TARGET_MODIFIER)):
         side_data = data.get(side)
         if side_data is None:
             continue

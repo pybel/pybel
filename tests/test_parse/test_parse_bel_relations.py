@@ -10,12 +10,13 @@ from pyparsing import ParseException
 from pybel import BELGraph
 from pybel.canonicalize import edge_to_bel
 from pybel.constants import (
-    ABUNDANCE, ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE, CITATION, COMPLEX,
-    COMPOSITE, CONCEPT, CORRELATION, DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE,
-    FROM_LOC, FUNCTION, GENE, GMOD, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, INCREASES, IS_A, KIND, LOCATION,
-    MEMBERS, MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, NO_CORRELATION, OBJECT, ORTHOLOGOUS, PART_OF, PATHOLOGY,
+    ABUNDANCE, ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE, CITATION, COMPLEX, COMPOSITE,
+    CONCEPT, CORRELATION, DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE, FROM_LOC,
+    FUNCTION, GENE, GMOD, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, INCREASES, IS_A, KIND, LOCATION, MEMBERS,
+    MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, NO_CORRELATION, ORTHOLOGOUS, PART_OF, PATHOLOGY,
     POSITIVE_CORRELATION, PRODUCTS, PROTEIN, RATE_LIMITING_STEP_OF, REACTANTS, REACTION, REGULATES, RELATION, RNA,
-    SUBJECT, SUBPROCESS_OF, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, VARIANTS,
+    SOURCE, SOURCE_MODIFIER, SUBPROCESS_OF, TARGET, TARGET_MODIFIER, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO,
+    TRANSLOCATION, VARIANTS,
 )
 from pybel.dsl import (
     ComplexAbundance, Pathology, Protein, Rna, abundance, activity, bioprocess, complex_abundance, composite_abundance,
@@ -139,7 +140,7 @@ class TestRelations(TestTokenParserBase):
         statement = 'a(CHEBI:"lead atom") -> g(HGNC:APP, gmod(Me))'
         result = self.parser.relation.parseString(statement)
         expected_dict = {
-            OBJECT: {
+            TARGET: {
                 FUNCTION: GENE,
                 CONCEPT: {
                     NAMESPACE: 'HGNC',
@@ -156,7 +157,7 @@ class TestRelations(TestTokenParserBase):
                 ],
             },
             RELATION: INCREASES,
-            SUBJECT: {
+            SOURCE: {
                 FUNCTION: ABUNDANCE,
                 CONCEPT: {
                     NAMESPACE: 'CHEBI',
@@ -180,7 +181,7 @@ class TestRelations(TestTokenParserBase):
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
-            SUBJECT: {
+            SOURCE: {
                 FUNCTION: ABUNDANCE,
                 CONCEPT: {
                     NAMESPACE: 'CHEBI',
@@ -188,7 +189,7 @@ class TestRelations(TestTokenParserBase):
                 },
             },
             RELATION: DIRECTLY_INCREASES,
-            OBJECT: {
+            TARGET: {
                 FUNCTION: ABUNDANCE,
                 CONCEPT: {
                     NAMESPACE: 'CHEBI',
@@ -211,7 +212,7 @@ class TestRelations(TestTokenParserBase):
 
         expected_annotations = {
             RELATION: DIRECTLY_INCREASES,
-            OBJECT: {
+            TARGET_MODIFIER: {
                 MODIFIER: TRANSLOCATION,
                 EFFECT: {
                     FROM_LOC: {NAMESPACE: 'MESH', NAME: 'Cell Membrane'},
@@ -231,7 +232,7 @@ class TestRelations(TestTokenParserBase):
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
-            SUBJECT: {
+            SOURCE: {
                 MODIFIER: ACTIVITY,
                 FUNCTION: PROTEIN,
                 CONCEPT: {
@@ -242,7 +243,7 @@ class TestRelations(TestTokenParserBase):
                 EFFECT: activity_mapping['pep'],
             },
             RELATION: DECREASES,
-            OBJECT: {
+            TARGET: {
                 FUNCTION: REACTION,
                 REACTANTS: [
                     {
@@ -283,7 +284,7 @@ class TestRelations(TestTokenParserBase):
 
         expected_edge_attributes = {
             RELATION: DECREASES,
-            SUBJECT: {
+            SOURCE_MODIFIER: {
                 MODIFIER: ACTIVITY,
                 EFFECT: activity_mapping['pep'],
                 LOCATION: {
@@ -293,8 +294,10 @@ class TestRelations(TestTokenParserBase):
             }
         }
 
-        self.assertEqual(expected_edge_attributes[SUBJECT],
-                         activity(name='pep', location=Entity(name='intracellular', namespace='GO')))
+        self.assertEqual(
+            expected_edge_attributes[SOURCE_MODIFIER],
+            activity(name='pep', location=Entity(name='intracellular', namespace='GO')),
+        )
 
         self.assert_has_edge(sub, obj, **expected_edge_attributes)
 
@@ -306,7 +309,7 @@ class TestRelations(TestTokenParserBase):
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
-            SUBJECT: {
+            SOURCE: {
                 FUNCTION: PROTEIN,
                 CONCEPT: {
                     NAMESPACE: 'HGNC',
@@ -315,7 +318,7 @@ class TestRelations(TestTokenParserBase):
                 LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}
             },
             RELATION: DIRECTLY_DECREASES,
-            OBJECT: {
+            TARGET: {
                 FUNCTION: ABUNDANCE,
                 CONCEPT: {
                     NAMESPACE: 'CHEBI',
@@ -332,7 +335,7 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_node(obj)
 
         expected_attrs = {
-            SUBJECT: {
+            SOURCE_MODIFIER: {
                 LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}
             },
             RELATION: DIRECTLY_DECREASES,
@@ -355,7 +358,7 @@ class TestRelations(TestTokenParserBase):
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
-            SUBJECT: {
+            SOURCE: {
                 FUNCTION: GENE,
                 CONCEPT: {
                     NAMESPACE: 'HGNC',
@@ -367,7 +370,7 @@ class TestRelations(TestTokenParserBase):
                 }
             },
             RELATION: DIRECTLY_DECREASES,
-            OBJECT: {
+            TARGET: {
                 FUNCTION: ABUNDANCE,
                 CONCEPT: {
                     NAMESPACE: 'CHEBI',
@@ -384,7 +387,7 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_node(obj)
 
         expected_attrs = {
-            SUBJECT: {
+            SOURCE_MODIFIER: {
                 LOCATION: {
                     NAMESPACE: 'GO',
                     NAME: 'intracellular'
@@ -406,7 +409,7 @@ class TestRelations(TestTokenParserBase):
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
-            SUBJECT: {
+            SOURCE: {
                 MODIFIER: ACTIVITY,
                 FUNCTION: PROTEIN,
                 CONCEPT: {
@@ -416,7 +419,7 @@ class TestRelations(TestTokenParserBase):
                 EFFECT: activity_mapping['cat'],
             },
             RELATION: RATE_LIMITING_STEP_OF,
-            OBJECT: {
+            TARGET: {
                 FUNCTION: BIOPROCESS,
                 CONCEPT: {
                     NAMESPACE: 'GO',
@@ -443,7 +446,7 @@ class TestRelations(TestTokenParserBase):
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
-            SUBJECT: {
+            SOURCE: {
                 FUNCTION: GENE,
                 CONCEPT: {
                     NAMESPACE: 'HGNC',
@@ -457,7 +460,7 @@ class TestRelations(TestTokenParserBase):
                 ],
             },
             RELATION: CAUSES_NO_CHANGE,
-            OBJECT: {
+            TARGET: {
                 FUNCTION: PATHOLOGY,
                 CONCEPT: {
                     NAMESPACE: 'MESH',
@@ -485,7 +488,7 @@ class TestRelations(TestTokenParserBase):
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
-            SUBJECT: {
+            SOURCE: {
                 MODIFIER: ACTIVITY,
                 EFFECT: activity_mapping['pep'],
                 FUNCTION: COMPLEX,
@@ -501,7 +504,7 @@ class TestRelations(TestTokenParserBase):
                 ],
             },
             RELATION: REGULATES,
-            OBJECT: {
+            TARGET: {
                 MODIFIER: ACTIVITY,
                 EFFECT: activity_mapping['pep'],
                 FUNCTION: PROTEIN,
@@ -560,7 +563,7 @@ class TestRelations(TestTokenParserBase):
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
-            SUBJECT: {
+            SOURCE: {
                 MODIFIER: ACTIVITY,
                 EFFECT: activity_mapping['kin'],
                 FUNCTION: PROTEIN,
@@ -570,7 +573,7 @@ class TestRelations(TestTokenParserBase):
                 },
             },
             RELATION: NEGATIVE_CORRELATION,
-            OBJECT: {
+            TARGET: {
                 FUNCTION: PROTEIN,
                 CONCEPT: {
                     NAMESPACE: 'HGNC',
@@ -598,7 +601,7 @@ class TestRelations(TestTokenParserBase):
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
-            SUBJECT: {
+            SOURCE: {
                 FUNCTION: PROTEIN,
                 CONCEPT: {
                     NAMESPACE: 'HGNC',
@@ -607,7 +610,7 @@ class TestRelations(TestTokenParserBase):
                 VARIANTS: [pmod('Ph', position=9, code='Ser')]
             },
             RELATION: POSITIVE_CORRELATION,
-            OBJECT: {
+            TARGET: {
                 MODIFIER: ACTIVITY,
                 FUNCTION: PROTEIN,
                 CONCEPT: {
@@ -677,7 +680,7 @@ class TestRelations(TestTokenParserBase):
 
         # [[RNA, ['HGNC', 'AKT1']], TRANSLATED_TO, [PROTEIN, ['HGNC', 'AKT1']]]
         expected_result = {
-            SUBJECT: {
+            SOURCE: {
                 FUNCTION: RNA,
                 CONCEPT: {
                     NAMESPACE: 'HGNC',
@@ -689,7 +692,7 @@ class TestRelations(TestTokenParserBase):
                 }
             },
             RELATION: TRANSLATED_TO,
-            OBJECT: {
+            TARGET: {
                 FUNCTION: PROTEIN,
                 CONCEPT: {
                     NAMESPACE: 'HGNC',
@@ -810,7 +813,7 @@ class TestRelations(TestTokenParserBase):
         result = self.parser.relation.parseString(statement)
 
         expected_result = {
-            SUBJECT: {
+            SOURCE: {
                 FUNCTION: GENE,
                 CONCEPT: {
                     NAMESPACE: 'dbSNP',
@@ -818,7 +821,7 @@ class TestRelations(TestTokenParserBase):
                 },
             },
             RELATION: EQUIVALENT_TO,
-            OBJECT: {
+            TARGET: {
                 FUNCTION: GENE,
                 CONCEPT: {
                     NAMESPACE: 'HGNC',

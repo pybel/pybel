@@ -10,7 +10,7 @@ import unittest
 from pybel import from_cbn_jgif, to_jgif
 from pybel.constants import (
     ACTIVITY, ANNOTATIONS, CITATION, CITATION_TYPE_OTHER, CITATION_TYPE_PUBMED, DECREASES, DIRECTLY_INCREASES, EFFECT,
-    EVIDENCE, IDENTIFIER, MODIFIER, NAMESPACE, OBJECT, RELATION,
+    EVIDENCE, IDENTIFIER, MODIFIER, NAMESPACE, TARGET_MODIFIER, RELATION,
 )
 from pybel.dsl import (
     Abundance, BiologicalProcess, ComplexAbundance, NamedComplexAbundance, Pathology, Protein,
@@ -87,7 +87,7 @@ jgif_expected_edges = [
             NAMESPACE: CITATION_TYPE_PUBMED,
             IDENTIFIER: '12483215'
         },
-        OBJECT: {MODIFIER: ACTIVITY, EFFECT: activity_mapping['phos']},
+        TARGET_MODIFIER: {MODIFIER: ACTIVITY, EFFECT: activity_mapping['phos']},
         ANNOTATIONS: {
             'Species': {'10116': True},
             'Cell': {'neuron': True}
@@ -112,7 +112,7 @@ jgif_expected_edges = [
             NAMESPACE: CITATION_TYPE_OTHER,
             IDENTIFIER: "20335267"
         },
-        OBJECT: {MODIFIER: ACTIVITY, EFFECT: activity_mapping['cat']},
+        TARGET_MODIFIER: {MODIFIER: ACTIVITY, EFFECT: activity_mapping['cat']},
         ANNOTATIONS: {
             'Tissue': {'lung': True}
         }

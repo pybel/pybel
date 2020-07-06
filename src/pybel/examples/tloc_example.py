@@ -49,7 +49,7 @@ ras_tloc_graph.add_directly_increases(
     ras_farn,
     evidence=evidence,
     citation=pmid,
-    subject_modifier=activity('cat'),
+    source_modifier=activity('cat'),
 )
 
 ras_tloc_graph.add_directly_increases(
@@ -57,7 +57,7 @@ ras_tloc_graph.add_directly_increases(
     ras,
     evidence=evidence,
     citation=pmid,
-    object_modifier=translocation(
+    target_modifier=translocation(
         from_loc=Entity(namespace='GO', name='intracellular', identifier='GO:0005622'),
         to_loc=Entity(namespace='GO', name='plasma membrane', identifier='GO:0005886'),
     ),

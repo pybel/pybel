@@ -202,7 +202,8 @@ for your own purposes, you can directly use the `pybel.parse()` function.
     {'object': {'concept': {'name': '456', 'namespace': 'hgnc'}, 'function': 'Protein'}, 'relation': 'increases', 'subject': {'concept': {'name': '123', 'namespace': 'hgnc'}, 'function': 'Protein'}}
 
 This functionality can also be exposed through a Flask-based web application with ``python -m pybel.apps.parser`` after
-installing ``flask`` with ``pip install flask``.
+installing ``flask`` with ``pip install flask``. Note that the first run requires about a ~2 second delay to generate
+the parser, after which each parse is very fast.
 
 Using the CLI
 ~~~~~~~~~~~~~

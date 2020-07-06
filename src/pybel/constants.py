@@ -250,10 +250,12 @@ EVIDENCE = 'evidence'
 ANNOTATIONS = 'annotations'
 #: The key for free annotations
 FREE_ANNOTATIONS = 'free_annotations'
-#: The key for an internal edge data dictionary for the subject modifier dictionary
-SUBJECT = 'subject'
-#: The key for an internal edge data dictionary for the object modifier dictionary
-OBJECT = 'object'
+SOURCE = 'source'
+TARGET = 'target'
+#: The key for an internal edge data dictionary for the source modifier dictionary
+SOURCE_MODIFIER = 'source_modifier'
+#: The key for an internal edge data dictionary for the target modifier dictionary
+TARGET_MODIFIER = 'target_modifier'
 #: The key or an internal edge data dictionary for the line number
 LINE = 'line'
 #: The key representing the hash of the other
@@ -265,8 +267,8 @@ PYBEL_EDGE_DATA_KEYS = {
     CITATION,
     EVIDENCE,
     ANNOTATIONS,
-    SUBJECT,
-    OBJECT,
+    SOURCE_MODIFIER,
+    TARGET_MODIFIER,
 }
 
 #: The group of all PyBEL-specific keys for edge data dictionaries, not used for hashing.

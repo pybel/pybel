@@ -155,7 +155,7 @@ def location(identifier: Entity) -> LocationDict:
             target,
             citation=...,
             evidence=...,
-            object_modifier=location(entity(namespace='GO', name='cytosol', identifier='GO:0005829')),
+            target_modifier=location(entity(namespace='GO', name='cytosol', identifier='GO:0005829')),
         )
 
     X increases the kinase activity of Y in the cytoplasm. In this case, the :func:`activity` function takes a location as
@@ -175,7 +175,7 @@ def location(identifier: Entity) -> LocationDict:
             target,
             citation=...,
             evidence=...,
-            object_modifier=activity('kin', location=entity(namespace='GO', name='cytosol', identifier='GO:0005829')),
+            target_modifier=activity('kin', location=entity(namespace='GO', name='cytosol', identifier='GO:0005829')),
         )
     """
     return {

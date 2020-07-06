@@ -5,7 +5,7 @@
 from tqdm import tqdm
 
 from ..constants import (
-    ANNOTATIONS, CITATION, EVIDENCE, FUSION, IDENTIFIER, MEMBERS, NAMESPACE, OBJECT, RELATION, SUBJECT, VARIANTS,
+    ANNOTATIONS, CITATION, EVIDENCE, FUSION, MEMBERS, NAMESPACE, RELATION, SOURCE_MODIFIER, TARGET_MODIFIER, VARIANTS,
 )
 from ..utils import flatten_dict
 
@@ -85,7 +85,7 @@ def to_neo4j(graph, neo_connection, use_tqdm: bool = False):
         if EVIDENCE in d:
             attrs[EVIDENCE] = d[EVIDENCE]
 
-        for side in (SUBJECT, OBJECT):
+        for side in (SOURCE_MODIFIER, TARGET_MODIFIER):
             side_data = d.get(side)
             if side_data:
                 attrs.update(flatten_dict(side_data, parent_key=side))

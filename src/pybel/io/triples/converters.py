@@ -8,7 +8,7 @@ from typing import Dict, Tuple
 from ...constants import (
     ACTIVITY, ASSOCIATION, CAUSAL_DECREASE_RELATIONS, CAUSAL_INCREASE_RELATIONS, CAUSAL_RELATIONS, CAUSES_NO_CHANGE,
     CORRELATIVE_RELATIONS, DECREASES, DEGRADATION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EQUIVALENT_TO, HAS_PRODUCT,
-    HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A, MODIFIER, OBJECT, PART_OF, REGULATES, RELATION,
+    HAS_REACTANT, HAS_VARIANT, INCREASES, IS_A, MODIFIER, PART_OF, REGULATES, RELATION, TARGET_MODIFIER,
 )
 from ...dsl import (
     Abundance, BaseAbundance, BaseEntity, BiologicalProcess, CentralDogma, ComplexAbundance, Gene, MicroRna,
@@ -287,8 +287,8 @@ class RegulatesAmountConverter(TypedConverter):
     @classmethod
     def predicate(cls, u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> bool:
         """Test a BEL edge."""
-        object_modifier = edge_data.get(OBJECT)
-        return edge_data[RELATION] == cls.relation and (not object_modifier or not object_modifier.get(MODIFIER))
+        target_modifier = edge_data.get(TARGET_MODIFIER)
+        return edge_data[RELATION] == cls.relation and (not target_modifier or not target_modifier.get(MODIFIER))
 
 
 class IncreasesAmountConverter(RegulatesAmountConverter):
@@ -321,11 +321,11 @@ class RegulatesDegradationConverter(TypedConverter):
     @classmethod
     def predicate(cls, u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> bool:
         """Test a BEL edge."""
-        object_modifier = edge_data.get(OBJECT)
+        target_modifier = edge_data.get(TARGET_MODIFIER)
         return (
             edge_data[RELATION] == cls.relation
-            and object_modifier
-            and object_modifier.get(MODIFIER) == DEGRADATION
+            and target_modifier
+            and target_modifier.get(MODIFIER) == DEGRADATION
         )
 
 
@@ -359,11 +359,11 @@ class RegulatesActivityConverter(TypedConverter):
     @classmethod
     def predicate(cls, u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> bool:
         """Test a BEL edge."""
-        object_modifier = edge_data.get(OBJECT)
+        target_modifier = edge_data.get(TARGET_MODIFIER)
         return (
             edge_data[RELATION] == cls.relation
-            and object_modifier
-            and object_modifier.get(MODIFIER) == ACTIVITY
+            and target_modifier
+            and target_modifier.get(MODIFIER) == ACTIVITY
         )
 
 

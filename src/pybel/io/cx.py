@@ -25,10 +25,9 @@ from networkx.utils import open_file
 
 from ..canonicalize import calculate_canonical_name
 from ..constants import (
-    ANNOTATIONS, CITATION, EVIDENCE, FUSION, GRAPH_ANNOTATION_LIST,
-    GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL,
-    MEMBERS, NAME, OBJECT, PARTNER_3P, PARTNER_5P, PRODUCTS, RANGE_3P, RANGE_5P, REACTANTS,
-    RELATION, SUBJECT, UNQUALIFIED_EDGES, VARIANTS,
+    ANNOTATIONS, CITATION, EVIDENCE, FUSION, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL,
+    GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, MEMBERS, NAME, PARTNER_3P, PARTNER_5P, PRODUCTS,
+    RANGE_3P, RANGE_5P, REACTANTS, RELATION, SOURCE_MODIFIER, TARGET_MODIFIER, UNQUALIFIED_EDGES, VARIANTS,
 )
 from ..dsl import BaseAbundance, BaseEntity
 from ..struct import BELGraph
@@ -51,6 +50,9 @@ log = logging.getLogger(__name__)
 
 CX_NODE_NAME = 'label'
 NDEX_SOURCE_FORMAT = "ndex:sourceFormat"
+
+NDEX_SOURCE_MODIFIER = 'sourceModifier'
+NDEX_TARGET_MODIFIER = 'targetModifier'
 
 
 def _cx_to_dict(list_of_dicts: List[Dict], key_tag: str = 'k', value_tag: str = 'v') -> Dict:
@@ -205,19 +207,19 @@ def to_cx(graph: BELGraph) -> List[Dict]:  # noqa: C901
                     'd': 'list_of_string',
                 })
 
-        if SUBJECT in d:
-            for k, v in flatten_dict(d[SUBJECT]).items():
+        if SOURCE_MODIFIER in d:
+            for k, v in flatten_dict(d[SOURCE_MODIFIER]).items():
                 edge_attributes_entry.append({
                     'po': edge_index,
-                    'n': '{}_{}'.format(SUBJECT, k),
+                    'n': '{}_{}'.format(NDEX_SOURCE_MODIFIER, k),
                     'v': v,
                 })
 
-        if OBJECT in d:
-            for k, v in flatten_dict(d[OBJECT]).items():
+        if TARGET_MODIFIER in d:
+            for k, v in flatten_dict(d[TARGET_MODIFIER]).items():
                 edge_attributes_entry.append({
                     'po': edge_index,
-                    'n': '{}_{}'.format(OBJECT, k),
+                    'n': '{}_{}'.format(NDEX_TARGET_MODIFIER, k),
                     'v': v,
                 })
 
@@ -515,10 +517,10 @@ def from_cx(cx: List[Dict]) -> BELGraph:  # noqa: C901
             if key.startswith(CITATION):
                 vl = _after_underscore(key)
                 edge_citation[eid][vl] = value
-            elif key.startswith(SUBJECT):
+            elif key.startswith(NDEX_SOURCE_MODIFIER):
                 vl = _after_underscore(key)
                 edge_subject[eid][vl] = value
-            elif key.startswith(OBJECT):
+            elif key.startswith(NDEX_TARGET_MODIFIER):
                 vl = _after_underscore(key)
                 edge_object[eid][vl] = value
             elif key == EVIDENCE:
@@ -530,10 +532,10 @@ def from_cx(cx: List[Dict]) -> BELGraph:  # noqa: C901
         edge_data_pp[eid][CITATION] = data
 
     for eid, data in edge_subject.items():
-        edge_data_pp[eid][SUBJECT] = expand_dict(data)
+        edge_data_pp[eid][SOURCE_MODIFIER] = expand_dict(data)
 
     for eid, data in edge_object.items():
-        edge_data_pp[eid][OBJECT] = expand_dict(data)
+        edge_data_pp[eid][TARGET_MODIFIER] = expand_dict(data)
 
     for eid in edge_relation:
         if eid in edge_annotations:  # FIXME stick this in edge_data.items() iteration
@@ -549,8 +551,8 @@ def from_cx(cx: List[Dict]) -> BELGraph:  # noqa: C901
                 relation=edge_relation[eid],
                 citation=edge_data_pp[eid][CITATION],
                 evidence=edge_data_pp[eid][EVIDENCE],
-                subject_modifier=edge_data_pp[eid].get(SUBJECT),
-                object_modifier=edge_data_pp[eid].get(OBJECT),
+                source_modifier=edge_data_pp[eid].get(SOURCE_MODIFIER),
+                target_modifier=edge_data_pp[eid].get(TARGET_MODIFIER),
                 annotations=edge_data_pp[eid].get(ANNOTATIONS),
             )
         elif edge_relation[eid] in UNQUALIFIED_EDGES:

@@ -13,8 +13,8 @@ from datetime import datetime
 from typing import Any, List, Mapping, Optional, Tuple, TypeVar
 
 from .constants import (
-    ACTIVITY, CITATION, DEGRADATION, EFFECT, EVIDENCE, FROM_LOC,
-    IDENTIFIER, LOCATION, MODIFIER, NAME, NAMESPACE, OBJECT, RELATION, SUBJECT, TO_LOC, TRANSLOCATION,
+    ACTIVITY, CITATION, DEGRADATION, EFFECT, EVIDENCE, FROM_LOC, IDENTIFIER, LOCATION, MODIFIER, NAME, NAMESPACE,
+    RELATION, SOURCE_MODIFIER, TARGET_MODIFIER, TO_LOC, TRANSLOCATION,
 )
 from .typing import EdgeData
 
@@ -224,8 +224,8 @@ def canonicalize_edge(edge_data: EdgeData) -> CanonicalEdge:
     """Canonicalize the edge to a tuple based on the relation, subject modifications, and object modifications."""
     return (
         edge_data[RELATION],
-        _canonicalize_edge_modifications(edge_data.get(SUBJECT)),
-        _canonicalize_edge_modifications(edge_data.get(OBJECT)),
+        _canonicalize_edge_modifications(edge_data.get(SOURCE_MODIFIER)),
+        _canonicalize_edge_modifications(edge_data.get(TARGET_MODIFIER)),
     )
 
 

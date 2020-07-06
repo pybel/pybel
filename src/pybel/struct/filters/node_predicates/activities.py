@@ -4,7 +4,7 @@
 
 from ..utils import part_has_modifier
 from ...graph import BELGraph
-from ....constants import ACTIVITY, DEGRADATION, OBJECT, SUBJECT, TRANSLOCATION
+from ....constants import ACTIVITY, DEGRADATION, SOURCE_MODIFIER, TARGET_MODIFIER, TRANSLOCATION
 from ....dsl import BaseEntity
 
 __all__ = [
@@ -28,12 +28,12 @@ def has_edge_modifier(graph: BELGraph, node: BaseEntity, modifier: str) -> bool:
                         :data:`pybel.constants.TRANSLOCATION`
     """
     modifier_in_subject = any(
-        part_has_modifier(d, SUBJECT, modifier)
+        part_has_modifier(d, SOURCE_MODIFIER, modifier)
         for _, _, d in graph.out_edges(node, data=True)
     )
 
     modifier_in_object = any(
-        part_has_modifier(d, OBJECT, modifier)
+        part_has_modifier(d, TARGET_MODIFIER, modifier)
         for _, _, d in graph.in_edges(node, data=True)
     )
 

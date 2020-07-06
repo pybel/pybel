@@ -9,7 +9,7 @@ from typing import Any, Iterable, List, TextIO, Union
 from networkx.utils import open_file
 
 from .nodelink import _augment_node, _fix_annotation_list
-from ..constants import CITATION, OBJECT, SUBJECT
+from ..constants import CITATION, SOURCE_MODIFIER, TARGET_MODIFIER
 from ..language import CitationDict
 from ..struct.graph import BELGraph, _handle_modifier
 from ..tokens import parse_result_to_dsl
@@ -98,7 +98,7 @@ def add_sbel(graph: BELGraph, it: Iterable[SBEL]) -> None:
             for k, v in data.items()
             if k not in {'source', 'target', 'key'}
         }
-        for side in (SUBJECT, OBJECT):
+        for side in (SOURCE_MODIFIER, TARGET_MODIFIER):
             side_data = edge_data.get(side)
             if side_data:
                 _handle_modifier(side_data)
