@@ -7,7 +7,7 @@ import os
 import unittest
 
 import pybel.dsl
-from pybel.schema import is_valid_node, is_valid_edge
+from pybel.schema import is_valid_edge, is_valid_node
 from pybel.testing.utils import n
 
 NAMESPACE, NAME, IDENTIFIER = n(), n(), n()
