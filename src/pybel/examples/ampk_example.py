@@ -60,7 +60,7 @@ ampk_graph.add_directly_phosphorylates(
 )
 ampk_graph.add_binds(
     ComplexAbundance([
-        rptor.with_variants(ProteinModification('Ser')),
+        rptor.with_variants(ProteinModification('Ph')),
         mtor,
     ]),
     p14_3_3,

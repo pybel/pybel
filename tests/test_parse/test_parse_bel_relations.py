@@ -150,9 +150,10 @@ class TestRelations(TestTokenParserBase):
                     {
                         KIND: GMOD,
                         CONCEPT: {
-                            NAMESPACE: BEL_DEFAULT_NAMESPACE,
-                            NAME: 'Me',
-                        }
+                            NAMESPACE: 'go',
+                            IDENTIFIER: '0006306',
+                            NAME: 'DNA methylation',
+                        },
                     },
                 ],
             },
@@ -934,7 +935,7 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_node(expected_child)
 
         self.assertEqual('g(HGNC:AKT1)', self.graph.node_to_bel(expected_parent))
-        self.assertEqual('g(HGNC:AKT1, gmod(Me))', self.graph.node_to_bel(expected_child))
+        self.assertEqual('g(HGNC:AKT1, gmod(go:0006306 ! "DNA methylation"))', self.graph.node_to_bel(expected_child))
 
         self.assert_has_edge(expected_parent, expected_child, **{RELATION: HAS_VARIANT})
 

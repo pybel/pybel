@@ -927,7 +927,10 @@ class TestProtein(TestTokenParserBase):
         parent = protein('HGNC', 'AKT1')
         expected_node = parent.with_variants(pmod('Ph', code='Ser', position=473))
         self.assert_has_node(expected_node)
-        self.assertEqual('p(HGNC:AKT1, pmod(Ph, Ser, 473))', self.graph.node_to_bel(expected_node))
+        self.assertEqual(
+            'p(HGNC:AKT1, pmod(go:0006468 ! "protein phosphorylation", Ser, 473))',
+            self.graph.node_to_bel(expected_node),
+        )
 
         self.assert_has_node(parent)
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
@@ -940,7 +943,10 @@ class TestProtein(TestTokenParserBase):
         parent = protein('HGNC', 'AKT1')
         expected_node = parent.with_variants(pmod('Ph', code='Ser', position=473))
         self.assert_has_node(expected_node)
-        self.assertEqual('p(HGNC:AKT1, pmod(Ph, Ser, 473))', self.graph.node_to_bel(expected_node))
+        self.assertEqual(
+            'p(HGNC:AKT1, pmod(go:0006468 ! "protein phosphorylation", Ser, 473))',
+            self.graph.node_to_bel(expected_node),
+        )
 
         self.assert_has_node(parent)
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)

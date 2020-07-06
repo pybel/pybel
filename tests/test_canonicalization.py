@@ -28,7 +28,7 @@ class TestCanonicalize(unittest.TestCase):
         self.assertEqual('var("p.Val600Glu")', str(Hgvs('p.Val600Glu')))
         self.assertEqual('var("p.Val600Glu")', str(ProteinSubstitution('Val', 600, 'Glu')))
 
-        self.assertEqual('pmod(Ph)', str(ProteinModification('Ph')))
+        self.assertEqual('pmod(go:0006468 ! "protein phosphorylation")', str(ProteinModification('Ph')))
         self.assertEqual('pmod(TEST:Ph)', str(ProteinModification('Ph', namespace='TEST')))
         self.assertEqual('pmod(TEST:Ph, Ser)', str(ProteinModification('Ph', namespace='TEST', code='Ser')))
         self.assertEqual('pmod(TEST:Ph, Ser, 5)',
@@ -68,7 +68,7 @@ class TestCanonicalize(unittest.TestCase):
 
     def test_protein_pmod(self):
         node = Protein(name='PLCG1', namespace='HGNC', variants=[ProteinModification(name='Ph', code='Tyr')])
-        self.assertEqual('p(HGNC:PLCG1, pmod(Ph, Tyr))', str(node))
+        self.assertEqual('p(HGNC:PLCG1, pmod(go:0006468 ! "protein phosphorylation", Tyr))', str(node))
 
     def test_protein_fragment(self):
         node = Protein(name='APP', namespace='HGNC', variants=[Fragment(start=672, stop=713)])

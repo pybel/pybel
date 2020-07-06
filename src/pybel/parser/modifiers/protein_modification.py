@@ -80,8 +80,8 @@ from pyparsing import Group, MatchFirst, Optional, ParseResults, ParserElement, 
 
 from .constants import amino_acid
 from ..utils import WCW, nest, one_of_tags
-from ...constants import BEL_DEFAULT_NAMESPACE, CONCEPT, KIND, NAME, NAMESPACE, PMOD, PMOD_CODE, PMOD_POSITION
-from ...language import pmod_legacy_labels, pmod_namespace
+from ...constants import CONCEPT, IDENTIFIER, KIND, NAME, NAMESPACE, PMOD, PMOD_CODE, PMOD_POSITION
+from ...language import pmod_legacy_labels, pmod_mappings, pmod_namespace
 
 __all__ = [
     'get_protein_modification_language',
@@ -91,16 +91,21 @@ logger = logging.getLogger(__name__)
 
 
 def _handle_pmod_default_ns(_, __, tokens: ParseResults) -> ParseResults:
-    tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
-    tokens[NAME] = pmod_namespace[tokens[0]]
-    return tokens
+    upgraded = pmod_namespace[tokens[0]]
+    return _r(upgraded, tokens)
 
 
 def _handle_pmod_legacy_ns(line, _, tokens: ParseResults) -> ParseResults:
     upgraded = pmod_legacy_labels[tokens[0]]
     logger.log(5, 'legacy pmod() value %s upgraded to %s', line, upgraded)
-    tokens[NAMESPACE] = BEL_DEFAULT_NAMESPACE
-    tokens[NAME] = upgraded
+    return _r(upgraded, tokens)
+
+
+def _r(upgraded, tokens):
+    e = pmod_mappings[upgraded]['xrefs'][0]
+    tokens[NAMESPACE] = e.namespace
+    tokens[IDENTIFIER] = e.identifier
+    tokens[NAME] = e.name
     return tokens
 
 
