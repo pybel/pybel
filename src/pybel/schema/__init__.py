@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 
-"""Validation for PyBEL data."""
+"""Validation for PyBEL data.
+
+The :mod:`pybel.schema` module houses functions to verify the format of a given node or edge.
+Its inclusion will help ensure that all PyBEL data is stored in a consistent and
+clearly defined manner across the repository.
+"""
 
 import json
 import logging
