@@ -602,7 +602,8 @@ class BELParser(BaseParser):
             self.has_member,
             self.has_component,
         ])
-        self.inverted_unqualified_relation.setParseAction(self.handle_inverse_unqualified_relation)
+        if self.graph is not None:
+            self.inverted_unqualified_relation.setParseAction(self.handle_inverse_unqualified_relation)
 
         self.normal_unqualified_relation = MatchFirst([
             self.has_member,
@@ -610,7 +611,8 @@ class BELParser(BaseParser):
             self.has_variant_relation,
             self.part_of_reaction,
         ])
-        self.normal_unqualified_relation.setParseAction(self.handle_unqualified_relation)
+        if self.graph is not None:
+            self.normal_unqualified_relation.setParseAction(self.handle_unqualified_relation)
 
         #: 3.1 Causal Relationships - nested.
         causal_relation_tags = MatchFirst([
@@ -626,7 +628,8 @@ class BELParser(BaseParser):
             nest(triple(self.bel_term, causal_relation_tags, self.bel_term)),
         )
 
-        self.nested_causal_relationship.setParseAction(self.handle_nested_relation)
+        if self.graph is not None:
+            self.nested_causal_relationship.setParseAction(self.handle_nested_relation)
 
         # has_members is handled differently from all other relations becuase it gets distrinbuted
         self.relation = MatchFirst([
@@ -637,7 +640,9 @@ class BELParser(BaseParser):
             self.normal_unqualified_relation,
         ])
 
-        self.singleton_term = (self.bel_term + StringEnd()).setParseAction(self.handle_term)
+        self.singleton_term = self.bel_term + StringEnd()
+        if self.graph is not None:
+            self.singleton_term.setParseAction(self.handle_term)
 
         self.statement = self.relation | self.singleton_term
         self.language = self.control_parser.language | self.statement
