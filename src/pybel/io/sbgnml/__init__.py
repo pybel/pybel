@@ -9,4 +9,4 @@ Example SBGN-ML files can be found at:
 """
 
 from .convert import convert_sbgn
-from .parse import parse_sbgn
+from .parse import parse_sbgn, parse_sbgn_url

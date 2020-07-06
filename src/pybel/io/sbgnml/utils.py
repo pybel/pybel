@@ -8,21 +8,21 @@ from urllib.parse import unquote_plus
 
 from pyobo.identifier_utils import normalize_prefix
 
-from .constants import RDF, SBGN, hgnc_name_to_id
+from .constants import RDF, hgnc_name_to_id
 
 logger = logging.getLogger(__name__)
 
 
-def _get_label(glyph) -> Optional[str]:
+def _get_label(glyph, sbgn_prefix) -> Optional[str]:
     _labels = list({
         label.get('text')
-        for label in glyph.findall(f'{SBGN}label')
+        for label in glyph.findall(f'{sbgn_prefix}label')
     })
     return _labels[0] if _labels else None
 
 
-def _iter_references(glyph) -> Iterable[Tuple[str, str]]:
-    _xpath = f"{SBGN}extension/annotation/{RDF}RDF/{RDF}Description/"
+def _iter_references(glyph, sbgn_prefix) -> Iterable[Tuple[str, str]]:
+    _xpath = f"{sbgn_prefix}extension/annotation/{RDF}RDF/{RDF}Description/"
     for d in glyph.findall(_xpath):
         for bag in d:
             for y in bag:

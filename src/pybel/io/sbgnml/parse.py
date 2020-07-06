@@ -13,8 +13,9 @@ from typing import Any, Iterable, List, Mapping, Optional, Tuple, Union
 from xml.etree import ElementTree  # noqa:S405
 
 import pyobo
+import requests
 
-from .constants import SBGN, XHTML, chebi_name_to_id
+from .constants import SBGN_VERSIONS, XHTML, chebi_name_to_id
 from .utils import _get_label, _iter_references
 
 logger = logging.getLogger(__name__)
@@ -24,20 +25,43 @@ COMPLEX_DELIM = re.compile(r'[:/]')
 GroundingMap = Mapping[str, Tuple[str, str, str]]
 
 
-def parse_sbgn(path: str, grounding_map: Optional[GroundingMap] = None) -> Mapping[str, Any]:
+def parse_sbgn_url(
+    url: str,
+    grounding_map: Optional[GroundingMap] = None,
+    version: Optional[str] = None,
+) -> Mapping[str, Any]:
+    """Parse a SBGN-ML file by a URL into a usable dictionary."""
+    res = requests.get(url)
+    tree = ElementTree.fromstring(res.text)
+    return parse_sbgn_tree(tree, grounding_map=grounding_map, version=version)
+
+
+def parse_sbgn(
+    path: str,
+    grounding_map: Optional[GroundingMap] = None,
+    version: Optional[str] = None,
+) -> Mapping[str, Any]:
     """Parse a SBGN-ML file into a usable dictionary."""
     tree = ElementTree.parse(path)  # noqa:S314
-    return parse_sbgn_tree(tree, grounding_map=grounding_map)
-
-
-def parse_sbgn_tree(tree: ElementTree.ElementTree, grounding_map: Optional[GroundingMap] = None) -> Mapping[str, Any]:
-    """Parse an SBGN-ML XML element tree."""
     root = tree.getroot()
-    maps = list(root.findall(f"{SBGN}map"))
+    return parse_sbgn_tree(root, grounding_map=grounding_map)
+
+
+def parse_sbgn_tree(
+    root: ElementTree.Element,
+    grounding_map: Optional[GroundingMap] = None,
+    version: Optional[str] = None,
+) -> Mapping[str, Any]:
+    """Parse an SBGN-ML XML element tree."""
+    sbgn_prefix = SBGN_VERSIONS.get(version or '0.2')
+    logger.info('Using SBGN prefix: %s', sbgn_prefix)
+    maps = list(root.findall(f"{sbgn_prefix}map"))
+    if 0 == len(maps):
+        raise ValueError('no maps found')
     if 1 < len(maps):
         raise ValueError('not supporting multiple maps in one XML now')
     sbgn_map = maps[0]
-    return handle_sbgn_map(sbgn_map, grounding_map=grounding_map)
+    return handle_sbgn_map(sbgn_map, grounding_map=grounding_map, sbgn_prefix=sbgn_prefix)
 
 
 def ground(namespaces: Union[str, Iterable[str]], text: str, *, grounding_map: Optional[GroundingMap] = None):
@@ -47,12 +71,17 @@ def ground(namespaces: Union[str, Iterable[str]], text: str, *, grounding_map: O
     return pyobo.ground(namespaces, text)
 
 
-def handle_sbgn_map(sbgn_map: ElementTree.Element, grounding_map: Optional[GroundingMap] = None):  # noqa: C901
+def handle_sbgn_map(
+    sbgn_map: ElementTree.Element,
+    *,
+    sbgn_prefix: str,
+    grounding_map: Optional[GroundingMap] = None,
+):  # noqa: C901
     """Handle a map element from an SBGN-ML XML element tree."""
     compartments = {}
-    for compartment in sbgn_map.findall(f'{SBGN}glyph[@class="compartment"]'):
+    for compartment in sbgn_map.findall(f'{sbgn_prefix}glyph[@class="compartment"]'):
         compartment_id = compartment.get('id')
-        compartment_label = compartment.findall(f'{SBGN}label')[0].get('text')
+        compartment_label = compartment.findall(f'{sbgn_prefix}label')[0].get('text')
 
         g_prefix, g_id, g_name = None, None, None
 
@@ -83,10 +112,10 @@ def handle_sbgn_map(sbgn_map: ElementTree.Element, grounding_map: Optional[Groun
     port_to_process = {}
     process_to_ports = defaultdict(list)
     process_to_references = defaultdict(list)
-    for process in sbgn_map.findall(f'{SBGN}glyph[@class="process"]'):
+    for process in sbgn_map.findall(f'{sbgn_prefix}glyph[@class="process"]'):
         process_id = process.get('id')
-        process_to_references[process_id].extend(_iter_references(process))
-        for port in process.findall(f'{SBGN}port'):
+        process_to_references[process_id].extend(_iter_references(process, sbgn_prefix=sbgn_prefix))
+        for port in process.findall(f'{sbgn_prefix}port'):
             port_id = port.get('id')
             process_to_ports[process_id].append(port_id)
             if port_id in port_to_process:
@@ -95,9 +124,9 @@ def handle_sbgn_map(sbgn_map: ElementTree.Element, grounding_map: Optional[Groun
 
     and_to_ports = defaultdict(list)
     ports_to_and = {}
-    for and_glyph in sbgn_map.findall(f'{SBGN}glyph[@class="and"]'):
+    for and_glyph in sbgn_map.findall(f'{sbgn_prefix}glyph[@class="and"]'):
         and_id = and_glyph.get('id')
-        for port in and_glyph.findall(f'{SBGN}port'):
+        for port in and_glyph.findall(f'{sbgn_prefix}port'):
             port_id = port.get('id')
             and_to_ports[and_id].append(port_id)
             if port_id in ports_to_and:
@@ -108,9 +137,9 @@ def handle_sbgn_map(sbgn_map: ElementTree.Element, grounding_map: Optional[Groun
     glyphs = {}
 
     # Build up phenotype glyphs
-    for phenotype_glyph in sbgn_map.findall(f'{SBGN}glyph[@class="phenotype"]'):
+    for phenotype_glyph in sbgn_map.findall(f'{sbgn_prefix}glyph[@class="phenotype"]'):
         phenotype_glyph_id = phenotype_glyph.get('id')
-        phenotype_glyph_label = _get_label(phenotype_glyph)
+        phenotype_glyph_label = _get_label(phenotype_glyph, sbgn_prefix)
         references = _get_references(
             glyph=phenotype_glyph,
             glyph_id=phenotype_glyph_id,
@@ -118,6 +147,7 @@ def handle_sbgn_map(sbgn_map: ElementTree.Element, grounding_map: Optional[Groun
             glyph_label=phenotype_glyph_label,
             prefixes=['go', 'efo', 'hp', 'doid', 'mesh'],
             grounding_map=grounding_map,
+            sbgn_prefix=sbgn_prefix,
         )
         glyphs[phenotype_glyph_id] = {
             'glyph_id': phenotype_glyph_id,
@@ -131,8 +161,8 @@ def handle_sbgn_map(sbgn_map: ElementTree.Element, grounding_map: Optional[Groun
 
     # Build up normal glyphs (and ones inside complexes)
     for glyph in itt.chain(
-        sbgn_map.findall(f'{SBGN}glyph'),
-        sbgn_map.findall(f'{SBGN}glyph[@class="complex"]/{SBGN}glyph'),
+        sbgn_map.findall(f'{sbgn_prefix}glyph'),
+        sbgn_map.findall(f'{sbgn_prefix}glyph[@class="complex"]/{sbgn_prefix}glyph'),
     ):
         glyph_class = glyph.get('class')
         if glyph_class is None:
@@ -153,17 +183,17 @@ def handle_sbgn_map(sbgn_map: ElementTree.Element, grounding_map: Optional[Groun
         glyph_compartment_id = glyph.get('compartmentRef')
         glyph_compartment = compartments[glyph_compartment_id] if glyph_compartment_id else None
 
-        label = _get_label(glyph)
+        label = _get_label(glyph, sbgn_prefix)
 
         states = [
             state.get('value')
-            for state in glyph.findall(f'{SBGN}glyph[@class="state variable"]/{SBGN}state')
+            for state in glyph.findall(f'{sbgn_prefix}glyph[@class="state variable"]/{sbgn_prefix}state')
             if state.get('value')
         ]  # TODO there's also the 'variable' entry which might tell you the position
 
         info = [
             state.get('text')
-            for state in glyph.findall(f'{SBGN}glyph[@class="unit of information"]/{SBGN}label')
+            for state in glyph.findall(f'{sbgn_prefix}glyph[@class="unit of information"]/{sbgn_prefix}label')
             if state.get('text')
         ]
 
@@ -184,6 +214,7 @@ def handle_sbgn_map(sbgn_map: ElementTree.Element, grounding_map: Optional[Groun
             glyph_label=label,
             prefixes=['hgnc', 'fplx', 'go', 'chebi'],
             grounding_map=grounding_map,
+            sbgn_prefix=sbgn_prefix,
         )
         if len(references) > 1 and glyph_class == 'macromolecule':
             logger.warning(
@@ -217,9 +248,9 @@ def handle_sbgn_map(sbgn_map: ElementTree.Element, grounding_map: Optional[Groun
         }
 
     # Build up complexes
-    for complex_glyph in sbgn_map.findall(f'{SBGN}glyph[@class="complex"]'):
+    for complex_glyph in sbgn_map.findall(f'{sbgn_prefix}glyph[@class="complex"]'):
         complex_id = complex_glyph.get('id')
-        label = _get_label(complex_glyph)
+        label = _get_label(complex_glyph, sbgn_prefix)
         component_label_to_info = {}
         for component_label in COMPLEX_DELIM.split(label):  # either split on colon or slash, curation is inconsistent
             # make list of endings
@@ -270,7 +301,7 @@ def handle_sbgn_map(sbgn_map: ElementTree.Element, grounding_map: Optional[Groun
     arcs = {}
     successful = 0
     failures = 0
-    for arc in sbgn_map.findall(f'{SBGN}arc'):
+    for arc in sbgn_map.findall(f'{sbgn_prefix}arc'):
         arc_class = arc.get('class')
         if arc_class is None:
             logger.warning('arc has no class')
@@ -384,7 +415,7 @@ def handle_sbgn_map(sbgn_map: ElementTree.Element, grounding_map: Optional[Groun
                 arc_source, arc_target
             )
 
-    bodies = sbgn_map.findall(f'{SBGN}notes/{XHTML}html/{XHTML}body')
+    bodies = sbgn_map.findall(f'{sbgn_prefix}notes/{XHTML}html/{XHTML}body')
     try:
         body = bodies[0]
     except IndexError:
@@ -401,9 +432,9 @@ def handle_sbgn_map(sbgn_map: ElementTree.Element, grounding_map: Optional[Groun
 
 def _get_references(
     *, glyph, glyph_id, glyph_label, glyph_class,
-    prefixes, grounding_map: Optional[GroundingMap],
+    prefixes, grounding_map: Optional[GroundingMap], sbgn_prefix,
 ) -> List[Tuple[str, str]]:
-    references = list(_iter_references(glyph))
+    references = list(_iter_references(glyph, sbgn_prefix=sbgn_prefix))
     if references:
         return references
 

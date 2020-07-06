@@ -7,8 +7,9 @@ import logging
 import uuid
 from typing import Any, List, Mapping, Optional
 
-from pybel import BELGraph, dsl
-from pybel.dsl import CentralDogma
+from ... import dsl
+from ...dsl import CentralDogma
+from ...struct import BELGraph
 
 __all__ = [
     'convert_sbgn',
@@ -73,9 +74,9 @@ def _handle_reified_edge(graph: BELGraph, d: Mapping[str, Any]) -> None:
             compl = targets[0]
             graph.add_node_from_data(compl)
             for catalyst in catalysts:
-                graph.add_increases(catalyst, compl, citation='', evidence='')
+                graph.add_increases(catalyst, compl, citation=('Other', 'SBGN'), evidence='')
             for inhibitor in inhibitors:
-                graph.add_decreases(inhibitor, compl, citation='', evidence='')
+                graph.add_decreases(inhibitor, compl, citation=('Other', 'SBGN'), evidence='')
             return
         if (
             len(sources) == 1 and len(targets) == 1
@@ -90,18 +91,18 @@ def _handle_reified_edge(graph: BELGraph, d: Mapping[str, Any]) -> None:
                     print('free backward pmod statement')
                     graph.add_node_from_data(source)
                 for catalyst in catalysts:
-                    graph.add_decreases(catalyst, source, citation='', evidence='')
+                    graph.add_decreases(catalyst, source, citation=('Other', 'SBGN'), evidence='')
                 for inhibitor in inhibitors:
-                    graph.add_increases(inhibitor, source, citation='', evidence='')
+                    graph.add_increases(inhibitor, source, citation=('Other', 'SBGN'), evidence='')
                 return
             elif not source.variants and not target.variants:  # forward mod
                 if not catalysts and not inhibitors:
                     print('free pmod statement')
                     graph.add_node_from_data(target)
                 for catalyst in catalysts:
-                    graph.add_increases(catalyst, source, citation='', evidence='')
+                    graph.add_increases(catalyst, source, citation=('Other', 'SBGN'), evidence='')
                 for inhibitor in inhibitors:
-                    graph.add_decreases(inhibitor, source, citation='', evidence='')
+                    graph.add_decreases(inhibitor, source, citation=('Other', 'SBGN'), evidence='')
                 return
             elif source.variants and target.variants:
                 print('@@unhandled complex pmod statement')
@@ -129,12 +130,12 @@ def _handle_direct_edge(graph: BELGraph, d: Mapping[str, Any]) -> Optional[str]:
     if edge_type in {'inhibition'}:
         return graph.add_inhibits(
             source_bel, target_bel,
-            citation='', evidence='', annotations={'sbgnml_edge': edge_type},
+            citation=('Other', 'SBGN'), evidence='', annotations={'sbgnml_edge': edge_type},
         )
     if edge_type in {'stimulation', 'necessary stimulation'}:
         return graph.add_activates(
             source_bel, target_bel,
-            citation='', evidence='', annotations={'sbgnml_edge': edge_type},
+            citation=('Other', 'SBGN'), evidence='', annotations={'sbgnml_edge': edge_type},
         )
 
     print('##', source_bel, edge_type, target_bel)
@@ -176,7 +177,7 @@ def _glyph_to_bel(glyph):
     if cls == 'macromolecule' and entity and entity['prefix'] and entity['identifier']:
         rv = dsl.Protein(
             namespace=entity['prefix'],
-            identifier=entity['identifier'],
+            identifier=entity['identifier'] or None,
             name=entity['name'],
             variants=states or None,
         )
@@ -186,7 +187,7 @@ def _glyph_to_bel(glyph):
     elif cls == 'phenotype' and entity and entity['identifier']:
         rv = dsl.BiologicalProcess(
             namespace=entity['prefix'],
-            identifier=entity['identifier'],
+            identifier=entity['identifier'] or None,
             name=entity['name'],
         )
         # print('found BP', rv)
@@ -195,7 +196,7 @@ def _glyph_to_bel(glyph):
     elif cls == 'simple chemical' and entity and entity['prefix'] == 'chebi':
         rv = dsl.Abundance(
             namespace=entity['prefix'],
-            identifier=entity['identifier'],
+            identifier=entity['identifier'] or None,
             name=entity['name'],
         )
         # print('found chemical', rv)
@@ -208,14 +209,14 @@ def _glyph_to_bel(glyph):
                 return
             return dsl.NamedComplexAbundance(
                 namespace=c['entity']['prefix'],
-                identifier=c['entity']['identifier'],
+                identifier=c['entity']['identifier'] or None,
                 name=c['entity']['name'],
             )
         elif all(c['entity']['prefix'] for c in components.values()):
             rv = dsl.ComplexAbundance([
                 dsl.Protein(
                     namespace=c['entity']['prefix'],
-                    identifier=c['entity']['identifier'],
+                    identifier=c['entity']['identifier'] or None,
                     name=c['entity']['name'],
                 )
                 for c in components.values()
@@ -228,7 +229,7 @@ def _glyph_to_bel(glyph):
     elif cls == 'nucleic acid feature' and entity and entity['prefix']:
         rv = dsl.Rna(
             namespace=entity['prefix'],
-            identifier=entity['identifier'],
+            identifier=entity['identifier'] or None,
             name=entity['name'],
         )
         return rv
