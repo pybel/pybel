@@ -42,7 +42,7 @@ class TestCanonicalize(unittest.TestCase):
         self.assertEqual('frag("?", "descr")', str(Fragment(description='descr')))
         self.assertEqual('frag("672_713", "descr")', str(Fragment(start=672, stop=713, description='descr')))
 
-        self.assertEqual('gmod(Me)', str(GeneModification('Me')))
+        self.assertEqual('gmod(go:0006306 ! "DNA methylation")', str(GeneModification('Me')))
         self.assertEqual('gmod(TEST:Me)', str(GeneModification('Me', namespace='TEST')))
         self.assertEqual('gmod(GO:"DNA Methylation")', str(GeneModification('DNA Methylation', namespace='GO')))
 

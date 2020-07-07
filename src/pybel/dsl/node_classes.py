@@ -9,13 +9,12 @@ from typing import Iterable, List, Optional, Set, Union
 
 from .exc import InferCentralDogmaException, ListAbundanceEmptyException, ReactionEmptyException
 from ..constants import (
-    ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, CONCEPT, FRAGMENT, FRAGMENT_DESCRIPTION,
-    FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE, FUSION_START,
-    FUSION_STOP, GENE, GMOD, HGVS, KIND, MEMBERS, MIRNA, PARTNER_3P, PARTNER_5P, PATHOLOGY, PMOD, PMOD_CODE, PMOD_ORDER,
-    PMOD_POSITION, POPULATION, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P, REACTANTS, REACTION, RNA, VARIANTS, XREFS,
-    rev_abundance_labels,
+    ABUNDANCE, BIOPROCESS, COMPLEX, COMPOSITE, CONCEPT, FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING,
+    FRAGMENT_START, FRAGMENT_STOP, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GENE,
+    GMOD, HGVS, KIND, MEMBERS, MIRNA, PARTNER_3P, PARTNER_5P, PATHOLOGY, PMOD, PMOD_CODE, PMOD_ORDER, PMOD_POSITION,
+    POPULATION, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P, REACTANTS, REACTION, RNA, VARIANTS, XREFS, rev_abundance_labels,
 )
-from ..language import Entity, pmod_mappings, gmod_mappings
+from ..language import Entity, gmod_mappings, pmod_mappings
 
 __all__ = [
     # Base Classes
@@ -453,6 +452,8 @@ class ProteinModification(EntityVariant):
 class GeneModification(EntityVariant):
     """Build a gene modification variant dictionary."""
 
+    function = GMOD
+
     def __init__(
         self,
         name: str,
@@ -491,8 +492,6 @@ class GeneModification(EntityVariant):
             identifier=identifier,
             xrefs=xrefs,
         )
-
-    function = GMOD
 
     def as_bel(self, use_identifiers: bool = True) -> str:
         """Return this gene modification variant as a BEL string."""

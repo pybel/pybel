@@ -117,11 +117,11 @@ Protein           7
 Complex           1
 Abundance         1
 
-Namespace (4)      Count
+Namespace (3)      Count
 ---------------  -------
 hgnc                   8
-chebi                  2
 go                     3
+chebi                  2
 
 Edge Type (7)                        Count
 ---------------------------------  -------

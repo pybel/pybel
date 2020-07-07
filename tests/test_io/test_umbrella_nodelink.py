@@ -27,7 +27,7 @@ class TestUmbrellaNodeLinkExporter(unittest.TestCase):
             custom_json_dict['nodes'],
         )
         self.assertIn(
-            'act(p(hgnc:PTK2, pmod(Ph, Tyr, 925)), ma(go:0016301 ! "kinase activity"))',
+            'act(p(hgnc:PTK2, pmod(go:0006468 ! "protein phosphorylation", Tyr, 925)), ma(go:0016301 ! "kinase activity"))',
             custom_json_dict['nodes'])
         self.assertIn(
             'act(p(fus(hgnc:BCR, "?", hgnc:ABL1, "?")), ma(go:0016301 ! "kinase activity"))',

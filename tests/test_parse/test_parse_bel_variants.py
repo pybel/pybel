@@ -8,7 +8,7 @@ import unittest
 
 from pybel.constants import (
     BEL_DEFAULT_NAMESPACE, CONCEPT, FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP,
-    FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, KIND, LOCATION, NAME, NAMESPACE,
+    FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, IDENTIFIER, KIND, LOCATION, NAME, NAMESPACE,
     PARTNER_3P, PARTNER_5P, PMOD, PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P,
 )
 from pybel.dsl import GeneModification, Hgvs, ProteinModification
@@ -109,8 +109,9 @@ class TestPmod(unittest.TestCase):
         expected = {
             KIND: PMOD,
             CONCEPT: {
-                NAMESPACE: BEL_DEFAULT_NAMESPACE,
-                NAME: 'Ph',
+                NAMESPACE: 'go',
+                NAME: 'protein phosphorylation',
+                IDENTIFIER: '0006468',
             },
         }
         self.assertEqual(expected, ProteinModification('Ph'))
@@ -133,8 +134,9 @@ class TestPmod(unittest.TestCase):
         expected = {
             KIND: PMOD,
             CONCEPT: {
-                NAMESPACE: BEL_DEFAULT_NAMESPACE,
-                NAME: 'Ph',
+                NAMESPACE: 'go',
+                NAME: 'protein phosphorylation',
+                IDENTIFIER: '0006468',
             },
             PMOD_CODE: 'Ser',
         }
@@ -153,8 +155,9 @@ class TestPmod(unittest.TestCase):
         expected = {
             KIND: PMOD,
             CONCEPT: {
-                NAMESPACE: BEL_DEFAULT_NAMESPACE,
-                NAME: 'Ph',
+                NAMESPACE: 'go',
+                NAME: 'protein phosphorylation',
+                IDENTIFIER: '0006468',
             },
             PMOD_CODE: 'Ser',
             PMOD_POSITION: 473,
@@ -205,8 +208,9 @@ class TestGeneModification(unittest.TestCase):
         self.assertEqual({
             KIND: GMOD,
             CONCEPT: {
-                NAME: 'Me',
-                NAMESPACE: BEL_DEFAULT_NAMESPACE,
+                NAME: 'DNA methylation',
+                IDENTIFIER: '0006306',
+                NAMESPACE: 'go',
             }
         }, self.expected)
 

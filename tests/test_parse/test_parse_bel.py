@@ -11,10 +11,8 @@ from pybel.constants import (
     ABUNDANCE, ACTIVITY, BIOPROCESS, CELL_SECRETION, CELL_SURFACE_EXPRESSION, COMPLEX, COMPOSITE, CONCEPT, DEGRADATION,
     DIRECTLY_INCREASES, DIRTY, EFFECT, FRAGMENT, FROM_LOC, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE,
     FUSION_START, FUSION_STOP, GENE, HAS_VARIANT, HGVS, IDENTIFIER, KIND, LOCATION, MEMBERS, MIRNA, MODIFIER, NAME,
-    NAMESPACE, SOURCE, TARGET, TARGET_MODIFIER, PARTNER_3P, PARTNER_5P, PART_OF, PATHOLOGY, POPULATION, PRODUCTS,
-    PROTEIN,
-    RANGE_3P, RANGE_5P,
-    REACTANTS, REACTION, RELATION, RNA, SOURCE_MODIFIER, TO_LOC, TRANSLOCATION, VARIANTS,
+    NAMESPACE, PARTNER_3P, PARTNER_5P, PART_OF, PATHOLOGY, POPULATION, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P, REACTANTS,
+    REACTION, RELATION, RNA, SOURCE, TARGET, TARGET_MODIFIER, TO_LOC, TRANSLOCATION, VARIANTS,
 )
 from pybel.dsl import (
     Fragment, Population, abundance, bioprocess, cell_surface_expression, complex_abundance, composite_abundance,
@@ -252,7 +250,7 @@ class TestGene(TestTokenParserBase):
 
         expected_node = gene('HGNC', 'AKT1', variants=gmod('Me'))
         self.assert_has_node(expected_node)
-        self.assertEqual('g(HGNC:AKT1, gmod(Me))', self.graph.node_to_bel(expected_node))
+        self.assertEqual('g(HGNC:AKT1, gmod(go:0006306 ! "DNA methylation"))', self.graph.node_to_bel(expected_node))
 
         parent = gene('HGNC', 'AKT1')
         self.assert_has_node(parent)
@@ -750,7 +748,10 @@ class TestProtein(TestTokenParserBase):
         parent = protein('HGNC', 'AKT1')
         node = parent.with_variants([hgvs('p.Ala127Tyr'), pmod('Ph', code='Ser')])
         self.assert_has_node(node)
-        self.assertEqual('p(HGNC:AKT1, pmod(Ph, Ser), var("p.Ala127Tyr"))', self.graph.node_to_bel(node))
+        self.assertEqual(
+            'p(HGNC:AKT1, pmod(go:0006468 ! "protein phosphorylation", Ser), var("p.Ala127Tyr"))',
+            self.graph.node_to_bel(node),
+        )
 
         self.assert_has_node(parent)
         self.assert_has_edge(parent, node, relation=HAS_VARIANT)
@@ -972,7 +973,10 @@ class TestProtein(TestTokenParserBase):
         parent = protein('HGNC', 'HRAS')
         expected_node = parent.with_variants(pmod('Palm'))
         self.assert_has_node(expected_node)
-        self.assertEqual('p(HGNC:HRAS, pmod(Palm))', self.graph.node_to_bel(expected_node))
+        self.assertEqual(
+            'p(HGNC:HRAS, pmod(go:0018345 ! "protein palmitoylation"))',
+            self.graph.node_to_bel(expected_node),
+        )
 
         self.assert_has_node(parent)
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
