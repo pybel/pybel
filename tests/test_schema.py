@@ -2,6 +2,7 @@
 
 """Tests for the jsonschema node validation."""
 
+import copy
 import json
 import os
 import unittest
@@ -131,31 +132,31 @@ class TestEdgeSchema(unittest.TestCase):
         here = os.path.abspath(os.path.dirname(__file__))
         example_file = os.path.join(here, 'example_edge.json')
         with open(example_file) as example_json:
-            cls.example_edge = json.load(example_json)
+            edge = json.load(example_json)
+        cls.example_edge = edge
 
     def test_predefined_example(self):
         """Test a predefined edge example."""
         edge = self.example_edge
-
         self.assertTrue(is_valid_edge(edge))
 
     def test_missing_information(self):
         """Test removing information from the predefined edge."""
         edge = self.example_edge
 
-        missing_source = edge.copy()
+        missing_source = copy.deepcopy(edge)
         missing_source.pop('source')
         self.assertFalse(is_valid_edge(missing_source))
 
-        missing_relation = edge.copy()
+        missing_relation = copy.deepcopy(edge)
         missing_relation.pop('relation')
         self.assertFalse(is_valid_edge(missing_relation))
 
-        missing_target = edge.copy()
+        missing_target = copy.deepcopy(edge)
         missing_target.pop('target')
         self.assertFalse(is_valid_edge(missing_target))
 
-        missing_location = edge.copy()
+        missing_location = copy.deepcopy(edge)
         missing_location['target']['effect'].pop('fromLoc')
         self.assertFalse(is_valid_edge(missing_location))
 
