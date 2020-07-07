@@ -9,13 +9,12 @@ from typing import Iterable, List, Optional, Set, Union
 
 from .exc import InferCentralDogmaException, ListAbundanceEmptyException, ReactionEmptyException
 from ..constants import (
-    ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, COMPOSITE, CONCEPT, FRAGMENT, FRAGMENT_DESCRIPTION,
-    FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE, FUSION_START,
-    FUSION_STOP, GENE, GMOD, HGVS, KIND, MEMBERS, MIRNA, PARTNER_3P, PARTNER_5P, PATHOLOGY, PMOD, PMOD_CODE, PMOD_ORDER,
-    PMOD_POSITION, POPULATION, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P, REACTANTS, REACTION, RNA, VARIANTS, XREFS,
-    rev_abundance_labels,
+    ABUNDANCE, BIOPROCESS, COMPLEX, COMPOSITE, CONCEPT, FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING,
+    FRAGMENT_START, FRAGMENT_STOP, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GENE,
+    GMOD, HGVS, KIND, MEMBERS, MIRNA, PARTNER_3P, PARTNER_5P, PATHOLOGY, PMOD, PMOD_CODE, PMOD_ORDER, PMOD_POSITION,
+    POPULATION, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P, REACTANTS, REACTION, RNA, VARIANTS, XREFS, rev_abundance_labels,
 )
-from ..language import Entity
+from ..language import Entity, gmod_mappings, pmod_mappings
 
 __all__ = [
     # Base Classes
@@ -369,7 +368,7 @@ class EntityVariant(Variant, BaseConcept):
         super().__init__(kind=self.function)
 
         self[CONCEPT] = Entity(
-            namespace=(namespace or BEL_DEFAULT_NAMESPACE),
+            namespace=namespace,
             name=name,
             identifier=identifier,
         )
@@ -420,6 +419,10 @@ class ProteinModification(EntityVariant):
         >>>                     identifier='0006468', code='Thr', position=308)
 
         """
+        if name and not namespace and not identifier:
+            x = pmod_mappings[name]['xrefs'][0]
+            namespace, identifier, name = x.namespace, x.identifier, x.name
+
         super().__init__(
             name=name,
             namespace=namespace,
@@ -447,23 +450,48 @@ class ProteinModification(EntityVariant):
 
 
 class GeneModification(EntityVariant):
-    """Build a gene modification variant dictionary.
-
-    Either the name or the identifier must be used. If the namespace is omitted, it is assumed that a name is
-    specified from the BEL default namespace.
-
-    Example from BEL default namespace:
-
-    >>> from pybel.dsl import GeneModification
-    >>> GeneModification(name='Me')
-
-    Example from custom namespace:
-
-    >>> from pybel.dsl import GeneModification
-    >>> GeneModification(name='DNA methylation', namespace='GO', identifier='0006306',)
-    """
+    """Build a gene modification variant dictionary."""
 
     function = GMOD
+
+    def __init__(
+        self,
+        name: str,
+        namespace: Optional[str] = None,
+        identifier: Optional[str] = None,
+        xrefs: Optional[List[Entity]] = None,
+    ) -> None:
+        """Build a protein modification variant data dictionary.
+
+        :param name: The name of the modification
+        :param namespace: The namespace to which the name of this modification belongs
+        :param identifier: The identifier of the name of the modification
+        :param xrefs: Alternative database xrefs
+
+        Either the name or the identifier must be used. If the namespace is omitted, it is assumed that a name is
+        specified from the BEL default namespace.
+
+        Example from BEL default namespace:
+
+        >>> from pybel.dsl import GeneModification
+        >>> GeneModification(name='Me')
+
+        Example from custom namespace:
+
+        >>> from pybel.dsl import GeneModification
+        >>> GeneModification(name='DNA methylation', namespace='GO', identifier='0006306')
+
+        """
+        if name and not namespace and not identifier:
+            x = gmod_mappings[name]['xrefs'][0]
+            namespace, identifier, name = x.namespace, x.identifier, x.name
+
+        super().__init__(
+            name=name,
+            namespace=namespace,
+            identifier=identifier,
+            xrefs=xrefs,
+        )
 
     def as_bel(self, use_identifiers: bool = True) -> str:
         """Return this gene modification variant as a BEL string."""

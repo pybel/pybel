@@ -316,14 +316,20 @@ class BELParser(BaseParser):
         # 2.2 Abundance Modifier Functions
 
         #: `2.2.1 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_protein_modifications>`_
-        self.pmod = get_protein_modification_language(self.concept_parser.identifier_qualified)
+        self.pmod = get_protein_modification_language(
+            concept_fqualified=self.concept_parser.identifier_fqualified,
+            concept_qualified=self.concept_parser.identifier_qualified,
+        )
 
         #: `2.2.4 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_cellular_location>`_
         self.location = get_location_language(self.concept_parser.language)
         opt_location = pyparsing.Optional(WCW + self.location)
 
         #: PyBEL BEL Specification variant
-        self.gmod = get_gene_modification_language(self.concept_parser.identifier_qualified)
+        self.gmod = get_gene_modification_language(
+            concept_fqualified=self.concept_parser.identifier_fqualified,
+            concept_qualified=self.concept_parser.identifier_qualified,
+        )
 
         # 2.6 Other Functions
 
