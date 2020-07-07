@@ -65,9 +65,13 @@ gmod_tag = one_of_tags(tags=['gmod', 'geneModification'], canonical_tag=GMOD, na
 gmod_default_ns = oneOf(list(gmod_namespace)).setParseAction(_handle_gmod_default)
 
 
-def get_gene_modification_language(concept_qualified: ParserElement) -> ParserElement:
+def get_gene_modification_language(
+    concept_fqualified: ParserElement,
+    concept_qualified: ParserElement,
+) -> ParserElement:
     """Build a gene modification parser."""
     concept = MatchFirst([
+        concept_fqualified,
         concept_qualified,
         gmod_default_ns,
     ])

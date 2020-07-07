@@ -7,9 +7,9 @@ import re
 import unittest
 
 from pybel.constants import (
-    BEL_DEFAULT_NAMESPACE, CONCEPT, FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP,
-    FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, IDENTIFIER, KIND, LOCATION, NAME, NAMESPACE,
-    PARTNER_3P, PARTNER_5P, PMOD, PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P,
+    CONCEPT, FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP, FUSION_MISSING,
+    FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, IDENTIFIER, KIND, LOCATION, NAME, NAMESPACE, PARTNER_3P,
+    PARTNER_5P, PMOD, PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P,
 )
 from pybel.dsl import GeneModification, Hgvs, ProteinModification
 from pybel.language import Entity
@@ -100,8 +100,10 @@ class TestPmod(unittest.TestCase):
             'MOD': re.compile('.*'),
             'HGNC': re.compile('.*'),
         })
-        identifier_qualified = identifier_parser.identifier_qualified
-        self.parser = get_protein_modification_language(identifier_qualified)
+        self.parser = get_protein_modification_language(
+            concept_qualified=identifier_parser.identifier_qualified,
+            concept_fqualified=identifier_parser.identifier_fqualified,
+        )
 
     def _help_test_pmod_simple(self, statement):
         result = self.parser.parseString(statement)
@@ -199,8 +201,10 @@ class TestPmod(unittest.TestCase):
 class TestGeneModification(unittest.TestCase):
     def setUp(self):
         identifier_parser = ConceptParser()
-        identifier_qualified = identifier_parser.identifier_qualified
-        self.parser = get_gene_modification_language(identifier_qualified)
+        self.parser = get_gene_modification_language(
+            concept_fqualified=identifier_parser.identifier_fqualified,
+            concept_qualified=identifier_parser.identifier_qualified,
+        )
 
         self.expected = GeneModification('Me')
 

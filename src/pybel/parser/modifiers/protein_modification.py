@@ -114,9 +114,13 @@ pmod_default_ns = oneOf(list(pmod_namespace)).setParseAction(_handle_pmod_defaul
 pmod_legacy_ns = oneOf(list(pmod_legacy_labels)).setParseAction(_handle_pmod_legacy_ns)
 
 
-def get_protein_modification_language(concept_qualified: ParserElement) -> ParserElement:
+def get_protein_modification_language(
+    concept_fqualified: ParserElement,
+    concept_qualified: ParserElement,
+) -> ParserElement:
     """Build a protein modification parser."""
     pmod_concept = MatchFirst([
+        concept_fqualified,
         concept_qualified,
         pmod_default_ns,
         pmod_legacy_ns,
