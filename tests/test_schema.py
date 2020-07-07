@@ -125,24 +125,23 @@ class TestNodeSchema(unittest.TestCase):
 class TestEdgeSchema(unittest.TestCase):
     """Tests for the jsonschema edge validation."""
 
-    @staticmethod
-    def _load_example() -> dict:
+    @classmethod
+    def setUpClass(cls):
         """Load the edge contained in example_edge.json."""
         here = os.path.abspath(os.path.dirname(__file__))
         example_file = os.path.join(here, 'example_edge.json')
         with open(example_file) as example_json:
-            example_edge = json.load(example_json)
-        return example_edge
+            cls.example_edge = json.load(example_json)
 
     def test_predefined_example(self):
         """Test a predefined edge example."""
-        edge = self._load_example()
+        edge = self.example_edge
 
         self.assertTrue(is_valid_edge(edge))
 
     def test_missing_information(self):
         """Test removing information from the predefined edge."""
-        edge = self._load_example()
+        edge = self.example_edge
 
         missing_source = edge.copy()
         missing_source.pop('source')
