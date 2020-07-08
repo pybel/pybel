@@ -6,7 +6,7 @@ import warnings
 from typing import Dict, Optional, Union
 
 from ..constants import (
-    ACTIVITY, BEL_DEFAULT_NAMESPACE, CELL_SURFACE, DEGRADATION, EFFECT, EXTRACELLULAR, FROM_LOC, INTRACELLULAR,
+    ACTIVITY, CELL_SURFACE, DEGRADATION, EFFECT, EXTRACELLULAR, FROM_LOC, INTRACELLULAR,
     LOCATION, MODIFIER, NAME, NAMESPACE, TO_LOC, TRANSLOCATION,
 )
 from ..language import Entity, activity_mapping, compartment_mapping
@@ -58,7 +58,7 @@ def activity(
     """
     rv = _modifier_helper(ACTIVITY, location=location)
 
-    if namespace == BEL_DEFAULT_NAMESPACE or (name and not namespace):
+    if name and not namespace:
         rv[EFFECT] = activity_mapping[name]
     elif not name and not namespace and not identifier:
         pass
@@ -92,16 +92,10 @@ def translocation(
     rv = _modifier_helper(TRANSLOCATION)
     if isinstance(from_loc, str):
         from_loc = compartment_mapping[from_loc]
-    elif from_loc[NAMESPACE] == BEL_DEFAULT_NAMESPACE:
-        warnings.warn('Deprecated usage of translocation()')
-        from_loc = compartment_mapping[from_loc[NAME]]
     if not isinstance(from_loc, Entity):
         raise TypeError
     if isinstance(to_loc, str):
         to_loc = compartment_mapping[to_loc]
-    elif to_loc[NAMESPACE] == BEL_DEFAULT_NAMESPACE:
-        warnings.warn('Deprecated usage of translocation()')
-        to_loc = compartment_mapping[to_loc[NAME]]
     if not isinstance(to_loc, Entity):
         raise TypeError
 

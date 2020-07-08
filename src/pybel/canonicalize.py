@@ -14,10 +14,9 @@ from networkx.utils import open_file
 import bel_resources.constants
 from bel_resources import make_knowledge_header
 from .constants import (
-    ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CELL_SURFACE, CITATION, CITATION_TYPE_PUBMED, DEGRADATION, EFFECT,
-    EVIDENCE, EXTRACELLULAR, FROM_LOC, INTRACELLULAR, LOCATION, MODIFIER, NAME, NAMESPACE, PYBEL_AUTOEVIDENCE,
-    PYBEL_PUBMED, RELATION, SET_CITATION_FMT, SOURCE_MODIFIER, TARGET_MODIFIER, TO_LOC, TRANSLOCATION,
-    UNQUALIFIED_EDGES, VARIANTS,
+    ACTIVITY, ANNOTATIONS, CITATION, CITATION_TYPE_PUBMED, DEGRADATION, EFFECT, EVIDENCE, FROM_LOC, LOCATION, MODIFIER,
+    NAME, NAMESPACE, PYBEL_AUTOEVIDENCE, PYBEL_PUBMED, RELATION, SET_CITATION_FMT, SOURCE_MODIFIER, TARGET_MODIFIER,
+    TO_LOC, TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS,
 )
 from .dsl import BaseAbundance, BaseEntity, FusionBase, ListAbundance, Reaction
 from .language import Entity
@@ -136,16 +135,6 @@ def _decanonicalize_edge_node(
 
         to_loc_data: Entity = effect[TO_LOC]
         from_loc_data: Entity = effect[FROM_LOC]
-
-        if from_loc_data[NAMESPACE] == BEL_DEFAULT_NAMESPACE and from_loc_data[NAME] == INTRACELLULAR:
-            if to_loc_data[NAMESPACE] == BEL_DEFAULT_NAMESPACE and to_loc_data[NAME] == EXTRACELLULAR:
-                warnings.warn('deprecated output of BEL default namespace', DeprecationWarning)
-                return f'sec({node_str})'
-            if to_loc_data[NAMESPACE] == BEL_DEFAULT_NAMESPACE and to_loc_data[NAME] == CELL_SURFACE:
-                warnings.warn('deprecated output of BEL default namespace', DeprecationWarning)
-                return f'surf({node_str})'
-            raise ValueError
-
         return f"tloc({node_str}, fromLoc({from_loc_data}), toLoc({to_loc_data}))"
 
     raise ValueError('invalid modifier: {}'.format(modifier))

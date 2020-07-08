@@ -23,9 +23,6 @@ def get_cache_connection() -> str:
 PYBEL_CONTEXT_TAG = 'pybel_context'
 PYBEL_AUTOEVIDENCE = 'Automatically added by PyBEL'
 
-#: The default namespace given to entities in the BEL language
-BEL_DEFAULT_NAMESPACE = 'bel'
-
 CITATION_TYPE_BOOK = 'Book'
 CITATION_TYPE_PUBMED = 'PubMed'
 CITATION_TYPE_PMC = 'PubMed Central'

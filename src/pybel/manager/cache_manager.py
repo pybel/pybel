@@ -8,8 +8,7 @@ enable this option, but can specify a database location if they choose.
 
 import logging
 import time
-from itertools import chain
-from typing import Any, Iterable, List, Mapping, Optional, Set, Tuple
+from typing import Iterable, List, Mapping, Optional, Set, Tuple
 
 import pandas as pd
 import requests
@@ -29,14 +28,11 @@ from .models import (
 from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, update_insert_values
 from ..constants import (
-    ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_TYPE_PUBMED, EVIDENCE, IDENTIFIER, METADATA_INSERT_KEYS,
-    NAMESPACE, RELATION, SOURCE_MODIFIER, TARGET_MODIFIER, UNQUALIFIED_EDGES, belns_encodings, get_cache_connection,
+    ANNOTATIONS, CITATION, CITATION_TYPE_PUBMED, EVIDENCE, IDENTIFIER, METADATA_INSERT_KEYS, NAMESPACE, RELATION,
+    SOURCE_MODIFIER, TARGET_MODIFIER, UNQUALIFIED_EDGES, belns_encodings, get_cache_connection,
 )
 from ..dsl import BaseConcept, BaseEntity
-from ..language import (
-    BEL_DEFAULT_NAMESPACE_URL, BEL_DEFAULT_NAMESPACE_VERSION, Entity, activity_mapping, compartment_mapping,
-    gmod_mappings, pmod_mappings,
-)
+from ..language import Entity
 from ..struct.graph import AnnotationsDict, BELGraph
 from ..struct.operations import union
 from ..typing import EdgeData
@@ -102,14 +98,6 @@ def _clean_bel_namespace_values(bel_resource):
     }
 
 
-def _normalize_url(graph: BELGraph, keyword: str) -> Optional[str]:  # FIXME move to utilities and unit test
-    """Normalize a URL for the BEL graph."""
-    if keyword == BEL_DEFAULT_NAMESPACE and BEL_DEFAULT_NAMESPACE not in graph.namespace_url:
-        return BEL_DEFAULT_NAMESPACE_URL
-
-    return graph.namespace_url.get(keyword)
-
-
 class NamespaceManager(BaseManager):
     """Manages BEL namespaces."""
 
@@ -151,27 +139,6 @@ class NamespaceManager(BaseManager):
         """Get a namespace with a given keyword and version."""
         filt = and_(Namespace.keyword == keyword, Namespace.version == version)
         return self.session.query(Namespace).filter(filt).one_or_none()
-
-    def ensure_default_namespace(self) -> Namespace:  # FIXME remove this
-        """Get or create the BEL default namespace."""
-        namespace = self.get_namespace_by_keyword_version(BEL_DEFAULT_NAMESPACE, BEL_DEFAULT_NAMESPACE_VERSION)
-
-        if namespace is None:
-            namespace = Namespace(
-                name='BEL Default Namespace',
-                keyword=BEL_DEFAULT_NAMESPACE,
-                version=BEL_DEFAULT_NAMESPACE_VERSION,
-                url=BEL_DEFAULT_NAMESPACE_URL,
-            )
-
-            for name in set(chain(pmod_mappings, gmod_mappings, activity_mapping, compartment_mapping)):
-                entry = NamespaceEntry(name=name, namespace=namespace)
-                self.session.add(entry)
-
-            self.session.add(namespace)
-            self.session.commit()
-
-        return namespace
 
     def _ensure_namespace_urls(
         self,

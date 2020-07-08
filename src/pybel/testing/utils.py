@@ -6,7 +6,6 @@ from uuid import uuid4
 
 from requests.compat import urlparse
 
-from ..constants import BEL_DEFAULT_NAMESPACE
 from ..manager import Manager
 from ..manager.models import Namespace, NamespaceEntry
 from ..struct import BELGraph
@@ -34,9 +33,6 @@ def n() -> str:
 def make_dummy_namespaces(manager: Manager, graph: BELGraph) -> None:
     """Make dummy namespaces for the test."""
     for keyword, names in get_names(graph).items():
-        if keyword == BEL_DEFAULT_NAMESPACE:
-            continue
-
         graph.namespace_url[keyword] = url = n()
 
         namespace = Namespace(keyword=keyword, url=url)
