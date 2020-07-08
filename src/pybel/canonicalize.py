@@ -57,7 +57,7 @@ def to_bel_script_gz(graph, path, **kwargs) -> None:
         to_bel_script(graph, file, **kwargs)
 
 
-def to_bel_script_lines(graph, use_identifiers: bool = False) -> Iterable[str]:
+def to_bel_script_lines(graph, use_identifiers: bool = True) -> Iterable[str]:
     """Iterate over the lines of the BEL graph as a canonical BEL script.
 
     :param pybel.BELGraph graph: A BEL Graph

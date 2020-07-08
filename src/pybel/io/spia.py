@@ -17,6 +17,7 @@ import pandas as pd
 
 from ..constants import ASSOCIATION, CAUSAL_DECREASE_RELATIONS, CAUSAL_INCREASE_RELATIONS, RELATION
 from ..dsl import CentralDogma, Gene, ListAbundance, ProteinModification, Rna
+from ..language import pmod_mappings
 from ..struct import BELGraph
 from ..typing import EdgeData
 
@@ -142,6 +143,10 @@ def build_spia_matrices(nodes: Set[str]) -> Dict[str, pd.DataFrame]:
     return matrices
 
 
+UB_NAMES = {"Ub"} | {e.name for e in pmod_mappings['Ub']['xrefs']}
+PH_NAMES = {"Ph"} | {e.name for e in pmod_mappings['Ph']['xrefs']}
+
+
 def update_spia_matrices(
     spia_matrices: Dict[str, pd.DataFrame],
     u: CentralDogma,
@@ -162,9 +167,9 @@ def update_spia_matrices(
             for variant in v.variants:
                 if not isinstance(variant, ProteinModification):
                     continue
-                elif variant.entity.name == "Ub":  # FIXME update with grounding
+                elif variant.entity.name in UB_NAMES:
                     spia_matrices["activation_ubiquination"][u_name][v_name] = 1
-                elif variant.entity.name == "Ph":
+                elif variant.entity.name in PH_NAMES:
                     spia_matrices["activation_phosphorylation"][u_name][v_name] = 1
         elif isinstance(v, (Gene, Rna)):  # Normal increase, add activation
             spia_matrices['expression'][u_name][v_name] = 1
@@ -177,9 +182,9 @@ def update_spia_matrices(
             for variant in v.variants:
                 if not isinstance(variant, ProteinModification):
                     continue
-                elif variant.entity.name == "Ub":
+                elif variant.entity.name in UB_NAMES:
                     spia_matrices['inhibition_ubiquination'][u_name][v_name] = 1
-                elif variant.entity.name == "Ph":
+                elif variant.entity.name in PH_NAMES:
                     spia_matrices["inhibition_phosphorylation"][u_name][v_name] = 1
         elif isinstance(v, (Gene, Rna)):  # Normal decrease, check which matrix
             spia_matrices["repression"][u_name][v_name] = 1

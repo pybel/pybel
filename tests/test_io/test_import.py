@@ -207,7 +207,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
         os.remove(path)
 
     def test_thorough_upgrade(self):
-        lines = to_bel_script_lines(self.thorough_graph)
+        lines = to_bel_script_lines(self.thorough_graph, use_identifiers=True)
         reconstituted = BELGraph()
         parse_lines(reconstituted, lines, manager=self.manager)
         self.bel_thorough_reconstituted(reconstituted, check_citation_name=False, check_path=False)

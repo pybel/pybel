@@ -10,13 +10,12 @@ from pyparsing import ParseException
 from pybel import BELGraph
 from pybel.canonicalize import edge_to_bel
 from pybel.constants import (
-    ABUNDANCE, ACTIVITY, ANNOTATIONS, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CAUSES_NO_CHANGE, CITATION, COMPLEX, COMPOSITE,
-    CONCEPT, CORRELATION, DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE, FROM_LOC,
-    FUNCTION, GENE, GMOD, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, INCREASES, IS_A, KIND, LOCATION, MEMBERS,
-    MODIFIER, NAME, NAMESPACE, NEGATIVE_CORRELATION, NO_CORRELATION, ORTHOLOGOUS, PART_OF, PATHOLOGY,
-    POSITIVE_CORRELATION, PRODUCTS, PROTEIN, RATE_LIMITING_STEP_OF, REACTANTS, REACTION, REGULATES, RELATION, RNA,
-    SOURCE, SOURCE_MODIFIER, SUBPROCESS_OF, TARGET, TARGET_MODIFIER, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO,
-    TRANSLOCATION, VARIANTS,
+    ABUNDANCE, ACTIVITY, ANNOTATIONS, BIOPROCESS, CAUSES_NO_CHANGE, CITATION, COMPLEX, COMPOSITE, CONCEPT, CORRELATION,
+    DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE, FROM_LOC, FUNCTION, GENE, GMOD,
+    HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, IDENTIFIER, INCREASES, IS_A, KIND, LOCATION, MEMBERS, MODIFIER, NAME,
+    NAMESPACE, NEGATIVE_CORRELATION, NO_CORRELATION, ORTHOLOGOUS, PART_OF, PATHOLOGY, POSITIVE_CORRELATION, PRODUCTS,
+    PROTEIN, RATE_LIMITING_STEP_OF, REACTANTS, REACTION, REGULATES, RELATION, RNA, SOURCE, SOURCE_MODIFIER,
+    SUBPROCESS_OF, TARGET, TARGET_MODIFIER, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, VARIANTS,
 )
 from pybel.dsl import (
     ComplexAbundance, Pathology, Protein, Rna, abundance, activity, bioprocess, complex_abundance, composite_abundance,
@@ -137,7 +136,12 @@ class TestRelations(TestTokenParserBase):
 
     def test_increases_methylation(self):
         """Test a causal statement with a gene modification."""
-        statement = 'a(CHEBI:"lead atom") -> g(HGNC:APP, gmod(Me))'
+        for gmod in ['Me', 'go:0006306 ! "DNA methylation"']:
+            with self.subTest(gmod=gmod):
+                self._help_test_increases_methylation(gmod)
+
+    def _help_test_increases_methylation(self, x):
+        statement = f'a(CHEBI:"lead atom") -> g(HGNC:APP, gmod({x}))'
         result = self.parser.relation.parseString(statement)
         expected_dict = {
             TARGET: {
@@ -150,9 +154,10 @@ class TestRelations(TestTokenParserBase):
                     {
                         KIND: GMOD,
                         CONCEPT: {
-                            NAMESPACE: BEL_DEFAULT_NAMESPACE,
-                            NAME: 'Me',
-                        }
+                            NAMESPACE: 'go',
+                            IDENTIFIER: '0006306',
+                            NAME: 'DNA methylation',
+                        },
                     },
                 ],
             },
@@ -559,7 +564,12 @@ class TestRelations(TestTokenParserBase):
         """
         3.2.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XnegCor
         Test phosphoralation tag"""
-        statement = 'kin(p(FPLX:GSK3)) neg p(HGNC:MAPT,pmod(P))'
+        for pmod in ['P', 'Ph', 'go:0006468 ! "protein phosphorylation"']:
+            with self.subTest(pmod=pmod):
+                self._help_test_negative_correlation_with_object_variant(pmod)
+
+    def _help_test_negative_correlation_with_object_variant(self, x):
+        statement = f'kin(p(FPLX:GSK3)) neg p(HGNC:MAPT,pmod({x}))'
         result = self.parser.relation.parseString(statement)
 
         expected_dict = {
@@ -934,7 +944,7 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_node(expected_child)
 
         self.assertEqual('g(HGNC:AKT1)', self.graph.node_to_bel(expected_parent))
-        self.assertEqual('g(HGNC:AKT1, gmod(Me))', self.graph.node_to_bel(expected_child))
+        self.assertEqual('g(HGNC:AKT1, gmod(go:0006306 ! "DNA methylation"))', self.graph.node_to_bel(expected_child))
 
         self.assert_has_edge(expected_parent, expected_child, **{RELATION: HAS_VARIANT})
 

@@ -7,9 +7,9 @@ import re
 import unittest
 
 from pybel.constants import (
-    BEL_DEFAULT_NAMESPACE, CONCEPT, FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP,
-    FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, KIND, LOCATION, NAME, NAMESPACE,
-    PARTNER_3P, PARTNER_5P, PMOD, PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P,
+    CONCEPT, FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP, FUSION_MISSING,
+    FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, IDENTIFIER, KIND, LOCATION, NAME, NAMESPACE, PARTNER_3P,
+    PARTNER_5P, PMOD, PMOD_CODE, PMOD_POSITION, RANGE_3P, RANGE_5P,
 )
 from pybel.dsl import GeneModification, Hgvs, ProteinModification
 from pybel.language import Entity
@@ -100,8 +100,10 @@ class TestPmod(unittest.TestCase):
             'MOD': re.compile('.*'),
             'HGNC': re.compile('.*'),
         })
-        identifier_qualified = identifier_parser.identifier_qualified
-        self.parser = get_protein_modification_language(identifier_qualified)
+        self.parser = get_protein_modification_language(
+            concept_qualified=identifier_parser.identifier_qualified,
+            concept_fqualified=identifier_parser.identifier_fqualified,
+        )
 
     def _help_test_pmod_simple(self, statement):
         result = self.parser.parseString(statement)
@@ -109,8 +111,9 @@ class TestPmod(unittest.TestCase):
         expected = {
             KIND: PMOD,
             CONCEPT: {
-                NAMESPACE: BEL_DEFAULT_NAMESPACE,
-                NAME: 'Ph',
+                NAMESPACE: 'go',
+                NAME: 'protein phosphorylation',
+                IDENTIFIER: '0006468',
             },
         }
         self.assertEqual(expected, ProteinModification('Ph'))
@@ -133,8 +136,9 @@ class TestPmod(unittest.TestCase):
         expected = {
             KIND: PMOD,
             CONCEPT: {
-                NAMESPACE: BEL_DEFAULT_NAMESPACE,
-                NAME: 'Ph',
+                NAMESPACE: 'go',
+                NAME: 'protein phosphorylation',
+                IDENTIFIER: '0006468',
             },
             PMOD_CODE: 'Ser',
         }
@@ -153,8 +157,9 @@ class TestPmod(unittest.TestCase):
         expected = {
             KIND: PMOD,
             CONCEPT: {
-                NAMESPACE: BEL_DEFAULT_NAMESPACE,
-                NAME: 'Ph',
+                NAMESPACE: 'go',
+                NAME: 'protein phosphorylation',
+                IDENTIFIER: '0006468',
             },
             PMOD_CODE: 'Ser',
             PMOD_POSITION: 473,
@@ -196,8 +201,10 @@ class TestPmod(unittest.TestCase):
 class TestGeneModification(unittest.TestCase):
     def setUp(self):
         identifier_parser = ConceptParser()
-        identifier_qualified = identifier_parser.identifier_qualified
-        self.parser = get_gene_modification_language(identifier_qualified)
+        self.parser = get_gene_modification_language(
+            concept_fqualified=identifier_parser.identifier_fqualified,
+            concept_qualified=identifier_parser.identifier_qualified,
+        )
 
         self.expected = GeneModification('Me')
 
@@ -205,8 +212,9 @@ class TestGeneModification(unittest.TestCase):
         self.assertEqual({
             KIND: GMOD,
             CONCEPT: {
-                NAME: 'Me',
-                NAMESPACE: BEL_DEFAULT_NAMESPACE,
+                NAME: 'DNA methylation',
+                IDENTIFIER: '0006306',
+                NAMESPACE: 'go',
             }
         }, self.expected)
 

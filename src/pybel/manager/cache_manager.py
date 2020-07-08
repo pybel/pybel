@@ -568,8 +568,6 @@ class InsertManager(NamespaceManager, LookupManager):
 
         t = time.time()
 
-        self.ensure_default_namespace()
-
         namespace_urls = graph.namespace_url.values()
         self._ensure_namespace_urls(namespace_urls, use_tqdm=use_tqdm)
         for keyword, pattern in graph.namespace_pattern.items():
