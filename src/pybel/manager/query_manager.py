@@ -54,7 +54,7 @@ class QueryManager(LookupManager):
         q = self.session.query(Node)
 
         if bel:
-            q = q.filter(Node.bel.contains(bel))
+            q = q.filter(Node.bel.ilike(f'%{bel}%'))
 
         if type:
             q = q.filter(Node.type == type)
@@ -63,10 +63,10 @@ class QueryManager(LookupManager):
             q = q.join(NamespaceEntry)
 
             if namespace:
-                q = q.join(Namespace).filter(Namespace.keyword.contains(namespace))
+                q = q.join(Namespace).filter(Namespace.keyword.ilike(namespace))
 
             if name:
-                q = q.filter(NamespaceEntry.name.contains(name))
+                q = q.filter(NamespaceEntry.name.ilike(f'%{name}%'))
 
         return q
 
