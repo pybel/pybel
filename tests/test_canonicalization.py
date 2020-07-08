@@ -185,7 +185,7 @@ class TestCanonicalizeEdge(unittest.TestCase):
         )
 
         c4 = self.add_edge(
-            source_modifier=activity(name='tport', namespace='', identifier=''),
+            source_modifier=activity(namespace='go', name='transporter activity', identifier='0005215'),
         )
 
         self.assertEqual(c1, c2)
