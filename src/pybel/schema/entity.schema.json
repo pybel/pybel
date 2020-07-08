@@ -1,0 +1,22 @@
+{
+    "$schema": "https://json-schema.org/draft/2019-09/schema#",
+    "title": "BEL Entity",
+    "description": "Schema to validate a named entity with a namespace and a name/identifier",
+    "type": "object",
+    "properties": {
+        "namespace": {
+            "description": "Namespace of the node, e.g. ChemBL",
+            "type": "string"
+        },
+        "name": {
+            "description": "Name of the node, e.g. ACE2",
+            "type": "string"
+        },
+        "identifier": {"type": "string"}
+    },
+    "anyOf": [
+        {"required": ["namespace"]},
+        {"required": ["name"]},
+        {"required": ["identifier"]}
+    ]
+}

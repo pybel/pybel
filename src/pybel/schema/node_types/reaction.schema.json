@@ -1,0 +1,18 @@
+{
+    "$schema": "https://json-schema.org/draft/2019-09/schema#",
+    "title": "BEL Reaction Node",
+    "description": "Schema to validate JSON files containing a Reaction node.",
+    "type": "object",
+    "properties": {
+        "function": {"const": "Reaction"},
+        "reactants": {
+            "type": "array",
+            "items": {"$ref": "base_abundance.schema.json"}
+        },
+        "products": {
+            "type": "array",
+            "items": {"$ref": "base_abundance.schema.json"}
+        }
+    },
+    "required": ["function", "reactants", "products"]
+}

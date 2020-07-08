@@ -1,0 +1,30 @@
+{
+    "$schema": "https://json-schema.org/draft/2019-09/schema#",
+    "title": "BEL Fusion Node",
+    "description": "Basic schema to validate JSON files describing a BEL fusion object",
+    "type": "object",
+    "properties": {
+        "fusion": {
+            "type": "object",
+            "properties": {
+                "partner_5p": {
+                    "description": "5-prime fusion partner",
+                    "$ref": "base_abundance.schema.json"
+                },
+                "partner_3p": {
+                    "description": "3-prime fusion partner",
+                    "$ref": "base_abundance.schema.json"
+                },
+                "range_5p": {
+                    "description": "Fusion range for the 5-prime partner",
+                    "$ref": "fusion_range.schema.json"
+                },
+                "range_3p": {
+                    "description": "Fusion range for the 3-prime partner",
+                    "$ref": "fusion_range.schema.json"
+                }
+            }
+        }
+    },
+    "required": ["function", "fusion"]
+}
