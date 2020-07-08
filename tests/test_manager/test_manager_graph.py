@@ -848,11 +848,11 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         self.assertEqual(2, network.nodes.count(), msg='number of nodes')
         self.assertEqual(1, network.edges.count(), msg='number of edges')
 
-        kin_list = self.manager.session.query(NamespaceEntry).filter(NamespaceEntry.name == 'kin').all()
+        kin_list = self.manager.session.query(NamespaceEntry).filter(NamespaceEntry.name == 'kinase activity').all()
         self.assertEqual(1, len(kin_list), msg='number of kinase NamespaceEntrys')
 
         kin = list(kin_list)[0]
-        self.assertEqual('kin', kin.name)
+        self.assertEqual('kinase activity', kin.name)
 
     @mock_bel_resources
     def test_subject_activity_custom(self, mock):
@@ -900,11 +900,11 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
-        kin_list = self.manager.session.query(NamespaceEntry).filter(NamespaceEntry.name == 'kin').all()
+        kin_list = self.manager.session.query(NamespaceEntry).filter(NamespaceEntry.name == 'kinase activity').all()
         self.assertEqual(1, len(kin_list))
 
         kin = list(kin_list)[0]
-        self.assertEqual('kin', kin.name)
+        self.assertEqual('kinase activity', kin.name)
 
     @mock_bel_resources
     def test_object_activity_custom(self, mock):

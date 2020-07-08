@@ -359,7 +359,7 @@ class BelReconstitutionMixin(TestGraphMixin):
         for node in graph:
             self.assertIsInstance(node, BaseEntity)
 
-        self.assertEqual(set(BEL_THOROUGH_NODES), set(graph), msg='Nodes not equal')
+        self.assertEqual(sorted(BEL_THOROUGH_NODES, key=str), sorted(graph, key=str), msg='Nodes not equal')
 
         # FIXME
         # self.assertEqual(set((u, v) for u, v, _ in e), set(g.edges()))

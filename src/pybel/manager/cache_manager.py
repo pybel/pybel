@@ -585,8 +585,6 @@ class InsertManager(NamespaceManager, LookupManager):
 
         t = time.time()
 
-        self.ensure_default_namespace()
-
         namespace_urls = graph.namespace_url.values()
         if use_tqdm:
             namespace_urls = tqdm(namespace_urls, **(tqdm_kwargs or {}))
