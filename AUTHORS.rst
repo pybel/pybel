@@ -17,3 +17,4 @@ Contributors
 - `Steffen Möller <https://github.com/smoe>`_
 - `tehw0lf <https://github.com/tehw0lf>`_
 - `Jeremy Zucker <https://github.com/djinnome>`_
+- `Aman Choudhri <https://github.com/aman527>`_

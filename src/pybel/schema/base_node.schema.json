@@ -1,0 +1,38 @@
+{
+    "$schema": "https://json-schema.org/draft/2019-09/schema#",
+    "title": "BEL Node",
+    "description": "Top-level schema to validate JSON files containing any node.",
+    "type": "object",
+    "allOf": [
+        {
+            "$comment": "Check if the key 'fusion' is present. If so, validate based on the fusion schema.",
+            "if": {
+                "required": ["fusion"]
+            },
+            "then": {
+                "$ref": "node_types/fusion.schema.json"
+            }
+        },
+        {
+            "$comment": "Check whether the node is a Reaction. If so, validate accordingly.",
+            "if": {
+                "properties": {"function": {"const": "Reaction"}}
+            },
+            "then": {
+                "$ref": "node_types/reaction.schema.json"
+            }
+        },
+        {
+            "$comment": "Check whether the node is a Complex or Composite. If so, validate as a ListAbundance; if not, validate as a BaseAbundance.",
+            "if": {
+                "properties": {"function": {"enum": ["Complex", "Composite"]}}
+            },
+            "then": {
+                "$ref": "node_types/list_abundance.schema.json"
+            },
+            "else": {
+                "$ref": "node_types/base_abundance.schema.json"
+            }
+        }
+    ]
+}

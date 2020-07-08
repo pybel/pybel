@@ -1,0 +1,36 @@
+{
+    "$schema": "https://json-schema.org/draft/2019-09/schema#",
+    "title": "BEL Variant Node",
+    "description": "Basic schema to validate JSON files describing a BEL variant object",
+    "type": "object",
+    "properties": {
+      "concept": {
+        "description": "Entity description if the variant is a protein or gene modification",
+        "$ref": "../../entity.schema.json"
+      },
+      "code": {
+        "description": "Amino acid code for the affected residue in a protein modification",
+        "enum": [
+          "Ala", "Arg", "Asn", "Asp", "Cys", "Glu", "Gln",
+          "Gly", "His", "Ile", "Leu", "Lys", "Met", "Phe",
+          "Pro", "Ser", "Thr", "Trp", "Tyr", "Val"
+        ]
+      },
+      "pos": {
+        "description": "Position of the affected residue in a protein modification",
+        "type": "number"
+      },
+      "hgvs": {
+        "description": "HGVS variant string",
+        "type": "string"
+      },
+      "start": {
+        "description": "Starting position of a protein fragment",
+        "type": ["number", "string"]
+      },
+      "stop": {
+        "description": "Stopping position of a protein fragment",
+        "type": ["number", "string"]
+      }
+    }
+}

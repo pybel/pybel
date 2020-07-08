@@ -1,0 +1,16 @@
+{
+    "$schema": "https://json-schema.org/draft/2019-09/schema#",
+    "title": "BEL Variant Node",
+    "description": "Schema to validate JSON files describing a gene modification variant.",
+    "type": "object",
+    "allOf": [
+        {
+            "$ref": "base_variant.schema.json"
+        },
+        {
+            "properties": {
+                "kind": {"const": "gmod"}
+            }
+        }
+    ]
+}

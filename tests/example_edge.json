@@ -1,0 +1,45 @@
+{
+    "source": {
+        "function": "Protein",
+        "concept": {
+            "namespace": "HGNC",
+            "name": "123"
+        },
+        "variants": [
+            {
+                "kind": "pmod",
+                "concept": {
+                    "namespace": "bel",
+                    "name": "Ph"
+                }
+            }
+        ],
+        "modifier": "Activity",
+        "effect": {
+            "namespace": "go",
+            "name": "transporter activity",
+            "identifier": "0005215"
+        }
+    },
+    "relation": "directlyDecreases",
+    "target": {
+        "function": "Protein",
+        "concept": {
+            "namespace": "HGNC",
+            "name": "234"
+        },
+        "modifier": "Translocation",
+        "effect": {
+            "fromLoc": {
+                "namespace": "go",
+                "name": "intracellular",
+                "identifier": "0005622"
+            },
+            "toLoc": {
+                "namespace": "go",
+                "name": "extracellular space",
+                "identifier": "0005615"
+            }
+        }
+    }
+}

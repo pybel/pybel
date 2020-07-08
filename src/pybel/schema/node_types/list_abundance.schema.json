@@ -1,0 +1,34 @@
+{
+    "$schema": "https://json-schema.org/draft/2019-09/schema#",
+    "title": "BEL ListAbundance Node",
+    "description": "Schema to validate JSON files containing a ListAbundance (ComplexAbundance or CompositeAbundance) node.",
+    "type": "object",
+    "properties": {
+        "function": {"enum": ["Complex", "Composite"]},
+        "members": {
+            "type": "array",
+            "items": {"$ref": "base_abundance.schema.json"}
+        },
+        "concept": {"$ref": "../entity.schema.json"},
+        "xrefs": {
+            "description": "An optional list of extra identifiers for the node.",
+            "type": "array",
+            "items": {"$ref": "../entity.schema.json"}
+        },
+        "variants": {
+            "type": "array",
+            "items": {"$ref": "variants/base_variant.schema.json"}
+        }
+    },
+    "if": {
+        "properties": {
+            "function": {"const": "Complex"}
+        }
+    },
+    "then": {
+        "required": ["function", "concept"]
+    },
+    "else": {
+        "required": ["function"]
+    }
+}
