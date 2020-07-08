@@ -7,7 +7,7 @@ from typing import Iterable
 
 from pybel import BELGraph
 from pybel.canonicalize import _to_bel_lines_body, postpend_location
-from pybel.constants import BEL_DEFAULT_NAMESPACE, EXTRACELLULAR, INTRACELLULAR, MODIFIER
+from pybel.constants import EXTRACELLULAR, INTRACELLULAR, MODIFIER
 from pybel.dsl import (
     Abundance, BiologicalProcess, ComplexAbundance, CompositeAbundance, EnumeratedFusionRange, Fragment, Gene,
     GeneFusion, GeneModification, Hgvs, MicroRna, NamedComplexAbundance, Pathology, Protein, ProteinModification,
@@ -185,7 +185,7 @@ class TestCanonicalizeEdge(unittest.TestCase):
         )
 
         c4 = self.add_edge(
-            source_modifier=activity('tport', namespace=BEL_DEFAULT_NAMESPACE),
+            source_modifier=activity(namespace='go', name='transporter activity', identifier='0005215'),
         )
 
         self.assertEqual(c1, c2)

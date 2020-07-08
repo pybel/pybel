@@ -8,8 +8,7 @@ This module contains mappings between PyBEL's internal constants and BEL languag
 from typing import Optional
 
 from .constants import (
-    ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, CELL_SURFACE, COMPLEX, COMPOSITE, EXTRACELLULAR, GENE, IDENTIFIER,
-    INTRACELLULAR, MIRNA, NAME, NAMESPACE, PATHOLOGY, PROTEIN, RNA, TRANSCRIBED_TO, TRANSLATED_TO,
+    ABUNDANCE, BIOPROCESS, CELL_SURFACE, COMPLEX, COMPOSITE, EXTRACELLULAR, GENE, IDENTIFIER, INTRACELLULAR, MIRNA, NAME, NAMESPACE, PATHOLOGY, PROTEIN, RNA, TRANSCRIBED_TO, TRANSLATED_TO,
 )
 from .utils import ensure_quotes
 
@@ -73,9 +72,6 @@ class Entity(dict):
     @property
     def curie(self) -> str:
         """Return this entity as a CURIE."""
-        if self[NAMESPACE] == BEL_DEFAULT_NAMESPACE:
-            return self[NAME]
-
         return '{}:{}'.format(
             self.namespace,
             ensure_quotes(self.identifier if self.identifier else self.name),
@@ -552,9 +548,6 @@ gmod_mappings = {
         ],
     },
 }
-
-BEL_DEFAULT_NAMESPACE_VERSION = '2.1.1'
-BEL_DEFAULT_NAMESPACE_URL = 'http://openbel.org/2.1.1.belns'  # just needs something unique... will change later
 
 
 class CitationDict(Entity):

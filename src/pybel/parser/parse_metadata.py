@@ -142,7 +142,7 @@ class MetadataParser(BaseParser):
             self.namespace_pattern,
         ]).setName('BEL Metadata')
 
-        super(MetadataParser, self).__init__(self.language)
+        super().__init__(self.language)
 
     def handle_document(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
         """Handle statements like ``SET DOCUMENT X = "Y"``.
@@ -196,13 +196,24 @@ class MetadataParser(BaseParser):
 
         self.namespace_url_dict[namespace_keyword] = url
 
-        if self.skip_validation:
-            return tokens
-
-        namespace = self.manager.get_or_create_namespace(url)
-        self.namespace_to_term_to_encoding[namespace_keyword] = namespace.get_term_to_encodings()
-
         return tokens
+
+    def ensure_resources(self):
+        """Load all namespaces/annotations that have been encountered so far during parsing."""
+        if self.skip_validation:
+            return
+
+        if self.namespace_url_dict:
+            keywords, urls = zip(*self.namespace_url_dict.items())
+            namespaces = self.manager._ensure_namespace_urls(urls)
+            for keyword, namespace in zip(keywords, namespaces):
+                self.namespace_to_term_to_encoding[keyword] = namespace.get_term_to_encodings()
+
+        if self.annotation_url_dict:
+            keywords, urls = zip(*self.annotation_url_dict.items())
+            namespaces = self.manager._ensure_namespace_urls(urls, is_annotation=True)
+            for keyword, namespace in zip(keywords, namespaces):
+                self.annotation_to_term[keyword] = {entry.name for entry in namespace.entries}
 
     def handle_namespace_pattern(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
         """Handle statements like ``DEFINE NAMESPACE X AS PATTERN "Y"``.
@@ -229,15 +240,7 @@ class MetadataParser(BaseParser):
         """
         keyword = tokens['name']
         self.raise_for_redefined_annotation(line, position, keyword)
-
-        url = tokens['url']
-        self.annotation_url_dict[keyword] = url
-
-        if self.skip_validation:
-            return tokens
-
-        self.annotation_to_term[keyword] = self.manager.get_annotation_entry_names(url)
-
+        self.annotation_url_dict[keyword] = tokens['url']
         return tokens
 
     def handle_annotation_list(self, line: str, position: int, tokens: ParseResults) -> ParseResults:

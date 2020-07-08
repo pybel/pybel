@@ -6,7 +6,7 @@ import unittest
 from collections import Counter
 
 from pybel import BELGraph
-from pybel.constants import ABUNDANCE, BEL_DEFAULT_NAMESPACE, BIOPROCESS, COMPLEX, PROTEIN
+from pybel.constants import ABUNDANCE, BIOPROCESS, COMPLEX, PROTEIN
 from pybel.dsl import fusion_range, pathology, protein, protein_fusion
 from pybel.examples import egf_graph, sialic_acid_graph
 from pybel.struct.summary.node_summary import (

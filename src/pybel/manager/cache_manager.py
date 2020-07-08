@@ -8,9 +8,9 @@ enable this option, but can specify a database location if they choose.
 
 import logging
 import time
-from itertools import chain
-from typing import Any, Iterable, List, Mapping, Optional, Set, Tuple
+from typing import Iterable, List, Mapping, Optional, Set, Tuple
 
+import pandas as pd
 import requests
 import sqlalchemy
 from sqlalchemy import and_, exists, func
@@ -28,14 +28,11 @@ from .models import (
 from .query_manager import QueryManager
 from .utils import extract_shared_optional, extract_shared_required, update_insert_values
 from ..constants import (
-    ANNOTATIONS, BEL_DEFAULT_NAMESPACE, CITATION, CITATION_TYPE_PUBMED, EVIDENCE, IDENTIFIER, METADATA_INSERT_KEYS,
-    NAMESPACE, RELATION, SOURCE_MODIFIER, TARGET_MODIFIER, UNQUALIFIED_EDGES, belns_encodings, get_cache_connection,
+    ANNOTATIONS, CITATION, CITATION_TYPE_PUBMED, EVIDENCE, IDENTIFIER, METADATA_INSERT_KEYS, NAMESPACE, RELATION,
+    SOURCE_MODIFIER, TARGET_MODIFIER, UNQUALIFIED_EDGES, belns_encodings, get_cache_connection,
 )
 from ..dsl import BaseConcept, BaseEntity
-from ..language import (
-    BEL_DEFAULT_NAMESPACE_URL, BEL_DEFAULT_NAMESPACE_VERSION, Entity, activity_mapping, compartment_mapping,
-    gmod_mappings, pmod_mappings,
-)
+from ..language import Entity
 from ..struct.graph import AnnotationsDict, BELGraph
 from ..struct.operations import union
 from ..typing import EdgeData
@@ -101,14 +98,6 @@ def _clean_bel_namespace_values(bel_resource):
     }
 
 
-def _normalize_url(graph: BELGraph, keyword: str) -> Optional[str]:  # FIXME move to utilities and unit test
-    """Normalize a URL for the BEL graph."""
-    if keyword == BEL_DEFAULT_NAMESPACE and BEL_DEFAULT_NAMESPACE not in graph.namespace_url:
-        return BEL_DEFAULT_NAMESPACE_URL
-
-    return graph.namespace_url.get(keyword)
-
-
 class NamespaceManager(BaseManager):
     """Manages BEL namespaces."""
 
@@ -151,26 +140,77 @@ class NamespaceManager(BaseManager):
         filt = and_(Namespace.keyword == keyword, Namespace.version == version)
         return self.session.query(Namespace).filter(filt).one_or_none()
 
-    def ensure_default_namespace(self) -> Namespace:
-        """Get or create the BEL default namespace."""
-        namespace = self.get_namespace_by_keyword_version(BEL_DEFAULT_NAMESPACE, BEL_DEFAULT_NAMESPACE_VERSION)
+    def _ensure_namespace_urls(
+        self,
+        urls: Iterable[str],
+        use_tqdm: bool = True,
+        is_annotation: bool = False,
+    ) -> List[Namespace]:
+        ext = 'belanno' if is_annotation else 'belns'
 
-        if namespace is None:
-            namespace = Namespace(
-                name='BEL Default Namespace',
-                keyword=BEL_DEFAULT_NAMESPACE,
-                version=BEL_DEFAULT_NAMESPACE_VERSION,
-                url=BEL_DEFAULT_NAMESPACE_URL,
-            )
+        rv = []
+        url_to_namespace = {}
+        url_to_values = {}
+        url_to_name_to_id = {}
 
-            for name in set(chain(pmod_mappings, gmod_mappings, activity_mapping, compartment_mapping)):
-                entry = NamespaceEntry(name=name, namespace=namespace)
-                self.session.add(entry)
+        if use_tqdm:
+            urls = tqdm(urls, desc='downloading namespaces')
+        for url in urls:
+            result = self.get_namespace_by_url(url)
+            if result:
+                rv.append(result)
+                continue
+            bel_resource = get_bel_resource(url)
+            _clean_bel_namespace_values(bel_resource)
+            url_to_values[url] = bel_resource['Values']
 
-            self.session.add(namespace)
-            self.session.commit()
+            if is_annotation:
+                namespace_kwargs = _get_annotation_insert_values(bel_resource)
+            else:
+                namespace_kwargs = _get_namespace_insert_values(bel_resource)
+            result = url_to_namespace[url] = Namespace(url=url, **namespace_kwargs)
+            rv.append(result)
+            if url.endswith(f'-names.{ext}'):
+                mapping_url = url[:-len(f'-names.{ext}')] + f'.{ext}.mapping'
+                try:
+                    res = requests.get(mapping_url)
+                    res.raise_for_status()
+                except requests.exceptions.HTTPError:
+                    logger.warning('No mappings found for %s', url)
+                else:
+                    mappings = res.json()
+                    logger.debug('got %d mappings', len(mappings))
+                    url_to_name_to_id[url] = {v: k for k, v in res.json().items()}
 
-        return namespace
+        self.session.add_all(url_to_namespace.values())
+        self.session.commit()
+
+        url_to_id = {url: namespace.id for url, namespace in url_to_namespace.items()}
+
+        rows = []
+        it = url_to_values.items()
+        if use_tqdm:
+            it = tqdm(it, desc='making namespace entry table')
+
+        if is_annotation:
+            for url, values in it:
+                for name, identifier in values.items():
+                    if not name:
+                        continue
+                    rows.append((url_to_id[url], name, None, identifier))  # TODO is this a fair assumption?
+        else:
+            for url, values in it:
+                name_to_id = url_to_name_to_id.get(url, {})
+                for name, encoding in values.items():
+                    if not name:
+                        continue
+                    rows.append((url_to_id[url], name, encoding, name_to_id.get(name)))
+        df = pd.DataFrame(rows, columns=['namespace_id', 'name', 'encoding', 'identifier'])
+        df.to_sql(NamespaceEntry.__tablename__, con=self.engine, if_exists='append', index=False)
+
+        self.session.commit()
+
+        return rv
 
     def get_or_create_namespace(self, url: str) -> Namespace:
         """Insert the namespace file at the given location to the cache.
@@ -179,52 +219,7 @@ class NamespaceManager(BaseManager):
 
         :raises: pybel.resources.exc.ResourceError
         """
-        result = self.get_namespace_by_url(url)
-
-        if result is not None:
-            return result
-
-        t = time.time()
-
-        bel_resource = get_bel_resource(url)
-
-        _clean_bel_namespace_values(bel_resource)
-
-        values = bel_resource['Values']
-
-        namespace_insert_values = _get_namespace_insert_values(bel_resource)
-
-        name_to_id = {}
-        if url.endswith('-names.belns'):
-            mapping_url = url[:-len('-names.belns')] + '.belns.mapping'
-            try:
-                res = requests.get(mapping_url)
-                res.raise_for_status()
-            except requests.exceptions.HTTPError:
-                logger.warning('No mappings found for %s', url)
-            else:
-                mappings = res.json()
-                logger.debug('got %d mappings', len(mappings))
-                name_to_id.update({v: k for k, v in res.json().items()})
-
-        namespace = Namespace(
-            url=url,
-            **namespace_insert_values,
-        )
-
-        logger.debug('building NamespaceEntry instances')
-        namespace.entries = [
-            NamespaceEntry(name=name, encoding=encoding, identifier=name_to_id.get(name))
-            for name, encoding in values.items()
-        ]
-
-        self.session.add(namespace)
-
-        logger.debug('committing namespace')
-        self.session.commit()
-
-        logger.info('inserted namespace: %s (%d terms in %.2f seconds)', url, len(values), time.time() - t)
-        return namespace
+        return self._ensure_namespace_urls([url])[0]
 
     def get_namespace_by_keyword_pattern(self, keyword: str, pattern: str) -> Optional[Namespace]:
         """Get a namespace with a given keyword and pattern."""
@@ -319,51 +314,7 @@ class NamespaceManager(BaseManager):
 
         :raises: pybel.resources.exc.ResourceError
         """
-        result = self.get_namespace_by_url(url)
-
-        if result is not None:
-            return result
-
-        t = time.time()
-
-        bel_resource = get_bel_resource(url)
-
-        result = Namespace(
-            url=url,
-            is_annotation=True,
-            **_get_annotation_insert_values(bel_resource),
-        )
-        result.entries = [
-            NamespaceEntry(name=name, identifier=label)
-            for name, label in bel_resource['Values'].items()
-            if name
-        ]
-
-        self.session.add(result)
-        self.session.commit()
-
-        logger.info(
-            'inserted annotation: %s (%d terms in %.2f seconds)', url, len(bel_resource['Values']),
-            time.time() - t,
-        )
-
-        return result
-
-    def get_annotation_entry_names(self, url: str) -> Set[str]:
-        """Return a dict of annotations and their labels for the given annotation file.
-
-        :param url: the location of the annotation file
-        """
-        annotation = self.get_or_create_annotation(url)
-        return {
-            x.name
-            for x in self.session.query(NamespaceEntry.name).filter(NamespaceEntry.namespace == annotation)
-        }
-
-    def get_namespace_encoding(self, url: str) -> Mapping[str, str]:
-        annotation = self.get_or_create_annotation(url)
-        namespace_filter = NamespaceEntry.namespace == annotation
-        return dict(self.session.query(NamespaceEntry.name, NamespaceEntry.encoding).filter(namespace_filter))
+        return self._ensure_namespace_urls([url], is_annotation=True)[0]
 
     def get_annotation_entries_by_names(self, url: str, names: Iterable[str]) -> List[NamespaceEntry]:
         """Get annotation entries by URL and names.
@@ -569,7 +520,6 @@ class InsertManager(NamespaceManager, LookupManager):
         self,
         graph: BELGraph,
         use_tqdm: bool = True,
-        tqdm_kwargs: Optional[Mapping[str, Any]] = None,
     ) -> Network:
         """Insert a graph in the database and returns the corresponding Network model.
 
@@ -586,21 +536,12 @@ class InsertManager(NamespaceManager, LookupManager):
         t = time.time()
 
         namespace_urls = graph.namespace_url.values()
-        if use_tqdm:
-            namespace_urls = tqdm(namespace_urls, **(tqdm_kwargs or {}))
-        for namespace_url in namespace_urls:
-            if use_tqdm:
-                namespace_urls.write('inserting namespace: {}'.format(namespace_url))
-            self.get_or_create_namespace(namespace_url)
-
+        self._ensure_namespace_urls(namespace_urls, use_tqdm=use_tqdm)
         for keyword, pattern in graph.namespace_pattern.items():
             self.ensure_regex_namespace(keyword, pattern)
 
         annotation_urls = graph.annotation_url.values()
-        if use_tqdm:
-            annotation_urls = tqdm(annotation_urls, desc='annotations')
-        for annotation_url in annotation_urls:
-            self.get_or_create_annotation(annotation_url)
+        self._ensure_namespace_urls(annotation_urls, use_tqdm=use_tqdm, is_annotation=True)
 
         network = Network(**{
             key: value
