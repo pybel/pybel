@@ -189,22 +189,24 @@ class NamespaceManager(BaseManager):
 
         rows = []
         it = url_to_values.items()
-        if use_tqdm:
-            it = tqdm(it, desc='making namespace entry table')
-
         if is_annotation:
+            if use_tqdm:
+                it = tqdm(it, desc='making annotation entry table')
             for url, values in it:
                 for name, identifier in values.items():
                     if not name:
                         continue
                     rows.append((url_to_id[url], name, None, identifier))  # TODO is this a fair assumption?
         else:
+            if use_tqdm:
+                it = tqdm(it, desc='making namespace entry table')
             for url, values in it:
                 name_to_id = url_to_name_to_id.get(url, {})
                 for name, encoding in values.items():
                     if not name:
                         continue
                     rows.append((url_to_id[url], name, encoding, name_to_id.get(name)))
+
         df = pd.DataFrame(rows, columns=['namespace_id', 'name', 'encoding', 'identifier'])
         df.to_sql(NamespaceEntry.__tablename__, con=self.engine, if_exists='append', index=False)
 
