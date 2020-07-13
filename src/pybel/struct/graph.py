@@ -1042,10 +1042,10 @@ class SummarizeDispatch(Dispatch):
         """Return a string that summarizes the graph."""
         return tabulate(self.list())
 
-    def list(self) -> List[Tuple[str, float]]:
+    def list(self) -> List[Tuple[str, Any]]:
         """Return a list of tuples that summarize the graph."""
         number_nodes = self.graph.number_of_nodes()
-        return [
+        rv = [
             ('Name', self.graph.name),
             ('Version', self.graph.version),
             ('Number of Nodes', number_nodes),
@@ -1058,6 +1058,11 @@ class SummarizeDispatch(Dispatch):
             ('Number of Components', nx.number_weakly_connected_components(self.graph)),
             ('Number of Warnings', self.graph.number_of_warnings()),
         ]
+        if self.graph.authors:
+            authors = self.graph.authors
+            key = 'Author' if authors.count(',') == 0 else 'Authors'
+            rv.insert(2, (key, authors))
+        return rv
 
 
 class PlotDispatch(Dispatch):

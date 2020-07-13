@@ -97,9 +97,10 @@ class TestStruct(unittest.TestCase):
         random.seed(5)
         pybel.examples.sialic_acid_graph.version = '1.0.0'
         pybel.examples.sialic_acid_graph.summarize(file=sio, examples=False)
-        test_str = """---------------------  -----------------
+        test_str = """---------------------  -------------------
 Name                   Sialic Acid Graph
 Version                1.0.0
+Author                 Charles Tapley Hoyt
 Number of Nodes        9
 Number of Namespaces   3
 Number of Edges        11
@@ -109,7 +110,7 @@ Number of Authors      0
 Network Density        1.53E-01
 Number of Components   1
 Number of Warnings     0
----------------------  -----------------
+---------------------  -------------------
 
 Type (3)      Count
 ----------  -------
