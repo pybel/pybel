@@ -131,7 +131,7 @@ class BELRepository:
 
     def iterate_bel(self) -> Iterable[Tuple[str, str]]:
         """Yield all paths to BEL documents."""
-        for root, dirs, file_names in self.walk():
+        for root, _dirs, file_names in self.walk():
             for file_name in sorted(file_names):
                 if not file_name.startswith('_') and file_name.endswith('.bel'):
                     yield root, file_name
@@ -155,7 +155,7 @@ class BELRepository:
         return os.path.exists(self._build_warnings_path(root, file_name))
 
     def _remove_root_file_name(self, root: str, file_name: str) -> None:
-        for extension, path in self._iterate_extension_path(root, file_name):
+        for _, path in self._iterate_extension_path(root, file_name):
             if os.path.exists(path):
                 os.remove(path)
 
@@ -164,7 +164,7 @@ class BELRepository:
             yield extension, self._build_cache_ext_path(root, file_name, extension)
 
     def _import_local(self, root: str, file_name: str) -> Optional[BELGraph]:
-        for extension, path in self._iterate_extension_path(root, file_name):
+        for _, path in self._iterate_extension_path(root, file_name):
             if os.path.exists(path):
                 return load(path)
 
