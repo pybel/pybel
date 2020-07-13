@@ -105,6 +105,26 @@ graph_argument = click.argument(
     callback=lambda _, __, path: load(path),
 )
 
+LOG_FMT = '%(asctime)s %(levelname)-8s %(message)s'
+LOG_DATEFMT = '%Y-%m-%d %H:%M:%S'
+
+
+def _debug_callback(_ctx, _param, value):
+    if not value:
+        logging.basicConfig(level=logging.WARNING, format=LOG_FMT, datefmt=LOG_DATEFMT)
+    elif value == 1:
+        logging.basicConfig(level=logging.INFO, format=LOG_FMT, datefmt=LOG_DATEFMT)
+    else:
+        logging.basicConfig(level=logging.DEBUG, format=LOG_FMT, datefmt=LOG_DATEFMT)
+
+
+verbose_option = click.option(
+    '-v', '--verbose',
+    count=True,
+    callback=_debug_callback,
+    expose_value=False,
+)
+
 
 @with_plugins(iter_entry_points('pybel.cli_plugins'))
 @click.group(help="PyBEL CLI on {}".format(sys.executable))
@@ -136,18 +156,14 @@ def parse(text: str, pprint: bool):
 @click.option('-r', '--required-annotations', multiple=True, help='Specify multiple required annotations')
 @click.option('--upgrade-urls', is_flag=True)
 @click.option('--skip-tqdm', is_flag=True)
-@click.option('-v', '--verbose', is_flag=True)
+@verbose_option
 @click.pass_obj
 def compile(
     manager, path, allow_naked_names, disallow_nested, disallow_unqualified_translocations,
-    no_identifier_validation, no_citation_clearing, required_annotations, upgrade_urls,
-    skip_tqdm, verbose,
+    no_identifier_validation, no_citation_clearing, required_annotations, upgrade_urls, skip_tqdm,
 ):
     """Compile a BEL script to a graph."""
-    if verbose:
-        logging.basicConfig(level=logging.DEBUG)
-        logger.setLevel(logging.DEBUG)
-        logger.debug('using connection: %s', manager.engine.url)
+    logger.debug('using connection: %s', manager.engine.url)
 
     click.secho('Compilation', fg='red', bold=True)
     if skip_tqdm:
@@ -155,7 +171,7 @@ def compile(
     graph = from_bel_script(
         path,
         manager=manager,
-        use_tqdm=(not (skip_tqdm or verbose)),
+        use_tqdm=(not skip_tqdm),
         disallow_nested=disallow_nested,
         allow_naked_names=allow_naked_names,
         disallow_unqualified_translocations=disallow_unqualified_translocations,
