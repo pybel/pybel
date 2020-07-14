@@ -153,8 +153,10 @@ class NamespaceManager(BaseManager):
         url_to_values = {}
         url_to_name_to_id = {}
 
+        tag = 'annotations' if is_annotation else 'namespaces'
+
         if use_tqdm:
-            urls = tqdm(urls, desc='downloading namespaces')
+            urls = tqdm(urls, desc=f'downloading {tag}')
         for url in urls:
             result = self.get_namespace_by_url(url)
             if result:
@@ -187,19 +189,20 @@ class NamespaceManager(BaseManager):
 
         url_to_id = {url: namespace.id for url, namespace in url_to_namespace.items()}
 
+        if not url_to_values:
+            return rv
+
         rows = []
         it = url_to_values.items()
+        if use_tqdm:
+            it = tqdm(it, desc=f'making {tag} entry table')
         if is_annotation:
-            if use_tqdm:
-                it = tqdm(it, desc='making annotation entry table')
             for url, values in it:
                 for name, identifier in values.items():
                     if not name:
                         continue
                     rows.append((url_to_id[url], name, None, identifier))  # TODO is this a fair assumption?
         else:
-            if use_tqdm:
-                it = tqdm(it, desc='making namespace entry table')
             for url, values in it:
                 name_to_id = url_to_name_to_id.get(url, {})
                 for name, encoding in values.items():
@@ -208,9 +211,12 @@ class NamespaceManager(BaseManager):
                     rows.append((url_to_id[url], name, encoding, name_to_id.get(name)))
 
         df = pd.DataFrame(rows, columns=['namespace_id', 'name', 'encoding', 'identifier'])
+        logger.info('preparing sql objects for %s', tag)
         df.to_sql(NamespaceEntry.__tablename__, con=self.engine, if_exists='append', index=False)
-
+        logger.info('committing %s', tag)
+        start_commit_time = time.time()
         self.session.commit()
+        logger.info('done committing %s after %.2f seconds', tag, time.time() - start_commit_time)
 
         return rv
 
@@ -260,6 +266,7 @@ class NamespaceManager(BaseManager):
         result = self.session.query(NamespaceEntry).join(Namespace).filter(entry_filter).all()
 
         if 0 == len(result):
+            logger.debug('could not find namespace entry for %s in url=%s', name, url)
             return
 
         if 1 < len(result):
@@ -790,7 +797,7 @@ class InsertManager(NamespaceManager, LookupManager):
             entry = self.get_namespace_entry(url, name)
 
             if entry is None:
-                logger.debug('skipping node with identifier %s: %s', url, name)
+                logger.debug('skipping node with entity %s:%s from url=%s', node.namespace, name, url)
                 return
 
             self.session.add(entry)

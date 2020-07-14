@@ -116,7 +116,7 @@ class Namespace(Base):
     is_annotation = Column(Boolean)
 
     def __str__(self):
-        return self.keyword
+        return f'[id={self.id}] {self.keyword}'
 
     def get_term_to_encodings(self) -> Mapping[Tuple[Optional[str], str], str]:
         """Return the term (db, id, name) to encodings from this namespace."""
