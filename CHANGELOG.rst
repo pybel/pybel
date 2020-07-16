@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`Unreleased <https://github.com/pybel/pybel/compare/v0.14.10...HEAD>`_
+----------------------------------------------------------------------
+Added
+~~~~~
+- Support for homomultimers in ML triples export
+- Graph dispatches allow quick access to PyBEL functionality (https://github.com/pybel/pybel/pull/449)
+- Add "Streamable" BEL I/O (https://github.com/pybel/pybel/pull/451)
+- ``pybel.to_triples`` allows direct export of ML-ready triples to a numpy ndarray.
+- ``pybel.parse`` function allows for quick parsing of BEL strings
+- Add JSON Schema for validating nodes and edges (https://github.com/pybel/pybel/pull/450) thanks @aman527
+- Add BEL Repository functionality, previously located in https://github.com/pybel/bel-repository
+
+Changed
+~~~~~~~
+- PyBEL now supports Python 3.6+ only.
+- ``pybel.to_tsv`` renamed to ``pybel.to_triples_file``
+- The citation entry in PyBEL JSON datastructure now uses ``namespace``/``identifier``/``name`` instead
+  of ``db``/``db_id``. The corresponding constants ``pybel.constants.CITATION_DB``/``pybel.constants.CITATION_DB_ID``/
+  ``pybel.constants.CITATION_DB_NAME`` have been removed (https://github.com/pybel/pybel/pull/453).
+- The citation entry now relies on a subclass of ``pybel.language.Entity``, which means empty strings are
+  no longer allowed.
+- The inconsistent usage of ``subject``/``source`` as well as ``object``/``target`` has been normalized everywhere.
+  This means the constants ``pybel.constants.SUBJECT``/``pybel.constants.OBJECT`` were removed and
+  new constants ``pybel.constants.SOURCE_MODIFIER``/``pybel.constants.TARGET_MODIFIER`` were added
+  (https://github.com/pybel/pybel/pull/453).
+- Remove the BEL default namespace. All usages get normalized to controlled vocabularies (mostly GO) automatically
+  (https://github.com/pybel/pybel/pull/455).
+- Improve namespace/annotation database insertion with Pandas (https://github.com/pybel/pybel/pull/454)
+
 `0.14.10 <https://github.com/pybel/pybel/compare/v0.14.9...v0.14.10>`_ - 2020-06-15
 -----------------------------------------------------------------------------------
 Added
