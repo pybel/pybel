@@ -5,9 +5,9 @@ import copy
 from typing import Any, List, Mapping, Tuple
 
 import pybel
-from pybel.examples import egf_graph as g
-from pybel.schema import is_valid_edge, is_valid_node
 import pymongo
+
+from pybel.schema import is_valid_edge, is_valid_node
 from pymongo.collection import Collection
 
 
