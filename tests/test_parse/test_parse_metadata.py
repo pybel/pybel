@@ -178,12 +178,15 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
         self.assertEqual(re.compile(r'\w+'), self.parser.annotation_to_pattern['Test'])
 
     def test_define_namespace_regex(self):
-        s = 'DEFINE NAMESPACE dbSNP AS PATTERN "rs[0-9]*"'
-        self.parser.parseString(s)
-
-        self.assertNotIn('dbSNP', self.parser.namespace_to_term_to_encoding)
-        self.assertIn('dbSNP', self.parser.namespace_to_pattern)
-        self.assertEqual(re.compile('rs[0-9]*'), self.parser.namespace_to_pattern['dbSNP'])
+        for s, namespace, regex in [
+            ('DEFINE NAMESPACE dbSNP AS PATTERN "rs[0-9]*"', 'dbSNP', re.compile(r'rs[0-9]*')),
+            ('DEFINE NAMESPACE ec-code AS PATTERN ".*"', 'ec-code', re.compile(r'.*')),
+        ]:
+            with self.subTest(namespace=namespace):
+                self.parser.parseString(s)
+                self.assertNotIn(namespace, self.parser.namespace_to_term_to_encoding)
+                self.assertIn(namespace, self.parser.namespace_to_pattern)
+                self.assertEqual(regex, self.parser.namespace_to_pattern[namespace])
 
     def test_not_semantic_version(self):
         s = 'SET DOCUMENT Version = "1.0"'

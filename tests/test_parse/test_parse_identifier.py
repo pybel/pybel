@@ -175,19 +175,25 @@ class TestConceptParserRegex(unittest.TestCase):
     """Tests for regular expression parsing"""
 
     def setUp(self) -> None:
-        self.parser = ConceptParser(namespace_to_pattern={'hgnc': re.compile(r'\d+')})
+        self.parser = ConceptParser(namespace_to_pattern={
+            'hgnc': re.compile(r'\d+'),
+            'ec-code': re.compile(r'.+'),
+        })
         self.assertEqual({}, self.parser.namespace_to_identifier_to_encoding)
         self.assertEqual({}, self.parser.namespace_to_name_to_encoding)
 
     def test_valid(self):
-        s = 'hgnc:391'
-        result = self.parser.parseString(s)
-
-        self.assertIn('namespace', result)
-        self.assertIn('name', result)
-        self.assertNotIn('identifier', result)
-        self.assertEqual('hgnc', result['namespace'])
-        self.assertEqual('391', result['name'])
+        for curie, namespace, name in [
+            ('hgnc:391', 'hgnc', '391'),
+            ('ec-code:1.1.1.27', 'ec-code', '1.1.1.27'),
+        ]:
+            with self.subTest(curie=curie):
+                result = self.parser.parseString(curie)
+                self.assertIn('namespace', result)
+                self.assertIn('name', result)
+                self.assertNotIn('identifier', result)
+                self.assertEqual(namespace, result['namespace'])
+                self.assertEqual(name, result['name'])
 
     def test_invalid(self):
         """Test invalid BEL term."""
