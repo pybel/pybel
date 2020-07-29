@@ -91,20 +91,25 @@ def add_sbel(graph: BELGraph, it: Iterable[SBEL]) -> None:
     :param it: An iterable of dictionaries.
     """
     for data in it:
-        u = parse_result_to_dsl(data['source'])
-        v = parse_result_to_dsl(data['target'])
-        edge_data = {
-            k: v
-            for k, v in data.items()
-            if k not in {'source', 'target', 'key'}
-        }
-        for side in (SOURCE_MODIFIER, TARGET_MODIFIER):
-            side_data = edge_data.get(side)
-            if side_data:
-                _handle_modifier(side_data)
-        if CITATION in edge_data:
-            edge_data[CITATION] = CitationDict(**edge_data[CITATION])
-        graph.add_edge(u, v, key=hash_edge(u, v, edge_data), **edge_data)
+        add_sbel_row(graph, data)
+
+
+def add_sbel_row(graph: BELGraph, data: SBEL) -> str:
+    """Add a single SBEL data dictionary to a graph."""
+    u = parse_result_to_dsl(data['source'])
+    v = parse_result_to_dsl(data['target'])
+    edge_data = {
+        k: v
+        for k, v in data.items()
+        if k not in {'source', 'target', 'key'}
+    }
+    for side in (SOURCE_MODIFIER, TARGET_MODIFIER):
+        side_data = edge_data.get(side)
+        if side_data:
+            _handle_modifier(side_data)
+    if CITATION in edge_data:
+        edge_data[CITATION] = CitationDict(**edge_data[CITATION])
+    return graph.add_edge(u, v, key=hash_edge(u, v, edge_data), **edge_data)
 
 
 @open_file(0, mode='r')
