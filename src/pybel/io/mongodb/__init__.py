@@ -4,11 +4,11 @@
 import copy
 from typing import Any, List, Mapping, Tuple
 
-import pybel
+from pymongo.collection import Collection
 import pymongo
 
+import pybel
 from pybel.schema import is_valid_edge, is_valid_node
-from pymongo.collection import Collection
 
 
 client = pymongo.MongoClient()
