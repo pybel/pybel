@@ -11,6 +11,7 @@ from pybel.exceptions import (
     InvalidPubMedIdentifierWarning, MissingAnnotationKeyWarning, MissingAnnotationRegexWarning,
     UndefinedAnnotationWarning,
 )
+from pybel.language import Entity
 from pybel.parser import ControlParser
 from pybel.parser.parse_control import set_citation_stub
 from pybel.testing.utils import n
@@ -79,10 +80,10 @@ class TestParseControlUnsetStatementErrors(TestParseControl):
             'SET Custom2 = "Custom2_A"',
         ]
         self.parser.parse_lines(s)
-        self.assertIn('Custom1', self.parser.annotations)
-        self.assertIn('Custom2', self.parser.annotations)
+        self.assertIn('Custom1', self.parser._annotations)
+        self.assertIn('Custom2', self.parser._annotations)
         self.parser.parseString('UNSET {Custom1,Custom2}')
-        self.assertFalse(self.parser.annotations)
+        self.assertFalse(self.parser._annotations)
 
     def test_unset_list_spaced(self):
         """Tests unsetting an annotation list, with spaces in it"""
@@ -271,10 +272,10 @@ class TestParseControl2(TestParseControl):
         self.parser.parse_lines(s)
 
         expected_annotation = {
-            'Custom1': 'Custom1_A'
+            'Custom1': [Entity(namespace='text', name='Custom1_A')],
         }
 
-        self.assertEqual(expected_annotation, self.parser.annotations)
+        self.assertEqual(expected_annotation, self.parser._annotations)
 
     def test_custom_annotation_list(self):
         s = [
@@ -284,15 +285,15 @@ class TestParseControl2(TestParseControl):
         self.parser.parse_lines(s)
 
         expected_annotation = {
-            'Custom1': {'Custom1_A', 'Custom1_B'}
+            'Custom1': [Entity(namespace='text', name='Custom1_A'), Entity(namespace='text', name='Custom1_B')],
         }
 
-        self.assertEqual(expected_annotation, self.parser.annotations)
+        self.assertEqual(expected_annotation, self.parser._annotations)
 
         expected_dict = {
             ANNOTATIONS: expected_annotation,
             CITATION: test_citation_dict,
-            EVIDENCE: None
+            EVIDENCE: None,
         }
 
         self.assertEqual(expected_dict, self.parser.get_annotations())
@@ -347,13 +348,13 @@ class TestParseControl2(TestParseControl):
         self.assertEqual(s3_identifier, self.parser.citation_db_id)
 
         self.parser.parseString('UNSET {Custom1,Evidence}')
-        self.assertNotIn('Custom1', self.parser.annotations)
+        self.assertNotIn('Custom1', self.parser._annotations)
         self.assertIsNone(self.parser.evidence)
-        self.assertIn('Custom2', self.parser.annotations)
+        self.assertIn('Custom2', self.parser._annotations)
         self.assertTrue(self.parser.citation_is_set)
 
         self.parser.parseString('UNSET ALL')
-        self.assertEqual(0, len(self.parser.annotations))
+        self.assertEqual(0, len(self.parser._annotations))
         self.assertFalse(self.parser.citation_is_set)
 
     def test_set_regex(self):
@@ -364,4 +365,4 @@ class TestParseControl2(TestParseControl):
         ]
         self.parser.parse_lines(s)
 
-        self.assertEqual(v, self.parser.annotations['CustomRegex'])
+        self.assertEqual(v, self.parser._annotations['CustomRegex'])

@@ -918,7 +918,7 @@ class BELGraph(nx.MultiDiGraph):
             if all(isinstance(v, str) for v in values):
                 return [
                     Entity(namespace=namespace, identifier=identifier)
-                    for identifier in values
+                    for identifier in sorted(values)
                 ]
             elif all(isinstance(v, Entity) for v in values):
                 return values
@@ -928,7 +928,7 @@ class BELGraph(nx.MultiDiGraph):
             if all(isinstance(v, bool) for v in values.values()):
                 return [
                     Entity(namespace=namespace, identifier=name)
-                    for name in values.values()
+                    for name in sorted(values)
                 ]
             raise TypeError(f'dictionary of wrong format for key {key}: {values}')
         raise TypeError(f'values of wrong data type for key {key}: {values}')

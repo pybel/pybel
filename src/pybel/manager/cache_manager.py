@@ -678,7 +678,7 @@ class InsertManager(NamespaceManager, LookupManager):
                 except Exception as e:
                     self.session.rollback()
                     logger.exception('error storing edge in database. edge data: %s', data)
-                    raise EdgeAddError(e, u, v, key, data) from e
+                    raise EdgeAddError(e, u, v, key, data)
                 else:
                     yield edge
 

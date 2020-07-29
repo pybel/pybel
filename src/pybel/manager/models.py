@@ -154,7 +154,7 @@ class NamespaceEntry(Base):
     id = Column(Integer, primary_key=True)
 
     name = Column(
-        String(1023), index=True, nullable=False,
+        String(1023), index=True, nullable=True,
         doc='Name that is defined in the corresponding namespace definition file',
     )
     identifier = Column(String(255), index=True, nullable=True, doc='The database accession number')

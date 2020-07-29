@@ -37,8 +37,8 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
             citation=test_citation_dict,
             annotations={
                 'Disease': {'Disease1': True},
-                'Cell': {'Cell1': True}
-            }
+                'Cell': {'Cell1': True},
+            },
         )
 
         make_dummy_namespaces(self.manager, graph)

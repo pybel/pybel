@@ -310,7 +310,8 @@ def from_jgif(graph_jgif_dict, parser_kwargs: Optional[Mapping[str, Any]] = None
                 parser.control_parser.citation_db = citation['type'].strip()
                 parser.control_parser.citation_db_id = citation['id'].strip()
                 parser.control_parser.evidence = summary_text
-                parser.control_parser.annotations.update(evidence[EXPERIMENT_CONTEXT])
+                annotations = parser.graph._clean_annotations(evidence[EXPERIMENT_CONTEXT])
+                parser.control_parser._annotations.update(annotations)
 
                 try:
                     parser.parseString(bel_statement, line_number=i)

@@ -11,8 +11,8 @@ from pybel import BELGraph
 from pybel.canonicalize import edge_to_bel
 from pybel.constants import (
     ANNOTATIONS, ASSOCIATION, CITATION, CITATION_TYPE_PUBMED, DECREASES, DIRECTLY_DECREASES, EVIDENCE, IDENTIFIER,
-    INCREASES, METADATA_AUTHORS, METADATA_DESCRIPTION, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAMESPACE,
-    PART_OF, RELATION,
+    INCREASES, LINE, METADATA_AUTHORS, METADATA_DESCRIPTION, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION,
+    NAMESPACE, PART_OF, RELATION,
 )
 from pybel.dsl import BaseEntity, ComplexAbundance, Pathology, Protein
 from pybel.dsl.namespaces import hgnc
@@ -24,11 +24,11 @@ from pybel.exceptions import (
     NestedRelationWarning, PlaceholderAminoAcidWarning, UndefinedAnnotationWarning, UndefinedNamespaceWarning,
     VersionFormatWarning,
 )
+from pybel.language import Entity, citation_dict
 from pybel.parser.parse_bel import BELParser
 from pybel.parser.parse_control import ControlParser
 from pybel.testing.constants import test_bel_thorough
 from pybel.utils import subdict_matches
-from pybel.language import citation_dict
 from tests.constant_helper import (
     BEL_THOROUGH_EDGES, BEL_THOROUGH_NODES, citation_1, evidence_1, expected_test_simple_metadata,
     expected_test_thorough_metadata,
@@ -110,6 +110,10 @@ def any_subdict_matches(dict_of_dicts, query_dict) -> bool:
     )
 
 
+def _remove_line(d):
+    return {k: v for k, v in d.items() if k != LINE}
+
+
 def assert_has_edge(
     self: unittest.TestCase,
     u: BaseEntity,
@@ -117,7 +121,8 @@ def assert_has_edge(
     graph: BELGraph,
     permissive: bool = True,
     use_identifiers: bool = False,
-    **kwargs
+    only: bool = False,
+    **expected_edge_data
 ):
     """A helper function for checking if an edge with the given properties is contained within a graph."""
     self.assertIsInstance(u, BaseEntity)
@@ -131,21 +136,28 @@ def assert_has_edge(
         ))
     )
 
-    if not kwargs:
+    if not expected_edge_data:
         return
 
-    if permissive:
-        matches = any_subdict_matches(graph[u][v], kwargs)
-    else:
-        matches = any_dict_matches(graph[u][v], kwargs)
+    if ANNOTATIONS in expected_edge_data:
+        expected_edge_data[ANNOTATIONS] = graph._clean_annotations(expected_edge_data[ANNOTATIONS])
 
-    msg = 'No edge ({}, {}) with correct properties. expected:\n {}\nbut got:\n{}'.format(
-        u,
-        v,
-        dumps(kwargs, indent=2, sort_keys=True),
-        str(graph[u][v])
-    )
-    self.assertTrue(matches, msg=msg)
+    if only:
+        _key, actual_edge_data = list(graph[u][v].items())[0]
+        self.assertEqual(_remove_line(expected_edge_data), _remove_line(actual_edge_data))
+    else:
+        if permissive:
+            matches = any_subdict_matches(graph[u][v], expected_edge_data)
+        else:
+            matches = any_dict_matches(graph[u][v], expected_edge_data)
+
+        msg = 'No edge ({}, {}) with correct properties. expected:\n {}\nbut got:\n{}'.format(
+            u,
+            v,
+            dumps(expected_edge_data, indent=2, sort_keys=True),
+            str(graph[u][v])
+        )
+        self.assertTrue(matches, msg=msg)
 
 
 class TestGraphMixin(unittest.TestCase):
@@ -195,9 +207,9 @@ class TestTokenParserBase(unittest.TestCase):
         """Assert that this test case's graph has the given node."""
         assert_has_node(self, member, self.graph, **kwargs)
 
-    def assert_has_edge(self, u: BaseEntity, v: BaseEntity, **kwargs):
+    def assert_has_edge(self, u: BaseEntity, v: BaseEntity, only: bool = False, **kwargs):
         """Assert that this test case's graph has the given edge."""
-        assert_has_edge(self, u, v, self.graph, **kwargs)
+        assert_has_edge(self, u, v, self.graph, only=only, **kwargs)
 
     def add_default_provenance(self):
         """Add a default citation and evidence to the parser."""
@@ -262,28 +274,28 @@ class BelReconstitutionMixin(TestGraphMixin):
         evidence_2 = 'Evidence 2'
         evidence_3 = 'Evidence 3'
 
-        assert_has_edge(self, akt1, egfr, graph, **{
+        assert_has_edge(self, akt1, egfr, graph, only=True, **{
             RELATION: INCREASES,
             CITATION: bel_simple_citation_1,
             EVIDENCE: evidence_1_extra,
             ANNOTATIONS: {
-                'Species': {'9606': True}
+                'Species': [Entity(namespace='text', name='9606')],
             }
         })
-        assert_has_edge(self, egfr, fadd, graph, **{
+        assert_has_edge(self, egfr, fadd, graph, only=True, **{
             RELATION: DECREASES,
             ANNOTATIONS: {
-                'Species': {'9606': True},
+                'Species': [Entity(namespace='text', name='9606')],
                 'CellLine': {'10B9 cell': True}
             },
             CITATION: bel_simple_citation_1,
             EVIDENCE: evidence_2
         })
-        assert_has_edge(self, egfr, casp8, graph, **{
+        assert_has_edge(self, egfr, casp8, graph, only=True, **{
             RELATION: DIRECTLY_DECREASES,
             ANNOTATIONS: {
-                'Species': {'9606': True},
-                'CellLine': {'10B9 cell': True}
+                'Species': [Entity(namespace='text', name='9606')],
+                'CellLine': [Entity(namespace='text', name='10B9 cell')],
             },
             CITATION: bel_simple_citation_1,
             EVIDENCE: evidence_2,
@@ -291,7 +303,7 @@ class BelReconstitutionMixin(TestGraphMixin):
         assert_has_edge(self, fadd, casp8, graph, **{
             RELATION: INCREASES,
             ANNOTATIONS: {
-                'Species': {'10116': True}
+                'Species': [Entity(namespace='text', name='10116')],
             },
             CITATION: bel_simple_citation_2,
             EVIDENCE: evidence_3,
@@ -299,7 +311,7 @@ class BelReconstitutionMixin(TestGraphMixin):
         assert_has_edge(self, akt1, casp8, graph, **{
             RELATION: ASSOCIATION,
             ANNOTATIONS: {
-                'Species': {'10116': True}
+                'Species': [Entity(namespace='text', name='10116')],
             },
             CITATION: bel_simple_citation_2,
             EVIDENCE: evidence_3,
@@ -307,7 +319,7 @@ class BelReconstitutionMixin(TestGraphMixin):
         assert_has_edge(self, casp8, akt1, graph, **{
             RELATION: ASSOCIATION,
             ANNOTATIONS: {
-                'Species': {'10116': True}
+                'Species': [Entity(namespace='text', name='10116')],
             },
             CITATION: bel_simple_citation_2,
             EVIDENCE: evidence_3,

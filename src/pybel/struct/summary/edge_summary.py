@@ -11,6 +11,7 @@ from ..graph import BELGraph
 from ...canonicalize import edge_to_bel
 from ...constants import ANNOTATIONS, RELATION
 from ...dsl import BaseEntity
+from ...language import Entity
 from ...utils import CanonicalEdge, canonicalize_edge
 
 __all__ = [
@@ -28,31 +29,30 @@ __all__ = [
 ]
 
 
-def iter_annotation_value_pairs(graph: BELGraph) -> Iterable[Tuple[str, str]]:
+def iter_annotation_value_pairs(graph: BELGraph) -> Iterable[Tuple[str, Entity]]:
     """Iterate over the key/value pairs, with duplicates, for each annotation used in a BEL graph.
 
     :param graph: A BEL graph
     """
     return (
-        (key, value)
+        (key, entity)
         for _, _, data in graph.edges(data=True)
-        if ANNOTATIONS in data
-        for key, values in data[ANNOTATIONS].items()
-        for value in values
+        for key, entities in data.get(ANNOTATIONS, {}).items()
+        for entity in entities
     )
 
 
-def iter_annotation_values(graph: BELGraph, annotation: str) -> Iterable[str]:
+def iter_annotation_values(graph: BELGraph, annotation: str) -> Iterable[Entity]:
     """Iterate over all of the values for an annotation used in the graph.
 
     :param graph: A BEL graph
     :param annotation: The annotation to grab
     """
     return (
-        value
+        entity
         for _, _, data in graph.edges(data=True)
         if edge_has_annotation(data, annotation)
-        for value in data[ANNOTATIONS][annotation]
+        for entity in data[ANNOTATIONS][annotation]
     )
 
 
@@ -68,7 +68,7 @@ def _group_dict_set(iterator):
     return dict(d)
 
 
-def get_annotation_values_by_annotation(graph: BELGraph) -> Mapping[str, Set[str]]:
+def get_annotation_values_by_annotation(graph: BELGraph) -> Mapping[str, Set[Entity]]:
     """Get the set of values for each annotation used in a BEL graph.
 
     :param graph: A BEL graph

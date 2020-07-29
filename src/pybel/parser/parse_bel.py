@@ -833,7 +833,7 @@ class BELParser(BaseParser):
         )
 
     def _get_prepared_annotations(self):
-        return self.control_parser._annotations.items()
+        return self.control_parser._annotations
 
     def _handle_relation_harness(self, line: str, position: int, tokens: Union[ParseResults, Dict]) -> ParseResults:
         """Handle BEL relations based on the policy specified on instantiation.

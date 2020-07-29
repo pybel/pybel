@@ -162,9 +162,9 @@ class TestEdgeFilters(unittest.TestCase):
             'A': {'1', '2', '3'}
         })
 
-        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_any_filter({'A': {'1'}})))
-        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_any_filter({'A': {'1', '2'}})))
-        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_any_filter({'A': {'1', '2', '3'}})))
+        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_any_filter(graph._clean_annotations({'A': {'1'}}))))
+        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_any_filter(graph._clean_annotations({'A': {'1', '2'}}))))
+        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_any_filter(graph._clean_annotations({'A': {'1', '2', '3'}}))))
 
     def test_b(self):
         self.assertTrue(_annotation_dict_all_filter(
@@ -229,32 +229,33 @@ class TestEdgeFilters(unittest.TestCase):
             'A': {'1', '2', '3'}
         })
 
-        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter({'A': {'1'}})))
-        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter({'A': {'1', '2'}})))
-        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter({'A': {'1', '2', '3'}})))
+        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter(graph._clean_annotations({'A': {'1'}}))))
+        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter(graph._clean_annotations({'A': {'1', '2'}}))))
+        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter(graph._clean_annotations({'A': {'1', '2', '3'}}))))
         self.assertEqual(0,
-                         count_passed_edge_filter(graph, build_annotation_dict_all_filter({'A': {'1', '2', '3', '4'}})))
-        self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_all_filter({'A': {'4'}})))
+                         count_passed_edge_filter(graph, build_annotation_dict_all_filter(graph._clean_annotations({'A': {'1', '2', '3', '4'}}))))
+        self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_all_filter(graph._clean_annotations({'A': {'4'}}))))
 
     def test_all_filter_dict(self):
         graph = BELGraph()
-        graph.add_edge(1, 2, annotations={
-            'A': {'1', '2', '3'}
+        a, b = Protein(namespace='hgnc', identifier='1', name='A'), Protein(namespace='hgnc', identifier='2', name='B')
+        graph.add_increases(a, b, citation=n(), evidence=n(), annotations={
+            'A': {'1', '2', '3'},
         })
 
-        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter({'A': {'1': True}})))
-        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter({
+        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter(graph._clean_annotations({'A': {'1': True}}))))
+        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter(graph._clean_annotations({
             'A': {'1': True, '2': True}
-        })))
-        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter({
+        }))))
+        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter(graph._clean_annotations({
             'A': {'1': True, '2': True, '3': True}
-        })))
-        self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_all_filter({
+        }))))
+        self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_all_filter(graph._clean_annotations({
             'A': {'1': True, '2': True, '3': True, '4': True}
-        })))
-        self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_all_filter({
+        }))))
+        self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_all_filter(graph._clean_annotations({
             'A': {'4': True}
-        })))
+        }))))
 
 
 if __name__ == '__main__':

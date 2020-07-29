@@ -3,11 +3,11 @@
 """Functions for inducing graphs based on edge annotations."""
 
 import logging
-from typing import Iterable, Mapping, Optional, Union
+from typing import Iterable, Optional, Union
 
 from .utils import get_subgraph_by_edge_filter
 from ...filters.edge_predicate_builders import build_annotation_dict_all_filter, build_annotation_dict_any_filter
-from ...graph import BELGraph
+from ...graph import AnnotationsHint, BELGraph
 from ...pipeline import transformation
 
 __all__ = [
@@ -21,13 +21,13 @@ logger = logging.getLogger(__name__)
 @transformation
 def get_subgraph_by_annotations(
     graph: BELGraph,
-    annotations: Mapping[str, Iterable[str]],
+    annotations: AnnotationsHint,
     or_: Optional[bool] = None,
 ) -> BELGraph:
     """Induce a sub-graph given an annotations filter.
 
-    :param graph: pybel.BELGraph graph: A BEL graph
-    :param dict[str,iter[str]] annotations: Annotation filters (match all with :func:`pybel.utils.subdict_matches`)
+    :param graph: A BEL graph
+    :param annotations: Annotation filters (match all with :func:`pybel.utils.subdict_matches`)
     :param or_: if True any annotation should be present, if False all annotations should be present in the
      edge. Defaults to True.
     :return: A subgraph of the original BEL graph
@@ -38,6 +38,7 @@ def get_subgraph_by_annotations(
         build_annotation_dict_all_filter
     )
 
+    annotations = graph._clean_annotations(annotations)
     return get_subgraph_by_edge_filter(graph, edge_filter_builder(annotations))
 
 

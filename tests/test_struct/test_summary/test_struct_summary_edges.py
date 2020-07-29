@@ -8,6 +8,7 @@ from collections import Counter
 from pybel import BELGraph
 from pybel.dsl import protein
 from pybel.examples import sialic_acid_graph
+from pybel.language import Entity
 from pybel.struct.summary.edge_summary import (
     count_annotations, get_annotation_values, get_annotation_values_by_annotation, get_annotations,
     get_unused_annotations, get_unused_list_annotation_values, iter_annotation_value_pairs, iter_annotation_values,
@@ -43,8 +44,8 @@ class TestEdgeSummary(unittest.TestCase):
             citation=n(),
             annotations={
                 'A': {'1', '3'},
-                'C': {'a'}
-            }
+                'C': {'a'},
+            },
         )
 
         graph.add_increases(
@@ -54,7 +55,7 @@ class TestEdgeSummary(unittest.TestCase):
             citation=n(),
         )
 
-        x = dict(Counter(iter_annotation_value_pairs(graph)))
+        x = dict(Counter((key, entity.identifier) for key, entity in iter_annotation_value_pairs(graph)))
 
         self.assertEqual({
             ('A', '1'): 2,
@@ -76,8 +77,13 @@ class TestEdgeSummary(unittest.TestCase):
     def test_get_annotation_values(self):
         """Test getting annotation values."""
         expected = {
-            'Confidence': {'High', 'Low'},
-            'Species': {'9606'}
+            'Confidence': [
+                Entity(namespace='Confidence', identifier='High'),
+                Entity(namespace='Confidence', identifier='Low'),
+            ],
+            'Species': [
+                Entity(namespace='text', identifier='9606'),
+            ],
         }
 
         self.assertEqual({'Confidence', 'Species'}, get_annotations(sialic_acid_graph))
