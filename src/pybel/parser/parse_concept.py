@@ -11,7 +11,7 @@ from pyparsing import ParseResults, Suppress
 
 from .baseparser import BaseParser
 from .constants import NamespaceTermEncodingMapping
-from .utils import quote, word
+from .utils import ns, quote
 from ..constants import DIRTY, IDENTIFIER, NAME, NAMESPACE
 from ..exceptions import (
     MissingDefaultNameWarning, MissingNamespaceNameWarning, MissingNamespaceRegexWarning, NakedNameWarning,
@@ -48,13 +48,13 @@ class ConceptParser(BaseParser):
         :param allow_naked_names: If true, turn off naked namespace failures
         """
         self.identifier_fqualified = (
-            word(NAMESPACE)
+            ns(NAMESPACE)
             + Suppress(':')
-            + (word | quote)(IDENTIFIER)
+            + (ns | quote)(IDENTIFIER)
             + Suppress('!')
-            + (word | quote)(NAME)
+            + (ns | quote)(NAME)
         )
-        self.identifier_qualified = word(NAMESPACE) + Suppress(':') + (word | quote)(NAME)
+        self.identifier_qualified = ns(NAMESPACE) + Suppress(':') + (ns | quote)(NAME)
 
         if namespace_to_term_to_encoding is not None:
             self.namespace_to_name_to_encoding = defaultdict(dict)
@@ -81,7 +81,7 @@ class ConceptParser(BaseParser):
         self.default_namespace = set(default_namespace) if default_namespace is not None else None
         self.allow_naked_names = allow_naked_names
 
-        self.identifier_bare = (word | quote)(NAME)
+        self.identifier_bare = (ns | quote)(NAME)
         self.identifier_bare.setParseAction(
             self.handle_namespace_default if self.default_namespace else
             self.handle_namespace_lenient if self.allow_naked_names else
