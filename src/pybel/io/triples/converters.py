@@ -2,6 +2,7 @@
 
 """TSV converter classes."""
 
+import warnings
 from abc import ABC, abstractmethod
 from typing import Dict, Tuple
 
@@ -17,16 +18,9 @@ from ...dsl import (
 from ...typing import EdgeData
 
 
-def _safe_label(u: BaseEntity):
-    if isinstance(u, CentralDogma) and u.variants:
-        return u.as_bel()
-
-    try:
-        curie = u.curie
-    except AttributeError:
-        return u.as_bel()
-    else:
-        return curie
+def _safe_label(base_entity: BaseEntity):
+    warnings.warn('Use BaseEntity.safe_label', DeprecationWarning)
+    return base_entity.safe_label
 
 
 class Converter(ABC):
@@ -49,7 +43,7 @@ class SimpleConverter(Converter):
     @classmethod
     def convert(cls, u: BaseAbundance, v: BaseAbundance, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
         """Convert a BEL edge."""
-        return _safe_label(u), edge_data[RELATION], _safe_label(v)
+        return u.safe_label, edge_data[RELATION], v.safe_label
 
 
 class TypedConverter(Converter):
@@ -60,7 +54,7 @@ class TypedConverter(Converter):
     @classmethod
     def convert(cls, u: BaseAbundance, v: BaseAbundance, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
         """Convert a BEL edge."""
-        return _safe_label(u), cls.target_relation, _safe_label(v)
+        return u.safe_label, cls.target_relation, v.safe_label
 
 
 class SimplePredicate(Converter):
@@ -255,7 +249,7 @@ class AssociationConverter(Converter):
     def convert(u: BaseAbundance, v: BaseAbundance, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
         """Convert a BEL edge."""
         relation = edge_data.get('association_type', ASSOCIATION)  # allow more specific association to be defined
-        return _safe_label(u), relation, _safe_label(v)
+        return u.safe_label, relation, v.safe_label
 
 
 class DrugEffectConverter(SimpleConverter, SimpleTypedPredicate):
@@ -461,9 +455,9 @@ class TranscriptionFactorForConverter(Converter):
         """Convert a transcription factor for edge."""
         gene = v.get_gene()
         if gene == u.members[0]:
-            return _safe_label(u.members[1]), edge_data[RELATION], _safe_label(v)
+            return u.members[1].safe_label, edge_data[RELATION], v.safe_label
         else:
-            return _safe_label(u.members[0]), edge_data[RELATION], _safe_label(v)
+            return u.members[0].safe_label, edge_data[RELATION], v.safe_label
 
     @classmethod
     def predicate(cls, u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> bool:
@@ -501,8 +495,8 @@ class BindsProteinConverter(Converter):
     @staticmethod
     def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
         """Convert a binds protein factor for edge."""
-        g = [m for m in v.members if m != u][0]
-        return _safe_label(u), 'bindsToProtein', _safe_label(g)
+        v = [m for m in v.members if m != u][0]
+        return u.safe_label, 'bindsToProtein', v.safe_label
 
 
 class HomomultimerConverter(Converter):
@@ -521,7 +515,7 @@ class HomomultimerConverter(Converter):
     @staticmethod
     def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
         """Convert a homomultimer formation."""
-        return _safe_label(u), 'bindsToProtein', _safe_label(u)
+        return u.safe_label, 'bindsToProtein', u.safe_label
 
 
 class BindsGeneConverter(Converter):
@@ -542,8 +536,8 @@ class BindsGeneConverter(Converter):
     @staticmethod
     def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
         """Convert a transcription factor for edge."""
-        g = [m for m in v.members if m != u][0]
-        return _safe_label(u), 'bindsToGene', _safe_label(g)
+        v = [m for m in v.members if m != u][0]
+        return u.safe_label, 'bindsToGene', v.safe_label
 
 
 class ProteinRegulatesComplex(Converter):
@@ -573,4 +567,4 @@ class ProteinRegulatesComplex(Converter):
         else:
             raise ValueError('invalid relation type')
 
-        return _safe_label(u), relation, _safe_label(v)
+        return u.safe_label, relation, v.safe_label

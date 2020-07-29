@@ -115,6 +115,15 @@ class BaseEntity(dict, metaclass=ABCMeta):
     def __str__(self):  # noqa: D105
         return self.as_bel()
 
+    @property
+    def safe_label(self) -> str:
+        """Get the safe label for the node (name or BEL)."""
+        if isinstance(self, CentralDogma) and self.variants:
+            return self.as_bel()
+        if isinstance(self, BaseConcept):
+            return self.curie
+        return self.as_bel()
+
 
 class BaseConcept(dict):
     """A dictionary containing a concept entry."""
