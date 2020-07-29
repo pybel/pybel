@@ -7,11 +7,11 @@ import re
 from collections import defaultdict
 from typing import Mapping, Optional, Pattern, Set
 
-from pyparsing import ParseResults, Suppress, Word, alphanums
+from pyparsing import ParseResults, Suppress
 
 from .baseparser import BaseParser
 from .constants import NamespaceTermEncodingMapping
-from .utils import quote
+from .utils import ns, quote
 from ..constants import DIRTY, IDENTIFIER, NAME, NAMESPACE
 from ..exceptions import (
     MissingDefaultNameWarning, MissingNamespaceNameWarning, MissingNamespaceRegexWarning, NakedNameWarning,
@@ -23,8 +23,6 @@ __all__ = [
 ]
 
 logger = logging.getLogger(__name__)
-
-ns = Word(alphanums + '_-.')
 
 
 class ConceptParser(BaseParser):
