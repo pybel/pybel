@@ -6,11 +6,11 @@ import logging
 import re
 from typing import Mapping, Optional, Pattern, Set
 
-from pyparsing import And, MatchFirst, ParseResults, Suppress, Word, pyparsing_common as ppc
+from pyparsing import And, MatchFirst, ParseResults, Suppress, Word
 
 from .baseparser import BaseParser
 from .constants import NamespaceTermEncodingMapping
-from .utils import delimited_quoted_list, qid, quote, word
+from .utils import delimited_quoted_list, ns, qid, quote, word
 from ..constants import (
     BEL_KEYWORD_ANNOTATION, BEL_KEYWORD_AS, BEL_KEYWORD_DEFINE, BEL_KEYWORD_DOCUMENT, BEL_KEYWORD_LIST,
     BEL_KEYWORD_NAMESPACE, BEL_KEYWORD_PATTERN, BEL_KEYWORD_SET, BEL_KEYWORD_URL, DOCUMENT_KEYS, METADATA_VERSION,
@@ -117,11 +117,11 @@ class MetadataParser(BaseParser):
             qid('value'),
         ])
 
-        namespace_tag = And([define_tag, Suppress(BEL_KEYWORD_NAMESPACE), ppc.identifier('name'), as_tag])
+        namespace_tag = And([define_tag, Suppress(BEL_KEYWORD_NAMESPACE), ns('name'), as_tag])
         self.namespace_url = And([namespace_tag, url_tag, quote('url')])
         self.namespace_pattern = And([namespace_tag, Suppress(BEL_KEYWORD_PATTERN), quote('value')])
 
-        annotation_tag = And([define_tag, Suppress(BEL_KEYWORD_ANNOTATION), ppc.identifier('name'), as_tag])
+        annotation_tag = And([define_tag, Suppress(BEL_KEYWORD_ANNOTATION), ns('name'), as_tag])
         self.annotation_url = And([annotation_tag, url_tag, quote('url')])
         self.annotation_list = And([annotation_tag, list_tag, delimited_quoted_list('values')])
         self.annotation_pattern = And([annotation_tag, Suppress(BEL_KEYWORD_PATTERN), quote('value')])

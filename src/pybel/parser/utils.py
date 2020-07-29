@@ -37,6 +37,7 @@ LP = Suppress('(') + W
 RP = W + Suppress(')')
 
 word = Word(alphanums)
+ns = Word(alphanums + '_-.')
 identifier = Word(alphanums + '_')
 quote = dblQuotedString().setParseAction(removeQuotes)
 qid = quote | identifier
