@@ -19,12 +19,12 @@ from ..canonicalize import edge_to_bel
 from ..constants import (
     ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_TYPE_PUBMED, CORRELATION,
     DECREASES, DEGRADATION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE, FROM_LOC,
-    GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN,
-    GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, IDENTIFIER, INCREASES,
-    IS_A, LOCATION, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER,
-    METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, MODIFIER, NAMESPACE, NEGATIVE_CORRELATION, NO_CORRELATION,
-    ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, REGULATES, RELATION, SOURCE_MODIFIER, TARGET_MODIFIER, TO_LOC,
-    TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION,
+    GRAPH_ANNOTATION_CURIE, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_MIRIAM, GRAPH_ANNOTATION_PATTERN,
+    GRAPH_ANNOTATION_URL, GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION,
+    HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, IDENTIFIER, INCREASES, IS_A, LOCATION, METADATA_AUTHORS, METADATA_CONTACT,
+    METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION,
+    MODIFIER, NAMESPACE, NEGATIVE_CORRELATION, NO_CORRELATION, ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, REGULATES,
+    RELATION, SOURCE_MODIFIER, TARGET_MODIFIER, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION,
 )
 from ..dsl import (
     BaseAbundance, BaseConcept, BaseEntity, CentralDogma, ComplexAbundance, Gene, ListAbundance, MicroRna, Protein,
@@ -87,6 +87,9 @@ class BELGraph(nx.MultiDiGraph):
         self.graph[GRAPH_ANNOTATION_URL] = {}
         self.graph[GRAPH_ANNOTATION_PATTERN] = {}
         self.graph[GRAPH_ANNOTATION_LIST] = defaultdict(set)
+
+        self.graph[GRAPH_ANNOTATION_CURIE] = set()
+        self.graph[GRAPH_ANNOTATION_MIRIAM] = set()
 
         if name:
             self.name = name
@@ -317,6 +320,16 @@ class BELGraph(nx.MultiDiGraph):
         return self.graph[GRAPH_ANNOTATION_URL]
 
     @property
+    def annotation_miriam(self) -> Set[str]:  # noqa: D401
+        """The set of annotations defined by MIRIAM."""
+        return self.graph[GRAPH_ANNOTATION_MIRIAM]
+
+    @property
+    def annotation_curie(self) -> Set[str]:  # noqa: D401
+        """The set of annotations defined by CURIE."""
+        return self.graph[GRAPH_ANNOTATION_CURIE]
+
+    @property
     def annotation_pattern(self) -> Dict[str, str]:  # noqa: D401
         """The mapping from the annotation keywords used to create this graph to their regex patterns as strings.
 
@@ -501,8 +514,8 @@ class BELGraph(nx.MultiDiGraph):
         )
         return self._help_add_edge(source=source, target=target, attr=attr)
 
-    @staticmethod
     def _build_attr(
+        self,
         relation: str,
         evidence: str,
         citation: Union[str, Tuple[str, str], CitationDict],
@@ -518,7 +531,7 @@ class BELGraph(nx.MultiDiGraph):
         })
 
         if annotations:  # clean up annotations
-            attr[ANNOTATIONS] = _clean_annotations(annotations)
+            attr[ANNOTATIONS] = self._clean_annotations(annotations)
 
         if source_modifier:
             attr[SOURCE_MODIFIER] = _handle_modifier(source_modifier)
@@ -868,17 +881,57 @@ class BELGraph(nx.MultiDiGraph):
         from ..grounding import ground
         return ground(self, **kwargs)
 
+    def _clean_annotations(self, annotations_dict: AnnotationsHint) -> AnnotationsDict:
+        """Fix the formatting of annotation dict.
 
-def _clean_annotations(annotations_dict: AnnotationsHint) -> AnnotationsDict:
-    """Fix the formatting of annotation dict."""
-    return {
-        key: (
-            values if isinstance(values, dict) else
-            {v: True for v in values} if isinstance(values, set) else
-            {values: True}
-        )
-        for key, values in annotations_dict.items()
-    }
+        .. seealso:: https://github.com/vtoure/bep/blob/master/docs/published/BEP-0013.md
+
+        Scenarios:
+
+        1. ``DEFINE ANNOTATION CellLine AS URL "..."``
+           ``SET CellLine = "NIH-3T3 cell"``
+           ``{'CellLine': dict(namespace='text', identifier=None, name='NIH-3T3 cell')}``
+        2. ``DEFINE ANNOTATION CellLine AS CURIE``
+           ``SET CellLine = "bto:0000944 ! NIH-3T3 cell"``
+           ``{'CellLine': dict(namespace='bto', identifier='0000944', name='NIH-3T3 cell')}``
+        3. ``DEFINE ANNOTATION ECO AS MIRIAM``
+           ``SET ECO = "0007682 ! reporter gene assay evidence used in manual assertion"``
+           ``{'ECO': dict(namespace='ECO', identifier='0007682', name='reporter gene assay...')}``
+        """
+        return {key: self._clean_value(key, values) for key, values in annotations_dict.items()}
+
+    def _clean_value(self, key, values) -> List[Entity]:
+        if key in self.annotation_miriam:  # this annotation was given by a lookup
+            return self._clean_value_helper(key=key, namespace=key, values=values)
+        if key in self.annotation_curie:
+            raise NotImplementedError
+        # if key in self.annotation_url:  # this is a name given
+        return self._clean_value_helper(key=key, namespace='text', values=values)
+
+    @staticmethod
+    def _clean_value_helper(key, namespace, values):
+        if isinstance(values, str):
+            return [
+                Entity(namespace=namespace, identifier=values),
+            ]
+        if isinstance(values, (list, set)):
+            if all(isinstance(v, str) for v in values):
+                return [
+                    Entity(namespace=namespace, identifier=identifier)
+                    for identifier in values
+                ]
+            elif all(isinstance(v, Entity) for v in values):
+                return values
+            else:
+                raise TypeError(f'list of wrong format for key {key}: {values}')
+        if isinstance(values, dict):
+            if all(isinstance(v, bool) for v in values.values()):
+                return [
+                    Entity(namespace=namespace, identifier=name)
+                    for name in values.values()
+                ]
+            raise TypeError(f'dictionary of wrong format for key {key}: {values}')
+        raise TypeError(f'values of wrong data type for key {key}: {values}')
 
 
 def _handle_modifier(side_data: Dict[str, Any]) -> Mapping[str, Any]:

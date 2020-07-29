@@ -13,8 +13,8 @@ from networkx.utils import open_file
 
 from .utils import ensure_version
 from ..constants import (
-    CITATION, FUSION, GRAPH_ANNOTATION_LIST, MEMBERS, PARTNER_3P, PARTNER_5P, PRODUCTS, REACTANTS, SOURCE_MODIFIER,
-    TARGET_MODIFIER,
+    CITATION, FUSION, GRAPH_ANNOTATION_CURIE, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_MIRIAM, MEMBERS, PARTNER_3P,
+    PARTNER_5P, PRODUCTS, REACTANTS, SOURCE_MODIFIER, TARGET_MODIFIER,
 )
 from ..dsl import BaseEntity
 from ..language import CitationDict
@@ -44,13 +44,20 @@ def to_nodelink(graph: BELGraph) -> Mapping[str, Any]:
     """
     graph_json_dict = _to_nodelink_json_helper(graph)
 
-    # Convert annotation list definitions (which are sets) to canonicalized/sorted lists
-    graph_json_dict['graph'][GRAPH_ANNOTATION_LIST] = {
-        keyword: list(sorted(values))
-        for keyword, values in graph_json_dict['graph'].get(GRAPH_ANNOTATION_LIST, {}).items()
-    }
+    _prepare_graph_dict(graph_json_dict['graph'])
 
     return graph_json_dict
+
+
+def _prepare_graph_dict(g):
+    # Convert annotation list definitions (which are sets) to canonicalized/sorted lists
+    g[GRAPH_ANNOTATION_LIST] = {
+        keyword: list(sorted(values))
+        for keyword, values in g.get(GRAPH_ANNOTATION_LIST, {}).items()
+    }
+
+    g[GRAPH_ANNOTATION_CURIE] = list(sorted(g[GRAPH_ANNOTATION_CURIE]))
+    g[GRAPH_ANNOTATION_MIRIAM] = list(sorted(g[GRAPH_ANNOTATION_MIRIAM]))
 
 
 @open_file(1, mode='w')
@@ -148,11 +155,13 @@ def _augment_node(node: BaseEntity) -> BaseEntity:
     return rv
 
 
-def _fix_annotation_list(graph: BELGraph):
+def _recover_graph_dict(graph: BELGraph):
     graph.graph[GRAPH_ANNOTATION_LIST] = {
         keyword: set(values)
         for keyword, values in graph.graph.get(GRAPH_ANNOTATION_LIST, {}).items()
     }
+    graph.graph[GRAPH_ANNOTATION_CURIE] = set(graph.graph.get(GRAPH_ANNOTATION_CURIE, []))
+    graph.graph[GRAPH_ANNOTATION_MIRIAM] = set(graph.graph.get(GRAPH_ANNOTATION_MIRIAM, []))
 
 
 def _from_nodelink_json_helper(data: Mapping[str, Any]) -> BELGraph:
@@ -162,7 +171,7 @@ def _from_nodelink_json_helper(data: Mapping[str, Any]) -> BELGraph:
     """
     graph = BELGraph()
     graph.graph = data.get('graph', {})
-    _fix_annotation_list(graph)
+    _recover_graph_dict(graph)
 
     mapping = []
 
