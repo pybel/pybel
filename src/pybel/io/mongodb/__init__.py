@@ -78,51 +78,46 @@ def find_nodes(
     if variants:
         filter_['variants'] = variants
 
-    return collection.find(filter_)
+    return list(collection.find(filter_))
 
 
-def get_edges(
+def get_edges_from_node(collection: Collection, node: Mapping[str, Any]) -> List[Mapping[str, Any]]:
+    """Return all the edges for the given node.
+
+    :param collection: A MongoDB collection within a database where a PyBEL graph has been stored
+    :param node: The node whose edges should be returned
+    :return: A list of the edges pointing to or from the given node
+    """
+    if not is_valid_node(node):
+        raise ValueError("Invalid node ", node)
+    # Remove the _id and type properties from the node (since they won't be included in the edge source/target information)
+    n = copy.deepcopy(node)
+    del n['_id'], n['type']
+    # Find all the links where either the source or the target is node n
+    filter_ = {'type': 'link', '$or': [{'source': n}, {'target': n}]}
+    return list(collection.find(filter_))
+
+
+def get_edges_from_criteria(
     collection: Collection,
-    node: Mapping[str, Any] = None,
     node_name: str = None,
     node_identifier: str = None,
     node_variants: List[pybel.dsl.EntityVariant] = None,
 ) -> List[Tuple[Mapping[str, Any], List[Mapping[str, Any]]]]:
-    """
-    Get all the edges for nodes that match the given criteria and return in a list of tuples.
-
-    Either a specific node or criteria (name, identifier, variants) that a desired node matches can be passed to this function. If a specific node is passed,
-    the function will find all the edges for that node; if not, the function will find all nodes that match the criteria and and find all edges for those matching nodes.
+    """Get all the edges for nodes that match the given criteria and return in a list of tuples.
 
     :param collection: A MongoDB collection within a database where a PyBEL graph has been stored
-    :param node: The node whose edges should be found.
     :param name: The name of the desired node
     :param identifier: The identifier of the desired node
     :param variants: A list of variants that the desired node should contain. Note: nodes that contain the variants in addition to specified variants will be matched.
-    :return: A list of tuples. The first element of each tuple is the node, and the second element is a list of all the edges for that node.
+    :return: A list of tuples. The first element of each tuple is the node, and the second element is a list of the edges.
     """
-    if not (node or node_name or node_identifier):
-        raise ValueError("Either a specific node, 'node_name', or 'node_identifier' is required to get edges.")
-    matching_nodes = []
-    # If the `node` parameter is None or is an invalid node
-    if not node or not is_valid_node(node):
-        # If a node was present, TODO: log that an invalid node was passed
-        if node:
-            pass
-        # Otherwise, no node was passed, so find all the nodes that match the given criteria
-        matching_nodes = find_nodes(collection, name=node_name, identifier=node_identifier, variants=node_variants)
-    # If a valid node was passed
-    else:
-        # Search only for that node in the graph
-        matching_nodes = [node]
-
+    if not (node_name or node_identifier):
+        raise ValueError("Either a name or an identifier is required to get edges.")
+    matching_nodes = find_nodes(collection, name=node_name, identifier=node_identifier, variants=node_variants)
     edges = []
     for node in matching_nodes:
-        # Remove the _id and type properties from the node (since they won't be included in the edge source/target information)
-        n = copy.deepcopy(node)
-        del n['_id'], n['type']
-        # Find all the links where either the source or the target is node n
-        filter_ = {'type': 'link', '$or': [{'source': n}, {'target': n}]}
-        # Append (node n, [edge1, edge2...]) to edges
-        edges.append((n, list(collection.find(filter_))))
+        matching_edges = get_edges_from_node(collection, node)
+        # Append (node, [edge1, edge2...]) to edges
+        edges.append((node, matching_edges))
     return edges
