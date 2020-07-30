@@ -4,8 +4,8 @@
 import copy
 from typing import Any, List, Mapping, Tuple
 
-from pymongo.collection import Collection
 import pymongo
+from pymongo.collection import Collection
 
 import pybel
 from pybel.schema import is_valid_edge, is_valid_node
