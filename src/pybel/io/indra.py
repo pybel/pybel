@@ -33,10 +33,14 @@ After assembling a model with `INDRA <https://github.com/sorgerlab/indra>`_, a l
 """
 
 import json
-from pickle import load
 from typing import Any, List, Mapping, Optional, TextIO, Union
 
 from networkx.utils import open_file
+
+try:
+    from pickle5 import load
+except ImportError:
+    from pickle import load
 
 __all__ = [
     'from_indra_statements',

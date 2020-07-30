@@ -2,13 +2,17 @@
 
 """Conversion functions for BEL graphs with bytes and Python pickles."""
 
-from pickle import HIGHEST_PROTOCOL, dumps, loads
 from typing import BinaryIO, Union
 
 import networkx as nx
 
 from .utils import raise_for_not_bel, raise_for_old_graph
 from ..struct.graph import BELGraph
+
+try:
+    from pickle5 import HIGHEST_PROTOCOL, dumps, loads
+except ImportError:
+    from pickle import HIGHEST_PROTOCOL, dumps, loads
 
 __all__ = [
     'to_bytes',
