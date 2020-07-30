@@ -9,7 +9,7 @@ import unittest
 import pymongo
 from pymongo.collection import Collection
 
-from pybel import BELGraph
+from pybel import BELGraph, to_nodelink
 from pybel.dsl import Entity, ComplexAbundance, Gene, Protein, Rna
 from pybel.io.mongodb import (
     _entity_to_dict, to_mongodb,
@@ -39,14 +39,18 @@ class TestMongoDB(unittest.TestCase):
     """Tests for the MongoDB exporting and querying."""
     def setUp(self):
         """Create and export a test graph."""
-        graph = BELGraph()
-        graph.add_increases(ca, r2, citation=n(), evidence=n())
-        graph.add_increases(p2, p3, citation=n(), evidence=n())
-        graph.add_decreases(p3, p1, citation=n(), evidence=n())
-        self.collection = to_mongodb(graph, TEST_DB.name, TEST_COLLECTION.name)
+        self.graph = BELGraph()
+        self.graph.add_increases(ca, r2, citation=n(), evidence=n())
+        self.graph.add_increases(p2, p3, citation=n(), evidence=n())
+        self.graph.add_decreases(p3, p1, citation=n(), evidence=n())
+        self.links = to_nodelink(self.graph)['links']
+        self.collection = to_mongodb(self.graph, TEST_DB.name, TEST_COLLECTION.name)
 
-    def _assert_node(self, node: Mapping[str, Any], assert_fn) -> None:
+    def assert_node(self, node: Mapping[str, Any], assert_in=True) -> None:
         """Assert that the given node is present or not present in the MongoDB collection."""
+        assert_fn = self.assertEqual
+        if not assert_in:
+            assert_fn = self.assertNotEqual
         # Convert the node to a dict so it can be matched against entries in the MongoDB
         node_dict = _entity_to_dict(node)
         match = self.collection.find_one(node_dict)
@@ -60,23 +64,34 @@ class TestMongoDB(unittest.TestCase):
             # And check that the two nodes are equal
             assert_fn(node_dict, match)
 
-    def assert_node_in(self, node: Mapping[str, Any]) -> None:
-        """Assert that the given node is present in the MongoDB collection."""
-        self._assert_node(node, self.assertEqual)
-
-    def assert_node_not_in(self, node: Mapping[str, Any]) -> None:
-        """Assert that the given node is present in the MongoDB collection."""
-        self._assert_node(node, self.assertNotEqual)
+    def assert_edge(self, edge: dict, assert_in=True) -> None:
+        """Assert that the given edge is or isn't present in the Mongo collection."""
+        assert_fn = self.assertEqual
+        if not assert_in:
+            assert_fn = self.assertNotEqual
+        if type(edge) is not dict:
+            raise ValueError('Expeced type(edge) to be dict. Insead found: ', type(edge))
+        # Query the collection for the given edge
+        match = self.collection.find_one(edge)
+        if match is not None:
+            # If a match was found, delete the _id and type keys
+            del match['_id'], match['type']
+        # Assert that the given edge and match are or are not equal (based on assert_in param)
+        assert_fn(edge, match)
 
     def test_export(self):
         """Test that the to_mongodb export function operates as expeced."""
-        self.assert_node_in(ca)
-        self.assert_node_in(r2)
-        self.assert_node_in(p2)
-        self.assert_node_in(p3)
-
-        self.assert_node_not_in(g1)
-        self.assert_node_not_in(r1)
+        # Assert that all nodes in self.graph are in self.collection
+        self.assert_node(ca)
+        self.assert_node(r2)
+        self.assert_node(p2)
+        self.assert_node(p3)
+        # Assert that the two nodes not in self.graph are not in self.collection
+        self.assert_node(g1, assert_in=False)
+        self.assert_node(r1, assert_in=False)
+        # Assert that every edge from self.graph is in self.collection
+        for link in self.links:
+            self.assert_edge(link)
 
 
 if __name__ == '__main__':
