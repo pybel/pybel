@@ -10,8 +10,34 @@ from pymongo.collection import Collection
 import pybel
 from pybel.schema import is_valid_edge, is_valid_node
 
+__all__ = [
+    '_entity_to_dict',
+    'to_mongodb',
+    'find_nodes',
+    'get_edges_from_node',
+    'get_edges_from_criteria'
+]
 
 client = pymongo.MongoClient()
+
+
+def _handle_member(elem):
+    """Convert a member element from a complex or composite to a dictionary."""
+    # Convert each member element to a dictionary
+    new_elem = dict(elem)
+    # Remove the 'bel' and 'id' properties (which occur seemingly at random)
+    for prop in ('bel', 'id'):
+        if prop in new_elem.keys():
+            del new_elem[prop]
+    return new_elem
+
+
+def _entity_to_dict(entity: pybel.dsl.Entity) -> Mapping[str, Any]:
+    """Input a pybel Entity and return a dict representing it."""
+    new_node = dict(entity)
+    if new_node['function'] in ['Complex', 'Composite']:
+        new_node['members'] = list(map(_handle_member, new_node['members']))
+    return new_node
 
 
 def to_mongodb(graph: pybel.BELGraph, db_name: str, collection_name: str) -> Collection:
@@ -37,6 +63,7 @@ def to_mongodb(graph: pybel.BELGraph, db_name: str, collection_name: str) -> Col
             pass
         # Add a 'type' parameter to avoid confusing nodes and links
         n = copy.deepcopy(node)
+        n = _entity_to_dict(n)
         n['type'] = 'node'
         collection.insert_one(n)
 
@@ -92,6 +119,8 @@ def get_edges_from_node(collection: Collection, node: Mapping[str, Any]) -> List
         raise ValueError("Invalid node ", node)
     # Remove the _id and type properties from the node (since they won't be included in the edge source/target information)
     n = copy.deepcopy(node)
+    # Convert the pybel node to a dict so it can be matched against entries in the MongoDB
+    n = _entity_to_dict(n)
     del n['_id'], n['type']
     # Find all the links where either the source or the target is node n
     filter_ = {'type': 'link', '$or': [{'source': n}, {'target': n}]}
