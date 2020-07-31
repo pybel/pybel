@@ -12,7 +12,7 @@ from .io.cx import from_cx, from_cx_file, from_cx_gz, from_cx_jsons, to_cx, to_c
 from .io.emmaa import from_emmaa
 from .io.extras import to_csv, to_gsea, to_sif
 from .io.fraunhofer_orientdb import from_fraunhofer_orientdb
-from .io.gpickle import from_bytes, from_pickle, to_bytes, to_pickle
+from .io.gpickle import from_bytes, from_pickle, from_pickle_gz, to_bytes, to_pickle, to_pickle_gz
 from .io.graphdati import (
     from_graphdati, from_graphdati_file, from_graphdati_gz, from_graphdati_jsons, to_graphdati, to_graphdati_file,
     to_graphdati_gz, to_graphdati_jsonl, to_graphdati_jsonl_gz, to_graphdati_jsons,
