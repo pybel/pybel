@@ -12,7 +12,9 @@ from pymongo.collection import Collection
 from pybel import BELGraph, to_nodelink
 from pybel.dsl import Entity, ComplexAbundance, Gene, Protein, Rna
 from pybel.io.mongodb import (
-    _entity_to_dict, to_mongodb,
+    _entity_to_dict, 
+    to_mongodb,
+    find_nodes,
     get_edges_from_node,
     get_edges_from_criteria
 )
@@ -27,7 +29,7 @@ p2 = Protein('hgnc', '2')
 g3 = Gene('hgnc', '3')
 p3 = Protein('hgnc', '3')
 
-ca = ComplexAbundance([p1, g2], name='ca')
+ca = ComplexAbundance([p1, g2], name='ca', namespace='hgnc')
 
 client = pymongo.MongoClient()
 TEST_DB = client['test_db']
@@ -82,16 +84,36 @@ class TestMongoDB(unittest.TestCase):
     def test_export(self):
         """Test that the to_mongodb export function operates as expeced."""
         # Assert that all nodes in self.graph are in self.collection
-        self.assert_node(ca)
-        self.assert_node(r2)
-        self.assert_node(p2)
-        self.assert_node(p3)
+        for node in self.graph:
+            self.assert_node(node)
         # Assert that the two nodes not in self.graph are not in self.collection
         self.assert_node(g1, assert_in=False)
         self.assert_node(r1, assert_in=False)
         # Assert that every edge from self.graph is in self.collection
         for link in self.links:
             self.assert_edge(link)
+
+    def test_query_nodes(self):
+        """Test that the find_nodes() function correctly finds the desired nodes."""
+        for node in self.graph:
+            # Convert the node to a dict
+            n = _entity_to_dict(node)
+            # Get the concept entry (where the name / identifier are stored)
+            concept = n['concept']
+            name, identifier, variants = None, None, None
+            # Query based on name, identifier, variants if they are present
+            if 'name' in concept.keys():
+                name = concept['name']
+            if 'identifier' in concept.keys():
+                identifier = concept['identifier']
+            if 'variants' in n.keys():
+                variants = n['variants']
+
+            matches = find_nodes(self.collection, name=name, identifier=identifier, variants=variants)
+            for match in matches:
+                del match['_id'], match['type']
+
+            self.assertIn(n, matches)
 
 
 if __name__ == '__main__':
