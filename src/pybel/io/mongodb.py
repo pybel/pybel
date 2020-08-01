@@ -12,6 +12,7 @@ from pybel.schema import is_valid_edge, is_valid_node
 
 __all__ = [
     '_entity_to_dict',
+    '_rm_mongo_keys',
     'to_mongodb',
     'find_nodes',
     'get_edges_from_node',
@@ -38,7 +39,11 @@ def _entity_to_dict(entity: pybel.dsl.Entity) -> Mapping[str, Any]:
     return new_node
 
 
-def to_mongodb(graph: pybel.BELGraph, db_name: str, collection_name: str, client: Optional[pymongo.MongoClient] = None) -> Collection:
+def to_mongodb(
+    graph: pybel.BELGraph,
+    db_name: str, collection_name: str,
+    client: Optional[pymongo.MongoClient] = None
+) -> Collection:
     """Export the given BELGraph to a MongoDB.
 
     In order to use this function, MongoDB must already be running locally.
@@ -92,7 +97,8 @@ def find_nodes(
     :param collection: A MongoDB collection within a database where a PyBEL graph has been stored
     :param name: The name of the desired node
     :param identifier: The identifier of the desired node
-    :param variants: A list of variants that the desired node should contain. Note: nodes that contain the variants in addition to specified variants will be matched.
+    :param variants: A list of variants that the desired node should contain.
+     Note: nodes that contain the variants in addition to specified variants will be matched.
     :return: A list containing all the nodes that match the given criteria
     """
     if not (name or identifier):
@@ -108,6 +114,17 @@ def find_nodes(
     return list(collection.find(filter_))
 
 
+def _rm_mongo_keys(self, *items: dict):
+    """Remove any dictionary keys used for internal MongoDB identification from the items.
+
+    Note: each item should be a dictionary representing a node or an edge from a MongoDB collection.
+    """
+    for item in items:
+        for prop in ('_id', 'type'):
+            if prop in item.keys():
+                del item[prop]
+
+
 def get_edges_from_node(collection: Collection, node: Mapping[str, Any]) -> List[Mapping[str, Any]]:
     """Return all the edges for the given node.
 
@@ -121,7 +138,7 @@ def get_edges_from_node(collection: Collection, node: Mapping[str, Any]) -> List
     n = copy.deepcopy(node)
     # Convert the pybel node to a dict so it can be matched against entries in the MongoDB
     n = _entity_to_dict(n)
-    del n['_id'], n['type']
+    _rm_mongo_keys(n)
     # Find all the links where either the source or the target is node n
     filter_ = {'type': 'link', '$or': [{'source': n}, {'target': n}]}
     return list(collection.find(filter_))
@@ -131,14 +148,15 @@ def get_edges_from_criteria(
     collection: Collection,
     node_name: str = None,
     node_identifier: str = None,
-    node_variants: List[pybel.dsl.EntityVariant] = None,
+    node_variants: List[pybel.dsl.Variant] = None,
 ) -> List[Tuple[Mapping[str, Any], List[Mapping[str, Any]]]]:
     """Get all the edges for nodes that match the given criteria and return in a list of tuples.
 
     :param collection: A MongoDB collection within a database where a PyBEL graph has been stored
     :param name: The name of the desired node
     :param identifier: The identifier of the desired node
-    :param variants: A list of variants that the desired node should contain. Note: nodes that contain the variants in addition to specified variants will be matched.
+    :param variants: A list of variants that the desired node should contain.
+     Note: nodes that contain the variants in addition to specified variants will be matched.
     :return: A list of tuples. The first element of each tuple is the node, and the second element is a list of the edges.
     """
     if not (node_name or node_identifier):
