@@ -8,11 +8,12 @@ import unittest
 
 import pymongo
 from pymongo.collection import Collection
+from pymongo.errors import ConnectionFailure
 
 from pybel import BELGraph, to_nodelink
 from pybel.dsl import Entity, ComplexAbundance, Gene, Protein, Rna
 from pybel.io.mongodb import (
-    _entity_to_dict, 
+    _entity_to_dict,
     to_mongodb,
     find_nodes,
     get_edges_from_node,
@@ -31,22 +32,31 @@ p3 = Protein('hgnc', '3')
 
 ca = ComplexAbundance([p1, g2], name='ca', namespace='hgnc')
 
-client = pymongo.MongoClient()
-TEST_DB = client['test_db']
-TEST_COLLECTION = TEST_DB['test_collection']
-TEST_COLLECTION.drop()
-
 
 class TestMongoDB(unittest.TestCase):
     """Tests for the MongoDB exporting and querying."""
     def setUp(self):
-        """Create and export a test graph."""
-        self.graph = BELGraph()
-        self.graph.add_increases(ca, r2, citation=n(), evidence=n())
-        self.graph.add_increases(p2, p3, citation=n(), evidence=n())
-        self.graph.add_decreases(p3, p1, citation=n(), evidence=n())
-        self.links = to_nodelink(self.graph)['links']
-        self.collection = to_mongodb(self.graph, TEST_DB.name, TEST_COLLECTION.name)
+        """Set up MongoDB and create/export a test graph."""
+        client = pymongo.MongoClient()
+        # Check if there was an error connecting to MongoDB
+        try:
+            # The ismaster command is cheap and does not require auth.
+            client.admin.command('ismaster')
+            # Set up the test mongo database and collection
+            TEST_DB = client['test_db']
+            TEST_COLLECTION = TEST_DB['test_collection']
+            TEST_COLLECTION.drop()
+            # Create the graph
+            self.graph = BELGraph()
+            self.graph.add_increases(ca, r2, citation=n(), evidence=n())
+            self.graph.add_increases(p2, p3, citation=n(), evidence=n())
+            self.graph.add_decreases(p3, p1, citation=n(), evidence=n())
+            self.links = to_nodelink(self.graph)['links']
+            # Export it to mongo
+            self.collection = to_mongodb(self.graph, TEST_DB.name, TEST_COLLECTION.name)
+
+        except ConnectionFailure:
+            self.skipTest("Error connecting to a MongoDB server, skipping test.")
 
     def assert_node(self, node: Mapping[str, Any], assert_in=True) -> None:
         """Assert that the given node is present or not present in the MongoDB collection."""
@@ -71,8 +81,8 @@ class TestMongoDB(unittest.TestCase):
         assert_fn = self.assertEqual
         if not assert_in:
             assert_fn = self.assertNotEqual
-        if type(edge) is not dict:
-            raise ValueError('Expeced type(edge) to be dict. Insead found: ', type(edge))
+        if not isinstance(edge, dict):
+            raise ValueError('Expeced edge to be of type dict. Insead found: ', type(edge))
         # Query the collection for the given edge
         match = self.collection.find_one(edge)
         if match is not None:
