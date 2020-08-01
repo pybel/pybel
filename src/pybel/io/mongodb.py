@@ -114,15 +114,14 @@ def find_nodes(
     return list(collection.find(filter_))
 
 
-def _rm_mongo_keys(self, *items: dict):
+def _rm_mongo_keys(item: dict):
     """Remove any dictionary keys used for internal MongoDB identification from the items.
 
-    Note: each item should be a dictionary representing a node or an edge from a MongoDB collection.
+    :param item: A dictionary representing a node or an edge from a MongoDB collection
     """
-    for item in items:
-        for prop in ('_id', 'type'):
-            if prop in item.keys():
-                del item[prop]
+    for prop in ('_id', 'type'):
+        if prop in item.keys():
+            del item[prop]
 
 
 def get_edges_from_node(collection: Collection, node: Mapping[str, Any]) -> List[Mapping[str, Any]]:
