@@ -2,7 +2,7 @@
 """An exporter from PyBEL graphs to a local Mongo database."""
 
 import copy
-from typing import Any, List, Mapping, Tuple
+from typing import Any, List, Mapping, Optional, Tuple
 
 import pymongo
 from pymongo.collection import Collection
@@ -17,8 +17,6 @@ __all__ = [
     'get_edges_from_node',
     'get_edges_from_criteria'
 ]
-
-client = pymongo.MongoClient()
 
 
 def _handle_member(elem):
@@ -40,7 +38,7 @@ def _entity_to_dict(entity: pybel.dsl.Entity) -> Mapping[str, Any]:
     return new_node
 
 
-def to_mongodb(graph: pybel.BELGraph, db_name: str, collection_name: str) -> Collection:
+def to_mongodb(graph: pybel.BELGraph, db_name: str, collection_name: str, client: Optional[pymongo.MongoClient] = None) -> Collection:
     """Export the given BELGraph to a MongoDB.
 
     In order to use this function, MongoDB must already be running locally.
@@ -50,6 +48,8 @@ def to_mongodb(graph: pybel.BELGraph, db_name: str, collection_name: str) -> Col
     :param collection_name: the name of the collection within the MongoDB where the graph will be stored.
     :return: the collection that now stores the graph
     """
+    if client is None:
+        client = pymongo.MongoClient()
     # Access (or create) the specified database and collection
     db = client[db_name]
     collection = db[collection_name]
@@ -85,7 +85,7 @@ def find_nodes(
     collection: Collection,
     name: str = None,
     identifier: str = None,
-    variants: List[pybel.dsl.EntityVariant] = None,
+    variants: List[pybel.dsl.Variant] = None,
 ) -> List[Mapping[str, Any]]:
     """Find all the nodes that match the given criteria from a MongoDB Collection where a graph is stored.
 
