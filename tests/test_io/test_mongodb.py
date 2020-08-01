@@ -4,7 +4,7 @@
 
 import copy
 from collections import namedtuple
-from typing import Any, List, Mapping, Tuple
+from typing import Any, List, Mapping, Optional, Tuple
 import unittest
 
 import pymongo
@@ -71,15 +71,11 @@ class TestMongoDB(unittest.TestCase):
         # Convert the node to a dict so it can be matched against entries in the MongoDB
         node_dict = _entity_to_dict(node)
         match = self.collection.find_one(node_dict)
-        # If the passed node has a MongoDB unique _id, check that the two ids match
-        if '_id' in node.keys():
-            assert_fn(node_dict['_id'], match['_id'])
-        else:
-            # Otherwise, delete the parameters type and _id unique to the to_mongodb output
-            if match is not None:
-                _rm_mongo_keys(match)
-            # And check that the two nodes are equal
-            assert_fn(node_dict, match)
+        # Delete the parameters type and _id unique to the to_mongodb output
+        if match is not None:
+            _rm_mongo_keys(match)
+        # And check that the two nodes are equal
+        assert_fn(node_dict, match)
 
     def assert_edge(self, edge: dict, assert_in=True) -> None:
         """Assert that the given edge is or isn't present in the Mongo collection."""
@@ -87,7 +83,7 @@ class TestMongoDB(unittest.TestCase):
         if not assert_in:
             assert_fn = self.assertNotEqual
         if not isinstance(edge, dict):
-            raise ValueError('Expeced edge to be of type dict. Insead found: ', type(edge))
+            raise ValueError('Expected edge to be of type dict. Insead found: ', type(edge))
         # Query the collection for the given edge
         match = self.collection.find_one(edge)
         if match is not None:
@@ -97,7 +93,7 @@ class TestMongoDB(unittest.TestCase):
         assert_fn(edge, match)
 
     def test_export(self):
-        """Test that the to_mongodb export function operates as expeced."""
+        """Test that the to_mongodb export function operates as expected."""
         # Assert that all nodes in self.graph are in self.collection
         for node in self.graph:
             self.assert_node(node)
@@ -111,15 +107,15 @@ class TestMongoDB(unittest.TestCase):
     def id_info(self, node: dict) -> NodeInfo:
         """Return the important identifying information for a given node."""
         # Get the concept entry (where the name / identifier are stored)
-        concept = n['concept']
+        concept = node['concept']
         name, identifier, variants = None, None, None
         # Query based on name, identifier, variants if they are present
         if 'name' in concept.keys():
             name = concept['name']
         if 'identifier' in concept.keys():
             identifier = concept['identifier']
-        if 'variants' in n.keys():
-            variants = n['variants']
+        if 'variants' in node.keys():
+            variants = node['variants']
         return NodeInfo(name=name, identifier=identifier, variants=variants)
 
     def test_query_nodes(self):
@@ -143,26 +139,50 @@ class TestMongoDB(unittest.TestCase):
                          if edge['source'] == node or edge['target'] == node]
         return correct_edges
 
-    def test_edges_from_node(self):
+    def _edges_from_node(self, node: dict) -> List[dict]:
+        """Return the matching edges for the given node from get_edges_from_node()."""
+        # Get the matches from get_edges_from_node()
+        matches_from_node = get_edges_from_node(self.collection, node)
+        # Remove the mongodb-added _id and type keys
+        for match in matches_from_node:
+            _rm_mongo_keys(match)
+        return matches_from_node
+
+    def _edges_from_criteria(self, node: dict) -> Optional[List[dict]]:
+        """Return the matching edges for the given node from get_edges_from_node()."""
+        # Get the matches from get_edges_from_criteria()
+        criteria = self.id_info(node)
+        pairs_from_criteria = get_edges_from_criteria(
+            self.collection,
+            node_name=criteria.name,
+            node_identifier=criteria.identifier,
+            node_variants=criteria.variants
+        )
+        matches_from_criteria = []
+        # Since get_edges_from_criteria can return edges for multiple matching nodes,
+        # loop through every tuple (node, [edges...]) in pairs_from_criteria
+        for (node_match, edges_match) in pairs_from_criteria:
+            _rm_mongo_keys(node_match)
+            # If node_match is equal to the given node, let matches_from_criteria equal the returned edges
+            if node_match == node:
+                matches_from_criteria = edges_match
+                break
+        return matches_from_criteria
+
+    def test_get_edges(self):
         """Test that the get_edges_from_node and _from_criteria functions correctly find all edges for the given node."""
         for node in self.graph:
             # Convert the node to a dict
             n = _entity_to_dict(node)
+
             # Find all the correct edges pointing to and from the current node
             correct_edges = self.get_true_edges(n)
-            # Get the matches from get_edges_from_node()
-            matches_from_node = get_edges_from_node(self.collection, n)
-            # Get the matches from get_edges_from_criteria()
-            criteria = self.id_info(n)
-            matches_from_criteria = get_edges_from_criteria(
-                self.collection,
-                node_name=criteria.name,
-                node_identifier=criteria.identifier,
-                node_variants=criteria.variants
-            )
-            # Remove the mongodb-added _id and type keys
-            for match1, match2 in zip(matches_from_node, matches_from_criteria):
-                _rm_mongo_keys(match1, match2)
+
+            # Get the matching edges from get_edges_from_node()
+            matches_from_node = self._edges_from_node(node)
+            # Get the matching edges from get_edges_from_criteria()
+            matches_from_criteria = self._edges_from_criteria(node)
+
             # Assert that the matches_from_node are equal to the correct edges
             self.assertEqual(correct_edges, matches_from_node)
             # Assert that the matches_from_criteria are equal to the correct edges
