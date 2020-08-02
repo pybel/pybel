@@ -2,7 +2,6 @@
 
 """TSV converter classes."""
 
-import warnings
 from abc import ABC, abstractmethod
 from typing import Dict, Tuple
 
@@ -19,7 +18,6 @@ from ...typing import EdgeData
 
 
 def _safe_label(base_entity: BaseEntity):
-    warnings.warn('Use BaseEntity.safe_label', DeprecationWarning)
     return base_entity.safe_label
 
 

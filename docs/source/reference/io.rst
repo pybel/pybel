@@ -62,6 +62,9 @@ Bytes
 .. autofunction:: pybel.from_pickle
 .. autofunction:: pybel.to_pickle
 
+.. autofunction:: pybel.from_pickle_gz
+.. autofunction:: pybel.to_pickle_gz
+
 Node-Link JSON
 ~~~~~~~~~~~~~~
 .. automodule:: pybel.io.nodelink

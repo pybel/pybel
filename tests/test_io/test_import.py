@@ -77,6 +77,14 @@ class TestExampleInterchange(unittest.TestCase):
         graph = from_pickle(bio)
         self._help_test_equal(graph)
 
+    def test_example_pickle_gz(self):
+        """Test the round-trip through a gzipped pickle."""
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, 'test.gz')
+            pybel.to_pickle_gz(sialic_acid_graph, path)
+            graph = pybel.from_pickle_gz(path)
+        self._help_test_equal(graph)
+
     def test_thorough_json(self):
         """Test the round-trip through node-link JSON."""
         graph_json_dict = to_nodelink(sialic_acid_graph)
