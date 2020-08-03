@@ -2,12 +2,12 @@
 
 """Tests for the jsonschema node validation."""
 
-import copy
+from copy import deepcopy
 from collections import namedtuple
 from typing import Any, List, Mapping, Optional, Tuple
 import unittest
 
-import pymongo
+from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.errors import ConnectionFailure
 
@@ -22,7 +22,7 @@ from pybel.io.mongodb import (
     get_edges_from_criteria
 )
 from pybel.io.sbel import to_sbel
-from pybel.testing.utils import n
+from pybel.testing.utils import n as n_
 
 g1 = Gene('hgnc', '1')
 r1 = Rna('hgnc', '1')
@@ -56,7 +56,7 @@ def id_info(node: Mapping[str, Any]) -> NodeInfo:
 
 def _edge_to_dict(edge: dict) -> dict:
     """Helper function to convert an edge to a dictionary."""
-    new_edge = copy.deepcopy(edge)
+    new_edge = deepcopy(edge)
     for key in ('source', 'target'):
         new_edge[key] = _entity_to_dict(new_edge[key])
     return new_edge
@@ -66,7 +66,7 @@ class TestMongoDB(unittest.TestCase):
     """Tests for the MongoDB exporting and querying."""
     def setUp(self):
         """Set up MongoDB and create/export a test graph."""
-        client = pymongo.MongoClient()
+        client = MongoClient()
         # Check if there was an error connecting to MongoDB
         try:
             # The ismaster command is cheap and does not require auth.
@@ -78,9 +78,9 @@ class TestMongoDB(unittest.TestCase):
             TEST_COLLECTION.drop()
             # Create the graph
             self.graph = BELGraph()
-            self.graph.add_increases(ca, r2, citation=n(), evidence=n())
-            self.graph.add_increases(p2, p3, citation=n(), evidence=n())
-            self.graph.add_decreases(p3, p1, citation=n(), evidence=n())
+            self.graph.add_increases(ca, r2, citation=n_(), evidence=n_())
+            self.graph.add_increases(p2, p3, citation=n_(), evidence=n_())
+            self.graph.add_decreases(p3, p1, citation=n_(), evidence=n_())
             # The first entry is a dict of annotations, not an edge
             self.links = to_sbel(self.graph)[1:]
             # Export it to mongo

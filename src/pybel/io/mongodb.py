@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 """An exporter from PyBEL graphs to a local Mongo database."""
 
-import copy
+from copy import deepcopy
 from typing import Any, List, Mapping, Optional, Tuple
 
-import pymongo
+from pymongo import MongoClient
 from pymongo.collection import Collection
 
-import pybel
+from pybel import BELGraph
+from pybel.dsl import Entity, Variant
+from pybel.io.sbel import to_sbel
 from pybel.schema import is_valid_edge, is_valid_node
 
 __all__ = [
@@ -20,7 +22,7 @@ __all__ = [
 ]
 
 
-def _entity_to_dict(entity: pybel.dsl.Entity) -> Mapping[str, Any]:
+def _entity_to_dict(entity: Entity) -> Mapping[str, Any]:
     """Input a pybel Entity and return a dict representing it."""
     new_node = dict(entity)
     if new_node['function'] in ['Complex', 'Composite']:
@@ -29,9 +31,9 @@ def _entity_to_dict(entity: pybel.dsl.Entity) -> Mapping[str, Any]:
 
 
 def to_mongodb(
-    graph: pybel.BELGraph,
+    graph: BELGraph,
     db_name: str, collection_name: str,
-    client: Optional[pymongo.MongoClient] = None
+    client: Optional[MongoClient] = None
 ) -> Collection:
     """Export the given BELGraph to a MongoDB.
 
@@ -43,7 +45,7 @@ def to_mongodb(
     :return: the collection that now stores the graph
     """
     if client is None:
-        client = pymongo.MongoClient()
+        client = MongoClient()
     # Access (or create) the specified database and collection
     db = client[db_name]
     collection = db[collection_name]
@@ -56,19 +58,19 @@ def to_mongodb(
             # TODO: Raise/log on invalid node
             pass
         # Add a 'type' parameter to avoid confusing nodes and links
-        n = copy.deepcopy(node)
+        n = deepcopy(node)
         n = _entity_to_dict(n)
         n['type'] = 'node'
         collection.insert_one(n)
 
-    # Add the edges
-    edges = pybel.io.sbel.to_sbel(graph)[1:]
+    # Add the edges (the first item returned from to_sbel() is a dict of annotations, not an edge)
+    edges = to_sbel(graph)[1:]
     for edge in edges:
         if not is_valid_edge(edge):
             # TODO: Raise/log on invalid edge
             pass
         # Add a 'type' parameter to avoid confusing nodes and links
-        e = copy.deepcopy(edge)
+        e = deepcopy(edge)
         e['type'] = 'link'
         collection.insert_one(e)
 
@@ -79,7 +81,7 @@ def find_nodes(
     collection: Collection,
     name: str = None,
     identifier: str = None,
-    variants: List[pybel.dsl.Variant] = None,
+    variants: List[Variant] = None,
 ) -> List[Mapping[str, Any]]:
     """Find all the nodes that match the given criteria from a MongoDB Collection where a graph is stored.
 
@@ -123,7 +125,7 @@ def get_edges_from_node(collection: Collection, node: Mapping[str, Any]) -> List
     if not is_valid_node(node):
         raise ValueError("Invalid node ", node)
     # Remove the _id and type properties from the node (since they won't be included in the edge source/target information)
-    n = copy.deepcopy(node)
+    n = deepcopy(node)
     # Convert the pybel node to a dict so it can be matched against entries in the MongoDB
     n = _entity_to_dict(n)
     _rm_mongo_keys(n)
@@ -136,7 +138,7 @@ def get_edges_from_criteria(
     collection: Collection,
     node_name: str = None,
     node_identifier: str = None,
-    node_variants: List[pybel.dsl.Variant] = None,
+    node_variants: List[Variant] = None,
 ) -> List[Tuple[Mapping[str, Any], List[Mapping[str, Any]]]]:
     """Get all the edges for nodes that match the given criteria and return in a list of tuples.
 
