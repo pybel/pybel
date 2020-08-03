@@ -20,22 +20,11 @@ __all__ = [
 ]
 
 
-def _handle_member(elem):
-    """Convert a member element from a complex or composite to a dictionary."""
-    # Convert each member element to a dictionary
-    new_elem = dict(elem)
-    # Remove the 'bel' and 'id' properties (which occur seemingly at random)
-    for prop in ('bel', 'id'):
-        if prop in new_elem.keys():
-            del new_elem[prop]
-    return new_elem
-
-
 def _entity_to_dict(entity: pybel.dsl.Entity) -> Mapping[str, Any]:
     """Input a pybel Entity and return a dict representing it."""
     new_node = dict(entity)
     if new_node['function'] in ['Complex', 'Composite']:
-        new_node['members'] = list(map(_handle_member, new_node['members']))
+        new_node['members'] = list(map(dict, new_node['members']))
     return new_node
 
 
@@ -73,7 +62,7 @@ def to_mongodb(
         collection.insert_one(n)
 
     # Add the edges
-    edges = pybel.to_nodelink(graph)['links']
+    edges = pybel.io.sbel.to_sbel(graph)[1:]
     for edge in edges:
         if not is_valid_edge(edge):
             # TODO: Raise/log on invalid edge
