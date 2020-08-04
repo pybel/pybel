@@ -28,36 +28,45 @@ SBEL = Any
 
 
 @open_file(1, mode='w')
-def to_sbel_file(graph: BELGraph, path: Union[str, TextIO], separators=(',', ':'), **kwargs) -> None:
+def to_sbel_file(
+    graph: BELGraph,
+    path: Union[str, TextIO],
+    separators=(',', ':'),
+    yield_metadata: bool = True,
+    **kwargs
+) -> None:
     """Write this graph as BEL JSONL to a file.
 
     :param graph: A BEL graph
     :param separators: The separators used in :func:`json.dumps`
     :param path: A path or file-like
+    :param yield_metadata: Should the graph metadata be sent as the first element?
     """
-    for i in iterate_sbel(graph):
+    for i in iterate_sbel(graph, yield_metadata=yield_metadata):
         print(json.dumps(i, ensure_ascii=False, separators=separators, **kwargs), file=path)
 
 
-def to_sbel_gz(graph: BELGraph, path: str, separators=(',', ':'), **kwargs) -> None:
+def to_sbel_gz(graph: BELGraph, path: str, separators=(',', ':'), yield_metadata: bool = True, **kwargs) -> None:
     """Write a graph as BEL JSONL to a gzip file.
 
     :param graph: A BEL graph
     :param separators: The separators used in :func:`json.dumps`
     :param path: A path for a gzip file
+    :param yield_metadata: Should the graph metadata be sent as the first element?
     """
     with gzip.open(path, 'wt') as file:
-        to_sbel_file(graph, file, separators=separators, **kwargs)
+        to_sbel_file(graph, file, yield_metadata=yield_metadata, separators=separators, **kwargs)
 
 
-def to_sbel(graph: BELGraph) -> List[SBEL]:
+def to_sbel(graph: BELGraph, yield_metadata: bool = True) -> List[SBEL]:
     """Create a list of JSON dictionaries corresponding to lines in BEL JSONL."""
-    return list(iterate_sbel(graph))
+    return list(iterate_sbel(graph, yield_metadata=yield_metadata))
 
 
-def iterate_sbel(graph: BELGraph) -> Iterable[SBEL]:
+def iterate_sbel(graph: BELGraph, yield_metadata: bool = True) -> Iterable[SBEL]:
     """Iterate over JSON dictionaries corresponding to lines in BEL JSONL."""
-    yield graph.graph.copy()
+    if yield_metadata:
+        yield graph.graph.copy()
     for u, v, k, d in graph.edges(data=True, keys=True):
         yield {
             'source': _augment_node(u),

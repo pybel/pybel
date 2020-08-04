@@ -62,7 +62,7 @@ def to_mongodb(
         collection.insert_one(n)
 
     # Add the edges
-    edges = pybel.io.sbel.to_sbel(graph)[1:]
+    edges = pybel.to_sbel(graph, yield_metadata=False)
     for edge in edges:
         if not is_valid_edge(edge):
             # TODO: Raise/log on invalid edge
