@@ -7,9 +7,8 @@ from typing import Any, List, Mapping, Optional, Tuple
 from pymongo import MongoClient
 from pymongo.collection import Collection
 
-from pybel import BELGraph
+from pybel import BELGraph, to_sbel
 from pybel.dsl import Entity, Variant
-from pybel.io.sbel import to_sbel
 from pybel.schema import is_valid_edge, is_valid_node
 
 __all__ = [
@@ -63,8 +62,8 @@ def to_mongodb(
         n['type'] = 'node'
         collection.insert_one(n)
 
-    # Add the edges (the first item returned from to_sbel() is a dict of annotations, not an edge)
-    edges = to_sbel(graph)[1:]
+    # Add the edges
+    edges = to_sbel(graph, yield_metadata=False)
     for edge in edges:
         if not is_valid_edge(edge):
             # TODO: Raise/log on invalid edge
