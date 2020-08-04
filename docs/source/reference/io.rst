@@ -59,6 +59,9 @@ Bytes
 .. autofunction:: pybel.from_bytes
 .. autofunction:: pybel.to_bytes
 
+.. autofunction:: pybel.from_bytes_gz
+.. autofunction:: pybel.to_bytes_gz
+
 .. autofunction:: pybel.from_pickle
 .. autofunction:: pybel.to_pickle
 
