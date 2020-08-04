@@ -11,7 +11,7 @@ from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.errors import ConnectionFailure
 
-from pybel import BELGraph
+from pybel import BELGraph, to_sbel
 from pybel.dsl import Entity, ComplexAbundance, Gene, Protein, Rna
 from pybel.io.mongodb import (
     _entity_to_dict,
@@ -21,7 +21,6 @@ from pybel.io.mongodb import (
     get_edges_from_node,
     get_edges_from_criteria
 )
-from pybel.io.sbel import to_sbel
 from pybel.testing.utils import n as n_
 
 g1 = Gene('hgnc', '1')
@@ -82,7 +81,7 @@ class TestMongoDB(unittest.TestCase):
             self.graph.add_increases(p2, p3, citation=n_(), evidence=n_())
             self.graph.add_decreases(p3, p1, citation=n_(), evidence=n_())
             # The first entry is a dict of annotations, not an edge
-            self.links = to_sbel(self.graph)[1:]
+            self.links = to_sbel(self.graph, yield_metadata=False)
             # Export it to mongo
             self.collection = to_mongodb(self.graph, TEST_DB.name, TEST_COLLECTION.name)
 
