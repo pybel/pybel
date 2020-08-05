@@ -15,7 +15,10 @@ from .cx import from_cx, from_cx_file, from_cx_gz, from_cx_jsons, to_cx, to_cx_f
 from .emmaa import from_emmaa
 from .extras import to_csv, to_gsea, to_sif
 from .fraunhofer_orientdb import from_fraunhofer_orientdb
-from .gpickle import from_bytes, from_pickle, to_bytes, to_pickle
+from .gpickle import (
+    from_bytes, from_bytes_gz, from_pickle, from_pickle_gz, to_bytes, to_bytes_gz, to_pickle,
+    to_pickle_gz,
+)
 from .graphdati import (
     from_graphdati, from_graphdati_file, from_graphdati_gz, from_graphdati_jsons, to_graphdati, to_graphdati_file,
     to_graphdati_gz, to_graphdati_jsonl, to_graphdati_jsonl_gz, to_graphdati_jsons,

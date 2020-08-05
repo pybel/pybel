@@ -71,12 +71,26 @@ class TestExampleInterchange(unittest.TestCase):
         graph = from_bytes(graph_bytes)
         self._help_test_equal(graph)
 
+    def test_thorough_bytes_gz(self):
+        """Test the round-trip through gzipped bytes."""
+        graph_bytes = pybel.to_bytes_gz(sialic_acid_graph)
+        graph = pybel.from_bytes_gz(graph_bytes)
+        self._help_test_equal(graph)
+
     def test_example_pickle(self):
         """Test the round-trip through a pickle."""
         bio = BytesIO()
         to_pickle(sialic_acid_graph, bio)
         bio.seek(0)
         graph = from_pickle(bio)
+        self._help_test_equal(graph)
+
+    def test_example_pickle_gz(self):
+        """Test the round-trip through a gzipped pickle."""
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, 'test.gz')
+            pybel.to_pickle_gz(sialic_acid_graph, path)
+            graph = pybel.from_pickle_gz(path)
         self._help_test_equal(graph)
 
     def test_thorough_json(self):

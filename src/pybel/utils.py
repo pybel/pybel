@@ -5,7 +5,6 @@
 import hashlib
 import json
 import logging
-import pickle
 import typing
 from collections import defaultdict
 from collections.abc import Iterable, MutableMapping
@@ -17,6 +16,11 @@ from .constants import (
     RELATION, SOURCE_MODIFIER, TARGET_MODIFIER, TO_LOC, TRANSLOCATION,
 )
 from .typing import EdgeData
+
+try:
+    import pickle5 as pickle
+except ImportError:
+    import pickle
 
 logger = logging.getLogger(__name__)
 
