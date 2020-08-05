@@ -35,22 +35,20 @@ p3 = Protein('hgnc', '3')
 ca = ComplexAbundance([p1, g2], name='ca', namespace='hgnc')
 
 # Define a namedtuple to make it easier to pass around important node information
-NodeInfo = namedtuple('NodeInfo', 'name identifier variants')
+NodeInfo = namedtuple('NodeInfo', 'name identifier function variants')
 
 
 def id_info(node: Mapping[str, Any]) -> NodeInfo:
     """Return the important identifying information for a given node."""
     # Get the concept entry (where the name / identifier are stored)
     concept = node['concept']
-    name, identifier, variants = None, None, None
-    # Query based on name, identifier, variants if they are present
-    if 'name' in concept.keys():
-        name = concept['name']
-    if 'identifier' in concept.keys():
-        identifier = concept['identifier']
-    if 'variants' in node.keys():
-        variants = node['variants']
-    return NodeInfo(name=name, identifier=identifier, variants=variants)
+    # Get the id info
+    name = concept.get('name')
+    identifier = concept.get('identifier')
+    function = concept.get('function')
+    variants = node.get('variants')
+
+    return NodeInfo(name=name, identifier=identifier, function=function, variants=variants)
 
 
 def _edge_to_dict(edge: dict) -> dict:
@@ -140,7 +138,11 @@ class TestMongoDB(unittest.TestCase):
             n_info = id_info(n)
             # Query the MongoDB based on that info
             matches = find_nodes(
-                self.collection, name=n_info.name, identifier=n_info.identifier, variants=n_info.variants
+                self.collection,
+                name=n_info.name,
+                identifier=n_info.identifier,
+                function=n_info.function,
+                variants=n_info.variants
             )
             for match in matches:
                 _rm_mongo_keys(match)
