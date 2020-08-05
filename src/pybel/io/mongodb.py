@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """An exporter from PyBEL graphs to a local Mongo database."""
 
-from copy import deepcopy
 import logging
+from copy import deepcopy
 from typing import Any, List, Mapping, Optional, Tuple
 
 from pymongo import MongoClient
