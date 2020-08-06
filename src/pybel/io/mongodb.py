@@ -9,12 +9,12 @@ from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.database import Database
 
+from .sbel import to_sbel
 from ..constants import (
     CONCEPT, FUNCTION, IDENTIFIER,
     NAME, SOURCE, TARGET, VARIANTS,
 )
 from ..dsl import Entity, Variant
-from .sbel import to_sbel
 from ..schema import is_valid_edge, is_valid_node
 from ..struct import BELGraph
 
@@ -126,12 +126,12 @@ def find_nodes(
     if not (name or identifier):
         raise ValueError("Either a 'name' or 'identifier' is required to find a node.")
     # The mongo .find() method requires that sub-elements be notated 'parent.child'
-    CONCEPT_NAME = '.'.join((CONCEPT, NAME))
-    CONCEPT_IDENTIFIER = '.'.join((CONCEPT, IDENTIFIER))
+    concept_name = '.'.join((CONCEPT, NAME))
+    concept_identifier = '.'.join((CONCEPT, IDENTIFIER))
     filter_ = {
         TYPE: NODE,
-        CONCEPT_NAME: name,
-        CONCEPT_IDENTIFIER: identifier,
+        concept_name: name,
+        concept_identifier: identifier,
         FUNCTION: function,
         VARIANTS: variants,
     }
