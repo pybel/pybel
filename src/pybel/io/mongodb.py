@@ -7,6 +7,7 @@ from typing import Any, List, Mapping, Optional, Tuple
 
 from pymongo import MongoClient
 from pymongo.collection import Collection
+from pymongo.database import Database
 
 from ..constants import (
     CONCEPT, FUNCTION, IDENTIFIER,
@@ -28,53 +29,80 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 # Define some reused values
+DB_NAME = 'pybel_graphs'
+COLLECTION_NAME = 'collection'
+
 TYPE = 'type'
 ID = '_id'
 NODE = 'node'
 LINK = 'link'
 
 
+def _default_collection_name(database: Database):
+    """Get a valid (unused) default collection name."""
+    idx = 1
+    collection_name = COLLECTION_NAME
+    while database[collection_name].find_one() is not None:
+        # Naming convention is: collection_1, collection_2, etc
+        collection_name = '_'.join((COLLECTION_NAME, str(idx)))
+        idx += 1
+    return collection_name
+
+
 def to_mongodb(
     graph: BELGraph,
-    db_name: str, collection_name: str,
+    db_name: Optional[str] = None,
+    collection_name: Optional[str] = None,
     client: Optional[MongoClient] = None
 ) -> Collection:
     """Export the given BELGraph to a MongoDB.
 
     In order to use this function, MongoDB must already be running locally.
 
-    :param graph: the graph to be exported
-    :param db_name: the name of the MongoDB to which the graph should be exported
-    :param collection_name: the name of the collection within the MongoDB where the graph will be stored.
+    :param graph: The graph to be exported
+    :param db_name: An optional name of the MongoDB to which the graph should be exported
+    :param collection_name: An optional name of the collection within the MongoDB where the graph will be stored.
+    :param client: An optional MongoClient object to use instead of a default
     :return: the collection that now stores the graph
     """
     if client is None:
         client = MongoClient()
-    # Access (or create) the specified database and collection
+    if db_name is None:
+        db_name = DB_NAME
+    # Access (or create) the specified database
     db = client[db_name]
+    # If no collection_name was passed
+    if collection_name is None:
+        # Attempt to create collections until a unique name is found
+        collection_name = _default_collection_name(db)
+    # Access (or create) the specified collection
     collection = db[collection_name]
     # If a collection with the same name already exists, drop its contents
     collection.drop()
 
-    # Add the nodes
+    # Store all the nodes/edges in a list to be bulk added
+    documents = []
+
+    # Add the nodes to documents
     for node in graph:
         if not is_valid_node(node):
             logger.warning(f'Invalid node encountered: {node}')
         # Add a 'type' parameter to avoid confusing nodes and links
         n = deepcopy(node)
         n[TYPE] = NODE
-        collection.insert_one(n)
+        documents.append(n)
 
-    # Add the edges
+    # Add the edges to documents
     edges = to_sbel(graph, yield_metadata=False)
     for edge in edges:
         if not is_valid_edge(edge):
             logger.warning(f'Invalid edge encountered: {edge}')
         # Add a 'type' parameter to avoid confusing nodes and links
         e = deepcopy(edge)
-        e[LINK] = LINK
-        collection.insert_one(e)
-
+        e[TYPE] = LINK
+        documents.append(e)
+    # Insert the documents into the collection
+    collection.insert_many(documents)
     return collection
 
 
@@ -101,7 +129,7 @@ def find_nodes(
     CONCEPT_NAME = '.'.join((CONCEPT, NAME))
     CONCEPT_IDENTIFIER = '.'.join((CONCEPT, IDENTIFIER))
     filter_ = {
-        LINK: NODE,
+        TYPE: NODE,
         CONCEPT_NAME: name,
         CONCEPT_IDENTIFIER: identifier,
         FUNCTION: function,
@@ -119,7 +147,7 @@ def _rm_mongo_keys(item: dict):
 
     :param item: A dictionary representing a node or an edge from a MongoDB collection
     """
-    for prop in (ID, LINK):
+    for prop in (ID, TYPE):
         if prop in item.keys():
             del item[prop]
 
@@ -137,7 +165,7 @@ def get_edges_from_node(collection: Collection, node: Mapping[str, Any]) -> List
     n = deepcopy(node)
     _rm_mongo_keys(n)
     # Find all the links where either the source or the target is node n
-    filter_ = {LINK: LINK, '$or': [{SOURCE: n}, {TARGET: n}]}
+    filter_ = {TYPE: LINK, '$or': [{SOURCE: n}, {TARGET: n}]}
     return list(collection.find(filter_))
 
 
