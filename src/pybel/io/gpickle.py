@@ -3,6 +3,7 @@
 """Conversion functions for BEL graphs with bytes and Python pickles."""
 
 import gzip
+from io import BytesIO
 from typing import BinaryIO, Union
 
 from networkx.utils import open_file
@@ -18,6 +19,8 @@ except ImportError:
 __all__ = [
     'to_bytes',
     'from_bytes',
+    'to_bytes_gz',
+    'from_bytes_gz',
     'to_pickle',
     'to_pickle_gz',
     'from_pickle',
@@ -31,7 +34,7 @@ def to_bytes(graph: BELGraph, protocol: int = pickle.HIGHEST_PROTOCOL) -> bytes:
     Note that the pickle module has some incompatibilities between Python 2 and 3. To export a universally importable
     pickle, choose 0, 1, or 2.
 
-    :param graph: A BEL network
+    :param graph: A BEL graph
     :param protocol: Pickling protocol to use. Defaults to ``HIGHEST_PROTOCOL``.
 
     .. seealso:: https://docs.python.org/3.6/library/pickle.html#data-stream-format
@@ -53,6 +56,27 @@ def from_bytes(bytes_graph: bytes, check_version: bool = True) -> BELGraph:
         raise_for_old_graph(graph)
 
     return graph
+
+
+def to_bytes_gz(graph: BELGraph, protocol: int = pickle.HIGHEST_PROTOCOL) -> bytes:
+    """Convert a graph to gzipped bytes with pickle.
+
+    :param graph: A BEL graph
+    :param protocol: Pickling protocol to use. Defaults to ``HIGHEST_PROTOCOL``.
+    """
+    io = BytesIO()
+    with gzip.open(io, mode='wb') as file:
+        pickle.dump(graph, file, protocol=protocol)
+    return io.getvalue()
+
+
+def from_bytes_gz(bytes_graph: bytes) -> BELGraph:
+    """Read a graph from gzipped bytes (the result of pickling the graph).
+
+    :param bytes_graph: File or filename to write
+    """
+    with gzip.GzipFile(fileobj=BytesIO(bytes_graph), mode='rb') as file:
+        return pickle.load(file)
 
 
 @open_file(1, mode='wb')
