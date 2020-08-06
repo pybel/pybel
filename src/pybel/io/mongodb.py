@@ -8,6 +8,10 @@ from typing import Any, List, Mapping, Optional, Tuple
 from pymongo import MongoClient
 from pymongo.collection import Collection
 
+from ..constants import (
+    CONCEPT, FUNCTION, IDENTIFIER,
+    NAME, SOURCE, TARGET, VARIANTS,
+)
 from ..dsl import Entity, Variant
 from .sbel import to_sbel
 from ..schema import is_valid_edge, is_valid_node
@@ -22,6 +26,12 @@ __all__ = [
 ]
 
 logger = logging.getLogger(__name__)
+
+# Define some reused values
+TYPE = 'type'
+ID = '_id'
+NODE = 'node'
+LINK = 'link'
 
 
 def to_mongodb(
@@ -52,7 +62,7 @@ def to_mongodb(
             logger.warning(f'Invalid node encountered: {node}')
         # Add a 'type' parameter to avoid confusing nodes and links
         n = deepcopy(node)
-        n['type'] = 'node'
+        n[TYPE] = NODE
         collection.insert_one(n)
 
     # Add the edges
@@ -62,7 +72,7 @@ def to_mongodb(
             logger.warning(f'Invalid edge encountered: {edge}')
         # Add a 'type' parameter to avoid confusing nodes and links
         e = deepcopy(edge)
-        e['type'] = 'link'
+        e[LINK] = LINK
         collection.insert_one(e)
 
     return collection
@@ -87,12 +97,15 @@ def find_nodes(
     """
     if not (name or identifier):
         raise ValueError("Either a 'name' or 'identifier' is required to find a node.")
+    # The mongo .find() method requires that sub-elements be notated 'parent.child'
+    CONCEPT_NAME = '.'.join((CONCEPT, NAME))
+    CONCEPT_IDENTIFIER = '.'.join((CONCEPT, IDENTIFIER))
     filter_ = {
-        'type': 'node',
-        'concept.name': name,
-        'concept.identifier': identifier,
-        'function': function,
-        'variants': variants,
+        LINK: NODE,
+        CONCEPT_NAME: name,
+        CONCEPT_IDENTIFIER: identifier,
+        FUNCTION: function,
+        VARIANTS: variants,
     }
     for key, value in list(filter_.items()):
         if not value:
@@ -106,7 +119,7 @@ def _rm_mongo_keys(item: dict):
 
     :param item: A dictionary representing a node or an edge from a MongoDB collection
     """
-    for prop in ('_id', 'type'):
+    for prop in (ID, LINK):
         if prop in item.keys():
             del item[prop]
 
@@ -124,7 +137,7 @@ def get_edges_from_node(collection: Collection, node: Mapping[str, Any]) -> List
     n = deepcopy(node)
     _rm_mongo_keys(n)
     # Find all the links where either the source or the target is node n
-    filter_ = {'type': 'link', '$or': [{'source': n}, {'target': n}]}
+    filter_ = {LINK: LINK, '$or': [{SOURCE: n}, {TARGET: n}]}
     return list(collection.find(filter_))
 
 

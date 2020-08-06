@@ -12,6 +12,10 @@ from pymongo.collection import Collection
 from pymongo.errors import ConnectionFailure
 
 from pybel import BELGraph, to_sbel
+from pybel.constants import (
+    COMPLEX, COMPOSITE, CONCEPT, FUNCTION, IDENTIFIER,
+    MEMBERS, NAME, SOURCE, TARGET, VARIANTS,
+)
 from pybel.dsl import Entity, ComplexAbundance, Gene, Protein, Rna
 from pybel.io.mongodb import (
     _rm_mongo_keys,
@@ -40,12 +44,13 @@ NodeInfo = namedtuple('NodeInfo', 'name identifier function variants')
 def id_info(node: Mapping[str, Any]) -> NodeInfo:
     """Return the important identifying information for a given node."""
     # Get the concept entry (where the name / identifier are stored)
-    concept = node['concept']
+    concept = node[CONCEPT]
     # Get the id info
-    name = concept.get('name')
-    identifier = concept.get('identifier')
-    function = concept.get('function')
-    variants = node.get('variants')
+    name = concept.get(NAME)
+    identifier = concept.get(IDENTIFIER)
+    function = concept.get(FUNCTION)
+
+    variants = node.get(VARIANTS)
 
     return NodeInfo(name=name, identifier=identifier, function=function, variants=variants)
 
@@ -53,15 +58,15 @@ def id_info(node: Mapping[str, Any]) -> NodeInfo:
 def _entity_to_dict(entity: Entity) -> Mapping[str, Any]:
     """Input a pybel Entity and return a dict representing it."""
     new_node = dict(entity)
-    if new_node['function'] in ['Complex', 'Composite']:
-        new_node['members'] = list(map(dict, new_node['members']))
+    if new_node[FUNCTION] in [COMPLEX, COMPOSITE]:
+        new_node[MEMBERS] = list(map(dict, new_node[MEMBERS]))
     return new_node
 
 
-def _edge_to_dict(edge: dict) -> dict:
+def _edge_to_dict(edge: Mapping[str, Any]) -> dict:
     """Helper function to convert an edge to a dictionary."""
-    new_edge = deepcopy(edge)
-    for key in ('source', 'target'):
+    new_edge = dict(deepcopy(edge))
+    for key in (SOURCE, TARGET):
         new_edge[key] = _entity_to_dict(new_edge[key])
     return new_edge
 
@@ -85,9 +90,9 @@ class TestMongoDB(unittest.TestCase):
             self.graph.add_increases(ca, r2, citation=n_(), evidence=n_())
             self.graph.add_increases(p2, p3, citation=n_(), evidence=n_())
             self.graph.add_decreases(p3, p1, citation=n_(), evidence=n_())
-            # The first entry is a dict of annotations, not an edge
+            # Store the links separately
             self.links = to_sbel(self.graph, yield_metadata=False)
-            # Export it to mongo
+            # Export the graph to mongo
             self.collection = to_mongodb(self.graph, TEST_DB.name, TEST_COLLECTION.name)
 
         except ConnectionFailure:
@@ -114,9 +119,8 @@ class TestMongoDB(unittest.TestCase):
             assert_fn = self.assertNotEqual
         if not isinstance(edge, dict):
             raise ValueError('Expected edge to be of type dict. Insead found: ', type(edge))
-        # Convert the 'source' and 'target' of each edge to a dict
-        for key in ('source', 'target'):
-            edge[key] = _entity_to_dict(edge[key])
+        # Convert the edge child elements (source, target) to dicts
+        edge = _edge_to_dict(edge)
         # Query the collection for the given edge
         match = self.collection.find_one(edge)
         if match is not None:
@@ -162,7 +166,7 @@ class TestMongoDB(unittest.TestCase):
         correct_edges: List[dict] = []
         for edge in self.links:
             dict_edge = _edge_to_dict(edge)
-            if n in (dict_edge['source'], dict_edge['target']):
+            if n in (dict_edge[SOURCE], dict_edge[TARGET]):
                 correct_edges.append(dict_edge)
         return correct_edges
 
@@ -188,7 +192,7 @@ class TestMongoDB(unittest.TestCase):
         matches_from_criteria = []
         # Since get_edges_from_criteria can return edges for multiple matching nodes,
         # loop through every tuple (node, [edges...]) in pairs_from_criteria
-        for (node_match, edges_match) in pairs_from_criteria:
+        for node_match, edges_match in pairs_from_criteria:
             _rm_mongo_keys(node_match)
             # If node_match is equal to the given node, let matches_from_criteria equal the returned edges
             if node_match == _entity_to_dict(node):
