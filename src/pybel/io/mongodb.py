@@ -14,7 +14,6 @@ from ..schema import is_valid_edge, is_valid_node
 from ..struct import BELGraph
 
 __all__ = [
-    '_entity_to_dict',
     '_rm_mongo_keys',
     'to_mongodb',
     'find_nodes',
@@ -23,14 +22,6 @@ __all__ = [
 ]
 
 logger = logging.getLogger(__name__)
-
-
-def _entity_to_dict(entity: Entity) -> Mapping[str, Any]:
-    """Input a pybel Entity and return a dict representing it."""
-    new_node = dict(entity)
-    if new_node['function'] in ['Complex', 'Composite']:
-        new_node['members'] = list(map(dict, new_node['members']))
-    return new_node
 
 
 def to_mongodb(
@@ -61,7 +52,6 @@ def to_mongodb(
             logger.warning(f'Invalid node encountered: {node}')
         # Add a 'type' parameter to avoid confusing nodes and links
         n = deepcopy(node)
-        n = _entity_to_dict(n)
         n['type'] = 'node'
         collection.insert_one(n)
 
@@ -132,8 +122,6 @@ def get_edges_from_node(collection: Collection, node: Mapping[str, Any]) -> List
         raise ValueError("Invalid node ", node)
     # Remove the _id and type properties from the node (since they won't be included in the edge source/target information)
     n = deepcopy(node)
-    # Convert the pybel node to a dict so it can be matched against entries in the MongoDB
-    n = _entity_to_dict(n)
     _rm_mongo_keys(n)
     # Find all the links where either the source or the target is node n
     filter_ = {'type': 'link', '$or': [{'source': n}, {'target': n}]}

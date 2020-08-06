@@ -14,7 +14,6 @@ from pymongo.errors import ConnectionFailure
 from pybel import BELGraph, to_sbel
 from pybel.dsl import Entity, ComplexAbundance, Gene, Protein, Rna
 from pybel.io.mongodb import (
-    _entity_to_dict,
     _rm_mongo_keys,
     to_mongodb,
     find_nodes,
@@ -49,6 +48,14 @@ def id_info(node: Mapping[str, Any]) -> NodeInfo:
     variants = node.get('variants')
 
     return NodeInfo(name=name, identifier=identifier, function=function, variants=variants)
+
+
+def _entity_to_dict(entity: Entity) -> Mapping[str, Any]:
+    """Input a pybel Entity and return a dict representing it."""
+    new_node = dict(entity)
+    if new_node['function'] in ['Complex', 'Composite']:
+        new_node['members'] = list(map(dict, new_node['members']))
+    return new_node
 
 
 def _edge_to_dict(edge: dict) -> dict:
