@@ -77,7 +77,7 @@ def get_annotation_values_by_annotation(graph: BELGraph) -> Mapping[str, Set[Ent
     return _group_dict_set(iter_annotation_value_pairs(graph))
 
 
-def get_annotation_values(graph: BELGraph, annotation: str) -> Set[str]:
+def get_annotation_values(graph: BELGraph, annotation: str) -> Set[Entity]:
     """Get all values for the given annotation.
 
     :param graph: A BEL graph
@@ -139,7 +139,7 @@ def _annotation_iter_helper(graph: BELGraph) -> Iterable[str]:
     )
 
 
-def get_unused_list_annotation_values(graph: BELGraph) -> Mapping[str, Set[str]]:
+def get_unused_list_annotation_values(graph: BELGraph) -> Mapping[str, Set[Entity]]:
     """Get all of the unused values for list annotations.
 
     :param graph: A BEL graph
@@ -150,7 +150,7 @@ def get_unused_list_annotation_values(graph: BELGraph) -> Mapping[str, Set[str]]
         used_values = get_annotation_values(graph, annotation)
         if len(used_values) == len(values):  # all values have been used
             continue
-        result[annotation] = set(values) - used_values
+        result[annotation] = {v for v in values if v not in used_values}
     return result
 
 

@@ -371,6 +371,8 @@ class TestEdgeInduction(unittest.TestCase):
     def test_get_subgraph_by_annotation_values(self):
         """Test getting a subgraph by multiple annotation value."""
         graph = BELGraph()
+        graph.annotation_list['Subgraph'] = set('ABCDE')
+
         a, b, c, d = [protein(namespace='test', name=n()) for _ in range(4)]
 
         k1 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={

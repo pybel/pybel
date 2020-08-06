@@ -215,7 +215,7 @@ def _set_annotation_to_str(annotation_data: Mapping[str, Mapping[str, bool]], ke
     if len(value) == 1:
         return 'SET {} = "{}"'.format(key, list(value)[0])
 
-    x = ('"{}"'.format(v) for v in sorted(value))
+    x = ('"{}"'.format(v) for v in sorted(value, key=lambda e: (e.namespace, e.identifier, e.name)))
 
     return 'SET {} = {{{}}}'.format(key, ', '.join(x))
 

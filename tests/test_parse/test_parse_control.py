@@ -93,10 +93,10 @@ class TestParseControlUnsetStatementErrors(TestParseControl):
             'SET Custom2 = "Custom2_A"',
         ]
         self.parser.parse_lines(s)
-        self.assertIn('Custom1', self.parser.annotations)
-        self.assertIn('Custom2', self.parser.annotations)
+        self.assertIn('Custom1', self.parser._annotations)
+        self.assertIn('Custom2', self.parser._annotations)
         self.parser.parseString('UNSET {Custom1, Custom2}')
-        self.assertFalse(self.parser.annotations)
+        self.assertFalse(self.parser._annotations)
 
 
 class TestSetCitation(unittest.TestCase):
@@ -272,7 +272,7 @@ class TestParseControl2(TestParseControl):
         self.parser.parse_lines(s)
 
         expected_annotation = {
-            'Custom1': [Entity(namespace='text', name='Custom1_A')],
+            'Custom1': [Entity(namespace='Custom1', identifier='Custom1_A')],
         }
 
         self.assertEqual(expected_annotation, self.parser._annotations)
@@ -285,7 +285,10 @@ class TestParseControl2(TestParseControl):
         self.parser.parse_lines(s)
 
         expected_annotation = {
-            'Custom1': [Entity(namespace='text', name='Custom1_A'), Entity(namespace='text', name='Custom1_B')],
+            'Custom1': [
+                Entity(namespace='Custom1', identifier='Custom1_A'),
+                Entity(namespace='Custom1', identifier='Custom1_B'),
+            ],
         }
 
         self.assertEqual(expected_annotation, self.parser._annotations)
@@ -314,7 +317,7 @@ class TestParseControl2(TestParseControl):
         self.parser.parseString(s1)
         self.parser.parseString(s2)
 
-        self.assertEqual({}, self.parser.annotations)
+        self.assertEqual({}, self.parser._annotations)
 
     def test_unset_custom(self):
         statements = [
@@ -325,7 +328,7 @@ class TestParseControl2(TestParseControl):
 
         self.parser.parse_lines(statements)
 
-        self.assertEqual({}, self.parser.annotations)
+        self.assertEqual({}, self.parser._annotations)
 
     def test_reset_citation(self):
         s1_identifier = str(randint(0, 1e7))
@@ -365,4 +368,4 @@ class TestParseControl2(TestParseControl):
         ]
         self.parser.parse_lines(s)
 
-        self.assertEqual(v, self.parser._annotations['CustomRegex'])
+        self.assertEqual(Entity(namespace='CustomRegex', identifier=v), self.parser._annotations['CustomRegex'])

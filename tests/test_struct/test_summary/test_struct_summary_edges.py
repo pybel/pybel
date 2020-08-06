@@ -22,6 +22,11 @@ class TestEdgeSummary(unittest.TestCase):
     def test_1(self):
         """Test iterating over annotation/value pairs."""
         graph = BELGraph()
+        graph.annotation_list.update({
+            'A': set('1234'),
+            'B': set('XYZ'),
+            'C': set('abcde'),
+        })
         u = protein('HGNC', name='U')
         v = protein('HGNC', name='V')
         w = protein('HGNC', name='W')
@@ -77,13 +82,13 @@ class TestEdgeSummary(unittest.TestCase):
     def test_get_annotation_values(self):
         """Test getting annotation values."""
         expected = {
-            'Confidence': [
+            'Confidence': {
                 Entity(namespace='Confidence', identifier='High'),
                 Entity(namespace='Confidence', identifier='Low'),
-            ],
-            'Species': [
-                Entity(namespace='text', identifier='9606'),
-            ],
+            },
+            'Species': {
+                Entity(namespace='Species', identifier='9606'),
+            },
         }
 
         self.assertEqual({'Confidence', 'Species'}, get_annotations(sialic_acid_graph))
@@ -116,8 +121,26 @@ class TestEdgeSummary(unittest.TestCase):
     def test_get_unused_annotation_list_values(self):
         """Test getting unused annotation list values."""
         graph = BELGraph()
-        name = 'test'
+        annotation_key = 'test'
         a, b, c = 'abc'
-        graph.annotation_list[name] = {a, b, c}
-        graph.add_increases(protein(n(), n()), protein(n(), n()), citation=n(), evidence=n(), annotations={name: {a}})
-        self.assertEqual({name: {b, c}}, get_unused_list_annotation_values(graph))
+        graph.annotation_list[annotation_key] = {a, b, c}
+        graph.add_increases(
+            protein(n(), n()), protein(n(), n()),
+            citation=n(),
+            evidence=n(),
+            annotations={annotation_key: {a}},
+        )
+
+        rv = get_unused_list_annotation_values(graph)
+        self.assertIsInstance(rv, dict)
+        for k, v in rv.items():
+            self.assertIsInstance(k, str)
+            for li in v:
+                self.assertIs(li, Entity)
+
+        self.assertEqual({
+            annotation_key: {
+                Entity(namespace=annotation_key, identifier=b),
+                Entity(namespace=annotation_key, identifier=c),
+            },
+        }, rv)

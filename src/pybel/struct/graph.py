@@ -890,7 +890,7 @@ class BELGraph(nx.MultiDiGraph):
 
         1. ``DEFINE ANNOTATION CellLine AS URL "..."``
            ``SET CellLine = "NIH-3T3 cell"``
-           ``{'CellLine': dict(namespace='text', identifier=None, name='NIH-3T3 cell')}``
+           ``{'CellLine': dict(namespace='CellLine', identifier=None, name='NIH-3T3 cell')}``
         2. ``DEFINE ANNOTATION CellLine AS CURIE``
            ``SET CellLine = "bto:0000944 ! NIH-3T3 cell"``
            ``{'CellLine': dict(namespace='bto', identifier='0000944', name='NIH-3T3 cell')}``
@@ -905,8 +905,17 @@ class BELGraph(nx.MultiDiGraph):
             return self._clean_value_helper(key=key, namespace=key, values=values)
         if key in self.annotation_curie:
             raise NotImplementedError
-        # if key in self.annotation_url:  # this is a name given
-        return self._clean_value_helper(key=key, namespace='text', values=values)
+        if key in self.annotation_list:
+            if all(isinstance(v, Entity) for v in values):
+                return values
+            return [Entity(namespace=key, identifier=v) for v in values]
+        if key in self.annotation_pattern:
+            # TODO pattern checking?
+            return [Entity(namespace=key, identifier=v) for v in values]
+        if key in self.annotation_url:  # this is a name given
+            return self._clean_value_helper(key=key, namespace=key, values=values)
+
+        raise NotImplementedError(f'where is key {key}?')
 
     @staticmethod
     def _clean_value_helper(key, namespace, values):
@@ -922,13 +931,15 @@ class BELGraph(nx.MultiDiGraph):
                 ]
             elif all(isinstance(v, Entity) for v in values):
                 return values
+            elif all(isinstance(v, dict) for v in values):
+                return [Entity(**v) for v in values]
             else:
                 raise TypeError(f'list of wrong format for key {key}: {values}')
         if isinstance(values, dict):
             if all(isinstance(v, bool) for v in values.values()):
                 return [
-                    Entity(namespace=namespace, identifier=name)
-                    for name in sorted(values)
+                    Entity(namespace=namespace, identifier=identifier)
+                    for identifier in sorted(values)
                 ]
             raise TypeError(f'dictionary of wrong format for key {key}: {values}')
         raise TypeError(f'values of wrong data type for key {key}: {values}')

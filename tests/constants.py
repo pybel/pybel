@@ -279,14 +279,14 @@ class BelReconstitutionMixin(TestGraphMixin):
             CITATION: bel_simple_citation_1,
             EVIDENCE: evidence_1_extra,
             ANNOTATIONS: {
-                'Species': [Entity(namespace='text', name='9606')],
+                'Species': [Entity(namespace='Species', identifier='9606')],
             }
         })
         assert_has_edge(self, egfr, fadd, graph, only=True, **{
             RELATION: DECREASES,
             ANNOTATIONS: {
-                'Species': [Entity(namespace='text', name='9606')],
-                'CellLine': {'10B9 cell': True}
+                'Species': [Entity(namespace='Species', identifier='9606')],
+                'CellLine': [Entity(namespace='CellLine', identifier='10B9 cell')],
             },
             CITATION: bel_simple_citation_1,
             EVIDENCE: evidence_2
@@ -294,8 +294,8 @@ class BelReconstitutionMixin(TestGraphMixin):
         assert_has_edge(self, egfr, casp8, graph, only=True, **{
             RELATION: DIRECTLY_DECREASES,
             ANNOTATIONS: {
-                'Species': [Entity(namespace='text', name='9606')],
-                'CellLine': [Entity(namespace='text', name='10B9 cell')],
+                'Species': [Entity(namespace='Species', identifier='9606')],
+                'CellLine': [Entity(namespace='CellLine', identifier='10B9 cell')],
             },
             CITATION: bel_simple_citation_1,
             EVIDENCE: evidence_2,
@@ -303,7 +303,7 @@ class BelReconstitutionMixin(TestGraphMixin):
         assert_has_edge(self, fadd, casp8, graph, **{
             RELATION: INCREASES,
             ANNOTATIONS: {
-                'Species': [Entity(namespace='text', name='10116')],
+                'Species': [Entity(namespace='Species', identifier='10116')],
             },
             CITATION: bel_simple_citation_2,
             EVIDENCE: evidence_3,
@@ -311,7 +311,7 @@ class BelReconstitutionMixin(TestGraphMixin):
         assert_has_edge(self, akt1, casp8, graph, **{
             RELATION: ASSOCIATION,
             ANNOTATIONS: {
-                'Species': [Entity(namespace='text', name='10116')],
+                'Species': [Entity(namespace='Species', identifier='10116')],
             },
             CITATION: bel_simple_citation_2,
             EVIDENCE: evidence_3,
@@ -319,7 +319,7 @@ class BelReconstitutionMixin(TestGraphMixin):
         assert_has_edge(self, casp8, akt1, graph, **{
             RELATION: ASSOCIATION,
             ANNOTATIONS: {
-                'Species': [Entity(namespace='text', name='10116')],
+                'Species': [Entity(namespace='Species', identifier='10116')],
             },
             CITATION: bel_simple_citation_2,
             EVIDENCE: evidence_3,

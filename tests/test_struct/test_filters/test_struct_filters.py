@@ -158,6 +158,7 @@ class TestEdgeFilters(unittest.TestCase):
 
     def test_any_filter(self):
         graph = BELGraph()
+        graph.annotation_list['A'] = set('12345')
         graph.add_increases(Protein(n(), n()), Protein(n(), n()), citation=n(), evidence=n(), annotations={
             'A': {'1', '2', '3'}
         })
@@ -225,8 +226,9 @@ class TestEdgeFilters(unittest.TestCase):
 
     def test_all_filter(self):
         graph = BELGraph()
+        graph.annotation_list['A'] = set('12345')
         graph.add_increases(Protein(n(), n()), Protein(n(), n()), citation=n(), evidence=n(), annotations={
-            'A': {'1', '2', '3'}
+            'A': {'1', '2', '3'},
         })
 
         self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter(graph._clean_annotations({'A': {'1'}}))))
@@ -238,6 +240,7 @@ class TestEdgeFilters(unittest.TestCase):
 
     def test_all_filter_dict(self):
         graph = BELGraph()
+        graph.annotation_list['A'] = set('12345')
         a, b = Protein(namespace='hgnc', identifier='1', name='A'), Protein(namespace='hgnc', identifier='2', name='B')
         graph.add_increases(a, b, citation=n(), evidence=n(), annotations={
             'A': {'1', '2', '3'},
@@ -256,7 +259,3 @@ class TestEdgeFilters(unittest.TestCase):
         self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_all_filter(graph._clean_annotations({
             'A': {'4': True}
         }))))
-
-
-if __name__ == '__main__':
-    unittest.main()

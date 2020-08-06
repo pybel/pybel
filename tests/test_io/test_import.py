@@ -333,6 +333,11 @@ class TestFull(TestTokenParserBase):
     def setUp(self):
         super().setUp()
         self.graph = BELGraph()
+        self.graph.annotation_list.update({
+            'TestAnnotation1': {'A', 'B', 'C'},
+            'TestAnnotation2': {'X', 'Y', 'Z'},
+            'TestAnnotation3': {'D', 'E', 'F'},
+        })
         self.parser.graph = self.graph
         self.assertIn(GRAPH_ANNOTATION_MIRIAM, self.graph.graph, msg=f'Graph metadata: {self.graph.graph}')
 
@@ -422,15 +427,15 @@ class TestFull(TestTokenParserBase):
         self.assertEqual(2, len(self.parser.control_parser._annotations['TestAnnotation1']))
         self.assertEqual(
             [
-                Entity(namespace='text', identifier='A'),
-                Entity(namespace='text', identifier='B'),
+                Entity(namespace='TestAnnotation1', identifier='A'),
+                Entity(namespace='TestAnnotation1', identifier='B'),
             ],
             self.parser.control_parser._annotations['TestAnnotation1'],
         )
         self.assertEqual(1, len(self.parser.control_parser._annotations['TestAnnotation2']))
         self.assertEqual(
             [
-                Entity(namespace='text', identifier='X'),
+                Entity(namespace='TestAnnotation2', identifier='X'),
             ],
             self.parser.control_parser._annotations['TestAnnotation2'],
         )

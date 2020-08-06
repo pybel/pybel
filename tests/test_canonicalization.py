@@ -245,7 +245,7 @@ class TestSerializeBEL(unittest.TestCase):
         self.assertEqual(lines, list(_to_bel_lines_body(self.graph)))
 
     def test_simple(self):
-        """Tests a scenario with a qualified edge, but no annotaitons"""
+        """Test a scenario with a qualified edge, but no annotations."""
         self.graph.add_increases(
             Protein(namespace='HGNC', name='YFG1'),
             Protein(namespace='HGNC', name='YFG'),
@@ -268,7 +268,7 @@ class TestSerializeBEL(unittest.TestCase):
         self._help_check_lines(expected_lines)
 
     def test_single_annotation(self):
-        """Tests a scenario with a qualified edge, but no annotaitons"""
+        """Test a scenario with a qualified edge, but no annotations."""
         a1, v1 = map(lambda _: n(), range(2))
 
         self.graph.add_increases(
@@ -277,7 +277,7 @@ class TestSerializeBEL(unittest.TestCase):
             citation=self.citation,
             evidence=self.evidence,
             annotations={
-                a1: {v1}
+                a1: {v1},
             }
         )
 
@@ -301,13 +301,14 @@ class TestSerializeBEL(unittest.TestCase):
         a1, v1, v2 = map(lambda _: n(), range(3))
         v1, v2 = sorted([v1, v2])
 
+        self.graph.annotation_list[a1] = {v1, v2}
         self.graph.add_increases(
             Protein(namespace='HGNC', name='YFG1'),
             Protein(namespace='HGNC', name='YFG'),
             citation=self.citation,
             evidence=self.evidence,
             annotations={
-                a1: {v1, v2}
+                a1: {v1, v2},
             }
         )
 

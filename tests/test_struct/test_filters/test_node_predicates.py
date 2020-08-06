@@ -173,6 +173,7 @@ class TestNodePredicates(unittest.TestCase):
     def test_object_has_translocation(self):
         """p(HGNC: EGF) increases tloc(p(HGNC: VCP), GO:0005634, GO:0005737)"""
         g = BELGraph()
+        g.annotation_pattern['Species'] = r'\d+'
         u = protein(name='EFG', namespace='HGNC')
         v = protein(name='VCP', namespace='HGNC')
 
@@ -204,6 +205,8 @@ class TestNodePredicates(unittest.TestCase):
     def test_object_has_secretion(self):
         """p(MGI:Il4) increases sec(p(MGI:Cxcl1))"""
         g = BELGraph()
+        g.annotation_pattern['Species'] = r'\d+'
+        g.annotation_pattern['MeSH'] = '.*'
         u = protein(name='Il4', namespace='MGI')
         v = protein(name='Cxcl1', namespace='MGI')
 
@@ -235,6 +238,8 @@ class TestNodePredicates(unittest.TestCase):
     def test_subject_has_secretion(self):
         """sec(p(MGI:S100b)) increases a(CHEBI:"nitric oxide")"""
         g = BELGraph()
+        g.annotation_pattern['Species'] = r'\d+'
+        g.annotation_pattern['Cell'] = r'.*'
         u = protein(name='S100b', namespace='MGI')
         v = abundance(name='nitric oxide', namespace='CHEBI')
 
