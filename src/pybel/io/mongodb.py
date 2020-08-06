@@ -8,9 +8,10 @@ from typing import Any, List, Mapping, Optional, Tuple
 from pymongo import MongoClient
 from pymongo.collection import Collection
 
-from pybel import BELGraph, to_sbel
-from pybel.dsl import Entity, Variant
-from pybel.schema import is_valid_edge, is_valid_node
+from ..dsl import Entity, Variant
+from .sbel import to_sbel
+from ..schema import is_valid_edge, is_valid_node
+from ..struct import BELGraph
 
 __all__ = [
     '_entity_to_dict',
