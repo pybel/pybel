@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 """An exporter from PyBEL graphs to a local Mongo database."""
 
 import logging
@@ -14,7 +15,7 @@ from ..constants import (
     CONCEPT, FUNCTION, IDENTIFIER,
     NAME, SOURCE, TARGET, VARIANTS,
 )
-from ..dsl import Entity, Variant
+from ..dsl import Variant
 from ..schema import is_valid_edge, is_valid_node
 from ..struct import BELGraph
 
