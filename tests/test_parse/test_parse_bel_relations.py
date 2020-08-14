@@ -407,9 +407,14 @@ class TestRelations(TestTokenParserBase):
             CITATION: test_citation_dict,
             EVIDENCE: test_evidence_text,
             ANNOTATIONS: {
-                'ListAnnotation': {'a': True, 'b': True},
-                'ScalarAnnotation': {'c': True},
-            }
+                'ListAnnotation': [
+                    Entity(namespace='ListAnnotation', identifier='a'),
+                    Entity(namespace='ListAnnotation', identifier='b'),
+                ],
+                'ScalarAnnotation': [
+                    Entity(namespace='ScalarAnnotation', identifier='c'),
+                ],
+            },
         }
         self.assert_has_edge(sub, obj, only=True, **expected_attrs)
 
