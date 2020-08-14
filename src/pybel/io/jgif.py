@@ -20,7 +20,7 @@ from networkx.utils import open_file
 from pyparsing import ParseException
 
 from ..constants import (
-    ANNOTATIONS, CITATION, EVIDENCE, GRAPH_NAMESPACE_URL, GRAPH_ANNOTATION_URL, METADATA_AUTHORS, METADATA_CONTACT,
+    ANNOTATIONS, CITATION, EVIDENCE, GRAPH_ANNOTATION_URL, GRAPH_NAMESPACE_URL, METADATA_AUTHORS, METADATA_CONTACT,
     METADATA_INSERT_KEYS, METADATA_LICENSES, RELATION, UNQUALIFIED_EDGES,
 )
 from ..exceptions import NakedNameWarning, UndefinedNamespaceWarning
@@ -224,7 +224,7 @@ def from_cbn_jgif(graph_jgif_dict):
     return graph
 
 
-def from_jgif(graph_jgif_dict, parser_kwargs: Optional[Mapping[str, Any]] = None):
+def from_jgif(graph_jgif_dict, parser_kwargs: Optional[Mapping[str, Any]] = None):  # noqa:C901
     """Build a BEL graph from a JGIF JSON object.
 
     :param dict graph_jgif_dict: The JSON object representing the graph in JGIF format

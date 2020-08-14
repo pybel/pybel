@@ -53,7 +53,6 @@ class TestSanitizeDate(unittest.TestCase):
         self.assertEqual(None, sanitize_date('2012 Early Spring'))
 
 
-@unittest.skip('pubmed down')
 class TestCitations(TemporaryCacheMixin):
     """Tests for citations."""
 
