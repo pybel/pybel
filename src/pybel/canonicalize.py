@@ -208,16 +208,19 @@ def _evidence_sort_key(t: EdgeTuple) -> str:
     return t[3][EVIDENCE]
 
 
-def _set_annotation_to_str(annotation_data: Mapping[str, Mapping[str, bool]], key: str) -> str:
+def _set_annotation_to_str(annotation_data: Mapping[str, List[Entity]], key: str, use_curie: bool = False) -> str:
     """Return a set annotation string."""
     value = annotation_data[key]
 
     if len(value) == 1:
-        return 'SET {} = "{}"'.format(key, list(value)[0])
+        value = list(value)[0]
+        return f'SET {key} = "{value if use_curie else value.identifier}"'
 
-    x = ('"{}"'.format(v) for v in sorted(value, key=lambda e: (e.namespace, e.identifier, e.name)))
-
-    return 'SET {} = {{{}}}'.format(key, ', '.join(x))
+    value_strings = ', '.join(
+        f'"{v if use_curie else v.identifier}"'
+        for v in sorted(value, key=lambda e: (e.namespace, e.identifier, e.name))
+    )
+    return f'SET {key} = {{{value_strings}}}'
 
 
 def _unset_annotation_to_str(keys: List[str]) -> str:
@@ -275,7 +278,7 @@ def _to_bel_lines_body(graph, use_identifiers: bool = False) -> Iterable[str]:
 
                 keys = sorted(annotations_data) if annotations_data is not None else tuple()
                 for key in keys:
-                    yield _set_annotation_to_str(annotations_data, key)
+                    yield _set_annotation_to_str(annotations_data, key, use_curie=key in graph.annotation_curie)
 
                 yield graph.edge_to_bel(u, v, data, use_identifiers=use_identifiers)
 

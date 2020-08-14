@@ -331,8 +331,8 @@ class TestFull(TestTokenParserBase):
         )
 
     def setUp(self):
-        super().setUp()
-        self.graph = BELGraph()
+        self.parser.clear()
+        self.parser.graph = BELGraph()
         self.graph.annotation_list.update({
             'TestAnnotation1': {'A', 'B', 'C'},
             'TestAnnotation2': {'X', 'Y', 'Z'},

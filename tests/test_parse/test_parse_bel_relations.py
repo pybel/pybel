@@ -12,7 +12,8 @@ from pybel.canonicalize import edge_to_bel
 from pybel.constants import (
     ABUNDANCE, ACTIVITY, ANNOTATIONS, BIOPROCESS, CAUSES_NO_CHANGE, CITATION, COMPLEX, COMPOSITE, CONCEPT, CORRELATION,
     DECREASES, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE, FROM_LOC, FUNCTION, GENE, GMOD,
-    HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, IDENTIFIER, INCREASES, IS_A, KIND, LOCATION, MEMBERS, MODIFIER, NAME,
+    GRAPH_ANNOTATION_LIST, HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, HGVS, IDENTIFIER, INCREASES, IS_A, KIND, LOCATION,
+    MEMBERS, MODIFIER, NAME,
     NAMESPACE, NEGATIVE_CORRELATION, NO_CORRELATION, ORTHOLOGOUS, PART_OF, PATHOLOGY, POSITIVE_CORRELATION, PRODUCTS,
     PROTEIN, RATE_LIMITING_STEP_OF, REACTANTS, REACTION, REGULATES, RELATION, RNA, SOURCE, SOURCE_MODIFIER,
     SUBPROCESS_OF, TARGET, TARGET_MODIFIER, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION, VARIANTS,
@@ -353,9 +354,13 @@ class TestRelations(TestTokenParserBase):
         Tests simple triple"""
         statement = 'g(HGNC:CAT, location(GO:intracellular)) directlyDecreases abundance(CHEBI:"hydrogen peroxide")'
 
+        self.graph.annotation_list.update({
+            'ListAnnotation': set('abef'),
+            'ScalarAnnotation': set('cghi'),
+        })
         annotations = self.parser.graph._clean_annotations({
             'ListAnnotation': {'a', 'b'},
-            'ScalarAnnotation': {'c'}
+            'ScalarAnnotation': {'c'},
         })
 
         self.parser.control_parser._annotations.update(annotations)
@@ -406,7 +411,7 @@ class TestRelations(TestTokenParserBase):
                 'ScalarAnnotation': {'c': True},
             }
         }
-        self.assert_has_edge(sub, obj, **expected_attrs)
+        self.assert_has_edge(sub, obj, only=True, **expected_attrs)
 
     def test_rateLimitingStepOf_subjectActivity(self):
         """3.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_ratelimitingstepof"""

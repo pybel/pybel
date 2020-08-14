@@ -364,8 +364,13 @@ class TestParseControl2(TestParseControl):
         v = str(randint(0, 1e5))
         s = [
             SET_CITATION_TEST,
-            'SET CustomRegex = "{}"'.format(v)
+            f'SET CustomRegex = "{v}"'
         ]
         self.parser.parse_lines(s)
 
-        self.assertEqual(Entity(namespace='CustomRegex', identifier=v), self.parser._annotations['CustomRegex'])
+        self.assertEqual(
+            [
+                Entity(namespace='CustomRegex', identifier=v),
+            ],
+            self.parser._annotations['CustomRegex'],
+        )

@@ -139,7 +139,7 @@ def _annotation_iter_helper(graph: BELGraph) -> Iterable[str]:
     )
 
 
-def get_unused_list_annotation_values(graph: BELGraph) -> Mapping[str, Set[Entity]]:
+def get_unused_list_annotation_values(graph: BELGraph) -> Mapping[str, Set[str]]:
     """Get all of the unused values for list annotations.
 
     :param graph: A BEL graph
@@ -147,10 +147,9 @@ def get_unused_list_annotation_values(graph: BELGraph) -> Mapping[str, Set[Entit
     """
     result = {}
     for annotation, values in graph.annotation_list.items():
-        used_values = get_annotation_values(graph, annotation)
-        if len(used_values) == len(values):  # all values have been used
-            continue
-        result[annotation] = {v for v in values if v not in used_values}
+        unused = values - {e.identifier for e in get_annotation_values(graph, annotation)}
+        if unused:
+            result[annotation] = unused
     return result
 
 

@@ -5,6 +5,7 @@
 import hashlib
 import json
 import logging
+import re
 import typing
 from collections import defaultdict
 from collections.abc import Iterable, MutableMapping
@@ -96,9 +97,13 @@ def tokenize_version(version_string: str) -> Tuple[int, int, int]:
     return int(major), int(minor), int(patch)
 
 
+_re = re.compile(r'^[a-zA-Z0-9-\.]*$')
+
+
 def ensure_quotes(s: str) -> str:
     """Quote a string that isn't solely alphanumeric."""
-    return '"{}"'.format(s) if not s.isalnum() else s
+    s.isalnum()
+    return s if _re.match(s) else f'"{s}"'
 
 
 CREATION_DATE_FMT = '%Y-%m-%dT%H:%M:%S'

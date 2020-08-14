@@ -70,7 +70,6 @@ sialic_acid_graph.annotation_url.update({
 sialic_acid_graph.annotation_pattern.update({
     'Species': SPECIES_PATTERN,
 })
-sialic_acid_graph.annotation_list['Confidence'] = {'Very Low', 'Low', 'Medium', 'High', 'Very High'}
 
 sialic_acid = Abundance(name='sialic acid', namespace='chebi', identifier='26667')
 cd33 = Protein(

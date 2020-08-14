@@ -78,18 +78,17 @@ class BELGraph(nx.MultiDiGraph):
 
         self._warnings = []
 
-        self.graph[GRAPH_PYBEL_VERSION] = get_version()
-        self.graph[GRAPH_METADATA] = {}
-
-        self.graph[GRAPH_NAMESPACE_URL] = {}
-        self.graph[GRAPH_NAMESPACE_PATTERN] = {}
-
-        self.graph[GRAPH_ANNOTATION_URL] = {}
-        self.graph[GRAPH_ANNOTATION_PATTERN] = {}
-        self.graph[GRAPH_ANNOTATION_LIST] = defaultdict(set)
-
-        self.graph[GRAPH_ANNOTATION_CURIE] = set()
-        self.graph[GRAPH_ANNOTATION_MIRIAM] = set()
+        self.graph.update({
+            GRAPH_PYBEL_VERSION: get_version(),
+            GRAPH_METADATA: {},
+            GRAPH_NAMESPACE_URL: {},
+            GRAPH_NAMESPACE_PATTERN: {},
+            GRAPH_ANNOTATION_URL: {},
+            GRAPH_ANNOTATION_PATTERN: {},
+            GRAPH_ANNOTATION_LIST: defaultdict(set),
+            GRAPH_ANNOTATION_CURIE: set(),
+            GRAPH_ANNOTATION_MIRIAM: set(),
+        })
 
         if name:
             self.name = name
@@ -118,13 +117,15 @@ class BELGraph(nx.MultiDiGraph):
         if path:
             self.path = path
 
-        #: A refernce to the parent graph
+        #: A reference to the parent graph
         self.parent = None
         self._count = CountDispatch(self)
         self._expand = ExpandDispatch(self)
         self._induce = InduceDispatch(self)
         self._plot = PlotDispatch(self)
         self._summary = SummarizeDispatch(self)
+
+        self.raise_on_missing_annotations = True
 
     def child(self) -> 'BELGraph':
         """Create an empty graph with a "parent" reference back to this one."""
@@ -322,11 +323,15 @@ class BELGraph(nx.MultiDiGraph):
     @property
     def annotation_miriam(self) -> Set[str]:  # noqa: D401
         """The set of annotations defined by MIRIAM."""
+        if GRAPH_ANNOTATION_MIRIAM not in self.graph:
+            self.graph[GRAPH_ANNOTATION_MIRIAM] = set()
         return self.graph[GRAPH_ANNOTATION_MIRIAM]
 
     @property
     def annotation_curie(self) -> Set[str]:  # noqa: D401
         """The set of annotations defined by CURIE."""
+        if GRAPH_ANNOTATION_CURIE not in self.graph:
+            self.graph[GRAPH_ANNOTATION_CURIE] = set()
         return self.graph[GRAPH_ANNOTATION_CURIE]
 
     @property
@@ -900,22 +905,45 @@ class BELGraph(nx.MultiDiGraph):
         """
         return {key: self._clean_value(key, values) for key, values in annotations_dict.items()}
 
-    def _clean_value(self, key, values) -> List[Entity]:
+    def _clean_value(self, key, values: Union[str, Entity, List[str], List[Mapping[str, str]], List[Entity]]) -> List[Entity]:
         if key in self.annotation_miriam:  # this annotation was given by a lookup
             return self._clean_value_helper(key=key, namespace=key, values=values)
         if key in self.annotation_curie:
-            raise NotImplementedError
+            if isinstance(values, Entity):
+                return [values]
+            if all(isinstance(v, dict) for v in values):
+                return [Entity(**v) for v in values]
+            if not all(isinstance(v, Entity) for v in values):
+                raise ValueError('if annotation_curie, all must be given as Entity instances')
+            return values
+        if key in self.annotation_miriam:
+            raise NotImplementedError('parsing of annotation as MIRIAM not yet implemented')
         if key in self.annotation_list:
+            if isinstance(values, str):
+                return [Entity(namespace=key, identifier=values)]
             if all(isinstance(v, Entity) for v in values):
                 return values
-            return [Entity(namespace=key, identifier=v) for v in values]
+            if all(isinstance(v, dict) for v in values):
+                return [Entity(**v) for v in values]
+            if all(isinstance(v, str) for v in values):
+                return [Entity(namespace=key, identifier=v) for v in values]
+            raise TypeError(f'Mixed values: {values}')
         if key in self.annotation_pattern:
             # TODO pattern checking?
-            return [Entity(namespace=key, identifier=v) for v in values]
+            if isinstance(values, str):
+                return [Entity(namespace=key, identifier=values)]
+            if all(isinstance(v, Entity) for v in values):
+                return values
+            if all(isinstance(v, str) for v in values):
+                return [Entity(namespace=key, identifier=v) for v in values]
+            raise TypeError(f'Mixed values: {values}')
         if key in self.annotation_url:  # this is a name given
             return self._clean_value_helper(key=key, namespace=key, values=values)
 
-        raise NotImplementedError(f'where is key {key}?')
+        if self.raise_on_missing_annotations:
+            raise NotImplementedError(f'where is key {key}?')
+
+        return self._clean_value_helper(key=key, namespace=key, values=values)
 
     @staticmethod
     def _clean_value_helper(key, namespace, values):

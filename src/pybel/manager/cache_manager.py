@@ -331,7 +331,7 @@ class NamespaceManager(BaseManager):
         :param url: The url of the annotation source
         :param entities: The names of the annotation entries from the given url's document
         """
-        names = {e.identifier for e in entities}
+        names = [e.identifier if isinstance(e, Entity) else e for e in entities]
         annotation_filter = and_(Namespace.url == url, NamespaceEntry.name.in_(names))
         return self.session.query(NamespaceEntry).join(Namespace).filter(annotation_filter).all()
 

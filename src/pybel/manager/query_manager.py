@@ -23,9 +23,12 @@ __all__ = [
 def graph_from_edges(edges: Iterable[Edge], **kwargs) -> BELGraph:
     """Build a BEL graph from edges."""
     graph = BELGraph(**kwargs)
+    graph.raise_on_missing_annotations = False
 
     for edge in edges:
         edge.insert_into_graph(graph)
+
+    graph.raise_on_missing_annotations = True
 
     return graph
 

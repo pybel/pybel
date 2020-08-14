@@ -122,25 +122,15 @@ class TestEdgeSummary(unittest.TestCase):
         """Test getting unused annotation list values."""
         graph = BELGraph()
         annotation_key = 'test'
-        a, b, c = 'abc'
-        graph.annotation_list[annotation_key] = {a, b, c}
+        graph.annotation_list[annotation_key] = set('abc')
         graph.add_increases(
             protein(n(), n()), protein(n(), n()),
             citation=n(),
             evidence=n(),
-            annotations={annotation_key: {a}},
+            annotations={annotation_key: {'a'}},
         )
 
         rv = get_unused_list_annotation_values(graph)
         self.assertIsInstance(rv, dict)
-        for k, v in rv.items():
-            self.assertIsInstance(k, str)
-            for li in v:
-                self.assertIs(li, Entity)
 
-        self.assertEqual({
-            annotation_key: {
-                Entity(namespace=annotation_key, identifier=b),
-                Entity(namespace=annotation_key, identifier=c),
-            },
-        }, rv)
+        self.assertEqual({annotation_key: set('bc')}, rv)

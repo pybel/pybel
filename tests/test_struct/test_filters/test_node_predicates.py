@@ -141,6 +141,7 @@ class TestNodePredicates(unittest.TestCase):
     def test_p1_active(self):
         """cat(p(HGNC:HSD11B1)) increases deg(a(CHEBI:cortisol))"""
         g = BELGraph()
+        g.annotation_pattern['Species'] = r'\d+'
 
         u = protein(name='HSD11B1', namespace='HGNC')
         v = abundance(name='cortisol', namespace='CHEBI', identifier='17650')

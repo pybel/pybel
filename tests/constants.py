@@ -119,9 +119,10 @@ def assert_has_edge(
     u: BaseEntity,
     v: BaseEntity,
     graph: BELGraph,
+    *,
+    only: bool = False,
     permissive: bool = True,
     use_identifiers: bool = False,
-    only: bool = False,
     **expected_edge_data
 ):
     """A helper function for checking if an edge with the given properties is contained within a graph."""
@@ -144,18 +145,22 @@ def assert_has_edge(
 
     if only:
         _key, actual_edge_data = list(graph[u][v].items())[0]
-        self.assertEqual(_remove_line(expected_edge_data), _remove_line(actual_edge_data))
+        self.assertEqual(_remove_line(expected_edge_data), _remove_line(actual_edge_data), msg='Only entry not equal')
     else:
+        actual_dicts = {
+            k: _remove_line(v)
+            for k, v in graph[u][v].items()
+        }
         if permissive:
-            matches = any_subdict_matches(graph[u][v], expected_edge_data)
+            matches = any_subdict_matches(actual_dicts, _remove_line(expected_edge_data))
         else:
-            matches = any_dict_matches(graph[u][v], expected_edge_data)
+            matches = any_dict_matches(actual_dicts, _remove_line(expected_edge_data))
 
         msg = 'No edge ({}, {}) with correct properties. expected:\n {}\nbut got:\n{}'.format(
             u,
             v,
             dumps(expected_edge_data, indent=2, sort_keys=True),
-            str(graph[u][v])
+            dumps(actual_dicts, indent=2, sort_keys=True),
         )
         self.assertTrue(matches, msg=msg)
 
@@ -167,9 +172,9 @@ class TestGraphMixin(unittest.TestCase):
         """Help assert node membership."""
         assert_has_node(self, n, g, **kwargs)
 
-    def assert_has_edge(self, g: BELGraph, u: BaseEntity, v: BaseEntity, **kwargs):
+    def assert_has_edge(self, g: BELGraph, u: BaseEntity, v: BaseEntity, only=False, permissive=True, **kwargs):
         """Help assert edge membership."""
-        assert_has_edge(self, u, v, g, **kwargs)
+        assert_has_edge(self, u, v, g, only=only, permissive=permissive, **kwargs)
 
 
 class TestTokenParserBase(unittest.TestCase):
@@ -178,9 +183,8 @@ class TestTokenParserBase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Build a BEL graph and BEL parser that persist through the class."""
-        cls.graph = BELGraph()
         cls.parser = BELParser(
-            cls.graph,
+            BELGraph(),  # gets overwritten in each test
             autostreamline=False,
             disallow_unqualified_translocations=True,
             namespace_to_pattern={
@@ -196,12 +200,17 @@ class TestTokenParserBase(unittest.TestCase):
                 'MESH': re.compile(r'.*'),
                 'MGI': re.compile(r'.*'),
                 'dbSNP': re.compile(r'.*'),
-            }
+            },
         )
+
+    @property
+    def graph(self):
+        return self.parser.graph
 
     def setUp(self):
         """Clear the parser at the beginning of each test."""
         self.parser.clear()
+        self.parser.graph = BELGraph()  # because all the good stuff in the graph is cleared
 
     def assert_has_node(self, member: BaseEntity, **kwargs):
         """Assert that this test case's graph has the given node."""
@@ -260,15 +269,8 @@ class BelReconstitutionMixin(TestGraphMixin):
         self.assertIn(fadd, graph)
         self.assertIn(casp8, graph)
 
-        bel_simple_citation_1 = {
-            IDENTIFIER: "123455",
-            NAMESPACE: CITATION_TYPE_PUBMED,
-        }
-
-        bel_simple_citation_2 = {
-            IDENTIFIER: "123456",
-            NAMESPACE: CITATION_TYPE_PUBMED,
-        }
+        bel_simple_citation_1 = citation_dict(namespace=CITATION_TYPE_PUBMED, identifier="123455")
+        bel_simple_citation_2 = citation_dict(namespace=CITATION_TYPE_PUBMED, identifier="123456")
 
         evidence_1_extra = "Evidence 1 w extra notes"
         evidence_2 = 'Evidence 2'
@@ -300,7 +302,7 @@ class BelReconstitutionMixin(TestGraphMixin):
             CITATION: bel_simple_citation_1,
             EVIDENCE: evidence_2,
         })
-        assert_has_edge(self, fadd, casp8, graph, **{
+        assert_has_edge(self, fadd, casp8, graph, only=True, **{
             RELATION: INCREASES,
             ANNOTATIONS: {
                 'Species': [Entity(namespace='Species', identifier='10116')],
@@ -308,7 +310,7 @@ class BelReconstitutionMixin(TestGraphMixin):
             CITATION: bel_simple_citation_2,
             EVIDENCE: evidence_3,
         })
-        assert_has_edge(self, akt1, casp8, graph, **{
+        assert_has_edge(self, akt1, casp8, graph, only=True, **{
             RELATION: ASSOCIATION,
             ANNOTATIONS: {
                 'Species': [Entity(namespace='Species', identifier='10116')],
@@ -316,7 +318,7 @@ class BelReconstitutionMixin(TestGraphMixin):
             CITATION: bel_simple_citation_2,
             EVIDENCE: evidence_3,
         })
-        assert_has_edge(self, casp8, akt1, graph, **{
+        assert_has_edge(self, casp8, akt1, graph, only=True, **{
             RELATION: ASSOCIATION,
             ANNOTATIONS: {
                 'Species': [Entity(namespace='Species', identifier='10116')],
@@ -453,7 +455,7 @@ class BelReconstitutionMixin(TestGraphMixin):
         self.assertEqual(2, graph.number_of_nodes(), msg='Wrong number of nodes retrieved from slushy.bel')
         self.assertEqual(1, graph.number_of_edges(), msg='Wrong nunber of edges retrieved from slushy.bel')
 
-        assert_has_edge(self, akt1, egfr, graph, **{
+        assert_has_edge(self, akt1, egfr, graph, only=True, **{
             RELATION: INCREASES,
             CITATION: citation_1,
             EVIDENCE: evidence_1,
@@ -477,5 +479,5 @@ class BelReconstitutionMixin(TestGraphMixin):
         self.assertIn(adgrb_complex, graph)
         self.assertIn(achlorhydria, graph)
 
-        assert_has_edge(self, adgrb1, adgrb_complex, graph, relation=PART_OF)
-        assert_has_edge(self, adgrb2, adgrb_complex, graph, relation=PART_OF)
+        assert_has_edge(self, adgrb1, adgrb_complex, graph, only=True, relation=PART_OF)
+        assert_has_edge(self, adgrb2, adgrb_complex, graph, only=True, relation=PART_OF)

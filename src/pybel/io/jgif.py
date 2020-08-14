@@ -20,7 +20,7 @@ from networkx.utils import open_file
 from pyparsing import ParseException
 
 from ..constants import (
-    ANNOTATIONS, CITATION, EVIDENCE, METADATA_AUTHORS, METADATA_CONTACT,
+    ANNOTATIONS, CITATION, EVIDENCE, GRAPH_NAMESPACE_URL, GRAPH_ANNOTATION_URL, METADATA_AUTHORS, METADATA_CONTACT,
     METADATA_INSERT_KEYS, METADATA_LICENSES, RELATION, UNQUALIFIED_EDGES,
 )
 from ..exceptions import NakedNameWarning, UndefinedNamespaceWarning
@@ -198,6 +198,8 @@ def from_cbn_jgif(graph_jgif_dict):
     """
     graph_jgif_dict = map_cbn(graph_jgif_dict)
 
+    graph_jgif_dict['graph'][GRAPH_NAMESPACE_URL] = NAMESPACE_URLS
+    graph_jgif_dict['graph'][GRAPH_ANNOTATION_URL] = ANNOTATION_URLS
     graph_jgif_dict['graph']['metadata'].update({
         METADATA_AUTHORS: 'Causal Biological Networks Database',
         METADATA_LICENSES: """
@@ -219,10 +221,6 @@ def from_cbn_jgif(graph_jgif_dict):
     })
 
     graph = from_jgif(graph_jgif_dict)
-
-    graph.namespace_url.update(NAMESPACE_URLS)
-    graph.annotation_url.update(ANNOTATION_URLS)
-
     return graph
 
 
@@ -245,6 +243,10 @@ def from_jgif(graph_jgif_dict, parser_kwargs: Optional[Mapping[str, Any]] = None
         for key in METADATA_INSERT_KEYS:
             if key in metadata:
                 graph.document[key] = metadata[key]
+
+    for k in (GRAPH_ANNOTATION_URL, GRAPH_NAMESPACE_URL):
+        if k in root:
+            graph.graph[k] = root[k]
 
     parser = BELParser(graph, namespace_to_pattern=NAMESPACE_TO_PATTERN)
     parser.bel_term.addParseAction(parser.handle_term)
