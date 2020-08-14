@@ -78,7 +78,7 @@ class ControlParser(BaseParser):
         self.citation_db = None
         self.citation_db_id = None
         self.evidence = None
-        self._annotations = {}
+        self.annotations = {}
         self.required_annotations = required_annotations or []
 
         annotation_key = ppc.identifier('key').setParseAction(self.handle_annotation_key)
@@ -256,7 +256,7 @@ class ControlParser(BaseParser):
         """Handle a ``SET X = "Y"`` statement."""
         key, value = tokens['key'], tokens['value']
         self.raise_for_invalid_annotation_value(line, position, key, value)
-        self._annotations[key] = [Entity(namespace=key, identifier=value)]
+        self.annotations[key] = [Entity(namespace=key, identifier=value)]
         return tokens
 
     def handle_set_command_list(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
@@ -264,7 +264,7 @@ class ControlParser(BaseParser):
         key, values = tokens['key'], tokens['values']
         for value in values:
             self.raise_for_invalid_annotation_value(line, position, key, value)
-        self._annotations[key] = [Entity(namespace=key, identifier=value) for value in values]
+        self.annotations[key] = [Entity(namespace=key, identifier=value) for value in values]
         return tokens
 
     def handle_unset_statement_group(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
@@ -306,7 +306,7 @@ class ControlParser(BaseParser):
 
         :raises: MissingAnnotationKeyWarning
         """
-        if annotation not in self._annotations:
+        if annotation not in self.annotations:
             raise MissingAnnotationKeyWarning(self.get_line_number(), line, position, annotation)
 
     def handle_unset_command(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
@@ -316,7 +316,7 @@ class ControlParser(BaseParser):
         """
         key = tokens['key']
         self.validate_unset_command(line, position, key)
-        del self._annotations[key]
+        del self.annotations[key]
         return tokens
 
     def handle_unset_list(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
@@ -331,7 +331,7 @@ class ControlParser(BaseParser):
                 self.evidence = None
             else:
                 self.validate_unset_command(line, position, key)
-                del self._annotations[key]
+                del self.annotations[key]
 
         return tokens
 
@@ -345,7 +345,7 @@ class ControlParser(BaseParser):
         return {
             EVIDENCE: self.evidence,
             CITATION: self.get_citation(),
-            ANNOTATIONS: self._annotations.copy(),
+            ANNOTATIONS: self.annotations.copy(),
         }
 
     def get_citation(self) -> Optional[CitationDict]:
@@ -360,7 +360,7 @@ class ControlParser(BaseParser):
         return [
             required_annotation
             for required_annotation in self.required_annotations
-            if required_annotation not in self._annotations
+            if required_annotation not in self.annotations
         ]
 
     def clear_citation(self) -> None:
@@ -370,7 +370,7 @@ class ControlParser(BaseParser):
 
         if self.citation_clearing:
             self.evidence = None
-            self._annotations.clear()
+            self.annotations.clear()
 
     def clear(self) -> None:
         """Clear the statement_group, citation, evidence, and annotations."""
@@ -378,4 +378,4 @@ class ControlParser(BaseParser):
         self.citation_db = None
         self.citation_db_id = None
         self.evidence = None
-        self._annotations.clear()
+        self.annotations.clear()

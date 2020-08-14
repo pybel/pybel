@@ -2002,7 +2002,7 @@ class TestTransformation(TestTokenParserBase):
         self.parser.clear()
         self.assertEqual(0, self.parser.graph.number_of_nodes())
         self.assertEqual(0, self.parser.graph.number_of_edges())
-        self.assertEqual(0, len(self.parser.control_parser._annotations))
+        self.assertEqual(0, len(self.parser.control_parser.annotations))
         self.assertFalse(self.parser.control_parser.citation_is_set)
 
 

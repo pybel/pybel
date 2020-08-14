@@ -80,10 +80,10 @@ class TestParseControlUnsetStatementErrors(TestParseControl):
             'SET Custom2 = "Custom2_A"',
         ]
         self.parser.parse_lines(s)
-        self.assertIn('Custom1', self.parser._annotations)
-        self.assertIn('Custom2', self.parser._annotations)
+        self.assertIn('Custom1', self.parser.annotations)
+        self.assertIn('Custom2', self.parser.annotations)
         self.parser.parseString('UNSET {Custom1,Custom2}')
-        self.assertFalse(self.parser._annotations)
+        self.assertFalse(self.parser.annotations)
 
     def test_unset_list_spaced(self):
         """Tests unsetting an annotation list, with spaces in it"""
@@ -93,10 +93,10 @@ class TestParseControlUnsetStatementErrors(TestParseControl):
             'SET Custom2 = "Custom2_A"',
         ]
         self.parser.parse_lines(s)
-        self.assertIn('Custom1', self.parser._annotations)
-        self.assertIn('Custom2', self.parser._annotations)
+        self.assertIn('Custom1', self.parser.annotations)
+        self.assertIn('Custom2', self.parser.annotations)
         self.parser.parseString('UNSET {Custom1, Custom2}')
-        self.assertFalse(self.parser._annotations)
+        self.assertFalse(self.parser.annotations)
 
 
 class TestSetCitation(unittest.TestCase):
@@ -275,7 +275,7 @@ class TestParseControl2(TestParseControl):
             'Custom1': [Entity(namespace='Custom1', identifier='Custom1_A')],
         }
 
-        self.assertEqual(expected_annotation, self.parser._annotations)
+        self.assertEqual(expected_annotation, self.parser.annotations)
 
     def test_custom_annotation_list(self):
         s = [
@@ -291,7 +291,7 @@ class TestParseControl2(TestParseControl):
             ],
         }
 
-        self.assertEqual(expected_annotation, self.parser._annotations)
+        self.assertEqual(expected_annotation, self.parser.annotations)
 
         expected_dict = {
             ANNOTATIONS: expected_annotation,
@@ -317,7 +317,7 @@ class TestParseControl2(TestParseControl):
         self.parser.parseString(s1)
         self.parser.parseString(s2)
 
-        self.assertEqual({}, self.parser._annotations)
+        self.assertEqual({}, self.parser.annotations)
 
     def test_unset_custom(self):
         statements = [
@@ -328,7 +328,7 @@ class TestParseControl2(TestParseControl):
 
         self.parser.parse_lines(statements)
 
-        self.assertEqual({}, self.parser._annotations)
+        self.assertEqual({}, self.parser.annotations)
 
     def test_reset_citation(self):
         s1_identifier = str(randint(0, 1e7))
@@ -351,13 +351,13 @@ class TestParseControl2(TestParseControl):
         self.assertEqual(s3_identifier, self.parser.citation_db_id)
 
         self.parser.parseString('UNSET {Custom1,Evidence}')
-        self.assertNotIn('Custom1', self.parser._annotations)
+        self.assertNotIn('Custom1', self.parser.annotations)
         self.assertIsNone(self.parser.evidence)
-        self.assertIn('Custom2', self.parser._annotations)
+        self.assertIn('Custom2', self.parser.annotations)
         self.assertTrue(self.parser.citation_is_set)
 
         self.parser.parseString('UNSET ALL')
-        self.assertEqual(0, len(self.parser._annotations))
+        self.assertEqual(0, len(self.parser.annotations))
         self.assertFalse(self.parser.citation_is_set)
 
     def test_set_regex(self):
@@ -372,5 +372,5 @@ class TestParseControl2(TestParseControl):
             [
                 Entity(namespace='CustomRegex', identifier=v),
             ],
-            self.parser._annotations['CustomRegex'],
+            self.parser.annotations['CustomRegex'],
         )

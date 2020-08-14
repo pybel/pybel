@@ -801,11 +801,11 @@ class BELParser(BaseParser):
         else:
             return self.graph.add_qualified_edge(source=source, target=target, relation=relation, **d)
 
-    def _add_qualified_edge(self, *, source, source_modifier, relation, target, target_modifier, annotations) -> str:
+    def _add_qualified_edge(self, *, source, source_modifier, relation, target, target_modifier) -> str:
         """Add an edge, then adds the opposite direction edge if it should."""
         d = dict(
             relation=relation,
-            annotations=annotations,
+            annotations=self.control_parser.annotations,
         )
         if relation in TWO_WAY_RELATIONS:
             self._add_qualified_edge_helper(
@@ -823,17 +823,11 @@ class BELParser(BaseParser):
         target = self.ensure_node(tokens[TARGET])
         target_modifier = modifier_po_to_dict(tokens[TARGET])
 
-        annotations = self._get_prepared_annotations()
-
         return self._add_qualified_edge(
             source=source, source_modifier=source_modifier,
             relation=relation,
             target=target, target_modifier=target_modifier,
-            annotations=annotations,
         )
-
-    def _get_prepared_annotations(self):
-        return self.control_parser._annotations
 
     def _handle_relation_harness(self, line: str, position: int, tokens: Union[ParseResults, Dict]) -> ParseResults:
         """Handle BEL relations based on the policy specified on instantiation.

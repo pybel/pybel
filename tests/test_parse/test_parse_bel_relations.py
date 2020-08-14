@@ -363,7 +363,7 @@ class TestRelations(TestTokenParserBase):
             'ScalarAnnotation': {'c'},
         })
 
-        self.parser.control_parser._annotations.update(annotations)
+        self.parser.control_parser.annotations.update(annotations)
 
         result = self.parser.relation.parseString(statement)
 

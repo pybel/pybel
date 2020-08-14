@@ -384,9 +384,9 @@ class TestFull(TestTokenParserBase):
 
         self.parser.parse_lines(statements)
 
-        self.assertEqual(2, len(self.parser.control_parser._annotations))
-        self.assertIn('TestAnnotation1', self.parser.control_parser._annotations)
-        self.assertIn('TestAnnotation2', self.parser.control_parser._annotations)
+        self.assertEqual(2, len(self.parser.control_parser.annotations))
+        self.assertIn('TestAnnotation1', self.parser.control_parser.annotations)
+        self.assertIn('TestAnnotation2', self.parser.control_parser.annotations)
 
         test_node_1 = Gene(namespace='TESTNS', name='1')
         test_node_2 = Gene(namespace='TESTNS', name='2')
@@ -421,23 +421,23 @@ class TestFull(TestTokenParserBase):
 
         self.parser.parse_lines(statements)
 
-        self.assertEqual(2, len(self.parser.control_parser._annotations))
-        self.assertIn('TestAnnotation1', self.parser.control_parser._annotations)
-        self.assertIn('TestAnnotation2', self.parser.control_parser._annotations)
-        self.assertEqual(2, len(self.parser.control_parser._annotations['TestAnnotation1']))
+        self.assertEqual(2, len(self.parser.control_parser.annotations))
+        self.assertIn('TestAnnotation1', self.parser.control_parser.annotations)
+        self.assertIn('TestAnnotation2', self.parser.control_parser.annotations)
+        self.assertEqual(2, len(self.parser.control_parser.annotations['TestAnnotation1']))
         self.assertEqual(
             [
                 Entity(namespace='TestAnnotation1', identifier='A'),
                 Entity(namespace='TestAnnotation1', identifier='B'),
             ],
-            self.parser.control_parser._annotations['TestAnnotation1'],
+            self.parser.control_parser.annotations['TestAnnotation1'],
         )
-        self.assertEqual(1, len(self.parser.control_parser._annotations['TestAnnotation2']))
+        self.assertEqual(1, len(self.parser.control_parser.annotations['TestAnnotation2']))
         self.assertEqual(
             [
                 Entity(namespace='TestAnnotation2', identifier='X'),
             ],
-            self.parser.control_parser._annotations['TestAnnotation2'],
+            self.parser.control_parser.annotations['TestAnnotation2'],
         )
 
         test_node_1_dict = Gene(namespace='TESTNS', name='1')
@@ -471,10 +471,10 @@ class TestFull(TestTokenParserBase):
         ]
         self.parser.parse_lines(statements)
 
-        self.assertEqual(3, len(self.parser.control_parser._annotations))
-        self.assertIn('TestAnnotation1', self.parser.control_parser._annotations)
-        self.assertIn('TestAnnotation2', self.parser.control_parser._annotations)
-        self.assertIn('TestAnnotation3', self.parser.control_parser._annotations)
+        self.assertEqual(3, len(self.parser.control_parser.annotations))
+        self.assertIn('TestAnnotation1', self.parser.control_parser.annotations)
+        self.assertIn('TestAnnotation2', self.parser.control_parser.annotations)
+        self.assertIn('TestAnnotation3', self.parser.control_parser.annotations)
 
         test_node_1 = Gene(namespace='TESTNS', name='1')
         test_node_2 = Gene(namespace='TESTNS', name='2')
