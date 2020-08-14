@@ -11,7 +11,7 @@ from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.errors import ConnectionFailure
 
-from pybel import BELGraph, to_sbel
+from pybel import BELGraph, to_sbel, BaseEntity
 from pybel.constants import (
     COMPLEX, COMPOSITE, CONCEPT, FUNCTION, IDENTIFIER,
     MEMBERS, NAME, SOURCE, TARGET, VARIANTS,
@@ -144,9 +144,8 @@ class TestMongoDB(unittest.TestCase):
     def test_query_nodes(self):
         """Test that the find_nodes() function correctly finds the desired nodes."""
         for node in self.graph:
-            n = _entity_to_dict(node)
             # Get the relevant identifying information for the node
-            n_info = id_info(n)
+            n_info = id_info(node)
             # Query the MongoDB based on that info
             matches = find_nodes(
                 self.collection,
@@ -156,9 +155,11 @@ class TestMongoDB(unittest.TestCase):
                 variants=n_info.variants
             )
             for match in matches:
+                self.assertIsInstance(match, BaseEntity)
+            for match in matches:
                 _rm_mongo_keys(match)
 
-            self.assertIn(n, matches)
+            self.assertIn(node, matches)
 
     def _get_true_edges(self, node: Mapping[str, Any]) -> List[dict]:
         """For a given node, return all its edges from self.links"""
