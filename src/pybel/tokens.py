@@ -2,7 +2,9 @@
 
 """This module helps handle node data dictionaries."""
 
-from typing import List
+from typing import Any, List, Mapping, Union
+
+from pyparsing import ParseResults
 
 from .constants import (
     CONCEPT, FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_START, FRAGMENT_STOP, FUNCTION, FUSION, FUSION_MISSING,
@@ -34,6 +36,8 @@ def parse_result_to_dsl(tokens) -> BaseEntity:
         return _variant_po_to_dict(tokens)
 
     elif MEMBERS in tokens:
+        if CONCEPT in tokens:
+            return _list_po_with_concept_to_dict(tokens)
         return _list_po_to_dict(tokens)
 
     elif FUSION in tokens:
@@ -193,6 +197,25 @@ def _reaction_po_to_dict(tokens) -> Reaction:
     return Reaction(
         reactants=_parse_tokens_list(tokens[REACTANTS]),
         products=_parse_tokens_list(tokens[PRODUCTS]),
+    )
+
+
+def _list_po_with_concept_to_dict(tokens: Union[ParseResults, Mapping[str, Any]]) -> ListAbundance:
+    """Convert a list parse object to a node.
+
+    :type tokens: ParseResult
+    """
+    func = tokens[FUNCTION]
+    dsl = FUNC_TO_LIST_DSL[func]
+    members = _parse_tokens_list(tokens[MEMBERS])
+
+    concept = tokens[CONCEPT]
+    return dsl(
+        members=members,
+        namespace=concept[NAMESPACE],
+        name=concept.get(NAME),
+        identifier=concept.get(IDENTIFIER),
+        xrefs=tokens.get(XREFS),
     )
 
 

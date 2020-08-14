@@ -221,7 +221,8 @@ class TestParse(unittest.TestCase):
             Protein(namespace='c', identifier='e'),
         ])
 
-        y = parse_result_to_dsl(x)
+        y = parse_result_to_dsl(dict(x))
+        self.assertIsInstance(y, ComplexAbundance)
         self.assertIn(pc.MEMBERS, y)
         self.assertIn(pc.CONCEPT, y)
 
