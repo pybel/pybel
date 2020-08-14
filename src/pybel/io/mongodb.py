@@ -180,10 +180,10 @@ def get_edges_from_criteria(
     """Get all the edges for nodes that match the given criteria and return in a list of tuples.
 
     :param collection: A MongoDB collection within a database where a PyBEL graph has been stored
-    :param name: The name of the desired node
-    :param identifier: The identifier of the desired node
-    :param function: The type of the desired node ("protein", "complex", etc)
-    :param variants: A list of variants that the desired node should contain.
+    :param node_name: The name of the desired node
+    :param node_identifier: The identifier of the desired node
+    :param node_function: The type of the desired node ("protein", "complex", etc)
+    :param node_variants: A list of variants that the desired node should contain.
      Note: nodes that contain the variants in addition to specified variants will be matched.
     :return: A list of tuples. The first element of each tuple is the node, and the second element is a list of the edges.
     """
