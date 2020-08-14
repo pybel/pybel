@@ -4,6 +4,7 @@
 
 import unittest
 
+import pybel.constants as pc
 from pybel import BELGraph
 from pybel.constants import NAME
 from pybel.dsl import (
@@ -12,6 +13,7 @@ from pybel.dsl import (
 )
 from pybel.language import Entity
 from pybel.testing.utils import n
+from pybel.tokens import parse_result_to_dsl
 from pybel.utils import ensure_quotes
 
 
@@ -208,6 +210,20 @@ class TestCentralDogma(unittest.TestCase):
         """Test that the construction of reaction doesn't have empty lists."""
         with self.assertRaises(ReactionEmptyException):
             Reaction([], [])
+
+
+class TestParse(unittest.TestCase):
+    """Test that :func:`parse_result_to_dsl` works correctly."""
+
+    def test_named_complex(self):
+        x = ComplexAbundance(namespace='a', identifier='b', members=[
+            Protein(namespace='c', identifier='d'),
+            Protein(namespace='c', identifier='e'),
+        ])
+
+        y = parse_result_to_dsl(x)
+        self.assertIn(pc.MEMBERS, y)
+        self.assertIn(pc.CONCEPT, y)
 
 
 if __name__ == '__main__':
