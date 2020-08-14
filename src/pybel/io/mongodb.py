@@ -15,9 +15,10 @@ from ..constants import (
     CONCEPT, FUNCTION, IDENTIFIER,
     NAME, SOURCE, TARGET, VARIANTS,
 )
-from ..dsl import Variant
+from ..dsl import BaseEntity, Variant
 from ..schema import is_valid_edge, is_valid_node
 from ..struct import BELGraph
+from ..tokens import parse_result_to_dsl
 
 __all__ = [
     '_rm_mongo_keys',
@@ -113,7 +114,7 @@ def find_nodes(
     identifier: str = None,
     function: str = None,
     variants: List[Variant] = None,
-) -> List[Mapping[str, Any]]:
+) -> List[BaseEntity]:
     """Find all the nodes that match the given criteria from a MongoDB Collection where a graph is stored.
 
     :param collection: A MongoDB collection within a database where a PyBEL graph has been stored
@@ -140,7 +141,10 @@ def find_nodes(
         if not value:
             del filter_[key]
 
-    return list(collection.find(filter_))
+    return [
+        parse_result_to_dsl(node)
+        for node in collection.find(filter_)
+    ]
 
 
 def _rm_mongo_keys(item: dict):
