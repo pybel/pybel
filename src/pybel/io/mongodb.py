@@ -18,6 +18,7 @@ from ..constants import (
 from ..dsl import Variant
 from ..schema import is_valid_edge, is_valid_node
 from ..struct import BELGraph
+from ..tokens import parse_result_to_dsl
 
 __all__ = [
     '_rm_mongo_keys',
@@ -136,11 +137,20 @@ def find_nodes(
         FUNCTION: function,
         VARIANTS: variants,
     }
+    # Delete filter entries for blank values
     for key, value in list(filter_.items()):
         if not value:
             del filter_[key]
+    # Get the results from the MongoDB
+    results = collection.find(filter_)
 
-    return list(collection.find(filter_))
+    def handle_node(node: dict):
+        """Parse node returned from mongo to dsl."""
+        _rm_mongo_keys(node)
+        return parse_result_to_dsl(node)
+
+    nodes = list(map(handle_node, results))
+    return nodes
 
 
 def _rm_mongo_keys(item: dict):
@@ -176,14 +186,14 @@ def get_edges_from_criteria(
     node_identifier: str = None,
     node_function: str = None,
     node_variants: List[Variant] = None,
-) -> List[Tuple[Mapping[str, Any], List[Mapping[str, Any]]]]:
+) -> Mapping[Mapping[str, Any], List[Mapping[str, Any]]]:
     """Get all the edges for nodes that match the given criteria and return in a list of tuples.
 
     :param collection: A MongoDB collection within a database where a PyBEL graph has been stored
-    :param name: The name of the desired node
-    :param identifier: The identifier of the desired node
-    :param function: The type of the desired node ("protein", "complex", etc)
-    :param variants: A list of variants that the desired node should contain.
+    :param node_name: The name of the desired node
+    :param node_identifier: The identifier of the desired node
+    :param node_function: The type of the desired node ("protein", "complex", etc)
+    :param node_variants: A list of variants that the desired node should contain.
      Note: nodes that contain the variants in addition to specified variants will be matched.
     :return: A list of tuples. The first element of each tuple is the node, and the second element is a list of the edges.
     """
@@ -196,9 +206,9 @@ def get_edges_from_criteria(
         function=node_function,
         variants=node_variants
     )
-    edges = []
+    edges = {}
     for node in matching_nodes:
         matching_edges = get_edges_from_node(collection, node)
         # Append (node, [edge1, edge2...]) to edges
-        edges.append((node, matching_edges))
+        edges[node] = matching_edges
     return edges

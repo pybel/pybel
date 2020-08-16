@@ -144,9 +144,8 @@ class TestMongoDB(unittest.TestCase):
     def test_query_nodes(self):
         """Test that the find_nodes() function correctly finds the desired nodes."""
         for node in self.graph:
-            n = _entity_to_dict(node)
             # Get the relevant identifying information for the node
-            n_info = id_info(n)
+            n_info = id_info(node)
             # Query the MongoDB based on that info
             matches = find_nodes(
                 self.collection,
@@ -155,10 +154,8 @@ class TestMongoDB(unittest.TestCase):
                 function=n_info.function,
                 variants=n_info.variants
             )
-            for match in matches:
-                _rm_mongo_keys(match)
 
-            self.assertIn(n, matches)
+            self.assertIn(node, matches)
 
     def _get_true_edges(self, node: Mapping[str, Any]) -> List[dict]:
         """For a given node, return all its edges from self.links"""
@@ -187,6 +184,7 @@ class TestMongoDB(unittest.TestCase):
             self.collection,
             node_name=criteria.name,
             node_identifier=criteria.identifier,
+            node_function=criteria.function,
             node_variants=criteria.variants
         )
         matches_from_criteria = []
