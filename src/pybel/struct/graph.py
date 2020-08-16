@@ -42,7 +42,7 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 
-AnnotationsDict = Mapping[str, Mapping[str, bool]]
+AnnotationsDict = Mapping[str, List[Entity]]
 AnnotationsHint = Union[Mapping[str, str], Mapping[str, Set[str]], AnnotationsDict]
 WarningTuple = Tuple[Optional[str], BELParserWarning, EdgeData]
 
@@ -903,7 +903,10 @@ class BELGraph(nx.MultiDiGraph):
            ``SET ECO = "0007682 ! reporter gene assay evidence used in manual assertion"``
            ``{'ECO': dict(namespace='ECO', identifier='0007682', name='reporter gene assay...')}``
         """
-        return {key: self._clean_value(key, values) for key, values in annotations_dict.items()}
+        return {
+            key: sorted(self._clean_value(key, values), key=lambda e: (e.namespace, e.identifier, e.name))
+            for key, values in annotations_dict.items()
+        }
 
     def _clean_value(self, key, values: Union[str, Entity, List[str], List[Mapping[str, str]], List[Entity]]) -> List[Entity]:
         if key in self.annotation_miriam:  # this annotation was given by a lookup
