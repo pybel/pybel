@@ -11,7 +11,7 @@ from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.errors import ConnectionFailure
 
-from pybel import BELGraph, to_sbel
+from pybel import BELGraph, to_sbel, BaseEntity
 from pybel.constants import (
     COMPLEX, COMPOSITE, CONCEPT, FUNCTION, IDENTIFIER,
     MEMBERS, NAME, SOURCE, TARGET, VARIANTS,
@@ -154,6 +154,10 @@ class TestMongoDB(unittest.TestCase):
                 function=n_info.function,
                 variants=n_info.variants
             )
+            for match in matches:
+                self.assertIsInstance(match, BaseEntity)
+            for match in matches:
+                _rm_mongo_keys(match)
 
             self.assertIn(node, matches)
 
