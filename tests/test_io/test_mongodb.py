@@ -20,8 +20,8 @@ from pybel.dsl import ComplexAbundance, Entity, Gene, Protein, Rna
 from pybel.io.mongodb import (
     _rm_mongo_keys,
     find_nodes,
-    get_edges_from_node,
     get_edges_from_criteria,
+    get_edges_from_node,
     to_mongodb
 )
 from pybel.testing.utils import n as n_
