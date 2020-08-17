@@ -3,6 +3,7 @@ dist: xenial
 os: linux
 
 services:
+  - mongodb
   - mysql
   - postgresql
 
