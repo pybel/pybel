@@ -12,8 +12,8 @@ from pymongo.database import Database
 
 from .sbel import to_sbel
 from ..constants import (
-    CONCEPT, FUNCTION, IDENTIFIER,
-    NAME, SOURCE, TARGET, VARIANTS,
+    CONCEPT, FUNCTION, IDENTIFIER, NAME,
+    NAMESPACE, SOURCE, TARGET, VARIANTS,
 )
 from ..dsl import BaseEntity, Variant
 from ..schema import is_valid_edge, is_valid_node
@@ -59,13 +59,40 @@ def to_mongodb(
 ) -> Collection:
     """Export the given BELGraph to a MongoDB.
 
-    In order to use this function, MongoDB must already be running locally.
+    Note: in order to use this function, MongoDB must already be running locally.
 
     :param graph: The graph to be exported
     :param db_name: An optional name of the MongoDB to which the graph should be exported
     :param collection_name: An optional name of the collection within the MongoDB where the graph will be stored.
     :param client: An optional MongoClient object to use instead of a default
     :return: the collection that now stores the graph
+
+    The example below shows how to export a BEL graph to a MongoDB collection.
+
+    .. code-block:: python
+
+        from pybel.examples import sialic_acid_graph
+        from pybel.io.mongodb import to_mongodb
+
+        to_mongodb(sialic_acid_graph)
+
+    The BEL graph can also be exported to a custom MongoDB database and collection with a custom client.
+
+    .. code-block:: python
+
+        from pybel.examples import sialic_acid_graph
+        from pybel.io.mongodb import to_mongodb
+
+        from pymongo import MongoClient
+
+        custom_client = MongoClient(host="mongodb://mongodb0.example.com:27017")
+
+        to_mongodb(
+            sialic_acid_graph,
+            db_name='database',
+            collection_name='sialic_acid_graph',
+            client=custom_client
+        )
     """
     if client is None:
         client = MongoClient()
@@ -111,6 +138,7 @@ def to_mongodb(
 def find_nodes(
     collection: Collection,
     name: str = None,
+    namespace: str = None,
     identifier: str = None,
     function: str = None,
     variants: List[Variant] = None,
@@ -120,19 +148,29 @@ def find_nodes(
     :param collection: A MongoDB collection within a database where a PyBEL graph has been stored
     :param name: The name of the desired node
     :param identifier: The identifier of the desired node
-    :param function: The type of the desired node ("protein", "complex", etc)
+    :param function: The type of the desired node ("Protein", "Complex", etc). Case-sensitive.
     :param variants: A list of variants that the desired node should contain.
      Note: nodes that contain the variants in addition to specified variants will be matched.
     :return: A list containing all the nodes that match the given criteria
+
+    Example usage:
+
+    >>> from pybel.examples import sialic_acid_graph
+    >>> from pybel.io.mongodb import to_mongodb, find_nodes
+    >>> collection = to_mongodb(sialic_acid_graph)
+    >>> find_nodes(collection, name='PTPN6')
+    [<BEL p(hgnc:9658 ! PTPN6)>]
     """
     if not (name or identifier):
         raise ValueError("Either a 'name' or 'identifier' is required to find a node.")
     # The mongo .find() method requires that sub-elements be notated 'parent.child'
     concept_name = '.'.join((CONCEPT, NAME))
+    concept_namespace = '.'.join((CONCEPT, NAMESPACE))
     concept_identifier = '.'.join((CONCEPT, IDENTIFIER))
     filter_ = {
         TYPE: NODE,
         concept_name: name,
+        concept_namespace: namespace,
         concept_identifier: identifier,
         FUNCTION: function,
         VARIANTS: variants,
@@ -206,12 +244,38 @@ def _build_edge_filter(node: BaseEntity):
     return filter_
 
 
-def get_edges_from_node(collection: Collection, node: Mapping[str, Any]) -> List[Mapping[str, Any]]:
+def get_edges_from_node(collection: Collection, node: BaseEntity) -> List[Mapping[str, Any]]:
     """Return all the edges for the given node.
 
     :param collection: A MongoDB collection within a database where a PyBEL graph has been stored
     :param node: The node whose edges should be returned
     :return: A list of the edges pointing to or from the given node
+
+    Example usage:
+
+    >>> from pybel.examples import sialic_acid_graph
+    >>> from pybel.io.mongodb import to_mongodb, find_nodes, get_edges_from_node
+    >>> collection = to_mongodb(sialic_acid_graph)
+    >>> shp1 = find_nodes(collection, name='PTPN6')[0]
+    >>> example_edge = get_edges_from_node(collection, shp1)[0]
+    >>> print(example_edge)
+    {
+        'source': {
+            'function': 'Protein',
+            'concept': {'namespace': 'hgnc', 'name': 'CD33', 'identifier': '1659'},
+            'variants': [{'kind': 'pmod', 'concept': {'namespace': 'go', 'name': 'protein phosphorylation', 'identifier': '0006468'}}],
+            'id': ...,
+            'bel': 'p(hgnc:1659 ! CD33, pmod(go:0006468 ! "protein phosphorylation"))'
+        },
+        'target': {
+            'function': 'Protein',
+            'concept': {'namespace': 'hgnc', 'name': 'PTPN6', 'identifier': '9658'},
+            'id': ...,
+            'bel': 'p(hgnc:9658 ! PTPN6)'
+        },
+        'relation': 'directlyIncreases',
+        'key': ..., 'evidence': ..., 'citation': {...}, 'annotations': {...}, 'source_modifier': {...}, 'target_modifier': {...}
+    }
     """
     if not is_valid_node(node):
         raise ValueError("Invalid node ", node)
@@ -231,7 +295,7 @@ def get_edges_from_criteria(
     node_function: str = None,
     node_variants: List[Variant] = None,
 ) -> Dict[BaseEntity, List[Mapping[str, Any]]]:
-    """Get all the edges for nodes that match the given criteria and return in a list of tuples.
+    """Get all the edges for nodes that match the given criteria and return in a dict.
 
     :param collection: A MongoDB collection within a database where a PyBEL graph has been stored
     :param node_name: The name of the desired node
@@ -239,7 +303,32 @@ def get_edges_from_criteria(
     :param node_function: The type of the desired node ("protein", "complex", etc)
     :param node_variants: A list of variants that the desired node should contain.
      Note: nodes that contain the variants in addition to specified variants will be matched.
-    :return: A list of tuples. The first element of each tuple is the node, and the second element is a list of the edges.
+    :return: A dictionary. The keys are the nodes, and the values are a list of the edges for each node.
+
+    Example usage:
+
+    >>> from pybel.examples import sialic_acid_graph
+    >>> from pybel.io.mongodb import to_mongodb, find_nodes, get_edges_from_criteria
+    >>> collection = to_mongodb(sialic_acid_graph)
+    >>> shp1 = find_nodes(collection, name='PTPN6')[0]
+    >>> get_edges_from_criteria(collection, node_name=shp1.name, node_function=shp1.function)[shp1]
+    {
+        'source': {
+            'function': 'Protein',
+            'concept': {'namespace': 'hgnc', 'name': 'CD33', 'identifier': '1659'},
+            'variants': [{'kind': 'pmod', 'concept': {'namespace': 'go', 'name': 'protein phosphorylation', 'identifier': '0006468'}}],
+            'id': ...,
+            'bel': 'p(hgnc:1659 ! CD33, pmod(go:0006468 ! "protein phosphorylation"))'
+        },
+        'target': {
+            'function': 'Protein',
+            'concept': {'namespace': 'hgnc', 'name': 'PTPN6', 'identifier': '9658'},
+            'id': ...,
+            'bel': 'p(hgnc:9658 ! PTPN6)'
+        },
+        'relation': 'directlyIncreases',
+        'key': ..., 'evidence': ..., 'citation': {...}, 'annotations': {...}, 'source_modifier': {...}, 'target_modifier': {...}
+    }
     """
     if not (node_name or node_identifier):
         raise ValueError("Either a name or an identifier is required to get edges.")
