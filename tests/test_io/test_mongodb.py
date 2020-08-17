@@ -48,8 +48,8 @@ def id_info(node: Mapping[str, Any]) -> NodeInfo:
     # Get the id info
     name = concept.get(NAME)
     identifier = concept.get(IDENTIFIER)
-    function = concept.get(FUNCTION)
 
+    function = node.get(FUNCTION)
     variants = node.get(VARIANTS)
 
     return NodeInfo(name=name, identifier=identifier, function=function, variants=variants)
@@ -69,6 +69,13 @@ def _edge_to_dict(edge: Mapping[str, Any]) -> dict:
     for key in (SOURCE, TARGET):
         new_edge[key] = _entity_to_dict(new_edge[key])
     return new_edge
+
+
+def _clean_entity(entity):
+    """Remove the 'bel' and 'id' properties from an entity"""
+    for prop in ('bel', 'id'):
+        if entity.get(prop):
+            del entity[prop]
 
 
 class TestMongoDB(unittest.TestCase):
@@ -164,10 +171,18 @@ class TestMongoDB(unittest.TestCase):
     def _get_true_edges(self, node: Mapping[str, Any]) -> List[dict]:
         """For a given node, return all its edges from self.links"""
         n = _entity_to_dict(node)
+        _clean_entity(n)
         correct_edges: List[dict] = []
         for edge in self.links:
+            # Convert the edge to a dict for comparison
             dict_edge = _edge_to_dict(edge)
-            if n in (dict_edge[SOURCE], dict_edge[TARGET]):
+            # Create a copy of dict_edge so properties can be deleted
+            comparison_edge = deepcopy(dict_edge)
+            # Remove the 'bel' and 'id' properties from the edge's source and target
+            for node_name in (SOURCE, TARGET):
+                _clean_entity(comparison_edge[node_name])
+            # Check whether node n is the source or target of the edge
+            if n in (comparison_edge[SOURCE], comparison_edge[TARGET]):
                 correct_edges.append(dict_edge)
         return correct_edges
 
@@ -194,10 +209,9 @@ class TestMongoDB(unittest.TestCase):
         matches_from_criteria = []
         # Since get_edges_from_criteria can return edges for multiple matching nodes,
         # loop through every tuple (node, [edges...]) in pairs_from_criteria
-        for node_match, edges_match in pairs_from_criteria:
-            _rm_mongo_keys(node_match)
+        for node_match, edges_match in pairs_from_criteria.items():
             # If node_match is equal to the given node, let matches_from_criteria equal the returned edges
-            if node_match == _entity_to_dict(node):
+            if node_match == node:
                 matches_from_criteria = edges_match
                 break
         # Remove the mongo keys from each match
@@ -208,11 +222,8 @@ class TestMongoDB(unittest.TestCase):
     def test_get_edges(self):
         """Test that the get_edges_from_node and _from_criteria functions correctly find all edges for the given node."""
         for node in self.graph:
-            # Convert the node to a dict
-            n = _entity_to_dict(node)
-
             # Find all the correct edges pointing to and from the current node
-            correct_edges = self._get_true_edges(n)
+            correct_edges = self._get_true_edges(node)
 
             # Get the matching edges from get_edges_from_node()
             matches_from_node = self._edges_from_node(node)

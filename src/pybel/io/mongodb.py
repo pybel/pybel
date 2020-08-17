@@ -4,7 +4,7 @@
 
 import logging
 from copy import deepcopy
-from typing import Any, List, Mapping, Optional, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 from pymongo import MongoClient
 from pymongo.collection import Collection
@@ -163,6 +163,49 @@ def _rm_mongo_keys(item: dict):
             del item[prop]
 
 
+def _build_subfilter(destination: str, n: dict):
+    """Recursively build a subfilter given the destination (what the prefix for the keys should be) and a node."""
+    subfilter = {}
+    # Iterate over the keys and values in n and add them to the subfilter
+    for prop, value in n.items():
+        # Build the new key: "source.function", "target.concept", etc
+        key = '.'.join((destination, prop))
+        # Check for whether the value is a dict (and thus must be expanded to "concept.name" etc)
+        if isinstance(value, dict):
+            # Add the new entries to the subfilter
+            subfilter.update(_build_subfilter(key, value))
+        # If the value is a list, iterate through its entries and create subfilters for the elements
+        # because the list may not be in the same order / the elements' properties may not be
+        elif isinstance(value, list):
+            for i, elem in enumerate(value):
+                # for example, "source.members.2"
+                elem_key = '.'.join((key, str(i)))
+                # e.g. _build_subfilter ==> {"source.members.0.function": "Protein", "source.members.0.concept.namespace": "hgnc", ...}
+                subfilter.update(_build_subfilter(elem_key, elem))
+        # Otherwise, just add the key to the subfilter
+        else:
+            subfilter[key] = value
+    return subfilter
+
+
+def _build_edge_filter(node: BaseEntity):
+    """Given a node, build a query for MongoDB to find the edges of that node."""
+    # Remove the _id and type properties from the node (since they won't be included in the edge source/target)
+    n = dict(node)
+    _rm_mongo_keys(n)
+    # Start building the filter
+    # "$or" queries for the node being either the source or target of an edge
+    filter_ = {TYPE: LINK, '$or': []}
+    # In order for the filtering not to match n exactly, each property has to be queried individually
+    # For example, "$or": [{"source.function": ..., ...}, {"target.function": ..., ...}]
+    # Build subfilters for "source" and  "target" to put in the "$or"
+    for destination in (SOURCE, TARGET):
+        subfilter = _build_subfilter(destination, n)
+        # Append the subfilter to "$or"
+        filter_["$or"].append(subfilter)
+    return filter_
+
+
 def get_edges_from_node(collection: Collection, node: Mapping[str, Any]) -> List[Mapping[str, Any]]:
     """Return all the edges for the given node.
 
@@ -172,12 +215,13 @@ def get_edges_from_node(collection: Collection, node: Mapping[str, Any]) -> List
     """
     if not is_valid_node(node):
         raise ValueError("Invalid node ", node)
-    # Remove the _id and type properties from the node (since they won't be included in the edge source/target information)
-    n = deepcopy(node)
-    _rm_mongo_keys(n)
+    # Build a filter to find the edges of the given node
+    filter_ = _build_edge_filter(node)
     # Find all the links where either the source or the target is node n
-    filter_ = {TYPE: LINK, '$or': [{SOURCE: n}, {TARGET: n}]}
-    return list(collection.find(filter_))
+    matches = list(collection.find(filter_))
+    for match in matches:
+        _rm_mongo_keys(match)
+    return matches
 
 
 def get_edges_from_criteria(
@@ -186,7 +230,7 @@ def get_edges_from_criteria(
     node_identifier: str = None,
     node_function: str = None,
     node_variants: List[Variant] = None,
-) -> Mapping[Mapping[str, Any], List[Mapping[str, Any]]]:
+) -> Dict[BaseEntity, List[Mapping[str, Any]]]:
     """Get all the edges for nodes that match the given criteria and return in a list of tuples.
 
     :param collection: A MongoDB collection within a database where a PyBEL graph has been stored
@@ -209,6 +253,6 @@ def get_edges_from_criteria(
     edges = {}
     for node in matching_nodes:
         matching_edges = get_edges_from_node(collection, node)
-        # Append (node, [edge1, edge2...]) to edges
+        # Add node:[edge1, edge2, ...] to edges
         edges[node] = matching_edges
     return edges
