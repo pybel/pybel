@@ -2,27 +2,27 @@
 
 """Tests for the jsonschema node validation."""
 
-from copy import deepcopy
-from collections import namedtuple
-from typing import Any, List, Mapping, Optional, Tuple
 import unittest
+from collections import namedtuple
+from copy import deepcopy
+from typing import Any, List, Mapping, Optional, Tuple
 
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.errors import ConnectionFailure
 
-from pybel import BELGraph, to_sbel, BaseEntity
+from pybel import BELGraph, BaseEntity, to_sbel
 from pybel.constants import (
     COMPLEX, COMPOSITE, CONCEPT, FUNCTION, IDENTIFIER,
     MEMBERS, NAME, SOURCE, TARGET, VARIANTS,
 )
-from pybel.dsl import Entity, ComplexAbundance, Gene, Protein, Rna
+from pybel.dsl import ComplexAbundance, Entity, Gene, Protein, Rna
 from pybel.io.mongodb import (
     _rm_mongo_keys,
-    to_mongodb,
     find_nodes,
     get_edges_from_node,
-    get_edges_from_criteria
+    get_edges_from_criteria,
+    to_mongodb
 )
 from pybel.testing.utils import n as n_
 
@@ -64,7 +64,7 @@ def _entity_to_dict(entity: Entity) -> Mapping[str, Any]:
 
 
 def _edge_to_dict(edge: Mapping[str, Any]) -> dict:
-    """Helper function to convert an edge to a dictionary."""
+    """Convert an edge to a dictionary (helper function)."""
     new_edge = dict(deepcopy(edge))
     for key in (SOURCE, TARGET):
         new_edge[key] = _entity_to_dict(new_edge[key])
@@ -72,7 +72,7 @@ def _edge_to_dict(edge: Mapping[str, Any]) -> dict:
 
 
 def _clean_entity(entity):
-    """Remove the 'bel' and 'id' properties from an entity"""
+    """Remove the 'bel' and 'id' properties from an entity."""
     for prop in ('bel', 'id'):
         if entity.get(prop):
             del entity[prop]
@@ -80,6 +80,7 @@ def _clean_entity(entity):
 
 class TestMongoDB(unittest.TestCase):
     """Tests for the MongoDB exporting and querying."""
+
     def setUp(self):
         """Set up MongoDB and create/export a test graph."""
         client = MongoClient()
@@ -89,9 +90,9 @@ class TestMongoDB(unittest.TestCase):
             # If it fails, there was a connection failure
             client.admin.command('ismaster')
             # Set up the test mongo database and collection
-            TEST_DB = client['test_db']
-            TEST_COLLECTION = TEST_DB['test_collection']
-            TEST_COLLECTION.drop()
+            test_db = client['test_db']
+            test_collection = test_db['test_collection']
+            test_collection.drop()
             # Create the graph
             self.graph = BELGraph()
             self.graph.add_increases(ca, r2, citation=n_(), evidence=n_())
@@ -100,7 +101,7 @@ class TestMongoDB(unittest.TestCase):
             # Store the links separately
             self.links = to_sbel(self.graph, yield_metadata=False)
             # Export the graph to mongo
-            self.collection = to_mongodb(self.graph, TEST_DB.name, TEST_COLLECTION.name)
+            self.collection = to_mongodb(self.graph, test_db.name, test_collection.name)
 
         except ConnectionFailure:
             self.skipTest("Error connecting to a MongoDB server, skipping test.")
@@ -169,7 +170,7 @@ class TestMongoDB(unittest.TestCase):
             self.assertIn(node, matches)
 
     def _get_true_edges(self, node: Mapping[str, Any]) -> List[dict]:
-        """For a given node, return all its edges from self.links"""
+        """For a given node, return all its edges from self.links."""
         n = _entity_to_dict(node)
         _clean_entity(n)
         correct_edges: List[dict] = []
@@ -187,7 +188,7 @@ class TestMongoDB(unittest.TestCase):
         return correct_edges
 
     def _edges_from_node(self, node: Mapping[str, Any]) -> List[dict]:
-        """Return the matching edges for the given node from get_edges_from_node()."""
+        """Return the matching edges for the given node."""
         # Get the matches from get_edges_from_node()
         matches_from_node = get_edges_from_node(self.collection, node)
         # Remove the mongodb-added _id and type keys
