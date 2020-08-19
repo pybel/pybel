@@ -121,6 +121,7 @@ activity_labels = {
 
 #: Maps the default BEL molecular activities to Gene Ontology Molecular Functions
 activity_mapping = {
+    'act': Entity(namespace='go', name='molecular function', identifier='0003674'),
     'cat': Entity(namespace='go', name='catalytic activity', identifier='0003824'),
     'chap': Entity(namespace='go', name='protein binding involved in protein folding', identifier='0044183'),
     'gtp': Entity(namespace='go', name='GTP binding', identifier='0005525'),

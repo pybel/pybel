@@ -61,7 +61,7 @@ def activity(
     if name and not namespace:
         rv[EFFECT] = activity_mapping[name]
     elif not name and not namespace and not identifier:
-        pass
+        rv[EFFECT] = activity_mapping['act']
     else:
         rv[EFFECT] = Entity(
             namespace=namespace,
