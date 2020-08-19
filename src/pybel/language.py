@@ -94,6 +94,13 @@ class Entity(dict):
         return hash((self.namespace, self.identifier, self.name))
 
 
+text_location_labels = {
+    'Abstract': Entity(namespace='iao', identifier='0000315', name='abstract'),
+    'Review': Entity(namespace='iao', identifier='0000311', name='publication'),  # sue me
+    'Results': Entity(namespace='iao', identifier='0000318', name='results section'),
+    'Legend': Entity(namespace='sio', identifier='000468 ', name='legend'),
+}
+
 #: A dictionary of activity labels used in the ma() function in activity(p(X), ma(Y))
 activity_labels = {
     'catalyticActivity': 'cat',

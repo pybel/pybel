@@ -908,7 +908,11 @@ class BELGraph(nx.MultiDiGraph):
             for key, values in annotations_dict.items()
         }
 
-    def _clean_value(self, key, values: Union[str, Entity, List[str], List[Mapping[str, str]], List[Entity]]) -> List[Entity]:
+    def _clean_value(
+        self,
+        key,
+        values: Union[str, Entity, List[str], List[Mapping[str, str]], List[Entity]],
+    ) -> List[Entity]:
         if key in self.annotation_miriam:  # this annotation was given by a lookup
             return self._clean_value_helper(key=key, namespace=key, values=values)
         if key in self.annotation_curie:
