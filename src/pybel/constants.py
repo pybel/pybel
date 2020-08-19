@@ -241,12 +241,16 @@ rev_abundance_labels = {
 RELATION = 'relation'
 #: The key for an internal edge data dictionary for the citation dictionary
 CITATION = 'citation'
+CITATION_DB = NAMESPACE  # for backwards compatibility
+CITATION_IDENTIFIER = IDENTIFIER  # for backwards compatibility
 #: The key for an internal edge data dictionary for the evidence string
 EVIDENCE = 'evidence'
 #: The key for an internal edge data dictionary for the annotations dictionary
 ANNOTATIONS = 'annotations'
 SOURCE = 'source'
+SUBJECT = SOURCE  # for backwards compatibility
 TARGET = 'target'
+OBJECT = TARGET  # for backwards compatibility
 #: The key for an internal edge data dictionary for the source modifier dictionary
 SOURCE_MODIFIER = 'source_modifier'
 #: The key for an internal edge data dictionary for the target modifier dictionary
