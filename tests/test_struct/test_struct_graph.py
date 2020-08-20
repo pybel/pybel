@@ -120,8 +120,8 @@ Abundance         1
 
 Namespace (3)      Count
 ---------------  -------
+go                    15
 hgnc                   8
-go                     3
 chebi                  2
 
 Edge Type (7)                        Count
