@@ -46,7 +46,7 @@ class TestSummary(unittest.TestCase):
         namespace_result = {
             'hgnc': 8,
             'chebi': 2,
-            'go': 3,
+            'go': 15,
         }
         self.assertEqual(set(namespace_result), get_namespaces(sialic_acid_graph))
         self.assertEqual(Counter(namespace_result), count_namespaces(sialic_acid_graph))
