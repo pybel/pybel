@@ -17,7 +17,8 @@ from pybel import (
 )
 from pybel.config import PYBEL_MINIMUM_IMPORT_VERSION
 from pybel.constants import (
-    ANNOTATIONS, CITATION, DECREASES, DIRECTLY_DECREASES, EVIDENCE, GRAPH_PYBEL_VERSION, INCREASES, RELATION,
+    ANNOTATIONS, CITATION, DECREASES, DIRECTLY_DECREASES, EVIDENCE, GRAPH_ANNOTATION_MIRIAM, GRAPH_PYBEL_VERSION,
+    INCREASES, RELATION,
 )
 from pybel.dsl import BaseEntity, Gene, Protein
 from pybel.examples.sialic_acid_example import sialic_acid_graph
@@ -27,6 +28,7 @@ from pybel.exceptions import (
 from pybel.io.exc import ImportVersionWarning, import_version_message_fmt
 from pybel.io.line_utils import parse_lines
 from pybel.io.nodelink import from_nodelink_jsons, to_nodelink_jsons
+from pybel.language import Entity
 from pybel.parser import BELParser
 from pybel.struct.summary import get_syntax_errors
 from pybel.testing.cases import TemporaryCacheClsMixin, TemporaryCacheMixin
@@ -281,7 +283,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
                 'TESTAN1': {testan1: True}
             }
         }
-        self.assert_has_edge(self.misordered_graph, akt1, egfr, **e1)
+        self.assert_has_edge(self.misordered_graph, akt1, egfr, only=True, **e1)
 
         e2 = {
             RELATION: DECREASES,
@@ -291,7 +293,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
                 'TESTAN1': {testan1: True}
             }
         }
-        self.assert_has_edge(self.misordered_graph, egfr, fadd, **e2)
+        self.assert_has_edge(self.misordered_graph, egfr, fadd, only=True, **e2)
 
         e3 = {
             RELATION: DIRECTLY_DECREASES,
@@ -301,7 +303,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
                 'TESTAN1': {testan1: True},
             },
         }
-        self.assert_has_edge(self.misordered_graph, egfr, casp8, **e3)
+        self.assert_has_edge(self.misordered_graph, egfr, casp8, only=True, **e3)
 
 
 namespace_to_term = {
@@ -321,13 +323,23 @@ annotation_to_term = {
 class TestFull(TestTokenParserBase):
     @classmethod
     def setUpClass(cls):
-        cls.graph = BELGraph()
         cls.parser = BELParser(
-            cls.graph,
+            graph=BELGraph(),  # gets overwritten in each test
             namespace_to_term_to_encoding=namespace_to_term,
             annotation_to_term=annotation_to_term,
             namespace_to_pattern={'dbSNP': re.compile('rs[0-9]*')},
         )
+
+    def setUp(self):
+        self.parser.clear()
+        self.parser.graph = BELGraph()
+        self.graph.annotation_list.update({
+            'TestAnnotation1': {'A', 'B', 'C'},
+            'TestAnnotation2': {'X', 'Y', 'Z'},
+            'TestAnnotation3': {'D', 'E', 'F'},
+        })
+        self.parser.graph = self.graph
+        self.assertIn(GRAPH_ANNOTATION_MIRIAM, self.graph.graph, msg=f'Graph metadata: {self.graph.graph}')
 
     def test_regex_match(self):
         line = 'g(dbSNP:rs10234) -- g(dbSNP:rs10235)'
@@ -367,10 +379,14 @@ class TestFull(TestTokenParserBase):
         statements = [
             'SET TestAnnotation1 = "A"',
             'SET TestAnnotation2 = "X"',
-            'g(TESTNS:1) -> g(TESTNS:2)'
+            'g(TESTNS:1) -> g(TESTNS:2)',
         ]
 
         self.parser.parse_lines(statements)
+
+        self.assertEqual(2, len(self.parser.control_parser.annotations))
+        self.assertIn('TestAnnotation1', self.parser.control_parser.annotations)
+        self.assertIn('TestAnnotation2', self.parser.control_parser.annotations)
 
         test_node_1 = Gene(namespace='TESTNS', name='1')
         test_node_2 = Gene(namespace='TESTNS', name='2')
@@ -382,16 +398,19 @@ class TestFull(TestTokenParserBase):
         self.assertEqual(1, self.parser.graph.number_of_edges())
 
         kwargs = {
+            RELATION: INCREASES,
             ANNOTATIONS: {
                 'TestAnnotation1': {'A': True},
                 'TestAnnotation2': {'X': True},
             },
             EVIDENCE: test_evidence_text,
-            CITATION: test_citation_dict
+            CITATION: test_citation_dict,
         }
-        self.assert_has_edge(test_node_1, test_node_2, **kwargs)
+
+        self.assert_has_edge(test_node_1, test_node_2, only=True, **kwargs)
 
     def test_annotations_with_list(self):
+        self.assertIsNotNone(self.parser.graph)
         self.add_default_provenance()
 
         statements = [
@@ -399,7 +418,27 @@ class TestFull(TestTokenParserBase):
             'SET TestAnnotation2 = "X"',
             'g(TESTNS:1) -> g(TESTNS:2)'
         ]
+
         self.parser.parse_lines(statements)
+
+        self.assertEqual(2, len(self.parser.control_parser.annotations))
+        self.assertIn('TestAnnotation1', self.parser.control_parser.annotations)
+        self.assertIn('TestAnnotation2', self.parser.control_parser.annotations)
+        self.assertEqual(2, len(self.parser.control_parser.annotations['TestAnnotation1']))
+        self.assertEqual(
+            [
+                Entity(namespace='TestAnnotation1', identifier='A'),
+                Entity(namespace='TestAnnotation1', identifier='B'),
+            ],
+            self.parser.control_parser.annotations['TestAnnotation1'],
+        )
+        self.assertEqual(1, len(self.parser.control_parser.annotations['TestAnnotation2']))
+        self.assertEqual(
+            [
+                Entity(namespace='TestAnnotation2', identifier='X'),
+            ],
+            self.parser.control_parser.annotations['TestAnnotation2'],
+        )
 
         test_node_1_dict = Gene(namespace='TESTNS', name='1')
         test_node_2_dict = Gene(namespace='TESTNS', name='2')
@@ -411,13 +450,15 @@ class TestFull(TestTokenParserBase):
         self.assertEqual(1, self.parser.graph.number_of_edges())
 
         kwargs = {
+            RELATION: INCREASES,
+            EVIDENCE: test_evidence_text,
             ANNOTATIONS: {
                 'TestAnnotation1': {'A': True, 'B': True},
-                'TestAnnotation2': {'X': True}
+                'TestAnnotation2': {'X': True},
             },
-            CITATION: test_citation_dict
+            CITATION: test_citation_dict,
         }
-        self.assert_has_edge(test_node_1_dict, test_node_2_dict, **kwargs)
+        self.assert_has_edge(test_node_1_dict, test_node_2_dict, only=True, **kwargs)
 
     def test_annotations_with_multilist(self):
         self.add_default_provenance()
@@ -426,28 +467,35 @@ class TestFull(TestTokenParserBase):
             'SET TestAnnotation1 = {"A","B"}',
             'SET TestAnnotation2 = "X"',
             'SET TestAnnotation3 = {"D","E"}',
-            'g(TESTNS:1) -> g(TESTNS:2)'
+            'g(TESTNS:1) -> g(TESTNS:2)',
         ]
         self.parser.parse_lines(statements)
 
-        test_node_1_dict = Gene(namespace='TESTNS', name='1')
-        test_node_2_dict = Gene(namespace='TESTNS', name='2')
+        self.assertEqual(3, len(self.parser.control_parser.annotations))
+        self.assertIn('TestAnnotation1', self.parser.control_parser.annotations)
+        self.assertIn('TestAnnotation2', self.parser.control_parser.annotations)
+        self.assertIn('TestAnnotation3', self.parser.control_parser.annotations)
+
+        test_node_1 = Gene(namespace='TESTNS', name='1')
+        test_node_2 = Gene(namespace='TESTNS', name='2')
 
         self.assertEqual(2, self.parser.graph.number_of_nodes())
-        self.assertIn(test_node_1_dict, self.graph)
-        self.assertIn(test_node_2_dict, self.graph)
+        self.assertIn(test_node_1, self.graph)
+        self.assertIn(test_node_2, self.graph)
 
         self.assertEqual(1, self.parser.graph.number_of_edges())
 
         kwargs = {
+            RELATION: INCREASES,
+            EVIDENCE: test_evidence_text,
             ANNOTATIONS: {
                 'TestAnnotation1': {'A': True, 'B': True},
                 'TestAnnotation2': {'X': True},
-                'TestAnnotation3': {'D': True, 'E': True}
+                'TestAnnotation3': {'D': True, 'E': True},
             },
-            CITATION: test_citation_dict
+            CITATION: test_citation_dict,
         }
-        self.assert_has_edge(test_node_1_dict, test_node_2_dict, **kwargs)
+        self.assert_has_edge(test_node_1, test_node_2, only=True, **kwargs)
 
 
 class TestRandom(unittest.TestCase):

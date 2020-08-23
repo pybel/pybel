@@ -142,6 +142,7 @@ class TestCanonicalizeEdge(unittest.TestCase):
 
     def setUp(self):
         self.g = BELGraph()
+        self.g.annotation_pattern['Species'] = r'\d+'
         self.u = Protein(name='u', namespace='TEST')
         self.v = Protein(name='v', namespace='TEST')
         self.g.add_node_from_data(self.u)
@@ -245,7 +246,7 @@ class TestSerializeBEL(unittest.TestCase):
         self.assertEqual(lines, list(_to_bel_lines_body(self.graph)))
 
     def test_simple(self):
-        """Tests a scenario with a qualified edge, but no annotaitons"""
+        """Test a scenario with a qualified edge, but no annotations."""
         self.graph.add_increases(
             Protein(namespace='HGNC', name='YFG1'),
             Protein(namespace='HGNC', name='YFG'),
@@ -267,17 +268,17 @@ class TestSerializeBEL(unittest.TestCase):
 
         self._help_check_lines(expected_lines)
 
-    def test_single_annotation(self):
-        """Tests a scenario with a qualified edge, but no annotaitons"""
-        a1, v1 = map(lambda _: n(), range(2))
+    def test_different_key_and_namespace(self):
+        key, namespace, value = map(lambda _: n(), range(3))
 
+        self.graph.annotation_curie.add(key)
         self.graph.add_increases(
             Protein(namespace='HGNC', name='YFG1'),
             Protein(namespace='HGNC', name='YFG'),
             citation=self.citation,
             evidence=self.evidence,
             annotations={
-                a1: {v1}
+                key: Entity(namespace=namespace, identifier=value),
             }
         )
 
@@ -285,11 +286,44 @@ class TestSerializeBEL(unittest.TestCase):
         self.assertEqual(1, self.graph.number_of_edges())
 
         expected_lines = [
-            'SET Citation = {{"PubMed", "{}"}}\n'.format(self.citation),
-            'SET SupportingText = "{}"'.format(self.evidence),
-            'SET {} = "{}"'.format(a1, v1),
+            f'SET Citation = {{"PubMed", "{self.citation}"}}\n',
+            f'SET SupportingText = "{self.evidence}"',
+            f'SET {key} = "{namespace}:{value}"',
             'p(HGNC:YFG1) increases p(HGNC:YFG)',
-            'UNSET {}'.format(a1),
+            f'UNSET {key}',
+            'UNSET SupportingText',
+            'UNSET Citation\n',
+            ('#' * 80),
+        ]
+
+        self._help_check_lines(expected_lines)
+
+    def test_single_annotation(self):
+        """Test a scenario with a qualified edge, but no annotations."""
+        a1, v1 = map(lambda _: n(), range(2))
+        self.graph.annotation_list[a1] = {v1}
+        self.graph.add_increases(
+            Protein(namespace='HGNC', name='YFG1'),
+            Protein(namespace='HGNC', name='YFG'),
+            citation=self.citation,
+            evidence=self.evidence,
+            annotations={
+                a1: {v1},
+            }
+        )
+
+        self.assertEqual(2, self.graph.number_of_nodes())
+        self.assertEqual(1, self.graph.number_of_edges())
+
+        # Means that only the identifier needs to be written out
+        self.assertNotIn(a1, self.graph.annotation_curie)
+
+        expected_lines = [
+            'SET Citation = {{"PubMed", "{}"}}\n'.format(self.citation),
+            f'SET SupportingText = "{self.evidence}"',
+            f'SET {a1} = "{v1}"',
+            'p(HGNC:YFG1) increases p(HGNC:YFG)',
+            f'UNSET {a1}',
             'UNSET SupportingText',
             'UNSET Citation\n',
             '#' * 80,
@@ -301,13 +335,14 @@ class TestSerializeBEL(unittest.TestCase):
         a1, v1, v2 = map(lambda _: n(), range(3))
         v1, v2 = sorted([v1, v2])
 
+        self.graph.annotation_list[a1] = {v1, v2}
         self.graph.add_increases(
             Protein(namespace='HGNC', name='YFG1'),
             Protein(namespace='HGNC', name='YFG'),
             citation=self.citation,
             evidence=self.evidence,
             annotations={
-                a1: {v1, v2}
+                a1: {v1, v2},
             }
         )
 
@@ -315,11 +350,11 @@ class TestSerializeBEL(unittest.TestCase):
         self.assertEqual(1, self.graph.number_of_edges())
 
         expected_lines = [
-            'SET Citation = {{"PubMed", "{}"}}\n'.format(self.citation),
-            'SET SupportingText = "{}"'.format(self.evidence),
-            'SET {} = {{"{}", "{}"}}'.format(a1, v1, v2),
+            f'SET Citation = {{"PubMed", "{self.citation}"}}\n',
+            f'SET SupportingText = "{self.evidence}"',
+            f'SET {a1} = {{"{v1}", "{v2}"}}',
             'p(HGNC:YFG1) increases p(HGNC:YFG)',
-            'UNSET {}'.format(a1),
+            f'UNSET {a1}',
             'UNSET SupportingText',
             'UNSET Citation\n',
             ('#' * 80),

@@ -8,7 +8,8 @@ This module contains mappings between PyBEL's internal constants and BEL languag
 from typing import Optional
 
 from .constants import (
-    ABUNDANCE, BIOPROCESS, CELL_SURFACE, COMPLEX, COMPOSITE, EXTRACELLULAR, GENE, IDENTIFIER, INTRACELLULAR, MIRNA, NAME, NAMESPACE, PATHOLOGY, PROTEIN, RNA, TRANSCRIBED_TO, TRANSLATED_TO,
+    ABUNDANCE, BIOPROCESS, CELL_SURFACE, COMPLEX, COMPOSITE, EXTRACELLULAR, GENE, IDENTIFIER, INTRACELLULAR, MIRNA,
+    NAME, NAMESPACE, PATHOLOGY, PROTEIN, RNA, TRANSCRIBED_TO, TRANSLATED_TO,
 )
 from .utils import ensure_quotes
 
@@ -49,9 +50,9 @@ class Entity(dict):
 
         if identifier is not None:
             if not isinstance(identifier, str):
-                raise TypeError('identifier should be a string {}'.format(identifier))
+                raise TypeError(f'identifier should be a string. Got {type(identifier)} {identifier}')
             if not identifier:
-                raise ValueError('identifier shold be non-empty')
+                raise ValueError('identifier should be non-empty')
             self[IDENTIFIER] = identifier
 
     @property
@@ -89,6 +90,16 @@ class Entity(dict):
     def __str__(self):  # noqa: D105
         return self.obo if self.identifier and self.name else self.curie
 
+    def __hash__(self) -> int:
+        return hash((self.namespace, self.identifier, self.name))
+
+
+text_location_labels = {
+    'Abstract': Entity(namespace='iao', identifier='0000315', name='abstract'),
+    'Review': Entity(namespace='iao', identifier='0000311', name='publication'),  # sue me
+    'Results': Entity(namespace='iao', identifier='0000318', name='results section'),
+    'Legend': Entity(namespace='sio', identifier='000468 ', name='legend'),
+}
 
 #: A dictionary of activity labels used in the ma() function in activity(p(X), ma(Y))
 activity_labels = {

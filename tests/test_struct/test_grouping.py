@@ -7,6 +7,7 @@ import unittest
 from pybel import BELGraph
 from pybel.constants import CITATION_TYPE_PUBMED
 from pybel.dsl import protein
+from pybel.language import Entity
 from pybel.struct.grouping import get_subgraphs_by_annotation, get_subgraphs_by_citation
 from pybel.testing.utils import n
 
@@ -36,10 +37,10 @@ class TestAnnotation(unittest.TestCase):
         subgraphs = get_subgraphs_by_annotation(self.graph, annotation='subgraph')
 
         self.assertEqual(2, len(subgraphs))
-        self.assertIn('1', subgraphs)
-        self.assertIn('2', subgraphs)
+        self.assertIn(Entity(namespace='subgraph', identifier='1'), subgraphs)
+        self.assertIn(Entity(namespace='subgraph', identifier='2'), subgraphs)
 
-        subgraph_1 = subgraphs['1']
+        subgraph_1 = subgraphs[Entity(namespace='subgraph', identifier='1')]
         self.assertIsInstance(subgraph_1, BELGraph)
 
         self.assertIn('test', subgraph_1.namespace_url)
@@ -56,7 +57,7 @@ class TestAnnotation(unittest.TestCase):
         self.assertNotIn(d, subgraph_1[a])
         self.assertNotIn(d, subgraph_1[c])
 
-        subgraph_2 = subgraphs['2']
+        subgraph_2 = subgraphs[Entity(namespace='subgraph', identifier='2')]
         self.assertIsInstance(subgraph_2, BELGraph)
 
         self.assertIn('test', subgraph_2.namespace_url)
@@ -77,8 +78,8 @@ class TestAnnotation(unittest.TestCase):
         subgraphs = get_subgraphs_by_annotation(self.graph, annotation='subgraph', sentinel=sentinel)
 
         self.assertEqual(3, len(subgraphs))
-        self.assertIn('1', subgraphs)
-        self.assertIn('2', subgraphs)
+        self.assertIn(Entity(namespace='subgraph', identifier='1'), subgraphs)
+        self.assertIn(Entity(namespace='subgraph', identifier='2'), subgraphs)
         self.assertIn(sentinel, subgraphs)
 
 

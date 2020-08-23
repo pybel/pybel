@@ -22,7 +22,7 @@ expected_test_simple_metadata = {
     METADATA_COPYRIGHT: "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
     METADATA_AUTHORS: "Charles Tapley Hoyt",
     METADATA_LICENSES: "WTF License",
-    METADATA_CONTACT: "charles.hoyt@scai.fraunhofer.de",
+    METADATA_CONTACT: "cthoyt@gmail.com",
     METADATA_PROJECT: 'PyBEL Testing',
 }
 
@@ -33,7 +33,7 @@ expected_test_thorough_metadata = {
     METADATA_COPYRIGHT: "Copyright (c) Charles Tapley Hoyt. All Rights Reserved.",
     METADATA_AUTHORS: "Charles Tapley Hoyt",
     METADATA_LICENSES: "WTF License",
-    METADATA_CONTACT: "charles.hoyt@scai.fraunhofer.de",
+    METADATA_CONTACT: "cthoyt@gmail.com",
 }
 
 citation_1 = citation_dict(namespace=CITATION_TYPE_PUBMED, identifier='123455')

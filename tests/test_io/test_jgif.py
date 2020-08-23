@@ -114,7 +114,8 @@ jgif_expected_edges = [
         },
         TARGET_MODIFIER: {MODIFIER: ACTIVITY, EFFECT: activity_mapping['cat']},
         ANNOTATIONS: {
-            'Tissue': {'lung': True}
+            'Tissue': {'lung': True},
+            'Species': {'9606': True},
         }
     })
 ]
@@ -134,7 +135,7 @@ class TestJgif(TestGraphMixin):
         self.assertEqual(jgif_expected_nodes, set(graph))
 
         for u, v, d in jgif_expected_edges:
-            self.assert_has_edge(graph, u, v, **d)
+            self.assert_has_edge(graph, u, v, permissive=False, **d)
 
         # TODO test more thoroughly?
         export_jgif = to_jgif(graph)

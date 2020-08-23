@@ -77,11 +77,23 @@ class TestDSL(unittest.TestCase):
         with self.assertRaises(ValueError):
             Protein(namespace='uniprot', identifier='', name='123')
 
-    def test_abundance_as_bel_quoted(self):
+    def test_abundance_as_bel_dash_unquoted(self):
         """Test converting an abundance to BEL with a name that needs quotation."""
         namespace, name = 'HGNC', 'YFG-1'
         node = Abundance(namespace=namespace, name=name)
-        self.assertEqual('a(HGNC:"YFG-1")', node.as_bel())
+        self.assertEqual('a(HGNC:YFG-1)', node.as_bel())
+
+    def test_abundance_as_no_quotes(self):
+        """Test converting an abundance that doesn't need quotes, but looks crazy."""
+        namespace, name = 'a-c', 'd.e.f'
+        node = Abundance(namespace=namespace, name=name)
+        self.assertEqual('a(a-c:d.e.f)', node.as_bel())
+
+    def test_abundance_as_bel_quoted(self):
+        """Test converting an abundance to BEL with a name that needs quotation."""
+        namespace, name = 'HGNC', 'YFG~1'
+        node = Abundance(namespace=namespace, name=name)
+        self.assertEqual('a(HGNC:"YFG~1")', node.as_bel())
 
     def test_abundance_as_bel(self):
         """Test converting an abundance to BEL with a name that does not need quotation."""

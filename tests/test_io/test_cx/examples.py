@@ -11,6 +11,9 @@ from pybel.dsl import (
 from pybel.language import citation_dict
 
 example_graph = BELGraph()
+example_graph.annotation_list['Confidence'] = {'Low', 'Medium', 'High', 'Very High'}
+example_graph.annotation_pattern['Number'] = r'\d+'
+example_graph.annotation_pattern['Species'] = r'\d+'
 
 ptk2 = Protein(namespace='hgnc', name='PTK2', variants=pmod('Ph', 'Tyr', 925))
 mapk1 = Protein(namespace='hgnc', name='MAPK1')

@@ -785,6 +785,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         """Creates a unit test with a manager and graph"""
         super().setUp()
         self.graph = BELGraph(name=n(), version=n())
+        self.graph.annotation_pattern['Species'] = r'\d+'
 
     @mock_bel_resources
     def test_translocation_default(self, mock):

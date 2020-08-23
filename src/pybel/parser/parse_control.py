@@ -26,7 +26,7 @@ from ..exceptions import (
     InvalidPubMedIdentifierWarning, MissingAnnotationKeyWarning, MissingAnnotationRegexWarning,
     MissingCitationException, UndefinedAnnotationWarning,
 )
-from ..language import CitationDict
+from ..language import CitationDict, Entity
 
 __all__ = ['ControlParser']
 
@@ -256,7 +256,7 @@ class ControlParser(BaseParser):
         """Handle a ``SET X = "Y"`` statement."""
         key, value = tokens['key'], tokens['value']
         self.raise_for_invalid_annotation_value(line, position, key, value)
-        self.annotations[key] = value
+        self.annotations[key] = [Entity(namespace=key, identifier=value)]
         return tokens
 
     def handle_set_command_list(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
@@ -264,7 +264,7 @@ class ControlParser(BaseParser):
         key, values = tokens['key'], tokens['values']
         for value in values:
             self.raise_for_invalid_annotation_value(line, position, key, value)
-        self.annotations[key] = set(values)
+        self.annotations[key] = [Entity(namespace=key, identifier=value) for value in values]
         return tokens
 
     def handle_unset_statement_group(self, line: str, position: int, tokens: ParseResults) -> ParseResults:

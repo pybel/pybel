@@ -51,7 +51,6 @@ After installation with ``pip install git+https://github.com/cthoyt/selventa-kno
 
 import logging
 import unittest
-from collections import defaultdict
 from typing import Any, Mapping, Tuple, Union
 
 import pyobo
@@ -63,13 +62,15 @@ from pyobo.xrefdb.sources.famplex import get_remapping
 from tqdm import tqdm
 
 from pybel.constants import (
-    ACTIVITY, ANNOTATIONS, CONCEPT, EFFECT, FREE_ANNOTATIONS, FROM_LOC, FUSION, GMOD, IDENTIFIER, KIND, LOCATION,
+    ACTIVITY, ANNOTATIONS, CONCEPT, EFFECT, FROM_LOC, FUSION, GMOD, IDENTIFIER, KIND, LOCATION,
     MEMBERS, MODIFIER, NAME, NAMESPACE, PARTNER_3P, PARTNER_5P, PMOD, PRODUCTS, REACTANTS, SOURCE_MODIFIER,
     TARGET_MODIFIER, TO_LOC, TRANSLOCATION, VARIANTS,
 )
 from pybel.dsl import BaseConcept
 from pybel.io import from_nodelink, to_nodelink
-from pybel.language import Entity, activity_mapping, compartment_mapping, gmod_mappings, pmod_mappings
+from pybel.language import (
+    Entity, activity_mapping, compartment_mapping, gmod_mappings, pmod_mappings, text_location_labels,
+)
 from pybel.struct import BELGraph, get_annotations, get_namespaces, get_ungrounded_nodes
 
 __all__ = [
@@ -166,9 +167,11 @@ def ground_nodelink(graph_nodelink_dict) -> None:
 _BEL_ANNOTATION_PREFIX_MAP = {
     'MeSHDisease': 'mesh',
     'MeSHAnatomy': 'mesh',
+    'CellStructure': 'mesh',
     'Species': 'ncbitaxon',
     'Disease': 'doid',
     'Cell': 'cl',
+    'Anatomy': 'uberon',
 }
 _BEL_ANNOTATION_PREFIX_CATEGORY_MAP = {
     'MeSHDisease': 'Disease',
@@ -176,72 +179,59 @@ _BEL_ANNOTATION_PREFIX_CATEGORY_MAP = {
 }
 
 _UNHANDLED_ANNOTATION = set()
+CATEGORY_BLACKLIST = {
+    'TextLocation',
+}
 
 
 def _process_annotations(data, remove_ungrounded: bool = False) -> None:
     """Process the annotations in a PyBEL edge data dictionary."""
-    grounded_category_curie_polarity = []
-    ungrounded_category_name_polarity = []
-
-    for category, names in data[ANNOTATIONS].items():
-        if category == 'CellLine':
-            _namespaces = [
-                'efo',
-                # 'clo',  # FIXME implement CLO import and add here
-            ]
-            for name, polarity in names.items():
-                g_prefix, g_identifier, g_name = pyobo.ground(_namespaces, name)
+    cell_line_entities = data[ANNOTATIONS].get('CellLine')
+    if cell_line_entities:
+        ne = []
+        for entity in cell_line_entities:
+            if entity[NAMESPACE] == 'CellLine':
+                _namespaces = [
+                    'efo',
+                    # 'clo',  # FIXME implement CLO in PyOBO then uncomment
+                ]
+                g_prefix, g_identifier, g_name = pyobo.ground(_namespaces, entity[IDENTIFIER])
                 if g_prefix and g_identifier:
-                    grounded_category_curie_polarity.append((
-                        category, Entity(namespace=g_prefix, identifier=g_identifier, name=g_name), polarity,
-                    ))
-                else:
-                    ungrounded_category_name_polarity.append((category, name, polarity))
+                    ne.append(Entity(namespace=g_prefix, identifier=g_identifier, name=g_name))
+                elif not remove_ungrounded:
+                    logger.warning('could not ground CellLine: "%s"', entity[IDENTIFIER])
+                    ne.append(entity)
+        data[ANNOTATIONS]['CellLine'] = ne
 
-        elif category in _BEL_ANNOTATION_PREFIX_MAP:
-            norm_prefix = _BEL_ANNOTATION_PREFIX_MAP[category]
-            norm_category = _BEL_ANNOTATION_PREFIX_CATEGORY_MAP.get(category, category)
-            for name, polarity in names.items():
-                _, identifier, _ = pyobo.ground(norm_prefix, name)
-                if identifier:
-                    grounded_category_curie_polarity.append((
-                        norm_category, Entity(namespace=norm_prefix, identifier=identifier, name=name), polarity,
-                    ))
-                else:
-                    ungrounded_category_name_polarity.append((norm_category, name, polarity))
+    # fix text locations
+    text_location = data[ANNOTATIONS].get('TextLocation')
+    if text_location:
+        data[ANNOTATIONS]['TextLocation'] = [
+            text_location_labels.get(entity.identifier, entity)
+            for entity in text_location
+        ]
 
-        elif normalize_prefix(category):
-            norm_prefix = normalize_prefix(category)
-            for name, polarity in names.items():
-                _, identifier, _ = pyobo.ground(norm_prefix, name)
-                if identifier:
-                    grounded_category_curie_polarity.append((
-                        category, Entity(namespace=norm_prefix, identifier=identifier, name=name), polarity,
-                    ))
-                else:
-                    ungrounded_category_name_polarity.append((category, name, polarity))
+    # remap category names
+    data[ANNOTATIONS] = {
+        _BEL_ANNOTATION_PREFIX_CATEGORY_MAP.get(category, category): entities
+        for category, entities in data[ANNOTATIONS].items()
+    }
+    # fix namespaces that were categories before
+    for category, entities in data[ANNOTATIONS].items():
+        if category in CATEGORY_BLACKLIST:
+            continue
 
-        else:
-            if category not in _UNHANDLED_ANNOTATION:
-                logger.warning('unhandled annotation: %s', category)
-                _UNHANDLED_ANNOTATION.add(category)
+        ne = []
+        for entity in entities:
+            if not isinstance(entity, dict):
+                raise TypeError(f'entity should be a dict. got: {entity}')
+            nn = _BEL_ANNOTATION_PREFIX_MAP.get(entity[NAMESPACE])
+            if nn is not None:
+                entity[NAMESPACE] = nn
 
-            if isinstance(names, dict):
-                for name, polarity in names.items():
-                    ungrounded_category_name_polarity.append((category, name, polarity))
-            else:
-                ungrounded_category_name_polarity.append((category, names, True))
-
-    data[ANNOTATIONS] = defaultdict(dict)
-    for category, entity, polarity in grounded_category_curie_polarity:
-        data[ANNOTATIONS][category][entity.curie] = polarity
-    data[ANNOTATIONS] = dict(data[ANNOTATIONS])
-
-    if not remove_ungrounded and ungrounded_category_name_polarity:
-        data[FREE_ANNOTATIONS] = defaultdict(dict)
-        for category, name, polarity in ungrounded_category_name_polarity:
-            data[FREE_ANNOTATIONS][category][name] = polarity
-        data[FREE_ANNOTATIONS] = dict(data[FREE_ANNOTATIONS])
+            _process_concept(concept=entity)
+            ne.append(entity)
+        data[ANNOTATIONS][category] = ne
 
 
 def _process_edge_side(side_data) -> bool:
@@ -295,7 +285,7 @@ def _process_concept(*, concept, node=None) -> bool:
 
     prefix = normalize_prefix(namespace)
     if prefix is None:
-        logger.warning('could not normalize namespace %s in concept %s', namespace, concept)
+        logger.warning('could not normalize namespace "%s" in concept "%s"', namespace, concept)
         return False
 
     concept[NAMESPACE] = prefix
@@ -304,6 +294,8 @@ def _process_concept(*, concept, node=None) -> bool:
     name = concept.get(NAME)
     if identifier:  # don't trust whatever was put for the name, even if it's available
         map_success = _handle_identifier_not_name(concept=concept, prefix=prefix, identifier=identifier)
+        if not map_success:  # just in case the name gets put in the identifier
+            map_success = _handle_name_and_not_identifier(concept=concept, prefix=prefix, name=identifier, node=node)
     else:
         map_success = _handle_name_and_not_identifier(concept=concept, prefix=prefix, name=name, node=node)
 
@@ -349,11 +341,12 @@ def _handle_identifier_not_name(*, concept, prefix, identifier) -> bool:
         return False
 
     if id_name_mapping is None:
-        logger.warning('could not get names for prefix %s', prefix)
+        logger.warning('could not get names for prefix "%s"', prefix)
         return False
+
     name = id_name_mapping.get(identifier)
     if name is None:
-        logger.warning('could not get name for %s:%s', prefix, identifier)
+        logger.warning('could not get name for curie %s:%s', prefix, identifier)
         return False
     concept[NAME] = name
 
@@ -403,7 +396,7 @@ def _handle_name_and_not_identifier(*, concept, prefix, name, node=None) -> bool
         concept[NAME] = _mapped[NAME]
         return True
     elif prefix == 'bel':
-        logger.warning('could not figure out how to map bel ! %s', name)
+        logger.warning('could not figure out how to map bel ! "%s"', name)
         return False
 
     if prefix == 'uniprot':
@@ -419,7 +412,7 @@ def _handle_name_and_not_identifier(*, concept, prefix, name, node=None) -> bool
             concept[NAME] = mnemomic
             return True
 
-        logger.warning('could not interpret uniprot name: %s', name)
+        logger.warning('could not interpret uniprot name: "%s"', name)
         return False
 
     try:
@@ -434,7 +427,7 @@ def _handle_name_and_not_identifier(*, concept, prefix, name, node=None) -> bool
 
     identifier = id_name_mapping.get(name)
     if identifier is None:
-        logger.warning('could not find name %s in namespace %s', name, prefix)
+        logger.warning('could not find name "%s" in namespace "%s"', name, prefix)
         return False
 
     concept[IDENTIFIER] = identifier
@@ -651,59 +644,89 @@ class TestGround(unittest.TestCase):
                 'Test Upgrade MeSH disease, MeSH anatomy, and species',
                 {  # Expected
                     ANNOTATIONS: {
-                        'Disease': {'mesh:D010300': True},
-                        'Anatomy': {'mesh:D013378': True},
-                        'Species': {'ncbitaxon:9606': True},
+                        'Disease': [Entity(namespace='mesh', identifier='D010300', name='Parkinson Disease')],
+                        'Anatomy': [Entity(namespace='mesh', identifier='D013378', name='Substantia Nigra')],
+                        'Species': [Entity(namespace='ncbitaxon', identifier='9606', name='Homo sapiens')],
                     },
                 },
                 {  # Original
                     ANNOTATIONS: {
-                        'MeSHDisease': {'Parkinson Disease': True},
-                        'MeSHAnatomy': {'Substantia Nigra': True},
-                        'Species': {'Homo sapiens': True},
+                        'MeSHDisease': [Entity(namespace='MeSHDisease', identifier='Parkinson Disease')],
+                        'MeSHAnatomy': [Entity(namespace='MeSHAnatomy', identifier='Substantia Nigra')],
+                        'Species': [Entity(namespace='Species', identifier='Homo sapiens')],
                     },
                 },
             ),
             (
-                'When the name of the annotation does not need to be mapped',
-                {
+                'Test Upgrade MeSH disease, MeSH anatomy, and species but with names',
+                {  # Expected
                     ANNOTATIONS: {
-                        'Disease': {'doid:14330': True},
-                        'Cell': {'cl:0000030': True},
+                        'Disease': [Entity(namespace='mesh', identifier='D010300', name='Parkinson Disease')],
+                        'Anatomy': [Entity(namespace='mesh', identifier='D013378', name='Substantia Nigra')],
+                        'Species': [Entity(namespace='ncbitaxon', identifier='9606', name='Homo sapiens')],
+                    },
+                },
+                {  # Original
+                    ANNOTATIONS: {
+                        'MeSHDisease': [Entity(namespace='MeSHDisease', name='Parkinson Disease')],
+                        'MeSHAnatomy': [Entity(namespace='MeSHAnatomy', name='Substantia Nigra')],
+                        'Species': [Entity(namespace='Species', name='Homo sapiens')],
+                    },
+                },
+            ),
+            (
+                'When the name of the annotation does not need to be mapped via identifiers',
+                {  # Expected
+                    ANNOTATIONS: {
+                        'Disease': [Entity(namespace='doid', identifier='14330', name="Parkinson's disease")],
+                        'Cell': [Entity(namespace='cl', identifier='0000030', name='glioblast')],
                     },
                 },
                 {
                     ANNOTATIONS: {
-                        'Disease': {"Parkinson's disease": True},
-                        'Cell': {'glioblast': True},
+                        'Disease': [Entity(namespace='doid', identifier="Parkinson's disease")],
+                        'Cell': [Entity(namespace='Cell', identifier='glioblast')],
+                    },
+                },
+            ),
+            (
+                'When the name of the annotation does not need to be mapped via names',
+                {  # Expected
+                    ANNOTATIONS: {
+                        'Disease': [Entity(namespace='doid', identifier='14330', name="Parkinson's disease")],
+                        'Cell': [Entity(namespace='cl', identifier='0000030', name='glioblast')],
+                    },
+                },
+                {
+                    ANNOTATIONS: {
+                        'Disease': [Entity(namespace='doid', name="Parkinson's disease")],
+                        'Cell': [Entity(namespace='cl', name='glioblast')],
                     },
                 },
             ),
             (
                 'Check unmappable disease',
-                {
-                    ANNOTATIONS: {},
-                    FREE_ANNOTATIONS: {
-                        'Disease': {"Failure": True},
-                    }
+                {  # Expected
+                    ANNOTATIONS: {
+                        'Disease': [Entity(namespace='doid', identifier='Failure')],
+                    },
                 },
                 {
                     ANNOTATIONS: {
-                        'Disease': {"Failure": True},
+                        'Disease': [Entity(namespace='Disease', identifier='Failure')],
                     },
                 },
             ),
             (
                 'Check unhandled annotation',
-                {
-                    ANNOTATIONS: {},
-                    FREE_ANNOTATIONS: {
-                        'Custom Annotation': {"Custom Value": True},
+                {  # Expected
+                    ANNOTATIONS: {
+                        'Custom Annotation': [Entity(namespace='Custom Annotation', identifier="Custom Value")],
                     }
                 },
                 {
                     ANNOTATIONS: {
-                        'Custom Annotation': {"Custom Value": True},
+                        'Custom Annotation': [Entity(namespace='Custom Annotation', identifier="Custom Value")],
                     },
                 },
             ),
@@ -712,3 +735,7 @@ class TestGround(unittest.TestCase):
             with self.subTest(name=name):
                 _process_annotations(data)
                 self.assertEqual(expected_data, data)
+
+
+if __name__ == '__main__':
+    unittest.main()
