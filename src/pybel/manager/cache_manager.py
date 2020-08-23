@@ -325,12 +325,13 @@ class NamespaceManager(BaseManager):
         """
         return self._ensure_namespace_urls([url], is_annotation=True)[0]
 
-    def get_annotation_entries_by_names(self, url: str, names: Iterable[str]) -> List[NamespaceEntry]:
+    def get_annotation_entries_by_names(self, url: str, entities: Iterable[Entity]) -> List[NamespaceEntry]:
         """Get annotation entries by URL and names.
 
         :param url: The url of the annotation source
-        :param names: The names of the annotation entries from the given url's document
+        :param entities: The names of the annotation entries from the given url's document
         """
+        names = [e.identifier if isinstance(e, Entity) else e for e in entities]
         annotation_filter = and_(Namespace.url == url, NamespaceEntry.name.in_(names))
         return self.session.query(NamespaceEntry).join(Namespace).filter(annotation_filter).all()
 
@@ -678,7 +679,7 @@ class InsertManager(NamespaceManager, LookupManager):
                 except Exception as e:
                     self.session.rollback()
                     logger.exception('error storing edge in database. edge data: %s', data)
-                    raise EdgeAddError(e, u, v, key, data) from e
+                    raise EdgeAddError(e, u, v, key, data)
                 else:
                     yield edge
 
@@ -686,9 +687,9 @@ class InsertManager(NamespaceManager, LookupManager):
     def _iter_from_annotations_dict(
         graph: BELGraph,
         annotations_dict: AnnotationsDict,
-    ) -> Iterable[Tuple[str, Set[str]]]:
+    ) -> Iterable[Tuple[str, Set[Entity]]]:
         """Iterate over the key/value pairs in this edge data dictionary normalized to their source URLs."""
-        for key, names in annotations_dict.items():
+        for key, entities in annotations_dict.items():
             if key in graph.annotation_url:
                 url = graph.annotation_url[key]
             elif key in graph.annotation_list:
@@ -699,7 +700,7 @@ class InsertManager(NamespaceManager, LookupManager):
             else:
                 raise ValueError('Graph resources does not contain keyword: {}'.format(key))
 
-            yield url, set(names)
+            yield url, set(entities)
 
     def _get_annotation_entries_from_data(self, graph: BELGraph, data: EdgeData) -> Optional[List[NamespaceEntry]]:
         """Get the annotation entries from an edge data dictionary."""
@@ -707,8 +708,8 @@ class InsertManager(NamespaceManager, LookupManager):
         if annotations_dict is None:
             return
         rv = []
-        for url, names in self._iter_from_annotations_dict(graph, annotations_dict=annotations_dict):
-            for entry in self.get_annotation_entries_by_names(url, names):
+        for url, entities in self._iter_from_annotations_dict(graph, annotations_dict=annotations_dict):
+            for entry in self.get_annotation_entries_by_names(url, entities):
                 rv.append(entry)
         return rv
 

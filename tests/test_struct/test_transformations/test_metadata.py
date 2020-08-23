@@ -25,6 +25,7 @@ class TestMetadata(unittest.TestCase):
         y = protein(namespace='HGNC', name='X')
 
         graph = BELGraph()
+        graph.annotation_list['A'] = set('ABC')
         key = graph.add_increases(
             x,
             y,
@@ -85,6 +86,7 @@ class TestMetadata(unittest.TestCase):
         y = protein(namespace='HGNC', name='X')
 
         graph = BELGraph()
+        graph.annotation_list['A'] = set('ABC')
 
         k0 = graph.add_part_of(x, y)
         k1 = graph.add_increases(

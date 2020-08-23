@@ -16,6 +16,8 @@ Added
 - ``pybel.parse`` function allows for quick parsing of BEL strings
 - Add JSON Schema for validating nodes and edges (https://github.com/pybel/pybel/pull/450) thanks @aman527
 - Add BEL Repository functionality, previously located in https://github.com/pybel/bel-repository
+- Pickling can be done with gzip to greatly reduce size both on files (https://github.com/pybel/pybel/commit/d90578cb)
+  and on bytes (https://github.com/pybel/pybel/commit/fcc99952)
 
 Changed
 ~~~~~~~
@@ -33,6 +35,12 @@ Changed
 - Remove the BEL default namespace. All usages get normalized to controlled vocabularies (mostly GO) automatically
   (https://github.com/pybel/pybel/pull/455).
 - Improve namespace/annotation database insertion with Pandas (https://github.com/pybel/pybel/pull/454)
+- Pickling now uses protocol 5 by default assisted by the ``pickle5`` backport on Python 3.6 (https://github.com/pybel/pybel/commit/679dcab7)
+- Database now stores graphs in gzipped pickles (https://github.com/pybel/pybel/commit/9ee9bf21)
+
+Fixed
+~~~~~
+- Parser now correctly supports dashes and dots in namespaces as well as in names without quoting (https://github.com/pybel/pybel/pull/460)
 
 `0.14.10 <https://github.com/pybel/pybel/compare/v0.14.9...v0.14.10>`_ - 2020-06-15
 -----------------------------------------------------------------------------------

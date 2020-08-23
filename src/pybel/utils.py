@@ -5,7 +5,7 @@
 import hashlib
 import json
 import logging
-import pickle
+import re
 import typing
 from collections import defaultdict
 from collections.abc import Iterable, MutableMapping
@@ -17,6 +17,11 @@ from .constants import (
     RELATION, SOURCE_MODIFIER, TARGET_MODIFIER, TO_LOC, TRANSLOCATION,
 )
 from .typing import EdgeData
+
+try:
+    import pickle5 as pickle
+except ImportError:
+    import pickle
 
 logger = logging.getLogger(__name__)
 
@@ -92,9 +97,13 @@ def tokenize_version(version_string: str) -> Tuple[int, int, int]:
     return int(major), int(minor), int(patch)
 
 
+_re = re.compile(r'^[a-zA-Z0-9-\.]*$')
+
+
 def ensure_quotes(s: str) -> str:
     """Quote a string that isn't solely alphanumeric."""
-    return '"{}"'.format(s) if not s.isalnum() else s
+    s.isalnum()
+    return s if _re.match(s) else f'"{s}"'
 
 
 CREATION_DATE_FMT = '%Y-%m-%dT%H:%M:%S'

@@ -30,6 +30,7 @@ from ..constants import (
     RANGE_3P, RANGE_5P, REACTANTS, RELATION, SOURCE_MODIFIER, TARGET_MODIFIER, UNQUALIFIED_EDGES, VARIANTS,
 )
 from ..dsl import BaseAbundance, BaseEntity
+from ..language import Entity
 from ..struct import BELGraph
 from ..tokens import parse_result_to_dsl
 from ..utils import expand_dict, flatten_dict
@@ -203,7 +204,7 @@ def to_cx(graph: BELGraph) -> List[Dict]:  # noqa: C901
                 edge_attributes_entry.append({
                     'po': edge_index,
                     'n': annotation,
-                    'v': sorted(values),
+                    'v': sorted(values, key=lambda e: (e.namespace, e.identifier, e.name)),
                     'd': 'list_of_string',
                 })
 
@@ -540,7 +541,7 @@ def from_cx(cx: List[Dict]) -> BELGraph:  # noqa: C901
     for eid in edge_relation:
         if eid in edge_annotations:  # FIXME stick this in edge_data.items() iteration
             edge_data_pp[eid][ANNOTATIONS] = {
-                key: {v: True for v in values}
+                key: [Entity(**v) for v in values]
                 for key, values in edge_annotations[eid].items()
             }
 

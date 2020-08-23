@@ -11,6 +11,7 @@ from pybel.exceptions import (
     InvalidPubMedIdentifierWarning, MissingAnnotationKeyWarning, MissingAnnotationRegexWarning,
     UndefinedAnnotationWarning,
 )
+from pybel.language import Entity
 from pybel.parser import ControlParser
 from pybel.parser.parse_control import set_citation_stub
 from pybel.testing.utils import n
@@ -271,7 +272,7 @@ class TestParseControl2(TestParseControl):
         self.parser.parse_lines(s)
 
         expected_annotation = {
-            'Custom1': 'Custom1_A'
+            'Custom1': [Entity(namespace='Custom1', identifier='Custom1_A')],
         }
 
         self.assertEqual(expected_annotation, self.parser.annotations)
@@ -284,7 +285,10 @@ class TestParseControl2(TestParseControl):
         self.parser.parse_lines(s)
 
         expected_annotation = {
-            'Custom1': {'Custom1_A', 'Custom1_B'}
+            'Custom1': [
+                Entity(namespace='Custom1', identifier='Custom1_A'),
+                Entity(namespace='Custom1', identifier='Custom1_B'),
+            ],
         }
 
         self.assertEqual(expected_annotation, self.parser.annotations)
@@ -292,7 +296,7 @@ class TestParseControl2(TestParseControl):
         expected_dict = {
             ANNOTATIONS: expected_annotation,
             CITATION: test_citation_dict,
-            EVIDENCE: None
+            EVIDENCE: None,
         }
 
         self.assertEqual(expected_dict, self.parser.get_annotations())
@@ -360,8 +364,13 @@ class TestParseControl2(TestParseControl):
         v = str(randint(0, 1e5))
         s = [
             SET_CITATION_TEST,
-            'SET CustomRegex = "{}"'.format(v)
+            f'SET CustomRegex = "{v}"'
         ]
         self.parser.parse_lines(s)
 
-        self.assertEqual(v, self.parser.annotations['CustomRegex'])
+        self.assertEqual(
+            [
+                Entity(namespace='CustomRegex', identifier=v),
+            ],
+            self.parser.annotations['CustomRegex'],
+        )

@@ -84,7 +84,7 @@ class TestModels(unittest.TestCase):
             species='9606',
             version='1.0.0',
             author='Charles Tapley Hoyt',
-            contact='charles.hoyt@scai.fraunhofer.de',
+            contact='cthoyt@gmail.com',
             uploaded=uploaded,
         )
 
@@ -112,7 +112,7 @@ class TestModels(unittest.TestCase):
             species='9606',
             version='1.0.0',
             author='Charles Tapley Hoyt',
-            contact='charles.hoyt@scai.fraunhofer.de',
+            contact='cthoyt@gmail.com',
             uploaded=uploaded,
         )
 

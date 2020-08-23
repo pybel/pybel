@@ -8,7 +8,7 @@ from typing import Any, Iterable, List, TextIO, Union
 
 from networkx.utils import open_file
 
-from .nodelink import _augment_node, _fix_annotation_list
+from .nodelink import _augment_node, _prepare_graph_dict, _recover_graph_dict
 from ..constants import CITATION, SOURCE_MODIFIER, TARGET_MODIFIER
 from ..language import CitationDict
 from ..struct.graph import BELGraph, _handle_modifier
@@ -57,7 +57,9 @@ def to_sbel(graph: BELGraph) -> List[SBEL]:
 
 def iterate_sbel(graph: BELGraph) -> Iterable[SBEL]:
     """Iterate over JSON dictionaries corresponding to lines in BEL JSONL."""
-    yield graph.graph.copy()
+    g = graph.graph.copy()
+    _prepare_graph_dict(g)
+    yield g
     for u, v, k, d in graph.edges(data=True, keys=True):
         yield {
             'source': _augment_node(u),
@@ -79,7 +81,7 @@ def from_sbel(it: Iterable[SBEL], includes_metadata: bool = True) -> BELGraph:
     rv = BELGraph()
     if includes_metadata:
         rv.graph.update(next(it))
-        _fix_annotation_list(rv)
+        _recover_graph_dict(rv)
     add_sbel(rv, it)
     return rv
 

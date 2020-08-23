@@ -8,6 +8,7 @@ from collections import Counter
 from pybel import BELGraph
 from pybel.dsl import protein
 from pybel.examples import sialic_acid_graph
+from pybel.language import Entity
 from pybel.struct.summary.edge_summary import (
     count_annotations, get_annotation_values, get_annotation_values_by_annotation, get_annotations,
     get_unused_annotations, get_unused_list_annotation_values, iter_annotation_value_pairs, iter_annotation_values,
@@ -21,6 +22,11 @@ class TestEdgeSummary(unittest.TestCase):
     def test_1(self):
         """Test iterating over annotation/value pairs."""
         graph = BELGraph()
+        graph.annotation_list.update({
+            'A': set('1234'),
+            'B': set('XYZ'),
+            'C': set('abcde'),
+        })
         u = protein('HGNC', name='U')
         v = protein('HGNC', name='V')
         w = protein('HGNC', name='W')
@@ -43,8 +49,8 @@ class TestEdgeSummary(unittest.TestCase):
             citation=n(),
             annotations={
                 'A': {'1', '3'},
-                'C': {'a'}
-            }
+                'C': {'a'},
+            },
         )
 
         graph.add_increases(
@@ -54,7 +60,7 @@ class TestEdgeSummary(unittest.TestCase):
             citation=n(),
         )
 
-        x = dict(Counter(iter_annotation_value_pairs(graph)))
+        x = dict(Counter((key, entity.identifier) for key, entity in iter_annotation_value_pairs(graph)))
 
         self.assertEqual({
             ('A', '1'): 2,
@@ -76,8 +82,13 @@ class TestEdgeSummary(unittest.TestCase):
     def test_get_annotation_values(self):
         """Test getting annotation values."""
         expected = {
-            'Confidence': {'High', 'Low'},
-            'Species': {'9606'}
+            'Confidence': {
+                Entity(namespace='Confidence', identifier='High'),
+                Entity(namespace='Confidence', identifier='Low'),
+            },
+            'Species': {
+                Entity(namespace='Species', identifier='9606'),
+            },
         }
 
         self.assertEqual({'Confidence', 'Species'}, get_annotations(sialic_acid_graph))
@@ -110,8 +121,16 @@ class TestEdgeSummary(unittest.TestCase):
     def test_get_unused_annotation_list_values(self):
         """Test getting unused annotation list values."""
         graph = BELGraph()
-        name = 'test'
-        a, b, c = 'abc'
-        graph.annotation_list[name] = {a, b, c}
-        graph.add_increases(protein(n(), n()), protein(n(), n()), citation=n(), evidence=n(), annotations={name: {a}})
-        self.assertEqual({name: {b, c}}, get_unused_list_annotation_values(graph))
+        annotation_key = 'test'
+        graph.annotation_list[annotation_key] = set('abc')
+        graph.add_increases(
+            protein(n(), n()), protein(n(), n()),
+            citation=n(),
+            evidence=n(),
+            annotations={annotation_key: {'a'}},
+        )
+
+        rv = get_unused_list_annotation_values(graph)
+        self.assertIsInstance(rv, dict)
+
+        self.assertEqual({annotation_key: set('bc')}, rv)

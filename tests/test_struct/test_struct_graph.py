@@ -14,6 +14,7 @@ from pybel import BELGraph
 from pybel.constants import CITATION_TYPE_PUBMED, IDENTIFIER, NAMESPACE
 from pybel.dsl import hgvs, protein
 from pybel.io.api import InvalidExtensionError
+from pybel.language import Entity
 from pybel.testing.utils import n
 
 
@@ -120,8 +121,8 @@ Abundance         1
 
 Namespace (3)      Count
 ---------------  -------
+go                    15
 hgnc                   8
-go                     3
 chebi                  2
 
 Edge Type (7)                        Count
@@ -154,6 +155,8 @@ class TestGetGraphProperties(unittest.TestCase):
     def setUp(self):
         """Set up the test case with a fresh BEL graph."""
         self.graph = BELGraph()
+        self.graph.annotation_pattern['Species'] = r'\d+'
+        self.graph.annotation_list['Confidence'] = {'Very Low', 'Low', 'Medium', 'High', 'Very High'}
 
     def test_get_qualified_edge(self):
         """Test adding an edge to a graph."""
@@ -196,11 +199,9 @@ class TestGetGraphProperties(unittest.TestCase):
         self.assertIsNotNone(annotations)
         self.assertIsInstance(annotations, dict)
         self.assertIn('Species', annotations)
-        self.assertIn('9606', annotations['Species'])
-        self.assertTrue(annotations['Species']['9606'])
+        self.assertIn(Entity(namespace='Species', identifier='9606'), annotations['Species'])
         self.assertIn('Confidence', annotations)
-        self.assertIn('Very High', annotations['Confidence'])
-        self.assertTrue(annotations['Confidence']['Very High'])
+        self.assertIn(Entity(namespace='Confidence', identifier='Very High'), annotations['Confidence'])
 
     def test_get_unqualified_edge(self):
         """Test adding an unqualified edge."""

@@ -18,8 +18,9 @@ from ..constants import (
     METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION,
     NAME, NAMESPACE,
 )
-from ..io.gpickle import from_bytes, to_bytes
+from ..io.gpickle import from_bytes_gz, to_bytes_gz
 from ..language import Entity
+from ..struct.graph import BELGraph
 from ..tokens import parse_result_to_dsl
 
 __all__ = [
@@ -154,7 +155,7 @@ class NamespaceEntry(Base):
     id = Column(Integer, primary_key=True)
 
     name = Column(
-        String(1023), index=True, nullable=False,
+        String(1023), index=True, nullable=True,
         doc='Name that is defined in the corresponding namespace definition file',
     )
     identifier = Column(String(255), index=True, nullable=True, doc='The database accession number')
@@ -292,19 +293,13 @@ class Network(Base):
     def __str__(self):
         return repr(self)
 
-    def as_bel(self):
-        """Get this network and loads it into a :class:`BELGraph`.
+    def as_bel(self) -> BELGraph:
+        """Get this network and loads it into a :class:`BELGraph`."""
+        return from_bytes_gz(self.blob)
 
-        :rtype: pybel.BELGraph
-        """
-        return from_bytes(self.blob)
-
-    def store_bel(self, graph):
-        """Insert a BEL graph.
-
-        :param pybel.BELGraph graph: A BEL Graph
-        """
-        self.blob = to_bytes(graph)
+    def store_bel(self, graph: BELGraph):
+        """Insert a BEL graph."""
+        self.blob = to_bytes_gz(graph)
 
 
 class Node(Base):
@@ -601,11 +596,8 @@ class Edge(Base):
 
         return result
 
-    def insert_into_graph(self, graph):
-        """Insert this edge into a BEL graph.
-
-        :param pybel.BELGraph graph: A BEL graph
-        """
+    def insert_into_graph(self, graph: BELGraph) -> str:
+        """Insert this edge into a BEL graph."""
         u = self.source.as_bel()
         v = self.target.as_bel()
 

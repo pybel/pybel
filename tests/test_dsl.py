@@ -4,6 +4,7 @@
 
 import unittest
 
+import pybel.constants as pc
 from pybel import BELGraph
 from pybel.constants import NAME
 from pybel.dsl import (
@@ -12,6 +13,7 @@ from pybel.dsl import (
 )
 from pybel.language import Entity
 from pybel.testing.utils import n
+from pybel.tokens import parse_result_to_dsl
 from pybel.utils import ensure_quotes
 
 
@@ -75,11 +77,23 @@ class TestDSL(unittest.TestCase):
         with self.assertRaises(ValueError):
             Protein(namespace='uniprot', identifier='', name='123')
 
-    def test_abundance_as_bel_quoted(self):
+    def test_abundance_as_bel_dash_unquoted(self):
         """Test converting an abundance to BEL with a name that needs quotation."""
         namespace, name = 'HGNC', 'YFG-1'
         node = Abundance(namespace=namespace, name=name)
-        self.assertEqual('a(HGNC:"YFG-1")', node.as_bel())
+        self.assertEqual('a(HGNC:YFG-1)', node.as_bel())
+
+    def test_abundance_as_no_quotes(self):
+        """Test converting an abundance that doesn't need quotes, but looks crazy."""
+        namespace, name = 'a-c', 'd.e.f'
+        node = Abundance(namespace=namespace, name=name)
+        self.assertEqual('a(a-c:d.e.f)', node.as_bel())
+
+    def test_abundance_as_bel_quoted(self):
+        """Test converting an abundance to BEL with a name that needs quotation."""
+        namespace, name = 'HGNC', 'YFG~1'
+        node = Abundance(namespace=namespace, name=name)
+        self.assertEqual('a(HGNC:"YFG~1")', node.as_bel())
 
     def test_abundance_as_bel(self):
         """Test converting an abundance to BEL with a name that does not need quotation."""
@@ -208,6 +222,21 @@ class TestCentralDogma(unittest.TestCase):
         """Test that the construction of reaction doesn't have empty lists."""
         with self.assertRaises(ReactionEmptyException):
             Reaction([], [])
+
+
+class TestParse(unittest.TestCase):
+    """Test that :func:`parse_result_to_dsl` works correctly."""
+
+    def test_named_complex(self):
+        x = ComplexAbundance(namespace='a', identifier='b', members=[
+            Protein(namespace='c', identifier='d'),
+            Protein(namespace='c', identifier='e'),
+        ])
+
+        y = parse_result_to_dsl(dict(x))
+        self.assertIsInstance(y, ComplexAbundance)
+        self.assertIn(pc.MEMBERS, y)
+        self.assertIn(pc.CONCEPT, y)
 
 
 if __name__ == '__main__':
