@@ -5,6 +5,7 @@
 This module contains mappings between PyBEL's internal constants and BEL language keywords.
 """
 
+import warnings
 from typing import Optional
 
 from .constants import (
@@ -570,6 +571,31 @@ class CitationDict(Entity):
         self.update(kwargs)
 
 
-def citation_dict(*, namespace: str, identifier: str, db_name: Optional[str] = None, **kwargs) -> CitationDict:
+def citation_dict(
+    *,
+    namespace: Optional[str]=None,
+    db: Optional[str]=None,
+    identifier: Optional[str]=None,
+    db_id: Optional[str] = None,
+    name: Optional[str] = None,
+    **kwargs,
+) -> CitationDict:
     """Make a citation dictionary."""
-    return CitationDict(namespace=namespace, identifier=identifier, name=db_name, **kwargs)
+    if namespace and db:
+        raise ValueError('can not specify both namespace and db')
+    if identifier and db_id:
+        raise ValueError('can not specify both identifier and db_id')
+    if db:
+        warnings.warn(
+            'usage of keyword argument `db` in citation_dict() should be replaced with `namespace`. '
+            'Will be removed in PyBEL 16.', DeprecationWarning,
+        )
+        namespace = db
+    if db_id:
+        warnings.warn(
+            'usage of keyword argument `db_id` in citation_dict() should be replaced with `identifier`. '
+            'Will be removed in PyBEL 16.', DeprecationWarning,
+        )
+        identifier = db_id
+
+    return CitationDict(namespace=namespace, identifier=identifier, name=name, **kwargs)
