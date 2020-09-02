@@ -82,8 +82,9 @@ def to_neo4j(graph: BELGraph, neo_connection=None, use_tqdm: bool = True, period
 
         rel_type = edge_data[RELATION]
 
-        for annotation, values in edge_data.get(ANNOTATIONS, {}).items():
-            attrs[annotation] = list(values)
+        for annotation, entities in edge_data.get(ANNOTATIONS, {}).items():
+            for entity in entities:
+                attrs[entity.namespace] = str(entity)  # use logic for identifier/name
 
         citation = edge_data.get(CITATION)
         if citation:
