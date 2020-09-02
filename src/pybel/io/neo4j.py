@@ -49,10 +49,14 @@ def to_neo4j(graph: BELGraph, neo_connection=None, use_tqdm: bool = True, period
         nodes = tqdm(nodes, desc='nodes')
 
     for i, node in enumerate(nodes, start=1):
+        attrs = {
+            'data': json.dumps(node),
+            'md5': node.md5,
+        }
         if CONCEPT not in node or VARIANTS in node or MEMBERS in node or FUSION in node:
-            attrs = {'name': node.as_bel()}
+            attrs['name'] = node.as_bel()
         else:
-            attrs = {'namespace': node.namespace, 'data': json.dumps(node)}
+            attrs['namespace'] = node.namespace
 
             if node.name and node.identifier:
                 attrs['name'] = node.name
