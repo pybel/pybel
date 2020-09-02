@@ -90,6 +90,11 @@ class Entity(dict):
     def __str__(self):  # noqa: D105
         return self.obo if self.identifier and self.name else self.curie
 
+    def __repr__(self):
+        identifier = f'"{self.identifier}"' if self.identifier else None
+        name = f'"{self.name}"' if self.name else None
+        return f'Entity(namespace="{self.namespace}", identifier={identifier}, name={name})'
+
     def __hash__(self) -> int:
         return hash((self.namespace, self.identifier, self.name))
 
