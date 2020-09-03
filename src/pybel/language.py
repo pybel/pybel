@@ -573,9 +573,9 @@ class CitationDict(Entity):
 
 def citation_dict(
     *,
-    namespace: Optional[str]=None,
-    db: Optional[str]=None,
-    identifier: Optional[str]=None,
+    namespace: Optional[str] = None,
+    db: Optional[str] = None,
+    identifier: Optional[str] = None,
     db_id: Optional[str] = None,
     name: Optional[str] = None,
     **kwargs,
