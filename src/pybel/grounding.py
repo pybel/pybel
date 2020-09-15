@@ -57,7 +57,8 @@ import pyobo
 from protmapper.uniprot_client import get_id_from_mnemonic, get_mnemonic
 from pyobo.extract import get_id_name_mapping, get_name_id_mapping
 from pyobo.getters import MissingOboBuild, NoOboFoundry
-from pyobo.identifier_utils import SYNONYM_TO_KEY, normalize_prefix
+from pyobo.identifier_utils import normalize_prefix
+from pyobo.registries import get_namespace_synonyms
 from pyobo.xrefdb.sources.famplex import get_remapping
 from tqdm import tqdm
 
@@ -81,6 +82,7 @@ __all__ = [
 logger = logging.getLogger(__name__)
 SKIP = {'ncbigene', 'pubchem.compound', 'chembl.compound'}
 NO_NAMES = {'fplx', 'eccode', 'dbsnp', 'smiles', 'inchi', 'inchikey'}
+SYNONYM_TO_KEY = get_namespace_synonyms()
 
 # TODO will get updated
 #: A mapping of (prefix, name) pairs to (prefix, identifier, name) triples
