@@ -408,7 +408,7 @@ def _handle_name_and_not_identifier(*, concept, prefix, name, node=None) -> bool
             concept[IDENTIFIER] = identifier
             return True
 
-        mnemomic = get_mnemonic(name, web_fallback=True)
+        mnemomic = get_mnemonic(name, web_fallback=False)
         if mnemomic is not None:
             concept[IDENTIFIER] = name
             concept[NAME] = mnemomic

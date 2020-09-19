@@ -925,22 +925,15 @@ class BELGraph(nx.MultiDiGraph):
             return values
         if key in self.annotation_miriam:
             raise NotImplementedError('parsing of annotation as MIRIAM not yet implemented')
-        if key in self.annotation_list:
+        if key in self.annotation_list or key in self.annotation_pattern:
             if isinstance(values, str):
                 return [Entity(namespace=key, identifier=values)]
+            if isinstance(values, Entity):
+                return [values]
             if all(isinstance(v, Entity) for v in values):
                 return values
             if all(isinstance(v, dict) for v in values):
                 return [Entity(**v) for v in values]
-            if all(isinstance(v, str) for v in values):
-                return [Entity(namespace=key, identifier=v) for v in values]
-            raise TypeError(f'Mixed values: {values}')
-        if key in self.annotation_pattern:
-            # TODO pattern checking?
-            if isinstance(values, str):
-                return [Entity(namespace=key, identifier=values)]
-            if all(isinstance(v, Entity) for v in values):
-                return values
             if all(isinstance(v, str) for v in values):
                 return [Entity(namespace=key, identifier=v) for v in values]
             raise TypeError(f'Mixed values: {values}')
