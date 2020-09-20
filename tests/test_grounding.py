@@ -66,8 +66,8 @@ class TestProcessConcept(unittest.TestCase):
             {NAMESPACE: 'MESH', NAME: 'Neurons'},
         )
 
-    def test_lookup_uniprot_identifier_2(self, _):
-        """"""
+    def test_lookup_uniprot_identifier(self, _):
+        """Test looking up a uniprot identifier."""
         self._help(
             {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN', IDENTIFIER: 'O60921'},
             {NAMESPACE: 'UniProt', NAME: 'HUS1_HUMAN'},
@@ -113,20 +113,20 @@ class TestProcessConcept(unittest.TestCase):
 class TestGround(unittest.TestCase):
     """Test grounding."""
 
-    def help(self, expected, result):
+    def _help(self, expected, result):
         _process_node(result)
         self.assertEqual(expected, result)
 
     def test_lookup_identifier_member(self, _):
         """Test looking up the identifier of a member by name."""
-        self.help(
+        self._help(
             {MEMBERS: [{CONCEPT: {NAMESPACE: 'mesh', NAME: 'Neurons', IDENTIFIER: 'D009474'}}]},
             {MEMBERS: [{CONCEPT: {NAMESPACE: 'MESH', NAME: 'Neurons'}}]},
         )
 
     def test_lookup_identifier_complex(self, _):
         """Test looking up the identifier of a named complex and its members at the same time."""
-        self.help(
+        self._help(
             {
                 CONCEPT: {NAMESPACE: 'complexportal', NAME: 'Checkpoint clamp complex', IDENTIFIER: 'CPX-1829'},
                 MEMBERS: [
@@ -147,28 +147,28 @@ class TestGround(unittest.TestCase):
 
     def test_lookup_identifier_protein(self, _):
         """Test looking up the identifier based on a protein's name."""
-        self.help(
+        self._help(
             {CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN', IDENTIFIER: 'O60921'}},
             {CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN'}},
         )
 
     def test_lookup_name_protein(self, _):
         """Test looking up the name based on a protein's identifier."""
-        self.help(
+        self._help(
             {CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN', IDENTIFIER: 'O60921'}},
             {CONCEPT: {NAMESPACE: 'uniprot', IDENTIFIER: 'O60921'}},
         )
 
     def test_fix_name_protein(self, _):
         """Test fixing a wrong name by overwriting by identifier-based lookup."""
-        self.help(
+        self._help(
             {CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN', IDENTIFIER: 'O60921'}},
             {CONCEPT: {NAMESPACE: 'uniprot', IDENTIFIER: 'O60921', NAME: 'wrong!!!'}},
         )
 
     def test_lookup_identifier_pmod(self, _):
         """Test looking up a protein modification's identifier by name."""
-        self.help(
+        self._help(
             {
                 CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN', IDENTIFIER: 'O60921'},
                 VARIANTS: [
@@ -191,7 +191,7 @@ class TestGround(unittest.TestCase):
 
     def test_lookup_name_pmod(self, _):
         """Test looking up a protein modification's name by identifier."""
-        self.help(
+        self._help(
             {
                 CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN', IDENTIFIER: 'O60921'},
                 VARIANTS: [
@@ -214,7 +214,7 @@ class TestGround(unittest.TestCase):
 
     def test_fix_pmod_name(self, _):
         """Test fixing a wrong name in a pmod."""
-        self.help(
+        self._help(
             {
                 CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN', IDENTIFIER: 'O60921'},
                 VARIANTS: [
@@ -236,7 +236,8 @@ class TestGround(unittest.TestCase):
         )
 
     def test_normalize_pmod_default(self, _):
-        self.help(
+        """Test normalizing a pmod using the default bel namespace."""
+        self._help(
             {
                 CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN', IDENTIFIER: 'O60921'},
                 VARIANTS: [
@@ -259,7 +260,7 @@ class TestGround(unittest.TestCase):
 
     def test_normalize_pmod_default_methylation(self, _):
         """Test normalizing the default namespace's Me entry because of conflict with gmods."""
-        self.help(
+        self._help(
             {
                 CONCEPT: {NAMESPACE: 'uniprot', NAME: 'HUS1_HUMAN', IDENTIFIER: 'O60921'},
                 VARIANTS: [
@@ -282,7 +283,7 @@ class TestGround(unittest.TestCase):
 
     def normalize_gmod_default_methylation(self, _):
         """Test normalizing the default namespace's Me entry because of conflict with pmods."""
-        self.help(
+        self._help(
             {
                 CONCEPT: {NAMESPACE: 'hgnc', NAME: 'MAPT', IDENTIFIER: '6893'},
                 VARIANTS: [
