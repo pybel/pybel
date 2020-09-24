@@ -14,7 +14,7 @@ mock_id_name_mapping = get_mock_id_name_mapping({
     'mesh': {
         'D009474': 'Neurons',
         'D010300': 'Parkinson Disease',
-        'D013378': 'Substantia Nigra'
+        'D013378': 'Substantia Nigra',
     },
     'doid': {
         '14330': "Parkinson's disease",
@@ -26,7 +26,7 @@ mock_id_name_mapping = get_mock_id_name_mapping({
         'CPX-1829': 'Checkpoint clamp complex',
     },
     'ncbitaxon': {
-        '9606': 'homo sapiens'
+        '9606': 'homo sapiens',
     },
     'cl': {
         '0000030': 'glioblast',
@@ -389,51 +389,35 @@ class TestAnnotations(unittest.TestCase):
             },
         )
 
-    def test_process_annotations(self, _mock_id_name_mapping):
-        """Test processing annotations data."""
-        r = [
-            (
-                'When the name of the annotation does not need to be mapped via identifiers',
-                {  # Expected
-                    'Disease': [Entity(namespace='doid', identifier='14330', name="Parkinson's disease")],
-                    'Cell': [Entity(namespace='cl', identifier='0000030', name='glioblast')],
-                },
-                {
-                    'Disease': [Entity(namespace='doid', identifier="Parkinson's disease")],
-                    'Cell': [Entity(namespace='Cell', identifier='glioblast')],
-                },
-            ),
-            (
-                'When the name of the annotation does not need to be mapped via names',
-                {  # Expected
-                    'Disease': [Entity(namespace='doid', identifier='14330', name="Parkinson's disease")],
-                    'Cell': [Entity(namespace='cl', identifier='0000030', name='glioblast')],
-                },
-                {
-                    'Disease': [Entity(namespace='doid', name="Parkinson's disease")],
-                    'Cell': [Entity(namespace='cl', name='glioblast')],
-                },
-            ),
-            (
-                'Check unmappable disease',
-                {  # Expected
-                    'Disease': [Entity(namespace='doid', identifier='Failure')],
-                },
-                {
-                    'Disease': [Entity(namespace='Disease', identifier='Failure')],
-                },
-            ),
-            (
-                'Check unhandled annotation',
-                {  # Expected
-                    'Custom Annotation': [Entity(namespace='Custom Annotation', identifier="Custom Value")],
-                },
-                {
-                    'Custom Annotation': [Entity(namespace='Custom Annotation', identifier="Custom Value")],
-                },
-            ),
-        ]
-        for name, expected_data, data in r:
-            with self.subTest(name=name):
-                _process_annotations(data)
-                self.assertEqual({ANNOTATIONS: expected_data}, {ANNOTATIONS: data})
+    def test_unmappable_category(self, _):
+        """Test when the category can't be mapped."""
+        self._help(
+            {  # Expected
+                'Custom Annotation': [Entity(namespace='Custom Annotation', identifier="Custom Value")],
+            },
+            {
+                'Custom Annotation': [Entity(namespace='Custom Annotation', identifier="Custom Value")],
+            },
+        )
+
+    def test_unmappable_identifier(self, _):
+        """Test when the identifier can not be resolved."""
+        self._help(
+            {  # Expected
+                'Disease': [Entity(namespace='doid', identifier='Failure')],
+            },
+            {
+                'Disease': [Entity(namespace='Disease', identifier='Failure')],
+            },
+        )
+
+    def test_unmappable_name(self, _):
+        """Test when the identifier can not be looked up by name."""
+        self._help(
+            {  # Expected
+                'Disease': [Entity(namespace='doid', name='Failure')],
+            },
+            {
+                'Disease': [Entity(namespace='Disease', name='Failure')],
+            },
+        )
