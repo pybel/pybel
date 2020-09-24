@@ -50,7 +50,7 @@ After installation with ``pip install git+https://github.com/cthoyt/selventa-kno
 """
 
 import logging
-from typing import Any, Mapping, Tuple, Union
+from typing import Any, Collection, Mapping, Optional, Tuple, Union
 
 import pyobo
 from protmapper.uniprot_client import get_id_from_mnemonic, get_mnemonic
@@ -99,10 +99,14 @@ def _get_id_remapping(prefix: str, identifier: str) -> Union[Tuple[str, str, str
     return _ID_REMAPPING.get((prefix, identifier), (None, None, None))
 
 
-def ground(graph: BELGraph, remove_ungrounded: bool = True) -> BELGraph:
+def ground(
+    graph: BELGraph,
+    remove_ungrounded: bool = True,
+    skip_namespaces: Optional[Collection[str]] = None,
+) -> BELGraph:
     """Ground all entities in a BEL graph."""
     j = to_nodelink(graph)
-    ground_nodelink(j)
+    ground_nodelink(j, skip_namespaces=skip_namespaces)
     graph = from_nodelink(j)
 
     remove_unused_annotation_metadata(graph)
@@ -151,18 +155,18 @@ def remove_unused_annotation_metadata(graph) -> None:
         del graph.annotation_list[annotation]
 
 
-def ground_nodelink(graph_nodelink_dict) -> None:
+def ground_nodelink(graph_nodelink_dict, skip_namespaces: Optional[Collection[str]] = None) -> None:
     """Ground entities in a nodelink data structure."""
     name = graph_nodelink_dict.get('graph', {}).get('name', 'graph')
 
     for data in tqdm(graph_nodelink_dict['links'], desc='grounding edges in {}'.format(name)):
-        _process_edge_side(data.get(SOURCE_MODIFIER))
-        _process_edge_side(data.get(TARGET_MODIFIER))
+        _process_edge_side(data.get(SOURCE_MODIFIER), skip_namespaces=skip_namespaces)
+        _process_edge_side(data.get(TARGET_MODIFIER), skip_namespaces=skip_namespaces)
         if ANNOTATIONS in data:
-            _process_annotations(data)
+            _process_annotations(data, skip_namespaces=skip_namespaces)
 
     for node in tqdm(graph_nodelink_dict['nodes'], desc='grounding nodes in {}'.format(name)):
-        _process_node(node)
+        _process_node(node, skip_namespaces=skip_namespaces)
 
 
 _BEL_ANNOTATION_PREFIX_MAP = {
@@ -185,7 +189,11 @@ CATEGORY_BLACKLIST = {
 }
 
 
-def _process_annotations(data, remove_ungrounded: bool = False) -> None:
+def _process_annotations(
+    data,
+    remove_ungrounded: bool = False,
+    skip_namespaces: Optional[Collection[str]] = None,
+) -> None:
     """Process the annotations in a PyBEL edge data dictionary."""
     cell_line_entities = data[ANNOTATIONS].get('CellLine')
     if cell_line_entities:
@@ -230,12 +238,12 @@ def _process_annotations(data, remove_ungrounded: bool = False) -> None:
             if nn is not None:
                 entity[NAMESPACE] = nn
 
-            _process_concept(concept=entity)
+            _process_concept(concept=entity, skip_namespaces=skip_namespaces)
             ne.append(entity)
         data[ANNOTATIONS][category] = ne
 
 
-def _process_edge_side(side_data) -> bool:
+def _process_edge_side(side_data, skip_namespaces: Optional[Collection[str]] = None) -> bool:
     """Process an edge JSON object, in place."""
     if side_data is None:
         return True
@@ -244,45 +252,48 @@ def _process_edge_side(side_data) -> bool:
     effect = side_data.get(EFFECT)
 
     if modifier == ACTIVITY and effect is not None:
-        _process_concept(concept=effect)
+        _process_concept(concept=effect, skip_namespaces=skip_namespaces)
     elif modifier == TRANSLOCATION and effect is not None:
-        _process_concept(concept=effect[FROM_LOC])
-        _process_concept(concept=effect[TO_LOC])
+        _process_concept(concept=effect[FROM_LOC], skip_namespaces=skip_namespaces)
+        _process_concept(concept=effect[TO_LOC], skip_namespaces=skip_namespaces)
 
     location = side_data.get(LOCATION)
     if location is not None:
-        _process_concept(concept=location)
+        _process_concept(concept=location, skip_namespaces=skip_namespaces)
 
 
 _UNHANDLED_NAMESPACES = set()
 
 
-def _process_node(node: Mapping[str, Any]) -> bool:
+def _process_node(node: Mapping[str, Any], skip_namespaces: Optional[Collection[str]] = None) -> bool:
     """Process a node JSON object, in place.
 
     :return: If all parts of the node were successfully grounded
     """
     success = True
     if CONCEPT in node:
-        success = success and _process_concept(concept=node[CONCEPT], node=node)
+        success = success and _process_concept(concept=node[CONCEPT], node=node, skip_namespaces=skip_namespaces)
     if VARIANTS in node:
-        success = success and _process_list(node[VARIANTS])
+        success = success and _process_list(node[VARIANTS], skip_namespaces=skip_namespaces)
     if MEMBERS in node:
-        success = success and _process_list(node[MEMBERS])
+        success = success and _process_list(node[MEMBERS], skip_namespaces=skip_namespaces)
     if REACTANTS in node:
-        success = success and _process_list(node[REACTANTS])
+        success = success and _process_list(node[REACTANTS], skip_namespaces=skip_namespaces)
     if PRODUCTS in node:
-        success = success and _process_list(node[PRODUCTS])
+        success = success and _process_list(node[PRODUCTS], skip_namespaces=skip_namespaces)
     if FUSION in node:
-        success = success and _process_fusion(node[FUSION])
+        success = success and _process_fusion(node[FUSION], skip_namespaces=skip_namespaces)
     return success
 
 
-def _process_concept(*, concept, node=None) -> bool:
+def _process_concept(*, concept, node=None, skip_namespaces: Optional[Collection[str]] = None) -> bool:
     """Process a node JSON object."""
     namespace = concept[NAMESPACE]
     if namespace.lower() in {'text', 'fixme'}:
         return False
+
+    if skip_namespaces and namespace in skip_namespaces:
+        return True
 
     prefix = normalize_prefix(namespace)
     if prefix is None:
@@ -294,11 +305,22 @@ def _process_concept(*, concept, node=None) -> bool:
     identifier = concept.get(IDENTIFIER)
     name = concept.get(NAME)
     if identifier:  # don't trust whatever was put for the name, even if it's available
-        map_success = _handle_identifier_not_name(concept=concept, prefix=prefix, identifier=identifier)
+        map_success = _handle_identifier_not_name(
+            concept=concept,
+            prefix=prefix,
+            identifier=identifier,
+            skip_namespaces=skip_namespaces
+        )
         if not map_success:  # just in case the name gets put in the identifier
-            map_success = _handle_name_and_not_identifier(concept=concept, prefix=prefix, name=identifier, node=node)
+            map_success = _handle_name_and_not_identifier(
+                concept=concept, prefix=prefix, name=identifier, node=node,
+                skip_namespaces=skip_namespaces,
+            )
     else:
-        map_success = _handle_name_and_not_identifier(concept=concept, prefix=prefix, name=name, node=node)
+        map_success = _handle_name_and_not_identifier(
+            concept=concept, prefix=prefix, name=name, node=node,
+            skip_namespaces=skip_namespaces,
+        )
 
     if not map_success:
         return False
@@ -323,10 +345,14 @@ def _remap_by_identifier(concept) -> bool:
     return False
 
 
-def _handle_identifier_not_name(*, concept, prefix, identifier) -> bool:
+def _handle_identifier_not_name(
+    *, concept, prefix, identifier, skip_namespaces: Optional[Collection[str]] = None,
+) -> bool:
     # Some namespaces are just too much of a problem at the moment to look up
     if prefix in SKIP:
         return False
+    if skip_namespaces and prefix in skip_namespaces:
+        return True
 
     if prefix in NO_NAMES:
         concept[NAME] = concept[IDENTIFIER]
@@ -354,7 +380,9 @@ def _handle_identifier_not_name(*, concept, prefix, identifier) -> bool:
     return True
 
 
-def _handle_name_and_not_identifier(*, concept, prefix, name, node=None) -> bool:
+def _handle_name_and_not_identifier(
+    *, concept, prefix, name, node=None, skip_namespaces: Optional[Collection[str]] = None,
+) -> bool:
     remapped_prefix, remapped_identifier, remapped_name = _get_name_remapping(prefix, name)
     if remapped_prefix:
         concept[NAMESPACE] = remapped_prefix
@@ -365,6 +393,8 @@ def _handle_name_and_not_identifier(*, concept, prefix, name, node=None) -> bool
     # Some namespaces are just too much of a problem at the moment to look up
     if prefix in SKIP:
         return False
+    if skip_namespaces and prefix in skip_namespaces:
+        return True
 
     concept[NAMESPACE] = prefix
     if prefix in NO_NAMES:
@@ -435,14 +465,14 @@ def _handle_name_and_not_identifier(*, concept, prefix, name, node=None) -> bool
     return True
 
 
-def _process_fusion(fusion) -> bool:
-    success_3p = _process_node(fusion[PARTNER_3P])
-    success_5p = _process_node(fusion[PARTNER_5P])
+def _process_fusion(fusion, skip_namespaces: Optional[Collection[str]] = None) -> bool:
+    success_3p = _process_node(fusion[PARTNER_3P], skip_namespaces=skip_namespaces)
+    success_5p = _process_node(fusion[PARTNER_5P], skip_namespaces=skip_namespaces)
     return success_3p and success_5p
 
 
-def _process_list(members) -> bool:
+def _process_list(members, skip_namespaces: Optional[Collection[str]] = None) -> bool:
     success = True
     for member in members:
-        success = success and _process_node(member)
+        success = success and _process_node(member, skip_namespaces=skip_namespaces)
     return success
