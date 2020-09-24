@@ -12,11 +12,9 @@ from sqlalchemy import (
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import backref, relationship
 
+from .. import constants as pc
 from ..constants import (
-    CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR, CITATION_JOURNAL, CITATION_LAST_AUTHOR,
-    CITATION_PAGES, CITATION_TYPE_PUBMED, CITATION_VOLUME, EVIDENCE, IDENTIFIER, METADATA_AUTHORS, METADATA_CONTACT,
-    METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION,
-    NAME, NAMESPACE,
+    CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR, CITATION_JOURNAL, CITATION_LAST_AUTHOR, CITATION_PAGES, CITATION_VOLUME, EVIDENCE, IDENTIFIER, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAME, NAMESPACE,
 )
 from ..io.gpickle import from_bytes_gz, to_bytes_gz
 from ..language import Entity
@@ -399,6 +397,7 @@ class Citation(Base):
     db = Column(String(16), nullable=False, doc='Type of the stored publication e.g. PubMed')
     db_id = Column(String(255), nullable=False, doc='Reference identifier of the publication e.g. PubMed_ID')
 
+    article_type = Column(Text, nullable=True, doc='Type of the publication')
     title = Column(Text, nullable=True, doc='Title of the publication')
     journal = Column(Text, nullable=True, doc='Journal name')
     volume = Column(Text, nullable=True, doc='Volume of the journal')
@@ -424,7 +423,7 @@ class Citation(Base):
     @property
     def is_pubmed(self) -> bool:
         """Return if this is a PubMed citation."""
-        return CITATION_TYPE_PUBMED == self.db
+        return self.db == 'pubmed'
 
     @property
     def is_enriched(self) -> bool:
@@ -462,6 +461,9 @@ class Citation(Base):
 
         if self.last:
             result[CITATION_LAST_AUTHOR] = self.last.name
+
+        if self.article_type:
+            result[pc.CITATION_ARTICLE_TYPE] = self.article_type
 
         if self.authors:
             result[CITATION_AUTHORS] = sorted(

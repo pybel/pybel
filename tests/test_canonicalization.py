@@ -7,7 +7,7 @@ from typing import Iterable
 
 from pybel import BELGraph
 from pybel.canonicalize import _to_bel_lines_body, postpend_location
-from pybel.constants import EXTRACELLULAR, INTRACELLULAR, MODIFIER
+from pybel.constants import EXTRACELLULAR, INTRACELLULAR, MODIFIER, CITATION_TYPE_PUBMED
 from pybel.dsl import (
     Abundance, BiologicalProcess, ComplexAbundance, CompositeAbundance, EnumeratedFusionRange, Fragment, Gene,
     GeneFusion, GeneModification, Hgvs, MicroRna, NamedComplexAbundance, Pathology, Protein, ProteinModification,
@@ -258,7 +258,7 @@ class TestSerializeBEL(unittest.TestCase):
         self.assertEqual(1, self.graph.number_of_edges())
 
         expected_lines = [
-            'SET Citation = {{"PubMed", "{}"}}\n'.format(self.citation),
+            f'SET Citation = {{"{CITATION_TYPE_PUBMED}", "{self.citation}"}}\n',
             'SET SupportingText = "{}"'.format(self.evidence),
             'p(HGNC:YFG1) increases p(HGNC:YFG)',
             'UNSET SupportingText',
@@ -286,7 +286,7 @@ class TestSerializeBEL(unittest.TestCase):
         self.assertEqual(1, self.graph.number_of_edges())
 
         expected_lines = [
-            f'SET Citation = {{"PubMed", "{self.citation}"}}\n',
+            f'SET Citation = {{"{CITATION_TYPE_PUBMED}", "{self.citation}"}}\n',
             f'SET SupportingText = "{self.evidence}"',
             f'SET {key} = "{namespace}:{value}"',
             'p(HGNC:YFG1) increases p(HGNC:YFG)',
@@ -319,7 +319,7 @@ class TestSerializeBEL(unittest.TestCase):
         self.assertNotIn(a1, self.graph.annotation_curie)
 
         expected_lines = [
-            'SET Citation = {{"PubMed", "{}"}}\n'.format(self.citation),
+            f'SET Citation = {{"{CITATION_TYPE_PUBMED}", "{self.citation}"}}\n',
             f'SET SupportingText = "{self.evidence}"',
             f'SET {a1} = "{v1}"',
             'p(HGNC:YFG1) increases p(HGNC:YFG)',
@@ -350,7 +350,7 @@ class TestSerializeBEL(unittest.TestCase):
         self.assertEqual(1, self.graph.number_of_edges())
 
         expected_lines = [
-            f'SET Citation = {{"PubMed", "{self.citation}"}}\n',
+            f'SET Citation = {{"{CITATION_TYPE_PUBMED}", "{self.citation}"}}\n',
             f'SET SupportingText = "{self.evidence}"',
             f'SET {a1} = {{"{v1}", "{v2}"}}',
             'p(HGNC:YFG1) increases p(HGNC:YFG)',

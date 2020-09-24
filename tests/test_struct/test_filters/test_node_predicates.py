@@ -6,10 +6,10 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import (
-    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_TYPE_ONLINE,
-    CITATION_TYPE_PUBMED, DECREASES, DEGRADATION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EVIDENCE, GMOD, IDENTIFIER,
-    INCREASES, LOCATION, MODIFIER, NAMESPACE, TARGET_MODIFIER, POLAR_RELATIONS, POSITIVE_CORRELATION, RELATION, SOURCE_MODIFIER,
-    TRANSLOCATION,
+    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_TYPE_PUBMED,
+    CITATION_TYPE_URL, DECREASES, DEGRADATION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EVIDENCE, GMOD, IDENTIFIER,
+    INCREASES, LOCATION, MODIFIER, NAMESPACE, POLAR_RELATIONS, POSITIVE_CORRELATION, RELATION, SOURCE_MODIFIER,
+    TARGET_MODIFIER, TRANSLOCATION,
 )
 from pybel.dsl import (
     abundance, activity, degradation, fragment, gene, gmod, hgvs, pmod, protein, secretion, translocation,
@@ -150,7 +150,7 @@ class TestNodePredicates(unittest.TestCase):
             u,
             v,
             citation={
-                NAMESPACE: CITATION_TYPE_ONLINE, IDENTIFIER: 'https://www.ncbi.nlm.nih.gov/gene/3290'
+                NAMESPACE: CITATION_TYPE_URL, IDENTIFIER: 'https://www.ncbi.nlm.nih.gov/gene/3290'
             },
             evidence="Entrez Gene Summary: Human: The protein encoded by this gene is a microsomal enzyme that "
                      "catalyzes the conversion of the stress hormone cortisol to the inactive metabolite cortisone. "
@@ -426,7 +426,7 @@ class TestEdgePredicate(unittest.TestCase):
 
     def test_has_pubmed(self):
         self.assertTrue(has_pubmed({CITATION: {NAMESPACE: CITATION_TYPE_PUBMED}}))
-        self.assertFalse(has_pubmed({CITATION: {NAMESPACE: CITATION_TYPE_ONLINE}}))
+        self.assertFalse(has_pubmed({CITATION: {NAMESPACE: CITATION_TYPE_URL}}))
         self.assertFalse(has_pubmed({}))
 
     def test_has_authors(self):
