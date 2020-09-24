@@ -77,7 +77,7 @@ def has_provenance(edge_data: EdgeData) -> bool:
 @edge_predicate
 def has_pubmed(edge_data: EdgeData) -> bool:
     """Check if the edge has a PubMed citation."""
-    return CITATION in edge_data and CITATION_TYPE_PUBMED == edge_data[CITATION][NAMESPACE]
+    return CITATION in edge_data and edge_data[CITATION][NAMESPACE].lower() in {'pubmed', 'pmid'}
 
 
 @edge_predicate
