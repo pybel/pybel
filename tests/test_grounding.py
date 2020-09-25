@@ -28,7 +28,7 @@ mock_id_name_mapping = get_mock_id_name_mapping({
         'CPX-1829': 'Checkpoint clamp complex',
     },
     'ncbitaxon': {
-        '9606': 'homo sapiens',
+        '9606': 'Homo sapiens',
     },
     'cl': {
         '0000030': 'glioblast',
