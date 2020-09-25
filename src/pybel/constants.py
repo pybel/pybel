@@ -23,25 +23,24 @@ def get_cache_connection() -> str:
 PYBEL_CONTEXT_TAG = 'pybel_context'
 PYBEL_AUTOEVIDENCE = 'Automatically added by PyBEL'
 
-CITATION_TYPE_BOOK = 'Book'
-CITATION_TYPE_PUBMED = 'PubMed'
-CITATION_TYPE_PMC = 'PubMed Central'
-CITATION_TYPE_JOURNAL = 'Journal'
-CITATION_TYPE_ONLINE = 'Online Resource'
-CITATION_TYPE_URL = 'URL'
-CITATION_TYPE_DOI = 'DOI'
-CITATION_TYPE_OTHER = 'Other'
-#: The valid citation types
-#: .. seealso:: https://wiki.openbel.org/display/BELNA/Citation
+CITATION_TYPE_BOOK = 'book'
+CITATION_TYPE_PUBMED = 'pubmed'
+CITATION_TYPE_PMC = 'pmc'
+CITATION_TYPE_URL = 'url'
+CITATION_TYPE_DOI = 'doi'
+CITATION_TYPE_OTHER = 'other'
 CITATION_TYPES = {
-    CITATION_TYPE_BOOK: None,
-    CITATION_TYPE_PUBMED: 'pmid',
-    CITATION_TYPE_PMC: 'pmc',
-    CITATION_TYPE_JOURNAL: None,
-    CITATION_TYPE_ONLINE: None,
-    CITATION_TYPE_URL: None,
-    CITATION_TYPE_DOI: 'doi',
-    CITATION_TYPE_OTHER: None,
+    CITATION_TYPE_BOOK,
+    CITATION_TYPE_PUBMED,
+    CITATION_TYPE_PMC,
+    CITATION_TYPE_URL,
+    CITATION_TYPE_DOI,
+    CITATION_TYPE_OTHER,
+}
+CITATION_NORMALIZER = {
+    'pubmed central': 'pmc',
+    'pmid': 'pubmed',
+    'online resource': 'url',
 }
 
 NAMESPACE_DOMAIN_BIOPROCESS = 'BiologicalProcess'
@@ -73,6 +72,8 @@ CITATION_PAGES = 'pages'
 CITATION_FIRST_AUTHOR = 'first'
 #: Represents the key for the optional PyBEL citation last author entry in a citation dictionary
 CITATION_LAST_AUTHOR = 'last'
+#: Represents the type of article (Journal Article, Review, etc.)
+CITATION_ARTICLE_TYPE = 'article_type'
 
 # Used during BEL parsing
 

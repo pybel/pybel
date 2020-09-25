@@ -19,6 +19,7 @@ import requests
 from networkx.utils import open_file
 from pyparsing import ParseException
 
+from .. import constants as pc
 from ..constants import (
     ANNOTATIONS, CITATION, EVIDENCE, GRAPH_ANNOTATION_URL, GRAPH_NAMESPACE_URL, METADATA_AUTHORS, METADATA_CONTACT,
     METADATA_INSERT_KEYS, METADATA_LICENSES, RELATION, UNQUALIFIED_EDGES,
@@ -309,7 +310,9 @@ def from_jgif(graph_jgif_dict, parser_kwargs: Optional[Mapping[str, Any]] = None
                     continue
 
                 parser.control_parser.clear()
-                parser.control_parser.citation_db = citation['type'].strip()
+                citation_namespace = citation['type'].lower().strip()
+                citation_namespace = pc.CITATION_NORMALIZER.get(citation_namespace, citation_namespace)
+                parser.control_parser.citation_db = citation_namespace
                 parser.control_parser.citation_db_id = citation['id'].strip()
                 parser.control_parser.evidence = summary_text
                 annotations = parser.graph._clean_annotations(evidence[EXPERIMENT_CONTEXT])

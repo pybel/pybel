@@ -6,12 +6,16 @@ import logging
 import re
 import time
 from datetime import datetime
-from itertools import zip_longest
 from typing import Dict, Iterable, List, Optional, Set, Tuple, Union
 
+import ratelimit
 import requests
+from more_itertools import chunked
+from sqlalchemy import and_
+from tqdm import tqdm
 
-from ..constants import CITATION, CITATION_TYPE_PUBMED, IDENTIFIER
+from . import models
+from ..constants import CITATION
 from ..struct.filters import filter_edges
 from ..struct.filters.edge_predicates import has_pubmed
 from ..struct.summary.provenance import get_pubmed_identifiers
@@ -32,6 +36,9 @@ re4 = re.compile(r'^[12][0-9]{3} [a-zA-Z]{3}-[a-zA-Z]{3}$')
 re5 = re.compile(r'^([12][0-9]{3}) (Spring|Fall|Winter|Summer)$')
 re6 = re.compile(r'^[12][0-9]{3} [a-zA-Z]{3} \d{1,2}-(\d{1,2})$')
 re7 = re.compile(r'^[12][0-9]{3} [a-zA-Z]{3} \d{1,2}-([a-zA-Z]{3} \d{1,2})$')
+
+# TODO "Winter 2016" probably with re.compile(r'^(Spring|Fall|Winter|Summer) ([12][0-9]{3})$')
+# TODO "YYYY Oct - Dec" update re4 to allow spaces before and after the dash
 
 season_map = {'Spring': '03', 'Summer': '06', 'Fall': '09', 'Winter': '12'}
 
@@ -67,22 +74,17 @@ def sanitize_date(publication_date: str) -> str:
         return datetime.strptime(publication_date, '%Y %b %d-{}'.format(s.groups()[0])).strftime('%Y-%m-%d')
 
 
-def grouper(n, iterable, fillvalue=None):
-    """Group iterables into tuples.
-
-    grouper(3, 'ABCDEFG', 'x') --> ABC DEF Gxx
-    """
-    args = [iter(iterable)] * n
-    return zip_longest(*args, fillvalue=fillvalue)
-
-
 def clean_pubmed_identifiers(pmids: Iterable[str]) -> List[str]:
     """Clean a list of PubMed identifiers with string strips, deduplicates, and sorting."""
     return sorted({str(pmid).strip() for pmid in pmids})
 
 
+@ratelimit.limits(calls=3, period=1)
 def get_pubmed_citation_response(pubmed_identifiers: Iterable[str]):
     """Get the response from PubMed E-Utils for a given list of PubMed identifiers.
+
+    Rate limit of 3 requests per second is from:
+    https://ncbiinsights.ncbi.nlm.nih.gov/2018/08/14/release-plan-for-e-utility-api-keys/
 
     :param pubmed_identifiers:
     :rtype: dict
@@ -117,6 +119,9 @@ def enrich_citation_model(manager, citation, p) -> bool:
     citation.pages = p['pages']
     citation.first = manager.get_or_create_author(p['sortfirstauthor'])
     citation.last = manager.get_or_create_author(p['lastauthor'])
+    pubtypes = p['pubtype']
+    if pubtypes:
+        citation.article_type = pubtypes[0]
 
     if 'authors' in p:
         for author in p['authors']:
@@ -125,7 +130,12 @@ def enrich_citation_model(manager, citation, p) -> bool:
                 citation.authors.append(author_model)
 
     publication_date = p['pubdate']
-    sanitized_publication_date = sanitize_date(publication_date)
+    try:
+        sanitized_publication_date = sanitize_date(publication_date)
+    except ValueError:
+        logger.warning('could not parse publication date %s for pubmed:%s', publication_date, citation.db_id)
+        sanitized_publication_date = None
+
     if sanitized_publication_date:
         citation.date = datetime.strptime(sanitized_publication_date, '%Y-%m-%d')
     else:
@@ -137,53 +147,54 @@ def enrich_citation_model(manager, citation, p) -> bool:
 def get_citations_by_pmids(
     manager,
     pmids: Iterable[Union[str, int]],
+    *,
     group_size: Optional[int] = None,
-    sleep_time: Optional[int] = None,
+    offline: bool = False,
 ) -> Tuple[Dict[str, Dict], Set[str]]:
     """Get citation information for the given list of PubMed identifiers using the NCBI's eUtils service.
 
     :type manager: pybel.Manager
     :param pmids: an iterable of PubMed identifiers
     :param group_size: The number of PubMed identifiers to query at a time. Defaults to 200 identifiers.
-    :param sleep_time: Number of seconds to sleep between queries. Defaults to 1 second.
     :return: A dictionary of {pmid: pmid data dictionary} or a pair of this dictionary and a set ot erroneous
             pmids if return_errors is :data:`True`
     """
     group_size = group_size if group_size is not None else 200
-    sleep_time = sleep_time if sleep_time is not None else 1
 
     pmids = clean_pubmed_identifiers(pmids)
-    logger.info('Ensuring %d PubMed identifiers', len(pmids))
+    logger.info('ensuring %d PubMed identifiers', len(pmids))
 
-    result = {}
+    enriched_pmids = {}
     unenriched_pmids = {}
 
-    for pmid in pmids:
-        citation = manager.get_or_create_citation(namespace=CITATION_TYPE_PUBMED, identifier=pmid)
-
-        if not citation.is_enriched:
+    citation_filter = and_(
+        models.Citation.db == 'pubmed',
+        models.Citation.db_id.in_(pmids),
+    )
+    citation_models = manager.session.query(models.Citation).filter(citation_filter).all()
+    pmid_to_model = {
+        citation_model.db_id: citation_model
+        for citation_model in citation_models
+    }
+    logger.info('%d of %d are already cached', len(pmid_to_model), len(pmids))
+    for pmid in tqdm(pmids, desc='creating database models'):
+        citation = pmid_to_model.get(pmid)
+        if citation is None:
+            citation = pmid_to_model[pmid] = manager.get_or_create_citation(identifier=pmid)
+        if citation.is_enriched:
+            enriched_pmids[pmid] = citation.to_json()
+        else:
             unenriched_pmids[pmid] = citation
-            continue
 
-        result[pmid] = citation.to_json()
-
+    logger.info('%d of %d are already enriched', len(enriched_pmids), len(pmids))
     manager.session.commit()
 
-    logger.debug('Found %d PubMed identifiers in database', len(pmids) - len(unenriched_pmids))
-
-    if not unenriched_pmids:
-        return result, set()
-
-    number_unenriched = len(unenriched_pmids)
-    logger.info('Querying PubMed for %d identifiers', number_unenriched)
-
     errors = set()
-    t = time.time()
+    if not unenriched_pmids or offline:
+        return enriched_pmids, errors
 
-    for pmid_group_index, pmid_list in enumerate(grouper(group_size, unenriched_pmids), start=1):
-        pmid_list = list(pmid_list)
-        logger.info('Getting group %d having %d PubMed identifiers', pmid_group_index, len(pmid_list))
-
+    it = tqdm(unenriched_pmids, desc=f'getting PubMed data in chunks of {group_size}')
+    for pmid_list in chunked(it, n=group_size):
         response = get_pubmed_citation_response(pmid_list)
         response_pmids = response['result']['uids']
 
@@ -194,28 +205,23 @@ def get_citations_by_pmids(
             successful_enrichment = enrich_citation_model(manager, citation, p)
 
             if not successful_enrichment:
-                logger.warning("Error downloading PubMed identifier: %s", pmid)
+                it.write(f"Error downloading PubMed identifier: {pmid}")
                 errors.add(pmid)
                 continue
 
-            result[pmid] = citation.to_json()
+            enriched_pmids[pmid] = citation.to_json()
             manager.session.add(citation)
 
         manager.session.commit()  # commit in groups
 
-        # Don't want to hit that rate limit
-        time.sleep(sleep_time)
-
-    logger.info('retrieved %d PubMed identifiers in %.02f seconds', len(unenriched_pmids), time.time() - t)
-
-    return result, errors
+    return enriched_pmids, errors
 
 
 def enrich_pubmed_citations(
     manager,
     graph,
     group_size: Optional[int] = None,
-    sleep_time: Optional[int] = None,
+    offline: bool = False,
 ) -> Set[str]:
     """Overwrite all PubMed citations with values from NCBI's eUtils lookup service.
 
@@ -225,14 +231,13 @@ def enrich_pubmed_citations(
     :type manager: pybel.manager.Manager
     :type graph: pybel.BELGraph
     :param group_size: The number of PubMed identifiers to query at a time. Defaults to 200 identifiers.
-    :param sleep_time: Number of seconds to sleep between queries. Defaults to 1 second.
     :return: A set of PMIDs for which the eUtils service crashed
     """
     pmids = {x for x in get_pubmed_identifiers(graph) if x}
-    pmid_data, errors = get_citations_by_pmids(manager, pmids=pmids, group_size=group_size, sleep_time=sleep_time)
+    pmid_data, errors = get_citations_by_pmids(manager, pmids=pmids, group_size=group_size, offline=offline)
 
     for u, v, k in filter_edges(graph, has_pubmed):
-        pmid = graph[u][v][k][CITATION][IDENTIFIER].strip()
+        pmid = graph[u][v][k][CITATION].identifier
 
         if pmid not in pmid_data:
             logger.warning('Missing data for PubMed identifier: %s', pmid)

@@ -247,7 +247,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
     def test_slushy_json(self):
         graph_json = to_nodelink(self.slushy_graph)
         graph = from_nodelink(graph_json)
-        self.bel_slushy_reconstituted(graph)
+        self.bel_slushy_reconstituted(graph, check_warnings=False)
 
     def test_slushy_graphml(self):
         handle, path = tempfile.mkstemp()
