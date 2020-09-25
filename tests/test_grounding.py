@@ -5,14 +5,26 @@
 import unittest
 from unittest import mock
 
-
-from pyobo.mocks import get_mock_id_name_mapping
+import pyobo
+from pyobo.mocks import _replace_mapping_getter, get_mock_id_name_mapping
 
 from pybel.constants import ANNOTATIONS, CONCEPT, GMOD, IDENTIFIER, KIND, MEMBERS, NAME, NAMESPACE, PMOD, VARIANTS
 from pybel.grounding import SYNONYM_TO_KEY, _process_annotations, _process_concept, _process_node
 from pybel.language import Entity
 
-mock_id_name_mapping = get_mock_id_name_mapping({
+
+def _failer(*_, **__):
+    """Fail for all calls to this function."""
+    raise ValueError('Called a PyOBO function that should be mocked')
+
+
+pyobo.getters.get = _failer
+pyobo.extract.get = _failer
+pyobo.extract.cached_mapping = _failer
+pyobo.extract.cached_multidict = _failer
+
+
+mock_id_name_data = {
     'mesh': {
         'D009474': 'Neurons',
         'D010300': 'Parkinson Disease',
@@ -33,7 +45,10 @@ mock_id_name_mapping = get_mock_id_name_mapping({
     'cl': {
         '0000030': 'glioblast',
     },
-})
+}
+
+mock_id_name_mapping = get_mock_id_name_mapping(mock_id_name_data)
+mock_id_name_mapping_2 = _replace_mapping_getter('pybel.grounding.get_id_name_mapping', mock_id_name_data)
 
 
 _mock_mnemonic_data = {
@@ -56,6 +71,7 @@ mock_get_id_from_mnemonic = mock.patch(
 
 
 @mock_id_name_mapping
+@mock_id_name_mapping_2
 @mock_get_mnemonic
 @mock_get_id_from_mnemonic
 class TestProcessConcept(unittest.TestCase):
@@ -140,6 +156,7 @@ class TestProcessConcept(unittest.TestCase):
 
 
 @mock_id_name_mapping
+@mock_id_name_mapping_2
 @mock_get_mnemonic
 @mock_get_id_from_mnemonic
 class TestGround(unittest.TestCase):
@@ -332,6 +349,7 @@ class TestGround(unittest.TestCase):
 
 
 @mock_id_name_mapping
+@mock_id_name_mapping_2
 class TestAnnotations(unittest.TestCase):
     """Test processing annotations."""
 
