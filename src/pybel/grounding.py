@@ -462,6 +462,7 @@ def _handle_name_and_not_identifier(
         return False
 
     concept[IDENTIFIER] = identifier
+    concept[NAME] = name
     return True
 
 

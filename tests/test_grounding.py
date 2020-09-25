@@ -89,6 +89,13 @@ class TestProcessConcept(unittest.TestCase):
             {NAMESPACE: 'MESH', NAME: 'Neurons'},
         )
 
+    def test_lookup_name_as_identifier(self, *_):
+        """Test look up of the name when given as the identifier."""
+        self._help(
+            {NAMESPACE: 'mesh', NAME: 'Neurons', IDENTIFIER: 'D009474'},
+            {NAMESPACE: 'MESH', IDENTIFIER: 'Neurons'},
+        )
+
     def test_lookup_uniprot_identifier(self, *_):
         """Test looking up a uniprot identifier."""
         self._help(
