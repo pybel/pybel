@@ -13,6 +13,8 @@ python: '3.8'
 jobs:
   allow_failures:
     - env: TOXENV=mypy
+    - python: 3.9-dev
+      env: TOXENV=py DB=sqlite
   include:
     # lint stage
     - stage: lint
@@ -42,8 +44,11 @@ jobs:
       env: TOXENV=py DB=postgresql PYBEL_TEST_CONNECTOR=psycopg2-binary PYBEL_TEST_CONNECTION=postgresql+psycopg2://travis@localhost/tests
     - name: "Tests with SQLite"
       env: TOXENV=py DB=sqlite
-    - name: "Tests with legacy Python (3.6)"
+    - name: "Tests with SQLite / legacy Python (3.6)"
       python: 3.6
+      env: TOXENV=py DB=sqlite
+    - name: "Tests with SQLite / preview Python (3.9)"
+      python: 3.9-dev
       env: TOXENV=py DB=sqlite
 
 install:
