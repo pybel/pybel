@@ -5,6 +5,8 @@
 import os
 import time
 import unittest
+from typing import Any, Iterable, Mapping
+from unittest import mock
 
 from pybel import BELGraph
 from pybel.constants import (
@@ -15,6 +17,28 @@ from pybel.manager.citation_utils import enrich_pubmed_citations, get_citations_
 from pybel.manager.models import Citation
 from pybel.testing.cases import TemporaryCacheMixin
 from pybel.testing.utils import n
+
+DATA = {
+    '29324713': {},
+    '29359844': {},
+    '9611787': {},
+    '25818332': {},
+}
+
+
+def _mock_fn(pubmed_identifiers: Iterable[str]) -> Mapping[str, Any]:
+    result = {
+        'uids': pubmed_identifiers,
+    }
+    for pmid in pubmed_identifiers:
+        result[pmid] = DATA[pmid]
+    return {'result': result}
+
+
+mock_get_pubmed_citation_response = mock.patch(
+    'pybel.manager.citation_utils.get_pubmed_citation_response',
+    side_effect=_mock_fn,
+)
 
 
 class TestSanitizeDate(unittest.TestCase):
@@ -59,7 +83,7 @@ class TestCitations(TemporaryCacheMixin):
     def setUp(self):
         super().setUp()
         self.u, self.v = (Protein(n(), n()) for _ in range(2))
-        self.pmid = "9611787"
+        self.pmid = '9611787'
         self.graph = BELGraph()
         self.graph.add_increases(self.u, self.v, citation=self.pmid, evidence=n())
 
@@ -74,7 +98,8 @@ class TestCitations(TemporaryCacheMixin):
         self.assertEqual(CITATION_TYPE_PUBMED, c.db)
         self.assertEqual(self.pmid, c.db_id)
 
-    def test_enrich_list(self):
+    @mock_get_pubmed_citation_response
+    def test_enrich_list(self, *_):
         pmids = [
             '25818332',
             '27003210',
@@ -87,7 +112,8 @@ class TestCitations(TemporaryCacheMixin):
         citation = self.manager.get_or_create_citation(namespace=CITATION_TYPE_PUBMED, identifier='25818332')
         self.assertIsNotNone(citation)
 
-    def test_enrich_list_grouped(self):
+    @mock_get_pubmed_citation_response
+    def test_enrich_list_grouped(self, *_):
         pmids = [
             '25818332',
             '27003210',
@@ -100,7 +126,8 @@ class TestCitations(TemporaryCacheMixin):
         citation = self.manager.get_citation_by_pmid('25818332')
         self.assertIsNotNone(citation)
 
-    def test_enrich_overwrite(self):
+    @mock_get_pubmed_citation_response
+    def test_enrich_overwrite(self, *_):
         citation = self.manager.get_or_create_citation(namespace=CITATION_TYPE_PUBMED, identifier=self.pmid)
         self.manager.session.commit()
         self.assertIsNone(citation.date)
@@ -121,7 +148,8 @@ class TestCitations(TemporaryCacheMixin):
             set(citation_dict[CITATION_AUTHORS])
         )
 
-    def test_enrich_graph(self):
+    @mock_get_pubmed_citation_response
+    def test_enrich_graph(self, *_):
         enrich_pubmed_citations(manager=self.manager, graph=self.graph)
 
         _, _, d = list(self.graph.edges(data=True))[0]
@@ -138,8 +166,9 @@ class TestCitations(TemporaryCacheMixin):
             set(citation_dict[CITATION_AUTHORS])
         )
 
+    @mock_get_pubmed_citation_response
     @unittest.skipIf(os.environ.get('DB') == 'mysql', reason='MySQL collation is wonky')
-    def test_accent_duplicate(self):
+    def test_accent_duplicate(self, *_):
         """Test when two authors, Gomez C and Goméz C are both checked that they are not counted as duplicates."""
         g1 = 'Gomez C'
         g2 = 'Gómez C'
