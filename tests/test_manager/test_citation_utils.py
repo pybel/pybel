@@ -1,7 +1,23 @@
 # -*- coding: utf-8 -*-
 
-"""Test the manager's citation utilities."""
+"""Test the manager's citation utilities.
 
+The test data can be created with the following script:
+
+.. code-block:: python
+
+    import json
+    from pybel.manager.citation_utils import get_pubmed_citation_response
+
+    DATA = {'29324713', '29359844', '9611787', '25818332', '26438529', '26649137', '27003210'}
+
+    rv = get_pubmed_citation_response(DATA)
+    with open('/Users/cthoyt/dev/bel/pybel/tests/test_manager/citation_data.json', 'w') as file:
+        json.dump(rv, file, indent=2)
+
+"""
+
+import json
 import os
 import time
 import unittest
@@ -18,12 +34,10 @@ from pybel.manager.models import Citation
 from pybel.testing.cases import TemporaryCacheMixin
 from pybel.testing.utils import n
 
-DATA = {
-    '29324713': {},
-    '29359844': {},
-    '9611787': {},
-    '25818332': {},
-}
+HERE = os.path.abspath(os.path.dirname(__file__))
+DATA_PATH = os.path.join(HERE, 'citation_data.json')
+with open(DATA_PATH) as _file:
+    DATA = json.load(_file)
 
 
 def _mock_fn(pubmed_identifiers: Iterable[str]) -> Mapping[str, Any]:
@@ -31,7 +45,7 @@ def _mock_fn(pubmed_identifiers: Iterable[str]) -> Mapping[str, Any]:
         'uids': pubmed_identifiers,
     }
     for pmid in pubmed_identifiers:
-        result[pmid] = DATA[pmid]
+        result[pmid] = DATA['result'][pmid]
     return {'result': result}
 
 
@@ -87,7 +101,8 @@ class TestCitations(TemporaryCacheMixin):
         self.graph = BELGraph()
         self.graph.add_increases(self.u, self.v, citation=self.pmid, evidence=n())
 
-    def test_enrich(self):
+    @mock_get_pubmed_citation_response
+    def test_enrich(self, *_):
         self.assertEqual(0, self.manager.count_citations())
         get_citations_by_pmids(manager=self.manager, pmids=[self.pmid])
         self.assertEqual(1, self.manager.count_citations())
@@ -182,7 +197,7 @@ class TestCitations(TemporaryCacheMixin):
 
         x = self.manager.get_citation_by_pmid(pmid_1)
         self.assertIsNotNone(x)
-        self.assertEqual('Martínez-Guillén JR', x.first.name)
+        self.assertEqual('Martínez-Guillén JR', x.first.name, msg='wrong first author name')
 
         self.assertIn(g1, self.manager.object_cache_author)
         self.assertIn(g2, self.manager.object_cache_author)
