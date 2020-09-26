@@ -1,0 +1,969 @@
+{
+  "header": {
+    "type": "esummary",
+    "version": "0.3"
+  },
+  "result": {
+    "uids": [
+      "26438529",
+      "29324713",
+      "29359844",
+      "27003210",
+      "25818332",
+      "9611787",
+      "26649137"
+    ],
+    "26438529": {
+      "uid": "26438529",
+      "pubdate": "2015 Oct 5",
+      "epubdate": "2015 Oct 5",
+      "source": "Mol Neurodegener",
+      "authors": [
+        {
+          "name": "Malik M",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Parikh I",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Vasquez JB",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Smith C",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Tai L",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Bu G",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "LaDu MJ",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Fardo DW",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Rebeck GW",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Estus S",
+          "authtype": "Author",
+          "clusterid": ""
+        }
+      ],
+      "lastauthor": "Estus S",
+      "title": "Genetics ignite focus on microglial inflammation in Alzheimer's disease.",
+      "sorttitle": "genetics ignite focus on microglial inflammation in alzheimer s disease",
+      "volume": "10",
+      "issue": "",
+      "pages": "52",
+      "lang": [
+        "eng"
+      ],
+      "nlmuniqueid": "101266600",
+      "issn": "",
+      "essn": "1750-1326",
+      "pubtype": [
+        "Journal Article",
+        "Review"
+      ],
+      "recordstatus": "PubMed - indexed for MEDLINE",
+      "pubstatus": "3",
+      "articleids": [
+        {
+          "idtype": "pubmed",
+          "idtypen": 1,
+          "value": "26438529"
+        },
+        {
+          "idtype": "doi",
+          "idtypen": 3,
+          "value": "10.1186/s13024-015-0048-1"
+        },
+        {
+          "idtype": "pii",
+          "idtypen": 4,
+          "value": "10.1186/s13024-015-0048-1"
+        },
+        {
+          "idtype": "pmc",
+          "idtypen": 8,
+          "value": "PMC4595327"
+        },
+        {
+          "idtype": "rid",
+          "idtypen": 8,
+          "value": "26438529"
+        },
+        {
+          "idtype": "eid",
+          "idtypen": 8,
+          "value": "26438529"
+        },
+        {
+          "idtype": "pmcid",
+          "idtypen": 5,
+          "value": "pmc-id: PMC4595327;"
+        }
+      ],
+      "history": [
+        {
+          "pubstatus": "received",
+          "date": "2015/08/03 00:00"
+        },
+        {
+          "pubstatus": "accepted",
+          "date": "2015/09/23 00:00"
+        },
+        {
+          "pubstatus": "entrez",
+          "date": "2015/10/07 06:00"
+        },
+        {
+          "pubstatus": "pubmed",
+          "date": "2015/10/07 06:00"
+        },
+        {
+          "pubstatus": "medline",
+          "date": "2016/08/25 06:00"
+        }
+      ],
+      "references": [],
+      "attributes": [
+        "Has Abstract"
+      ],
+      "pmcrefcount": 47,
+      "fulljournalname": "Molecular neurodegeneration",
+      "elocationid": "doi: 10.1186/s13024-015-0048-1",
+      "doctype": "citation",
+      "srccontriblist": [],
+      "booktitle": "",
+      "medium": "",
+      "edition": "",
+      "publisherlocation": "",
+      "publishername": "",
+      "srcdate": "",
+      "reportnumber": "",
+      "availablefromurl": "",
+      "locationlabel": "",
+      "doccontriblist": [],
+      "docdate": "",
+      "bookname": "",
+      "chapter": "",
+      "sortpubdate": "2015/10/05 00:00",
+      "sortfirstauthor": "Malik M",
+      "vernaculartitle": ""
+    },
+    "29324713": {
+      "uid": "29324713",
+      "pubdate": "2018 Jan 11",
+      "epubdate": "2018 Jan 11",
+      "source": "Molecules",
+      "authors": [
+        {
+          "name": "Mart\u00ednez-Guill\u00e9n JR",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Flores-Ferr\u00e1ndiz J",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "G\u00f3mez C",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "G\u00f3mez-Bengoa E",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Chinchilla R",
+          "authtype": "Author",
+          "clusterid": ""
+        }
+      ],
+      "lastauthor": "Chinchilla R",
+      "title": "Asymmetric Conjugate Addition of \u03b1,\u03b1-Disubstituted Aldehydes to Nitroalkenes Organocatalyzed by Chiral Monosalicylamides from trans-Cyclohexane-1,2-Diamines.",
+      "sorttitle": "asymmetric conjugate addition of disubstituted aldehydes to nitroalkenes organocatalyzed by chiral monosalicylamides from trans cyclohexane 1 2 diamines",
+      "volume": "23",
+      "issue": "1",
+      "pages": "",
+      "lang": [
+        "eng"
+      ],
+      "nlmuniqueid": "100964009",
+      "issn": "",
+      "essn": "1420-3049",
+      "pubtype": [
+        "Journal Article"
+      ],
+      "recordstatus": "PubMed - indexed for MEDLINE",
+      "pubstatus": "3",
+      "articleids": [
+        {
+          "idtype": "pubmed",
+          "idtypen": 1,
+          "value": "29324713"
+        },
+        {
+          "idtype": "pii",
+          "idtypen": 4,
+          "value": "molecules23010141"
+        },
+        {
+          "idtype": "doi",
+          "idtypen": 3,
+          "value": "10.3390/molecules23010141"
+        },
+        {
+          "idtype": "pmc",
+          "idtypen": 8,
+          "value": "PMC6017890"
+        },
+        {
+          "idtype": "rid",
+          "idtypen": 8,
+          "value": "29324713"
+        },
+        {
+          "idtype": "eid",
+          "idtypen": 8,
+          "value": "29324713"
+        },
+        {
+          "idtype": "pmcid",
+          "idtypen": 5,
+          "value": "pmc-id: PMC6017890;"
+        }
+      ],
+      "history": [
+        {
+          "pubstatus": "received",
+          "date": "2017/12/25 00:00"
+        },
+        {
+          "pubstatus": "revised",
+          "date": "2018/01/08 00:00"
+        },
+        {
+          "pubstatus": "accepted",
+          "date": "2018/01/09 00:00"
+        },
+        {
+          "pubstatus": "entrez",
+          "date": "2018/01/12 06:00"
+        },
+        {
+          "pubstatus": "pubmed",
+          "date": "2018/01/13 06:00"
+        },
+        {
+          "pubstatus": "medline",
+          "date": "2018/08/04 06:00"
+        }
+      ],
+      "references": [],
+      "attributes": [
+        "Has Abstract"
+      ],
+      "pmcrefcount": 3,
+      "fulljournalname": "Molecules (Basel, Switzerland)",
+      "elocationid": "pii: E141. doi: 10.3390/molecules23010141",
+      "doctype": "citation",
+      "srccontriblist": [],
+      "booktitle": "",
+      "medium": "",
+      "edition": "",
+      "publisherlocation": "",
+      "publishername": "",
+      "srcdate": "",
+      "reportnumber": "",
+      "availablefromurl": "",
+      "locationlabel": "",
+      "doccontriblist": [],
+      "docdate": "",
+      "bookname": "",
+      "chapter": "",
+      "sortpubdate": "2018/01/11 00:00",
+      "sortfirstauthor": "Mart\u00ednez-Guill\u00e9n JR",
+      "vernaculartitle": ""
+    },
+    "29359844": {
+      "uid": "29359844",
+      "pubdate": "2018 Apr",
+      "epubdate": "2018 Mar 13",
+      "source": "Transpl Infect Dis",
+      "authors": [
+        {
+          "name": "Botero V",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Garc\u00eda VH",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Aristizabal AM",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Gomez C",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Perez P",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Caicedo LA",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Echeverri GJ",
+          "authtype": "Author",
+          "clusterid": ""
+        }
+      ],
+      "lastauthor": "Echeverri GJ",
+      "title": "Hepatitis A, cardiomyopathy, aplastic anemia, and acute liver failure: A devastating scenario.",
+      "sorttitle": "hepatitis a cardiomyopathy aplastic anemia and acute liver failure a devastating scenario",
+      "volume": "20",
+      "issue": "2",
+      "pages": "e12842",
+      "lang": [
+        "eng"
+      ],
+      "nlmuniqueid": "100883688",
+      "issn": "1398-2273",
+      "essn": "1399-3062",
+      "pubtype": [
+        "Journal Article"
+      ],
+      "recordstatus": "PubMed - indexed for MEDLINE",
+      "pubstatus": "256",
+      "articleids": [
+        {
+          "idtype": "pubmed",
+          "idtypen": 1,
+          "value": "29359844"
+        },
+        {
+          "idtype": "doi",
+          "idtypen": 3,
+          "value": "10.1111/tid.12842"
+        },
+        {
+          "idtype": "rid",
+          "idtypen": 8,
+          "value": "29359844"
+        },
+        {
+          "idtype": "eid",
+          "idtypen": 8,
+          "value": "29359844"
+        }
+      ],
+      "history": [
+        {
+          "pubstatus": "received",
+          "date": "2017/04/19 00:00"
+        },
+        {
+          "pubstatus": "revised",
+          "date": "2017/09/14 00:00"
+        },
+        {
+          "pubstatus": "accepted",
+          "date": "2017/09/24 00:00"
+        },
+        {
+          "pubstatus": "pubmed",
+          "date": "2018/01/24 06:00"
+        },
+        {
+          "pubstatus": "medline",
+          "date": "2018/09/18 06:00"
+        },
+        {
+          "pubstatus": "entrez",
+          "date": "2018/01/24 06:00"
+        }
+      ],
+      "references": [],
+      "attributes": [
+        "Has Abstract"
+      ],
+      "pmcrefcount": 1,
+      "fulljournalname": "Transplant infectious disease : an official journal of the Transplantation Society",
+      "elocationid": "doi: 10.1111/tid.12842",
+      "doctype": "citation",
+      "srccontriblist": [],
+      "booktitle": "",
+      "medium": "",
+      "edition": "",
+      "publisherlocation": "",
+      "publishername": "",
+      "srcdate": "",
+      "reportnumber": "",
+      "availablefromurl": "",
+      "locationlabel": "",
+      "doccontriblist": [],
+      "docdate": "",
+      "bookname": "",
+      "chapter": "",
+      "sortpubdate": "2018/04/01 00:00",
+      "sortfirstauthor": "Botero V",
+      "vernaculartitle": ""
+    },
+    "27003210": {
+      "uid": "27003210",
+      "pubdate": "2016 Mar 15",
+      "epubdate": "",
+      "source": "J Alzheimers Dis",
+      "authors": [
+        {
+          "name": "Wang HF",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Wan Y",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Hao XK",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Cao L",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Zhu XC",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Jiang T",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Tan MS",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Tan L",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Zhang DQ",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Tan L",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Yu JT",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Disease Neuroimaging Initiative Alzheimer\u2019s.",
+          "authtype": "CollectiveName",
+          "clusterid": ""
+        }
+      ],
+      "lastauthor": "Yu JT",
+      "title": "Bridging Integrator 1 (BIN1) Genotypes Mediate Alzheimer's Disease Risk by Altering Neuronal Degeneration.",
+      "sorttitle": "bridging integrator 1 bin1 genotypes mediate alzheimer s disease risk by altering neuronal degeneration",
+      "volume": "52",
+      "issue": "1",
+      "pages": "179-90",
+      "lang": [
+        "eng"
+      ],
+      "nlmuniqueid": "9814863",
+      "issn": "1387-2877",
+      "essn": "1875-8908",
+      "pubtype": [
+        "Journal Article",
+        "Meta-Analysis",
+        "Multicenter Study"
+      ],
+      "recordstatus": "PubMed - indexed for MEDLINE",
+      "pubstatus": "4",
+      "articleids": [
+        {
+          "idtype": "pubmed",
+          "idtypen": 1,
+          "value": "27003210"
+        },
+        {
+          "idtype": "pii",
+          "idtypen": 4,
+          "value": "JAD150972"
+        },
+        {
+          "idtype": "doi",
+          "idtypen": 3,
+          "value": "10.3233/JAD-150972"
+        },
+        {
+          "idtype": "rid",
+          "idtypen": 8,
+          "value": "27003210"
+        },
+        {
+          "idtype": "eid",
+          "idtypen": 8,
+          "value": "27003210"
+        }
+      ],
+      "history": [
+        {
+          "pubstatus": "entrez",
+          "date": "2016/03/23 06:00"
+        },
+        {
+          "pubstatus": "pubmed",
+          "date": "2016/03/24 06:00"
+        },
+        {
+          "pubstatus": "medline",
+          "date": "2017/01/28 06:00"
+        }
+      ],
+      "references": [],
+      "attributes": [
+        "Has Abstract"
+      ],
+      "pmcrefcount": 9,
+      "fulljournalname": "Journal of Alzheimer's disease : JAD",
+      "elocationid": "doi: 10.3233/JAD-150972",
+      "doctype": "citation",
+      "srccontriblist": [],
+      "booktitle": "",
+      "medium": "",
+      "edition": "",
+      "publisherlocation": "",
+      "publishername": "",
+      "srcdate": "",
+      "reportnumber": "",
+      "availablefromurl": "",
+      "locationlabel": "",
+      "doccontriblist": [],
+      "docdate": "",
+      "bookname": "",
+      "chapter": "",
+      "sortpubdate": "2016/03/15 00:00",
+      "sortfirstauthor": "Wang HF",
+      "vernaculartitle": ""
+    },
+    "25818332": {
+      "uid": "25818332",
+      "pubdate": "2015 May 6",
+      "epubdate": "2015 Mar 25",
+      "source": "Neurosci Lett",
+      "authors": [
+        {
+          "name": "Shi X",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Zheng Z",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Li J",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Xiao Z",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Qi W",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Zhang A",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Wu Q",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Fang Y",
+          "authtype": "Author",
+          "clusterid": ""
+        }
+      ],
+      "lastauthor": "Fang Y",
+      "title": "Curcumin inhibits A\u03b2-induced microglial inflammatory responses in vitro: Involvement of ERK1/2 and p38 signaling pathways.",
+      "sorttitle": "curcumin inhibits a induced microglial inflammatory responses in vitro involvement of erk1 2 and p38 signaling pathways",
+      "volume": "594",
+      "issue": "",
+      "pages": "105-10",
+      "lang": [
+        "eng"
+      ],
+      "nlmuniqueid": "7600130",
+      "issn": "0304-3940",
+      "essn": "1872-7972",
+      "pubtype": [
+        "Journal Article"
+      ],
+      "recordstatus": "PubMed - indexed for MEDLINE",
+      "pubstatus": "256",
+      "articleids": [
+        {
+          "idtype": "pubmed",
+          "idtypen": 1,
+          "value": "25818332"
+        },
+        {
+          "idtype": "pii",
+          "idtypen": 4,
+          "value": "S0304-3940(15)00238-4"
+        },
+        {
+          "idtype": "doi",
+          "idtypen": 3,
+          "value": "10.1016/j.neulet.2015.03.045"
+        },
+        {
+          "idtype": "rid",
+          "idtypen": 8,
+          "value": "25818332"
+        },
+        {
+          "idtype": "eid",
+          "idtypen": 8,
+          "value": "25818332"
+        }
+      ],
+      "history": [
+        {
+          "pubstatus": "received",
+          "date": "2014/12/30 00:00"
+        },
+        {
+          "pubstatus": "revised",
+          "date": "2015/02/18 00:00"
+        },
+        {
+          "pubstatus": "accepted",
+          "date": "2015/03/21 00:00"
+        },
+        {
+          "pubstatus": "entrez",
+          "date": "2015/03/31 06:00"
+        },
+        {
+          "pubstatus": "pubmed",
+          "date": "2015/03/31 06:00"
+        },
+        {
+          "pubstatus": "medline",
+          "date": "2015/09/15 06:00"
+        }
+      ],
+      "references": [],
+      "attributes": [
+        "Has Abstract"
+      ],
+      "pmcrefcount": 17,
+      "fulljournalname": "Neuroscience letters",
+      "elocationid": "doi: 10.1016/j.neulet.2015.03.045",
+      "doctype": "citation",
+      "srccontriblist": [],
+      "booktitle": "",
+      "medium": "",
+      "edition": "",
+      "publisherlocation": "",
+      "publishername": "",
+      "srcdate": "",
+      "reportnumber": "",
+      "availablefromurl": "",
+      "locationlabel": "",
+      "doccontriblist": [],
+      "docdate": "",
+      "bookname": "",
+      "chapter": "",
+      "sortpubdate": "2015/05/06 00:00",
+      "sortfirstauthor": "Shi X",
+      "vernaculartitle": ""
+    },
+    "9611787": {
+      "uid": "9611787",
+      "pubdate": "1998 May-Jun",
+      "epubdate": "",
+      "source": "J Chem Inf Comput Sci",
+      "authors": [
+        {
+          "name": "Lewell XQ",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Judd DB",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Watson SP",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Hann MM",
+          "authtype": "Author",
+          "clusterid": ""
+        }
+      ],
+      "lastauthor": "Hann MM",
+      "title": "RECAP--retrosynthetic combinatorial analysis procedure: a powerful new technique for identifying privileged molecular fragments with useful applications in combinatorial chemistry.",
+      "sorttitle": "recap retrosynthetic combinatorial analysis procedure a powerful new technique for identifying privileged molecular fragments with useful applications in combinatorial chemistry",
+      "volume": "38",
+      "issue": "3",
+      "pages": "511-22",
+      "lang": [
+        "eng"
+      ],
+      "nlmuniqueid": "7505012",
+      "issn": "0095-2338",
+      "essn": "",
+      "pubtype": [
+        "Journal Article"
+      ],
+      "recordstatus": "PubMed - indexed for MEDLINE",
+      "pubstatus": "4",
+      "articleids": [
+        {
+          "idtype": "pubmed",
+          "idtypen": 1,
+          "value": "9611787"
+        },
+        {
+          "idtype": "doi",
+          "idtypen": 3,
+          "value": "10.1021/ci970429i"
+        },
+        {
+          "idtype": "rid",
+          "idtypen": 8,
+          "value": "9611787"
+        },
+        {
+          "idtype": "eid",
+          "idtypen": 8,
+          "value": "9611787"
+        }
+      ],
+      "history": [
+        {
+          "pubstatus": "pubmed",
+          "date": "1998/06/05 00:00"
+        },
+        {
+          "pubstatus": "medline",
+          "date": "1998/06/05 00:01"
+        },
+        {
+          "pubstatus": "entrez",
+          "date": "1998/06/05 00:00"
+        }
+      ],
+      "references": [],
+      "attributes": [
+        "Has Abstract"
+      ],
+      "pmcrefcount": 66,
+      "fulljournalname": "Journal of chemical information and computer sciences",
+      "elocationid": "",
+      "doctype": "citation",
+      "srccontriblist": [],
+      "booktitle": "",
+      "medium": "",
+      "edition": "",
+      "publisherlocation": "",
+      "publishername": "",
+      "srcdate": "",
+      "reportnumber": "",
+      "availablefromurl": "",
+      "locationlabel": "",
+      "doccontriblist": [],
+      "docdate": "",
+      "bookname": "",
+      "chapter": "",
+      "sortpubdate": "1998/05/01 00:00",
+      "sortfirstauthor": "Lewell XQ",
+      "vernaculartitle": ""
+    },
+    "26649137": {
+      "uid": "26649137",
+      "pubdate": "2016",
+      "epubdate": "2015 Nov 16",
+      "source": "Oxid Med Cell Longev",
+      "authors": [
+        {
+          "name": "Yan T",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Zhao Y",
+          "authtype": "Author",
+          "clusterid": ""
+        },
+        {
+          "name": "Zhang X",
+          "authtype": "Author",
+          "clusterid": ""
+        }
+      ],
+      "lastauthor": "Zhang X",
+      "title": "Acetaldehyde Induces Cytotoxicity of SH-SY5Y Cells via Inhibition of Akt Activation and Induction of Oxidative Stress.",
+      "sorttitle": "acetaldehyde induces cytotoxicity of sh sy5y cells via inhibition of akt activation and induction of oxidative stress",
+      "volume": "2016",
+      "issue": "",
+      "pages": "4512309",
+      "lang": [
+        "eng"
+      ],
+      "nlmuniqueid": "101479826",
+      "issn": "1942-0900",
+      "essn": "1942-0994",
+      "pubtype": [
+        "Journal Article"
+      ],
+      "recordstatus": "PubMed - indexed for MEDLINE",
+      "pubstatus": "256",
+      "articleids": [
+        {
+          "idtype": "pubmed",
+          "idtypen": 1,
+          "value": "26649137"
+        },
+        {
+          "idtype": "doi",
+          "idtypen": 3,
+          "value": "10.1155/2016/4512309"
+        },
+        {
+          "idtype": "pmc",
+          "idtypen": 8,
+          "value": "PMC4663355"
+        },
+        {
+          "idtype": "rid",
+          "idtypen": 8,
+          "value": "26649137"
+        },
+        {
+          "idtype": "eid",
+          "idtypen": 8,
+          "value": "26649137"
+        },
+        {
+          "idtype": "pmcid",
+          "idtypen": 5,
+          "value": "pmc-id: PMC4663355;"
+        }
+      ],
+      "history": [
+        {
+          "pubstatus": "received",
+          "date": "2015/06/13 00:00"
+        },
+        {
+          "pubstatus": "accepted",
+          "date": "2015/07/14 00:00"
+        },
+        {
+          "pubstatus": "entrez",
+          "date": "2015/12/10 06:00"
+        },
+        {
+          "pubstatus": "pubmed",
+          "date": "2015/12/10 06:00"
+        },
+        {
+          "pubstatus": "medline",
+          "date": "2016/09/13 06:00"
+        }
+      ],
+      "references": [],
+      "attributes": [
+        "Has Abstract"
+      ],
+      "pmcrefcount": 10,
+      "fulljournalname": "Oxidative medicine and cellular longevity",
+      "elocationid": "doi: 10.1155/2016/4512309",
+      "doctype": "citation",
+      "srccontriblist": [],
+      "booktitle": "",
+      "medium": "",
+      "edition": "",
+      "publisherlocation": "",
+      "publishername": "",
+      "srcdate": "",
+      "reportnumber": "",
+      "availablefromurl": "",
+      "locationlabel": "",
+      "doccontriblist": [],
+      "docdate": "",
+      "bookname": "",
+      "chapter": "",
+      "sortpubdate": "2016/01/01 00:00",
+      "sortfirstauthor": "Yan T",
+      "vernaculartitle": ""
+    }
+  }
+}
