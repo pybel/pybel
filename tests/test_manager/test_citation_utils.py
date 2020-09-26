@@ -1,10 +1,28 @@
 # -*- coding: utf-8 -*-
 
-"""Test the manager's citation utilities."""
+"""Test the manager's citation utilities.
 
+The test data can be created with the following script:
+
+.. code-block:: python
+
+    import json
+    from pybel.manager.citation_utils import get_pubmed_citation_response
+
+    DATA = {'29324713', '29359844', '9611787', '25818332', '26438529', '26649137', '27003210'}
+
+    rv = get_pubmed_citation_response(DATA)
+    with open('/Users/cthoyt/dev/bel/pybel/tests/test_manager/citation_data.json', 'w') as file:
+        json.dump(rv, file, indent=2)
+
+"""
+
+import json
 import os
 import time
 import unittest
+from typing import Any, Iterable, Mapping
+from unittest import mock
 
 from pybel import BELGraph
 from pybel.constants import (
@@ -15,6 +33,26 @@ from pybel.manager.citation_utils import enrich_pubmed_citations, get_citations_
 from pybel.manager.models import Citation
 from pybel.testing.cases import TemporaryCacheMixin
 from pybel.testing.utils import n
+
+HERE = os.path.abspath(os.path.dirname(__file__))
+DATA_PATH = os.path.join(HERE, 'citation_data.json')
+with open(DATA_PATH) as _file:
+    DATA = json.load(_file)
+
+
+def _mock_fn(pubmed_identifiers: Iterable[str]) -> Mapping[str, Any]:
+    result = {
+        'uids': pubmed_identifiers,
+    }
+    for pmid in pubmed_identifiers:
+        result[pmid] = DATA['result'][pmid]
+    return {'result': result}
+
+
+mock_get_pubmed_citation_response = mock.patch(
+    'pybel.manager.citation_utils.get_pubmed_citation_response',
+    side_effect=_mock_fn,
+)
 
 
 class TestSanitizeDate(unittest.TestCase):
@@ -59,11 +97,12 @@ class TestCitations(TemporaryCacheMixin):
     def setUp(self):
         super().setUp()
         self.u, self.v = (Protein(n(), n()) for _ in range(2))
-        self.pmid = "9611787"
+        self.pmid = '9611787'
         self.graph = BELGraph()
         self.graph.add_increases(self.u, self.v, citation=self.pmid, evidence=n())
 
-    def test_enrich(self):
+    @mock_get_pubmed_citation_response
+    def test_enrich(self, *_):
         self.assertEqual(0, self.manager.count_citations())
         get_citations_by_pmids(manager=self.manager, pmids=[self.pmid])
         self.assertEqual(1, self.manager.count_citations())
@@ -74,7 +113,8 @@ class TestCitations(TemporaryCacheMixin):
         self.assertEqual(CITATION_TYPE_PUBMED, c.db)
         self.assertEqual(self.pmid, c.db_id)
 
-    def test_enrich_list(self):
+    @mock_get_pubmed_citation_response
+    def test_enrich_list(self, *_):
         pmids = [
             '25818332',
             '27003210',
@@ -87,7 +127,8 @@ class TestCitations(TemporaryCacheMixin):
         citation = self.manager.get_or_create_citation(namespace=CITATION_TYPE_PUBMED, identifier='25818332')
         self.assertIsNotNone(citation)
 
-    def test_enrich_list_grouped(self):
+    @mock_get_pubmed_citation_response
+    def test_enrich_list_grouped(self, *_):
         pmids = [
             '25818332',
             '27003210',
@@ -100,7 +141,8 @@ class TestCitations(TemporaryCacheMixin):
         citation = self.manager.get_citation_by_pmid('25818332')
         self.assertIsNotNone(citation)
 
-    def test_enrich_overwrite(self):
+    @mock_get_pubmed_citation_response
+    def test_enrich_overwrite(self, *_):
         citation = self.manager.get_or_create_citation(namespace=CITATION_TYPE_PUBMED, identifier=self.pmid)
         self.manager.session.commit()
         self.assertIsNone(citation.date)
@@ -121,7 +163,8 @@ class TestCitations(TemporaryCacheMixin):
             set(citation_dict[CITATION_AUTHORS])
         )
 
-    def test_enrich_graph(self):
+    @mock_get_pubmed_citation_response
+    def test_enrich_graph(self, *_):
         enrich_pubmed_citations(manager=self.manager, graph=self.graph)
 
         _, _, d = list(self.graph.edges(data=True))[0]
@@ -138,8 +181,9 @@ class TestCitations(TemporaryCacheMixin):
             set(citation_dict[CITATION_AUTHORS])
         )
 
+    @mock_get_pubmed_citation_response
     @unittest.skipIf(os.environ.get('DB') == 'mysql', reason='MySQL collation is wonky')
-    def test_accent_duplicate(self):
+    def test_accent_duplicate(self, *_):
         """Test when two authors, Gomez C and Goméz C are both checked that they are not counted as duplicates."""
         g1 = 'Gomez C'
         g2 = 'Gómez C'
@@ -153,7 +197,7 @@ class TestCitations(TemporaryCacheMixin):
 
         x = self.manager.get_citation_by_pmid(pmid_1)
         self.assertIsNotNone(x)
-        self.assertEqual('Martínez-Guillén JR', x.first.name)
+        self.assertEqual('Martínez-Guillén JR', x.first.name, msg='wrong first author name')
 
         self.assertIn(g1, self.manager.object_cache_author)
         self.assertIn(g2, self.manager.object_cache_author)
