@@ -16,9 +16,10 @@ from pyparsing import And, Keyword, MatchFirst, ParseResults, Suppress, oneOf, p
 
 from .baseparser import BaseParser
 from .utils import delimited_quoted_list, delimited_unquoted_list, is_int, qid, quote
+from .. import constants as pc
 from ..constants import (
     ANNOTATIONS, BEL_KEYWORD_ALL, BEL_KEYWORD_CITATION, BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SET,
-    BEL_KEYWORD_STATEMENT_GROUP, BEL_KEYWORD_SUPPORT, BEL_KEYWORD_UNSET, CITATION, CITATION_TYPES, CITATION_TYPE_PUBMED,
+    BEL_KEYWORD_STATEMENT_GROUP, BEL_KEYWORD_SUPPORT, BEL_KEYWORD_UNSET, CITATION, CITATION_TYPES,
     EVIDENCE,
 )
 from ..exceptions import (
@@ -221,10 +222,10 @@ class ControlParser(BaseParser):
         if len(values) < 2:
             raise CitationTooShortException(self.get_line_number(), line, position)
 
-        citation_db = values[0]
-
-        if citation_db not in CITATION_TYPES:
-            raise InvalidCitationType(self.get_line_number(), line, position, citation_db)
+        citation_namespace = values[0].lower()
+        citation_namespace = pc.CITATION_NORMALIZER.get(citation_namespace, citation_namespace)
+        if citation_namespace not in CITATION_TYPES:
+            raise InvalidCitationType(self.get_line_number(), line, position, citation_namespace)
 
         if 2 == len(values):
             citation_db_id = values[1]
@@ -240,10 +241,10 @@ class ControlParser(BaseParser):
 
             citation_db_id = values[2]
 
-        if citation_db == CITATION_TYPE_PUBMED and not is_int(citation_db_id):
+        if citation_namespace == 'pubmed' and not is_int(citation_db_id):
             raise InvalidPubMedIdentifierWarning(self.get_line_number(), line, position, citation_db_id)
 
-        self.citation_db = citation_db
+        self.citation_db = citation_namespace
         self.citation_db_id = citation_db_id
         return tokens
 

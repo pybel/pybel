@@ -17,7 +17,8 @@ from pybel.constants import (
 from pybel.dsl import BaseEntity, ComplexAbundance, Pathology, Protein
 from pybel.dsl.namespaces import hgnc
 from pybel.exceptions import (
-    BELParserWarning, BELSyntaxError, IllegalAnnotationValueWarning, InvalidCitationLengthException,
+    BELParserWarning, BELSyntaxError, CitationTooShortException, IllegalAnnotationValueWarning,
+    InvalidCitationLengthException,
     InvalidCitationType, InvalidFunctionSemantic, InvalidPubMedIdentifierWarning, MalformedTranslocationWarning,
     MissingAnnotationKeyWarning, MissingAnnotationRegexWarning, MissingCitationException, MissingMetadataException,
     MissingNamespaceNameWarning, MissingNamespaceRegexWarning, MissingSupportWarning, NakedNameWarning,
@@ -410,7 +411,7 @@ class BelReconstitutionMixin(TestGraphMixin):
                 (3, VersionFormatWarning),
                 (26, MissingAnnotationKeyWarning),
                 (29, MissingAnnotationKeyWarning),
-                (34, InvalidCitationLengthException),
+                (34, CitationTooShortException),
                 (37, InvalidCitationType),
                 (40, InvalidPubMedIdentifierWarning),
                 (43, MissingCitationException),
@@ -435,6 +436,12 @@ class BelReconstitutionMixin(TestGraphMixin):
 
             for warning_tuple in graph.warnings:
                 self.assertEqual(3, len(warning_tuple), msg='Warning tuple is wrong size: {}'.format(warning_tuple))
+
+            _sliced_warnings = [
+                (w.line_number, w.__class__)
+                for _, w, _ in graph.warnings
+            ]
+            self.assertEqual(expected_warnings, _sliced_warnings, msg='wrong warnings')
 
             for (el, ew), (_, exc, _) in zip(expected_warnings, graph.warnings):
                 self.assertIsInstance(exc, BELParserWarning)

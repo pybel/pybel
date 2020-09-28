@@ -34,7 +34,7 @@ SET STATEMENT_GROUP = "Group 1"
 SET Citation = {"PubMed"}
 
 # InvalidCitationType
-SET Citation = {"Pubmed", "Incomplete", "1234"}
+SET Citation = {"Nope", "Incomplete", "1234"}
 
 # InvalidPubMedIdentifierWarning
 SET Citation = {"PubMed", "Fake Name", "Fake Reference"}
@@ -106,3 +106,6 @@ SET STATEMENT_GROUP = "Group 2"
 SET Citation = {"PubMed","That one article from last week","123455"}
 SET Evidence = "Evidence 1"
 p(HGNC:AKT1) -> p(HGNC:EGFR)
+
+# As of PyBEL 15, the type is auto-lowercased, so this is valid now
+SET Citation = {"Pubmed", "Incomplete", "1234"}
