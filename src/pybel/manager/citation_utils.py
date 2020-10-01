@@ -167,11 +167,15 @@ def get_citations_by_pmids(
     enriched_pmids = {}
     unenriched_pmids = {}
 
-    citation_filter = and_(
-        models.Citation.db == 'pubmed',
-        models.Citation.db_id.in_(pmids),
-    )
-    citation_models = manager.session.query(models.Citation).filter(citation_filter).all()
+    citation_models = []
+    for pmid_chunk in chunked(pmids, 200):
+        citation_filter = and_(
+            models.Citation.db == 'pubmed',
+            models.Citation.db_id.in_(pmid_chunk),
+        )
+        citation_model_chunk = manager.session.query(models.Citation).filter(citation_filter).all()
+        citation_models.extend(citation_model_chunk)
+
     pmid_to_model = {
         citation_model.db_id: citation_model
         for citation_model in citation_models
@@ -200,7 +204,10 @@ def get_citations_by_pmids(
 
         for pmid in response_pmids:
             p = response['result'][pmid]
-            citation = unenriched_pmids[pmid]
+            citation = unenriched_pmids.get(pmid)
+            if citation is None:
+                logger.warning('problem looking up pmid:%s', pmid)
+                continue
 
             successful_enrichment = enrich_citation_model(manager, citation, p)
 
