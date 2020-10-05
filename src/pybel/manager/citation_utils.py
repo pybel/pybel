@@ -16,7 +16,6 @@ from tqdm import tqdm
 
 from . import models
 from ..constants import CITATION
-from ..language import CitationDict
 from ..struct.filters import filter_edges
 from ..struct.filters.edge_predicates import CITATION_PREDIACATES
 from ..struct.summary.provenance import get_citation_identifiers
@@ -181,7 +180,7 @@ def _get_citations_by_identifiers(
     if helper is None:
         raise ValueError(f'can not work on prefix: {prefix}')
 
-    group_size = group_size if group_size is not None else 20 # FIXME
+    group_size = group_size if group_size is not None else 200
 
     identifiers = clean_pubmed_identifiers(identifiers)
     logger.info('ensuring %d %s identifiers', len(identifiers), prefix)
