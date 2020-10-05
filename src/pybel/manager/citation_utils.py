@@ -5,6 +5,7 @@
 import logging
 import re
 from datetime import datetime
+from functools import lru_cache
 from typing import Dict, Iterable, List, Optional, Set, Tuple, Union
 
 import ratelimit
@@ -15,6 +16,7 @@ from tqdm import tqdm
 
 from . import models
 from ..constants import CITATION
+from ..language import CitationDict
 from ..struct.filters import filter_edges
 from ..struct.filters.edge_predicates import CITATION_PREDIACATES
 from ..struct.summary.provenance import get_citation_identifiers
@@ -235,7 +237,7 @@ def _help_enrich_pmids(identifiers: Iterable[str], *, manager, unenriched_models
         successful_enrichment = enrich_citation_model(manager, citation, p)
 
         if not successful_enrichment:
-            tqdm.write(f"Error downloading PubMed identifier: {pmid}")
+            tqdm.write(f"Error downloading pubmed:{pmid}")
             errors.add(pmid)
             continue
 
@@ -246,7 +248,20 @@ def _help_enrich_pmids(identifiers: Iterable[str], *, manager, unenriched_models
 
 
 def _help_enrich_pmc_identifiers(identifiers: Iterable[str], *, manager, unenriched_models, enriched_models, errors):
-    raise NotImplementedError
+    for pmcid in identifiers:
+        try:
+            csl = get_pmc_csl_item(pmcid)
+        except Exception:
+            tqdm.write(f"Error downloading pmc:{pmcid}")
+            errors.add(pmcid)
+            continue
+
+        model = unenriched_models[pmcid]
+        enrich_citation_model_from_pmc(manager=manager, citation=model, csl=csl)
+        manager.session.add(model)
+        enriched_models[pmcid] = model.to_json()
+
+    manager.session.commit()  # commit in groups
 
 
 _HELPERS = {
@@ -321,3 +336,45 @@ def _enrich_citations(
         graph[u][v][k][CITATION].update(identifier_data)
 
     return errors
+
+
+@lru_cache()
+def get_pmc_csl_item(pmcid: str):
+    """Get the CSL Item for a PubMed Central record by its PMID, PMCID, or DOI, using the NCBI Citation Exporter API."""
+    if not pmcid.startswith("PMC"):
+        raise ValueError(f'not a valid pmd id: {pmcid}')
+
+    from manubot.cite.pubmed import get_pmc_csl_item
+    csl_item = get_pmc_csl_item(pmcid)
+    if "URL" not in csl_item:
+        csl_item["URL"] = f"https://www.ncbi.nlm.nih.gov/pmc/articles/{csl_item.get('PMCID', pmcid)}/"
+    return csl_item
+
+
+def enrich_citation_model_from_pmc(manager, citation, csl) -> bool:
+    """Enrich a citation model with the information from PubMed Central.
+
+    :param pybel.manager.Manager manager:
+    :param Citation citation: A citation model
+    :param dict csl: The dictionary from PMC
+    """
+    citation.title = csl['title']
+    citation.journal = csl['container-title']
+    citation.volume = csl['volume']
+    # citation.issue = csl['issue']
+    citation.pages = csl['page']
+    citation.article_type = csl['type']
+
+    for author in csl.get('author', []):
+        author_name = f'{author["given"]} {author["family"]}'
+        author_model = manager.get_or_create_author(author_name)
+        if author_model not in citation.authors:
+            citation.authors.append(author_model)
+
+    citation.first = citation.authors[0]
+    citation.last = citation.authors[-1]
+
+    published_year, published_month, published_day = csl['issued']['date-parts'][0]
+    citation.date = datetime(year=published_year, month=published_month, day=published_day)
+
+    return True
