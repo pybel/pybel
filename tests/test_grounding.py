@@ -9,7 +9,7 @@ import pyobo
 from pyobo.mocks import _replace_mapping_getter, get_mock_id_name_mapping
 
 from pybel.constants import ANNOTATIONS, CONCEPT, GMOD, IDENTIFIER, KIND, MEMBERS, NAME, NAMESPACE, PMOD, VARIANTS
-from pybel.grounding import SYNONYM_TO_KEY, _process_annotations, _process_concept, _process_node
+from pybel.grounding import SYNONYM_TO_KEY, _NAME_REMAPPING, _process_annotations, _process_concept, _process_node
 from pybel.language import Entity
 
 
@@ -22,7 +22,6 @@ pyobo.getters.get = _failer
 pyobo.extract.get = _failer
 pyobo.extract.cached_mapping = _failer
 pyobo.extract.cached_multidict = _failer
-
 
 mock_id_name_data = {
     'mesh': {
@@ -50,7 +49,6 @@ mock_id_name_data = {
 mock_id_name_mapping = get_mock_id_name_mapping(mock_id_name_data)
 mock_id_name_mapping_2 = _replace_mapping_getter('pybel.grounding.get_id_name_mapping', mock_id_name_data)
 
-
 _mock_mnemonic_data = {
     'O60921': 'HUS1_HUMAN',
     'Q99638': 'RAD9A_HUMAN',
@@ -77,12 +75,12 @@ mock_get_id_from_mnemonic = mock.patch(
 class TestProcessConcept(unittest.TestCase):
     """Test the :func:`_process_concept` function."""
 
-    def _help(self, expected, d):
+    def _help(self, expected, d, msg=None):
         expected = {CONCEPT: expected}
         d = {CONCEPT: d}
-        self.assertIn(expected[CONCEPT][NAMESPACE], SYNONYM_TO_KEY)
+        self.assertIn(expected[CONCEPT][NAMESPACE], SYNONYM_TO_KEY, msg='Unrecognized namespace')
         _process_concept(concept=d[CONCEPT], node=d)
-        self.assertEqual(expected[CONCEPT], d[CONCEPT])
+        self.assertEqual(expected[CONCEPT], d[CONCEPT], msg=msg)
 
     def test_normalize_prefix_case(self, *_):
         """Test normalizing the prefix to the correct case."""
@@ -149,6 +147,12 @@ class TestProcessConcept(unittest.TestCase):
 
     def test_remap_scomp(self, *_):
         """Test remapping SFAM to FPLX."""
+        self.assertIn('BEL', SYNONYM_TO_KEY)
+        self.assertIn(
+            ('bel', 'gamma Secretase Complex'),
+            _NAME_REMAPPING,
+            msg='name remapping is not populated properly',
+        )
         self._help(
             {NAMESPACE: 'fplx', NAME: 'Gamma_secretase', IDENTIFIER: 'Gamma_secretase'},
             {NAMESPACE: 'SCOMP', NAME: 'gamma Secretase Complex'},
