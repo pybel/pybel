@@ -4,7 +4,7 @@
 
 import logging
 import re
-from datetime import datetime
+from datetime import datetime, date
 from functools import lru_cache
 from typing import Dict, Iterable, List, Optional, Set, Tuple, Union
 
@@ -181,7 +181,7 @@ def _get_citations_by_identifiers(
     if helper is None:
         raise ValueError(f'can not work on prefix: {prefix}')
 
-    group_size = group_size if group_size is not None else 200
+    group_size = group_size if group_size is not None else 20 # FIXME
 
     identifiers = clean_pubmed_identifiers(identifiers)
     logger.info('ensuring %d %s identifiers', len(identifiers), prefix)
@@ -193,8 +193,8 @@ def _get_citations_by_identifiers(
         citation_model.db_id: citation_model
         for citation_model in _get_citation_models(identifiers, prefix=prefix, manager=manager)
     }
-    logger.info('%d of %d are already cached', len(id_to_model), len(identifiers))
-    for identifier in tqdm(identifiers, desc='creating database models'):
+    logger.info('%d of %d %s identifiers are already cached', len(id_to_model), len(identifiers), prefix)
+    for identifier in tqdm(identifiers, desc=f'creating {prefix} models'):
         model = id_to_model.get(identifier)
         if model is None:
             model = id_to_model[identifier] = manager.get_or_create_citation(identifier=identifier, namespace=prefix)
@@ -203,7 +203,7 @@ def _get_citations_by_identifiers(
         else:
             unenriched_models[identifier] = model
 
-    logger.info('%d of %d are already enriched', len(enriched_models), len(identifiers))
+    logger.info('%d of %d %s are identifiers already enriched', len(enriched_models), len(identifiers), prefix)
     manager.session.commit()
 
     errors = set()
@@ -360,21 +360,33 @@ def enrich_citation_model_from_pmc(manager, citation, csl) -> bool:
     """
     citation.title = csl['title']
     citation.journal = csl['container-title']
-    citation.volume = csl['volume']
+    citation.volume = csl.get('volume')
     # citation.issue = csl['issue']
     citation.pages = csl['page']
     citation.article_type = csl['type']
 
     for author in csl.get('author', []):
-        author_name = f'{author["given"]} {author["family"]}'
+        try:
+            author_name = f'{author["given"]} {author["family"]}'
+        except KeyError:
+            print(f'problem with author in pmc:{citation.db_id}', author)
+            continue
         author_model = manager.get_or_create_author(author_name)
         if author_model not in citation.authors:
             citation.authors.append(author_model)
 
-    citation.first = citation.authors[0]
-    citation.last = citation.authors[-1]
+    if citation.authors:
+        citation.first = citation.authors[0]
+        citation.last = citation.authors[-1]
 
-    published_year, published_month, published_day = csl['issued']['date-parts'][0]
-    citation.date = datetime(year=published_year, month=published_month, day=published_day)
+    date_parts = csl['issued']['date-parts'][0]
+    if len(date_parts) == 3:
+        citation.date = date(year=date_parts[0], month=date_parts[1], day=date_parts[2])
+    elif len(date_parts) == 2:
+        citation.date = date(year=date_parts[0], month=date_parts[1], day=1)
+    elif len(date_parts) == 1:
+        citation.date = date(year=date_parts[0], month=1, day=1)
+    else:
+        logger.warning('not sure about date parts: %s', date_parts)
 
     return True
