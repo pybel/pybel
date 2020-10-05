@@ -16,11 +16,11 @@ from tqdm import tqdm
 from . import models
 from ..constants import CITATION
 from ..struct.filters import filter_edges
-from ..struct.filters.edge_predicates import has_pubmed
-from ..struct.summary.provenance import get_pubmed_identifiers
+from ..struct.filters.edge_predicates import CITATION_PREDIACATES
+from ..struct.summary.provenance import get_citation_identifiers
 
 __all__ = [
-    'get_citations_by_pmids',
+    '_get_citations_by_identifiers',
     'enrich_pubmed_citations',
 ]
 
@@ -73,9 +73,10 @@ def sanitize_date(publication_date: str) -> str:
         return datetime.strptime(publication_date, '%Y %b %d-{}'.format(s.groups()[0])).strftime('%Y-%m-%d')
 
 
-def clean_pubmed_identifiers(pmids: Iterable[str]) -> List[str]:
-    """Clean a list of PubMed identifiers with string strips, deduplicates, and sorting."""
-    return sorted({str(pmid).strip() for pmid in pmids})
+def clean_pubmed_identifiers(identifiers: Iterable[str]) -> List[str]:
+    """Clean a list of identifiers with string strips, deduplicates, and sorting."""
+    _identifiers = (str(identifier).strip() for identifier in identifiers if identifier)
+    return sorted({i for i in _identifiers if i})
 
 
 @ratelimit.limits(calls=3, period=1)
@@ -150,63 +151,83 @@ def get_citations_by_pmids(
     group_size: Optional[int] = None,
     offline: bool = False,
 ) -> Tuple[Dict[str, Dict], Set[str]]:
+    return _get_citations_by_identifiers(
+        manager=manager, identifiers=pmids, group_size=group_size, offline=offline, prefix='pubmed',
+    )
+
+
+def _get_citations_by_identifiers(
+    manager,
+    identifiers: Iterable[Union[str, int]],
+    *,
+    group_size: Optional[int] = None,
+    offline: bool = False,
+    prefix: Optional[str] = None,
+) -> Tuple[Dict[str, Dict], Set[str]]:
     """Get citation information for the given list of PubMed identifiers using the NCBI's eUtils service.
 
     :type manager: pybel.Manager
-    :param pmids: an iterable of PubMed identifiers
+    :param identifiers: an iterable of PubMed identifiers
     :param group_size: The number of PubMed identifiers to query at a time. Defaults to 200 identifiers.
-    :return: A dictionary of {pmid: pmid data dictionary} or a pair of this dictionary and a set ot erroneous
-            pmids if return_errors is :data:`True`
+    :return: A dictionary of {identifier: data dictionary} or a pair of this dictionary and a set ot erroneous
+             identifiers.
     """
+    if prefix is None:
+        prefix = 'pubmed'
+
+    helper = _HELPERS.get(prefix)
+    if helper is None:
+        raise ValueError(f'can not work on prefix: {prefix}')
+
     group_size = group_size if group_size is not None else 200
 
-    pmids = clean_pubmed_identifiers(pmids)
-    logger.info('ensuring %d PubMed identifiers', len(pmids))
+    identifiers = clean_pubmed_identifiers(identifiers)
+    logger.info('ensuring %d %s identifiers', len(identifiers), prefix)
 
-    enriched_pmids = {}
-    unenriched_pmids = {}
+    enriched_models = {}
+    unenriched_models = {}
 
-    pmid_to_model = {
+    id_to_model = {
         citation_model.db_id: citation_model
-        for citation_model in _get_citation_models(pmids, prefix='pubmed', manager=manager)
+        for citation_model in _get_citation_models(identifiers, prefix=prefix, manager=manager)
     }
-    logger.info('%d of %d are already cached', len(pmid_to_model), len(pmids))
-    for pmid in tqdm(pmids, desc='creating database models'):
-        citation = pmid_to_model.get(pmid)
-        if citation is None:
-            citation = pmid_to_model[pmid] = manager.get_or_create_citation(identifier=pmid)
-        if citation.is_enriched:
-            enriched_pmids[pmid] = citation.to_json()
+    logger.info('%d of %d are already cached', len(id_to_model), len(identifiers))
+    for identifier in tqdm(identifiers, desc='creating database models'):
+        model = id_to_model.get(identifier)
+        if model is None:
+            model = id_to_model[identifier] = manager.get_or_create_citation(identifier=identifier, namespace=prefix)
+        if model.is_enriched:
+            enriched_models[identifier] = model.to_json()
         else:
-            unenriched_pmids[pmid] = citation
+            unenriched_models[identifier] = model
 
-    logger.info('%d of %d are already enriched', len(enriched_pmids), len(pmids))
+    logger.info('%d of %d are already enriched', len(enriched_models), len(identifiers))
     manager.session.commit()
 
     errors = set()
-    if not unenriched_pmids or offline:
-        return enriched_pmids, errors
+    if not unenriched_models or offline:
+        return enriched_models, errors
 
-    it = tqdm(unenriched_pmids, desc=f'getting PubMed data in chunks of {group_size}')
-    for pmid_list in chunked(it, n=group_size):
-        _help_enrich_pmids(
-            pmid_list,
+    it = tqdm(unenriched_models, desc=f'getting {prefix} data in chunks of {group_size}')
+    for identifier_chunk in chunked(it, n=group_size):
+        helper(
+            identifier_chunk,
             manager=manager,
-            enriched_pmids=enriched_pmids,
-            unenriched_pmids=unenriched_pmids,
+            enriched_models=enriched_models,
+            unenriched_models=unenriched_models,
             errors=errors,
         )
 
-    return enriched_pmids, errors
+    return enriched_models, errors
 
 
-def _help_enrich_pmids(pmid_list, *, manager, unenriched_pmids, enriched_pmids, errors):
-    response = get_pubmed_citation_response(pmid_list)
+def _help_enrich_pmids(identifiers: Iterable[str], *, manager, unenriched_models, enriched_models, errors):
+    response = get_pubmed_citation_response(identifiers)
     response_pmids = response['result']['uids']
 
     for pmid in response_pmids:
         p = response['result'][pmid]
-        citation = unenriched_pmids.get(pmid)
+        citation = unenriched_models.get(pmid)
         if citation is None:
             tqdm.write(f'problem looking up pubmed:{pmid}')
             continue
@@ -218,10 +239,20 @@ def _help_enrich_pmids(pmid_list, *, manager, unenriched_pmids, enriched_pmids, 
             errors.add(pmid)
             continue
 
-        enriched_pmids[pmid] = citation.to_json()
+        enriched_models[pmid] = citation.to_json()
         manager.session.add(citation)
 
     manager.session.commit()  # commit in groups
+
+
+def _help_enrich_pmc_identifiers(identifiers: Iterable[str], *, manager, unenriched_models, enriched_models, errors):
+    raise NotImplementedError
+
+
+_HELPERS = {
+    'pubmed': _help_enrich_pmids,
+    'pmc': _help_enrich_pmc_identifiers,
+}
 
 
 def _get_citation_models(identifiers: Iterable[str], *, prefix: str, manager, chunksize: int = 200):
@@ -241,25 +272,52 @@ def enrich_pubmed_citations(
 ) -> Set[str]:
     """Overwrite all PubMed citations with values from NCBI's eUtils lookup service.
 
-    Sets authors as list, so probably a good idea to run :func:`pybel_tools.mutation.serialize_authors` before
-    exporting.
-
     :type manager: pybel.manager.Manager
     :type graph: pybel.BELGraph
     :param group_size: The number of PubMed identifiers to query at a time. Defaults to 200 identifiers.
+    :param offline: An override for when you don't want to hit the eUtils
     :return: A set of PMIDs for which the eUtils service crashed
     """
-    pmids = {x for x in get_pubmed_identifiers(graph) if x}
-    pmid_data, errors = get_citations_by_pmids(manager, pmids=pmids, group_size=group_size, offline=offline)
+    return _enrich_citations(
+        manager=manager, graph=graph, group_size=group_size, offline=offline, prefix='pubmed',
+    )
 
-    for u, v, k in filter_edges(graph, has_pubmed):
-        pmid = graph[u][v][k][CITATION].identifier
 
-        if pmid not in pmid_data:
-            logger.warning('Missing data for PubMed identifier: %s', pmid)
-            errors.add(pmid)
+def _enrich_citations(
+    manager,
+    graph,
+    group_size: Optional[int] = None,
+    offline: bool = False,
+    prefix: Optional[str] = None,
+) -> Set[str]:
+    """Overwrite all citations of the given prefix using the predefined lookup functions.
+
+    :type manager: pybel.manager.Manager
+    :type graph: pybel.BELGraph
+    :param group_size: The number of identifiers to query at a time. Defaults to 200 identifiers.
+    :return: A set of identifiers for which lookup was not possible
+    """
+    if prefix is None:
+        prefix = 'pubmed'
+
+    identifiers = {identifier for identifier in get_citation_identifiers(graph, prefix) if identifier}
+    identifier_map, errors = _get_citations_by_identifiers(
+        manager,
+        identifiers=identifiers,
+        group_size=group_size,
+        offline=offline,
+        prefix=prefix,
+    )
+
+    for u, v, k in filter_edges(graph, CITATION_PREDIACATES[prefix]):
+        identifier = graph[u][v][k][CITATION].identifier
+
+        identifier_data = identifier_map.get(identifier)
+        if identifier_data is None:
+            logger.warning('Missing data for %s:%s', prefix, identifier)
+            errors.add(identifier)
             continue
 
-        graph[u][v][k][CITATION].update(pmid_data[pmid])
+        graph[u][v][k][CITATION].update(identifier_data)
 
     return errors
