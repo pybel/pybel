@@ -206,7 +206,7 @@ def get_citations_by_pmids(
             p = response['result'][pmid]
             citation = unenriched_pmids.get(pmid)
             if citation is None:
-                logger.warning('problem looking up pmid:%s', pmid)
+                it.write(f'problem looking up pubmed:{pmid}')
                 continue
 
             successful_enrichment = enrich_citation_model(manager, citation, p)
