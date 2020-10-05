@@ -167,18 +167,9 @@ def get_citations_by_pmids(
     enriched_pmids = {}
     unenriched_pmids = {}
 
-    citation_models = []
-    for pmid_chunk in chunked(pmids, 200):
-        citation_filter = and_(
-            models.Citation.db == 'pubmed',
-            models.Citation.db_id.in_(pmid_chunk),
-        )
-        citation_model_chunk = manager.session.query(models.Citation).filter(citation_filter).all()
-        citation_models.extend(citation_model_chunk)
-
     pmid_to_model = {
         citation_model.db_id: citation_model
-        for citation_model in citation_models
+        for citation_model in _get_citation_models(pmids, prefix='pubmed', manager=manager)
     }
     logger.info('%d of %d are already cached', len(pmid_to_model), len(pmids))
     for pmid in tqdm(pmids, desc='creating database models'):
@@ -222,6 +213,15 @@ def get_citations_by_pmids(
         manager.session.commit()  # commit in groups
 
     return enriched_pmids, errors
+
+
+def _get_citation_models(identifiers: Iterable[str], *, prefix: str, manager, chunksize: int = 200):
+    for identifiers_chunk in chunked(identifiers, chunksize):
+        citation_filter = and_(
+            models.Citation.db == prefix,
+            models.Citation.db_id.in_(identifiers_chunk),
+        )
+        yield from manager.session.query(models.Citation).filter(citation_filter).all()
 
 
 def enrich_pubmed_citations(
