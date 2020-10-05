@@ -36,7 +36,8 @@ def to_neo4j(graph: BELGraph, neo_connection=None, use_tqdm: bool = True, period
     import py2neo
 
     if neo_connection is None:
-        neo_connection = 'bolt://localhost:7687'
+        # neo_connection = 'neo4j://localhost:7687'
+        neo_connection = py2neo.Graph(user='neo4j', password='neo4j')
     if isinstance(neo_connection, str):
         neo_connection = py2neo.Graph(neo_connection)
 

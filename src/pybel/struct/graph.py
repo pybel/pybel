@@ -8,7 +8,7 @@ from collections import Counter, defaultdict
 from copy import deepcopy
 from functools import partialmethod
 from itertools import chain
-from typing import Any, Dict, Hashable, Iterable, List, Mapping, Optional, Set, TextIO, Tuple, Union
+from typing import Any, Collection, Dict, Hashable, Iterable, List, Mapping, Optional, Set, TextIO, Tuple, Union
 
 import networkx as nx
 from tabulate import tabulate
@@ -342,6 +342,12 @@ class BELGraph(nx.MultiDiGraph):
                   section of the source BEL document.
         """
         return self.graph[GRAPH_ANNOTATION_PATTERN]
+
+    def add_wildcard_annotations(self, prefixes: Union[str, Collection[str]]) -> None:
+        if isinstance(prefixes, str):
+            prefixes = [prefixes]
+        for prefix in prefixes:
+            self.annotation_pattern[prefix] = '.*'
 
     @property
     def annotation_list(self) -> Dict[str, Set[str]]:  # noqa: D401

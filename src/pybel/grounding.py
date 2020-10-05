@@ -85,14 +85,14 @@ SYNONYM_TO_KEY = get_namespace_synonyms()
 
 # TODO will get updated
 #: A mapping of (prefix, name) pairs to (prefix, identifier, name) triples
-_NAME_REMAPPING = get_remapping()
+_NAME_REMAPPING = ...
 
 #: A mapping of (prefix, identifier) pairs to (prefix, identifier, name) triples
 _ID_REMAPPING = {}
 
 
 def _get_name_remapping(prefix: str, name: str) -> Union[Tuple[str, str, str], Tuple[None, None, None]]:
-    return _NAME_REMAPPING.get((prefix, name), (None, None, None))
+    return get_remapping().get((prefix, name), (None, None, None))
 
 
 def _get_id_remapping(prefix: str, identifier: str) -> Union[Tuple[str, str, str], Tuple[None, None, None]]:
