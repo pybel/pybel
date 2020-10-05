@@ -4,7 +4,7 @@
 
 import logging
 import re
-from datetime import datetime, date
+from datetime import date, datetime
 from functools import lru_cache
 from typing import Dict, Iterable, List, Optional, Set, Tuple, Union
 
