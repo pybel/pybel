@@ -4,7 +4,6 @@
 
 import logging
 import re
-import time
 from datetime import datetime
 from typing import Dict, Iterable, List, Optional, Set, Tuple, Union
 
@@ -167,14 +166,9 @@ def get_citations_by_pmids(
     enriched_pmids = {}
     unenriched_pmids = {}
 
-    citation_filter = and_(
-        models.Citation.db == 'pubmed',
-        models.Citation.db_id.in_(pmids),
-    )
-    citation_models = manager.session.query(models.Citation).filter(citation_filter).all()
     pmid_to_model = {
         citation_model.db_id: citation_model
-        for citation_model in citation_models
+        for citation_model in _get_citation_models(pmids, prefix='pubmed', manager=manager)
     }
     logger.info('%d of %d are already cached', len(pmid_to_model), len(pmids))
     for pmid in tqdm(pmids, desc='creating database models'):
@@ -195,26 +189,48 @@ def get_citations_by_pmids(
 
     it = tqdm(unenriched_pmids, desc=f'getting PubMed data in chunks of {group_size}')
     for pmid_list in chunked(it, n=group_size):
-        response = get_pubmed_citation_response(pmid_list)
-        response_pmids = response['result']['uids']
-
-        for pmid in response_pmids:
-            p = response['result'][pmid]
-            citation = unenriched_pmids[pmid]
-
-            successful_enrichment = enrich_citation_model(manager, citation, p)
-
-            if not successful_enrichment:
-                it.write(f"Error downloading PubMed identifier: {pmid}")
-                errors.add(pmid)
-                continue
-
-            enriched_pmids[pmid] = citation.to_json()
-            manager.session.add(citation)
-
-        manager.session.commit()  # commit in groups
+        _help_enrich_pmids(
+            pmid_list,
+            manager=manager,
+            enriched_pmids=enriched_pmids,
+            unenriched_pmids=unenriched_pmids,
+            errors=errors,
+        )
 
     return enriched_pmids, errors
+
+
+def _help_enrich_pmids(pmid_list, *, manager, unenriched_pmids, enriched_pmids, errors):
+    response = get_pubmed_citation_response(pmid_list)
+    response_pmids = response['result']['uids']
+
+    for pmid in response_pmids:
+        p = response['result'][pmid]
+        citation = unenriched_pmids.get(pmid)
+        if citation is None:
+            tqdm.write(f'problem looking up pubmed:{pmid}')
+            continue
+
+        successful_enrichment = enrich_citation_model(manager, citation, p)
+
+        if not successful_enrichment:
+            tqdm.write(f"Error downloading PubMed identifier: {pmid}")
+            errors.add(pmid)
+            continue
+
+        enriched_pmids[pmid] = citation.to_json()
+        manager.session.add(citation)
+
+    manager.session.commit()  # commit in groups
+
+
+def _get_citation_models(identifiers: Iterable[str], *, prefix: str, manager, chunksize: int = 200):
+    for identifiers_chunk in chunked(identifiers, chunksize):
+        citation_filter = and_(
+            models.Citation.db == prefix,
+            models.Citation.db_id.in_(identifiers_chunk),
+        )
+        yield from manager.session.query(models.Citation).filter(citation_filter).all()
 
 
 def enrich_pubmed_citations(
