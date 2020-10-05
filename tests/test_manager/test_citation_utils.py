@@ -29,6 +29,7 @@ from pybel.constants import (
     CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_JOURNAL, CITATION_TYPE_PUBMED,
 )
 from pybel.dsl import Protein
+from pybel.language import CitationDict
 from pybel.manager.citation_utils import (
     _enrich_citations, enrich_pubmed_citations, get_citations_by_pmids, sanitize_date,
 )
@@ -154,6 +155,7 @@ class TestPubmed(TemporaryCacheMixin):
 
         _, _, d = list(self.graph.edges(data=True))[0]
         citation_dict = d[CITATION]
+        self.assertIsInstance(citation_dict, CitationDict)
 
         self.assertIn(CITATION_JOURNAL, citation_dict)
         self.assertIn(CITATION_DATE, citation_dict)
@@ -171,6 +173,7 @@ class TestPubmed(TemporaryCacheMixin):
 
         _, _, d = list(self.graph.edges(data=True))[0]
         citation_dict = d[CITATION]
+        self.assertIsInstance(citation_dict, CitationDict)
 
         self.assertIn(CITATION_JOURNAL, citation_dict)
 
@@ -223,9 +226,13 @@ class TestPMC(TemporaryCacheMixin):
 
     def test_enrich_pmc(self):
         # FIXME needs mock
-        _enrich_citations(manager=self.manager, graph=self.graph, prefix='pmc')
+        errors = _enrich_citations(manager=self.manager, graph=self.graph, prefix='pmc')
+        self.assertEqual(0, len(errors))
         _, _, d = list(self.graph.edges(data=True))[0]
         citation_dict = d[CITATION]
+        self.assertIsInstance(citation_dict, CitationDict)
+        self.assertEqual('pmc', citation_dict.namespace)
+        self.assertEqual(self.citation_identifier, citation_dict.identifier)
 
         self.assertIn(CITATION_JOURNAL, citation_dict)
 
