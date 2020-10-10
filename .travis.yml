@@ -2,6 +2,10 @@ cache: pip
 dist: xenial
 os: linux
 
+services:
+  - mysql
+  - postgresql
+
 language: python
 python: '3.8'
 
@@ -36,16 +40,14 @@ jobs:
     - stage: test
       name: "Tests with MySQL"
       env: TOXENV=py DB=mysql PYBEL_TEST_CONNECTOR=mysqlclient PYBEL_TEST_CONNECTION=mysql+mysqldb://travis@localhost/test?charset=utf8
-      services: mysql
     - name: "Tests with PostgreSQL"
       env: TOXENV=py DB=postgresql PYBEL_TEST_CONNECTOR=psycopg2-binary PYBEL_TEST_CONNECTION=postgresql+psycopg2://travis@localhost/tests
-      services: postgresql
     - name: "Tests with SQLite"
       env: TOXENV=py DB=sqlite
     - name: "Tests with SQLite / legacy Python (3.6)"
       python: 3.6
       env: TOXENV=py DB=sqlite
-    - name: "Tests with SQLite / preview Python (3.9)"
+    - name: "Tests with SQLite / preview Python (3.9-dev)"
       python: 3.9-dev
       env: TOXENV=py DB=sqlite
 
