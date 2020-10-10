@@ -17,7 +17,7 @@ from ..constants import (
     CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR, CITATION_JOURNAL, CITATION_LAST_AUTHOR, CITATION_PAGES, CITATION_VOLUME, EVIDENCE, IDENTIFIER, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAME, NAMESPACE,
 )
 from ..io.gpickle import from_bytes_gz, to_bytes_gz
-from ..language import Entity
+from ..language import CitationDict, Entity
 from ..struct.graph import BELGraph
 from ..tokens import parse_result_to_dsl
 
@@ -386,6 +386,9 @@ class Author(Base):
     def __str__(self):
         return self.name
 
+    def __repr__(self):
+        return f'Author(name="{self.name}")'
+
 
 class Citation(Base):
     """The information about the citations that are used to prove a specific relation are stored in this table."""
@@ -436,7 +439,11 @@ class Citation(Base):
         :param bool include_id: If true, includes the model identifier
         :return: Citation dictionary for the recreation of a :class:`BELGraph`.
         """
-        result = Entity(namespace=self.db, identifier=self.db_id)
+        result = CitationDict(
+            namespace=self.db,
+            identifier=self.db_id,
+            name=self.title,
+        )
 
         if include_id:
             result['id'] = self.id
