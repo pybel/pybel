@@ -38,9 +38,14 @@ from pybel.testing.cases import TemporaryCacheMixin
 from pybel.testing.utils import n
 
 HERE = os.path.abspath(os.path.dirname(__file__))
-DATA_PATH = os.path.join(HERE, 'citation_data.json')
-with open(DATA_PATH) as _file:
-    DATA = json.load(_file)
+
+PUBMED_DATA_PATH = os.path.join(HERE, 'pubmed_citation_data.json')
+with open(PUBMED_DATA_PATH) as _file:
+    PUBMED_DATA = json.load(_file)
+
+PMC_DATA_PATH = os.path.join(HERE, 'pmc_citation_data.json')
+with open(PMC_DATA_PATH) as _file:
+    PMC_DATA = json.load(_file)
 
 
 def _mock_fn(pubmed_identifiers: Iterable[str]) -> Mapping[str, Any]:
@@ -48,13 +53,23 @@ def _mock_fn(pubmed_identifiers: Iterable[str]) -> Mapping[str, Any]:
         'uids': pubmed_identifiers,
     }
     for pmid in pubmed_identifiers:
-        result[pmid] = DATA['result'][pmid]
+        result[pmid] = PUBMED_DATA['result'][pmid]
     return {'result': result}
 
 
 mock_get_pubmed_citation_response = mock.patch(
     'pybel.manager.citation_utils.get_pubmed_citation_response',
     side_effect=_mock_fn,
+)
+
+
+def _mock_get_pmc_csl_item(pmc_id: str) -> Mapping[str, Any]:
+    return PMC_DATA[pmc_id]
+
+
+mock_get_pmc_csl_item = mock.patch(
+    'pybel.manager.citation_utils.get_pmc_csl_item',
+    side_effect=_mock_get_pmc_csl_item,
 )
 
 
@@ -224,10 +239,10 @@ class TestPMC(TemporaryCacheMixin):
         self.graph = BELGraph()
         self.graph.add_increases(self.u, self.v, citation=('pmc', self.citation_identifier), evidence=n())
 
-    def test_enrich_pmc(self):
-        # FIXME needs mock
+    @mock_get_pmc_csl_item
+    def test_enrich_pmc(self, *_):
         errors = _enrich_citations(manager=self.manager, graph=self.graph, prefix='pmc')
-        self.assertEqual(0, len(errors))
+        self.assertEqual(0, len(errors), msg=f'Got errors: {errors}')
         _, _, d = list(self.graph.edges(data=True))[0]
         citation_dict = d[CITATION]
         self.assertIsInstance(citation_dict, CitationDict)
@@ -235,6 +250,7 @@ class TestPMC(TemporaryCacheMixin):
         self.assertEqual(self.citation_identifier, citation_dict.identifier)
 
         self.assertIn(CITATION_JOURNAL, citation_dict)
+        self.assertEqual('PLoS computational biology', citation_dict[CITATION_JOURNAL])
 
         self.assertIn(CITATION_DATE, citation_dict)
         self.assertEqual('2019-06-24', citation_dict[CITATION_DATE])

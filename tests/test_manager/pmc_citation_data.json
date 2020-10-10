@@ -1,0 +1,67 @@
+{
+  "PMC6611653": {
+    "source": "PubMed",
+    "accessed": {
+      "date-parts": [
+        [
+          2020,
+          10,
+          9
+        ]
+      ]
+    },
+    "id": "pmid:31233491",
+    "title": "Open collaborative writing with Manubot",
+    "author": [
+      {
+        "family": "Himmelstein",
+        "given": "Daniel S"
+      },
+      {
+        "family": "Rubinetti",
+        "given": "Vincent"
+      },
+      {
+        "family": "Slochower",
+        "given": "David R"
+      },
+      {
+        "family": "Hu",
+        "given": "Dongbo"
+      },
+      {
+        "family": "Malladi",
+        "given": "Venkat S"
+      },
+      {
+        "family": "Greene",
+        "given": "Casey S"
+      },
+      {
+        "family": "Gitter",
+        "given": "Anthony"
+      }
+    ],
+    "container-title-short": "PLoS Comput Biol",
+    "container-title": "PLoS computational biology",
+    "publisher": "Public Library of Science",
+    "ISSN": "1553-734X",
+    "issued": {
+      "date-parts": [
+        [
+          2019,
+          6,
+          24
+        ]
+      ]
+    },
+    "page": "e1007128",
+    "volume": "15",
+    "issue": "6",
+    "PMID": "31233491",
+    "PMCID": "PMC6611653",
+    "DOI": "10.1371/journal.pcbi.1007128",
+    "type": "article-journal",
+    "URL": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6611653/"
+  }
+}

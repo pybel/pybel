@@ -357,12 +357,12 @@ def enrich_citation_model_from_pmc(manager, citation, csl) -> bool:
     :param Citation citation: A citation model
     :param dict csl: The dictionary from PMC
     """
-    citation.title = csl['title']
-    citation.journal = csl['container-title']
+    citation.title = csl.get('title')
+    citation.journal = csl.get('container-title')
     citation.volume = csl.get('volume')
     # citation.issue = csl['issue']
-    citation.pages = csl['page']
-    citation.article_type = csl['type']
+    citation.pages = csl.get('page')
+    citation.article_type = csl.get('type')
 
     for author in csl.get('author', []):
         try:
@@ -378,14 +378,16 @@ def enrich_citation_model_from_pmc(manager, citation, csl) -> bool:
         citation.first = citation.authors[0]
         citation.last = citation.authors[-1]
 
-    date_parts = csl['issued']['date-parts'][0]
-    if len(date_parts) == 3:
-        citation.date = date(year=date_parts[0], month=date_parts[1], day=date_parts[2])
-    elif len(date_parts) == 2:
-        citation.date = date(year=date_parts[0], month=date_parts[1], day=1)
-    elif len(date_parts) == 1:
-        citation.date = date(year=date_parts[0], month=1, day=1)
-    else:
-        logger.warning('not sure about date parts: %s', date_parts)
+    issued = csl.get('issued')
+    if issued is not None:
+        date_parts = issued['date-parts'][0]
+        if len(date_parts) == 3:
+            citation.date = date(year=date_parts[0], month=date_parts[1], day=date_parts[2])
+        elif len(date_parts) == 2:
+            citation.date = date(year=date_parts[0], month=date_parts[1], day=1)
+        elif len(date_parts) == 1:
+            citation.date = date(year=date_parts[0], month=1, day=1)
+        else:
+            logger.warning('not sure about date parts: %s', date_parts)
 
     return True
