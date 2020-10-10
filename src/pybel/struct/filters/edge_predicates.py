@@ -9,7 +9,7 @@ from .typing import EdgePredicate
 from .utils import part_has_modifier
 from ..graph import BELGraph
 from ...constants import (
-    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSAL_RELATIONS, CITATION, CITATION_AUTHORS, CITATION_TYPE_PUBMED, DEGRADATION,
+    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSAL_RELATIONS, CITATION, CITATION_AUTHORS, DEGRADATION,
     DIRECT_CAUSAL_RELATIONS, EVIDENCE, NAMESPACE, POLAR_RELATIONS, RELATION, SOURCE_MODIFIER, TARGET_MODIFIER,
     TRANSLOCATION,
 )
@@ -22,6 +22,7 @@ __all__ = [
     'false_edge_predicate',
     'has_provenance',
     'has_pubmed',
+    'has_pmc',
     'has_authors',
     'is_causal_relation',
     'not_causal_relation',
@@ -77,7 +78,19 @@ def has_provenance(edge_data: EdgeData) -> bool:
 @edge_predicate
 def has_pubmed(edge_data: EdgeData) -> bool:
     """Check if the edge has a PubMed citation."""
-    return CITATION in edge_data and edge_data[CITATION][NAMESPACE].lower() in {'pubmed', 'pmid'}
+    return CITATION in edge_data and edge_data[CITATION][NAMESPACE].lower() in ('pubmed', 'pmid')
+
+
+@edge_predicate
+def has_pmc(edge_data: EdgeData) -> bool:
+    """Check if the edge has a PMC citation."""
+    return CITATION in edge_data and edge_data[CITATION][NAMESPACE].lower() in ('pmc', 'pmcid')
+
+
+CITATION_PREDIACATES = {
+    'pubmed': has_pubmed,
+    'pmc': has_pmc,
+}
 
 
 @edge_predicate
