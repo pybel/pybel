@@ -13,7 +13,7 @@ python: '3.8'
 jobs:
   allow_failures:
     - env: TOXENV=mypy
-    - python: 3.9-dev
+    - python: 3.9
       env: TOXENV=py DB=sqlite
   include:
     # lint stage
@@ -48,7 +48,7 @@ jobs:
       python: 3.6
       env: TOXENV=py DB=sqlite
     - name: "Tests with SQLite / preview Python (3.9-dev)"
-      python: 3.9-dev
+      python: 3.9
       env: TOXENV=py DB=sqlite
 
 install:
