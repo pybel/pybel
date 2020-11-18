@@ -5,8 +5,8 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-`Unreleased <https://github.com/pybel/pybel/compare/v0.14.10...HEAD>`_
-----------------------------------------------------------------------
+`0.15.0 <https://github.com/pybel/pybel/compare/v0.14.10...0.15.0>`_
+--------------------------------------------------------------------
 Added
 ~~~~~
 - Support for homomultimers in ML triples export
@@ -37,10 +37,14 @@ Changed
 - Improve namespace/annotation database insertion with Pandas (https://github.com/pybel/pybel/pull/454)
 - Pickling now uses protocol 5 by default assisted by the ``pickle5`` backport on Python 3.6 (https://github.com/pybel/pybel/commit/679dcab7)
 - Database now stores graphs in gzipped pickles (https://github.com/pybel/pybel/commit/9ee9bf21)
+- Unspecified molecular activities now use the top-level GO term (https://github.com/pybel/pybel/commit/d56993e6)
+- New annotation storage format using lists of annotations instead of dictionaries (https://github.com/pybel/pybel/pull/461)
+- Citations now wrapped in dedicated data structure (https://github.com/pybel/pybel/pull/468)
 
 Fixed
 ~~~~~
 - Parser now correctly supports dashes and dots in namespaces as well as in names without quoting (https://github.com/pybel/pybel/pull/460)
+- Bug in creating list abundances with name and list definition (https://github.com/pybel/pybel/pull/465)
 
 `0.14.10 <https://github.com/pybel/pybel/compare/v0.14.9...v0.14.10>`_ - 2020-06-15
 -----------------------------------------------------------------------------------
