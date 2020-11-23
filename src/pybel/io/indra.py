@@ -172,10 +172,12 @@ def to_indra_statements_json_file(graph, path: Union[str, TextIO], indent: Optio
     json.dump(to_indra_statements_json(graph), path, indent=indent, **kwargs)
 
 
-def from_biopax(path: str, **kwargs):
+def from_biopax(path: str, encoding: Optional[str] = None, **kwargs):
     """Import a model encoded in Pathway Commons `BioPAX <http://www.biopax.org/>`_ via :mod:`indra`.
 
     :param path: Path to a BioPAX OWL file
+    :param encoding: The encoding passed to :func:`indra.sources.biopax.process_owl`.
+        See https://github.com/sorgerlab/indra/pull/1199.
     :rtype: pybel.BELGraph
 
     Other kwargs are passed to :func:`from_indra_statements`.
@@ -184,5 +186,5 @@ def from_biopax(path: str, **kwargs):
     """
     from indra.sources.biopax import process_owl
 
-    model = process_owl(path)
+    model = process_owl(path, encoding=encoding)
     return from_indra_statements(stmts=model.statements, **kwargs)
