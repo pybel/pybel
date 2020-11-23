@@ -1,4 +1,4 @@
-name: Tests
+name: Documentation
 
 on: [ push ]
 
@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ 3.6, 3.7, 3.8, 3.9 ]
+        python-version: [ 3.6, 3.9 ]
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
@@ -16,6 +16,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: pip install tox
-      - name: Test with pytest
-        run:
-          tox -e py
+      - name: Check RST conformity with doc8
+        run: tox -e doc8
+      - name: Check README.rst
+        run: tox -e doc8
+      - name: Check documentation build with Sphinx
+        run: tox -e docs
