@@ -1,5 +1,5 @@
-PyBEL |zenodo| |build| |windows_build| |coverage| |documentation|
-=================================================================
+PyBEL |zenodo| |build| |coverage| |documentation|
+=================================================
 `PyBEL <http://pybel.readthedocs.io>`_ is a pure Python package for parsing and handling biological networks encoded in
 the `Biological Expression Language <https://biological-expression-language.github.io/>`_
 (BEL).
@@ -226,32 +226,28 @@ involved.
 
 Acknowledgements
 ----------------
-Funding
+Support
 ~~~~~~~
-The development of PyBEL has been funded by several projects/organizations:
+The development of PyBEL has been supported by several projects/organizations (in alphabetical order):
 
-- `Enveda Therapeutics <https://envedatherapeutics.com/>`_
-- `University of Bonn <https://www.uni-bonn.de>`_
-- `Fraunhofer Center for Machine Learning <https://www.cit.fraunhofer.de/de/zentren/maschinelles-lernen.html>`_
 - `The Cytoscape Consortium <https://cytoscape.org/>`_
+- `Enveda Biosciences <https://envedabio.com/>`_
 - The `European Union <https://europa.eu>`_, `European Federation of Pharmaceutical Industries and Associations
   (EFPIA) <https://www.efpia.eu/>`_, and `Innovative Medicines Initiative <https://www.imi.europa.eu>`_ Joint
   Undertaking under `AETIONOMY <https://www.aetionomy.eu/>`_ [grant number 115568], resources of which
   are composed of financial contribution from the European Union's Seventh Framework Programme (FP7/2007-2013) and
   EFPIA companies in kind contribution.
+- `Fraunhofer Center for Machine Learning <https://www.cit.fraunhofer.de/de/zentren/maschinelles-lernen.html>`_
 - `Fraunhofer Institute for Algorithms and Scientific Computing (SCAI) <https://www.scai.fraunhofer.de>`_
+- `University of Bonn <https://www.uni-bonn.de>`_
 
 Logo
 ~~~~
 The PyBEL `logo <https://github.com/pybel/pybel-art>`_ was designed by `Scott Colby <https://github.com/scolby33>`_.
 
-.. |build| image:: https://travis-ci.com/pybel/pybel.svg?branch=develop
-    :target: https://travis-ci.com/pybel/pybel
-    :alt: Development Build Status
-
-.. |windows_build| image:: https://ci.appveyor.com/api/projects/status/v22l3ymg3bdq525d/branch/develop?svg=true
-    :target: https://ci.appveyor.com/project/cthoyt/pybel
-    :alt: Development Windows Build Status
+.. |build| image:: https://github.com/pybel/pybel/workflows/Tests/badge.svg
+    :target: https://github.com/pybel/pybel/actions
+    :alt: Build Status
 
 .. |coverage| image:: https://codecov.io/gh/pybel/pybel/coverage.svg?branch=develop
     :target: https://codecov.io/gh/pybel/pybel/branch/develop
