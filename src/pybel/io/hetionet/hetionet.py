@@ -5,17 +5,15 @@
 import bz2
 import json
 import logging
-import os
 from typing import Any, Mapping, Set, Tuple, Union
-from urllib.request import urlretrieve
 
+import pystow
 from tqdm import tqdm
 
 from .constants import (
     ACTIVATES_ACTIONS, BINDS_ACTIONS, COMPOUND, DSL_MAP, GENE, HETIONET_PUBMED, INHIBITS_ACTIONS, PHARMACOLOGICAL_CLASS,
     QUALIFIED_MAPPING, REGULATES_ACTIONS, UNQUALIFIED_MAPPING,
 )
-from ...config import CACHE_DIRECTORY
 from ...dsl import Abundance, Protein
 from ...struct import BELGraph
 
@@ -29,15 +27,12 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 JSON_BZ2_URL = 'https://github.com/hetio/hetionet/raw/master/hetnet/json/hetionet-v1.0.json.bz2'
-PATH = os.path.join(CACHE_DIRECTORY, 'hetionet-v1.0.json.bz2')
 
 
 def get_hetionet() -> BELGraph:
     """Get Hetionet from GitHub, cache, and convert to BEL."""
-    if not os.path.exists(PATH):
-        logger.warning('downloading hetionet from %s to %s', JSON_BZ2_URL, PATH)
-        urlretrieve(JSON_BZ2_URL, PATH)  # noqa: S310
-    return from_hetionet_gz(PATH)
+    path = pystow.ensure('bio2bel', 'hetionet', url=JSON_BZ2_URL)
+    return from_hetionet_gz(path.as_posix())
 
 
 def from_hetionet_gz(path: str) -> BELGraph:
