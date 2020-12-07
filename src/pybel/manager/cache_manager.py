@@ -979,7 +979,7 @@ class Manager(_Manager):
 
         :param connection: An RFC-1738 database connection string. If ``None``, tries to load from the
          environment variable ``PYBEL_CONNECTION`` then from the config file ``~/.config/pybel/config.json`` whose
-         value for ``PYBEL_CONNECTION`` defaults to :data:`pybel.constants.DEFAULT_CACHE_LOCATION`.
+         value for ``PYBEL_CONNECTION`` defaults to :data:`pybel.constants.DEFAULT_CACHE_CONNECTION`.
         :param engine: Optional engine to use. Must be specified with a session and no connection.
         :param session: Optional session to use. Must be specified with an engine and no connection.
         :param bool echo: Turn on echoing sql

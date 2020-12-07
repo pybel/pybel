@@ -6,13 +6,15 @@ import configparser
 import logging
 import os
 
+import pystow
+
 from .version import VERSION
 
 __all__ = [
     'config',
     'connection',
     'PYBEL_MINIMUM_IMPORT_VERSION',
-    'CACHE_DIRECTORY',
+    'PYBEL_HOME',
 ]
 
 logger = logging.getLogger(__name__)
@@ -22,13 +24,9 @@ PYBEL_MINIMUM_IMPORT_VERSION = 0, 14, 0
 
 config = {}
 
-PYBEL_CACHE_DIRECTORY = 'PYBEL_CACHE_DIRECTORY'
-DEFAULT_CACHE_DIRECTORY = os.path.join(os.path.expanduser('~'), '.pybel')
-#: The default directory where PyBEL files, including logs and the  default cache, are stored. Created if not exists.
-CACHE_DIRECTORY = os.environ.get(PYBEL_CACHE_DIRECTORY, DEFAULT_CACHE_DIRECTORY)
-
+PYBEL_HOME = pystow.get('pybel')
 DEFAULT_CACHE_NAME = 'pybel_{}.{}.{}_cache.db'.format(*PYBEL_MINIMUM_IMPORT_VERSION)
-DEFAULT_CACHE_PATH = os.path.join(CACHE_DIRECTORY, DEFAULT_CACHE_NAME)
+DEFAULT_CACHE_PATH = os.path.join(PYBEL_HOME, DEFAULT_CACHE_NAME)
 #: The default cache connection string uses sqlite.
 DEFAULT_CACHE_CONNECTION = 'sqlite:///' + DEFAULT_CACHE_PATH
 
@@ -39,9 +37,9 @@ CONFIG_FILE_PATHS = [
     os.path.join(_CONFIG_DIRECTORY, 'pybel', 'pybel.ini'),
     os.path.join(_CONFIG_DIRECTORY, 'pybel', 'pybel.cfg'),
     os.path.join(_CONFIG_DIRECTORY, 'pybel', 'config.ini'),
-    os.path.join(PYBEL_CACHE_DIRECTORY, 'config.ini'),
-    os.path.join(PYBEL_CACHE_DIRECTORY, 'pybel.ini'),
-    os.path.join(PYBEL_CACHE_DIRECTORY, 'pybel.ini'),
+    os.path.join(PYBEL_HOME, 'config.ini'),
+    os.path.join(PYBEL_HOME, 'pybel.ini'),
+    os.path.join(PYBEL_HOME, 'pybel.ini'),
 ]
 config_parser = configparser.ConfigParser()
 config_parser.read(CONFIG_FILE_PATHS)
@@ -60,6 +58,6 @@ elif 'connection' in config:
     connection = config['connection']
     logger.info('getting configured connection: %s', connection)
 else:  # This means that there will have to be a cache directory created
-    os.makedirs(CACHE_DIRECTORY, exist_ok=True)
+    os.makedirs(PYBEL_HOME, exist_ok=True)
     connection = DEFAULT_CACHE_CONNECTION
     logger.info('no configuration found, using default sqlite connection %s', connection)
