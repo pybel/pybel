@@ -510,7 +510,7 @@ class BELGraph(nx.MultiDiGraph):
         """
         if 'subject_modifier' in attr:
             warnings.warn('subject_modifier has been renamed to source_modifier')
-            source_modifier = attr.pop('source_modifier')
+            source_modifier = attr.pop('subject_modifier')
         if 'object_modifier' in attr:
             warnings.warn('object_modifier has been renamed to target_modifier')
             target_modifier = attr.pop('object_modifier')
