@@ -6,9 +6,9 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import DIRECTLY_INCREASES
-from pybel.dsl import gene, mirna, pathology, pmod, protein, rna
+from pybel.dsl import ComplexAbundance, Protein, gene, mirna, pathology, pmod, protein, rna
 from pybel.struct.mutation.collapse import (
-    collapse_all_variants, collapse_nodes, collapse_to_genes, surviors_are_inconsistent,
+    collapse_all_variants, collapse_nodes, collapse_pair, collapse_to_genes, surviors_are_inconsistent,
 )
 from pybel.testing.utils import n
 
@@ -141,3 +141,20 @@ class TestCollapse(unittest.TestCase):
         self.assertIn(p1, graph)
         self.assertNotIn(p1_phosphorylated, graph)
         self.assertIn(p2, graph)
+
+    def test_collapse_list_abundance(self):
+        """Test collapsing when a variable is in a list abundance.
+
+        .. seealso:: https://github.com/pybel/pybel/issues/480
+        """
+        graph = BELGraph()
+        human_1, human_2 = Protein('hgnc', '1'), Protein('hgnc', '2')
+        mouse_1, mouse_2 = Protein('mgi', '1'), Protein('mgi', '2')
+        human_c, mouse_c = ComplexAbundance([human_1, human_2]), ComplexAbundance([mouse_1, mouse_2])
+        graph.add_node_from_data(human_c)
+        graph.add_node_from_data(mouse_c)
+        collapse_pair(graph, survivor=human_1, victim=mouse_1)
+        collapse_pair(graph, survivor=human_2, victim=mouse_2)
+        self.assertEqual({human_1, human_2, human_c}, set(graph))
+        self.assertEqual(2, graph.number_of_edges())
+        self.assertEqual(2, graph.number_of_edges())
