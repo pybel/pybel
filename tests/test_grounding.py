@@ -5,11 +5,12 @@
 import unittest
 from unittest import mock
 
+import bioregistry
 import pyobo
 from pyobo.mocks import _replace_mapping_getter, get_mock_id_name_mapping
 
 from pybel.constants import ANNOTATIONS, CONCEPT, GMOD, IDENTIFIER, KIND, MEMBERS, NAME, NAMESPACE, PMOD, VARIANTS
-from pybel.grounding import SYNONYM_TO_KEY, _NAME_REMAPPING, _process_annotations, _process_concept, _process_node
+from pybel.grounding import _NAME_REMAPPING, _process_annotations, _process_concept, _process_node
 from pybel.language import Entity
 
 
@@ -78,7 +79,7 @@ class TestProcessConcept(unittest.TestCase):
     def _help(self, expected, d, msg=None):
         expected = {CONCEPT: expected}
         d = {CONCEPT: d}
-        self.assertIn(expected[CONCEPT][NAMESPACE], SYNONYM_TO_KEY, msg='Unrecognized namespace')
+        self.assertIsNotNone(bioregistry.normalize_prefix(expected[CONCEPT][NAMESPACE]), msg='Unrecognized namespace')
         _process_concept(concept=d[CONCEPT], node=d)
         self.assertEqual(expected[CONCEPT], d[CONCEPT], msg=msg)
 
@@ -147,7 +148,7 @@ class TestProcessConcept(unittest.TestCase):
 
     def test_remap_scomp(self, *_):
         """Test remapping SFAM to FPLX."""
-        self.assertIn('BEL', SYNONYM_TO_KEY)
+        self.assertIsNotNone(bioregistry.normalize_prefix('BEL'))
         self.assertIn(
             ('bel', 'gamma Secretase Complex'),
             _NAME_REMAPPING,
