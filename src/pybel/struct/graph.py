@@ -125,7 +125,7 @@ class BELGraph(nx.MultiDiGraph):
         self._plot = PlotDispatch(self)
         self._summary = SummarizeDispatch(self)
 
-        self.raise_on_missing_annotations = True
+        self.raise_on_missing_annotations = False
 
     def child(self) -> 'BELGraph':
         """Create an empty graph with a "parent" reference back to this one."""
