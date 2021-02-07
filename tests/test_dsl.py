@@ -218,6 +218,27 @@ class TestCentralDogma(unittest.TestCase):
         with self.assertRaises(ListAbundanceEmptyException):
             CompositeAbundance([])
 
+    def test_reaction(self):
+        """Add identified reaction."""
+        graph = BELGraph()
+        reaction = Reaction(
+            namespace='rhea',
+            identifier='44104',
+            reactants=[
+                Abundance(namespace='chebi', identifier='17478'),
+                Abundance(namespace='chebi', identifier='15377'),
+                Abundance(namespace='chebi', identifier='57540'),
+            ],
+            products=[
+                Abundance(namespace='chebi', identifier='29067'),
+                Abundance(namespace='chebi', identifier='15378'),
+                Abundance(namespace='chebi', identifier='57945'),
+            ],
+        )
+        graph.add_node_from_data(reaction)
+        self.assertEqual(7, graph.number_of_nodes())
+        self.assertEqual(6, graph.number_of_edges())
+
     def test_reaction_has_contents(self):
         """Test that the construction of reaction doesn't have empty lists."""
         with self.assertRaises(ReactionEmptyException):
