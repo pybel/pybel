@@ -745,6 +745,17 @@ def _entity_list_as_bel(entities: Iterable[BaseEntity], use_identifiers: bool = 
     )
 
 
+def _help_named(self, namespace, identifier, name, xrefs):
+    if namespace:
+        self[CONCEPT] = Entity(
+            namespace=namespace,
+            name=name,
+            identifier=identifier,
+        )
+        if xrefs:
+            self[XREFS] = xrefs
+
+
 class Reaction(BaseEntity):
     """Build a reaction node."""
 
@@ -754,17 +765,26 @@ class Reaction(BaseEntity):
         self,
         reactants: Union[BaseAbundance, Iterable[BaseAbundance]],
         products: Union[BaseAbundance, Iterable[BaseAbundance]],
+        namespace: Optional[str] = None,
+        name: Optional[str] = None,
+        identifier: Optional[str] = None,
+        xrefs: Optional[List[Entity]] = None,
     ) -> None:
         """Build a reaction node.
 
         :param reactants: A list of PyBEL node data dictionaries representing the reactants
         :param products: A list of PyBEL node data dictionaries representing the products
+        :param namespace: The namespace from which the name originates
+        :param name: The name of the complex
+        :param identifier: The identifier in the namespace in which the name originates
+        :param xrefs: Alternate identifiers for the entity if it is named
 
         >>> from pybel.dsl import Reaction, Protein, Abundance
         >>> Reaction([Protein(namespace='HGNC', name='KNG1')], [Abundance(namespace='CHEBI', name='bradykinin')])
 
         """
         super().__init__()
+        _help_named(self, namespace=namespace, identifier=identifier, name=name, xrefs=xrefs)
 
         if isinstance(reactants, BaseEntity):
             reactants = [reactants]
@@ -776,7 +796,7 @@ class Reaction(BaseEntity):
         else:
             products = sorted(products, key=_as_bel)
 
-        if not reactants and not products:
+        if not reactants and not products and not namespace:
             raise ReactionEmptyException('Reaction can not be instantiated with an empty members list.')
 
         self.update({
@@ -859,14 +879,7 @@ class ComplexAbundance(ListAbundance):
         :param xrefs: Alternate identifiers for the entity if it is named
         """
         super().__init__(members=members)
-        if namespace:
-            self[CONCEPT] = Entity(
-                namespace=namespace,
-                name=name,
-                identifier=identifier,
-            )
-            if xrefs:
-                self[XREFS] = xrefs
+        _help_named(self, namespace=namespace, identifier=identifier, name=name, xrefs=xrefs)
 
     @property
     def entity(self) -> Optional[Entity]:  # noqa:D401
