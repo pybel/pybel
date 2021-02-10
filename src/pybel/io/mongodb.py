@@ -161,8 +161,8 @@ def find_nodes(
     >>> find_nodes(collection, name='PTPN6')
     [<BEL p(hgnc:9658 ! PTPN6)>]
     """
-    if not (name or identifier):
-        raise ValueError("Either a 'name' or 'identifier' is required to find a node.")
+    if not (name or (identifier and namespace)):
+        raise ValueError("Either a 'name' or an 'identifier' and a 'namespace' is required to find a node.")
     # The mongo .find() method requires that sub-elements be notated 'parent.child'
     concept_name = '.'.join((CONCEPT, NAME))
     concept_namespace = '.'.join((CONCEPT, NAMESPACE))
@@ -292,6 +292,7 @@ def get_edges_from_criteria(
     collection: Collection,
     node_name: str = None,
     node_identifier: str = None,
+    node_namespace: str = None,
     node_function: str = None,
     node_variants: List[Variant] = None,
 ) -> Dict[BaseEntity, List[Mapping[str, Any]]]:
@@ -300,7 +301,8 @@ def get_edges_from_criteria(
     :param collection: A MongoDB collection within a database where a PyBEL graph has been stored
     :param node_name: The name of the desired node
     :param node_identifier: The identifier of the desired node
-    :param node_function: The type of the desired node ("protein", "complex", etc)
+    :param node_namespace: The namespace of the desired node
+    :param node_function: The type of the desired node ("Protein", "Complex", etc). Case-sensitive.
     :param node_variants: A list of variants that the desired node should contain.
      Note: nodes that contain the variants in addition to specified variants will be matched.
     :return: A dictionary. The keys are the nodes, and the values are a list of the edges for each node.
@@ -335,6 +337,7 @@ def get_edges_from_criteria(
     matching_nodes = find_nodes(
         collection,
         name=node_name,
+        namespace=node_namespace,
         identifier=node_identifier,
         function=node_function,
         variants=node_variants
