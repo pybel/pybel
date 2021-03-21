@@ -18,8 +18,8 @@ from .utils import update_metadata
 from ..canonicalize import edge_to_bel
 from ..constants import (
     ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_TYPE_PUBMED, CORRELATION,
-    DECREASES, DEGRADATION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE, FROM_LOC,
-    GRAPH_ANNOTATION_CURIE, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_MIRIAM, GRAPH_ANNOTATION_PATTERN,
+    DECREASES, DEGRADATION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, DIRECTLY_REGULATES, EFFECT, EQUIVALENT_TO, EVIDENCE,
+    FROM_LOC, GRAPH_ANNOTATION_CURIE, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_MIRIAM, GRAPH_ANNOTATION_PATTERN,
     GRAPH_ANNOTATION_URL, GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION,
     HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, IDENTIFIER, INCREASES, IS_A, LOCATION, METADATA_AUTHORS, METADATA_CONTACT,
     METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION,
@@ -591,6 +591,9 @@ class BELGraph(nx.MultiDiGraph):
 
     add_regulates = partialmethod(add_qualified_edge, relation=REGULATES)
     """Add a :data:`pybel.constants.REGULATES` relationship with :meth:`add_qualified_edge`."""
+
+    add_directly_regulates = partialmethod(add_qualified_edge, relation=DIRECTLY_REGULATES)
+    """Add a :data:`pybel.constants.DIRECTLY_REGULATES` relationship with :meth:`add_qualified_edge`."""
 
     add_correlation = partialmethod(_add_two_way_qualified_edge, relation=CORRELATION)
     """Add a :data:`pybel.constants.CORRELATION` relationship with :meth:`add_qualified_edge`."""
