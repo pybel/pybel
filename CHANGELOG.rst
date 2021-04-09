@@ -17,7 +17,7 @@ Added
 - Add support for named reactions (https://github.com/pybel/pybel/pull/485)
 - Switch to GitHub Actions
 - Use `PyStow <https://github.com/cthoyt/pystow>`_ for file management
-- Use `Bioregistry <https://github.com/cthoyt/bioregistry>`_ for prefix normalization
+- Use `Bioregistry <https://github.com/bioregistry/bioregistry>`_ for prefix normalization
 
 `0.15.0 <https://github.com/pybel/pybel/compare/v0.14.10...0.15.0>`_ - 2020-12-17
 ---------------------------------------------------------------------------------
