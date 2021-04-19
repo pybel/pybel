@@ -7,7 +7,7 @@ from unittest import mock
 
 import bioregistry
 import pyobo
-from pyobo.mocks import _replace_mapping_getter, get_mock_id_name_mapping
+from pyobo.mocks import get_mock_id_name_mapping
 
 from pybel.constants import ANNOTATIONS, CONCEPT, GMOD, IDENTIFIER, KIND, MEMBERS, NAME, NAMESPACE, PMOD, VARIANTS
 from pybel.grounding import _NAME_REMAPPING, _process_annotations, _process_concept, _process_node
@@ -20,8 +20,6 @@ def _failer(*_, **__):
 
 
 pyobo.getters.get = _failer
-#pyobo.extract.cached_mapping = _failer
-#pyobo.extract.cached_multidict = _failer
 
 mock_id_name_data = {
     'mesh': {
