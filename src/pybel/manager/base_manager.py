@@ -5,11 +5,11 @@
 import logging
 from typing import List, Optional, Tuple, Type, TypeVar
 
+import pystow
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 from .models import Base
-from ..config import config
 
 __all__ = [
     'BaseManager',
@@ -52,14 +52,11 @@ def build_engine_session(
 
     engine = create_engine(connection, echo=echo)
 
-    if autoflush is None:
-        autoflush = config.get('PYBEL_MANAGER_AUTOFLUSH', True)
-
-    if autocommit is None:
-        autocommit = config.get('PYBEL_MANAGER_AUTOCOMMIT', False)
-
-    if expire_on_commit is None:
-        expire_on_commit = config.get('PYBEL_MANAGER_AUTOEXPIRE', True)
+    autoflush = pystow.get_config('pybel', 'manager_autoflush', passthrough=autoflush, dtype=bool, default=True)
+    autocommit = pystow.get_config('pybel', 'manager_autocommit', passthrough=autocommit, dtype=bool, default=False)
+    expire_on_commit = pystow.get_config(
+        'pybel', 'manager_autoexpire', passthrough=expire_on_commit, dtype=bool, default=True,
+    )
 
     logger.debug('auto flush: %s, auto commit: %s, expire on commmit: %s', autoflush, autocommit, expire_on_commit)
 

@@ -7,7 +7,8 @@ import os
 import tempfile
 import unittest
 
-from ..config import config
+import pystow
+
 from ..manager import Manager
 
 __all__ = [
@@ -19,7 +20,7 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 
-TEST_CONNECTION = config.get('test_connection')
+TEST_CONNECTION = pystow.get_config('pybel', 'test_connection')
 
 
 class TemporaryCacheMixin(unittest.TestCase):
