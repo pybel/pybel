@@ -20,6 +20,8 @@ def _failer(*_, **__):
 
 
 pyobo.getters.get = _failer
+pyobo.api.names.cached_mapping = _failer
+pyobo.api.names.cached_multidict = _failer
 
 mock_id_name_data = {
     'mesh': {
