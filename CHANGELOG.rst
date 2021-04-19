@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-`0.15.2 <https://github.com/pybel/pybel/compare/v0.15.2...0.15.4>`_ - 2021-04-19
+`0.15.3 <https://github.com/pybel/pybel/compare/v0.15.2...0.15.3>`_ - 2021-04-19
 --------------------------------------------------------------------------------
 Added
 ~~~~~
