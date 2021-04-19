@@ -275,7 +275,6 @@ class BELParser(BaseParser):
         :param required_annotations: Optional list of required annotations
         """
         self.graph = graph
-        self.metagraph = set()
 
         self.disallow_nested = disallow_nested
         self.disallow_unqualified_translocations = disallow_unqualified_translocations
@@ -705,7 +704,7 @@ class BELParser(BaseParser):
                 TARGET: tokens[TARGET][TARGET],
             },
         )
-        self.metagraph.add((subject_hash, object_hash))
+        self.graph.add_transitivity(subject_hash, object_hash)
         return tokens
 
     def check_function_semantics(self, line: str, position: int, tokens: ParseResults) -> ParseResults:

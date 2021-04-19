@@ -50,6 +50,11 @@ WarningTuple = Tuple[Optional[str], BELParserWarning, EdgeData]
 class BELGraph(nx.MultiDiGraph):
     """An extension to :class:`networkx.MultiDiGraph` to represent BEL."""
 
+    #: A set of pairs of hashes of edges over which there is transitivity.
+    #: For example, for the nested statement (P(X) -> P(Y)) -> P(Z) will have
+    #: a pair for (hash(P(X) -> P(Y)), hash(P(Y) -> P(Z)))
+    transitivities: Set[Tuple[str, str]]
+
     def __init__(
         self,
         name: Optional[str] = None,
@@ -116,6 +121,8 @@ class BELGraph(nx.MultiDiGraph):
 
         if path:
             self.path = path
+
+        self.transitivities = set()
 
         #: A reference to the parent graph
         self.parent = None
@@ -389,6 +396,14 @@ class BELGraph(nx.MultiDiGraph):
 
     def __str__(self):
         return '{} v{}'.format(self.name, self.version)
+
+    def add_transitivity(self, k1: str, k2: str) -> None:
+        """Add a pair of edge hashes over which there is transitivity.
+
+        :param k1: The hash of the subject edge
+        :param k2: The hash of the object edge
+        """
+        self.transitivities.add((k1, k2))
 
     def add_warning(
         self,
