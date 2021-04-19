@@ -20,9 +20,8 @@ def _failer(*_, **__):
 
 
 pyobo.getters.get = _failer
-pyobo.extract.get = _failer
-pyobo.extract.cached_mapping = _failer
-pyobo.extract.cached_multidict = _failer
+#pyobo.extract.cached_mapping = _failer
+#pyobo.extract.cached_multidict = _failer
 
 mock_id_name_data = {
     'mesh': {
@@ -48,7 +47,6 @@ mock_id_name_data = {
 }
 
 mock_id_name_mapping = get_mock_id_name_mapping(mock_id_name_data)
-mock_id_name_mapping_2 = _replace_mapping_getter('pybel.grounding.get_id_name_mapping', mock_id_name_data)
 
 _mock_mnemonic_data = {
     'O60921': 'HUS1_HUMAN',
@@ -70,7 +68,6 @@ mock_get_id_from_mnemonic = mock.patch(
 
 
 @mock_id_name_mapping
-@mock_id_name_mapping_2
 @mock_get_mnemonic
 @mock_get_id_from_mnemonic
 class TestProcessConcept(unittest.TestCase):
@@ -161,7 +158,6 @@ class TestProcessConcept(unittest.TestCase):
 
 
 @mock_id_name_mapping
-@mock_id_name_mapping_2
 @mock_get_mnemonic
 @mock_get_id_from_mnemonic
 class TestGround(unittest.TestCase):
@@ -354,7 +350,6 @@ class TestGround(unittest.TestCase):
 
 
 @mock_id_name_mapping
-@mock_id_name_mapping_2
 class TestAnnotations(unittest.TestCase):
     """Test processing annotations."""
 
