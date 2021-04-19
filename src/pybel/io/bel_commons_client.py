@@ -10,14 +10,12 @@ BEL Commons, there are instructions on its GitHub page.
 """
 
 import logging
-import os
 from typing import Optional
 
+import pystow
 import requests
 
 from .nodelink import from_nodelink, to_nodelink
-from ..config import config
-from ..constants import PYBEL_REMOTE_HOST, PYBEL_REMOTE_PASSWORD, PYBEL_REMOTE_USER
 from ..struct.graph import BELGraph
 from ..version import get_version
 
@@ -32,27 +30,23 @@ RECIEVE_ENDPOINT = '/api/receive/'
 GET_ENDPOINT = '/api/network/{}/export/nodelink'
 
 
-def _get_config_or_env(name: str) -> Optional[str]:
-    return config.get(name) or os.environ.get(name)
-
-
 def _get_host() -> Optional[str]:
-    """Find the host.
+    """Find the host with :func:`pystow.get_config`.
 
     Has two possibilities:
 
     1. The PyBEL config entry ``PYBEL_REMOTE_HOST``, loaded in :mod:`pybel.constants`
     2. The environment variable ``PYBEL_REMOTE_HOST``
     """
-    return _get_config_or_env(PYBEL_REMOTE_HOST)
+    return pystow.get_config('pybel', 'remote_host')
 
 
 def _get_user() -> Optional[str]:
-    return _get_config_or_env(PYBEL_REMOTE_USER)
+    return pystow.get_config('pybel', 'remote_user')
 
 
 def _get_password() -> Optional[str]:
-    return _get_config_or_env(PYBEL_REMOTE_PASSWORD)
+    return pystow.get_config('pybel', 'remote_password')
 
 
 def to_bel_commons(
