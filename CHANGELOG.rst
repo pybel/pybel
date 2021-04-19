@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
+`0.15.2 <https://github.com/pybel/pybel/compare/v0.15.2...0.15.4>`_ - 2021-04-19
+--------------------------------------------------------------------------------
+Added
+~~~~~
+- Exposed transitivities parsed via nested statements through ``pybel.BELGraph.transitivities``
+  (https://github.com/pybel/pybel/issues/490).
+
+Fixed
+~~~~~
+- Some dependencies updated their interfaces (https://github.com/pybel/pybel/pull/491)
+
 `0.15.2 <https://github.com/pybel/pybel/compare/v0.15.1...0.15.2>`_ - 2021-03-21
 --------------------------------------------------------------------------------
 Added
