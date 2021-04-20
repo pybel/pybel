@@ -15,7 +15,7 @@ import requests
 import sqlalchemy
 from sqlalchemy import and_, exists, func
 from sqlalchemy.orm import aliased
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
 from bel_resources import get_bel_resource
 from .base_manager import BaseManager, build_engine_session

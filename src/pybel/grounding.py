@@ -57,7 +57,7 @@ from protmapper.uniprot_client import get_id_from_mnemonic, get_mnemonic
 from pyobo.getters import MissingOboBuild, NoOboFoundry
 from pyobo.identifier_utils import normalize_prefix
 from pyobo.xrefdb.sources.famplex import get_remapping
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
 from pybel.constants import (
     ACTIVITY, ANNOTATIONS, CONCEPT, EFFECT, FROM_LOC, FUSION, GMOD, IDENTIFIER, KIND, LOCATION,

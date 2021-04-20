@@ -12,7 +12,7 @@ import ratelimit
 import requests
 from more_itertools import chunked
 from sqlalchemy import and_
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
 from . import models
 from ..constants import CITATION

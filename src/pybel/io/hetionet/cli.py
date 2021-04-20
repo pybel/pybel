@@ -8,7 +8,7 @@ from random import choice
 import click
 import networkx as nx
 import pandas as pd
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
 from pybel import (
     from_nodelink_gz, get_hetionet, to_bel_script, to_bel_script_gz, to_graphdati_file, to_graphdati_gz,

@@ -8,7 +8,7 @@ import logging
 from typing import Any, Mapping, Set, Tuple, Union
 
 import pystow
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
 from .constants import (
     ACTIVATES_ACTIONS, BINDS_ACTIONS, COMPOUND, DSL_MAP, GENE, HETIONET_PUBMED, INHIBITS_ACTIONS, PHARMACOLOGICAL_CLASS,

@@ -7,7 +7,7 @@ import logging
 from typing import List, Optional, TextIO, Tuple, Union
 
 from networkx.utils import open_file
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
 from . import converters
 from ...dsl import BaseEntity

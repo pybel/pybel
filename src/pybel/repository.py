@@ -13,7 +13,7 @@ from typing import Any, Iterable, Mapping, Optional, Set, TextIO, Tuple, Union
 
 import click
 import pandas as pd
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
 from .cli import connection_option, host_option, password_option, user_option, verbose_option
 from .constants import CITATION

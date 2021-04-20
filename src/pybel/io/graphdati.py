@@ -14,7 +14,7 @@ from typing import Any, Iterable, List, Mapping, Optional, TextIO, Tuple, Union
 
 import pyparsing
 from networkx.utils import open_file
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
 from .jgif import NAMESPACE_TO_PATTERN
 from ..canonicalize import edge_to_tuple

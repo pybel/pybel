@@ -5,7 +5,7 @@
 from typing import Iterable
 
 import networkx as nx
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
 from .utils import update_metadata
 from ..dsl import BaseEntity

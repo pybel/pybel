@@ -2,7 +2,7 @@
 
 """Output functions for BEL graphs to Neo4j."""
 
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
 from ..constants import (
     ANNOTATIONS, CITATION, EVIDENCE, FUSION, MEMBERS, NAMESPACE, RELATION, SOURCE_MODIFIER, TARGET_MODIFIER, VARIANTS,

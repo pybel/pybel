@@ -3,13 +3,14 @@
 """This module contains helper functions for reading BEL scripts."""
 
 import logging
+import os
 import re
 import time
 from typing import Any, Iterable, List, Mapping, Optional, Tuple
 
 from pyparsing import ParseException
 from sqlalchemy.exc import OperationalError
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
 from bel_resources import ResourceError, split_file_to_annotations_and_definitions
 from ..constants import INVERSE_DOCUMENT_KEYS, REQUIRED_METADATA
@@ -233,7 +234,7 @@ def parse_statements(
     graph: BELGraph,
     enumerated_lines: Iterable[Tuple[int, str]],
     bel_parser: BELParser,
-    use_tqdm: bool = False,
+    use_tqdm: bool = True,
     tqdm_kwargs: Optional[Mapping[str, Any]] = None,
 ) -> None:
     """Parse a list of statements from a BEL Script.
@@ -247,10 +248,10 @@ def parse_statements(
     parse_statements_start_time = time.time()
 
     if use_tqdm:
-        _tqdm_kwargs = dict(desc='Statements')
-        if tqdm_kwargs:
-            _tqdm_kwargs.update(tqdm_kwargs)
-        enumerated_lines = tqdm(list(enumerated_lines), **_tqdm_kwargs)
+        tqdm_kwargs = {} if tqdm_kwargs is None else dict(tqdm_kwargs)
+        tqdm_kwargs.setdefault('desc', 'Statements')
+        tqdm_kwargs.setdefault('leave', False)
+        enumerated_lines = tqdm(list(enumerated_lines), **tqdm_kwargs)
 
     for line_number, line in enumerated_lines:
         try:
@@ -279,6 +280,7 @@ def parse_statements(
 
 def _log_parse_exception(graph: BELGraph, exc: BELParserWarning):
     if graph.path:
-        parser_logger.error(LOG_FMT_PATH, graph.path, exc.line_number, exc.position, exc.__class__.__name__, exc)
+        s = LOG_FMT_PATH % (os.path.basename(graph.path), exc.line_number, exc.position, exc.__class__.__name__, exc)
     else:
-        parser_logger.error(LOG_FMT, exc.line_number, exc.position, exc.__class__.__name__, exc)
+        s = LOG_FMT % (exc.line_number, exc.position, exc.__class__.__name__, exc)
+    tqdm.write(s)
