@@ -7,6 +7,7 @@ import random
 from collections import Counter
 from typing import Optional, TextIO
 
+import bioregistry
 import pandas as pd
 from humanize import intword
 from tabulate import tabulate
@@ -35,12 +36,18 @@ def function_table_df(graph: BELGraph, examples: bool = True) -> pd.DataFrame:
     )
 
 
-def functions(graph, file: Optional[TextIO] = None, examples: bool = True):
-    """Print a summary of the functions in the graph."""
+def functions_str(graph, examples: bool = True, add_count: bool = True, **kwargs) -> str:
+    """Make a summary string of the functions in the graph."""
     df = function_table_df(graph, examples=examples)
     headers = list(df.columns)
-    headers[0] += ' ({})'.format(len(df.index))
-    print(tabulate(df.values, headers=headers), file=file)
+    if add_count:
+        headers[0] += ' ({})'.format(len(df.index))
+    return tabulate(df.values, headers=headers, **kwargs)
+
+
+def functions(graph, file: Optional[TextIO] = None, examples: bool = True, **kwargs) -> None:
+    """Print a summary of the functions in the graph."""
+    print(functions_str(graph=graph, examples=examples, **kwargs), file=file)
 
 
 def namespaces_table_df(graph: BELGraph, examples: bool = True) -> pd.DataFrame:
@@ -52,22 +59,29 @@ def namespaces_table_df(graph: BELGraph, examples: bool = True) -> pd.DataFrame:
     return pd.DataFrame(
         [
             (
-                namespace,
+                prefix,
+                bioregistry.get_name(prefix),
                 count,
-                random.choice(namespace_mapping[namespace]) if namespace in namespace_mapping else '',  # noqa:S311
+                random.choice(namespace_mapping[prefix]) if prefix in namespace_mapping else '',  # noqa:S311
             )
-            for namespace, count in namespace_c.most_common()
+            for prefix, count in namespace_c.most_common()
         ],
-        columns=['Namespace', 'Count', 'Example'],
+        columns=['Prefix', 'Name', 'Count', 'Example'],
     )
 
 
-def namespaces(graph: BELGraph, file: Optional[TextIO] = None, examples: bool = True) -> None:
-    """Print a summary of the namespaces in the graph."""
+def namespaces_str(graph: BELGraph, examples: bool = True, add_count: bool = True, **kwargs) -> None:
+    """Make a summary string of the namespaces in the graph."""
     df = namespaces_table_df(graph, examples=examples)
     headers = list(df.columns)
-    headers[0] += ' ({})'.format(len(df.index))
-    print(tabulate(df.values, headers=headers), file=file)
+    if add_count:
+        headers[0] += ' ({})'.format(len(df.index))
+    return tabulate(df.values, headers=headers, **kwargs)
+
+
+def namespaces(graph: BELGraph, file: Optional[TextIO] = None, examples: bool = True, **kwargs) -> None:
+    """Print a summary of the namespaces in the graph."""
+    print(namespaces_str(graph=graph, examples=examples, **kwargs), file=file)
 
 
 def edge_table_df(graph: BELGraph, *, examples: bool = True, minimum: Optional[int] = None) -> pd.DataFrame:
@@ -93,18 +107,32 @@ def edge_table_df(graph: BELGraph, *, examples: bool = True, minimum: Optional[i
     return pd.DataFrame(rows, columns=columns)
 
 
+def edges_str(
+    graph: BELGraph,
+    *,
+    examples: bool = True,
+    add_count: bool = True,
+    minimum: Optional[int] = None,
+    **kwargs,
+) -> str:
+    """Make a summary str of the edges in the graph."""
+    df = edge_table_df(graph, examples=examples, minimum=minimum)
+    headers = list(df.columns)
+    if add_count:
+        headers[0] += ' ({})'.format(intword(len(df.index)))
+    return tabulate(df.values, headers=headers, **kwargs)
+
+
 def edges(
     graph: BELGraph,
     *,
     examples: bool = True,
     minimum: Optional[int] = None,
     file: Optional[TextIO] = None,
+    **kwargs,
 ) -> None:
     """Print a summary of the edges in the graph."""
-    df = edge_table_df(graph, examples=examples, minimum=minimum)
-    headers = list(df.columns)
-    headers[0] += ' ({})'.format(intword(len(df.index)))
-    print(tabulate(df.values, headers=headers), file=file)
+    print(edges_str(graph=graph, examples=examples, minimum=minimum, **kwargs), file=file)
 
 
 def citations(graph: BELGraph, n: Optional[int] = 15, file: Optional[TextIO] = None) -> None:
