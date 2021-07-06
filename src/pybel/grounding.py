@@ -54,7 +54,7 @@ from typing import Any, Collection, Mapping, Optional, Tuple, Union
 
 import pyobo
 from protmapper.uniprot_client import get_id_from_mnemonic, get_mnemonic
-from pyobo.getters import MissingOboBuild, NoOboFoundry
+from pyobo.getters import NoBuild
 from pyobo.identifier_utils import normalize_prefix
 from pyobo.xrefdb.sources.famplex import get_remapping
 from tqdm.autonotebook import tqdm
@@ -361,7 +361,7 @@ def _handle_identifier_not_name(
 
     try:
         id_name_mapping = pyobo.api.names.get_id_name_mapping(prefix)
-    except (NoOboFoundry, MissingOboBuild):
+    except NoBuild:
         return False
 
     if id_name_mapping is None:
@@ -445,7 +445,7 @@ def _handle_name_and_not_identifier(
 
     try:
         id_name_mapping = pyobo.api.names.get_name_id_mapping(prefix)
-    except (NoOboFoundry, MissingOboBuild) as e:
+    except NoBuild as e:
         logger.warning('could not get namespace %s - %s', prefix, e)
         return False
 
