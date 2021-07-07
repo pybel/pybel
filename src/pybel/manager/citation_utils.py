@@ -3,26 +3,26 @@
 """Citation utilities for the database manager."""
 
 import logging
+import ratelimit
 import re
+import requests
 from datetime import date, datetime
 from functools import lru_cache
-from typing import Dict, Iterable, List, Optional, Set, Tuple, Union
-
-import ratelimit
-import requests
 from more_itertools import chunked
 from sqlalchemy import and_
 from tqdm.autonotebook import tqdm
+from typing import Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from . import models
+from .cache_manager import Manager
 from ..constants import CITATION
 from ..struct.filters import filter_edges
-from ..struct.filters.edge_predicates import CITATION_PREDIACATES
+from ..struct.filters.edge_predicates import CITATION_PREDICATES
 from ..struct.summary.provenance import get_citation_identifiers
 
 __all__ = [
-    '_get_citations_by_identifiers',
     'enrich_pubmed_citations',
+    'enrich_pmc_citations',
 ]
 
 logger = logging.getLogger(__name__)
@@ -279,15 +279,16 @@ def _get_citation_models(identifiers: Iterable[str], *, prefix: str, manager, ch
 
 
 def enrich_pubmed_citations(
-    manager,
     graph,
+    *,
+    manager: Optional[Manager] = None,
     group_size: Optional[int] = None,
     offline: bool = False,
 ) -> Set[str]:
     """Overwrite all PubMed citations with values from NCBI's eUtils lookup service.
 
-    :type manager: pybel.manager.Manager
     :type graph: pybel.BELGraph
+    :param manager: A PyBEL database manager
     :param group_size: The number of PubMed identifiers to query at a time. Defaults to 200 identifiers.
     :param offline: An override for when you don't want to hit the eUtils
     :return: A set of PMIDs for which the eUtils service crashed
@@ -297,20 +298,41 @@ def enrich_pubmed_citations(
     )
 
 
-def _enrich_citations(
-    manager,
+def enrich_pmc_citations(
     graph,
+    *,
+    manager: Optional[Manager] = None,
+    group_size: Optional[int] = None,
+    offline: bool = False,
+) -> Set[str]:
+    """Overwrite all PubMed citations with values from NCBI's eUtils lookup service.
+
+    :type graph: pybel.BELGraph
+    :param manager: A PyBEL database manager
+    :param group_size: The number of PubMed identifiers to query at a time. Defaults to 200 identifiers.
+    :param offline: An override for when you don't want to hit the eUtils
+    :return: A set of PMIDs for which the eUtils service crashed
+    """
+    return _enrich_citations(
+        manager=manager, graph=graph, group_size=group_size, offline=offline, prefix='pmc',
+    )
+
+
+def _enrich_citations(
+    graph,
+    manager: Optional[Manager],
     group_size: Optional[int] = None,
     offline: bool = False,
     prefix: Optional[str] = None,
 ) -> Set[str]:
     """Overwrite all citations of the given prefix using the predefined lookup functions.
 
-    :type manager: pybel.manager.Manager
     :type graph: pybel.BELGraph
     :param group_size: The number of identifiers to query at a time. Defaults to 200 identifiers.
     :return: A set of identifiers for which lookup was not possible
     """
+    if manager is None:
+        manager = Manager()
     if prefix is None:
         prefix = 'pubmed'
 
@@ -323,7 +345,7 @@ def _enrich_citations(
         prefix=prefix,
     )
 
-    for u, v, k in filter_edges(graph, CITATION_PREDIACATES[prefix]):
+    for u, v, k in filter_edges(graph, CITATION_PREDICATES[prefix]):
         identifier = graph[u][v][k][CITATION].identifier
 
         identifier_data = identifier_map.get(identifier)
