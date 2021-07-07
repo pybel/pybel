@@ -6,7 +6,7 @@ import logging
 import re
 from datetime import date, datetime
 from functools import lru_cache
-from typing import Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, Iterable, List, Mapping, Optional, Set, Tuple, Union
 
 import ratelimit
 import requests
@@ -19,6 +19,7 @@ from .cache_manager import Manager
 from ..constants import CITATION
 from ..struct.filters import filter_edges
 from ..struct.filters.edge_predicates import CITATION_PREDICATES
+from ..struct.graph import BELGraph
 from ..struct.summary.provenance import get_citation_identifiers
 
 __all__ = [
@@ -103,12 +104,12 @@ def get_pubmed_citation_response(pubmed_identifiers: Iterable[str]):
     return response.json()
 
 
-def enrich_citation_model(manager, citation, p) -> bool:
+def enrich_citation_model(manager: Manager, citation: models.Citation, p: Mapping[str, Any]) -> bool:
     """Enrich a citation model with the information from PubMed.
 
-    :param pybel.manager.Manager manager:
-    :param Citation citation: A citation model
-    :param dict p: The dictionary from PubMed E-Utils corresponding to d["result"][pmid]
+    :param manager: A database manager
+    :param citation: A citation model
+    :param p: The dictionary from PubMed E-Utils corresponding to d["result"][pmid]
     """
     if 'error' in p:
         logger.warning('Error downloading PubMed')
@@ -147,7 +148,7 @@ def enrich_citation_model(manager, citation, p) -> bool:
 
 
 def get_citations_by_pmids(
-    manager,
+    manager: Manager,
     pmids: Iterable[Union[str, int]],
     *,
     group_size: Optional[int] = None,
@@ -159,7 +160,7 @@ def get_citations_by_pmids(
 
 
 def _get_citations_by_identifiers(
-    manager,
+    manager: Manager,
     identifiers: Iterable[Union[str, int]],
     *,
     group_size: Optional[int] = None,
@@ -247,7 +248,14 @@ def _help_enrich_pmids(identifiers: Iterable[str], *, manager, unenriched_models
     manager.session.commit()  # commit in groups
 
 
-def _help_enrich_pmc_identifiers(identifiers: Iterable[str], *, manager, unenriched_models, enriched_models, errors):
+def _help_enrich_pmc_identifiers(
+    identifiers: Iterable[str],
+    *,
+    manager: Manager,
+    unenriched_models,
+    enriched_models,
+    errors,
+):
     for pmcid in identifiers:
         try:
             csl = get_pmc_csl_item(pmcid)
@@ -270,7 +278,13 @@ _HELPERS = {
 }
 
 
-def _get_citation_models(identifiers: Iterable[str], *, prefix: str, manager, chunksize: int = 200):
+def _get_citation_models(
+    identifiers: Iterable[str],
+    *,
+    prefix: str,
+    manager: Manager,
+    chunksize: int = 200,
+) -> Iterable[models.Citation]:
     for identifiers_chunk in chunked(identifiers, chunksize):
         citation_filter = and_(
             models.Citation.db == prefix,
@@ -280,7 +294,7 @@ def _get_citation_models(identifiers: Iterable[str], *, prefix: str, manager, ch
 
 
 def enrich_pubmed_citations(
-    graph,
+    graph: BELGraph,
     *,
     manager: Optional[Manager] = None,
     group_size: Optional[int] = None,
@@ -288,7 +302,7 @@ def enrich_pubmed_citations(
 ) -> Set[str]:
     """Overwrite all PubMed citations with values from NCBI's eUtils lookup service.
 
-    :type graph: pybel.BELGraph
+    :param graph: A BEL graph
     :param manager: A PyBEL database manager
     :param group_size: The number of PubMed identifiers to query at a time. Defaults to 200 identifiers.
     :param offline: An override for when you don't want to hit the eUtils
@@ -300,7 +314,7 @@ def enrich_pubmed_citations(
 
 
 def enrich_pmc_citations(
-    graph,
+    graph: BELGraph,
     *,
     manager: Optional[Manager] = None,
     group_size: Optional[int] = None,
@@ -308,7 +322,7 @@ def enrich_pmc_citations(
 ) -> Set[str]:
     """Overwrite all PubMed citations with values from NCBI's eUtils lookup service.
 
-    :type graph: pybel.BELGraph
+    :param graph: A BEL graph
     :param manager: A PyBEL database manager
     :param group_size: The number of PubMed identifiers to query at a time. Defaults to 200 identifiers.
     :param offline: An override for when you don't want to hit the eUtils
@@ -320,7 +334,7 @@ def enrich_pmc_citations(
 
 
 def _enrich_citations(
-    graph,
+    graph: BELGraph,
     manager: Optional[Manager],
     group_size: Optional[int] = None,
     offline: bool = False,
@@ -328,7 +342,7 @@ def _enrich_citations(
 ) -> Set[str]:
     """Overwrite all citations of the given prefix using the predefined lookup functions.
 
-    :type graph: pybel.BELGraph
+    :param graph: A BEL Graph
     :param group_size: The number of identifiers to query at a time. Defaults to 200 identifiers.
     :return: A set of identifiers for which lookup was not possible
     """
@@ -361,7 +375,7 @@ def _enrich_citations(
 
 
 @lru_cache()
-def get_pmc_csl_item(pmcid: str):
+def get_pmc_csl_item(pmcid: str) -> Mapping[str, Any]:
     """Get the CSL Item for a PubMed Central record by its PMID, PMCID, or DOI, using the NCBI Citation Exporter API."""
     if not pmcid.startswith("PMC"):
         raise ValueError(f'not a valid pmd id: {pmcid}')
@@ -373,11 +387,11 @@ def get_pmc_csl_item(pmcid: str):
     return csl_item
 
 
-def enrich_citation_model_from_pmc(manager, citation, csl) -> bool:
+def enrich_citation_model_from_pmc(manager: Manager, citation: models.Citation, csl: Mapping[str, Any]) -> bool:
     """Enrich a citation model with the information from PubMed Central.
 
-    :param pybel.manager.Manager manager:
-    :param Citation citation: A citation model
+    :param manager: A database manager
+    :param citation: A citation model
     :param dict csl: The dictionary from PMC
     """
     citation.title = csl.get('title')
