@@ -87,7 +87,7 @@ def has_pmc(edge_data: EdgeData) -> bool:
     return CITATION in edge_data and edge_data[CITATION][NAMESPACE].lower() in ('pmc', 'pmcid')
 
 
-CITATION_PREDIACATES = {
+CITATION_PREDICATES = {
     'pubmed': has_pubmed,
     'pmc': has_pmc,
 }

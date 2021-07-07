@@ -4,7 +4,7 @@
 
 from typing import Iterable, Set
 
-from ..filters.edge_predicates import CITATION_PREDIACATES
+from ..filters.edge_predicates import CITATION_PREDICATES
 from ..graph import BELGraph
 from ...constants import CITATION, IDENTIFIER
 
@@ -23,7 +23,7 @@ def iterate_citation_identifiers(graph, prefix: str):
     :param prefix: The citation prefix to keep
     :return: An iterator over the PubMed identifiers in the graph
     """
-    predicate = CITATION_PREDIACATES.get(prefix)
+    predicate = CITATION_PREDICATES.get(prefix)
     if predicate is None:
         raise ValueError(f'Invalid citation prefix: {prefix}')
 
