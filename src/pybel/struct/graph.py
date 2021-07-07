@@ -8,6 +8,7 @@ from collections import Counter, defaultdict
 from copy import deepcopy
 from functools import partialmethod
 from itertools import chain
+from textwrap import dedent
 from typing import Any, Dict, Hashable, Iterable, List, Mapping, Optional, Set, TextIO, Tuple, Union
 
 import networkx as nx
@@ -157,6 +158,9 @@ class BELGraph(nx.MultiDiGraph):
     def summarize(self) -> 'SummarizeDispatch':  # noqa: D401
         """A dispatch to summarize the graph."""
         return self._summary
+
+    def _repr_html_(self):
+        return self._summary._repr_html_()
 
     @property
     def expand(self) -> 'ExpandDispatch':  # noqa: D401
@@ -1127,14 +1131,29 @@ class SummarizeDispatch(Dispatch):
         self.edges(file=file, examples=examples)
         print('', file=file)
 
+    def _repr_html_(self) -> str:
+        from .summary import supersummary as ss
+        return dedent(f'''\
+            <h2>Metadata</h2>
+            {tabulate(self._metadata_list(), tablefmt='html')}
+            <h2>Statistics</h2>
+            {tabulate(self._statistics_list(prose_prefix=False), tablefmt='html')}
+            <h2>Nodes</h2>
+            {ss.functions_str(self.graph, examples=True, add_count=False, tablefmt='html')}
+            <h2>Namespaces</h2>
+            {ss.namespaces_str(self.graph, examples=True, add_count=False, tablefmt='html')}
+            <h2>Edges</h2>
+            {ss.edges_str(self.graph, examples=True, add_count=False, tablefmt='html')}
+        ''')
+
     def statistics(self, file: Optional[TextIO] = None):
         """Print summary statistics on the graph."""
         print(self.str(), file=file)
 
     def nodes(self, file: Optional[TextIO] = None, examples: bool = True):
         """Print a summary of the nodes' functions in the graph."""
-        from .summary.supersummary import functions
-        functions(self.graph, file=file, examples=examples)
+        from .summary.supersummary import functions_str
+        print(functions_str(self.graph, examples=examples), file=file)
 
     def namespaces(self, file: Optional[TextIO] = None, examples: bool = True):
         """Print a summary of the nodes' namespaces in the graph."""
@@ -1155,31 +1174,42 @@ class SummarizeDispatch(Dispatch):
         """Return a dictionary that summarizes the graph."""
         return dict(self.list())
 
-    def str(self) -> str:
+    def str(self, **kwargs) -> str:
         """Return a string that summarizes the graph."""
-        return tabulate(self.list())
+        return tabulate(self.list(), **kwargs)
 
-    def list(self) -> List[Tuple[str, Any]]:
-        """Return a list of tuples that summarize the graph."""
-        number_nodes = self.graph.number_of_nodes()
+    def _metadata_list(self) -> List[Tuple[str, Any]]:
         rv = [
             ('Name', self.graph.name),
             ('Version', self.graph.version),
-            ('Number of Nodes', number_nodes),
-            ('Number of Namespaces', len(self.graph.count.namespaces())),
-            ('Number of Edges', self.graph.number_of_edges()),
-            ('Number of Annotations', len(self.graph.count.annotations())),
-            ('Number of Citations', self.graph.number_of_citations()),
-            ('Number of Authors', self.graph.number_of_authors()),
-            ('Network Density', '{:.2E}'.format(nx.density(self.graph))),
-            ('Number of Components', nx.number_weakly_connected_components(self.graph)),
-            ('Number of Warnings', self.graph.number_of_warnings()),
         ]
         if self.graph.authors:
-            authors = self.graph.authors
-            key = 'Author' if authors.count(',') == 0 else 'Authors'
-            rv.insert(2, (key, authors))
+            rv.append(('Authors', self.graph.authors))
         return rv
+
+    def _statistics_list(self, prose_prefix: bool = True) -> List[Tuple[str, Any]]:
+        number_nodes = self.graph.number_of_nodes()
+        rv = [
+            ('Nodes', number_nodes),
+            ('Namespaces', len(self.graph.count.namespaces())),
+            ('Edges', self.graph.number_of_edges()),
+            ('Annotations', len(self.graph.count.annotations())),
+            ('Citations', self.graph.number_of_citations()),
+            ('Authors', self.graph.number_of_authors()),
+            ('Components', nx.number_weakly_connected_components(self.graph)),
+            ('Warnings', self.graph.number_of_warnings()),
+        ]
+        if prose_prefix:
+            rv = [(f'Number of {x}', y) for x, y in rv]
+        rv.append(('Network Density', '{:.2E}'.format(nx.density(self.graph))))
+        return rv
+
+    def list(self) -> List[Tuple[str, Any]]:
+        """Return a list of tuples that summarize the graph."""
+        return [
+            *self._metadata_list(),
+            *self._statistics_list(),
+        ]
 
 
 class PlotDispatch(Dispatch):

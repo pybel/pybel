@@ -29,7 +29,12 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-def from_emmaa(model: str, *, date: Optional[str] = None, extension: Optional[str] = None) -> BELGraph:
+def from_emmaa(
+    model: str, *,
+    date: Optional[str] = None,
+    extension: Optional[str] = None,
+    suppress_warnings: bool = False,
+) -> BELGraph:
     """Get an EMMAA model as a BEL graph.
 
     Get the most recent COVID-19 model from EMMAA with the following:
@@ -52,17 +57,27 @@ def from_emmaa(model: str, *, date: Optional[str] = None, extension: Optional[st
         covid19_emmaa_graph = pybel.from_emmaa('covid19', '2020-04-23-17-44-57', extension='jsonl')
         covid19_emmaa_graph.summarize()
     """
-    statements = get_statements_from_emmaa(model=model, date=date, extension=extension)
+    statements = get_statements_from_emmaa(
+        model=model, date=date, extension=extension, suppress_warnings=suppress_warnings,
+    )
     return from_indra_statements(statements, name=model, version=date)
 
 
-def get_statements_from_emmaa(model: str, *, date: Optional[str] = None, extension: Optional[str] = None):
+def get_statements_from_emmaa(
+    model: str, *,
+    date: Optional[str] = None,
+    extension: Optional[str] = None,
+    suppress_warnings: bool = False,
+):
     """Get INDRA statements from EMMAA.
 
     :rtype: List[indra.statements.Statement]
     """
     from indra.statements import stmts_from_json
 
+    if suppress_warnings:
+        logging.getLogger('indra.assemblers.pybel.assembler').setLevel(logging.ERROR)
+        logging.getLogger('indra.sources.bel.processor').setLevel(logging.ERROR)
     if extension is None:
         extension = 'json'
 
@@ -85,7 +100,7 @@ def get_statements_from_emmaa(model: str, *, date: Optional[str] = None, extensi
     elif extension == 'gz':
         raise NotImplementedError
     else:
-        raise ValueError
+        raise ValueError(f'unhandled extension: {extension}')
 
 
 def _get_latest_date(model: str) -> str:
