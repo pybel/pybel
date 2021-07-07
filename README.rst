@@ -234,8 +234,7 @@ The development of PyBEL has been supported by several projects/organizations (i
 - `Enveda Biosciences <https://envedabio.com/>`_
 - `Fraunhofer Center for Machine Learning <https://www.cit.fraunhofer.de/de/zentren/maschinelles-lernen.html>`_
 - `Fraunhofer Institute for Algorithms and Scientific Computing (SCAI) <https://www.scai.fraunhofer.de>`_
-- `Harvard Program in Therapeutic Science - Laboratory of Systems
-   Pharmacology <https://hits.harvard.edu/the-program/laboratory-of-systems-pharmacology/>`_
+- `Harvard Program in Therapeutic Science - Laboratory of Systems Pharmacology <https://hits.harvard.edu/the-program/laboratory-of-systems-pharmacology>`_
 - `University of Bonn <https://www.uni-bonn.de>`_
 
 Funding
