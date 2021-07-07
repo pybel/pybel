@@ -3,15 +3,16 @@
 """Citation utilities for the database manager."""
 
 import logging
-import ratelimit
 import re
-import requests
 from datetime import date, datetime
 from functools import lru_cache
+from typing import Dict, Iterable, List, Optional, Set, Tuple, Union
+
+import ratelimit
+import requests
 from more_itertools import chunked
 from sqlalchemy import and_
 from tqdm.autonotebook import tqdm
-from typing import Dict, Iterable, List, Optional, Set, Tuple, Union
 
 from . import models
 from .cache_manager import Manager
