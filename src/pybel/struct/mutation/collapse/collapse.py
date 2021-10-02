@@ -55,6 +55,8 @@ def collapse_pair(graph, survivor: BaseEntity, victim: BaseEntity) -> None:
     if victim in graph:
         graph.remove_node(victim)
 
+    # TODO find all nodes that this node is a part of and rewrite them as well
+
 
 # TODO what happens when collapsing is not consistent? Need to build intermediate mappings and test their consistency.
 
