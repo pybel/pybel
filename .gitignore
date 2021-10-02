@@ -147,6 +147,10 @@ tags
 [._]*.un~
 
 .mypy_cache
+
+# Testing SBGN files
+sbgn_tests/*
+
 notebooks/hipathia_demo/covid19/covid19.bel.nodelink.json
 notebooks/hipathia_demo/hemekg/hemekg.bel.nodelink.json
 notebooks/hipathia_demo/cbn/source
