@@ -18,8 +18,8 @@ from ..nodelink import to_nodelink_jsons
 from ...struct import BELGraph
 
 __all__ = [
-    'to_html',
-    'to_html_file',
+    "to_html",
+    "to_html_file",
 ]
 
 
@@ -34,7 +34,7 @@ def to_html(graph: BELGraph, color_map: Optional[Mapping[str, str]] = None) -> s
     color_map = DEFAULT_COLOR_MAP if color_map is None else color_map
     render_template = build_template_renderer(__file__)
     return render_template(
-        'graph_template.html',
+        "graph_template.html",
         graph=to_nodelink_jsons(graph),
         color_map=json.dumps(color_map),
         number_nodes=graph.number_of_nodes(),
@@ -42,7 +42,7 @@ def to_html(graph: BELGraph, color_map: Optional[Mapping[str, str]] = None) -> s
     )
 
 
-@open_file(1, mode='w')
+@open_file(1, mode="w")
 def to_html_file(
     graph: BELGraph,
     file: Union[str, TextIO],

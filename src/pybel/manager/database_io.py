@@ -10,8 +10,8 @@ from sqlalchemy.exc import IntegrityError, OperationalError
 from .cache_manager import Manager
 
 __all__ = [
-    'to_database',
-    'from_database',
+    "to_database",
+    "from_database",
 ]
 
 logger = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ def to_database(
         return manager.insert_graph(graph, use_tqdm=use_tqdm)
     except (IntegrityError, OperationalError):
         manager.session.rollback()
-        logger.exception('Error storing graph')
+        logger.exception("Error storing graph")
     except Exception as e:
         manager.session.rollback()
         raise e

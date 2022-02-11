@@ -24,7 +24,7 @@ class TestSchema1(TestCase):
         """Help test a graph round trip through a file."""
         fd, path = tempfile.mkstemp()
 
-        with open(path, 'w') as file:
+        with open(path, "w") as file:
             to_cx_file(graph, file)
 
         with open(path) as file:

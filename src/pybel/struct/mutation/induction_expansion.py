@@ -8,14 +8,17 @@ from typing import Iterable, Union
 from .expansion import expand_all_node_neighborhoods
 from .expansion.upstream import expand_downstream_causal, expand_upstream_causal
 from .induction.neighborhood import get_subgraph_by_neighborhood
-from .induction.upstream import get_downstream_causal_subgraph, get_upstream_causal_subgraph
+from .induction.upstream import (
+    get_downstream_causal_subgraph,
+    get_upstream_causal_subgraph,
+)
 from ..pipeline import transformation
 from ...dsl import BaseEntity
 
 __all__ = [
-    'get_multi_causal_upstream',
-    'get_multi_causal_downstream',
-    'get_subgraph_by_second_neighbors',
+    "get_multi_causal_upstream",
+    "get_multi_causal_downstream",
+    "get_subgraph_by_second_neighbors",
 ]
 
 logger = logging.getLogger(__name__)

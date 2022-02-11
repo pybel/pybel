@@ -15,8 +15,8 @@ from ..struct import BELGraph
 from ..utils import parse_datetime
 
 __all__ = [
-    'QueryManager',
-    'graph_from_edges',
+    "QueryManager",
+    "graph_from_edges",
 ]
 
 
@@ -57,7 +57,7 @@ class QueryManager(LookupManager):
         q = self.session.query(Node)
 
         if bel:
-            q = q.filter(Node.bel.ilike(f'%{bel}%'))
+            q = q.filter(Node.bel.ilike(f"%{bel}%"))
 
         if type:
             q = q.filter(Node.type == type)
@@ -69,7 +69,7 @@ class QueryManager(LookupManager):
                 q = q.join(Namespace).filter(Namespace.keyword.ilike(namespace))
 
             if name:
-                q = q.filter(NamespaceEntry.name.ilike(f'%{name}%'))
+                q = q.filter(NamespaceEntry.name.ilike(f"%{name}%"))
 
         return q
 
@@ -140,15 +140,15 @@ class QueryManager(LookupManager):
 
         if source_function:
             source_node_table = aliased(Node)
-            query = query \
-                .join(source_node_table, Edge.source_id == source_node_table.id) \
-                .filter(source_node_table.type == source_function)
+            query = query.join(source_node_table, Edge.source_id == source_node_table.id).filter(
+                source_node_table.type == source_function
+            )
 
         if target_function:
             target_node_table = aliased(Node)
-            query = query \
-                .join(target_node_table, Edge.target_id == target_node_table.id) \
-                .filter(target_node_table.type == target_function)
+            query = query.join(target_node_table, Edge.target_id == target_node_table.id).filter(
+                target_node_table.type == target_function
+            )
 
         if source:
             if isinstance(source, str):
@@ -160,7 +160,7 @@ class QueryManager(LookupManager):
             elif isinstance(source, Node):
                 query = query.filter(Edge.source == source)
             else:
-                raise TypeError('Invalid type of {}: {}'.format(source, source.__class__.__name__))
+                raise TypeError("Invalid type of {}: {}".format(source, source.__class__.__name__))
 
         if target:
             if isinstance(target, str):
@@ -170,7 +170,7 @@ class QueryManager(LookupManager):
             elif isinstance(target, Node):
                 query = query.filter(Edge.target == target)
             else:
-                raise TypeError('Invalid type of {}: {}'.format(target, target.__class__.__name__))
+                raise TypeError("Invalid type of {}: {}".format(target, target.__class__.__name__))
 
         return query
 
@@ -208,7 +208,7 @@ class QueryManager(LookupManager):
         elif db_id and db:
             query = query.filter(Citation.db_id == db_id)
         elif db_id and not db:
-            raise ValueError('reference specified without type')
+            raise ValueError("reference specified without type")
 
         if name:
             query = query.filter(Citation.name.like(name))
@@ -242,7 +242,7 @@ class QueryManager(LookupManager):
     def query_induction(self, nodes: List[Node]) -> List[Edge]:
         """Get all edges between any of the given nodes (minimum length of 2)."""
         if len(nodes) < 2:
-            raise ValueError('not enough nodes given to induce over')
+            raise ValueError("not enough nodes given to induce over")
 
         return self.session.query(Edge).filter(self._edge_both_nodes(nodes)).all()
 

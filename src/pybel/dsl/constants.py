@@ -3,15 +3,38 @@
 """Convenient dictionaries for mapping constants to DSL classes."""
 
 from .node_classes import (
-    Abundance, BiologicalProcess, ComplexAbundance, CompositeAbundance, Gene, GeneFusion, MicroRna,
-    NamedComplexAbundance, Pathology, Population, Protein, ProteinFusion, Rna, RnaFusion,
+    Abundance,
+    BiologicalProcess,
+    ComplexAbundance,
+    CompositeAbundance,
+    Gene,
+    GeneFusion,
+    MicroRna,
+    NamedComplexAbundance,
+    Pathology,
+    Population,
+    Protein,
+    ProteinFusion,
+    Rna,
+    RnaFusion,
 )
-from ..constants import ABUNDANCE, BIOPROCESS, COMPLEX, COMPOSITE, GENE, MIRNA, PATHOLOGY, POPULATION, PROTEIN, RNA
+from ..constants import (
+    ABUNDANCE,
+    BIOPROCESS,
+    COMPLEX,
+    COMPOSITE,
+    GENE,
+    MIRNA,
+    PATHOLOGY,
+    POPULATION,
+    PROTEIN,
+    RNA,
+)
 
 __all__ = [
-    'FUNC_TO_DSL',
-    'FUNC_TO_FUSION_DSL',
-    'FUNC_TO_LIST_DSL',
+    "FUNC_TO_DSL",
+    "FUNC_TO_FUSION_DSL",
+    "FUNC_TO_LIST_DSL",
 ]
 
 FUNC_TO_DSL = {

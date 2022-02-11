@@ -9,19 +9,19 @@ from ....constants import CAUSAL_RELATIONS, RELATION
 from ....dsl import BaseEntity
 
 __all__ = [
-    'has_in_edges',
-    'has_causal_out_edges',
-    'has_causal_in_edges',
-    'has_causal_edges',
-    'has_out_edges',
-    'is_causal_central',
-    'is_causal_sink',
-    'is_causal_source',
-    'no_causal_out_edges',
-    'no_causal_in_edges',
-    'no_out_edges',
-    'no_in_edges',
-    'no_causal_edges',
+    "has_in_edges",
+    "has_causal_out_edges",
+    "has_causal_in_edges",
+    "has_causal_edges",
+    "has_out_edges",
+    "is_causal_central",
+    "is_causal_sink",
+    "is_causal_source",
+    "no_causal_out_edges",
+    "no_causal_in_edges",
+    "no_out_edges",
+    "no_in_edges",
+    "no_causal_edges",
 ]
 
 
@@ -32,10 +32,7 @@ def has_in_edges(graph: BELGraph, node: BaseEntity, edge_types: Set[str]) -> boo
     :param node: A BEL term
     :param edge_types: A collection of edge types to check against
     """
-    return any(
-        data[RELATION] in edge_types
-        for _, _, data in graph.in_edges(node, data=True)
-    )
+    return any(data[RELATION] in edge_types for _, _, data in graph.in_edges(node, data=True))
 
 
 def no_in_edges(graph: BELGraph, node: BaseEntity, edge_types: Set[str]) -> bool:
@@ -45,10 +42,7 @@ def no_in_edges(graph: BELGraph, node: BaseEntity, edge_types: Set[str]) -> bool
     :param node: A BEL term
     :param edge_types: A collection of edge types to check against
     """
-    return all(
-        data[RELATION] not in edge_types
-        for _, _, data in graph.in_edges(node, data=True)
-    )
+    return all(data[RELATION] not in edge_types for _, _, data in graph.in_edges(node, data=True))
 
 
 def has_out_edges(graph: BELGraph, node: BaseEntity, edge_types: Set[str]) -> bool:
@@ -58,10 +52,7 @@ def has_out_edges(graph: BELGraph, node: BaseEntity, edge_types: Set[str]) -> bo
     :param node: A BEL term
     :param edge_types: A collection of edge types to check against
     """
-    return any(
-        data[RELATION] in edge_types
-        for _, _, data in graph.out_edges(node, data=True)
-    )
+    return any(data[RELATION] in edge_types for _, _, data in graph.out_edges(node, data=True))
 
 
 def no_out_edges(graph: BELGraph, node: BaseEntity, edge_types: Set[str]) -> bool:
@@ -71,10 +62,7 @@ def no_out_edges(graph: BELGraph, node: BaseEntity, edge_types: Set[str]) -> boo
     :param node: A BEL term
     :param edge_types: A collection of edge types to check against
     """
-    return all(
-        data[RELATION] not in edge_types
-        for _, _, data in graph.out_edges(node, data=True)
-    )
+    return all(data[RELATION] not in edge_types for _, _, data in graph.out_edges(node, data=True))
 
 
 def has_causal_in_edges(graph: BELGraph, node: BaseEntity) -> bool:

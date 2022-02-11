@@ -12,7 +12,7 @@ from ..pipeline import Pipeline
 from ...dsl import BaseEntity
 
 __all__ = [
-    'Query',
+    "Query",
 ]
 
 logger = logging.getLogger(__name__)
@@ -47,14 +47,14 @@ class Query:
             raise TypeError(network_ids)
 
         if seeding is not None and not isinstance(seeding, Seeding):
-            raise TypeError('Not a Seeding: {}'.format(seeding))
+            raise TypeError("Not a Seeding: {}".format(seeding))
         self.seeding = seeding or Seeding()
 
         if pipeline is not None and not isinstance(pipeline, Pipeline):
-            raise TypeError('Not a pipeline: {}'.format(pipeline))
+            raise TypeError("Not a pipeline: {}".format(pipeline))
         self.pipeline = pipeline or Pipeline()
 
-    def append_network(self, network_id: int) -> 'Query':
+    def append_network(self, network_id: int) -> "Query":
         """Add a network to this query.
 
         :param network_id: The database identifier of the network
@@ -121,26 +121,30 @@ class Query:
 
     def _get_universe(self, manager):
         if not self.network_ids:
-            raise QueryMissingNetworksError('can not run query without network identifiers')
+            raise QueryMissingNetworksError("can not run query without network identifiers")
 
-        logger.debug('query universe consists of networks: %s', self.network_ids)
+        logger.debug("query universe consists of networks: %s", self.network_ids)
 
         universe = manager.get_graph_by_ids(self.network_ids)
-        logger.debug('query universe has %d nodes/%d edges', universe.number_of_nodes(), universe.number_of_edges())
+        logger.debug(
+            "query universe has %d nodes/%d edges",
+            universe.number_of_nodes(),
+            universe.number_of_edges(),
+        )
 
         return universe
 
     def to_json(self) -> Dict:
         """Return this query as a JSON object."""
         rv = {
-            'network_ids': self.network_ids,
+            "network_ids": self.network_ids,
         }
 
         if self.seeding:
-            rv['seeding'] = self.seeding.to_json()
+            rv["seeding"] = self.seeding.to_json()
 
         if self.pipeline:
-            rv['pipeline'] = self.pipeline.to_json()
+            rv["pipeline"] = self.pipeline.to_json()
 
         return rv
 
@@ -153,29 +157,21 @@ class Query:
         return json.dumps(self.to_json(), **kwargs)
 
     @staticmethod
-    def from_json(data: Mapping) -> 'Query':
+    def from_json(data: Mapping) -> "Query":
         """Load a query from a JSON dictionary.
 
         :param data: A JSON dictionary
         :raises: QueryMissingNetworksError
         """
-        network_ids = data.get('network_ids')
+        network_ids = data.get("network_ids")
         if network_ids is None:
             raise QueryMissingNetworksError('query JSON did not have key "network_ids"')
 
-        seeding_data = data.get('seeding')
-        seeding = (
-            Seeding.from_json(seeding_data)
-            if seeding_data is not None else
-            None
-        )
+        seeding_data = data.get("seeding")
+        seeding = Seeding.from_json(seeding_data) if seeding_data is not None else None
 
-        pipeline_data = data.get('pipeline')
-        pipeline = (
-            Pipeline.from_json(pipeline_data)
-            if pipeline_data is not None else
-            None
-        )
+        pipeline_data = data.get("pipeline")
+        pipeline = Pipeline.from_json(pipeline_data) if pipeline_data is not None else None
 
         return Query(
             network_ids=network_ids,
@@ -184,7 +180,7 @@ class Query:
         )
 
     @staticmethod
-    def load(file: TextIO) -> 'Query':
+    def load(file: TextIO) -> "Query":
         """Load a query from a JSON file.
 
         :raises: QueryMissingNetworksError
@@ -192,7 +188,7 @@ class Query:
         return Query.from_json(json.load(file))
 
     @staticmethod
-    def loads(s: str) -> 'Query':
+    def loads(s: str) -> "Query":
         """Load a query from a JSON string.
 
         :param s: A stringified JSON query
@@ -201,4 +197,4 @@ class Query:
         return Query.from_json(json.loads(s))
 
     def __str__(self):
-        return 'Query(networks={}, seeding={}, pipeline={})'.format(self.network_ids, self.seeding, self.pipeline)
+        return "Query(networks={}, seeding={}, pipeline={})".format(self.network_ids, self.seeding, self.pipeline)

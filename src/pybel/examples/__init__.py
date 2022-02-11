@@ -12,12 +12,12 @@ from .tloc_example import ras_tloc_graph
 from .vegf_example import vegf_graph
 
 __all__ = [
-    'egf_graph',
-    'sialic_acid_graph',
-    'statin_graph',
-    'braf_graph',
-    'homology_graph',
-    'ras_tloc_graph',
-    'ampk_graph',
-    'vegf_graph',
+    "egf_graph",
+    "sialic_acid_graph",
+    "statin_graph",
+    "braf_graph",
+    "homology_graph",
+    "ras_tloc_graph",
+    "ampk_graph",
+    "vegf_graph",
 ]

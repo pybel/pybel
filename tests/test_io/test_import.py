@@ -12,18 +12,42 @@ from pathlib import Path
 
 import pybel
 from pybel import (
-    BELGraph, from_bel_script, from_bel_script_url, from_bytes, from_nodelink, from_nodelink_file, from_pickle,
-    to_bel_script_lines, to_bytes, to_csv, to_graphml, to_gsea, to_nodelink, to_nodelink_file, to_pickle, to_sif,
+    BELGraph,
+    from_bel_script,
+    from_bel_script_url,
+    from_bytes,
+    from_nodelink,
+    from_nodelink_file,
+    from_pickle,
+    to_bel_script_lines,
+    to_bytes,
+    to_csv,
+    to_graphml,
+    to_gsea,
+    to_nodelink,
+    to_nodelink_file,
+    to_pickle,
+    to_sif,
 )
 from pybel.config import PYBEL_MINIMUM_IMPORT_VERSION
 from pybel.constants import (
-    ANNOTATIONS, CITATION, DECREASES, DIRECTLY_DECREASES, EVIDENCE, GRAPH_ANNOTATION_MIRIAM, GRAPH_PYBEL_VERSION,
-    INCREASES, RELATION,
+    ANNOTATIONS,
+    CITATION,
+    DECREASES,
+    DIRECTLY_DECREASES,
+    EVIDENCE,
+    GRAPH_ANNOTATION_MIRIAM,
+    GRAPH_PYBEL_VERSION,
+    INCREASES,
+    RELATION,
 )
 from pybel.dsl import BaseEntity, Gene, Protein
 from pybel.examples.sialic_acid_example import sialic_acid_graph
 from pybel.exceptions import (
-    BELSyntaxError, InvalidFunctionSemantic, MissingCitationException, MissingNamespaceRegexWarning,
+    BELSyntaxError,
+    InvalidFunctionSemantic,
+    MissingCitationException,
+    MissingNamespaceRegexWarning,
 )
 from pybel.io.exc import ImportVersionWarning, import_version_message_fmt
 from pybel.io.line_utils import parse_lines
@@ -33,18 +57,32 @@ from pybel.parser import BELParser
 from pybel.struct.summary import get_syntax_errors
 from pybel.testing.cases import TemporaryCacheClsMixin, TemporaryCacheMixin
 from pybel.testing.constants import (
-    test_bel_isolated, test_bel_misordered, test_bel_simple, test_bel_slushy, test_bel_thorough, test_bel_with_obo,
+    test_bel_isolated,
+    test_bel_misordered,
+    test_bel_simple,
+    test_bel_slushy,
+    test_bel_thorough,
+    test_bel_with_obo,
 )
 from pybel.testing.mocks import mock_bel_resources
 from tests.constants import (
-    BelReconstitutionMixin, TestTokenParserBase, akt1, casp8, citation_1, egfr, evidence_1, fadd, test_citation_dict,
-    test_evidence_text, test_set_evidence,
+    BelReconstitutionMixin,
+    TestTokenParserBase,
+    akt1,
+    casp8,
+    citation_1,
+    egfr,
+    evidence_1,
+    fadd,
+    test_citation_dict,
+    test_evidence_text,
+    test_set_evidence,
 )
 
-logging.getLogger('requests').setLevel(logging.WARNING)
+logging.getLogger("requests").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
-testan1 = '1'
+testan1 = "1"
 
 
 class TestExampleInterchange(unittest.TestCase):
@@ -61,7 +99,7 @@ class TestExampleInterchange(unittest.TestCase):
         for node in sialic_acid_graph:
             if not isinstance(node, Protein):
                 continue
-            if node.namespace == 'HGNC' and node.name == 'CD33' and not node.variants:
+            if node.namespace == "HGNC" and node.name == "CD33" and not node.variants:
                 self.assertIsNotNone(node.xrefs)
                 self.assertEqual(1, len(node.xrefs))
 
@@ -88,7 +126,7 @@ class TestExampleInterchange(unittest.TestCase):
     def test_example_pickle_gz(self):
         """Test the round-trip through a gzipped pickle."""
         with tempfile.TemporaryDirectory() as directory:
-            path = os.path.join(directory, 'test.gz')
+            path = os.path.join(directory, "test.gz")
             pybel.to_pickle_gz(sialic_acid_graph, path)
             graph = pybel.from_pickle_gz(path)
         self._help_test_equal(graph)
@@ -130,7 +168,7 @@ class TestExampleInterchange(unittest.TestCase):
     def test_thorough_sbel_gzip_path(self):
         """Test round trip through a SBEL gzipped file."""
         with tempfile.TemporaryDirectory() as directory:
-            path = os.path.join(directory, 'test.gzip')
+            path = os.path.join(directory, "test.gzip")
             pybel.to_sbel_gz(sialic_acid_graph, path)
             graph = pybel.from_sbel_gz(path)
         self._help_test_equal(graph)
@@ -189,7 +227,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
     def test_thorough_graphml(self):
         handle, path = tempfile.mkstemp()
 
-        with open(path, 'wb') as f:
+        with open(path, "wb") as f:
             to_graphml(self.thorough_graph, f)
 
         os.close(handle)
@@ -198,7 +236,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
     def test_thorough_csv(self):
         handle, path = tempfile.mkstemp()
 
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             to_csv(self.thorough_graph, f)
 
         os.close(handle)
@@ -207,7 +245,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
     def test_thorough_sif(self):
         handle, path = tempfile.mkstemp()
 
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             to_sif(self.thorough_graph, f)
 
         os.close(handle)
@@ -216,7 +254,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
     def test_thorough_gsea(self):
         handle, path = tempfile.mkstemp()
 
-        with open(path, 'w') as f:
+        with open(path, "w") as f:
             to_gsea(self.thorough_graph, f)
 
         os.close(handle)
@@ -279,9 +317,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
             RELATION: INCREASES,
             CITATION: citation_1,
             EVIDENCE: evidence_1,
-            ANNOTATIONS: {
-                'TESTAN1': {testan1: True}
-            }
+            ANNOTATIONS: {"TESTAN1": {testan1: True}},
         }
         self.assert_has_edge(self.misordered_graph, akt1, egfr, only=True, **e1)
 
@@ -289,9 +325,7 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
             RELATION: DECREASES,
             CITATION: citation_1,
             EVIDENCE: evidence_1,
-            ANNOTATIONS: {
-                'TESTAN1': {testan1: True}
-            }
+            ANNOTATIONS: {"TESTAN1": {testan1: True}},
         }
         self.assert_has_edge(self.misordered_graph, egfr, fadd, only=True, **e2)
 
@@ -300,23 +334,23 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
             CITATION: citation_1,
             EVIDENCE: evidence_1,
             ANNOTATIONS: {
-                'TESTAN1': {testan1: True},
+                "TESTAN1": {testan1: True},
             },
         }
         self.assert_has_edge(self.misordered_graph, egfr, casp8, only=True, **e3)
 
 
 namespace_to_term = {
-    'TESTNS': {
+    "TESTNS": {
         (None, "1"): "GRP",
         (None, "2"): "GRP",
     }
 }
 
 annotation_to_term = {
-    'TestAnnotation1': {'A', 'B', 'C'},
-    'TestAnnotation2': {'X', 'Y', 'Z'},
-    'TestAnnotation3': {'D', 'E', 'F'},
+    "TestAnnotation1": {"A", "B", "C"},
+    "TestAnnotation2": {"X", "Y", "Z"},
+    "TestAnnotation3": {"D", "E", "F"},
 }
 
 
@@ -327,37 +361,43 @@ class TestFull(TestTokenParserBase):
             graph=BELGraph(),  # gets overwritten in each test
             namespace_to_term_to_encoding=namespace_to_term,
             annotation_to_term=annotation_to_term,
-            namespace_to_pattern={'dbSNP': re.compile('rs[0-9]*')},
+            namespace_to_pattern={"dbSNP": re.compile("rs[0-9]*")},
         )
 
     def setUp(self):
         self.parser.clear()
         self.parser.graph = BELGraph()
-        self.graph.annotation_list.update({
-            'TestAnnotation1': {'A', 'B', 'C'},
-            'TestAnnotation2': {'X', 'Y', 'Z'},
-            'TestAnnotation3': {'D', 'E', 'F'},
-        })
+        self.graph.annotation_list.update(
+            {
+                "TestAnnotation1": {"A", "B", "C"},
+                "TestAnnotation2": {"X", "Y", "Z"},
+                "TestAnnotation3": {"D", "E", "F"},
+            }
+        )
         self.parser.graph = self.graph
-        self.assertIn(GRAPH_ANNOTATION_MIRIAM, self.graph.graph, msg=f'Graph metadata: {self.graph.graph}')
+        self.assertIn(
+            GRAPH_ANNOTATION_MIRIAM,
+            self.graph.graph,
+            msg=f"Graph metadata: {self.graph.graph}",
+        )
 
     def test_regex_match(self):
-        line = 'g(dbSNP:rs10234) -- g(dbSNP:rs10235)'
+        line = "g(dbSNP:rs10234) -- g(dbSNP:rs10235)"
         self.add_default_provenance()
         self.parser.parseString(line)
-        self.assertIn(Gene('dbSNP', 'rs10234'), self.parser.graph)
-        self.assertIn(Gene('dbSNP', 'rs10235'), self.parser.graph)
+        self.assertIn(Gene("dbSNP", "rs10234"), self.parser.graph)
+        self.assertIn(Gene("dbSNP", "rs10235"), self.parser.graph)
 
     def test_regex_mismatch(self):
-        statement = 'g(dbSNP:10234) -- g(dbSNP:rr10235)'
+        statement = "g(dbSNP:10234) -- g(dbSNP:rr10235)"
         with self.assertRaises(MissingNamespaceRegexWarning):
             self.parser.parseString(statement)
 
     def test_semantic_failure(self):
         self.assertIsNotNone(self.parser.concept_parser.namespace_to_name_to_encoding)
-        self.assertIn('TESTNS', self.parser.concept_parser.namespace_to_name_to_encoding)
-        self.assertIn('1', self.parser.concept_parser.namespace_to_name_to_encoding['TESTNS'])
-        self.assertIn('2', self.parser.concept_parser.namespace_to_name_to_encoding['TESTNS'])
+        self.assertIn("TESTNS", self.parser.concept_parser.namespace_to_name_to_encoding)
+        self.assertIn("1", self.parser.concept_parser.namespace_to_name_to_encoding["TESTNS"])
+        self.assertIn("2", self.parser.concept_parser.namespace_to_name_to_encoding["TESTNS"])
         statement = "bp(TESTNS:1) -- p(TESTNS:2)"
         with self.assertRaises(InvalidFunctionSemantic):
             self.parser.parseString(statement)
@@ -367,7 +407,7 @@ class TestFull(TestTokenParserBase):
             test_set_evidence,
             'SET TestAnnotation1 = "A"',
             'SET TestAnnotation2 = "X"',
-            'g(TESTNS:1) -> g(TESTNS:2)',
+            "g(TESTNS:1) -> g(TESTNS:2)",
         ]
 
         with self.assertRaises(MissingCitationException):
@@ -379,17 +419,17 @@ class TestFull(TestTokenParserBase):
         statements = [
             'SET TestAnnotation1 = "A"',
             'SET TestAnnotation2 = "X"',
-            'g(TESTNS:1) -> g(TESTNS:2)',
+            "g(TESTNS:1) -> g(TESTNS:2)",
         ]
 
         self.parser.parse_lines(statements)
 
         self.assertEqual(2, len(self.parser.control_parser.annotations))
-        self.assertIn('TestAnnotation1', self.parser.control_parser.annotations)
-        self.assertIn('TestAnnotation2', self.parser.control_parser.annotations)
+        self.assertIn("TestAnnotation1", self.parser.control_parser.annotations)
+        self.assertIn("TestAnnotation2", self.parser.control_parser.annotations)
 
-        test_node_1 = Gene(namespace='TESTNS', name='1')
-        test_node_2 = Gene(namespace='TESTNS', name='2')
+        test_node_1 = Gene(namespace="TESTNS", name="1")
+        test_node_2 = Gene(namespace="TESTNS", name="2")
 
         self.assertEqual(2, self.graph.number_of_nodes())
         self.assertIn(test_node_1, self.graph)
@@ -400,8 +440,8 @@ class TestFull(TestTokenParserBase):
         kwargs = {
             RELATION: INCREASES,
             ANNOTATIONS: {
-                'TestAnnotation1': {'A': True},
-                'TestAnnotation2': {'X': True},
+                "TestAnnotation1": {"A": True},
+                "TestAnnotation2": {"X": True},
             },
             EVIDENCE: test_evidence_text,
             CITATION: test_citation_dict,
@@ -416,32 +456,32 @@ class TestFull(TestTokenParserBase):
         statements = [
             'SET TestAnnotation1 = {"A","B"}',
             'SET TestAnnotation2 = "X"',
-            'g(TESTNS:1) -> g(TESTNS:2)'
+            "g(TESTNS:1) -> g(TESTNS:2)",
         ]
 
         self.parser.parse_lines(statements)
 
         self.assertEqual(2, len(self.parser.control_parser.annotations))
-        self.assertIn('TestAnnotation1', self.parser.control_parser.annotations)
-        self.assertIn('TestAnnotation2', self.parser.control_parser.annotations)
-        self.assertEqual(2, len(self.parser.control_parser.annotations['TestAnnotation1']))
+        self.assertIn("TestAnnotation1", self.parser.control_parser.annotations)
+        self.assertIn("TestAnnotation2", self.parser.control_parser.annotations)
+        self.assertEqual(2, len(self.parser.control_parser.annotations["TestAnnotation1"]))
         self.assertEqual(
             [
-                Entity(namespace='TestAnnotation1', identifier='A'),
-                Entity(namespace='TestAnnotation1', identifier='B'),
+                Entity(namespace="TestAnnotation1", identifier="A"),
+                Entity(namespace="TestAnnotation1", identifier="B"),
             ],
-            self.parser.control_parser.annotations['TestAnnotation1'],
+            self.parser.control_parser.annotations["TestAnnotation1"],
         )
-        self.assertEqual(1, len(self.parser.control_parser.annotations['TestAnnotation2']))
+        self.assertEqual(1, len(self.parser.control_parser.annotations["TestAnnotation2"]))
         self.assertEqual(
             [
-                Entity(namespace='TestAnnotation2', identifier='X'),
+                Entity(namespace="TestAnnotation2", identifier="X"),
             ],
-            self.parser.control_parser.annotations['TestAnnotation2'],
+            self.parser.control_parser.annotations["TestAnnotation2"],
         )
 
-        test_node_1_dict = Gene(namespace='TESTNS', name='1')
-        test_node_2_dict = Gene(namespace='TESTNS', name='2')
+        test_node_1_dict = Gene(namespace="TESTNS", name="1")
+        test_node_2_dict = Gene(namespace="TESTNS", name="2")
 
         self.assertEqual(2, self.parser.graph.number_of_nodes())
         self.assertIn(test_node_1_dict, self.graph)
@@ -453,8 +493,8 @@ class TestFull(TestTokenParserBase):
             RELATION: INCREASES,
             EVIDENCE: test_evidence_text,
             ANNOTATIONS: {
-                'TestAnnotation1': {'A': True, 'B': True},
-                'TestAnnotation2': {'X': True},
+                "TestAnnotation1": {"A": True, "B": True},
+                "TestAnnotation2": {"X": True},
             },
             CITATION: test_citation_dict,
         }
@@ -467,17 +507,17 @@ class TestFull(TestTokenParserBase):
             'SET TestAnnotation1 = {"A","B"}',
             'SET TestAnnotation2 = "X"',
             'SET TestAnnotation3 = {"D","E"}',
-            'g(TESTNS:1) -> g(TESTNS:2)',
+            "g(TESTNS:1) -> g(TESTNS:2)",
         ]
         self.parser.parse_lines(statements)
 
         self.assertEqual(3, len(self.parser.control_parser.annotations))
-        self.assertIn('TestAnnotation1', self.parser.control_parser.annotations)
-        self.assertIn('TestAnnotation2', self.parser.control_parser.annotations)
-        self.assertIn('TestAnnotation3', self.parser.control_parser.annotations)
+        self.assertIn("TestAnnotation1", self.parser.control_parser.annotations)
+        self.assertIn("TestAnnotation2", self.parser.control_parser.annotations)
+        self.assertIn("TestAnnotation3", self.parser.control_parser.annotations)
 
-        test_node_1 = Gene(namespace='TESTNS', name='1')
-        test_node_2 = Gene(namespace='TESTNS', name='2')
+        test_node_1 = Gene(namespace="TESTNS", name="1")
+        test_node_2 = Gene(namespace="TESTNS", name="2")
 
         self.assertEqual(2, self.parser.graph.number_of_nodes())
         self.assertIn(test_node_1, self.graph)
@@ -489,9 +529,9 @@ class TestFull(TestTokenParserBase):
             RELATION: INCREASES,
             EVIDENCE: test_evidence_text,
             ANNOTATIONS: {
-                'TestAnnotation1': {'A': True, 'B': True},
-                'TestAnnotation2': {'X': True},
-                'TestAnnotation3': {'D': True, 'E': True},
+                "TestAnnotation1": {"A": True, "B": True},
+                "TestAnnotation2": {"X": True},
+                "TestAnnotation3": {"D": True, "E": True},
             },
             CITATION: test_citation_dict,
         }
@@ -504,7 +544,7 @@ class TestRandom(unittest.TestCase):
         graph = BELGraph()
 
         # Much with stuff that would normally be set
-        graph.graph[GRAPH_PYBEL_VERSION] = '0.0.0'
+        graph.graph[GRAPH_PYBEL_VERSION] = "0.0.0"
 
         graph_bytes = to_bytes(graph)
 
@@ -512,8 +552,8 @@ class TestRandom(unittest.TestCase):
             from_bytes(graph_bytes)
 
             self.assertEqual(
-                import_version_message_fmt.format('0.0.0', PYBEL_MINIMUM_IMPORT_VERSION),
-                str(cm.exception)
+                import_version_message_fmt.format("0.0.0", PYBEL_MINIMUM_IMPORT_VERSION),
+                str(cm.exception),
             )
 
 
@@ -523,15 +563,15 @@ class TestNomenclature(TemporaryCacheMixin):
     def test_bep_0008(self):
         """Test parsing works right"""
         graph = from_bel_script(test_bel_with_obo, manager=self.manager)
-        self.assertIn('hgnc', graph.namespace_pattern)
-        self.assertEqual(r'\d+', graph.namespace_pattern['hgnc'])
+        self.assertIn("hgnc", graph.namespace_pattern)
+        self.assertEqual(r"\d+", graph.namespace_pattern["hgnc"])
 
-        self.assertEqual(0, graph.number_of_warnings(), msg=',\n'.join(map(str, graph.warnings)))
+        self.assertEqual(0, graph.number_of_warnings(), msg=",\n".join(map(str, graph.warnings)))
 
         self.assertEqual(2, graph.number_of_nodes())
-        self.assertIn(Protein(namespace='hgnc', identifier='391', name='AKT1'), graph)
-        self.assertIn(Protein(namespace='hgnc', identifier='3236', name='EGFR'), graph)
+        self.assertIn(Protein(namespace="hgnc", identifier="391", name="AKT1"), graph)
+        self.assertIn(Protein(namespace="hgnc", identifier="3236", name="EGFR"), graph)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -5,23 +5,35 @@
 from typing import Iterable, Mapping
 
 from .edge_filters import invert_edge_predicate
-from .edge_predicates import edge_predicate, has_authors, has_pubmed, true_edge_predicate
+from .edge_predicates import (
+    edge_predicate,
+    has_authors,
+    has_pubmed,
+    true_edge_predicate,
+)
 from .typing import EdgePredicate
 from ..graph import BELGraph
-from ...constants import ANNOTATIONS, CAUSAL_RELATIONS, CITATION, CITATION_AUTHORS, IDENTIFIER, RELATION
+from ...constants import (
+    ANNOTATIONS,
+    CAUSAL_RELATIONS,
+    CITATION,
+    CITATION_AUTHORS,
+    IDENTIFIER,
+    RELATION,
+)
 from ...dsl import BaseEntity
 from ...typing import EdgeData, Strings
 
 __all__ = [
-    'build_pmid_exclusion_filter',
-    'build_annotation_dict_all_filter',
-    'build_annotation_dict_any_filter',
-    'build_upstream_edge_predicate',
-    'build_downstream_edge_predicate',
-    'build_relation_predicate',
-    'build_pmid_inclusion_filter',
-    'build_pmid_exclusion_filter',
-    'build_author_inclusion_filter',
+    "build_pmid_exclusion_filter",
+    "build_annotation_dict_all_filter",
+    "build_annotation_dict_any_filter",
+    "build_upstream_edge_predicate",
+    "build_downstream_edge_predicate",
+    "build_relation_predicate",
+    "build_pmid_inclusion_filter",
+    "build_pmid_exclusion_filter",
+    "build_author_inclusion_filter",
 ]
 
 
@@ -76,11 +88,7 @@ def _annotation_dict_any_filter(edge_data: EdgeData, query: Mapping[str, Iterabl
     if annotations is None:
         return False
 
-    return any(
-        key in annotations and value in annotations[key]
-        for key, values in query.items()
-        for value in values
-    )
+    return any(key in annotations and value in annotations[key] for key, values in query.items() for value in values)
 
 
 def build_annotation_dict_any_filter(annotations: Mapping[str, Iterable[str]]) -> EdgePredicate:
@@ -126,6 +134,7 @@ def build_downstream_edge_predicate(nodes: Iterable[BaseEntity]) -> EdgePredicat
 def build_relation_predicate(relations: Strings) -> EdgePredicate:
     """Build an edge predicate that passes for edges with the given relation."""
     if isinstance(relations, str):
+
         @edge_predicate
         def relation_predicate(edge_data: EdgeData) -> bool:
             """Pass for relations matching the enclosed value."""
@@ -151,6 +160,7 @@ def build_pmid_inclusion_filter(pmids: Strings) -> EdgePredicate:
     :param pmids: A PubMed identifier or list of PubMed identifiers to filter for
     """
     if isinstance(pmids, str):
+
         @edge_predicate
         def pmid_inclusion_filter(edge_data: EdgeData) -> bool:
             """Pass for edges with PubMed citations matching the contained PubMed identifier."""
@@ -181,6 +191,7 @@ def build_pmid_exclusion_filter(pmids: Strings) -> EdgePredicate:
 def build_author_inclusion_filter(authors: Strings) -> EdgePredicate:
     """Build an edge predicate that passes for edges with citations written by the given author(s)."""
     if isinstance(authors, str):
+
         @edge_predicate
         def author_filter(edge_data: EdgeData) -> bool:
             """Pass for edges with citations with an author that matches the contained author."""
@@ -192,10 +203,7 @@ def build_author_inclusion_filter(authors: Strings) -> EdgePredicate:
         @edge_predicate
         def author_filter(edge_data: EdgeData) -> bool:
             """Pass for edges with citations with an author that matches one or more of the contained authors."""
-            return has_authors(edge_data) and any(
-                author in edge_data[CITATION][CITATION_AUTHORS]
-                for author in authors
-            )
+            return has_authors(edge_data) and any(author in edge_data[CITATION][CITATION_AUTHORS] for author in authors)
 
     else:
         raise TypeError

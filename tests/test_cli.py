@@ -12,7 +12,7 @@ from click.testing import CliRunner
 
 from pybel import Manager, cli
 from pybel.constants import METADATA_NAME, PYBEL_CONTEXT_TAG
-from pybel.io import from_nodelink, from_bel_script, from_pickle
+from pybel.io import from_bel_script, from_nodelink, from_pickle
 from pybel.manager.database_io import from_database
 from pybel.testing.cases import FleetingTemporaryCacheMixin
 from pybel.testing.constants import test_bel_simple, test_bel_thorough
@@ -32,29 +32,38 @@ class TestCli(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
     def test_convert(self, mock_get):
         """Test conversion via the CLI."""
         with self.runner.isolated_filesystem():
-            test_csv = os.path.abspath('test.csv')
-            test_gpickle = os.path.abspath('test.gpickle')
-            test_canon = os.path.abspath('test.bel')
+            test_csv = os.path.abspath("test.csv")
+            test_gpickle = os.path.abspath("test.gpickle")
+            test_canon = os.path.abspath("test.bel")
 
             args = [
-                'convert',
+                "convert",
                 # Input
-                '--path', test_bel_thorough,
-                '--connection', self.connection,
+                "--path",
+                test_bel_thorough,
+                "--connection",
+                self.connection,
                 # Outputs
-                '--csv', test_csv,
-                '--pickle', test_gpickle,
-                '--bel', test_canon,
-                '--store',
-                '--allow-nested'
+                "--csv",
+                test_csv,
+                "--pickle",
+                test_gpickle,
+                "--bel",
+                test_canon,
+                "--store",
+                "--allow-nested",
             ]
 
             result = self.runner.invoke(cli.main, args)
-            self.assertEqual(0, result.exit_code, msg='{}\n{}\n{}'.format(
-                result.exc_info[0],
-                result.exc_info[1],
-                traceback.format_tb(result.exc_info[2])
-            ))
+            self.assertEqual(
+                0,
+                result.exit_code,
+                msg="{}\n{}\n{}".format(
+                    result.exc_info[0],
+                    result.exc_info[1],
+                    traceback.format_tb(result.exc_info[2]),
+                ),
+            )
 
             self.assertTrue(os.path.exists(test_csv))
 
@@ -63,19 +72,23 @@ class TestCli(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
 
             manager = Manager(connection=self.connection)
             self.bel_thorough_reconstituted(
-                from_database(expected_test_thorough_metadata[METADATA_NAME], manager=manager))
+                from_database(expected_test_thorough_metadata[METADATA_NAME], manager=manager)
+            )
 
     @mock_bel_resources
     def test_convert_json(self, mock_get):
         with self.runner.isolated_filesystem():
-            test_json = os.path.abspath('test.json')
+            test_json = os.path.abspath("test.json")
 
             args = [
-                'convert',
-                '--path', test_bel_thorough,
-                '--json', test_json,
-                '--connection', self.connection,
-                '--allow-nested'
+                "convert",
+                "--path",
+                test_bel_thorough,
+                "--json",
+                test_json,
+                "--connection",
+                self.connection,
+                "--allow-nested",
             ]
 
             result = self.runner.invoke(cli.main, args)
@@ -84,14 +97,14 @@ class TestCli(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
             with open(test_json) as f:
                 self.bel_thorough_reconstituted(from_nodelink(json.load(f)))
 
-    @unittest.skipUnless('NEO_PATH' in os.environ, 'Need environmental variable $NEO_PATH')
+    @unittest.skipUnless("NEO_PATH" in os.environ, "Need environmental variable $NEO_PATH")
     @mock_bel_resources
     def test_neo4j_remote(self, mock_get):
-        from py2neo.database.status import GraphError
         from py2neo import Graph
+        from py2neo.database.status import GraphError
 
-        test_context = 'PYBEL_TEST_CTX'
-        neo_path = os.environ['NEO_PATH']
+        test_context = "PYBEL_TEST_CTX"
+        neo_path = os.environ["NEO_PATH"]
 
         try:
             neo = Graph(neo_path)
@@ -103,14 +116,18 @@ class TestCli(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
         else:
             with self.runner.isolated_filesystem():
                 args = [
-                    'convert',
-                    '--path', test_bel_simple,
-                    '--connection', self.connection,
-                    '--neo', neo_path,
-                    '--neo-context', test_context
+                    "convert",
+                    "--path",
+                    test_bel_simple,
+                    "--connection",
+                    self.connection,
+                    "--neo",
+                    neo_path,
+                    "--neo-context",
+                    test_context,
                 ]
                 self.runner.invoke(cli.main, args)
 
                 q = 'match (n)-[r]->() where r.{}="{}" return count(n) as count'.format(PYBEL_CONTEXT_TAG, test_context)
-                count = neo.data(q)[0]['count']
+                count = neo.data(q)[0]["count"]
                 self.assertEqual(14, count)

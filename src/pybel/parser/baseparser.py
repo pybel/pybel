@@ -6,9 +6,9 @@ import logging
 import time
 from typing import Iterable, List
 
-from pyparsing import ParseResults, ParserElement
+from pyparsing import ParserElement, ParseResults
 
-__all__ = ['BaseParser']
+__all__ = ["BaseParser"]
 
 logger = logging.getLogger(__name__)
 
@@ -35,10 +35,7 @@ class BaseParser(object):
 
     def parse_lines(self, lines: Iterable[str]) -> List[ParseResults]:
         """Parse multiple lines in succession."""
-        return [
-            self.parseString(line, line_number)
-            for line_number, line in enumerate(lines)
-        ]
+        return [self.parseString(line, line_number) for line_number, line in enumerate(lines)]
 
     def parseString(self, line: str, line_number: int = 0) -> ParseResults:  # noqa: N802
         """Parse a string with the language represented by this parser.
@@ -57,4 +54,4 @@ class BaseParser(object):
         """Streamline the language represented by this parser to make queries run faster."""
         t = time.time()
         self.language.streamline()
-        logger.info('streamlined %s in %.02f seconds', self.__class__.__name__, time.time() - t)
+        logger.info("streamlined %s in %.02f seconds", self.__class__.__name__, time.time() - t)

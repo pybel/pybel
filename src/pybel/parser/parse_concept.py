@@ -14,12 +14,15 @@ from .constants import NamespaceTermEncodingMapping
 from .utils import ns, quote
 from ..constants import DIRTY, IDENTIFIER, NAME, NAMESPACE
 from ..exceptions import (
-    MissingDefaultNameWarning, MissingNamespaceNameWarning, MissingNamespaceRegexWarning, NakedNameWarning,
+    MissingDefaultNameWarning,
+    MissingNamespaceNameWarning,
+    MissingNamespaceRegexWarning,
+    NakedNameWarning,
     UndefinedNamespaceWarning,
 )
 
 __all__ = [
-    'ConceptParser',
+    "ConceptParser",
 ]
 
 logger = logging.getLogger(__name__)
@@ -48,13 +51,9 @@ class ConceptParser(BaseParser):
         :param allow_naked_names: If true, turn off naked namespace failures
         """
         self.identifier_fqualified = (
-            ns(NAMESPACE)
-            + Suppress(':')
-            + (ns | quote)(IDENTIFIER)
-            + Suppress('!')
-            + (ns | quote)(NAME)
+            ns(NAMESPACE) + Suppress(":") + (ns | quote)(IDENTIFIER) + Suppress("!") + (ns | quote)(NAME)
         )
-        self.identifier_qualified = ns(NAMESPACE) + Suppress(':') + (ns | quote)(NAME)
+        self.identifier_qualified = ns(NAMESPACE) + Suppress(":") + (ns | quote)(NAME)
 
         if namespace_to_term_to_encoding is not None:
             self.namespace_to_name_to_encoding = defaultdict(dict)
@@ -75,17 +74,19 @@ class ConceptParser(BaseParser):
             self.identifier_qualified.setParseAction(self.handle_identifier_qualified)
 
         self.namespace_to_pattern = namespace_to_pattern or {}
-        if ensure_go and 'go' not in self.namespace_to_name_to_encoding:
-            self.namespace_to_pattern['go'] = re.compile(r'^\d+$')
+        if ensure_go and "go" not in self.namespace_to_name_to_encoding:
+            self.namespace_to_pattern["go"] = re.compile(r"^\d+$")
 
         self.default_namespace = set(default_namespace) if default_namespace is not None else None
         self.allow_naked_names = allow_naked_names
 
         self.identifier_bare = (ns | quote)(NAME)
         self.identifier_bare.setParseAction(
-            self.handle_namespace_default if self.default_namespace else
-            self.handle_namespace_lenient if self.allow_naked_names else
-            self.handle_namespace_invalid,
+            self.handle_namespace_default
+            if self.default_namespace
+            else self.handle_namespace_lenient
+            if self.allow_naked_names
+            else self.handle_namespace_invalid,
         )
 
         super().__init__(
@@ -136,7 +137,7 @@ class ConceptParser(BaseParser):
         """Handle parsing an identifier for the default namespace."""
         name = tokens[NAME]
         if not self.default_namespace:
-            raise ValueError('Default namespace is not set')
+            raise ValueError("Default namespace is not set")
         if name not in self.default_namespace:
             raise MissingDefaultNameWarning(self.get_line_number(), line, position, name)
         return tokens
@@ -145,7 +146,7 @@ class ConceptParser(BaseParser):
     def handle_namespace_lenient(line: str, position: int, tokens: ParseResults) -> ParseResults:
         """Handle parsing an identifier for names missing a namespace that are outside the default namespace."""
         tokens[NAMESPACE] = DIRTY
-        logger.debug('Naked namespace: [%d] %s', position, line)
+        logger.debug("Naked namespace: [%d] %s", position, line)
         return tokens
 
     def handle_namespace_invalid(self, line: str, position: int, tokens: ParseResults) -> None:

@@ -3,12 +3,15 @@
 """Utilities for :mod:`pybel.struct`."""
 
 from ..constants import (
-    GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_PATTERN, GRAPH_ANNOTATION_URL, GRAPH_NAMESPACE_PATTERN,
+    GRAPH_ANNOTATION_LIST,
+    GRAPH_ANNOTATION_PATTERN,
+    GRAPH_ANNOTATION_URL,
+    GRAPH_NAMESPACE_PATTERN,
     GRAPH_NAMESPACE_URL,
 )
 
 __all__ = [
-    'update_metadata',
+    "update_metadata",
 ]
 
 

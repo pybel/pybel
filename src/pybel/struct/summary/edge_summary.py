@@ -15,17 +15,17 @@ from ...language import Entity
 from ...utils import CanonicalEdge, canonicalize_edge
 
 __all__ = [
-    'iter_annotation_value_pairs',
-    'iter_annotation_values',
-    'get_annotation_values_by_annotation',
-    'get_annotation_values',
-    'count_relations',
-    'get_annotations',
-    'count_annotations',
-    'get_unused_annotations',
-    'get_unused_list_annotation_values',
-    'get_metaedge_to_key',
-    'iter_sample_metaedges',
+    "iter_annotation_value_pairs",
+    "iter_annotation_values",
+    "get_annotation_values_by_annotation",
+    "get_annotation_values",
+    "count_relations",
+    "get_annotations",
+    "count_annotations",
+    "get_unused_annotations",
+    "get_unused_list_annotation_values",
+    "get_metaedge_to_key",
+    "iter_sample_metaedges",
 ]
 
 
@@ -93,10 +93,7 @@ def count_relations(graph: BELGraph) -> Counter:
     :param graph: A BEL graph
     :return: A Counter from {relation type: frequency}
     """
-    return Counter(
-        data[RELATION]
-        for _, _, data in graph.edges(data=True)
-    )
+    return Counter(data[RELATION] for _, _, data in graph.edges(data=True))
 
 
 def get_unused_annotations(graph: BELGraph) -> Set[str]:
@@ -131,12 +128,7 @@ def _annotation_iter_helper(graph: BELGraph) -> Iterable[str]:
 
     :param graph: A BEL graph
     """
-    return (
-        key
-        for _, _, data in graph.edges(data=True)
-        if ANNOTATIONS in data
-        for key in data[ANNOTATIONS]
-    )
+    return (key for _, _, data in graph.edges(data=True) if ANNOTATIONS in data for key in data[ANNOTATIONS])
 
 
 def get_unused_list_annotation_values(graph: BELGraph) -> Mapping[str, Set[str]]:
@@ -153,7 +145,9 @@ def get_unused_list_annotation_values(graph: BELGraph) -> Mapping[str, Set[str]]
     return result
 
 
-def get_metaedge_to_key(graph: BELGraph) -> Mapping[CanonicalEdge, Set[Tuple[BaseEntity, BaseEntity, str]]]:
+def get_metaedge_to_key(
+    graph: BELGraph,
+) -> Mapping[CanonicalEdge, Set[Tuple[BaseEntity, BaseEntity, str]]]:
     """Get all edge types."""
     rv = defaultdict(set)
     for u, v, k, d in graph.edges(keys=True, data=True):

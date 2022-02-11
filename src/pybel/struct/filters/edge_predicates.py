@@ -9,31 +9,43 @@ from .typing import EdgePredicate
 from .utils import part_has_modifier
 from ..graph import BELGraph
 from ...constants import (
-    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSAL_RELATIONS, CITATION, CITATION_AUTHORS, DEGRADATION,
-    DIRECT_CAUSAL_RELATIONS, EVIDENCE, NAMESPACE, POLAR_RELATIONS, RELATION, SOURCE_MODIFIER, TARGET_MODIFIER,
+    ACTIVITY,
+    ANNOTATIONS,
+    ASSOCIATION,
+    CAUSAL_RELATIONS,
+    CITATION,
+    CITATION_AUTHORS,
+    DEGRADATION,
+    DIRECT_CAUSAL_RELATIONS,
+    EVIDENCE,
+    NAMESPACE,
+    POLAR_RELATIONS,
+    RELATION,
+    SOURCE_MODIFIER,
+    TARGET_MODIFIER,
     TRANSLOCATION,
 )
 from ...dsl import BaseEntity, BiologicalProcess, Pathology
 from ...typing import EdgeData
 
 __all__ = [
-    'edge_predicate',
-    'true_edge_predicate',
-    'false_edge_predicate',
-    'has_provenance',
-    'has_pubmed',
-    'has_pmc',
-    'has_authors',
-    'is_causal_relation',
-    'not_causal_relation',
-    'is_direct_causal_relation',
-    'is_associative_relation',
-    'has_polarity',
-    'edge_has_activity',
-    'edge_has_degradation',
-    'edge_has_translocation',
-    'edge_has_annotation',
-    'has_pathology_causal',
+    "edge_predicate",
+    "true_edge_predicate",
+    "false_edge_predicate",
+    "has_provenance",
+    "has_pubmed",
+    "has_pmc",
+    "has_authors",
+    "is_causal_relation",
+    "not_causal_relation",
+    "is_direct_causal_relation",
+    "is_associative_relation",
+    "has_polarity",
+    "edge_has_activity",
+    "edge_has_degradation",
+    "edge_has_translocation",
+    "edge_has_annotation",
+    "has_pathology_causal",
 ]
 
 DictEdgePredicate = Callable[[EdgeData], bool]
@@ -78,18 +90,24 @@ def has_provenance(edge_data: EdgeData) -> bool:
 @edge_predicate
 def has_pubmed(edge_data: EdgeData) -> bool:
     """Check if the edge has a PubMed citation."""
-    return CITATION in edge_data and edge_data[CITATION][NAMESPACE].lower() in ('pubmed', 'pmid')
+    return CITATION in edge_data and edge_data[CITATION][NAMESPACE].lower() in (
+        "pubmed",
+        "pmid",
+    )
 
 
 @edge_predicate
 def has_pmc(edge_data: EdgeData) -> bool:
     """Check if the edge has a PMC citation."""
-    return CITATION in edge_data and edge_data[CITATION][NAMESPACE].lower() in ('pmc', 'pmcid')
+    return CITATION in edge_data and edge_data[CITATION][NAMESPACE].lower() in (
+        "pmc",
+        "pmcid",
+    )
 
 
 CITATION_PREDICATES = {
-    'pubmed': has_pubmed,
-    'pmc': has_pmc,
+    "pubmed": has_pubmed,
+    "pmc": has_pmc,
 }
 
 
@@ -137,9 +155,8 @@ def _has_modifier(edge_data: EdgeData, modifier: str) -> bool:
                         :data:`pybel.constants.DEGRADATION`, or :data:`pybel.constants.TRANSLOCATION`.
     :return: Does either the subject or object have the given modifier
     """
-    return (
-        part_has_modifier(edge_data, SOURCE_MODIFIER, modifier)
-        or part_has_modifier(edge_data, TARGET_MODIFIER, modifier)
+    return part_has_modifier(edge_data, SOURCE_MODIFIER, modifier) or part_has_modifier(
+        edge_data, TARGET_MODIFIER, modifier
     )
 
 

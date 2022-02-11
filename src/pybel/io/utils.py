@@ -26,7 +26,7 @@ def raise_for_not_bel(graph):
     :raises TypeError: If the argument is not a BEL graph
     """
     if not isinstance(graph, BELGraph):
-        raise TypeError('Not a BELGraph: {}'.format(graph))
+        raise TypeError("Not a BELGraph: {}".format(graph))
 
 
 def ensure_version(graph: BELGraph, check_version: bool = True) -> BELGraph:

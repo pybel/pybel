@@ -12,12 +12,15 @@ import networkx as nx
 from pybel.examples import sialic_acid_graph, statin_graph
 from pybel.struct.mutation.induction.paths import get_random_path
 from pybel.struct.mutation.induction.random_subgraph import (
-    _helper, get_graph_with_random_edges, get_random_node, get_random_subgraph,
+    _helper,
+    get_graph_with_random_edges,
+    get_random_node,
+    get_random_subgraph,
 )
 from pybel.testing.generate import generate_random_graph
 
 
-@unittest.skipIf(sys.version_info < (3,), 'Will not support random operations on python2')
+@unittest.skipIf(sys.version_info < (3,), "Will not support random operations on python2")
 class TestRandom(unittest.TestCase):
     """Test random graph induction functions."""
 
@@ -43,10 +46,7 @@ class TestRandom(unittest.TestCase):
         graph.add_edge(1, 5)
 
         n = 30000
-        r = Counter(
-            get_random_node(graph, set(), invert_degrees=False)
-            for _ in range(n)
-        )
+        r = Counter(get_random_node(graph, set(), invert_degrees=False) for _ in range(n))
 
         degree_sum = 4 + 1 + 1 + 1 + 1
 
@@ -66,10 +66,7 @@ class TestRandom(unittest.TestCase):
         graph.add_edge(1, 5)
 
         n = 30000
-        r = Counter(
-            get_random_node(graph, set(), invert_degrees=True)
-            for _ in range(n)
-        )
+        r = Counter(get_random_node(graph, set(), invert_degrees=True) for _ in range(n))
 
         degree_sum = (1 / 4) + (1 / 1) + (1 / 1) + (1 / 1) + (1 / 1)
 
@@ -100,12 +97,18 @@ class TestRandom(unittest.TestCase):
         self.assertEqual(n_edges, graph.number_of_edges())
 
         sg_1 = get_random_subgraph(graph, number_edges=250, number_seed_edges=5, invert_degrees=False)
-        self.assertEqual(graph.number_of_edges(), sg_1.number_of_edges(),
-                         msg='since graph is too small, the subgraph should contain the whole thing')
+        self.assertEqual(
+            graph.number_of_edges(),
+            sg_1.number_of_edges(),
+            msg="since graph is too small, the subgraph should contain the whole thing",
+        )
 
         sg_2 = get_random_subgraph(graph, number_edges=250, number_seed_edges=5, invert_degrees=True)
-        self.assertEqual(graph.number_of_edges(), sg_2.number_of_edges(),
-                         msg='since graph is too small, the subgraph should contain the whole thing')
+        self.assertEqual(
+            graph.number_of_edges(),
+            sg_2.number_of_edges(),
+            msg="since graph is too small, the subgraph should contain the whole thing",
+        )
 
     def test_helper_failure(self):
         graph = nx.MultiDiGraph()

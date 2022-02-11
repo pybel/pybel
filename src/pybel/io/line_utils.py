@@ -8,30 +8,35 @@ import re
 import time
 from typing import Any, Iterable, List, Mapping, Optional, Tuple
 
+from bel_resources import ResourceError, split_file_to_annotations_and_definitions
 from pyparsing import ParseException
 from sqlalchemy.exc import OperationalError
 from tqdm.autonotebook import tqdm
 
-from bel_resources import ResourceError, split_file_to_annotations_and_definitions
 from ..constants import INVERSE_DOCUMENT_KEYS, REQUIRED_METADATA
 from ..exceptions import (
-    BELParserWarning, BELSyntaxError, InconsistentDefinitionError, MalformedMetadataException, MissingMetadataException,
-    PlaceholderAminoAcidWarning, VersionFormatWarning,
+    BELParserWarning,
+    BELSyntaxError,
+    InconsistentDefinitionError,
+    MalformedMetadataException,
+    MissingMetadataException,
+    PlaceholderAminoAcidWarning,
+    VersionFormatWarning,
 )
 from ..manager import Manager
 from ..parser import BELParser, MetadataParser
 from ..struct.graph import BELGraph
 
 __all__ = [
-    'parse_lines',
+    "parse_lines",
 ]
 
 logger = logging.getLogger(__name__)
-parser_logger = logging.getLogger('pybel.parser')
+parser_logger = logging.getLogger("pybel.parser")
 
 METADATA_LINE_RE = re.compile(r"(SET\s+DOCUMENT|DEFINE\s+NAMESPACE|DEFINE\s+ANNOTATION)")
-LOG_FMT = '%d:%d %s %s'
-LOG_FMT_PATH = '%s:%d:%d %s %s'
+LOG_FMT = "%d:%d %s %s"
+LOG_FMT_PATH = "%s:%d:%d %s %s"
 
 
 def parse_lines(
@@ -128,7 +133,11 @@ def parse_lines(
         tqdm_kwargs=tqdm_kwargs,
     )
 
-    logger.info('Network has %d nodes and %d edges', graph.number_of_nodes(), graph.number_of_edges())
+    logger.info(
+        "Network has %d nodes and %d edges",
+        graph.number_of_nodes(),
+        graph.number_of_edges(),
+    )
 
 
 def parse_document(
@@ -163,7 +172,10 @@ def parse_document(
 
     graph.document.update(metadata_parser.document_metadata)
 
-    logger.info('Finished parsing document section in %.02f seconds', time.time() - parse_document_start_time)
+    logger.info(
+        "Finished parsing document section in %.02f seconds",
+        time.time() - parse_document_start_time,
+    )
 
 
 def parse_definitions(
@@ -189,7 +201,7 @@ def parse_definitions(
     parse_definitions_start_time = time.time()
 
     if use_tqdm:
-        _tqdm_kwargs = dict(desc='Definitions', leave=False)
+        _tqdm_kwargs = dict(desc="Definitions", leave=False)
         if tqdm_kwargs:
             _tqdm_kwargs.update(tqdm_kwargs)
         enumerated_lines = tqdm(list(enumerated_lines), **_tqdm_kwargs)
@@ -202,7 +214,7 @@ def parse_definitions(
             raise e
         except OperationalError as e:
             parser_logger.warning(
-                'Need to upgrade database. See http://pybel.readthedocs.io/en/latest/installation.html#upgrading',
+                "Need to upgrade database. See http://pybel.readthedocs.io/en/latest/installation.html#upgrading",
             )
             raise e
         except Exception as e:
@@ -212,22 +224,23 @@ def parse_definitions(
                 raise exc from e
 
     graph.namespace_url.update(metadata_parser.namespace_url_dict)
-    graph.namespace_pattern.update({
-        keyword: pattern.pattern
-        for keyword, pattern in metadata_parser.namespace_to_pattern.items()
-    })
+    graph.namespace_pattern.update(
+        {keyword: pattern.pattern for keyword, pattern in metadata_parser.namespace_to_pattern.items()}
+    )
 
     graph.annotation_url.update(metadata_parser.annotation_url_dict)
-    graph.annotation_pattern.update({
-        keyword: pattern.pattern
-        for keyword, pattern in metadata_parser.annotation_to_pattern.items()
-    })
+    graph.annotation_pattern.update(
+        {keyword: pattern.pattern for keyword, pattern in metadata_parser.annotation_to_pattern.items()}
+    )
     graph.annotation_list.update(metadata_parser.annotation_to_local)
 
-    logger.info('Finished parsing definitions section in %.02f seconds', time.time() - parse_definitions_start_time)
+    logger.info(
+        "Finished parsing definitions section in %.02f seconds",
+        time.time() - parse_definitions_start_time,
+    )
 
     metadata_parser.ensure_resources()
-    logger.info('Finished ensuring namespaces in cache')
+    logger.info("Finished ensuring namespaces in cache")
 
 
 def parse_statements(
@@ -249,8 +262,8 @@ def parse_statements(
 
     if use_tqdm:
         tqdm_kwargs = {} if tqdm_kwargs is None else dict(tqdm_kwargs)
-        tqdm_kwargs.setdefault('desc', 'Statements')
-        tqdm_kwargs.setdefault('leave', False)
+        tqdm_kwargs.setdefault("desc", "Statements")
+        tqdm_kwargs.setdefault("leave", False)
         enumerated_lines = tqdm(list(enumerated_lines), **tqdm_kwargs)
 
     for line_number, line in enumerated_lines:
@@ -268,11 +281,11 @@ def parse_statements(
             _log_parse_exception(graph, exc)
             graph.add_warning(exc, bel_parser.get_annotations())
         except Exception:
-            parser_logger.exception(LOG_FMT, line_number, 0, 'General Failure', line)
+            parser_logger.exception(LOG_FMT, line_number, 0, "General Failure", line)
             raise
 
     logger.info(
-        'Parsed statements section in %.02f seconds with %d warnings',
+        "Parsed statements section in %.02f seconds with %d warnings",
         time.time() - parse_statements_start_time,
         len(graph.warnings),
     )
@@ -280,7 +293,13 @@ def parse_statements(
 
 def _log_parse_exception(graph: BELGraph, exc: BELParserWarning):
     if graph.path:
-        s = LOG_FMT_PATH % (os.path.basename(graph.path), exc.line_number, exc.position, exc.__class__.__name__, exc)
+        s = LOG_FMT_PATH % (
+            os.path.basename(graph.path),
+            exc.line_number,
+            exc.position,
+            exc.__class__.__name__,
+            exc,
+        )
     else:
         s = LOG_FMT % (exc.line_number, exc.position, exc.__class__.__name__, exc)
     tqdm.write(s)

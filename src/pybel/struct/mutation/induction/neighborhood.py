@@ -11,7 +11,7 @@ from ...utils import update_metadata
 from ....dsl import BaseEntity
 
 __all__ = [
-    'get_subgraph_by_neighborhood',
+    "get_subgraph_by_neighborhood",
 ]
 
 

@@ -38,8 +38,8 @@ class TestGetters(unittest.TestCase):
     def test_get_tf_pairs(self):
         """Test iterating over transcription factor pairs."""
         graph = BELGraph()
-        p1, p2, p3 = (Protein('test', str(i)) for i in range(1, 4))
-        r4, r5, r6 = (Rna('test', str(j)) for j in range(4, 7))
+        p1, p2, p3 = (Protein("test", str(i)) for i in range(1, 4))
+        r4, r5, r6 = (Rna("test", str(j)) for j in range(4, 7))
 
         g4 = r4.get_gene()
         self.assertIsNotNone(g4)
@@ -54,9 +54,14 @@ class TestGetters(unittest.TestCase):
         self.assertEqual({p1, p2, p3, r4, r5, r6, g4, g5, c14, c25}, set(graph))
 
         expected_edges = [
-            (c14, r4), (p1, c14), (g4, c14),
-            (c25, r5), (p2, c25), (g5, c25),
-            (p3, r6), (r6, p3),
+            (c14, r4),
+            (p1, c14),
+            (g4, c14),
+            (c25, r5),
+            (p2, c25),
+            (g5, c25),
+            (p3, r6),
+            (r6, p3),
         ]
         sorted_expected_edges = sorted(expected_edges, key=_bel_pair_key)
         sorted_actual_edges = sorted(graph.edges(), key=_bel_pair_key)

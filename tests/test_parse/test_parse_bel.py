@@ -8,28 +8,99 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import (
-    ABUNDANCE, ACTIVITY, BIOPROCESS, CELL_SECRETION, CELL_SURFACE_EXPRESSION, COMPLEX, COMPOSITE, CONCEPT, DEGRADATION,
-    DIRECTLY_INCREASES, DIRTY, EFFECT, FRAGMENT, FROM_LOC, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE,
-    FUSION_START, FUSION_STOP, GENE, HAS_VARIANT, HGVS, IDENTIFIER, KIND, LOCATION, MEMBERS, MIRNA, MODIFIER, NAME,
-    NAMESPACE, PARTNER_3P, PARTNER_5P, PART_OF, PATHOLOGY, POPULATION, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P, REACTANTS,
-    REACTION, RELATION, RNA, SOURCE, TARGET, TARGET_MODIFIER, TO_LOC, TRANSLOCATION, VARIANTS,
+    ABUNDANCE,
+    ACTIVITY,
+    BIOPROCESS,
+    CELL_SECRETION,
+    CELL_SURFACE_EXPRESSION,
+    COMPLEX,
+    COMPOSITE,
+    CONCEPT,
+    DEGRADATION,
+    DIRECTLY_INCREASES,
+    DIRTY,
+    EFFECT,
+    FRAGMENT,
+    FROM_LOC,
+    FUNCTION,
+    FUSION,
+    FUSION_MISSING,
+    FUSION_REFERENCE,
+    FUSION_START,
+    FUSION_STOP,
+    GENE,
+    HAS_VARIANT,
+    HGVS,
+    IDENTIFIER,
+    KIND,
+    LOCATION,
+    MEMBERS,
+    MIRNA,
+    MODIFIER,
+    NAME,
+    NAMESPACE,
+    PART_OF,
+    PARTNER_3P,
+    PARTNER_5P,
+    PATHOLOGY,
+    POPULATION,
+    PRODUCTS,
+    PROTEIN,
+    RANGE_3P,
+    RANGE_5P,
+    REACTANTS,
+    REACTION,
+    RELATION,
+    RNA,
+    SOURCE,
+    TARGET,
+    TARGET_MODIFIER,
+    TO_LOC,
+    TRANSLOCATION,
+    VARIANTS,
 )
 from pybel.dsl import (
-    Fragment, Population, abundance, bioprocess, cell_surface_expression, complex_abundance, composite_abundance,
-    fragment, fusion_range, gene, gene_fusion, gmod, hgvs, mirna, named_complex_abundance, pathology, pmod, protein,
-    protein_fusion, reaction, rna, rna_fusion, secretion, translocation,
+    Fragment,
+    Population,
+    abundance,
+    bioprocess,
+    cell_surface_expression,
+    complex_abundance,
+    composite_abundance,
+    fragment,
+    fusion_range,
+    gene,
+    gene_fusion,
+    gmod,
+    hgvs,
+    mirna,
+    named_complex_abundance,
+    pathology,
+    pmod,
+    protein,
+    protein_fusion,
+    reaction,
+    rna,
+    rna_fusion,
+    secretion,
+    translocation,
 )
 from pybel.dsl.namespaces import hgnc
 from pybel.exceptions import MalformedTranslocationWarning
 from pybel.language import Entity, activity_mapping
 from pybel.parser import BELParser
 from pybel.parser.parse_bel import modifier_po_to_dict
-from tests.constants import TestTokenParserBase, assert_has_edge, assert_has_node, update_provenance
+from tests.constants import (
+    TestTokenParserBase,
+    assert_has_edge,
+    assert_has_node,
+    update_provenance,
+)
 
 logger = logging.getLogger(__name__)
 
-TEST_GENE_VARIANT = 'c.308G>A'
-TEST_PROTEIN_VARIANT = 'p.Phe508del'
+TEST_GENE_VARIANT = "c.308G>A"
+TEST_PROTEIN_VARIANT = "p.Phe508del"
 
 
 class TestAbundance(TestTokenParserBase):
@@ -39,7 +110,7 @@ class TestAbundance(TestTokenParserBase):
         self.parser.clear()
         self.parser.general_abundance.setParseAction(self.parser.handle_term)
 
-        self.expected_node = abundance(namespace='CHEBI', name='oxygen atom')
+        self.expected_node = abundance(namespace="CHEBI", name="oxygen atom")
         self.expected_canonical_bel = 'a(CHEBI:"oxygen atom")'
 
     def _test_abundance_helper(self, statement):
@@ -49,7 +120,11 @@ class TestAbundance(TestTokenParserBase):
         self.assertIn(self.expected_node, self.graph)
         self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node))
 
-        self.assertEqual({}, modifier_po_to_dict(result), msg='The modifier dictionary should be empty')
+        self.assertEqual(
+            {},
+            modifier_po_to_dict(result),
+            msg="The modifier dictionary should be empty",
+        )
 
     def test_abundance(self):
         """Test short/long abundance name."""
@@ -62,13 +137,10 @@ class TestAbundance(TestTokenParserBase):
         expected_result = {
             FUNCTION: ABUNDANCE,
             CONCEPT: {
-                NAMESPACE: 'CHEBI',
-                NAME: 'oxygen atom',
+                NAMESPACE: "CHEBI",
+                NAME: "oxygen atom",
             },
-            LOCATION: {
-                NAMESPACE: 'GO',
-                NAME: 'intracellular'
-            }
+            LOCATION: {NAMESPACE: "GO", NAME: "intracellular"},
         }
 
         self.assertEqual(expected_result, result.asDict())
@@ -77,9 +149,7 @@ class TestAbundance(TestTokenParserBase):
         self.assertEqual(self.expected_canonical_bel, self.graph.node_to_bel(self.expected_node))
 
         modifier = modifier_po_to_dict(result)
-        expected_modifier = {
-            LOCATION: {NAMESPACE: 'GO', NAME: 'intracellular'}
-        }
+        expected_modifier = {LOCATION: {NAMESPACE: "GO", NAME: "intracellular"}}
         self.assertEqual(expected_modifier, modifier)
 
     def test_abundance_with_location(self):
@@ -97,7 +167,7 @@ class TestAbundanceLabeled(TestTokenParserBase):
         self.parser.clear()
         self.parser.general_abundance.setParseAction(self.parser.handle_term)
 
-        self.expected_node = abundance(namespace='CHEBI', name='oxygen atom', identifier='CHEBI:25805')
+        self.expected_node = abundance(namespace="CHEBI", name="oxygen atom", identifier="CHEBI:25805")
         self.expected_canonical_bel = 'a(CHEBI:"CHEBI:25805" ! "oxygen atom")'
 
     def _test_abundance_helper(self, statement):
@@ -108,12 +178,19 @@ class TestAbundanceLabeled(TestTokenParserBase):
         node = list(self.graph)[0]
         self.assertEqual(self.expected_canonical_bel, node.as_bel())
 
-        self.assertEqual({}, modifier_po_to_dict(result), msg='The modifier dictionary should be empty')
+        self.assertEqual(
+            {},
+            modifier_po_to_dict(result),
+            msg="The modifier dictionary should be empty",
+        )
 
     def test_abundance(self):
         """Test short/long abundance name."""
-        for s in ('a(CHEBI:"CHEBI:25805"!"oxygen atom")', 'abundance(CHEBI:"CHEBI:25805"!"oxygen atom")',
-                  'abundance(CHEBI:"CHEBI:25805" ! "oxygen atom")'):
+        for s in (
+            'a(CHEBI:"CHEBI:25805"!"oxygen atom")',
+            'abundance(CHEBI:"CHEBI:25805"!"oxygen atom")',
+            'abundance(CHEBI:"CHEBI:25805" ! "oxygen atom")',
+        ):
             with self.subTest(s=s):
                 self._test_abundance_helper(s)
 
@@ -123,14 +200,14 @@ class TestAbundanceLabeled(TestTokenParserBase):
         expected_result = {
             FUNCTION: ABUNDANCE,
             CONCEPT: {
-                NAMESPACE: 'CHEBI',
-                NAME: 'oxygen atom',
-                IDENTIFIER: 'CHEBI:25805',
+                NAMESPACE: "CHEBI",
+                NAME: "oxygen atom",
+                IDENTIFIER: "CHEBI:25805",
             },
             LOCATION: {
-                NAMESPACE: 'GO',
-                NAME: 'intracellular',
-            }
+                NAMESPACE: "GO",
+                NAME: "intracellular",
+            },
         }
 
         self.assertEqual(expected_result, result.asDict())
@@ -141,8 +218,8 @@ class TestAbundanceLabeled(TestTokenParserBase):
         modifier = modifier_po_to_dict(result)
         expected_modifier = {
             LOCATION: {
-                NAMESPACE: 'GO',
-                NAME: 'intracellular',
+                NAMESPACE: "GO",
+                NAME: "intracellular",
             }
         }
         self.assertEqual(expected_modifier, modifier)
@@ -166,126 +243,129 @@ class TestGene(TestTokenParserBase):
 
     def test_gene_simple(self):
         """Test parsing a simple gene."""
-        statement = 'g(HGNC:AKT1)'
+        statement = "g(HGNC:AKT1)"
 
         result = self.parser.gene.parseString(statement)
-        expected_list = [GENE, ['HGNC', 'AKT1']]
+        expected_list = [GENE, ["HGNC", "AKT1"]]
         self.assertEqual(expected_list, result.asList())
 
         expected_dict = {
             FUNCTION: GENE,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1',
+                NAMESPACE: "HGNC",
+                NAME: "AKT1",
             },
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = gene('HGNC', 'AKT1')
+        expected_node = gene("HGNC", "AKT1")
         self.assert_has_node(expected_node)
-        self.assertEqual('g(HGNC:AKT1)', self.graph.node_to_bel(expected_node))
+        self.assertEqual("g(HGNC:AKT1)", self.graph.node_to_bel(expected_node))
         self.assertEqual(1, len(self.graph))
 
     def test_gene_with_location(self):
         """Test parsing a gene with a location."""
-        statement = 'g(HGNC:AKT1, loc(GO:intracellular))'
+        statement = "g(HGNC:AKT1, loc(GO:intracellular))"
 
         result = self.parser.gene.parseString(statement)
 
         expected_dict = {
             FUNCTION: GENE,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1',
+                NAMESPACE: "HGNC",
+                NAME: "AKT1",
             },
             LOCATION: {
-                NAMESPACE: 'GO',
-                NAME: 'intracellular',
+                NAMESPACE: "GO",
+                NAME: "intracellular",
             },
         }
 
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = gene('HGNC', 'AKT1')
+        expected_node = gene("HGNC", "AKT1")
         self.assert_has_node(expected_node)
-        self.assertEqual('g(HGNC:AKT1)', self.graph.node_to_bel(expected_node))
+        self.assertEqual("g(HGNC:AKT1)", self.graph.node_to_bel(expected_node))
 
     def test_gene_with_hgvs(self):
         """Test parsing a gene with a variant."""
-        statement = 'g(HGNC:AKT1, var(p.Phe508del))'
+        statement = "g(HGNC:AKT1, var(p.Phe508del))"
         result = self.parser.gene.parseString(statement)
 
         expected_result = {
             FUNCTION: GENE,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1',
+                NAMESPACE: "HGNC",
+                NAME: "AKT1",
             },
             VARIANTS: [hgvs(TEST_PROTEIN_VARIANT)],
         }
         self.assertEqual(expected_result, result.asDict())
 
-        expected_node = gene('HGNC', 'AKT1', variants=hgvs(TEST_PROTEIN_VARIANT))
+        expected_node = gene("HGNC", "AKT1", variants=hgvs(TEST_PROTEIN_VARIANT))
         self.assert_has_node(expected_node)
         self.assertEqual('g(HGNC:AKT1, var("p.Phe508del"))', self.graph.node_to_bel(expected_node))
 
-        parent = gene('HGNC', 'AKT1')
+        parent = gene("HGNC", "AKT1")
         self.assert_has_node(parent)
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_gene_with_gmod(self):
         """Test parsing a gene with a gene modification."""
-        statement = 'geneAbundance(HGNC:AKT1,gmod(M))'
+        statement = "geneAbundance(HGNC:AKT1,gmod(M))"
         result = self.parser.gene.parseString(statement)
 
         expected_result = {
             FUNCTION: GENE,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1',
+                NAMESPACE: "HGNC",
+                NAME: "AKT1",
             },
-            VARIANTS: [gmod('Me')]
+            VARIANTS: [gmod("Me")],
         }
         self.assertEqual(expected_result, result.asDict())
 
-        expected_node = gene('HGNC', 'AKT1', variants=gmod('Me'))
+        expected_node = gene("HGNC", "AKT1", variants=gmod("Me"))
         self.assert_has_node(expected_node)
-        self.assertEqual('g(HGNC:AKT1, gmod(go:0006306 ! "DNA methylation"))', self.graph.node_to_bel(expected_node))
+        self.assertEqual(
+            'g(HGNC:AKT1, gmod(go:0006306 ! "DNA methylation"))',
+            self.graph.node_to_bel(expected_node),
+        )
 
-        parent = gene('HGNC', 'AKT1')
+        parent = gene("HGNC", "AKT1")
         self.assert_has_node(parent)
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_gene_with_substitution(self):
         """Test BEL 1.0 gene substitution"""
-        statement = 'g(HGNC:AKT1,sub(G,308,A))'
+        statement = "g(HGNC:AKT1,sub(G,308,A))"
         result = self.parser.gene.parseString(statement)
 
         expected_result = gene(
-            name='AKT1',
-            namespace='HGNC',
+            name="AKT1",
+            namespace="HGNC",
             variants=[hgvs(TEST_GENE_VARIANT)],
         )
         self.assertEqual(dict(expected_result), result.asDict())
 
-        expected_node = gene('HGNC', 'AKT1', variants=hgvs("c.308G>A"))
+        expected_node = gene("HGNC", "AKT1", variants=hgvs("c.308G>A"))
         self.assert_has_node(expected_node)
         self.assertEqual('g(HGNC:AKT1, var("c.308G>A"))', self.graph.node_to_bel(expected_node))
 
-        parent = gene('HGNC', 'AKT1')
+        parent = gene("HGNC", "AKT1")
         self.assert_has_node(parent)
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_gene_with_substitution_and_location(self):
         """Test BEL 1.0 gene substitution with location tag"""
-        statement = 'g(HGNC:AKT1,sub(G,308,A),loc(GO:intracellular))'
+        statement = "g(HGNC:AKT1,sub(G,308,A),loc(GO:intracellular))"
         result = self.parser.gene.parseString(statement)
 
         expected_result = {
             FUNCTION: GENE,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1',
+                NAMESPACE: "HGNC",
+                NAME: "AKT1",
             },
             VARIANTS: [
                 {
@@ -294,49 +374,55 @@ class TestGene(TestTokenParserBase):
                 },
             ],
             LOCATION: {
-                NAMESPACE: 'GO',
-                NAME: 'intracellular',
+                NAMESPACE: "GO",
+                NAME: "intracellular",
             },
         }
         self.assertEqual(expected_result, result.asDict())
 
-        expected_node = gene('HGNC', 'AKT1', variants=hgvs("c.308G>A"))
+        expected_node = gene("HGNC", "AKT1", variants=hgvs("c.308G>A"))
         self.assert_has_node(expected_node)
         self.assertEqual('g(HGNC:AKT1, var("c.308G>A"))', self.graph.node_to_bel(expected_node))
 
-        parent = gene('HGNC', 'AKT1')
+        parent = gene("HGNC", "AKT1")
         self.assert_has_node(parent)
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_multiple_variants(self):
         """Test multiple variants"""
-        statement = 'g(HGNC:AKT1, var(p.Phe508del), sub(G,308,A), var(c.1521_1523delCTT))'
+        statement = "g(HGNC:AKT1, var(p.Phe508del), sub(G,308,A), var(c.1521_1523delCTT))"
         result = self.parser.gene.parseString(statement)
 
         expected_result = {
             FUNCTION: GENE,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1',
+                NAMESPACE: "HGNC",
+                NAME: "AKT1",
             },
             VARIANTS: [
                 hgvs(TEST_PROTEIN_VARIANT),
                 hgvs(TEST_GENE_VARIANT),
-                hgvs('c.1521_1523delCTT'),
+                hgvs("c.1521_1523delCTT"),
             ],
         }
         self.assertEqual(expected_result, result.asDict())
 
-        expected_node = gene('HGNC', 'AKT1', variants=[
-            hgvs('c.1521_1523delCTT'), hgvs(TEST_GENE_VARIANT), hgvs(TEST_PROTEIN_VARIANT)
-        ])
+        expected_node = gene(
+            "HGNC",
+            "AKT1",
+            variants=[
+                hgvs("c.1521_1523delCTT"),
+                hgvs(TEST_GENE_VARIANT),
+                hgvs(TEST_PROTEIN_VARIANT),
+            ],
+        )
         self.assert_has_node(expected_node)
         self.assertEqual(
             'g(HGNC:AKT1, var("c.1521_1523delCTT"), var("c.308G>A"), var("p.Phe508del"))',
             self.graph.node_to_bel(expected_node),
         )
 
-        parent = gene('HGNC', 'AKT1')
+        parent = gene("HGNC", "AKT1")
         self.assert_has_node(parent)
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
 
@@ -345,34 +431,38 @@ class TestGene(TestTokenParserBase):
         expected_dict = {
             FUNCTION: GENE,
             FUSION: {
-                PARTNER_5P: {CONCEPT: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'}},
-                PARTNER_3P: {CONCEPT: {NAMESPACE: 'HGNC', NAME: 'ERG'}},
+                PARTNER_5P: {CONCEPT: {NAMESPACE: "HGNC", NAME: "TMPRSS2"}},
+                PARTNER_3P: {CONCEPT: {NAMESPACE: "HGNC", NAME: "ERG"}},
                 RANGE_5P: {
-                    FUSION_REFERENCE: 'c',
+                    FUSION_REFERENCE: "c",
                     FUSION_START: 1,
                     FUSION_STOP: 79,
-
                 },
                 RANGE_3P: {
-                    FUSION_REFERENCE: 'c',
+                    FUSION_REFERENCE: "c",
                     FUSION_START: 312,
                     FUSION_STOP: 5034,
-                }
-            }
+                },
+            },
         }
         self.assertEqual(expected_dict, result.asDict())
 
         en = gene_fusion(
-            partner_5p=gene('HGNC', 'TMPRSS2'), range_5p=fusion_range('c', 1, 79),
-            partner_3p=gene('HGNC', 'ERG'), range_3p=fusion_range('c', 312, 5034)
+            partner_5p=gene("HGNC", "TMPRSS2"),
+            range_5p=fusion_range("c", 1, 79),
+            partner_3p=gene("HGNC", "ERG"),
+            range_3p=fusion_range("c", 312, 5034),
         )
         self.assert_has_node(en)
 
-        self.assertEqual('g(fus(HGNC:TMPRSS2, "c.1_79", HGNC:ERG, "c.312_5034"))', self.graph.node_to_bel(en))
+        self.assertEqual(
+            'g(fus(HGNC:TMPRSS2, "c.1_79", HGNC:ERG, "c.312_5034"))',
+            self.graph.node_to_bel(en),
+        )
 
     def test_gene_fusion_1(self):
         # no quotes
-        self._help_test_gene_fusion_1('g(fus(HGNC:TMPRSS2, c.1_79, HGNC:ERG, c.312_5034))')
+        self._help_test_gene_fusion_1("g(fus(HGNC:TMPRSS2, c.1_79, HGNC:ERG, c.312_5034))")
         # quotes
         self._help_test_gene_fusion_1('g(fus(HGNC:TMPRSS2, "c.1_79", HGNC:ERG, "c.312_5034"))')
 
@@ -381,25 +471,20 @@ class TestGene(TestTokenParserBase):
         expected_dict = {
             FUNCTION: GENE,
             FUSION: {
-                PARTNER_5P: {CONCEPT: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'}},
-                PARTNER_3P: {CONCEPT: {NAMESPACE: 'HGNC', NAME: 'ERG'}},
-                RANGE_5P: {
-                    FUSION_REFERENCE: 'c',
-                    FUSION_START: 1,
-                    FUSION_STOP: '?'
-
-                },
-                RANGE_3P: {
-                    FUSION_REFERENCE: 'c',
-                    FUSION_START: 312,
-                    FUSION_STOP: 5034
-                }
-            }
+                PARTNER_5P: {CONCEPT: {NAMESPACE: "HGNC", NAME: "TMPRSS2"}},
+                PARTNER_3P: {CONCEPT: {NAMESPACE: "HGNC", NAME: "ERG"}},
+                RANGE_5P: {FUSION_REFERENCE: "c", FUSION_START: 1, FUSION_STOP: "?"},
+                RANGE_3P: {FUSION_REFERENCE: "c", FUSION_START: 312, FUSION_STOP: 5034},
+            },
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = gene_fusion(gene('HGNC', 'TMPRSS2'), gene('HGNC', 'ERG'), fusion_range('c', 1, '?'),
-                                    fusion_range('c', 312, 5034))
+        expected_node = gene_fusion(
+            gene("HGNC", "TMPRSS2"),
+            gene("HGNC", "ERG"),
+            fusion_range("c", 1, "?"),
+            fusion_range("c", 312, 5034),
+        )
         self.assert_has_node(expected_node)
 
         canonical_bel = self.graph.node_to_bel(expected_node)
@@ -407,7 +492,7 @@ class TestGene(TestTokenParserBase):
 
     def test_gene_fusion_2(self):
         # no quotes
-        self._help_test_gene_fusion_2('g(fus(HGNC:TMPRSS2, c.1_?, HGNC:ERG, c.312_5034))')
+        self._help_test_gene_fusion_2("g(fus(HGNC:TMPRSS2, c.1_?, HGNC:ERG, c.312_5034))")
         # correct
         self._help_test_gene_fusion_2('g(fus(HGNC:TMPRSS2, "c.1_?", HGNC:ERG, "c.312_5034"))')
 
@@ -416,28 +501,29 @@ class TestGene(TestTokenParserBase):
         expected_dict = {
             FUNCTION: GENE,
             FUSION: {
-                PARTNER_5P: {CONCEPT: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'}},
-                PARTNER_3P: {CONCEPT: {NAMESPACE: 'HGNC', NAME: 'ERG'}},
-                RANGE_5P: {
-                    FUSION_MISSING: '?'
-                },
-                RANGE_3P: {
-                    FUSION_REFERENCE: 'c',
-                    FUSION_START: 312,
-                    FUSION_STOP: 5034
-                }
-            }
+                PARTNER_5P: {CONCEPT: {NAMESPACE: "HGNC", NAME: "TMPRSS2"}},
+                PARTNER_3P: {CONCEPT: {NAMESPACE: "HGNC", NAME: "ERG"}},
+                RANGE_5P: {FUSION_MISSING: "?"},
+                RANGE_3P: {FUSION_REFERENCE: "c", FUSION_START: 312, FUSION_STOP: 5034},
+            },
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = gene_fusion(gene('HGNC', 'TMPRSS2'), gene('HGNC', 'ERG'), range_3p=fusion_range('c', 312, 5034))
+        expected_node = gene_fusion(
+            gene("HGNC", "TMPRSS2"),
+            gene("HGNC", "ERG"),
+            range_3p=fusion_range("c", 312, 5034),
+        )
         self.assert_has_node(expected_node)
 
-        self.assertEqual('g(fus(HGNC:TMPRSS2, "?", HGNC:ERG, "c.312_5034"))', self.graph.node_to_bel(expected_node))
+        self.assertEqual(
+            'g(fus(HGNC:TMPRSS2, "?", HGNC:ERG, "c.312_5034"))',
+            self.graph.node_to_bel(expected_node),
+        )
 
     def test_gene_fusion_3(self):
         # no quotes
-        self._help_test_gene_fusion_3('g(fus(HGNC:TMPRSS2, ?, HGNC:ERG, c.312_5034))')
+        self._help_test_gene_fusion_3("g(fus(HGNC:TMPRSS2, ?, HGNC:ERG, c.312_5034))")
         # correct
         self._help_test_gene_fusion_3('g(fus(HGNC:TMPRSS2, "?", HGNC:ERG, "c.312_5034"))')
 
@@ -447,33 +533,31 @@ class TestGene(TestTokenParserBase):
         expected_dict = {
             FUNCTION: GENE,
             FUSION: {
-                PARTNER_5P: {CONCEPT: {NAMESPACE: 'HGNC', NAME: 'BCR'}},
-                PARTNER_3P: {CONCEPT: {NAMESPACE: 'HGNC', NAME: 'JAK2'}},
-                RANGE_5P: {
-                    FUSION_REFERENCE: 'c',
-                    FUSION_START: '?',
-                    FUSION_STOP: 1875
-
-                },
-                RANGE_3P: {
-                    FUSION_REFERENCE: 'c',
-                    FUSION_START: 2626,
-                    FUSION_STOP: '?'
-                }
-            }
+                PARTNER_5P: {CONCEPT: {NAMESPACE: "HGNC", NAME: "BCR"}},
+                PARTNER_3P: {CONCEPT: {NAMESPACE: "HGNC", NAME: "JAK2"}},
+                RANGE_5P: {FUSION_REFERENCE: "c", FUSION_START: "?", FUSION_STOP: 1875},
+                RANGE_3P: {FUSION_REFERENCE: "c", FUSION_START: 2626, FUSION_STOP: "?"},
+            },
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = gene_fusion(gene('HGNC', 'BCR'), gene('HGNC', 'JAK2'), fusion_range('c', '?', 1875),
-                                    fusion_range('c', 2626, '?'))
+        expected_node = gene_fusion(
+            gene("HGNC", "BCR"),
+            gene("HGNC", "JAK2"),
+            fusion_range("c", "?", 1875),
+            fusion_range("c", 2626, "?"),
+        )
         self.assert_has_node(expected_node)
-        self.assertEqual('g(fus(HGNC:BCR, "c.?_1875", HGNC:JAK2, "c.2626_?"))', self.graph.node_to_bel(expected_node))
+        self.assertEqual(
+            'g(fus(HGNC:BCR, "c.?_1875", HGNC:JAK2, "c.2626_?"))',
+            self.graph.node_to_bel(expected_node),
+        )
 
     def test_gene_fusion_legacy_1(self):
         # legacy
-        self._help_test_gene_fusion_legacy_1('g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))')
+        self._help_test_gene_fusion_legacy_1("g(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))")
         # no quotes
-        self._help_test_gene_fusion_legacy_1('g(fus(HGNC:BCR, c.?_1875, HGNC:JAK2, c.2626_?))')
+        self._help_test_gene_fusion_legacy_1("g(fus(HGNC:BCR, c.?_1875, HGNC:JAK2, c.2626_?))")
         # correct
         self._help_test_gene_fusion_legacy_1('g(fus(HGNC:BCR, "c.?_1875", HGNC:JAK2, "c.2626_?"))')
 
@@ -483,37 +567,43 @@ class TestGene(TestTokenParserBase):
         expected_dict = {
             FUNCTION: GENE,
             FUSION: {
-                PARTNER_5P: {CONCEPT: {NAMESPACE: 'HGNC', NAME: 'CHCHD4'}},
-                PARTNER_3P: {CONCEPT: {NAMESPACE: 'HGNC', NAME: 'AIFM1'}},
-                RANGE_5P: {FUSION_MISSING: '?'},
-                RANGE_3P: {FUSION_MISSING: '?'}
-            }
+                PARTNER_5P: {CONCEPT: {NAMESPACE: "HGNC", NAME: "CHCHD4"}},
+                PARTNER_3P: {CONCEPT: {NAMESPACE: "HGNC", NAME: "AIFM1"}},
+                RANGE_5P: {FUSION_MISSING: "?"},
+                RANGE_3P: {FUSION_MISSING: "?"},
+            },
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = gene_fusion(gene('HGNC', 'CHCHD4'), gene('HGNC', 'AIFM1'))
+        expected_node = gene_fusion(gene("HGNC", "CHCHD4"), gene("HGNC", "AIFM1"))
         self.assert_has_node(expected_node)
-        self.assertEqual('g(fus(HGNC:CHCHD4, "?", HGNC:AIFM1, "?"))', self.graph.node_to_bel(expected_node))
+        self.assertEqual(
+            'g(fus(HGNC:CHCHD4, "?", HGNC:AIFM1, "?"))',
+            self.graph.node_to_bel(expected_node),
+        )
 
     def test_gene_fusion_legacy_2(self):
         # legacy
-        self._help_test_gene_fusion_legacy_2('g(HGNC:CHCHD4, fusion(HGNC:AIFM1))')
+        self._help_test_gene_fusion_legacy_2("g(HGNC:CHCHD4, fusion(HGNC:AIFM1))")
         # no quotes
-        self._help_test_gene_fusion_legacy_2('g(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))')
+        self._help_test_gene_fusion_legacy_2("g(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))")
         # correct
         self._help_test_gene_fusion_legacy_2('g(fus(HGNC:CHCHD4, "?", HGNC:AIFM1, "?"))')
 
     def test_gene_variant_snp(self):
         """2.2.2 SNP"""
-        statement = 'g(SNP:rs113993960, var(c.1521_1523delCTT))'
+        statement = "g(SNP:rs113993960, var(c.1521_1523delCTT))"
         result = self.parser.gene.parseString(statement)
 
-        expected_result = [GENE, ['SNP', 'rs113993960'], [HGVS, 'c.1521_1523delCTT']]
+        expected_result = [GENE, ["SNP", "rs113993960"], [HGVS, "c.1521_1523delCTT"]]
         self.assertEqual(expected_result, result.asList())
 
-        expected_node = gene('SNP', 'rs113993960', variants=hgvs('c.1521_1523delCTT'))
+        expected_node = gene("SNP", "rs113993960", variants=hgvs("c.1521_1523delCTT"))
         self.assert_has_node(expected_node)
-        self.assertEqual('g(SNP:rs113993960, var("c.1521_1523delCTT"))', self.graph.node_to_bel(expected_node))
+        self.assertEqual(
+            'g(SNP:rs113993960, var("c.1521_1523delCTT"))',
+            self.graph.node_to_bel(expected_node),
+        )
 
         gene_node = expected_node.get_parent()
         self.assert_has_node(gene_node)
@@ -524,10 +614,14 @@ class TestGene(TestTokenParserBase):
         statement = 'g(REF:"NC_000007.13", var(g.117199646_117199648delCTT))'
         result = self.parser.gene.parseString(statement)
 
-        expected_result = [GENE, ['REF', 'NC_000007.13'], [HGVS, 'g.117199646_117199648delCTT']]
+        expected_result = [
+            GENE,
+            ["REF", "NC_000007.13"],
+            [HGVS, "g.117199646_117199648delCTT"],
+        ]
         self.assertEqual(expected_result, result.asList())
 
-        gene_node = gene('REF', 'NC_000007.13', variants=hgvs('g.117199646_117199648delCTT'))
+        gene_node = gene("REF", "NC_000007.13", variants=hgvs("g.117199646_117199648delCTT"))
         self.assert_has_node(gene_node)
 
         parent = gene_node.get_parent()
@@ -536,27 +630,30 @@ class TestGene(TestTokenParserBase):
 
     def test_gene_variant_deletion(self):
         """2.2.2 gene-coding DNA reference sequence"""
-        statement = 'g(HGNC:CFTR, var(c.1521_1523delCTT))'
+        statement = "g(HGNC:CFTR, var(c.1521_1523delCTT))"
         result = self.parser.gene.parseString(statement)
 
         expected_result = {
             FUNCTION: GENE,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'CFTR',
+                NAMESPACE: "HGNC",
+                NAME: "CFTR",
             },
             VARIANTS: [
                 {
                     KIND: HGVS,
-                    HGVS: 'c.1521_1523delCTT',
+                    HGVS: "c.1521_1523delCTT",
                 },
             ],
         }
         self.assertEqual(expected_result, result.asDict())
 
-        expected_node = gene('HGNC', 'CFTR', variants=hgvs('c.1521_1523delCTT'))
+        expected_node = gene("HGNC", "CFTR", variants=hgvs("c.1521_1523delCTT"))
         self.assert_has_node(expected_node)
-        self.assertEqual('g(HGNC:CFTR, var("c.1521_1523delCTT"))', self.graph.node_to_bel(expected_node))
+        self.assertEqual(
+            'g(HGNC:CFTR, var("c.1521_1523delCTT"))',
+            self.graph.node_to_bel(expected_node),
+        )
 
         gene_node = expected_node.get_parent()
         self.assert_has_node(gene_node)
@@ -572,63 +669,63 @@ class TestMicroRna(TestTokenParserBase):
 
     def _test_no_variant_helper(self, statement):
         result = self.parser.mirna.parseString(statement)
-        expected_result = [MIRNA, ['HGNC', 'MIR21']]
+        expected_result = [MIRNA, ["HGNC", "MIR21"]]
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
             FUNCTION: MIRNA,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'MIR21',
+                NAMESPACE: "HGNC",
+                NAME: "MIR21",
             },
         }
 
         self.assertEqual(expected_dict, result.asDict())
 
-        node = mirna('HGNC', 'MIR21')
+        node = mirna("HGNC", "MIR21")
         self.assert_has_node(node)
 
     def test_short(self):
-        self._test_no_variant_helper('m(HGNC:MIR21)')
-        self._test_no_variant_helper('microRNAAbundance(HGNC:MIR21)')
+        self._test_no_variant_helper("m(HGNC:MIR21)")
+        self._test_no_variant_helper("microRNAAbundance(HGNC:MIR21)")
 
     def test_mirna_location(self):
-        statement = 'm(HGNC:MIR21,loc(GO:intracellular))'
+        statement = "m(HGNC:MIR21,loc(GO:intracellular))"
         result = self.parser.mirna.parseString(statement)
 
         expected_dict = {
             FUNCTION: MIRNA,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'MIR21',
+                NAMESPACE: "HGNC",
+                NAME: "MIR21",
             },
             LOCATION: {
-                NAMESPACE: 'GO',
-                NAME: 'intracellular',
-            }
+                NAMESPACE: "GO",
+                NAME: "intracellular",
+            },
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = mirna('HGNC', 'MIR21')
+        expected_node = mirna("HGNC", "MIR21")
         self.assert_has_node(expected_node)
 
     def test_mirna_variant(self):
-        statement = 'm(HGNC:MIR21,var(p.Phe508del))'
+        statement = "m(HGNC:MIR21,var(p.Phe508del))"
         result = self.parser.mirna.parseString(statement)
 
         expected_dict = {
             FUNCTION: MIRNA,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'MIR21',
+                NAMESPACE: "HGNC",
+                NAME: "MIR21",
             },
             VARIANTS: [
                 hgvs(TEST_PROTEIN_VARIANT),
-            ]
+            ],
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        node = mirna('HGNC', 'MIR21', variants=hgvs(TEST_PROTEIN_VARIANT))
+        node = mirna("HGNC", "MIR21", variants=hgvs(TEST_PROTEIN_VARIANT))
         self.assert_has_node(node)
         self.assertEqual('m(HGNC:MIR21, var("p.Phe508del"))', self.graph.node_to_bel(node))
 
@@ -639,29 +736,26 @@ class TestMicroRna(TestTokenParserBase):
         self.assert_has_edge(expected_parent, node, relation=HAS_VARIANT)
 
     def test_mirna_variant_location(self):
-        statement = 'm(HGNC:MIR21,var(p.Phe508del),loc(GO:intracellular))'
+        statement = "m(HGNC:MIR21,var(p.Phe508del),loc(GO:intracellular))"
         result = self.parser.mirna.parseString(statement)
 
         expected_dict = {
             FUNCTION: MIRNA,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'MIR21',
+                NAMESPACE: "HGNC",
+                NAME: "MIR21",
             },
             VARIANTS: [
                 {
                     KIND: HGVS,
-                    HGVS: 'p.Phe508del',
+                    HGVS: "p.Phe508del",
                 },
             ],
-            LOCATION: {
-                NAMESPACE: 'GO',
-                NAME: 'intracellular'
-            }
+            LOCATION: {NAMESPACE: "GO", NAME: "intracellular"},
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        node = mirna('HGNC', 'MIR21', variants=hgvs(TEST_PROTEIN_VARIANT))
+        node = mirna("HGNC", "MIR21", variants=hgvs(TEST_PROTEIN_VARIANT))
         self.assert_has_node(node)
         self.assertEqual('m(HGNC:MIR21, var("p.Phe508del"))', self.graph.node_to_bel(node))
 
@@ -681,72 +775,63 @@ class TestProtein(TestTokenParserBase):
 
     def _test_reference_helper(self, statement):
         result = self.parser.protein.parseString(statement)
-        expected_result = [PROTEIN, ['HGNC', 'AKT1']]
+        expected_result = [PROTEIN, ["HGNC", "AKT1"]]
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
             FUNCTION: PROTEIN,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1',
-            }
+                NAMESPACE: "HGNC",
+                NAME: "AKT1",
+            },
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        node = protein('HGNC', 'AKT1')
+        node = protein("HGNC", "AKT1")
         self.assert_has_node(node)
-        self.assertEqual('p(HGNC:AKT1)', self.graph.node_to_bel(node))
+        self.assertEqual("p(HGNC:AKT1)", self.graph.node_to_bel(node))
 
     def test_reference(self):
-        self._test_reference_helper('p(HGNC:AKT1)')
-        self._test_reference_helper('proteinAbundance(HGNC:AKT1)')
+        self._test_reference_helper("p(HGNC:AKT1)")
+        self._test_reference_helper("proteinAbundance(HGNC:AKT1)")
 
     def test_protein_with_location(self):
-        statement = 'p(HGNC:AKT1, loc(GO:intracellular))'
+        statement = "p(HGNC:AKT1, loc(GO:intracellular))"
 
         result = self.parser.protein.parseString(statement)
 
         expected_dict = {
             FUNCTION: PROTEIN,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1',
+                NAMESPACE: "HGNC",
+                NAME: "AKT1",
             },
-            LOCATION: {
-                NAMESPACE: 'GO',
-                NAME: 'intracellular'
-            }
+            LOCATION: {NAMESPACE: "GO", NAME: "intracellular"},
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        node = protein('HGNC', 'AKT1')
+        node = protein("HGNC", "AKT1")
         self.assert_has_node(node)
-        self.assertEqual('p(HGNC:AKT1)', self.graph.node_to_bel(node))
+        self.assertEqual("p(HGNC:AKT1)", self.graph.node_to_bel(node))
 
     def test_multiple_variants(self):
-        statement = 'p(HGNC:AKT1,sub(A,127,Y),pmod(Ph, Ser),loc(GO:intracellular))'
+        statement = "p(HGNC:AKT1,sub(A,127,Y),pmod(Ph, Ser),loc(GO:intracellular))"
 
         result = self.parser.protein.parseString(statement)
 
         expected_dict = {
             FUNCTION: PROTEIN,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1',
+                NAMESPACE: "HGNC",
+                NAME: "AKT1",
             },
-            LOCATION: {
-                NAMESPACE: 'GO',
-                NAME: 'intracellular'
-            },
-            VARIANTS: [
-                hgvs('p.Ala127Tyr'),
-                pmod(name='Ph', code='Ser')
-            ]
+            LOCATION: {NAMESPACE: "GO", NAME: "intracellular"},
+            VARIANTS: [hgvs("p.Ala127Tyr"), pmod(name="Ph", code="Ser")],
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        parent = protein('HGNC', 'AKT1')
-        node = parent.with_variants([hgvs('p.Ala127Tyr'), pmod('Ph', code='Ser')])
+        parent = protein("HGNC", "AKT1")
+        node = parent.with_variants([hgvs("p.Ala127Tyr"), pmod("Ph", code="Ser")])
         self.assert_has_node(node)
         self.assertEqual(
             'p(HGNC:AKT1, pmod(go:0006468 ! "protein phosphorylation", Ser), var("p.Ala127Tyr"))',
@@ -761,15 +846,15 @@ class TestProtein(TestTokenParserBase):
         expected_dict = {
             FUNCTION: PROTEIN,
             FUSION: {
-                PARTNER_5P: {CONCEPT: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'}},
-                PARTNER_3P: {CONCEPT: {NAMESPACE: 'HGNC', NAME: 'ERG'}},
+                PARTNER_5P: {CONCEPT: {NAMESPACE: "HGNC", NAME: "TMPRSS2"}},
+                PARTNER_3P: {CONCEPT: {NAMESPACE: "HGNC", NAME: "ERG"}},
                 RANGE_5P: {
-                    FUSION_REFERENCE: 'p',
+                    FUSION_REFERENCE: "p",
                     FUSION_START: 1,
                     FUSION_STOP: 79,
                 },
                 RANGE_3P: {
-                    FUSION_REFERENCE: 'p',
+                    FUSION_REFERENCE: "p",
                     FUSION_START: 312,
                     FUSION_STOP: 5034,
                 },
@@ -778,10 +863,10 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_dict, result.asDict())
 
         expected_node = protein_fusion(
-            protein('HGNC', 'TMPRSS2'),
-            protein('HGNC', 'ERG'),
-            fusion_range('p', 1, 79),
-            fusion_range('p', 312, 5034),
+            protein("HGNC", "TMPRSS2"),
+            protein("HGNC", "ERG"),
+            fusion_range("p", 1, 79),
+            fusion_range("p", 312, 5034),
         )
         self.assert_has_node(expected_node)
         self.assertEqual(
@@ -791,7 +876,7 @@ class TestProtein(TestTokenParserBase):
 
     def test_protein_fusion_1(self):
         # no quotes
-        self._help_test_protein_fusion_1('p(fus(HGNC:TMPRSS2, p.1_79, HGNC:ERG, p.312_5034))')
+        self._help_test_protein_fusion_1("p(fus(HGNC:TMPRSS2, p.1_79, HGNC:ERG, p.312_5034))")
         # quotes
         self._help_test_protein_fusion_1('p(fus(HGNC:TMPRSS2, "p.1_79", HGNC:ERG, "p.312_5034"))')
 
@@ -801,17 +886,17 @@ class TestProtein(TestTokenParserBase):
         expected_dict = {
             FUNCTION: PROTEIN,
             FUSION: {
-                PARTNER_5P: {CONCEPT: {NAMESPACE: 'HGNC', NAME: 'BCR'}},
-                PARTNER_3P: {CONCEPT: {NAMESPACE: 'HGNC', NAME: 'JAK2'}},
+                PARTNER_5P: {CONCEPT: {NAMESPACE: "HGNC", NAME: "BCR"}},
+                PARTNER_3P: {CONCEPT: {NAMESPACE: "HGNC", NAME: "JAK2"}},
                 RANGE_5P: {
-                    FUSION_REFERENCE: 'p',
-                    FUSION_START: '?',
+                    FUSION_REFERENCE: "p",
+                    FUSION_START: "?",
                     FUSION_STOP: 1875,
                 },
                 RANGE_3P: {
-                    FUSION_REFERENCE: 'p',
+                    FUSION_REFERENCE: "p",
                     FUSION_START: 2626,
-                    FUSION_STOP: '?',
+                    FUSION_STOP: "?",
                 },
             },
         }
@@ -819,10 +904,10 @@ class TestProtein(TestTokenParserBase):
         self.assertEqual(expected_dict, result.asDict())
 
         expected_node = protein_fusion(
-            protein('HGNC', 'BCR'),
-            protein('HGNC', 'JAK2'),
-            fusion_range('p', '?', 1875),
-            fusion_range('p', 2626, '?')
+            protein("HGNC", "BCR"),
+            protein("HGNC", "JAK2"),
+            fusion_range("p", "?", 1875),
+            fusion_range("p", 2626, "?"),
         )
         self.assert_has_node(expected_node)
         canonical_bel = self.graph.node_to_bel(expected_node)
@@ -830,9 +915,9 @@ class TestProtein(TestTokenParserBase):
 
     def test_protein_fusion_legacy_1(self):
         # legacy (BEL 1.0)
-        self._help_test_protein_fusion_legacy_1('p(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))')
+        self._help_test_protein_fusion_legacy_1("p(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))")
         # missing quotes
-        self._help_test_protein_fusion_legacy_1('p(fus(HGNC:BCR, p.?_1875, HGNC:JAK2, p.2626_?))')
+        self._help_test_protein_fusion_legacy_1("p(fus(HGNC:BCR, p.?_1875, HGNC:JAK2, p.2626_?))")
         # correct
         self._help_test_protein_fusion_legacy_1('p(fus(HGNC:BCR, "p.?_1875", HGNC:JAK2, "p.2626_?"))')
 
@@ -842,17 +927,17 @@ class TestProtein(TestTokenParserBase):
         expected_dict = {
             FUNCTION: PROTEIN,
             FUSION: {
-                PARTNER_5P: {CONCEPT: {NAMESPACE: 'HGNC', NAME: 'CHCHD4'}},
-                PARTNER_3P: {CONCEPT: {NAMESPACE: 'HGNC', NAME: 'AIFM1'}},
-                RANGE_5P: {FUSION_MISSING: '?'},
-                RANGE_3P: {FUSION_MISSING: '?'}
-            }
+                PARTNER_5P: {CONCEPT: {NAMESPACE: "HGNC", NAME: "CHCHD4"}},
+                PARTNER_3P: {CONCEPT: {NAMESPACE: "HGNC", NAME: "AIFM1"}},
+                RANGE_5P: {FUSION_MISSING: "?"},
+                RANGE_3P: {FUSION_MISSING: "?"},
+            },
         }
         self.assertEqual(expected_dict, result.asDict())
 
         expected_node = protein_fusion(
-            protein('HGNC', 'CHCHD4'),
-            protein('HGNC', 'AIFM1'),
+            protein("HGNC", "CHCHD4"),
+            protein("HGNC", "AIFM1"),
         )
         self.assert_has_node(expected_node)
 
@@ -861,18 +946,18 @@ class TestProtein(TestTokenParserBase):
 
     def test_protein_fusion_legacy_2(self):
         # legacy (BEL 1.0)
-        self._help_test_protein_legacy_fusion_2('proteinAbundance(HGNC:CHCHD4, fusion(HGNC:AIFM1))')
+        self._help_test_protein_legacy_fusion_2("proteinAbundance(HGNC:CHCHD4, fusion(HGNC:AIFM1))")
         # legacy shorthand (BEL 1.0)
-        self._help_test_protein_legacy_fusion_2('p(HGNC:CHCHD4, fus(HGNC:AIFM1))')
+        self._help_test_protein_legacy_fusion_2("p(HGNC:CHCHD4, fus(HGNC:AIFM1))")
         # missing quotes
-        self._help_test_protein_legacy_fusion_2('p(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))')
+        self._help_test_protein_legacy_fusion_2("p(fus(HGNC:CHCHD4, ?, HGNC:AIFM1, ?))")
         # correct
         self._help_test_protein_legacy_fusion_2('p(fus(HGNC:CHCHD4, "?", HGNC:AIFM1, "?"))')
 
     def _help_test_protein_trunc_1(self, statement):
         result = self.parser.protein.parseString(statement)
 
-        expected_node = protein('HGNC', 'AKT1', variants=hgvs('p.40*'))
+        expected_node = protein("HGNC", "AKT1", variants=hgvs("p.40*"))
         self.assert_has_node(expected_node)
 
         canonical_bel = self.graph.node_to_bel(expected_node)
@@ -884,21 +969,21 @@ class TestProtein(TestTokenParserBase):
 
     def test_protein_trunc_1(self):
         # legacy
-        self._help_test_protein_trunc_1('p(HGNC:AKT1, trunc(40))')
+        self._help_test_protein_trunc_1("p(HGNC:AKT1, trunc(40))")
         # missing quotes
-        self._help_test_protein_trunc_1('p(HGNC:AKT1, var(p.40*))')
+        self._help_test_protein_trunc_1("p(HGNC:AKT1, var(p.40*))")
         # correct
         self._help_test_protein_trunc_1('p(HGNC:AKT1, var("p.40*"))')
 
     def test_protein_trunc_2(self):
-        statement = 'p(HGNC:AKT1, var(p.Cys40*))'
+        statement = "p(HGNC:AKT1, var(p.Cys40*))"
         result = self.parser.protein.parseString(statement)
 
-        expected_result = [PROTEIN, ['HGNC', 'AKT1'], [HGVS, 'p.Cys40*']]
+        expected_result = [PROTEIN, ["HGNC", "AKT1"], [HGVS, "p.Cys40*"]]
         self.assertEqual(expected_result, result.asList())
 
-        parent = protein('HGNC', 'AKT1')
-        expected_node = parent.with_variants(hgvs('p.Cys40*'))
+        parent = protein("HGNC", "AKT1")
+        expected_node = parent.with_variants(hgvs("p.Cys40*"))
         self.assert_has_node(expected_node)
         self.assertEqual('p(HGNC:AKT1, var("p.Cys40*"))', self.graph.node_to_bel(expected_node))
 
@@ -906,14 +991,14 @@ class TestProtein(TestTokenParserBase):
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_protein_trunc_3(self):
-        statement = 'p(HGNC:AKT1, var(p.Arg1851*))'
+        statement = "p(HGNC:AKT1, var(p.Arg1851*))"
         result = self.parser.protein.parseString(statement)
 
-        expected_result = [PROTEIN, ['HGNC', 'AKT1'], [HGVS, 'p.Arg1851*']]
+        expected_result = [PROTEIN, ["HGNC", "AKT1"], [HGVS, "p.Arg1851*"]]
         self.assertEqual(expected_result, result.asList())
 
-        parent = protein('HGNC', 'AKT1')
-        expected_node = parent.with_variants(hgvs('p.Arg1851*'))
+        parent = protein("HGNC", "AKT1")
+        expected_node = parent.with_variants(hgvs("p.Arg1851*"))
         self.assert_has_node(expected_node)
         self.assertEqual('p(HGNC:AKT1, var("p.Arg1851*"))', self.graph.node_to_bel(expected_node))
 
@@ -922,11 +1007,11 @@ class TestProtein(TestTokenParserBase):
 
     def test_protein_pmod_1(self):
         """2.2.1 Test default BEL namespace and 1-letter amino acid code:"""
-        statement = 'p(HGNC:AKT1, pmod(Ph, S, 473))'
+        statement = "p(HGNC:AKT1, pmod(Ph, S, 473))"
         result = self.parser.protein.parseString(statement)
 
-        parent = protein('HGNC', 'AKT1')
-        expected_node = parent.with_variants(pmod('Ph', code='Ser', position=473))
+        parent = protein("HGNC", "AKT1")
+        expected_node = parent.with_variants(pmod("Ph", code="Ser", position=473))
         self.assert_has_node(expected_node)
         self.assertEqual(
             'p(HGNC:AKT1, pmod(go:0006468 ! "protein phosphorylation", Ser, 473))',
@@ -938,11 +1023,11 @@ class TestProtein(TestTokenParserBase):
 
     def test_protein_pmod_2(self):
         """2.2.1 Test default BEL namespace and 3-letter amino acid code:"""
-        statement = 'p(HGNC:AKT1, pmod(Ph, Ser, 473))'
+        statement = "p(HGNC:AKT1, pmod(Ph, Ser, 473))"
         result = self.parser.protein.parseString(statement)
 
-        parent = protein('HGNC', 'AKT1')
-        expected_node = parent.with_variants(pmod('Ph', code='Ser', position=473))
+        parent = protein("HGNC", "AKT1")
+        expected_node = parent.with_variants(pmod("Ph", code="Ser", position=473))
         self.assert_has_node(expected_node)
         self.assertEqual(
             'p(HGNC:AKT1, pmod(go:0006468 ! "protein phosphorylation", Ser, 473))',
@@ -954,24 +1039,27 @@ class TestProtein(TestTokenParserBase):
 
     def test_protein_pmod_3(self):
         """2.2.1 Test PSI-MOD namespace and 3-letter amino acid code:"""
-        statement = 'p(HGNC:AKT1, pmod(MOD:PhosRes,Ser,473))'
+        statement = "p(HGNC:AKT1, pmod(MOD:PhosRes,Ser,473))"
         result = self.parser.protein.parseString(statement)
 
-        parent = protein('HGNC', 'AKT1')
-        expected_node = parent.with_variants(pmod(namespace='MOD', name='PhosRes', code='Ser', position=473))
+        parent = protein("HGNC", "AKT1")
+        expected_node = parent.with_variants(pmod(namespace="MOD", name="PhosRes", code="Ser", position=473))
         self.assert_has_node(expected_node)
-        self.assertEqual('p(HGNC:AKT1, pmod(MOD:PhosRes, Ser, 473))', self.graph.node_to_bel(expected_node))
+        self.assertEqual(
+            "p(HGNC:AKT1, pmod(MOD:PhosRes, Ser, 473))",
+            self.graph.node_to_bel(expected_node),
+        )
 
         self.assert_has_node(parent)
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_protein_pmod_4(self):
         """2.2.1 Test HRAS palmitoylated at an unspecified residue. Default BEL namespace"""
-        statement = 'p(HGNC:HRAS,pmod(Palm))'
+        statement = "p(HGNC:HRAS,pmod(Palm))"
         result = self.parser.protein.parseString(statement)
 
-        parent = protein('HGNC', 'HRAS')
-        expected_node = parent.with_variants(pmod('Palm'))
+        parent = protein("HGNC", "HRAS")
+        expected_node = parent.with_variants(pmod("Palm"))
         self.assert_has_node(expected_node)
         self.assertEqual(
             'p(HGNC:HRAS, pmod(go:0018345 ! "protein palmitoylation"))',
@@ -983,12 +1071,12 @@ class TestProtein(TestTokenParserBase):
 
     def test_protein_variant_reference(self):
         """2.2.2 Test reference allele"""
-        statement = 'p(HGNC:CFTR, var(=))'
+        statement = "p(HGNC:CFTR, var(=))"
         result = self.parser.protein.parseString(statement)
-        expected_result = [PROTEIN, ['HGNC', 'CFTR'], [HGVS, '=']]
+        expected_result = [PROTEIN, ["HGNC", "CFTR"], [HGVS, "="]]
         self.assertEqual(expected_result, result.asList())
 
-        expected_node = protein('HGNC', 'CFTR', variants=hgvs('='))
+        expected_node = protein("HGNC", "CFTR", variants=hgvs("="))
         self.assert_has_node(expected_node)
         self.assertEqual('p(HGNC:CFTR, var("="))', self.graph.node_to_bel(expected_node))
 
@@ -998,13 +1086,13 @@ class TestProtein(TestTokenParserBase):
 
     def test_protein_variant_unspecified(self):
         """2.2.2 Test unspecified variant"""
-        statement = 'p(HGNC:CFTR, var(?))'
+        statement = "p(HGNC:CFTR, var(?))"
         result = self.parser.protein.parseString(statement)
 
-        expected_result = [PROTEIN, ['HGNC', 'CFTR'], [HGVS, '?']]
+        expected_result = [PROTEIN, ["HGNC", "CFTR"], [HGVS, "?"]]
         self.assertEqual(expected_result, result.asList())
 
-        expected_node = protein('HGNC', 'CFTR', variants=hgvs('?'))
+        expected_node = protein("HGNC", "CFTR", variants=hgvs("?"))
         self.assert_has_node(expected_node)
         self.assertEqual('p(HGNC:CFTR, var("?"))', self.graph.node_to_bel(expected_node))
 
@@ -1014,12 +1102,12 @@ class TestProtein(TestTokenParserBase):
 
     def test_protein_variant_substitution(self):
         """2.2.2 Test substitution"""
-        statement = 'p(HGNC:CFTR, var(p.Gly576Ala))'
+        statement = "p(HGNC:CFTR, var(p.Gly576Ala))"
         result = self.parser.protein.parseString(statement)
-        expected_result = [PROTEIN, ['HGNC', 'CFTR'], [HGVS, 'p.Gly576Ala']]
+        expected_result = [PROTEIN, ["HGNC", "CFTR"], [HGVS, "p.Gly576Ala"]]
         self.assertEqual(expected_result, result.asList())
 
-        expected_node = protein('HGNC', 'CFTR', variants=hgvs('p.Gly576Ala'))
+        expected_node = protein("HGNC", "CFTR", variants=hgvs("p.Gly576Ala"))
         self.assert_has_node(expected_node)
         self.assertEqual('p(HGNC:CFTR, var("p.Gly576Ala"))', self.graph.node_to_bel(expected_node))
 
@@ -1029,13 +1117,13 @@ class TestProtein(TestTokenParserBase):
 
     def test_protein_variant_deletion(self):
         """2.2.2 deletion"""
-        statement = 'p(HGNC:CFTR, var(p.Phe508del))'
+        statement = "p(HGNC:CFTR, var(p.Phe508del))"
         result = self.parser.protein.parseString(statement)
 
-        expected_result = [PROTEIN, ['HGNC', 'CFTR'], [HGVS, TEST_PROTEIN_VARIANT]]
+        expected_result = [PROTEIN, ["HGNC", "CFTR"], [HGVS, TEST_PROTEIN_VARIANT]]
         self.assertEqual(expected_result, result.asList())
 
-        expected_node = protein('HGNC', 'CFTR', variants=hgvs('p.Phe508del'))
+        expected_node = protein("HGNC", "CFTR", variants=hgvs("p.Phe508del"))
         self.assert_has_node(expected_node)
         self.assertEqual('p(HGNC:CFTR, var("p.Phe508del"))', self.graph.node_to_bel(expected_node))
 
@@ -1045,10 +1133,10 @@ class TestProtein(TestTokenParserBase):
 
     def test_protein_fragment_known(self):
         """2.2.3 fragment with known start/stop"""
-        statement = 'p(HGNC:YFG, frag(5_20))'
+        statement = "p(HGNC:YFG, frag(5_20))"
         self.parser.protein.parseString(statement)
 
-        parent = protein('HGNC', 'YFG')
+        parent = protein("HGNC", "YFG")
         expected_node = parent.with_variants(fragment(5, 20))
         self.assert_has_node(expected_node)
         self.assertEqual('p(HGNC:YFG, frag("5_20"))', self.graph.node_to_bel(expected_node))
@@ -1058,11 +1146,11 @@ class TestProtein(TestTokenParserBase):
 
     def test_protein_fragment_unbounded(self):
         """2.2.3 amino-terminal fragment of unknown length"""
-        statement = 'p(HGNC:YFG, frag(1_?))'
+        statement = "p(HGNC:YFG, frag(1_?))"
         result = self.parser.protein.parseString(statement)
 
-        parent = protein('HGNC', 'YFG')
-        expected_node = parent.with_variants(fragment(1, '?'))
+        parent = protein("HGNC", "YFG")
+        expected_node = parent.with_variants(fragment(1, "?"))
         self.assert_has_node(expected_node)
         self.assertEqual('p(HGNC:YFG, frag("1_?"))', self.graph.node_to_bel(expected_node))
 
@@ -1071,11 +1159,11 @@ class TestProtein(TestTokenParserBase):
 
     def test_protein_fragment_unboundTerminal(self):
         """2.2.3 carboxyl-terminal fragment of unknown length"""
-        statement = 'p(HGNC:YFG, frag(?_*))'
+        statement = "p(HGNC:YFG, frag(?_*))"
         result = self.parser.protein.parseString(statement)
 
-        parent = protein('HGNC', 'YFG')
-        expected_node = parent.with_variants(fragment('?', '*'))
+        parent = protein("HGNC", "YFG")
+        expected_node = parent.with_variants(fragment("?", "*"))
         self.assert_has_node(expected_node)
         self.assertEqual('p(HGNC:YFG, frag("?_*"))', self.graph.node_to_bel(expected_node))
 
@@ -1084,13 +1172,13 @@ class TestProtein(TestTokenParserBase):
 
     def test_protein_fragment_unknown(self):
         """2.2.3 fragment with unknown start/stop"""
-        statement = 'p(HGNC:YFG, frag(?))'
+        statement = "p(HGNC:YFG, frag(?))"
         result = self.parser.protein.parseString(statement)
 
-        expected_result = [PROTEIN, ['HGNC', 'YFG'], [FRAGMENT, '?']]
+        expected_result = [PROTEIN, ["HGNC", "YFG"], [FRAGMENT, "?"]]
         self.assertEqual(expected_result, result.asList())
 
-        parent = protein('HGNC', 'YFG')
+        parent = protein("HGNC", "YFG")
         expected_node = parent.with_variants(fragment())
         self.assert_has_node(expected_node)
         self.assertEqual('p(HGNC:YFG, frag("?"))', self.graph.node_to_bel(expected_node))
@@ -1103,8 +1191,8 @@ class TestProtein(TestTokenParserBase):
         statement = 'p(HGNC:YFG, frag(?, "55kD"))'
         result = self.parser.protein.parseString(statement)
 
-        parent = protein('HGNC', 'YFG')
-        expected_node = parent.with_variants(fragment('?', description='55kD'))
+        parent = protein("HGNC", "YFG")
+        expected_node = parent.with_variants(fragment("?", description="55kD"))
         self.assert_has_node(expected_node)
         self.assertEqual('p(HGNC:YFG, frag("?", "55kD"))', self.graph.node_to_bel(expected_node))
 
@@ -1113,9 +1201,9 @@ class TestProtein(TestTokenParserBase):
 
     def test_ensure_no_dup_edges(self):
         """Ensure node and edges aren't added twice, even if from different statements and has origin completion"""
-        s1 = 'p(HGNC:AKT1)'
-        s2 = 'deg(p(HGNC:AKT1))'
-        node = protein('HGNC', 'AKT1')
+        s1 = "p(HGNC:AKT1)"
+        s2 = "deg(p(HGNC:AKT1))"
+        node = protein("HGNC", "AKT1")
 
         self.parser.bel_term.parseString(s1)
         self.assert_has_node(node)
@@ -1137,49 +1225,49 @@ class TestRna(TestTokenParserBase):
 
     def _help_test_reference(self, statement):
         result = self.parser.rna.parseString(statement)
-        expected_result = [RNA, ['HGNC', 'AKT1']]
+        expected_result = [RNA, ["HGNC", "AKT1"]]
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
             FUNCTION: RNA,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1',
+                NAMESPACE: "HGNC",
+                NAME: "AKT1",
             },
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = rna('HGNC', 'AKT1')
+        expected_node = rna("HGNC", "AKT1")
         self.assert_has_node(expected_node)
 
-        self.assertEqual('r(HGNC:AKT1)', self.graph.node_to_bel(expected_node))
+        self.assertEqual("r(HGNC:AKT1)", self.graph.node_to_bel(expected_node))
 
     def test_reference(self):
         # short
-        self._help_test_reference('r(HGNC:AKT1)')
+        self._help_test_reference("r(HGNC:AKT1)")
         # long
-        self._help_test_reference('rnaAbundance(HGNC:AKT1)')
+        self._help_test_reference("rnaAbundance(HGNC:AKT1)")
 
     def test_multiple_variants(self):
         """Test multiple variants."""
-        statement = 'r(HGNC:AKT1, var(p.Phe508del), var(c.1521_1523delCTT))'
+        statement = "r(HGNC:AKT1, var(p.Phe508del), var(c.1521_1523delCTT))"
         result = self.parser.rna.parseString(statement)
 
         expected_result = {
             FUNCTION: RNA,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1',
+                NAMESPACE: "HGNC",
+                NAME: "AKT1",
             },
             VARIANTS: [
                 hgvs(TEST_PROTEIN_VARIANT),
-                hgvs('c.1521_1523delCTT'),
+                hgvs("c.1521_1523delCTT"),
             ],
         }
         self.assertEqual(expected_result, result.asDict())
 
-        parent = rna('HGNC', 'AKT1')
-        expected_node = parent.with_variants([hgvs('c.1521_1523delCTT'), hgvs(TEST_PROTEIN_VARIANT)])
+        parent = rna("HGNC", "AKT1")
+        expected_node = parent.with_variants([hgvs("c.1521_1523delCTT"), hgvs(TEST_PROTEIN_VARIANT)])
         self.assert_has_node(expected_node)
 
         self.assertEqual(
@@ -1196,15 +1284,15 @@ class TestRna(TestTokenParserBase):
         expected_dict = {
             FUNCTION: RNA,
             FUSION: {
-                PARTNER_5P: {CONCEPT: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'}},
-                PARTNER_3P: {CONCEPT: {NAMESPACE: 'HGNC', NAME: 'ERG'}},
+                PARTNER_5P: {CONCEPT: {NAMESPACE: "HGNC", NAME: "TMPRSS2"}},
+                PARTNER_3P: {CONCEPT: {NAMESPACE: "HGNC", NAME: "ERG"}},
                 RANGE_5P: {
-                    FUSION_REFERENCE: 'r',
+                    FUSION_REFERENCE: "r",
                     FUSION_START: 1,
                     FUSION_STOP: 79,
                 },
                 RANGE_3P: {
-                    FUSION_REFERENCE: 'r',
+                    FUSION_REFERENCE: "r",
                     FUSION_START: 312,
                     FUSION_STOP: 5034,
                 },
@@ -1213,20 +1301,22 @@ class TestRna(TestTokenParserBase):
         self.assertEqual(expected_dict, result.asDict())
 
         expected_node = rna_fusion(
-            rna('HGNC', 'TMPRSS2'),
-            rna('HGNC', 'ERG'),
-            fusion_range('r', 1, 79),
-            fusion_range('r', 312, 5034)
+            rna("HGNC", "TMPRSS2"),
+            rna("HGNC", "ERG"),
+            fusion_range("r", 1, 79),
+            fusion_range("r", 312, 5034),
         )
         self.assert_has_node(expected_node)
 
-        self.assertEqual('r(fus(HGNC:TMPRSS2, "r.1_79", HGNC:ERG, "r.312_5034"))',
-                         self.graph.node_to_bel(expected_node))
+        self.assertEqual(
+            'r(fus(HGNC:TMPRSS2, "r.1_79", HGNC:ERG, "r.312_5034"))',
+            self.graph.node_to_bel(expected_node),
+        )
 
     def test_rna_fusion_known_breakpoints(self):
         """Test RNA fusions (2.6.1) with known breakpoints (2.6.1)."""
         # missing quotes
-        self._help_test_rna_fusion_1('r(fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.312_5034))')
+        self._help_test_rna_fusion_1("r(fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.312_5034))")
         # correct (short form)
         self._help_test_rna_fusion_1('r(fus(HGNC:TMPRSS2, "r.1_79", HGNC:ERG, "r.312_5034"))')
         # correct (long form)
@@ -1238,31 +1328,34 @@ class TestRna(TestTokenParserBase):
         expected_dict = {
             FUNCTION: RNA,
             FUSION: {
-                PARTNER_5P: {CONCEPT: {NAMESPACE: 'HGNC', NAME: 'TMPRSS2'}},
-                PARTNER_3P: {CONCEPT: {NAMESPACE: 'HGNC', NAME: 'ERG'}},
+                PARTNER_5P: {CONCEPT: {NAMESPACE: "HGNC", NAME: "TMPRSS2"}},
+                PARTNER_3P: {CONCEPT: {NAMESPACE: "HGNC", NAME: "ERG"}},
                 RANGE_5P: {
-                    FUSION_MISSING: '?',
+                    FUSION_MISSING: "?",
                 },
                 RANGE_3P: {
-                    FUSION_MISSING: '?',
-                }
-            }
+                    FUSION_MISSING: "?",
+                },
+            },
         }
         self.assertEqual(expected_dict, result.asDict())
 
         expected_node = rna_fusion(
-            rna('HGNC', 'TMPRSS2'),
-            rna('HGNC', 'ERG'),
+            rna("HGNC", "TMPRSS2"),
+            rna("HGNC", "ERG"),
         )
         self.assert_has_node(expected_node)
-        self.assertEqual('r(fus(HGNC:TMPRSS2, "?", HGNC:ERG, "?"))', self.graph.node_to_bel(expected_node))
+        self.assertEqual(
+            'r(fus(HGNC:TMPRSS2, "?", HGNC:ERG, "?"))',
+            self.graph.node_to_bel(expected_node),
+        )
 
     def test_rna_fusion_unspecified_breakpoints(self):
         """Test RNA fusions (2.6.1) with unspecified breakpoints."""
         # legacy
-        self._help_test_rna_fusion_unspecified_breakpoints('r(HGNC:TMPRSS2, fusion(HGNC:ERG))')
+        self._help_test_rna_fusion_unspecified_breakpoints("r(HGNC:TMPRSS2, fusion(HGNC:ERG))")
         # missing quotes
-        self._help_test_rna_fusion_unspecified_breakpoints('r(fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?))')
+        self._help_test_rna_fusion_unspecified_breakpoints("r(fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?))")
         # correct (short form)
         self._help_test_rna_fusion_unspecified_breakpoints('r(fus(HGNC:TMPRSS2, "?", HGNC:ERG, "?"))')
         # correct (long form)
@@ -1274,59 +1367,65 @@ class TestRna(TestTokenParserBase):
         expected_dict = {
             FUNCTION: RNA,
             FUSION: {
-                PARTNER_5P: {CONCEPT: {NAMESPACE: 'HGNC', NAME: 'BCR'}},
-                PARTNER_3P: {CONCEPT: {NAMESPACE: 'HGNC', NAME: 'JAK2'}},
+                PARTNER_5P: {CONCEPT: {NAMESPACE: "HGNC", NAME: "BCR"}},
+                PARTNER_3P: {CONCEPT: {NAMESPACE: "HGNC", NAME: "JAK2"}},
                 RANGE_5P: {
-                    FUSION_REFERENCE: 'r',
-                    FUSION_START: '?',
+                    FUSION_REFERENCE: "r",
+                    FUSION_START: "?",
                     FUSION_STOP: 1875,
                 },
                 RANGE_3P: {
-                    FUSION_REFERENCE: 'r',
+                    FUSION_REFERENCE: "r",
                     FUSION_START: 2626,
-                    FUSION_STOP: '?',
+                    FUSION_STOP: "?",
                 },
             },
         }
         self.assertEqual(expected_dict, result.asDict())
 
         expected_node = rna_fusion(
-            rna('HGNC', 'BCR'),
-            rna('HGNC', 'JAK2'),
-            fusion_range('r', '?', 1875),
-            fusion_range('r', 2626, '?'),
+            rna("HGNC", "BCR"),
+            rna("HGNC", "JAK2"),
+            fusion_range("r", "?", 1875),
+            fusion_range("r", 2626, "?"),
         )
         self.assert_has_node(expected_node)
-        self.assertEqual('r(fus(HGNC:BCR, "r.?_1875", HGNC:JAK2, "r.2626_?"))', self.graph.node_to_bel(expected_node))
+        self.assertEqual(
+            'r(fus(HGNC:BCR, "r.?_1875", HGNC:JAK2, "r.2626_?"))',
+            self.graph.node_to_bel(expected_node),
+        )
 
     def test_rna_fusion_legacy_1(self):
         # legacy
-        self._help_test_rna_fusion_legacy_1('r(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))')
+        self._help_test_rna_fusion_legacy_1("r(HGNC:BCR, fus(HGNC:JAK2, 1875, 2626))")
         # no quotes
-        self._help_test_rna_fusion_legacy_1('r(fus(HGNC:BCR, r.?_1875, HGNC:JAK2, r.2626_?))')
+        self._help_test_rna_fusion_legacy_1("r(fus(HGNC:BCR, r.?_1875, HGNC:JAK2, r.2626_?))")
         # correct
         self._help_test_rna_fusion_legacy_1('r(fus(HGNC:BCR, "r.?_1875", HGNC:JAK2, "r.2626_?"))')
 
     def test_rna_variant_codingReference(self):
         """2.2.2 RNA coding reference sequence"""
-        statement = 'r(HGNC:CFTR, var(r.1521_1523delcuu))'
+        statement = "r(HGNC:CFTR, var(r.1521_1523delcuu))"
         result = self.parser.rna.parseString(statement)
 
         expected_dict = {
             FUNCTION: RNA,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'CFTR',
+                NAMESPACE: "HGNC",
+                NAME: "CFTR",
             },
-            VARIANTS: [hgvs('r.1521_1523delcuu')],
+            VARIANTS: [hgvs("r.1521_1523delcuu")],
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        parent = rna('HGNC', 'CFTR')
-        expected_node = parent.with_variants(hgvs('r.1521_1523delcuu'))
+        parent = rna("HGNC", "CFTR")
+        expected_node = parent.with_variants(hgvs("r.1521_1523delcuu"))
         self.assert_has_node(expected_node)
 
-        self.assertEqual('r(HGNC:CFTR, var("r.1521_1523delcuu"))', self.graph.node_to_bel(expected_node))
+        self.assertEqual(
+            'r(HGNC:CFTR, var("r.1521_1523delcuu"))',
+            self.graph.node_to_bel(expected_node),
+        )
         self.assert_has_node(parent)
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
 
@@ -1339,29 +1438,29 @@ class TestComplex(TestTokenParserBase):
         self.parser.complex_abundances.setParseAction(self.parser.handle_term)
 
     def test_named_complex_singleton(self):
-        statement = 'complex(FPLX:AP1)'
+        statement = "complex(FPLX:AP1)"
         result = self.parser.complex_abundances.parseString(statement)
 
         expected_dict = {
             FUNCTION: COMPLEX,
             CONCEPT: {
-                NAMESPACE: 'FPLX',
-                NAME: 'AP1',
+                NAMESPACE: "FPLX",
+                NAME: "AP1",
             },
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = named_complex_abundance('FPLX', 'AP1')
+        expected_node = named_complex_abundance("FPLX", "AP1")
         self.assert_has_node(expected_node)
 
     def test_complex_list_short(self):
-        statement = 'complex(p(HGNC:FOS), p(HGNC:JUN))'
+        statement = "complex(p(HGNC:FOS), p(HGNC:JUN))"
         result = self.parser.complex_abundances.parseString(statement)
 
         expected_result = [
             COMPLEX,
-            [PROTEIN, ['HGNC', 'FOS']],
-            [PROTEIN, ['HGNC', 'JUN']],
+            [PROTEIN, ["HGNC", "FOS"]],
+            [PROTEIN, ["HGNC", "JUN"]],
         ]
         self.assertEqual(expected_result, result.asList())
 
@@ -1371,24 +1470,25 @@ class TestComplex(TestTokenParserBase):
                 {
                     FUNCTION: PROTEIN,
                     CONCEPT: {
-                        NAMESPACE: 'HGNC',
-                        NAME: 'FOS',
+                        NAMESPACE: "HGNC",
+                        NAME: "FOS",
                     },
-                }, {
+                },
+                {
                     FUNCTION: PROTEIN,
                     CONCEPT: {
-                        NAMESPACE: 'HGNC',
-                        NAME: 'JUN',
+                        NAMESPACE: "HGNC",
+                        NAME: "JUN",
                     },
                 },
             ],
         }
         self.assertEqual(expected_result, result.asDict())
 
-        child_1 = protein('HGNC', 'FOS')
+        child_1 = protein("HGNC", "FOS")
         self.assert_has_node(child_1)
 
-        child_2 = protein('HGNC', 'JUN')
+        child_2 = protein("HGNC", "JUN")
         self.assert_has_node(child_2)
 
         expected_node = complex_abundance([child_1, child_2])
@@ -1398,7 +1498,7 @@ class TestComplex(TestTokenParserBase):
         self.assert_has_edge(child_2, expected_node, relation=PART_OF)
 
     def test_complex_list_long(self):
-        statement = 'complexAbundance(proteinAbundance(HGNC:HBP1),geneAbundance(HGNC:NCF1))'
+        statement = "complexAbundance(proteinAbundance(HGNC:HBP1),geneAbundance(HGNC:NCF1))"
         self.parser.complex_abundances.parseString(statement)
 
 
@@ -1421,8 +1521,8 @@ class TestComposite(TestTokenParserBase):
 
         expected_result = [
             COMPOSITE,
-            [PROTEIN, ['HGNC', 'IL6']],
-            [COMPLEX, ['GO', 'interleukin-23 complex']],
+            [PROTEIN, ["HGNC", "IL6"]],
+            [COMPLEX, ["GO", "interleukin-23 complex"]],
         ]
         self.assertEqual(expected_result, result.asList())
 
@@ -1432,22 +1532,23 @@ class TestComposite(TestTokenParserBase):
                 {
                     FUNCTION: PROTEIN,
                     CONCEPT: {
-                        NAMESPACE: 'HGNC',
-                        NAME: 'IL6',
+                        NAMESPACE: "HGNC",
+                        NAME: "IL6",
                     },
-                }, {
+                },
+                {
                     FUNCTION: COMPLEX,
                     CONCEPT: {
-                        NAMESPACE: 'GO',
-                        NAME: 'interleukin-23 complex',
+                        NAMESPACE: "GO",
+                        NAME: "interleukin-23 complex",
                     },
-                }
-            ]
+                },
+            ],
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        il23 = named_complex_abundance('GO', 'interleukin-23 complex')
-        il6 = protein('HGNC', 'IL6')
+        il23 = named_complex_abundance("GO", "interleukin-23 complex")
+        il6 = protein("HGNC", "IL6")
         expected_node = composite_abundance([il23, il6])
         self.assert_has_node(expected_node)
 
@@ -1455,8 +1556,10 @@ class TestComposite(TestTokenParserBase):
         self.assertEqual(il23, expected_node[MEMBERS][0])
         self.assertEqual(il6, expected_node[MEMBERS][1])
 
-        self.assertEqual('composite(complex(GO:"interleukin-23 complex"), p(HGNC:IL6))',
-                         self.graph.node_to_bel(expected_node))
+        self.assertEqual(
+            'composite(complex(GO:"interleukin-23 complex"), p(HGNC:IL6))',
+            self.graph.node_to_bel(expected_node),
+        )
 
         self.assertEqual(3, self.parser.graph.number_of_nodes())
         self.assert_has_node(expected_node)
@@ -1474,19 +1577,19 @@ class TestBiologicalProcess(TestTokenParserBase):
         statement = 'bp(GO:"cell cycle arrest")'
         result = self.parser.biological_process.parseString(statement)
 
-        expected_result = [BIOPROCESS, ['GO', 'cell cycle arrest']]
+        expected_result = [BIOPROCESS, ["GO", "cell cycle arrest"]]
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
             FUNCTION: BIOPROCESS,
             CONCEPT: {
-                NAMESPACE: 'GO',
-                NAME: 'cell cycle arrest',
+                NAMESPACE: "GO",
+                NAME: "cell cycle arrest",
             },
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = bioprocess('GO', 'cell cycle arrest')
+        expected_node = bioprocess("GO", "cell cycle arrest")
         self.assert_has_node(expected_node)
 
 
@@ -1496,22 +1599,22 @@ class TestPathology(TestTokenParserBase):
         self.parser.pathology.setParseAction(self.parser.handle_term)
 
     def test_232a(self):
-        statement = 'pathology(MESH:adenocarcinoma)'
+        statement = "pathology(MESH:adenocarcinoma)"
         result = self.parser.pathology.parseString(statement)
 
         expected_dict = {
             FUNCTION: PATHOLOGY,
             CONCEPT: {
-                NAMESPACE: 'MESH',
-                NAME: 'adenocarcinoma',
+                NAMESPACE: "MESH",
+                NAME: "adenocarcinoma",
             },
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = pathology('MESH', 'adenocarcinoma')
+        expected_node = pathology("MESH", "adenocarcinoma")
         self.assert_has_node(expected_node)
 
-        self.assertEqual('path(MESH:adenocarcinoma)', self.graph.node_to_bel(expected_node))
+        self.assertEqual("path(MESH:adenocarcinoma)", self.graph.node_to_bel(expected_node))
 
 
 class TestPopulation(TestTokenParserBase):
@@ -1520,24 +1623,26 @@ class TestPopulation(TestTokenParserBase):
         self.parser.population.setParseAction(self.parser.handle_term)
 
     def test_parse_population(self):
-        statement = 'pop(UBERON:blood)'
+        statement = "pop(UBERON:blood)"
         result = self.parser.population.parseString(statement)
 
         expected_dict = {
             FUNCTION: POPULATION,
             CONCEPT: {
-                NAMESPACE: 'UBERON',
-                NAME: 'blood',
+                NAMESPACE: "UBERON",
+                NAME: "blood",
             },
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        expected_node = Population('UBERON', 'blood')
+        expected_node = Population("UBERON", "blood")
         self.assert_has_node(expected_node)
 
-        self.assertEqual('pop(UBERON:blood)',
-                         self.graph.node_to_bel(expected_node),
-                         msg='Nodes: {}'.format(list(self.graph)))
+        self.assertEqual(
+            "pop(UBERON:blood)",
+            self.graph.node_to_bel(expected_node),
+            msg="Nodes: {}".format(list(self.graph)),
+        )
 
 
 class TestActivity(TestTokenParserBase):
@@ -1549,10 +1654,10 @@ class TestActivity(TestTokenParserBase):
         self.parser.activity.setParseAction(self.parser.handle_term)
 
     def test_activity_bare(self):
-        statement = 'act(p(HGNC:AKT1))'
+        statement = "act(p(HGNC:AKT1))"
         result = self.parser.activity.parseString(statement)
 
-        expected_result = [ACTIVITY, PROTEIN, ['HGNC', 'AKT1']]
+        expected_result = [ACTIVITY, PROTEIN, ["HGNC", "AKT1"]]
         self.assertEqual(expected_result, result.asList())
 
         mod = modifier_po_to_dict(result)
@@ -1563,16 +1668,16 @@ class TestActivity(TestTokenParserBase):
 
     def test_activity_withMolecularActivityDefault(self):
         """Tests activity modifier with molecular activity from default BEL namespace"""
-        statement = 'act(p(HGNC:AKT1), ma(kin))'
+        statement = "act(p(HGNC:AKT1), ma(kin))"
         result = self.parser.activity.parseString(statement)
 
         expected_dict = {
             MODIFIER: ACTIVITY,
-            EFFECT: activity_mapping['kin'],
+            EFFECT: activity_mapping["kin"],
             FUNCTION: PROTEIN,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1',
+                NAMESPACE: "HGNC",
+                NAME: "AKT1",
             },
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1580,22 +1685,22 @@ class TestActivity(TestTokenParserBase):
         mod = modifier_po_to_dict(result)
         expected_mod = {
             MODIFIER: ACTIVITY,
-            EFFECT: activity_mapping['kin'],
+            EFFECT: activity_mapping["kin"],
         }
         self.assertEqual(expected_mod, mod)
 
     def test_activity_withMolecularActivityDefaultLong(self):
         """Tests activity modifier with molecular activity from custom namespaced"""
-        statement = 'act(p(HGNC:AKT1), ma(catalyticActivity))'
+        statement = "act(p(HGNC:AKT1), ma(catalyticActivity))"
         result = self.parser.activity.parseString(statement)
 
         expected_dict = {
             MODIFIER: ACTIVITY,
-            EFFECT: activity_mapping['cat'],
+            EFFECT: activity_mapping["cat"],
             FUNCTION: PROTEIN,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1',
+                NAMESPACE: "HGNC",
+                NAME: "AKT1",
             },
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1603,7 +1708,7 @@ class TestActivity(TestTokenParserBase):
         mod = modifier_po_to_dict(result)
         expected_mod = {
             MODIFIER: ACTIVITY,
-            EFFECT: activity_mapping['cat'],
+            EFFECT: activity_mapping["cat"],
         }
         self.assertEqual(expected_mod, mod)
 
@@ -1615,13 +1720,13 @@ class TestActivity(TestTokenParserBase):
         expected_dict = {
             MODIFIER: ACTIVITY,
             EFFECT: {
-                NAMESPACE: 'GO',
-                NAME: 'catalytic activity',
+                NAMESPACE: "GO",
+                NAME: "catalytic activity",
             },
             FUNCTION: PROTEIN,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1',
+                NAMESPACE: "HGNC",
+                NAME: "AKT1",
             },
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1629,25 +1734,22 @@ class TestActivity(TestTokenParserBase):
         mod = modifier_po_to_dict(result)
         expected_mod = {
             MODIFIER: ACTIVITY,
-            EFFECT: {
-                NAMESPACE: 'GO',
-                NAME: 'catalytic activity'
-            },
+            EFFECT: {NAMESPACE: "GO", NAME: "catalytic activity"},
         }
         self.assertEqual(expected_mod, mod)
 
     def test_activity_legacy(self):
         """Test BEL 1.0 style molecular activity annotation"""
-        statement = 'kin(p(HGNC:AKT1))'
+        statement = "kin(p(HGNC:AKT1))"
         result = self.parser.activity.parseString(statement)
 
         expected_dict = {
             MODIFIER: ACTIVITY,
-            EFFECT: activity_mapping['kin'],
+            EFFECT: activity_mapping["kin"],
             FUNCTION: PROTEIN,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1',
+                NAMESPACE: "HGNC",
+                NAME: "AKT1",
             },
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1655,27 +1757,27 @@ class TestActivity(TestTokenParserBase):
         mod = modifier_po_to_dict(result)
         expected_mod = {
             MODIFIER: ACTIVITY,
-            EFFECT: activity_mapping['kin'],
+            EFFECT: activity_mapping["kin"],
         }
         self.assertEqual(expected_mod, mod)
 
-        node = protein('HGNC', 'AKT1')
+        node = protein("HGNC", "AKT1")
         self.assert_has_node(node)
 
     def test_kinase_activity_on_named_complex(self):
-        statement = 'kin(complex(FPLX:C1))'
+        statement = "kin(complex(FPLX:C1))"
         self.parser.activity.parseString(statement)
 
     def test_activity_on_named_complex(self):
-        statement = 'act(complex(FPLX:C1), ma(kin))'
+        statement = "act(complex(FPLX:C1), ma(kin))"
         self.parser.activity.parseString(statement)
 
     def test_kinase_activity_on_listed_complex(self):
-        statement = 'kin(complex(p(HGNC:A), p(HGNC:B)))'
+        statement = "kin(complex(p(HGNC:A), p(HGNC:B)))"
         self.parser.activity.parseString(statement)
 
     def test_activity_on_listed_complex(self):
-        statement = 'act(complex(p(HGNC:A), p(HGNC:B)), ma(kin))'
+        statement = "act(complex(p(HGNC:A), p(HGNC:B)), ma(kin))"
         self.parser.activity.parseString(statement)
 
 
@@ -1687,9 +1789,9 @@ class TestTranslocationPermissive(unittest.TestCase):
             cls.graph,
             disallow_unqualified_translocations=False,
             namespace_to_pattern={
-                'HGNC': re.compile(r'.*'),
-                'CHEBI': re.compile(r'.*'),
-            }
+                "HGNC": re.compile(r".*"),
+                "CHEBI": re.compile(r".*"),
+            },
         )
 
     def setUp(self):
@@ -1704,15 +1806,15 @@ class TestTranslocationPermissive(unittest.TestCase):
 
     def test_unqualified_translocation_single(self):
         """translocation example"""
-        statement = 'tloc(p(HGNC:EGFR))'
+        statement = "tloc(p(HGNC:EGFR))"
         result = self.parser.transformation.parseString(statement)
 
         expected_dict = {
             MODIFIER: TRANSLOCATION,
             FUNCTION: PROTEIN,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'EGFR',
+                NAMESPACE: "HGNC",
+                NAME: "EGFR",
             },
         }
 
@@ -1724,7 +1826,7 @@ class TestTranslocationPermissive(unittest.TestCase):
         }
         self.assertEqual(expected_mod, mod)
 
-        node = protein('HGNC', 'EGFR')
+        node = protein("HGNC", "EGFR")
         self.assert_has_node(node)
 
     def test_unqualified_translocation_relation(self):
@@ -1741,33 +1843,33 @@ class TestTranslocationPermissive(unittest.TestCase):
             SOURCE: {
                 FUNCTION: ABUNDANCE,
                 CONCEPT: {
-                    NAMESPACE: 'CHEBI',
-                    NAME: 'Abeta_42',
+                    NAMESPACE: "CHEBI",
+                    NAME: "Abeta_42",
                 },
             },
             RELATION: DIRECTLY_INCREASES,
             TARGET: {
                 FUNCTION: ABUNDANCE,
                 CONCEPT: {
-                    NAMESPACE: 'CHEBI',
-                    NAME: 'calcium(2+)',
+                    NAMESPACE: "CHEBI",
+                    NAME: "calcium(2+)",
                 },
                 MODIFIER: TRANSLOCATION,
-            }
+            },
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        sub = abundance('CHEBI', 'Abeta_42')
+        sub = abundance("CHEBI", "Abeta_42")
         self.assert_has_node(sub)
 
-        obj = abundance('CHEBI', 'calcium(2+)')
+        obj = abundance("CHEBI", "calcium(2+)")
         self.assert_has_node(obj)
 
         expected_annotations = {
             RELATION: DIRECTLY_INCREASES,
             TARGET_MODIFIER: {
                 MODIFIER: TRANSLOCATION,
-            }
+            },
         }
 
         self.assert_has_edge(sub, obj, **expected_annotations)
@@ -1780,18 +1882,18 @@ class TestTransformation(TestTokenParserBase):
 
     def test_degradation_short(self):
         """Test the short form of degradation works"""
-        statement = 'deg(p(HGNC:AKT1))'
+        statement = "deg(p(HGNC:AKT1))"
         result = self.parser.transformation.parseString(statement)
 
-        expected_result = [DEGRADATION, PROTEIN, ['HGNC', 'AKT1']]
+        expected_result = [DEGRADATION, PROTEIN, ["HGNC", "AKT1"]]
         self.assertEqual(expected_result, result.asList())
 
         expected_dict = {
             MODIFIER: DEGRADATION,
             FUNCTION: PROTEIN,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'AKT1',
+                NAMESPACE: "HGNC",
+                NAME: "AKT1",
             },
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1804,15 +1906,15 @@ class TestTransformation(TestTokenParserBase):
 
     def test_degradation_long(self):
         """Test the long form of degradation works"""
-        statement = 'degradation(p(HGNC:EGFR))'
+        statement = "degradation(p(HGNC:EGFR))"
         result = self.parser.transformation.parseString(statement)
 
         expected_dict = {
             MODIFIER: DEGRADATION,
             FUNCTION: PROTEIN,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'EGFR',
+                NAMESPACE: "HGNC",
+                NAME: "EGFR",
             },
         }
         self.assertEqual(expected_dict, result.asDict())
@@ -1823,7 +1925,7 @@ class TestTransformation(TestTokenParserBase):
         }
         self.assertEqual(expected_mod, mod)
 
-        node = protein('HGNC', 'EGFR')
+        node = protein("HGNC", "EGFR")
         self.assert_has_node(node)
 
     def test_translocation_standard(self):
@@ -1835,26 +1937,32 @@ class TestTransformation(TestTokenParserBase):
             MODIFIER: TRANSLOCATION,
             FUNCTION: PROTEIN,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'EGFR',
+                NAMESPACE: "HGNC",
+                NAME: "EGFR",
             },
             EFFECT: {
-                FROM_LOC: {NAMESPACE: 'GO', NAME: 'cell surface', },
-                TO_LOC: {NAMESPACE: 'GO', NAME: 'endosome', },
-            }
+                FROM_LOC: {
+                    NAMESPACE: "GO",
+                    NAME: "cell surface",
+                },
+                TO_LOC: {
+                    NAMESPACE: "GO",
+                    NAME: "endosome",
+                },
+            },
         }
 
         self.assertEqual(expected_dict, result.asDict())
 
         mod = modifier_po_to_dict(result)
         expected_mod = translocation(
-            from_loc=Entity(namespace='GO', name='cell surface'),
-            to_loc=Entity(namespace='GO', name='endosome'),
+            from_loc=Entity(namespace="GO", name="cell surface"),
+            to_loc=Entity(namespace="GO", name="endosome"),
         )
 
         self.assertEqual(expected_mod, mod)
 
-        node = protein('HGNC', 'EGFR')
+        node = protein("HGNC", "EGFR")
         self.assert_has_node(node)
 
     def test_translocation_bare(self):
@@ -1866,13 +1974,13 @@ class TestTransformation(TestTokenParserBase):
             MODIFIER: TRANSLOCATION,
             FUNCTION: PROTEIN,
             CONCEPT: {
-                NAMESPACE: 'HGNC',
-                NAME: 'EGFR',
+                NAMESPACE: "HGNC",
+                NAME: "EGFR",
             },
             EFFECT: {
-                FROM_LOC: {NAMESPACE: 'GO', NAME: 'cell surface'},
-                TO_LOC: {NAMESPACE: 'GO', NAME: 'endosome'},
-            }
+                FROM_LOC: {NAMESPACE: "GO", NAME: "cell surface"},
+                TO_LOC: {NAMESPACE: "GO", NAME: "endosome"},
+            },
         }
         self.assertEqual(expected_dict, result.asDict())
 
@@ -1880,13 +1988,13 @@ class TestTransformation(TestTokenParserBase):
         expected_mod = {
             MODIFIER: TRANSLOCATION,
             EFFECT: {
-                FROM_LOC: {NAMESPACE: 'GO', NAME: 'cell surface'},
-                TO_LOC: {NAMESPACE: 'GO', NAME: 'endosome'},
+                FROM_LOC: {NAMESPACE: "GO", NAME: "cell surface"},
+                TO_LOC: {NAMESPACE: "GO", NAME: "endosome"},
             },
         }
         self.assertEqual(expected_mod, mod)
 
-        node = protein('HGNC', 'EGFR')
+        node = protein("HGNC", "EGFR")
         self.assert_has_node(node)
 
     def test_unqualified_translocation_strict(self):
@@ -1897,31 +2005,31 @@ class TestTransformation(TestTokenParserBase):
 
     def test_translocation_secretion(self):
         """cell secretion short form"""
-        statement = 'sec(p(HGNC:EGFR))'
+        statement = "sec(p(HGNC:EGFR))"
         result = self.parser.transformation.parseString(statement)
 
-        expected_result = [CELL_SECRETION, PROTEIN, ['HGNC', 'EGFR']]
+        expected_result = [CELL_SECRETION, PROTEIN, ["HGNC", "EGFR"]]
         self.assertEqual(expected_result, result.asList())
 
         mod = modifier_po_to_dict(result)
         expected_mod = secretion()
         self.assertEqual(expected_mod, mod)
 
-        node = protein('HGNC', 'EGFR')
+        node = protein("HGNC", "EGFR")
         self.assert_has_node(node)
 
     def test_translocation_surface(self):
         """cell surface expression short form"""
-        statement = 'surf(p(HGNC:EGFR))'
+        statement = "surf(p(HGNC:EGFR))"
         result = self.parser.transformation.parseString(statement)
 
-        expected_result = [CELL_SURFACE_EXPRESSION, PROTEIN, ['HGNC', 'EGFR']]
+        expected_result = [CELL_SURFACE_EXPRESSION, PROTEIN, ["HGNC", "EGFR"]]
         self.assertEqual(expected_result, result.asList())
 
         expected_mod = cell_surface_expression()
         self.assertEqual(expected_mod, modifier_po_to_dict(result))
 
-        node = protein('HGNC', 'EGFR')
+        node = protein("HGNC", "EGFR")
         self.assert_has_node(node)
 
     def test_reaction_1(self):
@@ -1934,8 +2042,8 @@ class TestTransformation(TestTokenParserBase):
                 {
                     FUNCTION: ABUNDANCE,
                     CONCEPT: {
-                        NAMESPACE: 'CHEBI',
-                        NAME: 'superoxide',
+                        NAMESPACE: "CHEBI",
+                        NAME: "superoxide",
                     },
                 }
             ],
@@ -1943,24 +2051,24 @@ class TestTransformation(TestTokenParserBase):
                 {
                     FUNCTION: ABUNDANCE,
                     CONCEPT: {
-                        NAMESPACE: 'CHEBI',
-                        NAME: 'hydrogen peroxide',
-                    }
-                }, {
-
+                        NAMESPACE: "CHEBI",
+                        NAME: "hydrogen peroxide",
+                    },
+                },
+                {
                     FUNCTION: ABUNDANCE,
                     CONCEPT: {
-                        NAMESPACE: 'CHEBI',
-                        NAME: 'oxygen',
-                    }
+                        NAMESPACE: "CHEBI",
+                        NAME: "oxygen",
+                    },
                 },
             ],
         }
         self.assertEqual(expected_dict, result.asDict())
 
-        superoxide_node = abundance('CHEBI', 'superoxide')
-        hydrogen_peroxide = abundance('CHEBI', 'hydrogen peroxide')
-        oxygen_node = abundance('CHEBI', 'oxygen')
+        superoxide_node = abundance("CHEBI", "superoxide")
+        hydrogen_peroxide = abundance("CHEBI", "hydrogen peroxide")
+        oxygen_node = abundance("CHEBI", "oxygen")
         expected_node = reaction([superoxide_node], [hydrogen_peroxide, oxygen_node])
 
         self.assert_has_node(expected_node)
@@ -1977,10 +2085,10 @@ class TestTransformation(TestTokenParserBase):
         self.assert_has_edge(expected_node, oxygen_node)
 
     def test_reaction_2(self):
-        statement = 'rxn(reactants(p(HGNC:APP)), products(p(HGNC:APP, frag(672_713))))'
+        statement = "rxn(reactants(p(HGNC:APP)), products(p(HGNC:APP, frag(672_713))))"
         self.parser.transformation.parseString(statement)
 
-        app = hgnc(name='APP')
+        app = hgnc(name="APP")
         self.assertIn(app, self.graph)
 
         amyloid_beta_42 = app.with_variants(Fragment(start=672, stop=713))
@@ -1991,7 +2099,7 @@ class TestTransformation(TestTokenParserBase):
 
     def test_clearance(self):
         """Tests that after adding things, the graph and parser can be cleared properly"""
-        s1 = 'surf(p(HGNC:EGFR))'
+        s1 = "surf(p(HGNC:EGFR))"
         s2 = 'rxn(reactants(a(CHEBI:superoxide)),products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:"oxygen")))'
 
         self.parser.transformation.parseString(s1)
@@ -2014,7 +2122,7 @@ class TestSemantics(unittest.TestCase):
         update_provenance(parser.control_parser)
 
         parser.bel_term.addParseAction(parser.handle_term)
-        parser.bel_term.parseString('bp(ABASD)')
+        parser.bel_term.parseString("bp(ABASD)")
 
-        node = bioprocess(namespace=DIRTY, name='ABASD')
+        node = bioprocess(namespace=DIRTY, name="ABASD")
         self.assertIn(node, graph)

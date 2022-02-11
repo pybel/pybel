@@ -31,7 +31,7 @@ class TestGraphProperties(unittest.TestCase):
             self.contact,
             self.licenses,
             self.copyrights,
-            self.disclaimer
+            self.disclaimer,
         ) = [n() for _ in range(8)]
 
     def _help_test_metadata(self, graph: BELGraph) -> None:
@@ -45,7 +45,7 @@ class TestGraphProperties(unittest.TestCase):
         self.assertEqual(self.copyrights, graph.copyright)
         self.assertEqual(self.disclaimer, graph.disclaimer)
 
-        self.assertEqual('{name} v{version}'.format(name=self.name, version=self.version), str(graph))
+        self.assertEqual("{name} v{version}".format(name=self.name, version=self.version), str(graph))
 
     def test_str_kwargs(self):
         """Test setting of metadata through keyword arguments."""
@@ -57,7 +57,7 @@ class TestGraphProperties(unittest.TestCase):
             contact=self.contact,
             license=self.licenses,
             copyright=self.copyrights,
-            disclaimer=self.disclaimer
+            disclaimer=self.disclaimer,
         )
         self._help_test_metadata(graph)
 
@@ -83,12 +83,12 @@ class TestStruct(unittest.TestCase):
     def test_add_simple(self):
         """Test that a simple node can be added, but not duplicated."""
         graph = BELGraph()
-        node = protein(namespace='TEST', name='YFG')
+        node = protein(namespace="TEST", name="YFG")
         graph.add_node_from_data(node)
         self.assertEqual(1, graph.number_of_nodes())
 
         graph.add_node_from_data(node)
-        self.assertEqual(1, graph.number_of_nodes(), msg='should not add same node again')
+        self.assertEqual(1, graph.number_of_nodes(), msg="should not add same node again")
 
     def test_summarize(self):
         """Test summarizing a graph."""
@@ -96,7 +96,7 @@ class TestStruct(unittest.TestCase):
         sio = StringIO()
 
         random.seed(5)
-        pybel.examples.sialic_acid_graph.version = '1.0.0'
+        pybel.examples.sialic_acid_graph.version = "1.0.0"
         pybel.examples.sialic_acid_graph.summarize(file=sio, examples=False)
         test_str = """---------------------  -------------------
 Name                   Sialic Acid Graph
@@ -142,8 +142,8 @@ Protein hasVariant Protein               1"""
 
         with self.assertRaises(TypeError):
             graph.add_increases(
-                protein(namespace='TEST', name='YFG1'),
-                protein(namespace='TEST', name='YFG2'),
+                protein(namespace="TEST", name="YFG1"),
+                protein(namespace="TEST", name="YFG2"),
                 evidence=n(),
                 citation=5,
             )
@@ -155,13 +155,19 @@ class TestGetGraphProperties(unittest.TestCase):
     def setUp(self):
         """Set up the test case with a fresh BEL graph."""
         self.graph = BELGraph()
-        self.graph.annotation_pattern['Species'] = r'\d+'
-        self.graph.annotation_list['Confidence'] = {'Very Low', 'Low', 'Medium', 'High', 'Very High'}
+        self.graph.annotation_pattern["Species"] = r"\d+"
+        self.graph.annotation_list["Confidence"] = {
+            "Very Low",
+            "Low",
+            "Medium",
+            "High",
+            "Very High",
+        }
 
     def test_get_qualified_edge(self):
         """Test adding an edge to a graph."""
-        test_source = protein(namespace='TEST', name='YFG')
-        test_target = protein(namespace='TEST', name='YFG2')
+        test_source = protein(namespace="TEST", name="YFG")
+        test_target = protein(namespace="TEST", name="YFG2")
 
         self.graph.add_node_from_data(test_source)
         self.graph.add_node_from_data(test_target)
@@ -174,10 +180,7 @@ class TestGetGraphProperties(unittest.TestCase):
             test_target,
             citation=test_pmid,
             evidence=test_evidence,
-            annotations={
-                'Species': '9606',
-                'Confidence': 'Very High'
-            },
+            annotations={"Species": "9606", "Confidence": "Very High"},
         )
 
         citation = self.graph.get_edge_citation(test_source, test_target, test_key)
@@ -198,15 +201,18 @@ class TestGetGraphProperties(unittest.TestCase):
         annotations = self.graph.get_edge_annotations(test_source, test_target, test_key)
         self.assertIsNotNone(annotations)
         self.assertIsInstance(annotations, dict)
-        self.assertIn('Species', annotations)
-        self.assertIn(Entity(namespace='Species', identifier='9606'), annotations['Species'])
-        self.assertIn('Confidence', annotations)
-        self.assertIn(Entity(namespace='Confidence', identifier='Very High'), annotations['Confidence'])
+        self.assertIn("Species", annotations)
+        self.assertIn(Entity(namespace="Species", identifier="9606"), annotations["Species"])
+        self.assertIn("Confidence", annotations)
+        self.assertIn(
+            Entity(namespace="Confidence", identifier="Very High"),
+            annotations["Confidence"],
+        )
 
     def test_get_unqualified_edge(self):
         """Test adding an unqualified edge."""
-        test_source = protein(namespace='TEST', name='YFG')
-        test_target = protein(namespace='TEST', name='YFG2')
+        test_source = protein(namespace="TEST", name="YFG")
+        test_target = protein(namespace="TEST", name="YFG2")
 
         key = self.graph.add_part_of(test_source, test_target)
 
@@ -223,7 +229,12 @@ class TestGetGraphProperties(unittest.TestCase):
         """Test that the identifier is carried through to the child."""
         graph = BELGraph()
         namespace, name, identifier, variant_name = n(), n(), n(), n()
-        node = protein(namespace=namespace, name=name, identifier=identifier, variants=hgvs(variant_name))
+        node = protein(
+            namespace=namespace,
+            name=name,
+            identifier=identifier,
+            variants=hgvs(variant_name),
+        )
         node.get_parent()
 
         graph.add_node_from_data(node)
@@ -234,7 +245,7 @@ class TestGetGraphProperties(unittest.TestCase):
 class TestExtensionIO(unittest.TestCase):
     def test_io(self):
         with tempfile.TemporaryDirectory() as directory:
-            path = os.path.join(directory, 'ampk.bel.nodelink.json')
+            path = os.path.join(directory, "ampk.bel.nodelink.json")
             pybel.dump(pybel.examples.ampk_graph, path)
             self.assertTrue(os.path.exists(path))
             new_graph = pybel.load(path)
@@ -242,7 +253,7 @@ class TestExtensionIO(unittest.TestCase):
 
     def test_invalid_io(self):
         with tempfile.TemporaryDirectory() as directory:
-            path = os.path.join(directory, 'ampk.bel.invalid.json')
+            path = os.path.join(directory, "ampk.bel.invalid.json")
             with self.assertRaises(InvalidExtensionError):
                 pybel.dump(pybel.examples.ampk_graph, path)
             self.assertFalse(os.path.exists(path))

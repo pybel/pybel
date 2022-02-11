@@ -29,7 +29,7 @@ class BELParserWarning(PyBELWarning):
         self.position = position
 
     def __str__(self):
-        return 'General Parser Failure on line {} at pos {}: {}'.format(self.line_number, self.position, self.line)
+        return "General Parser Failure on line {} at pos {}: {}".format(self.line_number, self.position, self.line)
 
 
 class BELSyntaxError(BELParserWarning, SyntaxError):
@@ -44,7 +44,7 @@ class InconsistentDefinitionError(BELParserWarning):
         self.definition = definition
 
     def __str__(self):
-        return 'Tried to redefine {} with: {}'.format(self.definition, self.line)
+        return "Tried to redefine {} with: {}".format(self.definition, self.line)
 
 
 class RedefinedNamespaceError(InconsistentDefinitionError):
@@ -56,6 +56,7 @@ class RedefinedAnnotationError(InconsistentDefinitionError):
 
 
 # Naming Warnings
+
 
 class NameWarning(BELParserWarning):
     """The base class for errors related to nomenclature."""
@@ -114,7 +115,7 @@ class MissingNamespaceRegexWarning(NamespaceIdentifierWarning):
     """Raised if reference not matching regex."""
 
     def __str__(self):
-        return '''"{}" doesn't match the regex for {} namespace'''.format(self.name, self.namespace)
+        return """"{}" doesn't match the regex for {} namespace""".format(self.name, self.namespace)
 
 
 class AnnotationWarning(BELParserWarning):
@@ -136,14 +137,14 @@ class UndefinedAnnotationWarning(AnnotationWarning):
     """Raised when an undefined annotation is used."""
 
     def __str__(self):
-        return '''"{}" is not defined'''.format(self.annotation)
+        return """"{}" is not defined""".format(self.annotation)
 
 
 class MissingAnnotationKeyWarning(AnnotationWarning):
     """Raised when trying to unset an annotation that is not set."""
 
     def __str__(self):
-        return '''"{}" is not set, so it can't be unset'''.format(self.annotation)
+        return """"{}" is not set, so it can't be unset""".format(self.annotation)
 
 
 class AnnotationIdentifierWarning(AnnotationWarning):
@@ -165,10 +166,11 @@ class MissingAnnotationRegexWarning(AnnotationIdentifierWarning):
     """Raised if annotation doesn't match regex."""
 
     def __str__(self):
-        return '''"{}" doesn't match the regex for {} annotation'''.format(self.value, self.annotation)
+        return """"{}" doesn't match the regex for {} annotation""".format(self.value, self.annotation)
 
 
 # Provenance Warnings
+
 
 class VersionFormatWarning(BELParserWarning):
     """Raised if the version string doesn't adhere to semantic versioning or ``YYYYMMDD`` format."""
@@ -180,7 +182,7 @@ class VersionFormatWarning(BELParserWarning):
     def __str__(self):
         return (
             'Version string "{}" neither is a date like YYYYMMDD nor adheres to semantic versioning.'
-            ' See http://semver.org/'.format(self.version_string)
+            " See http://semver.org/".format(self.version_string)
         )
 
 
@@ -219,7 +221,7 @@ class InvalidMetadataException(BELParserWarning):
         self.value = value
 
     def __str__(self):
-        return 'Invalid document metadata key: {}'.format(self.key)
+        return "Invalid document metadata key: {}".format(self.key)
 
 
 class MissingMetadataException(BELParserWarning):
@@ -230,7 +232,7 @@ class MissingMetadataException(BELParserWarning):
         self.key = key
 
     def __str__(self):
-        return 'Missing required document metadata: {}'.format(self.key)
+        return "Missing required document metadata: {}".format(self.key)
 
     @staticmethod
     def make(key: str):
@@ -238,7 +240,7 @@ class MissingMetadataException(BELParserWarning):
 
         Unlike normal classes, polymorphism on __init__ can't be used for exceptions when pickling/unpickling.
         """
-        return MissingMetadataException(0, '', 0, key)
+        return MissingMetadataException(0, "", 0, key)
 
 
 class InvalidCitationLengthException(BELParserWarning):
@@ -296,7 +298,7 @@ class MissingAnnotationWarning(BELParserWarning):
         self.required_annotations = required_annotations
 
     def __str__(self):
-        return 'Missing annotations: {}'.format(', '.join(sorted(self.required_annotations)))
+        return "Missing annotations: {}".format(", ".join(sorted(self.required_annotations)))
 
 
 class InvalidCitationType(BELParserWarning):
@@ -336,6 +338,7 @@ class InvalidPubMedIdentifierWarning(BELParserWarning):
 
 # BEL Syntax Warnings
 
+
 class MalformedTranslocationWarning(BELParserWarning):
     """Raised when there is a translocation statement without location information."""
 
@@ -344,7 +347,7 @@ class MalformedTranslocationWarning(BELParserWarning):
         self.tokens = tokens
 
     def __str__(self):
-        return 'Unqualified translocation: {} {}'.format(self.line, self.tokens)
+        return "Unqualified translocation: {} {}".format(self.line, self.tokens)
 
 
 class PlaceholderAminoAcidWarning(BELParserWarning):
@@ -359,7 +362,7 @@ class PlaceholderAminoAcidWarning(BELParserWarning):
         self.code = code
 
     def __str__(self):
-        return 'Placeholder amino acid found: {}'.format(self.code)
+        return "Placeholder amino acid found: {}".format(self.code)
 
 
 class NestedRelationWarning(BELParserWarning):
@@ -369,10 +372,11 @@ class NestedRelationWarning(BELParserWarning):
     """
 
     def __str__(self):
-        return 'Nesting is not supported. Split this statement: {}'.format(self.line)
+        return "Nesting is not supported. Split this statement: {}".format(self.line)
 
 
 # Semantic Warnings
+
 
 class InvalidEntity(BELParserWarning):
     """Raised when using a non-entity name for a name."""
@@ -383,7 +387,7 @@ class InvalidEntity(BELParserWarning):
         self.name = name
 
     def __str__(self):
-        return '{}:{} should not be coded as an entity'.format(self.namespace, ensure_quotes(self.name))
+        return "{}:{} should not be coded as an entity".format(self.namespace, ensure_quotes(self.name))
 
 
 class InvalidFunctionSemantic(BELParserWarning):
@@ -404,5 +408,5 @@ class InvalidFunctionSemantic(BELParserWarning):
             self.func,
             self.namespace,
             ensure_quotes(self.name),
-            ', '.join(self.allowed_functions),
+            ", ".join(self.allowed_functions),
         )

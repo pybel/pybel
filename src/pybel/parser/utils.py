@@ -7,13 +7,24 @@ import logging
 from typing import Any, List, Optional
 
 from pyparsing import (
-    And, Group, ParserElement, Suppress, White, Word, ZeroOrMore, alphanums, dblQuotedString, delimitedList, oneOf,
-    removeQuotes, replaceWith,
+    And,
+    Group,
+    ParserElement,
+    Suppress,
+    White,
+    Word,
+    ZeroOrMore,
+    alphanums,
+    dblQuotedString,
+    delimitedList,
+    oneOf,
+    removeQuotes,
+    replaceWith,
 )
 
 from ..constants import RELATION, SOURCE, TARGET
 
-logger = logging.getLogger('pybel')
+logger = logging.getLogger("pybel")
 
 
 def is_int(s: Any) -> bool:
@@ -30,25 +41,25 @@ def is_int(s: Any) -> bool:
 
 
 W = Suppress(ZeroOrMore(White()))
-C = Suppress(',')
+C = Suppress(",")
 WCW = W + C + W
-LPF, RPF = map(Suppress, '()')
-LP = Suppress('(') + W
-RP = W + Suppress(')')
+LPF, RPF = map(Suppress, "()")
+LP = Suppress("(") + W
+RP = W + Suppress(")")
 
 word = Word(alphanums)
-ns = Word(alphanums + '_-.')
-identifier = Word(alphanums + '_')
+ns = Word(alphanums + "_-.")
+identifier = Word(alphanums + "_")
 quote = dblQuotedString().setParseAction(removeQuotes)
 qid = quote | identifier
-delimited_quoted_list = And([Suppress('{'), delimitedList(quote), Suppress('}')])
-delimited_unquoted_list = And([Suppress('{'), delimitedList(identifier), Suppress('}')])
+delimited_quoted_list = And([Suppress("{"), delimitedList(quote), Suppress("}")])
+delimited_unquoted_list = And([Suppress("{"), delimitedList(identifier), Suppress("}")])
 
 
 def nest(*content):
     """Define a delimited list by enumerating each element of the list."""
     if len(content) == 0:
-        raise ValueError('no arguments supplied')
+        raise ValueError("no arguments supplied")
     return And([LPF, content[0]] + list(itt.chain.from_iterable(zip(itt.repeat(C), content[1:]))) + [RPF])
 
 

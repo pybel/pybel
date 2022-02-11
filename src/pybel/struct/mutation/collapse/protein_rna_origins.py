@@ -12,7 +12,7 @@ from ....constants import RELATION, TRANSCRIBED_TO, TRANSLATED_TO
 from ....dsl import BaseEntity
 
 __all__ = [
-    'collapse_to_genes',
+    "collapse_to_genes",
 ]
 
 
@@ -37,7 +37,7 @@ def _build_collapse_to_gene_dict(graph) -> Dict[BaseEntity, Set[BaseEntity]]:
             continue
 
         if rna_node not in r2g:
-            raise ValueError('Should complete origin before running this function')
+            raise ValueError("Should complete origin before running this function")
 
         collapse_dict[r2g[rna_node]].add(protein_node)
 

@@ -48,11 +48,11 @@ from ..utils import nest, one_of_tags, quote
 from ...constants import HGVS, KIND
 
 __all__ = [
-    'get_hgvs_language',
+    "get_hgvs_language",
 ]
 
-variant_tags = one_of_tags(tags=['var', 'variant'], canonical_tag=HGVS, name=KIND)
-variant_characters = Word(alphanums + '._*=?>')
+variant_tags = one_of_tags(tags=["var", "variant"], canonical_tag=HGVS, name=KIND)
+variant_characters = Word(alphanums + "._*=?>")
 
 
 def get_hgvs_language() -> ParserElement:

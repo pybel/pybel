@@ -8,8 +8,18 @@ import pybel.constants as pc
 from pybel import BELGraph
 from pybel.constants import NAME
 from pybel.dsl import (
-    Abundance, ComplexAbundance, CompositeAbundance, EnumeratedFusionRange, Fragment, Gene, GeneFusion,
-    ListAbundanceEmptyException, MissingFusionRange, Protein, Reaction, ReactionEmptyException,
+    Abundance,
+    ComplexAbundance,
+    CompositeAbundance,
+    EnumeratedFusionRange,
+    Fragment,
+    Gene,
+    GeneFusion,
+    ListAbundanceEmptyException,
+    MissingFusionRange,
+    Protein,
+    Reaction,
+    ReactionEmptyException,
 )
 from pybel.language import Entity
 from pybel.testing.utils import n
@@ -51,61 +61,61 @@ class TestDSL(unittest.TestCase):
     def test_missing_information(self):
         """Test that entity and abundance functions raise on missing name/identifier."""
         with self.assertRaises(ValueError):
-            Entity(namespace='test')
+            Entity(namespace="test")
 
         with self.assertRaises(ValueError):
-            Protein(namespace='test')
+            Protein(namespace="test")
 
         with self.assertRaises(ValueError):
-            Protein(namespace='')
+            Protein(namespace="")
 
         with self.assertRaises(TypeError):
-            Protein(namespace='uniprot', name=1234)
+            Protein(namespace="uniprot", name=1234)
 
         with self.assertRaises(TypeError):
-            Protein(namespace='uniprot', identifier=1234)
+            Protein(namespace="uniprot", identifier=1234)
 
         with self.assertRaises(ValueError):
-            Protein(namespace='uniprot', name='')
+            Protein(namespace="uniprot", name="")
 
         with self.assertRaises(ValueError):
-            Protein(namespace='uniprot', identifier='')
+            Protein(namespace="uniprot", identifier="")
 
         with self.assertRaises(ValueError):
-            Protein(namespace='uniprot', identifier='12345', name='')
+            Protein(namespace="uniprot", identifier="12345", name="")
 
         with self.assertRaises(ValueError):
-            Protein(namespace='uniprot', identifier='', name='123')
+            Protein(namespace="uniprot", identifier="", name="123")
 
     def test_abundance_as_bel_dash_unquoted(self):
         """Test converting an abundance to BEL with a name that needs quotation."""
-        namespace, name = 'HGNC', 'YFG-1'
+        namespace, name = "HGNC", "YFG-1"
         node = Abundance(namespace=namespace, name=name)
-        self.assertEqual('a(HGNC:YFG-1)', node.as_bel())
+        self.assertEqual("a(HGNC:YFG-1)", node.as_bel())
 
     def test_abundance_as_no_quotes(self):
         """Test converting an abundance that doesn't need quotes, but looks crazy."""
-        namespace, name = 'a-c', 'd.e.f'
+        namespace, name = "a-c", "d.e.f"
         node = Abundance(namespace=namespace, name=name)
-        self.assertEqual('a(a-c:d.e.f)', node.as_bel())
+        self.assertEqual("a(a-c:d.e.f)", node.as_bel())
 
     def test_abundance_as_bel_quoted(self):
         """Test converting an abundance to BEL with a name that needs quotation."""
-        namespace, name = 'HGNC', 'YFG~1'
+        namespace, name = "HGNC", "YFG~1"
         node = Abundance(namespace=namespace, name=name)
         self.assertEqual('a(HGNC:"YFG~1")', node.as_bel())
 
     def test_abundance_as_bel(self):
         """Test converting an abundance to BEL with a name that does not need quotation."""
-        namespace, name = 'HGNC', 'YFG'
+        namespace, name = "HGNC", "YFG"
         node = Abundance(namespace=namespace, name=name)
-        self.assertEqual('a(HGNC:YFG)', node.as_bel())
+        self.assertEqual("a(HGNC:YFG)", node.as_bel())
 
     def test_str_has_identifier(self):
         namespace, identifier = n(), n()
         node = Abundance(namespace=namespace, identifier=identifier)
         self.assertEqual(
-            'a({namespace}:{identifier})'.format(namespace=namespace, identifier=ensure_quotes(identifier)),
+            "a({namespace}:{identifier})".format(namespace=namespace, identifier=ensure_quotes(identifier)),
             node.as_bel(),
         )
 
@@ -113,7 +123,7 @@ class TestDSL(unittest.TestCase):
         namespace, identifier = n(), n()
         node = Abundance(namespace=namespace, identifier=identifier)
         self.assertEqual(
-            'a({namespace}:{identifier})'.format(namespace=namespace, identifier=ensure_quotes(identifier)),
+            "a({namespace}:{identifier})".format(namespace=namespace, identifier=ensure_quotes(identifier)),
             node.as_bel(),
         )
 
@@ -142,12 +152,12 @@ class TestDSL(unittest.TestCase):
             complex(SCOMP:"9-1-1 Complex") hasComponent p(HGNC:RAD9A)
 
         """
-        hus1 = Protein(namespace='HGNC', name='HUS1')
-        rad1 = Protein(namespace='HGNC', name='RAD1')
-        rad9a = Protein(namespace='HGNC', name='RAD9A')
+        hus1 = Protein(namespace="HGNC", name="HUS1")
+        rad1 = Protein(namespace="HGNC", name="RAD1")
+        rad9a = Protein(namespace="HGNC", name="RAD9A")
         members = [hus1, rad1, rad9a]
 
-        nine_one_one = ComplexAbundance(members=members, namespace='SCOMP', name='9-1-1 Complex')
+        nine_one_one = ComplexAbundance(members=members, namespace="SCOMP", name="9-1-1 Complex")
 
         graph = BELGraph()
 
@@ -160,26 +170,26 @@ class TestDSL(unittest.TestCase):
     def test_GeneFusion(self):
         """Test serialization of a gene fusion to BEL with a explicit fusion ranges."""
         dsl = GeneFusion(
-            Gene('HGNC', 'TMPRSS2'),
-            Gene('HGNC', 'ERG'),
-            EnumeratedFusionRange('c', 1, 79),
-            EnumeratedFusionRange('c', 312, 5034)
+            Gene("HGNC", "TMPRSS2"),
+            Gene("HGNC", "ERG"),
+            EnumeratedFusionRange("c", 1, 79),
+            EnumeratedFusionRange("c", 312, 5034),
         )
         self.assertEqual('g(fus(HGNC:TMPRSS2, "c.1_79", HGNC:ERG, "c.312_5034"))', dsl.as_bel())
 
     def test_gene_fusion_missing_implicit(self):
         """Test serialization of a gene fusion to BEL with a implicit missing fusion ranges."""
         dsl = GeneFusion(
-            Gene('HGNC', 'TMPRSS2'),
-            Gene('HGNC', 'ERG'),
+            Gene("HGNC", "TMPRSS2"),
+            Gene("HGNC", "ERG"),
         )
         self.assertEqual('g(fus(HGNC:TMPRSS2, "?", HGNC:ERG, "?"))', dsl.as_bel())
 
     def test_gene_fusion_missing_explicit(self):
         """Test serialization of a gene fusion to BEL with an explicit missing fusion ranges."""
         dsl = GeneFusion(
-            Gene('HGNC', 'TMPRSS2'),
-            Gene('HGNC', 'ERG'),
+            Gene("HGNC", "TMPRSS2"),
+            Gene("HGNC", "ERG"),
             MissingFusionRange(),
             MissingFusionRange(),
         )
@@ -191,23 +201,23 @@ class TestCentralDogma(unittest.TestCase):
 
     def test_get_parent(self):
         """Test the get_parent function in :class:`CentralDogmaAbundance`s."""
-        ab42 = Protein(name='APP', namespace='HGNC', variants=[Fragment(start=672, stop=713)])
+        ab42 = Protein(name="APP", namespace="HGNC", variants=[Fragment(start=672, stop=713)])
         app = ab42.get_parent()
-        self.assertEqual('p(HGNC:APP)', app.as_bel())
+        self.assertEqual("p(HGNC:APP)", app.as_bel())
         self.assertEqual('p(HGNC:APP, frag("672_713"))', ab42.as_bel())
 
     def test_with_variants(self):
         """Test the `with_variant` function in :class:`CentralDogmaAbundance`s."""
-        app = Protein(name='APP', namespace='HGNC')
+        app = Protein(name="APP", namespace="HGNC")
         ab42 = app.with_variants(Fragment(start=672, stop=713))
-        self.assertEqual('p(HGNC:APP)', app.as_bel())
+        self.assertEqual("p(HGNC:APP)", app.as_bel())
         self.assertEqual('p(HGNC:APP, frag("672_713"))', ab42.as_bel())
 
     def test_with_variants_list(self):
         """Test the `with_variant` function in :class:`CentralDogmaAbundance`s."""
-        app = Protein(name='APP', namespace='HGNC')
+        app = Protein(name="APP", namespace="HGNC")
         ab42 = app.with_variants([Fragment(start=672, stop=713)])
-        self.assertEqual('p(HGNC:APP)', app.as_bel())
+        self.assertEqual("p(HGNC:APP)", app.as_bel())
         self.assertEqual('p(HGNC:APP, frag("672_713"))', ab42.as_bel())
 
     def test_list_abundance_has_contents(self):
@@ -222,17 +232,17 @@ class TestCentralDogma(unittest.TestCase):
         """Add identified reaction."""
         graph = BELGraph()
         reaction = Reaction(
-            namespace='rhea',
-            identifier='44104',
+            namespace="rhea",
+            identifier="44104",
             reactants=[
-                Abundance(namespace='chebi', identifier='17478'),
-                Abundance(namespace='chebi', identifier='15377'),
-                Abundance(namespace='chebi', identifier='57540'),
+                Abundance(namespace="chebi", identifier="17478"),
+                Abundance(namespace="chebi", identifier="15377"),
+                Abundance(namespace="chebi", identifier="57540"),
             ],
             products=[
-                Abundance(namespace='chebi', identifier='29067'),
-                Abundance(namespace='chebi', identifier='15378'),
-                Abundance(namespace='chebi', identifier='57945'),
+                Abundance(namespace="chebi", identifier="29067"),
+                Abundance(namespace="chebi", identifier="15378"),
+                Abundance(namespace="chebi", identifier="57945"),
             ],
         )
         graph.add_node_from_data(reaction)
@@ -249,10 +259,14 @@ class TestParse(unittest.TestCase):
     """Test that :func:`parse_result_to_dsl` works correctly."""
 
     def test_named_complex(self):
-        x = ComplexAbundance(namespace='a', identifier='b', members=[
-            Protein(namespace='c', identifier='d'),
-            Protein(namespace='c', identifier='e'),
-        ])
+        x = ComplexAbundance(
+            namespace="a",
+            identifier="b",
+            members=[
+                Protein(namespace="c", identifier="d"),
+                Protein(namespace="c", identifier="e"),
+            ],
+        )
 
         y = parse_result_to_dsl(dict(x))
         self.assertIsInstance(y, ComplexAbundance)
@@ -260,5 +274,5 @@ class TestParse(unittest.TestCase):
         self.assertIn(pc.CONCEPT, y)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

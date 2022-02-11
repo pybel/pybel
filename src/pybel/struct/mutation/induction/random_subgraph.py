@@ -15,9 +15,9 @@ from ...utils import update_metadata
 from ....dsl import BaseEntity
 
 __all__ = [
-    'get_graph_with_random_edges',
-    'get_random_node',
-    'get_random_subgraph',
+    "get_graph_with_random_edges",
+    "get_random_node",
+    "get_random_subgraph",
 ]
 
 logger = logging.getLogger(__name__)
@@ -133,7 +133,7 @@ def _helper(
     """
     original_node_count = graph.number_of_nodes()
 
-    logger.debug('adding remaining %d edges', number_edges_remaining)
+    logger.debug("adding remaining %d edges", number_edges_remaining)
     for _ in range(number_edges_remaining):
 
         source, possible_step_nodes, c = None, set(), 0
@@ -142,9 +142,9 @@ def _helper(
 
             c += 1
             if c >= original_node_count:
-                logger.warning('infinite loop happening')
-                logger.warning('source: %s', source)
-                logger.warning('no grow: %s', node_blacklist)
+                logger.warning("infinite loop happening")
+                logger.warning("source: %s", source)
+                logger.warning("no grow: %s", node_blacklist)
                 return  # Happens when after exhausting the connected components. Try increasing the number seed edges
 
             if source is None:
@@ -195,12 +195,14 @@ def get_random_subgraph(
 
     # Check if graph will sample full graph, and just return it if it would
     if graph.number_of_edges() <= number_edges:
-        logger.info('sampled full graph')
+        logger.info("sampled full graph")
         return graph.copy()
 
     logger.debug(
-        'getting random sub-graph with %d seed edges, %d final edges, and seed=%s', number_seed_edges,
-        number_edges, seed,
+        "getting random sub-graph with %d seed edges, %d final edges, and seed=%s",
+        number_seed_edges,
+        number_edges,
+        seed,
     )
 
     # Get initial graph with `number_seed_edges` edges
@@ -215,7 +217,7 @@ def get_random_subgraph(
         invert_degrees=invert_degrees,
     )
 
-    logger.debug('removing isolated nodes')
+    logger.debug("removing isolated nodes")
     remove_isolated_nodes(result)
 
     return result

@@ -11,36 +11,36 @@ from pybel.testing.constants import belns_dir_path
 from pybel.testing.mocks import mock_bel_resources
 from tests.constants import OPENBEL_ANNOTATION_RESOURCES
 
-ns1 = Path(os.path.join(belns_dir_path, 'disease-ontology.belns')).as_uri()
-ns1_url = 'http://resources.openbel.org/belframework/20150611/namespace/disease-ontology-ids.belns'
+ns1 = Path(os.path.join(belns_dir_path, "disease-ontology.belns")).as_uri()
+ns1_url = "http://resources.openbel.org/belframework/20150611/namespace/disease-ontology-ids.belns"
 
-ns2 = Path(os.path.join(belns_dir_path, 'mesh-diseases.belns')).as_uri()
-ns2_url = 'http://resources.openbel.org/belframework/20150611/namespace/mesh-diseases.belns'
+ns2 = Path(os.path.join(belns_dir_path, "mesh-diseases.belns")).as_uri()
+ns2_url = "http://resources.openbel.org/belframework/20150611/namespace/mesh-diseases.belns"
 
-CELL_LINE_URL = OPENBEL_ANNOTATION_RESOURCES + 'cell-line.belanno'
-CELL_LINE_KEYWORD = 'CellLine'
+CELL_LINE_URL = OPENBEL_ANNOTATION_RESOURCES + "cell-line.belanno"
+CELL_LINE_KEYWORD = "CellLine"
 
 
 class TestDefinitionManagers(TemporaryCacheClsMixin):
     def _help_check_hgnc(self, manager: Manager) -> None:
         """Help check the HGNC namespace was loaded properly."""
-        entry = manager.get_namespace_entry(HGNC_URL, 'MHS2')
+        entry = manager.get_namespace_entry(HGNC_URL, "MHS2")
         self.assertIsNotNone(entry)
-        self.assertEqual('MHS2', entry.name)
-        self.assertIn('G', entry.encoding)
+        self.assertEqual("MHS2", entry.name)
+        self.assertIn("G", entry.encoding)
 
-        entry = manager.get_namespace_entry(HGNC_URL, 'MIATNB')
+        entry = manager.get_namespace_entry(HGNC_URL, "MIATNB")
         self.assertIsNotNone(entry)
-        self.assertEqual('MIATNB', entry.name)
-        self.assertIn('G', entry.encoding)
-        self.assertIn('R', entry.encoding)
+        self.assertEqual("MIATNB", entry.name)
+        self.assertIn("G", entry.encoding)
+        self.assertIn("R", entry.encoding)
 
-        entry = manager.get_namespace_entry(HGNC_URL, 'MIA')
+        entry = manager.get_namespace_entry(HGNC_URL, "MIA")
         self.assertIsNotNone(entry)
-        self.assertEqual('MIA', entry.name)
-        self.assertIn('G', entry.encoding)
-        self.assertIn('P', entry.encoding)
-        self.assertIn('R', entry.encoding)
+        self.assertEqual("MIA", entry.name)
+        self.assertIn("G", entry.encoding)
+        self.assertIn("P", entry.encoding)
+        self.assertIn("R", entry.encoding)
 
     @mock_bel_resources
     def test_insert_namespace_persistent(self, mock_get):
@@ -64,16 +64,16 @@ class TestDefinitionManagers(TemporaryCacheClsMixin):
         self.assertIsNotNone(annotation)
         self.assertEqual(CELL_LINE_URL, annotation.url)
 
-        entry = self.manager.get_namespace_entry(CELL_LINE_URL, '1321N1 cell')
-        self.assertEqual('1321N1 cell', entry.name)
-        self.assertEqual('CLO_0001072', entry.identifier)
+        entry = self.manager.get_namespace_entry(CELL_LINE_URL, "1321N1 cell")
+        self.assertEqual("1321N1 cell", entry.name)
+        self.assertEqual("CLO_0001072", entry.identifier)
 
-        entries = self.manager.get_annotation_entries_by_names(CELL_LINE_URL, ['1321N1 cell'])
+        entries = self.manager.get_annotation_entries_by_names(CELL_LINE_URL, ["1321N1 cell"])
         self.assertIsNotNone(entries)
         self.assertEqual(1, len(entries))
         entry = entries[0]
-        self.assertEqual('1321N1 cell', entry.name)
-        self.assertEqual('CLO_0001072', entry.identifier)
+        self.assertEqual("1321N1 cell", entry.name)
+        self.assertEqual("CLO_0001072", entry.identifier)
 
         graph = BELGraph()
         graph.annotation_url[CELL_LINE_KEYWORD] = CELL_LINE_URL
@@ -81,21 +81,21 @@ class TestDefinitionManagers(TemporaryCacheClsMixin):
         data = {
             ANNOTATIONS: {
                 CELL_LINE_KEYWORD: {
-                    '1321N1 cell': True,
+                    "1321N1 cell": True,
                 },
             },
         }
 
         annotations_iter = dict(self.manager._iter_from_annotations_dict(graph, annotations_dict=data[ANNOTATIONS]))
         self.assertIn(CELL_LINE_URL, annotations_iter)
-        self.assertIn('1321N1 cell', annotations_iter[CELL_LINE_URL])
+        self.assertIn("1321N1 cell", annotations_iter[CELL_LINE_URL])
 
         entries = self.manager._get_annotation_entries_from_data(graph, data)
         self.assertIsNotNone(entries)
         self.assertEqual(1, len(entries))
         entry = entries[0]
-        self.assertEqual('1321N1 cell', entry.name)
-        self.assertEqual('CLO_0001072', entry.identifier)
+        self.assertEqual("1321N1 cell", entry.name)
+        self.assertEqual("CLO_0001072", entry.identifier)
 
         self.manager.drop_namespace_by_url(CELL_LINE_URL)
         self.assertEqual(0, self.manager.count_annotations())

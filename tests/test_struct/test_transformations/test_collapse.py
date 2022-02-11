@@ -8,31 +8,34 @@ from pybel import BELGraph
 from pybel.constants import DIRECTLY_INCREASES
 from pybel.dsl import gene, mirna, pathology, pmod, protein, rna
 from pybel.struct.mutation.collapse import (
-    collapse_all_variants, collapse_nodes, collapse_to_genes, surviors_are_inconsistent,
+    collapse_all_variants,
+    collapse_nodes,
+    collapse_to_genes,
+    surviors_are_inconsistent,
 )
 from pybel.testing.utils import n
 
-HGNC = 'HGNC'
-GO = 'GO'
-CHEBI = 'CHEBI'
+HGNC = "HGNC"
+GO = "GO"
+CHEBI = "CHEBI"
 
-g1 = gene(HGNC, '1')
-r1 = rna(HGNC, '1')
-p1 = protein(HGNC, '1')
-p1_phosphorylated = protein(HGNC, '1', variants=[pmod('Ph')])
+g1 = gene(HGNC, "1")
+r1 = rna(HGNC, "1")
+p1 = protein(HGNC, "1")
+p1_phosphorylated = protein(HGNC, "1", variants=[pmod("Ph")])
 
-g2 = gene(HGNC, '2')
-r2 = rna(HGNC, '2')
-p2 = protein(HGNC, '2')
+g2 = gene(HGNC, "2")
+r2 = rna(HGNC, "2")
+p2 = protein(HGNC, "2")
 
-g3 = gene(HGNC, '3')
-r3 = rna(HGNC, '3')
-p3 = protein(HGNC, '3')
+g3 = gene(HGNC, "3")
+r3 = rna(HGNC, "3")
+p3 = protein(HGNC, "3")
 
-g4 = gene(HGNC, '4')
-m4 = mirna(HGNC, '4')
+g4 = gene(HGNC, "4")
+m4 = mirna(HGNC, "4")
 
-p5 = pathology(GO, '5')
+p5 = pathology(GO, "5")
 
 
 class TestCollapse(unittest.TestCase):
@@ -40,19 +43,23 @@ class TestCollapse(unittest.TestCase):
 
     def test_check_survivors_consistent(self):
         """Test the survivor mapping is consistent."""
-        inconsistencies = surviors_are_inconsistent({
-            1: {2},
-            3: {4},
-        })
+        inconsistencies = surviors_are_inconsistent(
+            {
+                1: {2},
+                3: {4},
+            }
+        )
         self.assertEqual(0, len(inconsistencies))
         self.assertFalse(inconsistencies)
 
-        inconsistencies = surviors_are_inconsistent({
-            1: {2},
-            2: {3},
-            3: {4},
-            5: {4},
-        })
+        inconsistencies = surviors_are_inconsistent(
+            {
+                1: {2},
+                2: {3},
+                3: {4},
+                5: {4},
+            }
+        )
         self.assertEqual(2, len(inconsistencies))
         self.assertIn(2, inconsistencies)
         self.assertIn(3, inconsistencies)
@@ -70,9 +77,7 @@ class TestCollapse(unittest.TestCase):
         self.assertEqual(3, graph.number_of_nodes())
         self.assertEqual(2, graph.number_of_edges())
 
-        d = {
-            p1: {p2}
-        }
+        d = {p1: {p2}}
 
         collapse_nodes(graph, d)
 

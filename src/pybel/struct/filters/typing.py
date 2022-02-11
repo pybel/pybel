@@ -8,12 +8,12 @@ from ..graph import BELGraph
 from ...dsl import BaseEntity
 
 __all__ = [
-    'NodePredicate',
-    'NodePredicates',
-    'EdgeTuple',
-    'EdgeIterator',
-    'EdgePredicate',
-    'EdgePredicates',
+    "NodePredicate",
+    "NodePredicates",
+    "EdgeTuple",
+    "EdgeIterator",
+    "EdgePredicate",
+    "EdgePredicates",
 ]
 
 NodePredicate = Callable[[BELGraph, BaseEntity], bool]

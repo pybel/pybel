@@ -10,17 +10,26 @@ from .constants import bel_dir_path, belanno_dir_path, belns_dir_path
 from .utils import get_uri_name
 
 __all__ = [
-    'MockResponse',
-    'MockSession',
-    'mock_bel_resources',
+    "MockResponse",
+    "MockSession",
+    "mock_bel_resources",
 ]
 
 _responses = [
-    ('go.belns', os.path.join(belns_dir_path, 'go-names.belns')),
-    ('hgnc-human-genes-20170725.belns', os.path.join(belns_dir_path, 'hgnc-names.belns')),
-    ('chebi-20170725.belns', os.path.join(belns_dir_path, 'chebi-names.belns')),
-    ('species-taxonomy-id-20170511.belanno', os.path.join(belanno_dir_path, 'species-taxonomy-id.belanno')),
-    ('confidence-1.0.0.belanno', os.path.join(belanno_dir_path, 'confidence-1.0.0.belanno')),
+    ("go.belns", os.path.join(belns_dir_path, "go-names.belns")),
+    (
+        "hgnc-human-genes-20170725.belns",
+        os.path.join(belns_dir_path, "hgnc-names.belns"),
+    ),
+    ("chebi-20170725.belns", os.path.join(belns_dir_path, "chebi-names.belns")),
+    (
+        "species-taxonomy-id-20170511.belanno",
+        os.path.join(belanno_dir_path, "species-taxonomy-id.belanno"),
+    ),
+    (
+        "confidence-1.0.0.belanno",
+        os.path.join(belanno_dir_path, "confidence-1.0.0.belanno"),
+    ),
 ]
 
 
@@ -30,9 +39,9 @@ class MockResponse:
     def __init__(self, url_to_mock: str):
         """Build a mock for the requests Response object."""
         _r = [
-            ('.belns', os.path.join(belns_dir_path, get_uri_name(url_to_mock))),
-            ('.belanno', os.path.join(belanno_dir_path, get_uri_name(url_to_mock))),
-            ('.bel', os.path.join(bel_dir_path, get_uri_name(url_to_mock))),
+            (".belns", os.path.join(belns_dir_path, get_uri_name(url_to_mock))),
+            (".belanno", os.path.join(belanno_dir_path, get_uri_name(url_to_mock))),
+            (".bel", os.path.join(bel_dir_path, get_uri_name(url_to_mock))),
         ]
 
         self.path = None
@@ -42,14 +51,14 @@ class MockResponse:
                 break
 
         if self.path is None:
-            raise ValueError('missing file')
+            raise ValueError("missing file")
 
         if not os.path.exists(self.path):
             raise ValueError("file doesn't exist: {}".format(self.path))
 
     def iter_lines(self):
         """Iterate the lines of the mock file."""
-        with open(self.path, 'rb') as file:
+        with open(self.path, "rb") as file:
             yield from file
 
     def raise_for_status(self):
@@ -71,4 +80,4 @@ class MockSession:
         """Mock closing a connection by not doing anything."""
 
 
-mock_bel_resources = mock.patch('bel_resources.utils.requests.Session', side_effect=MockSession)
+mock_bel_resources = mock.patch("bel_resources.utils.requests.Session", side_effect=MockSession)

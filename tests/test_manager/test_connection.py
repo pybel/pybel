@@ -23,7 +23,7 @@ class TestInstantiation(unittest.TestCase):
         used as context managers to mock the bio2bel connection getter functions."""
 
         self.fd, self.path = tempfile.mkstemp()
-        self.connection = 'sqlite:///' + self.path
+        self.connection = "sqlite:///" + self.path
 
         def mock_connection():
             """Get the connection enclosed by this class.
@@ -32,7 +32,7 @@ class TestInstantiation(unittest.TestCase):
             """
             return self.connection
 
-        self.mock_connection = mock.patch('pybel.manager.cache_manager.get_cache_connection', mock_connection)
+        self.mock_connection = mock.patch("pybel.manager.cache_manager.get_cache_connection", mock_connection)
 
     def tearDown(self):
         os.close(self.fd)
@@ -67,16 +67,16 @@ class TestInstantiation(unittest.TestCase):
 
     def test_instantiate_manager_connection_fail_too_many_keyword(self):
         with self.assertRaises(ValueError):
-            Manager(connection=self.connection, engine='something', session='something')
+            Manager(connection=self.connection, engine="something", session="something")
 
     def test_instantiate_manager_engine_fail_too_many_keywords(self):
         with self.assertRaises(ValueError):
-            Manager(engine='something', session='something', echo=False)
+            Manager(engine="something", session="something", echo=False)
 
     def test_instantiate_manager_engine_missing(self):
         with self.assertRaises(ValueError):
-            Manager(engine=None, session='fake-session')
+            Manager(engine=None, session="fake-session")
 
     def test_instantiate_manager_session_missing(self):
         with self.assertRaises(ValueError):
-            Manager(engine='fake-engine', session=None)
+            Manager(engine="fake-engine", session=None)

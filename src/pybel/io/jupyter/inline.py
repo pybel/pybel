@@ -10,10 +10,7 @@ from ..jinja_utils import build_template_renderer
 from ..nodelink import to_nodelink_jsons
 from ...struct import BELGraph
 
-__all__ = [
-    'to_jupyter',
-    'to_jupyter_str'
-]
+__all__ = ["to_jupyter", "to_jupyter_str"]
 
 DEFAULT_WIDTH = 1000
 DEFAULT_HEIGHT = 650
@@ -21,7 +18,7 @@ DEFAULT_HEIGHT = 650
 
 def _generate_id() -> str:
     """Generate a random string of letters."""
-    return "".join(sample('abcdefghjkmopqrstuvqxyz', 16))
+    return "".join(sample("abcdefghjkmopqrstuvqxyz", 16))
 
 
 def to_jupyter(
@@ -44,12 +41,14 @@ def to_jupyter(
     """
     from IPython.display import Javascript
 
-    return Javascript(to_jupyter_str(
-        graph,
-        width=width,
-        height=height,
-        color_map=color_map,
-    ))
+    return Javascript(
+        to_jupyter_str(
+            graph,
+            width=width,
+            height=height,
+            color_map=color_map,
+        )
+    )
 
 
 def to_jupyter_str(
@@ -74,7 +73,7 @@ def to_jupyter_str(
     render_template = build_template_renderer(__file__)
 
     return render_template(
-        'pybel_jupyter.js',
+        "pybel_jupyter.js",
         graph=gjson,
         chart=chart_id,
         width=width,

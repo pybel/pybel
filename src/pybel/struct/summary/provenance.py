@@ -9,10 +9,10 @@ from ..graph import BELGraph
 from ...constants import CITATION, IDENTIFIER
 
 __all__ = [
-    'iterate_pubmed_identifiers',
-    'iterate_pmc_identifiers',
-    'get_pubmed_identifiers',
-    'get_pmc_identifiers',
+    "iterate_pubmed_identifiers",
+    "iterate_pmc_identifiers",
+    "get_pubmed_identifiers",
+    "get_pmc_identifiers",
 ]
 
 
@@ -25,13 +25,9 @@ def iterate_citation_identifiers(graph, prefix: str):
     """
     predicate = CITATION_PREDICATES.get(prefix)
     if predicate is None:
-        raise ValueError(f'Invalid citation prefix: {prefix}')
+        raise ValueError(f"Invalid citation prefix: {prefix}")
 
-    return (
-        data[CITATION][IDENTIFIER].strip()
-        for _, _, data in graph.edges(data=True)
-        if predicate(data)
-    )
+    return (data[CITATION][IDENTIFIER].strip() for _, _, data in graph.edges(data=True) if predicate(data))
 
 
 def iterate_pubmed_identifiers(graph: BELGraph) -> Iterable[str]:
@@ -40,7 +36,7 @@ def iterate_pubmed_identifiers(graph: BELGraph) -> Iterable[str]:
     :param graph: A BEL graph
     :return: An iterator over the PubMed identifiers in the graph
     """
-    return iterate_citation_identifiers(graph, 'pubmed')
+    return iterate_citation_identifiers(graph, "pubmed")
 
 
 def iterate_pmc_identifiers(graph: BELGraph) -> Iterable[str]:
@@ -49,7 +45,7 @@ def iterate_pmc_identifiers(graph: BELGraph) -> Iterable[str]:
     :param graph: A BEL graph
     :return: An iterator over the PMC identifiers in the graph
     """
-    return iterate_citation_identifiers(graph, 'pmc')
+    return iterate_citation_identifiers(graph, "pmc")
 
 
 def get_citation_identifiers(graph: BELGraph, prefix: str) -> Set[str]:
@@ -68,7 +64,7 @@ def get_pubmed_identifiers(graph: BELGraph) -> Set[str]:
     :param graph: A BEL graph
     :return: A set of all PubMed identifiers cited in the construction of this graph
     """
-    return get_citation_identifiers(graph, 'pubmed')
+    return get_citation_identifiers(graph, "pubmed")
 
 
 def get_pmc_identifiers(graph: BELGraph) -> Set[str]:
@@ -77,4 +73,4 @@ def get_pmc_identifiers(graph: BELGraph) -> Set[str]:
     :param graph: A BEL graph
     :return: A set of all PMC identifiers cited in the construction of this graph
     """
-    return get_citation_identifiers(graph, 'pmc')
+    return get_citation_identifiers(graph, "pmc")

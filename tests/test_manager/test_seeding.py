@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from pybel.examples import sialic_acid_graph
-from pybel.examples.sialic_acid_example import cd33, cd33_phosphorylated, shp2, syk, trem2
+from pybel.examples.sialic_acid_example import (
+    cd33,
+    cd33_phosphorylated,
+    shp2,
+    syk,
+    trem2,
+)
 from pybel.manager.models import Edge, Namespace, Network
 from pybel.manager.query_manager import graph_from_edges
 from pybel.resources import CHEBI_URL, GO_URL, HGNC_URL
@@ -32,7 +38,7 @@ class TestSeeding(TemporaryCacheClsMixin):
         self.assertIsNotNone(ns)
 
     def test_sialic_acid_in_node_store(self):
-        r = 'sialic acid'
+        r = "sialic acid"
 
         n = self.manager.get_namespace_entry(CHEBI_URL, r)
         self.assertIsNotNone(n)
@@ -50,12 +56,12 @@ class TestSeeding(TemporaryCacheClsMixin):
         self.assertEqual(11, len(edges))
 
     def test_seed_by_pmid(self):
-        pmids = ['26438529']
+        pmids = ["26438529"]
         edges = self.manager.query_edges_by_pubmed_identifiers(pmids)
         self.assertLessEqual(1, len(edges))
 
     def test_seed_by_pmid_no_result(self):
-        missing_pmids = ['11111']
+        missing_pmids = ["11111"]
         edges = self.manager.query_edges_by_pubmed_identifiers(missing_pmids)
         self.assertEqual(0, len(edges))
 

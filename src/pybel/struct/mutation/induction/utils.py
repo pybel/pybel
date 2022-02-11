@@ -16,11 +16,11 @@ from ...pipeline import transformation
 from ....dsl import BaseEntity
 
 __all__ = [
-    'get_subgraph_by_edge_filter',
-    'get_subgraph_by_induction',
-    'get_subgraph_by_node_filter',
-    'get_largest_component',
-    'get_causal_subgraph',
+    "get_subgraph_by_edge_filter",
+    "get_subgraph_by_induction",
+    "get_subgraph_by_node_filter",
+    "get_largest_component",
+    "get_causal_subgraph",
 ]
 
 

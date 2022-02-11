@@ -11,7 +11,7 @@ from ..constants import RELATION
 from ..struct import BELGraph
 
 __all__ = [
-    'to_graphml',
+    "to_graphml",
 ]
 
 
@@ -26,12 +26,12 @@ def to_graphml(graph: BELGraph, path: Union[str, BinaryIO], schema: Optional[str
     By default, this function exports using the PyBEL schema of including modifier information into the edges.
     As an alternative, this function can also distinguish between
     """
-    if schema is None or schema == 'simple':
+    if schema is None or schema == "simple":
         rv = _to_graphml_simple(graph)
-    elif schema == 'umbrella':
+    elif schema == "umbrella":
         rv = _to_graphml_umbrella(graph)
     else:
-        raise ValueError('Unhandled schema: {}'.format(schema))
+        raise ValueError("Unhandled schema: {}".format(schema))
 
     nx.write_graphml(rv, path)
 

@@ -11,7 +11,7 @@ from ...constants import ANNOTATIONS
 from ...language import Entity
 
 __all__ = [
-    'get_subgraphs_by_annotation',
+    "get_subgraphs_by_annotation",
 ]
 
 logger = logging.getLogger(__name__)

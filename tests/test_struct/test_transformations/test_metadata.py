@@ -6,12 +6,21 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import (
-    ANNOTATIONS, CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_TYPE_PUBMED, IDENTIFIER, NAMESPACE,
+    ANNOTATIONS,
+    CITATION,
+    CITATION_AUTHORS,
+    CITATION_DATE,
+    CITATION_TYPE_PUBMED,
+    IDENTIFIER,
+    NAMESPACE,
 )
 from pybel.dsl import protein
 from pybel.examples import sialic_acid_graph
 from pybel.struct.mutation import (
-    add_annotation_value, remove_annotation_value, remove_extra_citation_metadata, strip_annotations,
+    add_annotation_value,
+    remove_annotation_value,
+    remove_extra_citation_metadata,
+    strip_annotations,
 )
 from pybel.testing.utils import n
 
@@ -21,19 +30,17 @@ class TestMetadata(unittest.TestCase):
 
     def test_strip_annotations(self):
         """Test the strip_annotation function."""
-        x = protein(namespace='HGNC', name='X')
-        y = protein(namespace='HGNC', name='X')
+        x = protein(namespace="HGNC", name="X")
+        y = protein(namespace="HGNC", name="X")
 
         graph = BELGraph()
-        graph.annotation_list['A'] = set('ABC')
+        graph.annotation_list["A"] = set("ABC")
         key = graph.add_increases(
             x,
             y,
-            citation='123456',
-            evidence='Fake',
-            annotations={
-                'A': {'B': True}
-            },
+            citation="123456",
+            evidence="Fake",
+            annotations={"A": {"B": True}},
         )
 
         self.assertIn(ANNOTATIONS, graph[x][y][key])
@@ -48,8 +55,8 @@ class TestMetadata(unittest.TestCase):
         :func:`pybel.struct.mutation.remove_annotation_value` functions.
         """
         graph = sialic_acid_graph.copy()
-        annotation = 'test-annotation'
-        value = 'test-value'
+        annotation = "test-annotation"
+        value = "test-value"
         url = n()
 
         graph.annotation_url[annotation] = url
@@ -82,34 +89,30 @@ class TestMetadata(unittest.TestCase):
 
     def test_remove_citation_metadata(self):
         """Test removing citation metadata from a graph."""
-        x = protein(namespace='HGNC', name='X')
-        y = protein(namespace='HGNC', name='X')
+        x = protein(namespace="HGNC", name="X")
+        y = protein(namespace="HGNC", name="X")
 
         graph = BELGraph()
-        graph.annotation_list['A'] = set('ABC')
+        graph.annotation_list["A"] = set("ABC")
 
         k0 = graph.add_part_of(x, y)
         k1 = graph.add_increases(
             x,
             y,
-            citation='123456',
-            evidence='Fake',
-            annotations={
-                'A': {'B': True}
-            },
+            citation="123456",
+            evidence="Fake",
+            annotations={"A": {"B": True}},
         )
         k2 = graph.add_increases(
             x,
             y,
             citation={
                 NAMESPACE: CITATION_TYPE_PUBMED,
-                IDENTIFIER: '12345678',
-                CITATION_DATE: '2018-12-10',
+                IDENTIFIER: "12345678",
+                CITATION_DATE: "2018-12-10",
             },
-            evidence='Fake',
-            annotations={
-                'A': {'B': True}
-            },
+            evidence="Fake",
+            annotations={"A": {"B": True}},
         )
 
         remove_extra_citation_metadata(graph)

@@ -10,11 +10,11 @@ from ...graph import BELGraph
 from ....dsl import BaseEntity
 
 __all__ = [
-    'node_predicate',
-    'invert_node_predicate',
-    'concatenate_node_predicates',
-    'true_node_predicate',
-    'false_node_predicate',
+    "node_predicate",
+    "invert_node_predicate",
+    "concatenate_node_predicates",
+    "true_node_predicate",
+    "false_node_predicate",
 ]
 
 
@@ -80,10 +80,7 @@ def concatenate_node_predicates(node_predicates: NodePredicates) -> NodePredicat
 
     def concatenated_node_predicate(graph: BELGraph, node: BaseEntity) -> bool:
         """Pass only for a nodes that pass all enclosed predicates."""
-        return all(
-            node_predicate(graph, node)
-            for node_predicate in node_predicates
-        )
+        return all(node_predicate(graph, node) for node_predicate in node_predicates)
 
     return concatenated_node_predicate
 

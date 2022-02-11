@@ -49,19 +49,19 @@ from ...constants import CONCEPT, GMOD, IDENTIFIER, KIND, NAME, NAMESPACE
 from ...language import gmod_mappings, gmod_namespace
 
 __all__ = [
-    'get_gene_modification_language',
+    "get_gene_modification_language",
 ]
 
 
 def _handle_gmod_default(_, __, tokens):
-    e = gmod_mappings[gmod_namespace[tokens[0]]]['xrefs'][0]
+    e = gmod_mappings[gmod_namespace[tokens[0]]]["xrefs"][0]
     tokens[NAMESPACE] = e.namespace
     tokens[IDENTIFIER] = e.identifier
     tokens[NAME] = e.name
     return tokens
 
 
-gmod_tag = one_of_tags(tags=['gmod', 'geneModification'], canonical_tag=GMOD, name=KIND)
+gmod_tag = one_of_tags(tags=["gmod", "geneModification"], canonical_tag=GMOD, name=KIND)
 gmod_default_ns = oneOf(list(gmod_namespace)).setParseAction(_handle_gmod_default)
 
 
@@ -70,9 +70,11 @@ def get_gene_modification_language(
     concept_qualified: ParserElement,
 ) -> ParserElement:
     """Build a gene modification parser."""
-    concept = MatchFirst([
-        concept_fqualified,
-        concept_qualified,
-        gmod_default_ns,
-    ])
+    concept = MatchFirst(
+        [
+            concept_fqualified,
+            concept_qualified,
+            gmod_default_ns,
+        ]
+    )
     return gmod_tag + nest(Group(concept)(CONCEPT))

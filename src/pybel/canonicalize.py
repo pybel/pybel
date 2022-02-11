@@ -9,14 +9,33 @@ import time
 import warnings
 from typing import Iterable, List, Mapping, Optional, TextIO, Tuple, Union
 
-from networkx.utils import open_file
-
 import bel_resources.constants
 from bel_resources import make_knowledge_header
+from networkx.utils import open_file
+
 from .constants import (
-    ACTIVITY, ANNOTATIONS, CITATION, CITATION_TYPE_PUBMED, DEGRADATION, EFFECT, EVIDENCE, FROM_LOC, LOCATION, MODIFIER,
-    NAME, NAMESPACE, PYBEL_AUTOEVIDENCE, PYBEL_PUBMED, RELATION, SET_CITATION_FMT, SOURCE_MODIFIER, TARGET_MODIFIER,
-    TO_LOC, TRANSLOCATION, UNQUALIFIED_EDGES, VARIANTS,
+    ACTIVITY,
+    ANNOTATIONS,
+    CITATION,
+    CITATION_TYPE_PUBMED,
+    DEGRADATION,
+    EFFECT,
+    EVIDENCE,
+    FROM_LOC,
+    LOCATION,
+    MODIFIER,
+    NAME,
+    NAMESPACE,
+    PYBEL_AUTOEVIDENCE,
+    PYBEL_PUBMED,
+    RELATION,
+    SET_CITATION_FMT,
+    SOURCE_MODIFIER,
+    TARGET_MODIFIER,
+    TO_LOC,
+    TRANSLOCATION,
+    UNQUALIFIED_EDGES,
+    VARIANTS,
 )
 from .dsl import BaseAbundance, BaseEntity, FusionBase, ListAbundance, Reaction
 from .language import Entity
@@ -25,12 +44,12 @@ from .utils import ensure_quotes
 from .version import VERSION
 
 __all__ = [
-    'to_bel_script',
-    'to_bel_script_gz',
-    'to_bel_script_lines',
-    'edge_to_bel',
-    'edge_to_tuple',
-    'calculate_canonical_name',
+    "to_bel_script",
+    "to_bel_script_gz",
+    "to_bel_script_lines",
+    "edge_to_bel",
+    "edge_to_tuple",
+    "calculate_canonical_name",
 ]
 
 logger = logging.getLogger(__name__)
@@ -38,7 +57,7 @@ logger = logging.getLogger(__name__)
 EdgeTuple = Tuple[BaseEntity, BaseEntity, str, EdgeData]
 
 
-@open_file(1, mode='w')
+@open_file(1, mode="w")
 def to_bel_script(graph, path: Union[str, TextIO], use_identifiers: bool = True) -> None:
     """Write the BELGraph as a canonical BEL script.
 
@@ -52,7 +71,7 @@ def to_bel_script(graph, path: Union[str, TextIO], use_identifiers: bool = True)
 
 def to_bel_script_gz(graph, path, **kwargs) -> None:
     """Write the graph as a BEL Script a gzip file."""
-    with gzip.open(path, 'wt') as file:
+    with gzip.open(path, "wt") as file:
         to_bel_script(graph, file, **kwargs)
 
 
@@ -80,7 +99,7 @@ def postpend_location(bel_string: str, location_model) -> str:
     :return: A part of a BEL string representing the location
     """
     if not all(k in location_model for k in {NAMESPACE, NAME}):
-        raise ValueError('Location model missing namespace and/or name keys: {}'.format(location_model))
+        raise ValueError("Location model missing namespace and/or name keys: {}".format(location_model))
 
     return "{}, loc({}:{}))".format(
         bel_string[:-1],
@@ -94,7 +113,7 @@ def _decanonicalize_edge_node(
     edge_data: EdgeData,
     node_position: str,
     *,
-    use_identifiers: bool = True
+    use_identifiers: bool = True,
 ) -> str:
     """Canonicalize a node with its modifiers stored in the given edge to a BEL string.
 
@@ -119,25 +138,25 @@ def _decanonicalize_edge_node(
         return node_str
 
     if DEGRADATION == modifier:
-        warnings.warn('degradation is deprecated', DeprecationWarning)
-        return f'deg({node_str})'
+        warnings.warn("degradation is deprecated", DeprecationWarning)
+        return f"deg({node_str})"
 
     effect = node_edge_data.get(EFFECT)
 
     if ACTIVITY == modifier:
         if effect is None:
-            return f'act({node_str})'
-        return f'act({node_str}, ma({effect}))'
+            return f"act({node_str})"
+        return f"act({node_str}, ma({effect}))"
 
     if TRANSLOCATION == modifier:
         if effect is None:
-            return f'tloc({node_str})'
+            return f"tloc({node_str})"
 
         to_loc_data: Entity = effect[TO_LOC]
         from_loc_data: Entity = effect[FROM_LOC]
         return f"tloc({node_str}, fromLoc({from_loc_data}), toLoc({to_loc_data}))"
 
-    raise ValueError('invalid modifier: {}'.format(modifier))
+    raise ValueError("invalid modifier: {}".format(modifier))
 
 
 def edge_to_tuple(
@@ -173,7 +192,7 @@ def edge_to_bel(
     :param sep: The separator between the source, relation, and target. Defaults to ' '
     :param use_identifiers: Enables extended `BEP-0008 <http://bep.bel.bio/published/BEP-0008.html>`_ syntax
     """
-    sep = sep or ' '
+    sep = sep or " "
     return sep.join(edge_to_tuple(source=source, target=target, data=data, use_identifiers=use_identifiers))
 
 
@@ -216,19 +235,19 @@ def _set_annotation_to_str(annotation_data: Mapping[str, List[Entity]], key: str
         value = list(value)[0]
         return f'SET {key} = "{value if use_curie else value.identifier}"'
 
-    value_strings = ', '.join(
+    value_strings = ", ".join(
         f'"{v if use_curie else v.identifier}"'
         for v in sorted(value, key=lambda e: (e.namespace, e.identifier, e.name))
     )
-    return f'SET {key} = {{{value_strings}}}'
+    return f"SET {key} = {{{value_strings}}}"
 
 
 def _unset_annotation_to_str(keys: List[str]) -> str:
     """Return an unset annotation string."""
     if len(keys) == 1:
-        return 'UNSET {}'.format(list(keys)[0])
+        return "UNSET {}".format(list(keys)[0])
 
-    return 'UNSET {{{}}}'.format(', '.join('{}'.format(key) for key in keys))
+    return "UNSET {{{}}}".format(", ".join("{}".format(key) for key in keys))
 
 
 def _to_bel_lines_header(graph) -> Iterable[str]:
@@ -236,8 +255,10 @@ def _to_bel_lines_header(graph) -> Iterable[str]:
 
     :param pybel.BELGraph graph: A BEL graph
     """
-    yield '# This document was created by PyBEL v{} and bel-resources v{} on {}\n'.format(
-        VERSION, bel_resources.constants.VERSION, time.asctime(),
+    yield "# This document was created by PyBEL v{} and bel-resources v{} on {}\n".format(
+        VERSION,
+        bel_resources.constants.VERSION,
+        time.asctime(),
     )
     yield from make_knowledge_header(
         namespace_url=graph.namespace_url,
@@ -249,12 +270,16 @@ def _to_bel_lines_header(graph) -> Iterable[str]:
     )
 
 
-def group_citation_edges(edges: Iterable[EdgeTuple]) -> Iterable[Tuple[Tuple[str, str], Iterable[EdgeTuple]]]:
+def group_citation_edges(
+    edges: Iterable[EdgeTuple],
+) -> Iterable[Tuple[Tuple[str, str], Iterable[EdgeTuple]]]:
     """Return an iterator over pairs of citation values and their corresponding edge iterators."""
     return itt.groupby(edges, key=_citation_sort_key)
 
 
-def group_evidence_edges(edges: Iterable[EdgeTuple]) -> Iterable[Tuple[str, Iterable[EdgeTuple]]]:
+def group_evidence_edges(
+    edges: Iterable[EdgeTuple],
+) -> Iterable[Tuple[str, Iterable[EdgeTuple]]]:
     """Return an iterator over pairs of evidence values and their corresponding edge iterators."""
     return itt.groupby(edges, key=_evidence_sort_key)
 
@@ -268,7 +293,7 @@ def _to_bel_lines_body(graph, use_identifiers: bool = False) -> Iterable[str]:
     qualified_edges = sort_qualified_edges(graph)
 
     for (citation_db, citation_id), citation_edges in group_citation_edges(qualified_edges):
-        yield SET_CITATION_FMT.format(citation_db, citation_id) + '\n'
+        yield SET_CITATION_FMT.format(citation_db, citation_id) + "\n"
 
         for evidence, evidence_edges in group_evidence_edges(citation_edges):
             yield 'SET SupportingText = "{}"'.format(evidence)
@@ -285,9 +310,9 @@ def _to_bel_lines_body(graph, use_identifiers: bool = False) -> Iterable[str]:
                 if keys:
                     yield _unset_annotation_to_str(keys)
 
-            yield 'UNSET SupportingText'
-        yield 'UNSET Citation\n'
-        yield '#' * 80
+            yield "UNSET SupportingText"
+        yield "UNSET Citation\n"
+        yield "#" * 80
 
 
 def _to_bel_lines_footer(graph, use_identifiers: bool = False) -> Iterable[str]:
@@ -297,24 +322,18 @@ def _to_bel_lines_footer(graph, use_identifiers: bool = False) -> Iterable[str]:
     :param use_identifiers: Enables extended `BEP-0008 <http://bep.bel.bio/published/BEP-0008.html>`_ syntax
     """
     unqualified_edges_to_serialize = [
-        (u, v, d)
-        for u, v, d in graph.edges(data=True)
-        if d[RELATION] in UNQUALIFIED_EDGES and EVIDENCE not in d
+        (u, v, d) for u, v, d in graph.edges(data=True) if d[RELATION] in UNQUALIFIED_EDGES and EVIDENCE not in d
     ]
 
-    isolated_nodes_to_serialize = [
-        node
-        for node in graph
-        if not graph.pred[node] and not graph.succ[node]
-    ]
+    isolated_nodes_to_serialize = [node for node in graph if not graph.pred[node] and not graph.succ[node]]
 
     if unqualified_edges_to_serialize or isolated_nodes_to_serialize:
-        yield '###############################################\n'
+        yield "###############################################\n"
         yield SET_CITATION_FMT.format(CITATION_TYPE_PUBMED, PYBEL_PUBMED)
         yield 'SET SupportingText = "{}"'.format(PYBEL_AUTOEVIDENCE)
 
         for u, v, data in unqualified_edges_to_serialize:
-            yield '{} {} {}'.format(
+            yield "{} {} {}".format(
                 u.as_bel(use_identifiers=use_identifiers),
                 data[RELATION],
                 v.as_bel(use_identifiers=use_identifiers),
@@ -323,8 +342,8 @@ def _to_bel_lines_footer(graph, use_identifiers: bool = False) -> Iterable[str]:
         for node in isolated_nodes_to_serialize:
             yield node.as_bel(use_identifiers=use_identifiers)
 
-        yield 'UNSET SupportingText'
-        yield 'UNSET Citation'
+        yield "UNSET SupportingText"
+        yield "UNSET Citation"
 
 
 def calculate_canonical_name(node: BaseEntity, use_identifiers: bool = True) -> str:
@@ -344,4 +363,4 @@ def calculate_canonical_name(node: BaseEntity, use_identifiers: bool = True) -> 
             return node.curie
 
     else:
-        raise TypeError('Unhandled node: {}'.format(node))
+        raise TypeError("Unhandled node: {}".format(node))

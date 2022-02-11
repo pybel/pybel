@@ -51,7 +51,7 @@ class LookupManager(BaseManager):
 
     def get_citation_by_curie(self, curie: str) -> Optional[Citation]:
         """Get a citation object by its hash."""
-        db, db_id = curie.split(':')
+        db, db_id = curie.split(":")
         return self.get_citation_by_reference(db=db, db_id=db_id)
 
     def get_author_by_name(self, name: str) -> Optional[Author]:

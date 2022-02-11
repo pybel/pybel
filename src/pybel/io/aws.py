@@ -15,8 +15,8 @@ from .nodelink import from_nodelink_gz_io, to_nodelink_gz_io
 from ..struct import BELGraph
 
 __all__ = [
-    'to_s3',
-    'from_s3',
+    "to_s3",
+    "from_s3",
 ]
 
 logger = logging.getLogger(__name__)
@@ -64,7 +64,8 @@ def to_s3(graph: BELGraph, *, bucket: str, key: str, client: Optional[S3Client] 
     """
     if client is None:
         import boto3
-        client = boto3.client('s3')
+
+        client = boto3.client("s3")
     io = to_nodelink_gz_io(graph)
     client.upload_fileobj(io, bucket, key)
 
@@ -95,7 +96,8 @@ def from_s3(*, bucket: str, key: str, client: Optional[S3Client] = None) -> BELG
     """
     if client is None:
         import boto3
-        client = boto3.client('s3')
+
+        client = boto3.client("s3")
     io = BytesIO()
     client.download_fileobj(bucket, key, io)
     io.seek(0)

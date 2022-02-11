@@ -8,9 +8,9 @@ from ....constants import FUNCTION, FUSION, MIRNA, RNA, VARIANTS
 from ....dsl import Protein
 
 __all__ = [
-    'enrich_rnas_with_genes',
-    'enrich_proteins_with_rnas',
-    'enrich_protein_and_rna_origins',
+    "enrich_rnas_with_genes",
+    "enrich_proteins_with_rnas",
+    "enrich_protein_and_rna_origins",
 ]
 
 

@@ -5,12 +5,21 @@
 from tqdm.autonotebook import tqdm
 
 from ..constants import (
-    ANNOTATIONS, CITATION, EVIDENCE, FUSION, MEMBERS, NAMESPACE, RELATION, SOURCE_MODIFIER, TARGET_MODIFIER, VARIANTS,
+    ANNOTATIONS,
+    CITATION,
+    EVIDENCE,
+    FUSION,
+    MEMBERS,
+    NAMESPACE,
+    RELATION,
+    SOURCE_MODIFIER,
+    TARGET_MODIFIER,
+    VARIANTS,
 )
 from ..utils import flatten_dict
 
 __all__ = [
-    'to_neo4j',
+    "to_neo4j",
 ]
 
 
@@ -41,21 +50,21 @@ def to_neo4j(graph, neo_connection, use_tqdm: bool = False):
 
     nodes = list(graph)
     if use_tqdm:
-        nodes = tqdm(nodes, desc='nodes')
+        nodes = tqdm(nodes, desc="nodes")
 
     for node in nodes:
         if NAMESPACE not in node or VARIANTS in node or MEMBERS in node or FUSION in node:
-            attrs = {'name': node.as_bel()}
+            attrs = {"name": node.as_bel()}
         else:
-            attrs = {'namespace': node.namespace}
+            attrs = {"namespace": node.namespace}
 
             if node.name and node.identifier:
-                attrs['name'] = node.name
-                attrs['identifier'] = node.identifier
+                attrs["name"] = node.name
+                attrs["identifier"] = node.identifier
             elif node.identifier and not node.name:
-                attrs['name'] = node.identifier
+                attrs["name"] = node.identifier
             elif node.name and not node.identifier:
-                attrs['name'] = node.name
+                attrs["name"] = node.name
 
         node_map[node] = py2neo.Node(node.function, **attrs)
 
@@ -63,7 +72,7 @@ def to_neo4j(graph, neo_connection, use_tqdm: bool = False):
 
     edges = graph.edges(keys=True, data=True)
     if use_tqdm:
-        edges = tqdm(edges, desc='edges')
+        edges = tqdm(edges, desc="edges")
 
     for u, v, key, node in edges:
         rel_type = node[RELATION]

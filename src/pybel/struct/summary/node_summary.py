@@ -10,29 +10,54 @@ from typing import Any, Iterable, List, Mapping, Optional, Set, Tuple
 from ..filters import get_nodes, has_activity, has_variant, is_degraded, is_translocated
 from ..graph import BELGraph
 from ...constants import (
-    ACTIVITY, CONCEPT, EFFECT, FROM_LOC, FUSION, KIND, LOCATION, MEMBERS, MODIFIER, NAME, NAMESPACE, PARTNER_3P,
-    PARTNER_5P, SOURCE_MODIFIER, TARGET_MODIFIER, TO_LOC, TRANSLOCATION, VARIANTS,
+    ACTIVITY,
+    CONCEPT,
+    EFFECT,
+    FROM_LOC,
+    FUSION,
+    KIND,
+    LOCATION,
+    MEMBERS,
+    MODIFIER,
+    NAME,
+    NAMESPACE,
+    PARTNER_3P,
+    PARTNER_5P,
+    SOURCE_MODIFIER,
+    TARGET_MODIFIER,
+    TO_LOC,
+    TRANSLOCATION,
+    VARIANTS,
 )
-from ...dsl import BaseConcept, BaseEntity, CentralDogma, EntityVariant, FusionBase, ListAbundance, Pathology, Reaction
+from ...dsl import (
+    BaseConcept,
+    BaseEntity,
+    CentralDogma,
+    EntityVariant,
+    FusionBase,
+    ListAbundance,
+    Pathology,
+    Reaction,
+)
 from ...language import Entity
 
 __all__ = [
-    'get_functions',
-    'count_functions',
-    'get_namespaces',
-    'count_namespaces',
-    'get_unused_namespaces',
-    'count_names_by_namespace',
-    'get_names',
-    'get_names_by_namespace',
-    'iterate_node_entities',
-    'iterate_entities',
-    'node_is_grounded',
-    'get_ungrounded_nodes',
-    'count_variants',
-    'count_pathologies',
-    'get_top_pathologies',
-    'get_top_hubs',
+    "get_functions",
+    "count_functions",
+    "get_namespaces",
+    "count_namespaces",
+    "get_unused_namespaces",
+    "count_names_by_namespace",
+    "get_names",
+    "get_names_by_namespace",
+    "iterate_node_entities",
+    "iterate_entities",
+    "node_is_grounded",
+    "get_ungrounded_nodes",
+    "count_variants",
+    "count_pathologies",
+    "get_top_pathologies",
+    "get_top_hubs",
 ]
 
 
@@ -41,10 +66,7 @@ def _function_iterator(graph: BELGraph) -> Iterable[str]:
 
     :param graph: A BEL graph
     """
-    return (
-        node.function
-        for node in graph
-    )
+    return (node.function for node in graph)
 
 
 def get_functions(graph: BELGraph) -> Set[str]:
@@ -265,7 +287,7 @@ def count_names_by_namespace(graph: BELGraph, namespace: str) -> typing.Counter[
     :raises IndexError: if the namespace is not defined in the graph.
     """
     if namespace not in graph.defined_namespace_keywords:
-        raise IndexError('{} is not defined in {}'.format(namespace, graph))
+        raise IndexError("{} is not defined in {}".format(namespace, graph))
 
     return Counter(_namespace_filtered_iterator(graph, namespace))
 
@@ -280,7 +302,7 @@ def get_names_by_namespace(graph: BELGraph, namespace: str) -> Set[str]:
     :raises IndexError: if the namespace is not defined in the graph.
     """
     if namespace not in graph.defined_namespace_keywords:
-        raise IndexError('{} is not defined in {}'.format(namespace, graph))
+        raise IndexError("{} is not defined in {}".format(namespace, graph))
 
     return set(_namespace_filtered_iterator(graph, namespace))
 
@@ -290,12 +312,7 @@ def count_variants(graph: BELGraph) -> typing.Counter[str]:
 
     :param graph: A BEL graph
     """
-    return Counter(
-        variant_data[KIND]
-        for data in graph
-        if has_variant(graph, data)
-        for variant_data in data[VARIANTS]
-    )
+    return Counter(variant_data[KIND] for data in graph if has_variant(graph, data) for variant_data in data[VARIANTS])
 
 
 def get_top_hubs(graph: BELGraph, *, n: Optional[int] = 15) -> List[Tuple[BaseEntity, int]]:
@@ -314,11 +331,7 @@ def count_pathologies(graph: BELGraph) -> typing.Counter[BaseEntity]:
     """
     # Don't double count relationships
     edges = {tuple(sorted([u, v], key=lambda node: node.as_bel())) for u, v in graph.edges()}
-    return Counter(
-        node
-        for node in itt.chain.from_iterable(edges)
-        if isinstance(node, Pathology)
-    )
+    return Counter(node for node in itt.chain.from_iterable(edges) if isinstance(node, Pathology))
 
 
 def get_top_pathologies(graph: BELGraph, n: Optional[int] = 15) -> List[Tuple[BaseEntity, int]]:
@@ -335,11 +348,7 @@ def get_ungrounded_nodes(graph: BELGraph) -> Set[BaseEntity]:
 
     :param graph: A BEL graph
     """
-    return {
-        node
-        for node in graph
-        if not node_is_grounded(node)
-    }
+    return {node for node in graph if not node_is_grounded(node)}
 
 
 def node_is_grounded(node: BaseEntity) -> bool:
@@ -347,10 +356,7 @@ def node_is_grounded(node: BaseEntity) -> bool:
 
     :param node: A BEL node
     """
-    return all(
-        entity.identifier is not None and entity.name is not None
-        for entity in iterate_node_entities(node)
-    )
+    return all(entity.identifier is not None and entity.name is not None for entity in iterate_node_entities(node))
 
 
 def get_degradations(graph: BELGraph) -> Set[BaseEntity]:
@@ -370,17 +376,17 @@ def get_translocated(graph: BELGraph) -> Set[BaseEntity]:
 
 def count_modifications(graph: BELGraph) -> Counter:
     """Get a modifications count dictionary."""
-    return Counter(remove_falsy_values({
-        'Translocations': len(get_translocated(graph)),
-        'Degradations': len(get_degradations(graph)),
-        'Molecular Activities': len(get_activities(graph)),
-    }))
+    return Counter(
+        remove_falsy_values(
+            {
+                "Translocations": len(get_translocated(graph)),
+                "Degradations": len(get_degradations(graph)),
+                "Molecular Activities": len(get_activities(graph)),
+            }
+        )
+    )
 
 
 def remove_falsy_values(counter: Mapping[Any, int]) -> Mapping[Any, int]:
     """Remove all values that are zero."""
-    return {
-        label: count
-        for label, count in counter.items()
-        if count
-    }
+    return {label: count for label, count in counter.items() if count}

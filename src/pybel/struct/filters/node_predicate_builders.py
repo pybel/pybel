@@ -12,14 +12,14 @@ from ...dsl import BaseConcept, BaseEntity
 from ...typing import Strings
 
 __all__ = [
-    'function_inclusion_filter_builder',
-    'function_exclusion_filter_builder',
-    'data_missing_key_builder',
-    'build_node_data_search',
-    'build_node_graph_data_search',
-    'build_node_key_search',
-    'build_node_name_search',
-    'namespace_inclusion_builder',
+    "function_inclusion_filter_builder",
+    "function_exclusion_filter_builder",
+    "data_missing_key_builder",
+    "build_node_data_search",
+    "build_node_graph_data_search",
+    "build_node_key_search",
+    "build_node_name_search",
+    "namespace_inclusion_builder",
 ]
 
 
@@ -34,7 +34,7 @@ def function_inclusion_filter_builder(func: Strings) -> NodePredicate:
     elif isinstance(func, Iterable):
         return _collection_function_inclusion_builder(func)
 
-    raise TypeError('Invalid type for argument: {}'.format(func))
+    raise TypeError("Invalid type for argument: {}".format(func))
 
 
 def _single_function_inclusion_filter_builder(func: str) -> NodePredicate:  # noqa: D202
@@ -52,7 +52,7 @@ def _collection_function_inclusion_builder(funcs: Iterable[str]) -> NodePredicat
     funcs = set(funcs)
 
     if not funcs:
-        raise ValueError('can not build function inclusion filter with empty list of functions')
+        raise ValueError("can not build function inclusion filter with empty list of functions")
 
     def functions_inclusion_filter(_: BELGraph, node: BaseEntity) -> bool:
         """Pass only for a node that is one of the enclosed functions."""
@@ -154,7 +154,7 @@ def build_node_key_search(
     if isinstance(query, Iterable):
         return build_node_data_search(key, lambda s: any(q.lower() in s.lower() for q in query))
 
-    raise TypeError('query is wrong type: %s', query)
+    raise TypeError("query is wrong type: %s", query)
 
 
 def build_node_name_search(query: Strings) -> NodePredicate:
@@ -170,6 +170,7 @@ def build_node_name_search(query: Strings) -> NodePredicate:
 def namespace_inclusion_builder(namespace: Strings) -> NodePredicate:
     """Build a predicate for namespace inclusion."""
     if isinstance(namespace, str):
+
         def namespace_filter(_: BELGraph, node: BaseEntity) -> bool:
             """Pass only for a node that has the enclosed namespace."""
             return isinstance(node, BaseConcept) and node.namespace == namespace
@@ -182,6 +183,6 @@ def namespace_inclusion_builder(namespace: Strings) -> NodePredicate:
             return isinstance(node, BaseConcept) and node.namespace in namespaces
 
     else:
-        raise TypeError('Invalid type for argument: {}'.format(namespace))
+        raise TypeError("Invalid type for argument: {}".format(namespace))
 
     return namespace_filter

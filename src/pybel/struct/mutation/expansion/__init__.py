@@ -6,4 +6,4 @@ from . import neighborhood, upstream
 from .neighborhood import *
 from .upstream import *
 
-__all__ = [k for k in locals() if not k.startswith('_')]
+__all__ = [k for k in locals() if not k.startswith("_")]

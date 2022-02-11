@@ -31,9 +31,9 @@ from ..constants import GRAPH_ANNOTATION_LIST, SOURCE_MODIFIER, TARGET_MODIFIER
 from ..struct import BELGraph
 
 __all__ = [
-    'to_umbrella_nodelink',
-    'to_umbrella_nodelink_file',
-    'to_umbrella_nodelink_gz',
+    "to_umbrella_nodelink",
+    "to_umbrella_nodelink_file",
+    "to_umbrella_nodelink_gz",
 ]
 
 
@@ -53,18 +53,24 @@ def to_umbrella_nodelink(graph: BELGraph) -> Mapping[str, Any]:
     mapping = dict(zip(nodes, count()))
 
     graph_json_dict = {
-        'directed': True,
-        'multigraph': True,
-        'graph': graph.graph.copy(),
-        'nodes': nodes,
-        'links': [
+        "directed": True,
+        "multigraph": True,
+        "graph": graph.graph.copy(),
+        "nodes": nodes,
+        "links": [
             dict(
                 chain(
                     data.copy().items(),
                     [
-                        ('source', mapping[_decanonicalize_edge_node(u, data, node_position=SOURCE_MODIFIER)]),
-                        ('target', mapping[_decanonicalize_edge_node(v, data, node_position=TARGET_MODIFIER)]),
-                        ('key', key),
+                        (
+                            "source",
+                            mapping[_decanonicalize_edge_node(u, data, node_position=SOURCE_MODIFIER)],
+                        ),
+                        (
+                            "target",
+                            mapping[_decanonicalize_edge_node(v, data, node_position=TARGET_MODIFIER)],
+                        ),
+                        ("key", key),
                     ],
                 ),
             )
@@ -73,15 +79,15 @@ def to_umbrella_nodelink(graph: BELGraph) -> Mapping[str, Any]:
     }
 
     # Convert annotation list definitions (which are sets) to canonicalized/sorted lists
-    graph_json_dict['graph'][GRAPH_ANNOTATION_LIST] = {
+    graph_json_dict["graph"][GRAPH_ANNOTATION_LIST] = {
         keyword: list(sorted(values))
-        for keyword, values in graph_json_dict['graph'].get(GRAPH_ANNOTATION_LIST, {}).items()
+        for keyword, values in graph_json_dict["graph"].get(GRAPH_ANNOTATION_LIST, {}).items()
     }
 
     return graph_json_dict
 
 
-@open_file(1, mode='w')
+@open_file(1, mode="w")
 def to_umbrella_nodelink_file(graph: BELGraph, path: Union[str, TextIO], **kwargs) -> None:
     """Write this graph as an umbrella node-link JSON to a file.
 
@@ -94,5 +100,5 @@ def to_umbrella_nodelink_file(graph: BELGraph, path: Union[str, TextIO], **kwarg
 
 def to_umbrella_nodelink_gz(graph, path: str, **kwargs) -> None:
     """Write this graph as an umbrella node-link JSON to a gzipped file."""
-    with gzip.open(path, 'wt') as file:
+    with gzip.open(path, "wt") as file:
         to_umbrella_nodelink_file(graph, file, **kwargs)

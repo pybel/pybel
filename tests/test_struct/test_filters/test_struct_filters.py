@@ -7,11 +7,18 @@ from pybel import BELGraph
 from pybel.constants import ANNOTATIONS
 from pybel.dsl import BaseEntity, Protein
 from pybel.struct.filters import (
-    and_edge_predicates, concatenate_node_predicates, count_passed_edge_filter, count_passed_node_filter, filter_edges,
-    get_nodes, invert_edge_predicate,
+    and_edge_predicates,
+    concatenate_node_predicates,
+    count_passed_edge_filter,
+    count_passed_node_filter,
+    filter_edges,
+    get_nodes,
+    invert_edge_predicate,
 )
 from pybel.struct.filters.edge_predicate_builders import (
-    _annotation_dict_all_filter, _annotation_dict_any_filter, build_annotation_dict_all_filter,
+    _annotation_dict_all_filter,
+    _annotation_dict_any_filter,
+    build_annotation_dict_all_filter,
     build_annotation_dict_any_filter,
 )
 from pybel.struct.filters.edge_predicates import true_edge_predicate
@@ -101,7 +108,10 @@ class TestNodeFilters(unittest.TestCase):
         edges = make_edge_iterator_set(filter_edges(self.universe, [has_odd_source, has_even_target]))
         self.assertEqual({(1, 2), (1, 4), (5, 6)}, edges)
 
-        self.assertEqual(3, count_passed_edge_filter(self.universe, [has_odd_source, has_even_target]))
+        self.assertEqual(
+            3,
+            count_passed_edge_filter(self.universe, [has_odd_source, has_even_target]),
+        )
 
         has_even_source = invert_edge_predicate(has_odd_source)
         edges = make_edge_iterator_set(filter_edges(self.universe, has_even_source))
@@ -110,35 +120,21 @@ class TestNodeFilters(unittest.TestCase):
 
 class TestEdgeFilters(unittest.TestCase):
     def test_a(self):
-        self.assertTrue(_annotation_dict_any_filter(
-            {ANNOTATIONS: {'A': {'1', '2'}}},
-            {'A': {'1'}}
-        ))
+        self.assertTrue(_annotation_dict_any_filter({ANNOTATIONS: {"A": {"1", "2"}}}, {"A": {"1"}}))
 
-        self.assertTrue(_annotation_dict_any_filter(
-            {ANNOTATIONS: {'A': {'1', '2'}}},
-            {'A': {'1', '2'}}
-        ))
+        self.assertTrue(_annotation_dict_any_filter({ANNOTATIONS: {"A": {"1", "2"}}}, {"A": {"1", "2"}}))
 
-        self.assertTrue(_annotation_dict_any_filter(
-            {ANNOTATIONS: {'A': {'1', '2'}}},
-            {'A': {'1', '2', '3'}}
-        ))
+        self.assertTrue(_annotation_dict_any_filter({ANNOTATIONS: {"A": {"1", "2"}}}, {"A": {"1", "2", "3"}}))
 
-        self.assertTrue(_annotation_dict_any_filter(
-            {ANNOTATIONS: {'A': {'1', '2'}, 'B': {'X'}}},
-            {'A': {'3'}, 'B': {'X'}}
-        ))
+        self.assertTrue(
+            _annotation_dict_any_filter({ANNOTATIONS: {"A": {"1", "2"}, "B": {"X"}}}, {"A": {"3"}, "B": {"X"}})
+        )
 
-        self.assertFalse(_annotation_dict_any_filter(
-            {ANNOTATIONS: {'A': {'1', '2'}}},
-            {'A': {'3'}}
-        ))
+        self.assertFalse(_annotation_dict_any_filter({ANNOTATIONS: {"A": {"1", "2"}}}, {"A": {"3"}}))
 
-        self.assertFalse(_annotation_dict_any_filter(
-            {ANNOTATIONS: {'A': {'1', '2'}, 'B': {'X'}}},
-            {'A': {'3'}, 'B': {'Y'}}
-        ))
+        self.assertFalse(
+            _annotation_dict_any_filter({ANNOTATIONS: {"A": {"1", "2"}, "B": {"X"}}}, {"A": {"3"}, "B": {"Y"}})
+        )
 
     def test_any_filter_no_query(self):
         """Test that the all filter returns true when there's no argument"""
@@ -149,64 +145,84 @@ class TestEdgeFilters(unittest.TestCase):
     def test_any_filter_no_annotations(self):
         graph = BELGraph()
         graph.add_increases(Protein(n(), n()), Protein(n(), n()), citation=n(), evidence=n())
-        self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_any_filter({'A': {'1'}})))
+        self.assertEqual(
+            0,
+            count_passed_edge_filter(graph, build_annotation_dict_any_filter({"A": {"1"}})),
+        )
 
     def test_any_filter_empty_annotations(self):
         graph = BELGraph()
-        graph.add_increases(Protein(n(), n()), Protein(n(), n()), citation=n(), evidence=n(), annotations={})
-        self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_any_filter({'A': {'1'}})))
+        graph.add_increases(
+            Protein(n(), n()),
+            Protein(n(), n()),
+            citation=n(),
+            evidence=n(),
+            annotations={},
+        )
+        self.assertEqual(
+            0,
+            count_passed_edge_filter(graph, build_annotation_dict_any_filter({"A": {"1"}})),
+        )
 
     def test_any_filter(self):
         graph = BELGraph()
-        graph.annotation_list['A'] = set('12345')
-        graph.add_increases(Protein(n(), n()), Protein(n(), n()), citation=n(), evidence=n(), annotations={
-            'A': {'1', '2', '3'}
-        })
+        graph.annotation_list["A"] = set("12345")
+        graph.add_increases(
+            Protein(n(), n()),
+            Protein(n(), n()),
+            citation=n(),
+            evidence=n(),
+            annotations={"A": {"1", "2", "3"}},
+        )
 
-        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_any_filter(graph._clean_annotations({'A': {'1'}}))))
-        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_any_filter(graph._clean_annotations({'A': {'1', '2'}}))))
-        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_any_filter(graph._clean_annotations({'A': {'1', '2', '3'}}))))
+        self.assertEqual(
+            1,
+            count_passed_edge_filter(
+                graph,
+                build_annotation_dict_any_filter(graph._clean_annotations({"A": {"1"}})),
+            ),
+        )
+        self.assertEqual(
+            1,
+            count_passed_edge_filter(
+                graph,
+                build_annotation_dict_any_filter(graph._clean_annotations({"A": {"1", "2"}})),
+            ),
+        )
+        self.assertEqual(
+            1,
+            count_passed_edge_filter(
+                graph,
+                build_annotation_dict_any_filter(graph._clean_annotations({"A": {"1", "2", "3"}})),
+            ),
+        )
 
     def test_b(self):
-        self.assertTrue(_annotation_dict_all_filter(
-            {ANNOTATIONS: {'A': {'1'}}},
-            {'A': {'1'}}
-        ))
+        self.assertTrue(_annotation_dict_all_filter({ANNOTATIONS: {"A": {"1"}}}, {"A": {"1"}}))
 
-        self.assertTrue(_annotation_dict_all_filter(
-            {ANNOTATIONS: {'A': {'1', '2'}}},
-            {'A': {'1', '2'}}
-        ))
+        self.assertTrue(_annotation_dict_all_filter({ANNOTATIONS: {"A": {"1", "2"}}}, {"A": {"1", "2"}}))
 
-        self.assertTrue(_annotation_dict_all_filter(
-            {ANNOTATIONS: {'A': {'1', '2'}}},
-            {'A': {'1', '2'}}
-        ))
+        self.assertTrue(_annotation_dict_all_filter({ANNOTATIONS: {"A": {"1", "2"}}}, {"A": {"1", "2"}}))
 
-        self.assertTrue(_annotation_dict_all_filter(
-            {ANNOTATIONS: {'A': {'1', '2'}, 'B': {'X'}}},
-            {'A': {'1', '2'}, 'B': {'X'}}
-        ))
+        self.assertTrue(
+            _annotation_dict_all_filter(
+                {ANNOTATIONS: {"A": {"1", "2"}, "B": {"X"}}},
+                {"A": {"1", "2"}, "B": {"X"}},
+            )
+        )
 
-        self.assertFalse(_annotation_dict_all_filter(
-            {ANNOTATIONS: {'A': {'1', '2'}, 'B': {'X'}}},
-            {'A': {'1', '2', '3'}, 'B': {'X', 'Y'}}
-        ))
+        self.assertFalse(
+            _annotation_dict_all_filter(
+                {ANNOTATIONS: {"A": {"1", "2"}, "B": {"X"}}},
+                {"A": {"1", "2", "3"}, "B": {"X", "Y"}},
+            )
+        )
 
-        self.assertFalse(_annotation_dict_all_filter(
-            {ANNOTATIONS: {'A': {'1'}}},
-            {'A': {'1', '2'}}
-        ))
+        self.assertFalse(_annotation_dict_all_filter({ANNOTATIONS: {"A": {"1"}}}, {"A": {"1", "2"}}))
 
-        self.assertFalse(_annotation_dict_all_filter(
-            {ANNOTATIONS: {'A': {'1'}}},
-            {'A': {'2'}}
-        ))
+        self.assertFalse(_annotation_dict_all_filter({ANNOTATIONS: {"A": {"1"}}}, {"A": {"2"}}))
 
-        self.assertFalse(_annotation_dict_all_filter(
-            {ANNOTATIONS: {'A': {'1'}}},
-            {'B': {'1'}}
-        ))
+        self.assertFalse(_annotation_dict_all_filter({ANNOTATIONS: {"A": {"1"}}}, {"B": {"1"}}))
 
     def test_all_filter_no_query(self):
         """Test that the all filter returns true when there's no argument"""
@@ -217,45 +233,122 @@ class TestEdgeFilters(unittest.TestCase):
     def test_all_filter_no_annotations(self):
         graph = BELGraph()
         graph.add_increases(Protein(n(), n()), Protein(n(), n()), citation=n(), evidence=n())
-        self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_all_filter({'A': {'1'}})))
+        self.assertEqual(
+            0,
+            count_passed_edge_filter(graph, build_annotation_dict_all_filter({"A": {"1"}})),
+        )
 
     def test_all_filter_empty_annotations(self):
         graph = BELGraph()
-        graph.add_increases(Protein(n(), n()), Protein(n(), n()), citation=n(), evidence=n(), annotations={})
-        self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_all_filter({'A': {'1'}})))
+        graph.add_increases(
+            Protein(n(), n()),
+            Protein(n(), n()),
+            citation=n(),
+            evidence=n(),
+            annotations={},
+        )
+        self.assertEqual(
+            0,
+            count_passed_edge_filter(graph, build_annotation_dict_all_filter({"A": {"1"}})),
+        )
 
     def test_all_filter(self):
         graph = BELGraph()
-        graph.annotation_list['A'] = set('12345')
-        graph.add_increases(Protein(n(), n()), Protein(n(), n()), citation=n(), evidence=n(), annotations={
-            'A': {'1', '2', '3'},
-        })
+        graph.annotation_list["A"] = set("12345")
+        graph.add_increases(
+            Protein(n(), n()),
+            Protein(n(), n()),
+            citation=n(),
+            evidence=n(),
+            annotations={
+                "A": {"1", "2", "3"},
+            },
+        )
 
-        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter(graph._clean_annotations({'A': {'1'}}))))
-        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter(graph._clean_annotations({'A': {'1', '2'}}))))
-        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter(graph._clean_annotations({'A': {'1', '2', '3'}}))))
-        self.assertEqual(0,
-                         count_passed_edge_filter(graph, build_annotation_dict_all_filter(graph._clean_annotations({'A': {'1', '2', '3', '4'}}))))
-        self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_all_filter(graph._clean_annotations({'A': {'4'}}))))
+        self.assertEqual(
+            1,
+            count_passed_edge_filter(
+                graph,
+                build_annotation_dict_all_filter(graph._clean_annotations({"A": {"1"}})),
+            ),
+        )
+        self.assertEqual(
+            1,
+            count_passed_edge_filter(
+                graph,
+                build_annotation_dict_all_filter(graph._clean_annotations({"A": {"1", "2"}})),
+            ),
+        )
+        self.assertEqual(
+            1,
+            count_passed_edge_filter(
+                graph,
+                build_annotation_dict_all_filter(graph._clean_annotations({"A": {"1", "2", "3"}})),
+            ),
+        )
+        self.assertEqual(
+            0,
+            count_passed_edge_filter(
+                graph,
+                build_annotation_dict_all_filter(graph._clean_annotations({"A": {"1", "2", "3", "4"}})),
+            ),
+        )
+        self.assertEqual(
+            0,
+            count_passed_edge_filter(
+                graph,
+                build_annotation_dict_all_filter(graph._clean_annotations({"A": {"4"}})),
+            ),
+        )
 
     def test_all_filter_dict(self):
         graph = BELGraph()
-        graph.annotation_list['A'] = set('12345')
-        a, b = Protein(namespace='hgnc', identifier='1', name='A'), Protein(namespace='hgnc', identifier='2', name='B')
-        graph.add_increases(a, b, citation=n(), evidence=n(), annotations={
-            'A': {'1', '2', '3'},
-        })
+        graph.annotation_list["A"] = set("12345")
+        a, b = Protein(namespace="hgnc", identifier="1", name="A"), Protein(namespace="hgnc", identifier="2", name="B")
+        graph.add_increases(
+            a,
+            b,
+            citation=n(),
+            evidence=n(),
+            annotations={
+                "A": {"1", "2", "3"},
+            },
+        )
 
-        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter(graph._clean_annotations({'A': {'1': True}}))))
-        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter(graph._clean_annotations({
-            'A': {'1': True, '2': True}
-        }))))
-        self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter(graph._clean_annotations({
-            'A': {'1': True, '2': True, '3': True}
-        }))))
-        self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_all_filter(graph._clean_annotations({
-            'A': {'1': True, '2': True, '3': True, '4': True}
-        }))))
-        self.assertEqual(0, count_passed_edge_filter(graph, build_annotation_dict_all_filter(graph._clean_annotations({
-            'A': {'4': True}
-        }))))
+        self.assertEqual(
+            1,
+            count_passed_edge_filter(
+                graph,
+                build_annotation_dict_all_filter(graph._clean_annotations({"A": {"1": True}})),
+            ),
+        )
+        self.assertEqual(
+            1,
+            count_passed_edge_filter(
+                graph,
+                build_annotation_dict_all_filter(graph._clean_annotations({"A": {"1": True, "2": True}})),
+            ),
+        )
+        self.assertEqual(
+            1,
+            count_passed_edge_filter(
+                graph,
+                build_annotation_dict_all_filter(graph._clean_annotations({"A": {"1": True, "2": True, "3": True}})),
+            ),
+        )
+        self.assertEqual(
+            0,
+            count_passed_edge_filter(
+                graph,
+                build_annotation_dict_all_filter(
+                    graph._clean_annotations({"A": {"1": True, "2": True, "3": True, "4": True}})
+                ),
+            ),
+        )
+        self.assertEqual(
+            0,
+            count_passed_edge_filter(
+                graph,
+                build_annotation_dict_all_filter(graph._clean_annotations({"A": {"4": True}})),
+            ),
+        )

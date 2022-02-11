@@ -7,11 +7,15 @@ import unittest
 from pybel import BELGraph
 from pybel.dsl import protein
 from pybel.struct.operations import (
-    left_full_join, left_node_intersection_join, left_outer_join, node_intersection, union,
+    left_full_join,
+    left_node_intersection_join,
+    left_outer_join,
+    node_intersection,
+    union,
 )
 from pybel.testing.utils import n
 
-p1, p2, p3, p4, p5, p6, p7, p8 = (protein(namespace='HGNC', name=n()) for _ in range(8))
+p1, p2, p3, p4, p5, p6, p7, p8 = (protein(namespace="HGNC", name=n()) for _ in range(8))
 
 
 class TestLeftFullJoin(unittest.TestCase):
@@ -21,12 +25,12 @@ class TestLeftFullJoin(unittest.TestCase):
     def setUp(self):
         """Set up tests for the left full join with two example graphs."""
         g = BELGraph()
-        g.add_increases(p1, p2, citation='PMID1', evidence='Evidence 1')
+        g.add_increases(p1, p2, citation="PMID1", evidence="Evidence 1")
 
         h = BELGraph()
-        h.add_increases(p1, p2, citation='PMID1', evidence='Evidence 1')
-        h.add_increases(p1, p2, citation='PMID2', evidence='Evidence 2')
-        h.add_increases(p1, p3, citation='PMID1', evidence='Evidence 3')
+        h.add_increases(p1, p2, citation="PMID1", evidence="Evidence 1")
+        h.add_increases(p1, p2, citation="PMID2", evidence="Evidence 2")
+        h.add_increases(p1, p3, citation="PMID1", evidence="Evidence 3")
 
         self.g = g
         self.h = h
@@ -36,13 +40,13 @@ class TestLeftFullJoin(unittest.TestCase):
 
     def _help_check_initial_g(self, graph: BELGraph):
         """Test the initial G graph."""
-        self.assertEqual(2, graph.number_of_nodes(), msg='initial graph G had wrong number of nodes')
-        self.assertEqual(1, graph.number_of_edges(), msg='initial graph G had wrong number of edges')
+        self.assertEqual(2, graph.number_of_nodes(), msg="initial graph G had wrong number of nodes")
+        self.assertEqual(1, graph.number_of_edges(), msg="initial graph G had wrong number of edges")
 
     def _help_check_initial_h(self, graph: BELGraph):
         """Test the initial H graph."""
-        self.assertEqual(3, graph.number_of_nodes(), msg='initial graph H had wrong number of nodes')
-        self.assertEqual(3, graph.number_of_edges(), msg='initial graph H had wrong number of edges')
+        self.assertEqual(3, graph.number_of_nodes(), msg="initial graph H had wrong number of nodes")
+        self.assertEqual(3, graph.number_of_edges(), msg="initial graph H had wrong number of edges")
 
     def _help_check_result(self, j: BELGraph):
         """Help check the result of left joining H into G.
@@ -50,7 +54,11 @@ class TestLeftFullJoin(unittest.TestCase):
         :param j: The resulting graph from G += H
         """
         self.assertEqual(3, j.number_of_nodes())
-        self.assertEqual(3, j.number_of_edges(), msg="G edges:\n{}".format('\n'.join(map(str, j.edges(data=True)))))
+        self.assertEqual(
+            3,
+            j.number_of_edges(),
+            msg="G edges:\n{}".format("\n".join(map(str, j.edges(data=True)))),
+        )
 
     def test_function(self):
         """Test full joining two networks using the function."""
@@ -216,7 +224,12 @@ class TestInnerJoin(unittest.TestCase):
         self.assertEqual(2, j.number_of_nodes())
         self.assertEqual({p1, p3}, set(j))
         self.assertEqual(1, j.number_of_edges())
-        self.assertEqual({(p1, p3), }, set(j.edges()))
+        self.assertEqual(
+            {
+                (p1, p3),
+            },
+            set(j.edges()),
+        )
 
     def test_in_place_type_failure(self):
         with self.assertRaises(TypeError):

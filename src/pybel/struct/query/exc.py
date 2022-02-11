@@ -3,8 +3,8 @@
 """Exceptions for the query builder."""
 
 __all__ = [
-    'QueryMissingNetworksError',
-    'NodeDegreeIterError',
+    "QueryMissingNetworksError",
+    "NodeDegreeIterError",
 ]
 
 

@@ -14,7 +14,7 @@ from pybel.testing.utils import n
 test_namespace_url = n()
 test_annotation_url = n()
 citation, evidence = n(), n()
-a, b, c, d = [protein(namespace='test', name=str(i)) for i in range(4)]
+a, b, c, d = [protein(namespace="test", name=str(i)) for i in range(4)]
 
 
 class TestAnnotation(unittest.TestCase):
@@ -24,27 +24,39 @@ class TestAnnotation(unittest.TestCase):
         """Set up the test case with a pre-populated BEL graph."""
         self.graph = BELGraph()
 
-        self.graph.namespace_url['test'] = test_namespace_url
-        self.graph.annotation_url['subgraph'] = test_annotation_url
+        self.graph.namespace_url["test"] = test_namespace_url
+        self.graph.annotation_url["subgraph"] = test_annotation_url
 
-        self.graph.add_increases(a, b, citation=citation, evidence=evidence, annotations={'subgraph': {'1', '2'}})
-        self.graph.add_increases(a, c, citation=citation, evidence=evidence, annotations={'subgraph': {'1'}})
-        self.graph.add_increases(b, d, citation=citation, evidence=evidence, annotations={'subgraph': {'1', '2'}})
-        self.graph.add_increases(a, d, citation=citation, evidence=evidence, annotations={'subgraph': {'2'}})
+        self.graph.add_increases(
+            a,
+            b,
+            citation=citation,
+            evidence=evidence,
+            annotations={"subgraph": {"1", "2"}},
+        )
+        self.graph.add_increases(a, c, citation=citation, evidence=evidence, annotations={"subgraph": {"1"}})
+        self.graph.add_increases(
+            b,
+            d,
+            citation=citation,
+            evidence=evidence,
+            annotations={"subgraph": {"1", "2"}},
+        )
+        self.graph.add_increases(a, d, citation=citation, evidence=evidence, annotations={"subgraph": {"2"}})
         self.graph.add_increases(c, d, citation=citation, evidence=evidence)
 
     def test_get_subgraphs_by_annotation(self):
-        subgraphs = get_subgraphs_by_annotation(self.graph, annotation='subgraph')
+        subgraphs = get_subgraphs_by_annotation(self.graph, annotation="subgraph")
 
         self.assertEqual(2, len(subgraphs))
-        self.assertIn(Entity(namespace='subgraph', identifier='1'), subgraphs)
-        self.assertIn(Entity(namespace='subgraph', identifier='2'), subgraphs)
+        self.assertIn(Entity(namespace="subgraph", identifier="1"), subgraphs)
+        self.assertIn(Entity(namespace="subgraph", identifier="2"), subgraphs)
 
-        subgraph_1 = subgraphs[Entity(namespace='subgraph', identifier='1')]
+        subgraph_1 = subgraphs[Entity(namespace="subgraph", identifier="1")]
         self.assertIsInstance(subgraph_1, BELGraph)
 
-        self.assertIn('test', subgraph_1.namespace_url)
-        self.assertIn('subgraph', subgraph_1.annotation_url)
+        self.assertIn("test", subgraph_1.namespace_url)
+        self.assertIn("subgraph", subgraph_1.annotation_url)
 
         self.assertIn(a, subgraph_1)
         self.assertIn(b, subgraph_1)
@@ -57,11 +69,11 @@ class TestAnnotation(unittest.TestCase):
         self.assertNotIn(d, subgraph_1[a])
         self.assertNotIn(d, subgraph_1[c])
 
-        subgraph_2 = subgraphs[Entity(namespace='subgraph', identifier='2')]
+        subgraph_2 = subgraphs[Entity(namespace="subgraph", identifier="2")]
         self.assertIsInstance(subgraph_2, BELGraph)
 
-        self.assertIn('test', subgraph_2.namespace_url)
-        self.assertIn('subgraph', subgraph_2.annotation_url)
+        self.assertIn("test", subgraph_2.namespace_url)
+        self.assertIn("subgraph", subgraph_2.annotation_url)
 
         self.assertIn(a, subgraph_2)
         self.assertIn(b, subgraph_2)
@@ -75,11 +87,11 @@ class TestAnnotation(unittest.TestCase):
 
     def test_get_subgraphs_by_annotation_with_sentinel(self):
         sentinel = n()
-        subgraphs = get_subgraphs_by_annotation(self.graph, annotation='subgraph', sentinel=sentinel)
+        subgraphs = get_subgraphs_by_annotation(self.graph, annotation="subgraph", sentinel=sentinel)
 
         self.assertEqual(3, len(subgraphs))
-        self.assertIn(Entity(namespace='subgraph', identifier='1'), subgraphs)
-        self.assertIn(Entity(namespace='subgraph', identifier='2'), subgraphs)
+        self.assertIn(Entity(namespace="subgraph", identifier="1"), subgraphs)
+        self.assertIn(Entity(namespace="subgraph", identifier="2"), subgraphs)
         self.assertIn(sentinel, subgraphs)
 
 

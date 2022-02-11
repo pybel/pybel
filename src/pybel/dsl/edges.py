@@ -6,18 +6,29 @@ import warnings
 from typing import Dict, Optional, Union
 
 from ..constants import (
-    ACTIVITY, CELL_SURFACE, DEGRADATION, EFFECT, EXTRACELLULAR, FROM_LOC, INTRACELLULAR,
-    LOCATION, MODIFIER, NAME, NAMESPACE, TO_LOC, TRANSLOCATION,
+    ACTIVITY,
+    CELL_SURFACE,
+    DEGRADATION,
+    EFFECT,
+    EXTRACELLULAR,
+    FROM_LOC,
+    INTRACELLULAR,
+    LOCATION,
+    MODIFIER,
+    NAME,
+    NAMESPACE,
+    TO_LOC,
+    TRANSLOCATION,
 )
 from ..language import Entity, activity_mapping, compartment_mapping
 
 __all__ = [
-    'activity',
-    'degradation',
-    'translocation',
-    'secretion',
-    'cell_surface_expression',
-    'location',
+    "activity",
+    "degradation",
+    "translocation",
+    "secretion",
+    "cell_surface_expression",
+    "location",
 ]
 
 ModifierDict = Dict
@@ -61,7 +72,7 @@ def activity(
     if name and not namespace:
         rv[EFFECT] = activity_mapping[name]
     elif not name and not namespace and not identifier:
-        rv[EFFECT] = activity_mapping['act']
+        rv[EFFECT] = activity_mapping["act"]
     else:
         rv[EFFECT] = Entity(
             namespace=namespace,

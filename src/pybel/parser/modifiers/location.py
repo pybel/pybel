@@ -50,10 +50,10 @@ from ..utils import nest
 from ...constants import LOCATION
 
 __all__ = [
-    'get_location_language',
+    "get_location_language",
 ]
 
-location_tag = Suppress(oneOf(['loc', 'location']))
+location_tag = Suppress(oneOf(["loc", "location"]))
 
 
 def get_location_language(identifier: ParserElement) -> ParserElement:

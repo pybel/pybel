@@ -26,13 +26,13 @@ def function_table_df(graph: BELGraph, examples: bool = True) -> pd.DataFrame:
     function_mapping = multidict((node.function, node) for node in graph)
     function_c = Counter({function: len(nodes) for function, nodes in function_mapping.items()})
     if not examples:
-        return pd.DataFrame(function_c.most_common(), columns=['Type', 'Count'])
+        return pd.DataFrame(function_c.most_common(), columns=["Type", "Count"])
     return pd.DataFrame(
         [
             (function, count, random.choice(function_mapping[function]))  # noqa:S311
             for function, count in function_c.most_common()
         ],
-        columns=['Type', 'Count', 'Example'],
+        columns=["Type", "Count", "Example"],
     )
 
 
@@ -41,7 +41,7 @@ def functions_str(graph, examples: bool = True, add_count: bool = True, **kwargs
     df = function_table_df(graph, examples=examples)
     headers = list(df.columns)
     if add_count:
-        headers[0] += ' ({})'.format(len(df.index))
+        headers[0] += " ({})".format(len(df.index))
     return tabulate(df.values, headers=headers, **kwargs)
 
 
@@ -55,18 +55,18 @@ def namespaces_table_df(graph: BELGraph, examples: bool = True) -> pd.DataFrame:
     namespace_mapping = multidict((node.namespace, node) for node in graph if isinstance(node, BaseConcept))
     namespace_c = count_namespaces(graph)
     if not examples:
-        return pd.DataFrame(namespace_c.most_common(), columns=['Namespace', 'Count'])
+        return pd.DataFrame(namespace_c.most_common(), columns=["Namespace", "Count"])
     return pd.DataFrame(
         [
             (
                 prefix,
                 bioregistry.get_name(prefix),
                 count,
-                random.choice(namespace_mapping[prefix]) if prefix in namespace_mapping else '',  # noqa:S311
+                random.choice(namespace_mapping[prefix]) if prefix in namespace_mapping else "",  # noqa:S311
             )
             for prefix, count in namespace_c.most_common()
         ],
-        columns=['Prefix', 'Name', 'Count', 'Example'],
+        columns=["Prefix", "Name", "Count", "Example"],
     )
 
 
@@ -75,7 +75,7 @@ def namespaces_str(graph: BELGraph, examples: bool = True, add_count: bool = Tru
     df = namespaces_table_df(graph, examples=examples)
     headers = list(df.columns)
     if add_count:
-        headers[0] += ' ({})'.format(len(df.index))
+        headers[0] += " ({})".format(len(df.index))
     return tabulate(df.values, headers=headers, **kwargs)
 
 
@@ -87,23 +87,30 @@ def namespaces(graph: BELGraph, file: Optional[TextIO] = None, examples: bool = 
 def edge_table_df(graph: BELGraph, *, examples: bool = True, minimum: Optional[int] = None) -> pd.DataFrame:
     """Create a dataframe describing the edges in the graph."""
     edge_mapping = multidict(
-        (f'{u.function} {d[RELATION]} {v.function}', graph.edge_to_bel(u, v, d, use_identifiers=True))
+        (
+            f"{u.function} {d[RELATION]} {v.function}",
+            graph.edge_to_bel(u, v, d, use_identifiers=True),
+        )
         for u, v, d in graph.edges(data=True)
         if d[RELATION] not in TWO_WAY_RELATIONS or u.function > v.function
     )
     edge_c = Counter({top_level_edge: len(edges) for top_level_edge, edges in edge_mapping.items()})
     if examples:
         rows = [
-            (top_level_edge, count, random.choice(edge_mapping[top_level_edge]))  # noqa:S311
+            (
+                top_level_edge,
+                count,
+                random.choice(edge_mapping[top_level_edge]),
+            )  # noqa:S311
             for top_level_edge, count in edge_c.most_common()
             if not minimum or count >= minimum
         ]
-        columns = ['Edge Type', 'Count', 'Example']
+        columns = ["Edge Type", "Count", "Example"]
     else:
         rows = edge_c.most_common()
         if minimum:
             rows = [(k, count) for k, count in rows if count >= minimum]
-        columns = ['Edge Type', 'Count']
+        columns = ["Edge Type", "Count"]
     return pd.DataFrame(rows, columns=columns)
 
 
@@ -119,7 +126,7 @@ def edges_str(
     df = edge_table_df(graph, examples=examples, minimum=minimum)
     headers = list(df.columns)
     if add_count:
-        headers[0] += ' ({})'.format(intword(len(df.index)))
+        headers[0] += " ({})".format(intword(len(df.index)))
     return tabulate(df.values, headers=headers, **kwargs)
 
 
@@ -138,21 +145,28 @@ def edges(
 def citations(graph: BELGraph, n: Optional[int] = 15, file: Optional[TextIO] = None) -> None:
     """Print a summary of the citations in the graph."""
     edge_mapping = multidict(
-        ((data[CITATION][NAMESPACE], data[CITATION][IDENTIFIER]), graph.edge_to_bel(u, v, data))
+        (
+            (data[CITATION][NAMESPACE], data[CITATION][IDENTIFIER]),
+            graph.edge_to_bel(u, v, data),
+        )
         for u, v, data in graph.edges(data=True)
         if CITATION in data
     )
     edge_c = Counter({top_level_edge: len(edges) for top_level_edge, edges in edge_mapping.items()})
     df = pd.DataFrame(
         [
-            (':'.join(top_level_edge), count, random.choice(edge_mapping[top_level_edge]))  # noqa:S311
+            (
+                ":".join(top_level_edge),
+                count,
+                random.choice(edge_mapping[top_level_edge]),
+            )  # noqa:S311
             for top_level_edge, count in edge_c.most_common(n=n)
         ],
-        columns=['Citation', 'Count', 'Example'],
+        columns=["Citation", "Count", "Example"],
     )
 
     if n is None or len(edge_mapping) < n:
-        print('{} Citation Count: {}'.format(graph, len(edge_mapping)))
+        print("{} Citation Count: {}".format(graph, len(edge_mapping)))
     else:
-        print('{} Citation Count: {} (Showing top {})'.format(graph, len(edge_mapping), n))
+        print("{} Citation Count: {} (Showing top {})".format(graph, len(edge_mapping), n))
     print(tabulate(df.values, headers=df.columns), file=file)

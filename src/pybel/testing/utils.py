@@ -9,19 +9,22 @@ from requests.compat import urlparse
 from ..manager import Manager
 from ..manager.models import Namespace, NamespaceEntry
 from ..struct import BELGraph
-from ..struct.summary import get_annotation_values_by_annotation, iter_annotation_value_pairs
+from ..struct.summary import (
+    get_annotation_values_by_annotation,
+    iter_annotation_value_pairs,
+)
 from ..struct.summary.node_summary import get_names
 
-_FRAUNHOFER_RESOURCES = 'https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path='
+_FRAUNHOFER_RESOURCES = "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path="
 
 
 def get_uri_name(url: str) -> str:
     """Get the file name from the end of the URL."""
     url_parsed = urlparse(url)
     if url.startswith(_FRAUNHOFER_RESOURCES):
-        return url_parsed.query.split('=')[-1]
+        return url_parsed.query.split("=")[-1]
     else:
-        url_parts = url_parsed.path.split('/')
+        url_parts = url_parsed.path.split("/")
         return url_parts[-1]
 
 

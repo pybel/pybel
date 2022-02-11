@@ -12,14 +12,14 @@ from inspect import signature
 from .exc import MissingPipelineFunctionError, PipelineNameError
 
 __all__ = [
-    'in_place_transformation',
-    'uni_in_place_transformation',
-    'uni_transformation',
-    'transformation',
-    'get_transformation',
-    'mapped',
-    'has_arguments_map',
-    'no_arguments_map',
+    "in_place_transformation",
+    "uni_in_place_transformation",
+    "uni_transformation",
+    "transformation",
+    "get_transformation",
+    "mapped",
+    "has_arguments_map",
+    "no_arguments_map",
 ]
 
 logger = logging.getLogger(__name__)
@@ -33,10 +33,7 @@ no_arguments_map = {}
 
 def _has_arguments(func, universe):
     sig = signature(func)
-    return (
-        (universe and 3 <= len(sig.parameters))
-        or (not universe and 2 <= len(sig.parameters))
-    )
+    return (universe and 3 <= len(sig.parameters)) or (not universe and 2 <= len(sig.parameters))
 
 
 def _register_function(name: str, func, universe: bool, in_place: bool):
@@ -51,7 +48,7 @@ def _register_function(name: str, func, universe: bool, in_place: bool):
     if name in mapped:
         mapped_func = mapped[name]
         raise PipelineNameError(
-            '{name} is already registered with {func_mod}.{func_name}'.format(
+            "{name} is already registered with {func_mod}.{func_name}".format(
                 name=name,
                 func_mod=mapped_func.__module__,
                 func_name=mapped_func.__name__,
@@ -112,6 +109,6 @@ def get_transformation(name: str):
     func = mapped.get(name)
 
     if func is None:
-        raise MissingPipelineFunctionError('{} is not registered as a pipeline function'.format(name))
+        raise MissingPipelineFunctionError("{} is not registered as a pipeline function".format(name))
 
     return func

@@ -5,9 +5,9 @@
 from typing import Mapping, Optional, Tuple
 
 __all__ = [
-    'Term',
-    'TermEncodingMapping',
-    'NamespaceTermEncodingMapping',
+    "Term",
+    "TermEncodingMapping",
+    "NamespaceTermEncodingMapping",
 ]
 
 Term = Tuple[Optional[str], str]

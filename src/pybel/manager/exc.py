@@ -5,9 +5,11 @@
 from ..constants import LINE
 from ..exceptions import PyBELWarning
 
-MSG = "Error adding edge {line_s} to database. Check this line in the file and make sure the citation, " \
-      "evidence, and annotations all use valid UTF-8 characters: {source} {target} {key} {data} with " \
-      "original error:\n {error}"
+MSG = (
+    "Error adding edge {line_s} to database. Check this line in the file and make sure the citation, "
+    "evidence, and annotations all use valid UTF-8 characters: {source} {target} {key} {data} with "
+    "original error:\n {error}"
+)
 
 
 class EdgeAddError(PyBELWarning):
@@ -22,7 +24,7 @@ class EdgeAddError(PyBELWarning):
         self.data = data
 
     def __str__(self):
-        line_s = 'from line {} '.format(self.line) if LINE in self.data else ''
+        line_s = "from line {} ".format(self.line) if LINE in self.data else ""
         return MSG.format(
             line_s=line_s,
             source=self.source,

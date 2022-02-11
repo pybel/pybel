@@ -13,9 +13,9 @@ from ..constants import ANNOTATIONS, CITATION, EVIDENCE, INCREASES, RELATION
 from ..dsl import BaseAbundance, BaseEntity, ListAbundance, Reaction
 
 __all__ = [
-    'flatten_list_abundance',
-    'list_abundance_cartesian_expansion',
-    'reaction_cartesian_expansion',
+    "flatten_list_abundance",
+    "list_abundance_cartesian_expansion",
+    "reaction_cartesian_expansion",
 ]
 
 logger = logging.getLogger(__name__)
@@ -23,23 +23,19 @@ logger = logging.getLogger(__name__)
 
 def flatten_list_abundance(node: ListAbundance) -> ListAbundance:
     """Flattens the complex or composite abundance."""
-    return node.__class__(list(chain.from_iterable(
-        (
-            flatten_list_abundance(member).members
-            if isinstance(member, ListAbundance) else
-            [member]
+    return node.__class__(
+        list(
+            chain.from_iterable(
+                (flatten_list_abundance(member).members if isinstance(member, ListAbundance) else [member])
+                for member in node.members
+            )
         )
-        for member in node.members
-    )))
+    )
 
 
 def list_abundance_expansion(graph) -> None:
     """Flatten list abundances."""
-    mapping = {
-        node: flatten_list_abundance(node)
-        for node in graph
-        if isinstance(node, ListAbundance)
-    }
+    mapping = {node: flatten_list_abundance(node) for node in graph if isinstance(node, ListAbundance)}
     relabel_nodes(graph, mapping, copy=False)
 
 
@@ -52,7 +48,8 @@ def list_abundance_cartesian_expansion(graph) -> None:
         if isinstance(u, ListAbundance) and isinstance(v, ListAbundance):
             for u_member, v_member in itt.product(u.members, v.members):
                 graph.add_qualified_edge(
-                    u_member, v_member,
+                    u_member,
+                    v_member,
                     relation=d[RELATION],
                     citation=d.get(CITATION),
                     evidence=d.get(EVIDENCE),
@@ -62,7 +59,8 @@ def list_abundance_cartesian_expansion(graph) -> None:
         elif isinstance(u, ListAbundance):
             for member in u.members:
                 graph.add_qualified_edge(
-                    member, v,
+                    member,
+                    v,
                     relation=d[RELATION],
                     citation=d.get(CITATION),
                     evidence=d.get(EVIDENCE),
@@ -72,7 +70,8 @@ def list_abundance_cartesian_expansion(graph) -> None:
         elif isinstance(v, ListAbundance):
             for member in v.members:
                 graph.add_qualified_edge(
-                    u, member,
+                    u,
+                    member,
                     relation=d[RELATION],
                     citation=d.get(CITATION),
                     evidence=d.get(EVIDENCE),
@@ -92,21 +91,20 @@ def _reaction_cartesian_expansion_unqualified_helper(
     if isinstance(u, Reaction) and isinstance(v, Reaction):
         enzymes = _get_catalysts_in_reaction(u) | _get_catalysts_in_reaction(v)
 
-        for reactant, product in chain(itt.product(u.reactants, u.products),
-                                       itt.product(v.reactants, v.products)):
+        for reactant, product in chain(itt.product(u.reactants, u.products), itt.product(v.reactants, v.products)):
             if reactant in enzymes or product in enzymes:
                 continue
 
-            graph.add_unqualified_edge(
-                reactant, product, INCREASES
-            )
+            graph.add_unqualified_edge(reactant, product, INCREASES)
 
         for product, reactant in itt.product(u.products, u.reactants):
             if reactant in enzymes or product in enzymes:
                 continue
 
             graph.add_unqualified_edge(
-                product, reactant, d[RELATION],
+                product,
+                reactant,
+                d[RELATION],
             )
 
     elif isinstance(u, Reaction):
@@ -120,13 +118,9 @@ def _reaction_cartesian_expansion_unqualified_helper(
             # Only add edge between v and reaction if the node is not part of the reaction
             # In practice skips hasReactant, hasProduct edges
             if v not in u.products and v not in u.reactants:
-                graph.add_unqualified_edge(
-                    product, v, INCREASES
-                )
+                graph.add_unqualified_edge(product, v, INCREASES)
             for reactant in u.reactants:
-                graph.add_unqualified_edge(
-                    reactant, product, INCREASES
-                )
+                graph.add_unqualified_edge(reactant, product, INCREASES)
 
     elif isinstance(v, Reaction):
         enzymes = _get_catalysts_in_reaction(v)
@@ -139,13 +133,9 @@ def _reaction_cartesian_expansion_unqualified_helper(
             # Only add edge between v and reaction if the node is not part of the reaction
             # In practice skips hasReactant, hasProduct edges
             if u not in v.products and u not in v.reactants:
-                graph.add_unqualified_edge(
-                    u, reactant, INCREASES
-                )
+                graph.add_unqualified_edge(u, reactant, INCREASES)
             for product in v.products:
-                graph.add_unqualified_edge(
-                    reactant, product, INCREASES
-                )
+                graph.add_unqualified_edge(reactant, product, INCREASES)
 
 
 def _get_catalysts_in_reaction(reaction: Reaction) -> Set[BaseAbundance]:
@@ -165,11 +155,15 @@ def reaction_cartesian_expansion(graph, accept_unqualified_edges: bool = True) -
         if isinstance(u, Reaction) and isinstance(v, Reaction):
             catalysts = _get_catalysts_in_reaction(u) | _get_catalysts_in_reaction(v)
 
-            for reactant, product in chain(itt.product(u.reactants, u.products), itt.product(v.reactants, v.products)):
+            for reactant, product in chain(
+                itt.product(u.reactants, u.products),
+                itt.product(v.reactants, v.products),
+            ):
                 if reactant in catalysts or product in catalysts:
                     continue
                 graph.add_increases(
-                    reactant, product,
+                    reactant,
+                    product,
                     citation=d.get(CITATION),
                     evidence=d.get(EVIDENCE),
                     annotations=d.get(ANNOTATIONS),
@@ -180,7 +174,8 @@ def reaction_cartesian_expansion(graph, accept_unqualified_edges: bool = True) -
                     continue
 
                 graph.add_qualified_edge(
-                    product, reactant,
+                    product,
+                    reactant,
                     relation=d[RELATION],
                     citation=d.get(CITATION),
                     evidence=d.get(EVIDENCE),
@@ -199,7 +194,8 @@ def reaction_cartesian_expansion(graph, accept_unqualified_edges: bool = True) -
                 # In practice skips hasReactant, hasProduct edges
                 if v not in u.products and v not in u.reactants:
                     graph.add_increases(
-                        product, v,
+                        product,
+                        v,
                         citation=d.get(CITATION),
                         evidence=d.get(EVIDENCE),
                         annotations=d.get(ANNOTATIONS),
@@ -207,7 +203,8 @@ def reaction_cartesian_expansion(graph, accept_unqualified_edges: bool = True) -
 
                 for reactant in u.reactants:
                     graph.add_increases(
-                        reactant, product,
+                        reactant,
+                        product,
                         citation=d.get(CITATION),
                         evidence=d.get(EVIDENCE),
                         annotations=d.get(ANNOTATIONS),
@@ -225,14 +222,16 @@ def reaction_cartesian_expansion(graph, accept_unqualified_edges: bool = True) -
                 # In practice skips hasReactant, hasProduct edges
                 if u not in v.products and u not in v.reactants:
                     graph.add_increases(
-                        u, reactant,
+                        u,
+                        reactant,
                         citation=d.get(CITATION),
                         evidence=d.get(EVIDENCE),
                         annotations=d.get(ANNOTATIONS),
                     )
                 for product in v.products:
                     graph.add_increases(
-                        reactant, product,
+                        reactant,
+                        product,
                         citation=d.get(CITATION),
                         evidence=d.get(EVIDENCE),
                         annotations=d.get(ANNOTATIONS),
@@ -259,8 +258,4 @@ def _remove_typed_nodes(
     graph,
     cls: Union[Type[BaseEntity], Tuple[Type[BaseEntity], ...]],
 ) -> None:
-    graph.remove_nodes_from({
-        node
-        for node in graph
-        if isinstance(node, cls)
-    })
+    graph.remove_nodes_from({node for node in graph if isinstance(node, cls)})

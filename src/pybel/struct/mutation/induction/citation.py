@@ -5,12 +5,15 @@
 import logging
 
 from .utils import get_subgraph_by_edge_filter
-from ...filters.edge_predicate_builders import build_author_inclusion_filter, build_pmid_inclusion_filter
+from ...filters.edge_predicate_builders import (
+    build_author_inclusion_filter,
+    build_pmid_inclusion_filter,
+)
 from ...pipeline import transformation
 
 __all__ = [
-    'get_subgraph_by_pubmed',
-    'get_subgraph_by_authors',
+    "get_subgraph_by_pubmed",
+    "get_subgraph_by_authors",
 ]
 
 logger = logging.getLogger(__name__)
