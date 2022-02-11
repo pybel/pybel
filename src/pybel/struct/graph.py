@@ -912,7 +912,11 @@ class BELGraph(nx.MultiDiGraph):
 
     def ground(self, **kwargs) -> 'BELGraph':
         """Ground this graph."""
-        from ..grounding import ground
+        try:
+            from ..grounding import ground
+        except ImportError:
+            logger.warning("Must install pyobo and protmapper, use pip install pybel[grounding] extra.")
+            raise
         return ground(self, **kwargs)
 
     def _clean_annotations(self, annotations_dict: AnnotationsHint) -> AnnotationsDict:

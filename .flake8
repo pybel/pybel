@@ -25,6 +25,8 @@ ignore =
     S301, S403
     # Redefinition in CLI
     F811
+    # Error names
+    N818
 exclude =
     .tox,
     .git,
