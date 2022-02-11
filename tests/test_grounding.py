@@ -60,6 +60,10 @@ mock_id_name_data = {
     "cl": {
         "0000030": "glioblast",
     },
+    "fplx":{
+        "TAP": "TAP",
+        "Gamma_secretase": "Gamma_secretase",
+    }
 }
 
 mock_id_name_mapping = get_mock_id_name_mapping(mock_id_name_data)
@@ -89,9 +93,9 @@ mock_get_id_from_mnemonic = mock.patch(
 class TestProcessConcept(unittest.TestCase):
     """Test the :func:`_process_concept` function."""
 
-    def _help(self, expected, d, msg=None):
+    def _help(self, expected, original, msg=None):
         expected = {CONCEPT: expected}
-        d = {CONCEPT: d}
+        d = {CONCEPT: original}
         self.assertIsNotNone(
             bioregistry.normalize_prefix(expected[CONCEPT][NAMESPACE]),
             msg="Unrecognized namespace",
@@ -157,6 +161,7 @@ class TestProcessConcept(unittest.TestCase):
 
     def test_remap_sfam(self, *_):
         """Test remapping SFAM to FPLX."""
+        self.assertIn(("bel", "TAP Family"), _NAME_REMAPPING)
         self._help(
             {NAMESPACE: "fplx", NAME: "TAP", IDENTIFIER: "TAP"},
             {NAMESPACE: "SFAM", NAME: "TAP Family"},

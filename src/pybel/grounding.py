@@ -115,6 +115,8 @@ _ID_REMAPPING = {}
 
 
 def _get_name_remapping(prefix: str, name: str) -> Union[Tuple[str, str, str], Tuple[None, None, None]]:
+    if prefix.lower() in {"sfam", "scomp"} and ("bel", name) in _NAME_REMAPPING:
+        return _NAME_REMAPPING["bel", name]
     return _NAME_REMAPPING.get((prefix, name), (None, None, None))
 
 
