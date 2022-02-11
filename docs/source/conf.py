@@ -3,6 +3,7 @@
 import os
 import re
 import sys
+from datetime import date
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -46,7 +47,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'PyBEL'
-copyright = '2016-2020, Charles Tapley Hoyt'
+copyright = f'2016-{date.today().year}, Charles Tapley Hoyt'
 author = 'Charles Tapley Hoyt'
 
 # The version info for the project you're documenting, acts as replacement for
