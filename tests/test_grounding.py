@@ -60,10 +60,10 @@ mock_id_name_data = {
     "cl": {
         "0000030": "glioblast",
     },
-    "fplx":{
+    "fplx": {
         "TAP": "TAP",
         "Gamma_secretase": "Gamma_secretase",
-    }
+    },
 }
 
 mock_id_name_mapping = get_mock_id_name_mapping(mock_id_name_data)
