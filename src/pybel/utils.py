@@ -13,8 +13,22 @@ from datetime import datetime
 from typing import Any, List, Mapping, Optional, Tuple, TypeVar
 
 from .constants import (
-    ACTIVITY, CITATION, DEGRADATION, EFFECT, EVIDENCE, FROM_LOC, IDENTIFIER, LOCATION, MODIFIER, NAME, NAMESPACE,
-    RELATION, SOURCE_MODIFIER, TARGET_MODIFIER, TO_LOC, TRANSLOCATION,
+    ACTIVITY,
+    CITATION,
+    DEGRADATION,
+    EFFECT,
+    EVIDENCE,
+    FROM_LOC,
+    IDENTIFIER,
+    LOCATION,
+    MODIFIER,
+    NAME,
+    NAMESPACE,
+    RELATION,
+    SOURCE_MODIFIER,
+    TARGET_MODIFIER,
+    TO_LOC,
+    TRANSLOCATION,
 )
 from .typing import EdgeData
 
@@ -28,7 +42,7 @@ logger = logging.getLogger(__name__)
 CanonicalEdge = Tuple[str, Optional[Tuple], Optional[Tuple]]
 
 
-def expand_dict(flat_dict, sep: str = '_'):
+def expand_dict(flat_dict, sep: str = "_"):
     """Expand a flattened dictionary.
 
     :param dict flat_dict: a nested dictionary that has been flattened so the keys are composite
@@ -53,8 +67,8 @@ def expand_dict(flat_dict, sep: str = '_'):
 
 def flatten_dict(
     data: Mapping[str, Any],
-    parent_key: str = '',
-    sep: str = '_',
+    parent_key: str = "",
+    sep: str = "_",
 ) -> Mapping[str, str]:
     """Flatten a nested dictionary.
 
@@ -74,7 +88,7 @@ def flatten_dict(
         if isinstance(value, (dict, MutableMapping)):
             items.update(flatten_dict(value, key, sep=sep))
         elif isinstance(value, (set, list)):
-            items[key] = ','.join(value)
+            items[key] = ",".join(value)
         else:
             items[key] = value
 
@@ -92,12 +106,12 @@ def tokenize_version(version_string: str) -> Tuple[int, int, int]:
     >>> tokenize_version('0.1.2-dev')
     (0, 1, 2)
     """
-    before_dash = version_string.split('-')[0]
-    major, minor, patch = before_dash.split('.')[:3]  # take only the first 3 in case there's an extension like -dev.0
+    before_dash = version_string.split("-")[0]
+    major, minor, patch = before_dash.split(".")[:3]  # take only the first 3 in case there's an extension like -dev.0
     return int(major), int(minor), int(patch)
 
 
-_re = re.compile(r'^[a-zA-Z0-9-\.]*$')
+_re = re.compile(r"^[a-zA-Z0-9-\.]*$")
 
 
 def ensure_quotes(s: str) -> str:
@@ -106,10 +120,10 @@ def ensure_quotes(s: str) -> str:
     return s if _re.match(s) else f'"{s}"'
 
 
-CREATION_DATE_FMT = '%Y-%m-%dT%H:%M:%S'
-PUBLISHED_DATE_FMT = '%Y-%m-%d'
-PUBLISHED_DATE_FMT_2 = '%d:%m:%Y %H:%M'
-DATE_VERSION_FMT = '%Y%m%d'
+CREATION_DATE_FMT = "%Y-%m-%dT%H:%M:%S"
+PUBLISHED_DATE_FMT = "%Y-%m-%d"
+PUBLISHED_DATE_FMT_2 = "%d:%m:%Y %H:%M"
+DATE_VERSION_FMT = "%Y%m%d"
 
 
 def valid_date(s: str) -> bool:
@@ -141,7 +155,7 @@ def parse_datetime(s: str) -> datetime.date:
         else:
             return dt
 
-    raise ValueError('Incorrect datetime format for {}'.format(s))
+    raise ValueError("Incorrect datetime format for {}".format(s))
 
 
 def _get_citation_str(data: Mapping) -> Optional[str]:
@@ -203,7 +217,7 @@ def subdict_matches(target: Mapping, query: Mapping, partial_match: bool = True)
         if k not in target:
             return False
         elif not isinstance(v, (int, str, dict, Iterable)):
-            raise ValueError('invalid value: {}'.format(v))
+            raise ValueError("invalid value: {}".format(v))
         elif isinstance(v, (int, str)) and target[k] != v:
             return False
         elif isinstance(v, dict):
@@ -226,7 +240,7 @@ def hash_dump(data) -> str:
     :param data: An arbitrary JSON-serializable object
     :type data: dict or list or tuple
     """
-    return hashlib.md5(json.dumps(data, sort_keys=True).encode('utf-8')).hexdigest()  # noqa: S303
+    return hashlib.md5(json.dumps(data, sort_keys=True).encode("utf-8")).hexdigest()  # noqa: S303
 
 
 def canonicalize_edge(edge_data: EdgeData) -> CanonicalEdge:
@@ -296,7 +310,7 @@ def _canonicalize_edge_modifications(edge_data: EdgeData) -> Optional[Tuple]:
         result.append(t)
 
     if not result:
-        raise ValueError('Invalid data: {}'.format(edge_data))
+        raise ValueError("Invalid data: {}".format(edge_data))
 
     return tuple(result)
 
@@ -306,11 +320,11 @@ def get_corresponding_pickle_path(path: str) -> str:
 
     :param path: A path to a BEL file.
     """
-    return '{path}.pickle'.format(path=path)
+    return "{path}.pickle".format(path=path)
 
 
-X = TypeVar('X')
-Y = TypeVar('Y')
+X = TypeVar("X")
+Y = TypeVar("Y")
 
 
 def multidict(pairs: typing.Iterable[Tuple[X, Y]]) -> Mapping[X, List[Y]]:

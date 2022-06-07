@@ -14,60 +14,71 @@ The following is an example of orthology annotations from
 """
 
 from ..dsl import Gene, Protein, Rna, activity
-from ..resources import FB_URL, HGNC_URL, MGI_URL, NCBIGENE_URL, RGD_URL, SPECIES_PATTERN
+from ..resources import (
+    FB_URL,
+    HGNC_URL,
+    MGI_URL,
+    NCBIGENE_URL,
+    RGD_URL,
+    SPECIES_PATTERN,
+)
 from ..struct.graph import BELGraph
 
 __all__ = [
-    'homology_graph',
+    "homology_graph",
 ]
 
 # TODO make SGD resource
 
 homology_graph = BELGraph(
-    name='Homology and Equivalence Example Graph',
-    version='1.0.1',
+    name="Homology and Equivalence Example Graph",
+    version="1.0.1",
     description="Adds several equivalence and orthology relationships related to the mitogen-activated protein kinase "
-                "(MAPK1)",
-    authors='Charles Tapley Hoyt',
-    contact='cthoyt@gmail.com',
+    "(MAPK1)",
+    authors="Charles Tapley Hoyt",
+    contact="cthoyt@gmail.com",
 )
 
-homology_graph.namespace_url.update({
-    'HGNC': HGNC_URL,
-    'MGI': MGI_URL,
-    'RGD': RGD_URL,
-    'FB': FB_URL,
-    'NCBIGENE': NCBIGENE_URL,
-    # 'SGD': '?',
-})
+homology_graph.namespace_url.update(
+    {
+        "HGNC": HGNC_URL,
+        "MGI": MGI_URL,
+        "RGD": RGD_URL,
+        "FB": FB_URL,
+        "NCBIGENE": NCBIGENE_URL,
+        # 'SGD': '?',
+    }
+)
 
-homology_graph.annotation_pattern.update({
-    'Species': SPECIES_PATTERN,
-})
+homology_graph.annotation_pattern.update(
+    {
+        "Species": SPECIES_PATTERN,
+    }
+)
 
-human_mapk1_gene = Gene(namespace='HGNC', name='MAPK1', identifier='HGNC:6871')
-human_mapk1_gene_entrez = Gene(namespace='NCBIGENE', name='5594')
-human_mapk1_rna = Rna(namespace='HGNC', name='MAPK1', identifier='HGNC:6871')
-human_mapk1_protein = Protein(namespace='HGNC', name='MAPK1', identifier='HGNC:6871')
+human_mapk1_gene = Gene(namespace="HGNC", name="MAPK1", identifier="HGNC:6871")
+human_mapk1_gene_entrez = Gene(namespace="NCBIGENE", name="5594")
+human_mapk1_rna = Rna(namespace="HGNC", name="MAPK1", identifier="HGNC:6871")
+human_mapk1_protein = Protein(namespace="HGNC", name="MAPK1", identifier="HGNC:6871")
 
-mouse_mapk1_gene = Gene(namespace='MGI', name='Mapk1', identifier='MGI:1346858')
-mouse_mapk1_gene_entrez = Gene(namespace='NCBIGENE', name='26413')
-mouse_mapk1_rna = Rna(namespace='MGI', name='Mapk1', identifier='MGI:1346858')
-mouse_mapk1_protein = Protein(namespace='MGI', name='Mapk1', identifier='MGI:1346858')
+mouse_mapk1_gene = Gene(namespace="MGI", name="Mapk1", identifier="MGI:1346858")
+mouse_mapk1_gene_entrez = Gene(namespace="NCBIGENE", name="26413")
+mouse_mapk1_rna = Rna(namespace="MGI", name="Mapk1", identifier="MGI:1346858")
+mouse_mapk1_protein = Protein(namespace="MGI", name="Mapk1", identifier="MGI:1346858")
 
-rat_mapk1 = Gene(namespace='RGD', name='Mapk1', identifier='70500')
-rat_mapk1_entrez = Gene(namespace='NCBIGENE', name='116590')
+rat_mapk1 = Gene(namespace="RGD", name="Mapk1", identifier="70500")
+rat_mapk1_entrez = Gene(namespace="NCBIGENE", name="116590")
 
-fly_mapk1 = Gene(namespace='FB', name='rl', identifier='FBgn0003256')
-fly_mapk1_entrez = Gene(namespace='NCBIGENE', name='3354888')
+fly_mapk1 = Gene(namespace="FB", name="rl", identifier="FBgn0003256")
+fly_mapk1_entrez = Gene(namespace="NCBIGENE", name="3354888")
 
-human_csf1_gene = Gene(namespace='HGNC', name='CSF1', identifier='HGNC:2432')
-human_csf1_rna = Rna(namespace='HGNC', name='CSF1', identifier='HGNC:2432')
-human_csf1_protein = Protein(namespace='HGNC', name='CSF1', identifier='HGNC:2432')
+human_csf1_gene = Gene(namespace="HGNC", name="CSF1", identifier="HGNC:2432")
+human_csf1_rna = Rna(namespace="HGNC", name="CSF1", identifier="HGNC:2432")
+human_csf1_protein = Protein(namespace="HGNC", name="CSF1", identifier="HGNC:2432")
 
-mouse_csf1_gene = Gene(namespace='MGI', name='Csf1', identifier='MGI:1339753')
-mouse_csf1_rna = Rna(namespace='MGI', name='Csf1', identifier='MGI:1339753')
-mouse_csf1_protein = Protein(namespace='MGI', name='Csf1', identifier='MGI:1339753')
+mouse_csf1_gene = Gene(namespace="MGI", name="Csf1", identifier="MGI:1339753")
+mouse_csf1_rna = Rna(namespace="MGI", name="Csf1", identifier="MGI:1339753")
+mouse_csf1_protein = Protein(namespace="MGI", name="Csf1", identifier="MGI:1339753")
 
 # yeast_mapk1 = Gene(namespace='SGD', name='KSS1', identifier='SGD:S000003272')
 # yeast_mapk1_entrez = Gene(namespace='NCBIGENE', name='KSS1', identifier='852931')
@@ -91,10 +102,10 @@ homology_graph.add_orthology(human_mapk1_gene, fly_mapk1)
 homology_graph.add_increases(
     source=mouse_csf1_protein,
     target=mouse_mapk1_protein,
-    citation='10452980',
-    evidence='M-CSF triggers the activation of extracellular signal-regulated protein kinases (ERK)-1/2.',
-    target_modifier=activity('kin'),
-    annotations={'Species': '10090'},
+    citation="10452980",
+    evidence="M-CSF triggers the activation of extracellular signal-regulated protein kinases (ERK)-1/2.",
+    target_modifier=activity("kin"),
+    annotations={"Species": "10090"},
 )
 
 homology_graph.add_transcription(mouse_mapk1_gene, mouse_mapk1_rna)

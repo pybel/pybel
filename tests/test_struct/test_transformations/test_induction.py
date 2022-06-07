@@ -6,19 +6,30 @@ import string
 import unittest
 
 from pybel import BELGraph
-from pybel.constants import CITATION_AUTHORS, CITATION_TYPE_PUBMED, IDENTIFIER, NAMESPACE
+from pybel.constants import (
+    CITATION_AUTHORS,
+    CITATION_TYPE_PUBMED,
+    IDENTIFIER,
+    NAMESPACE,
+)
 from pybel.dsl import BaseEntity, gene, protein, rna
 from pybel.struct.mutation.expansion import expand_upstream_causal
 from pybel.struct.mutation.induction import get_subgraph_by_annotation_value
-from pybel.struct.mutation.induction.citation import get_subgraph_by_authors, get_subgraph_by_pubmed
-from pybel.struct.mutation.induction.paths import get_nodes_in_all_shortest_paths, get_subgraph_by_all_shortest_paths
+from pybel.struct.mutation.induction.citation import (
+    get_subgraph_by_authors,
+    get_subgraph_by_pubmed,
+)
+from pybel.struct.mutation.induction.paths import (
+    get_nodes_in_all_shortest_paths,
+    get_subgraph_by_all_shortest_paths,
+)
 from pybel.struct.mutation.induction.upstream import get_upstream_causal_subgraph
 from pybel.struct.mutation.induction.utils import get_subgraph_by_induction
 from pybel.testing.utils import n
 
-trem2_gene = gene(namespace='HGNC', name='TREM2')
-trem2_rna = rna(namespace='HGNC', name='TREM2')
-trem2_protein = protein(namespace='HGNC', name='TREM2')
+trem2_gene = gene(namespace="HGNC", name="TREM2")
+trem2_rna = rna(namespace="HGNC", name="TREM2")
+trem2_protein = protein(namespace="HGNC", name="TREM2")
 
 
 class TestGraphMixin(unittest.TestCase):
@@ -48,7 +59,7 @@ class TestInduction(TestGraphMixin):
         graph = BELGraph()
         keyword, url = n(), n()
         graph.namespace_url[keyword] = url
-        a, b, c, d = [protein(namespace='test', name=str(i)) for i in range(4)]
+        a, b, c, d = [protein(namespace="test", name=str(i)) for i in range(4)]
         graph.add_directly_increases(a, b, citation=n(), evidence=n())
         graph.add_directly_increases(b, c, citation=n(), evidence=n())
         graph.add_directly_increases(c, d, citation=n(), evidence=n())
@@ -59,7 +70,11 @@ class TestInduction(TestGraphMixin):
 
         self.assertIsInstance(subgraph, BELGraph)
         self.assert_all_nodes_are_base_entities(subgraph)
-        self.assertNotEqual(0, len(subgraph.namespace_url), msg='improperly found metadata: {}'.format(subgraph.graph))
+        self.assertNotEqual(
+            0,
+            len(subgraph.namespace_url),
+            msg="improperly found metadata: {}".format(subgraph.graph),
+        )
         self.assertIn(keyword, subgraph.namespace_url)
         self.assertEqual(url, subgraph.namespace_url[keyword])
 
@@ -73,7 +88,7 @@ class TestInduction(TestGraphMixin):
         graph = BELGraph()
         keyword, url = n(), n()
         graph.namespace_url[keyword] = url
-        a, b, c, d, e, f = [protein(namespace='test', name=n()) for _ in range(6)]
+        a, b, c, d, e, f = [protein(namespace="test", name=n()) for _ in range(6)]
         graph.add_increases(a, b, citation=n(), evidence=n())
         graph.add_increases(a, c, citation=n(), evidence=n())
         graph.add_increases(b, d, citation=n(), evidence=n())
@@ -105,10 +120,10 @@ class TestInduction(TestGraphMixin):
 
     def test_get_upstream_causal_subgraph(self):
         """Test get_upstream_causal_subgraph."""
-        a, b, c, d, e, f = [protein(namespace='test', name=n()) for _ in range(6)]
+        a, b, c, d, e, f = [protein(namespace="test", name=n()) for _ in range(6)]
 
         universe = BELGraph()
-        universe.namespace_pattern['test'] = 'test-url'
+        universe.namespace_pattern["test"] = "test-url"
         universe.add_increases(a, b, citation=n(), evidence=n())
         universe.add_increases(b, c, citation=n(), evidence=n())
         universe.add_association(d, a, citation=n(), evidence=n())
@@ -120,8 +135,8 @@ class TestInduction(TestGraphMixin):
         self.assertIsInstance(subgraph, BELGraph)
         self.assert_all_nodes_are_base_entities(subgraph)
 
-        self.assertIn('test', subgraph.namespace_pattern)
-        self.assertEqual('test-url', subgraph.namespace_pattern['test'])
+        self.assertIn("test", subgraph.namespace_pattern)
+        self.assertEqual("test-url", subgraph.namespace_pattern["test"])
 
         self.assertIn(a, subgraph)
         self.assertIn(b, subgraph)
@@ -138,7 +153,7 @@ class TestInduction(TestGraphMixin):
 
     def test_expand_upstream_causal_subgraph(self):
         """Test expanding on the upstream causal subgraph."""
-        a, b, c, d, e, f = [protein(namespace='test', name=i) for i in string.ascii_lowercase[:6]]
+        a, b, c, d, e, f = [protein(namespace="test", name=i) for i in string.ascii_lowercase[:6]]
 
         universe = BELGraph()
         universe.add_increases(a, b, citation=n(), evidence=n())
@@ -167,7 +182,7 @@ class TestInduction(TestGraphMixin):
         self.assert_in_edge(a, b, subgraph)
         self.assert_in_edge(f, b, subgraph)
         self.assertEqual(2, len(subgraph[a][b]))
-        self.assertEqual(4, subgraph.number_of_edges(), msg='\n'.join(map(str, subgraph.edges())))
+        self.assertEqual(4, subgraph.number_of_edges(), msg="\n".join(map(str, subgraph.edges())))
 
 
 class TestEdgePredicateBuilders(TestGraphMixin):
@@ -175,7 +190,7 @@ class TestEdgePredicateBuilders(TestGraphMixin):
 
     def test_build_pmid_inclusion_filter(self):
         """Test getting a sub-graph by a single PubMed identifier."""
-        a, b, c, d = [protein(namespace='test', name=n()) for _ in range(4)]
+        a, b, c, d = [protein(namespace="test", name=n()) for _ in range(4)]
         p1, p2, p3, p4 = n(), n(), n(), n()
 
         graph = BELGraph()
@@ -207,7 +222,7 @@ class TestEdgePredicateBuilders(TestGraphMixin):
 
     def test_build_pmid_set_inclusion_filter(self):
         """Test getting a sub-graph by a set of PubMed identifiers."""
-        a, b, c, d, e, f = [protein(namespace='test', name=n()) for _ in range(6)]
+        a, b, c, d, e, f = [protein(namespace="test", name=n()) for _ in range(6)]
         p1, p2, p3, p4, p5, p6 = n(), n(), n(), n(), n(), n()
 
         graph = BELGraph()
@@ -242,18 +257,18 @@ class TestEdgePredicateBuilders(TestGraphMixin):
 
     def test_build_author_inclusion_filter(self):
         """Test getting a sub-graph by a single author."""
-        a, b, c, d = [protein(namespace='test', name=n()) for _ in range(4)]
+        a, b, c, d = [protein(namespace="test", name=n()) for _ in range(4)]
         a1, a2, a3, a4, a5 = n(), n(), n(), n(), n()
 
         c1 = {
             NAMESPACE: CITATION_TYPE_PUBMED,
             IDENTIFIER: n(),
-            CITATION_AUTHORS: [a1, a2, a3]
+            CITATION_AUTHORS: [a1, a2, a3],
         }
         c2 = {
             NAMESPACE: CITATION_TYPE_PUBMED,
             IDENTIFIER: n(),
-            CITATION_AUTHORS: [a1, a4]
+            CITATION_AUTHORS: [a1, a4],
         }
 
         graph = BELGraph()
@@ -301,18 +316,18 @@ class TestEdgePredicateBuilders(TestGraphMixin):
 
     def test_build_author_set_inclusion_filter(self):
         """Test getting a sub-graph by a set of authors."""
-        a, b, c, d = [protein(namespace='test', name=n()) for _ in range(4)]
+        a, b, c, d = [protein(namespace="test", name=n()) for _ in range(4)]
         a1, a2, a3, a4 = n(), n(), n(), n()
 
         c1 = {
             NAMESPACE: CITATION_TYPE_PUBMED,
             IDENTIFIER: n(),
-            CITATION_AUTHORS: [a1, a2, a3]
+            CITATION_AUTHORS: [a1, a2, a3],
         }
         c2 = {
             NAMESPACE: CITATION_TYPE_PUBMED,
             IDENTIFIER: n(),
-            CITATION_AUTHORS: [a1, a4]
+            CITATION_AUTHORS: [a1, a4],
         }
 
         graph = BELGraph()
@@ -343,22 +358,16 @@ class TestEdgeInduction(unittest.TestCase):
     def test_get_subgraph_by_annotation_value(self):
         """Test getting a subgraph by a single annotation value."""
         graph = BELGraph()
-        graph.annotation_url['Subgraph'] = n()
-        a, b, c, d = [protein(namespace='test', name=n()) for _ in range(4)]
+        graph.annotation_url["Subgraph"] = n()
+        a, b, c, d = [protein(namespace="test", name=n()) for _ in range(4)]
 
-        k1 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={
-            'Subgraph': {'A'}
-        })
+        k1 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={"Subgraph": {"A"}})
 
-        k2 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={
-            'Subgraph': {'B'}
-        })
+        k2 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={"Subgraph": {"B"}})
 
-        k3 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={
-            'Subgraph': {'A', 'C', 'D'}
-        })
+        k3 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={"Subgraph": {"A", "C", "D"}})
 
-        subgraph = get_subgraph_by_annotation_value(graph, 'Subgraph', 'A')
+        subgraph = get_subgraph_by_annotation_value(graph, "Subgraph", "A")
         self.assertIsInstance(subgraph, BELGraph)
 
         self.assertIn(a, subgraph)
@@ -371,27 +380,19 @@ class TestEdgeInduction(unittest.TestCase):
     def test_get_subgraph_by_annotation_values(self):
         """Test getting a subgraph by multiple annotation value."""
         graph = BELGraph()
-        graph.annotation_list['Subgraph'] = set('ABCDE')
+        graph.annotation_list["Subgraph"] = set("ABCDE")
 
-        a, b, c, d = [protein(namespace='test', name=n()) for _ in range(4)]
+        a, b, c, d = [protein(namespace="test", name=n()) for _ in range(4)]
 
-        k1 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={
-            'Subgraph': {'A'}
-        })
+        k1 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={"Subgraph": {"A"}})
 
-        k2 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={
-            'Subgraph': {'B'}
-        })
+        k2 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={"Subgraph": {"B"}})
 
-        k3 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={
-            'Subgraph': {'A', 'C', 'D'}
-        })
+        k3 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={"Subgraph": {"A", "C", "D"}})
 
-        k4 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={
-            'Subgraph': {'C', 'D'}
-        })
+        k4 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={"Subgraph": {"C", "D"}})
 
-        subgraph = get_subgraph_by_annotation_value(graph, 'Subgraph', {'A', 'C'})
+        subgraph = get_subgraph_by_annotation_value(graph, "Subgraph", {"A", "C"})
         self.assertIsInstance(subgraph, BELGraph)
 
         self.assertIn(a, subgraph)

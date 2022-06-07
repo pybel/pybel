@@ -15,16 +15,21 @@ from typing import Dict, Mapping, Set
 
 import pandas as pd
 
-from ..constants import ASSOCIATION, CAUSAL_DECREASE_RELATIONS, CAUSAL_INCREASE_RELATIONS, RELATION
+from ..constants import (
+    ASSOCIATION,
+    CAUSAL_DECREASE_RELATIONS,
+    CAUSAL_INCREASE_RELATIONS,
+    RELATION,
+)
 from ..dsl import CentralDogma, Gene, ListAbundance, ProteinModification, Rna
 from ..language import pmod_mappings
 from ..struct import BELGraph
 from ..typing import EdgeData
 
 __all__ = [
-    'to_spia_dfs',
-    'to_spia_excel',
-    'to_spia_tsvs',
+    "to_spia_dfs",
+    "to_spia_excel",
+    "to_spia_tsvs",
 ]
 
 SPIADataFrames = Mapping[str, pd.DataFrame]
@@ -54,7 +59,7 @@ KEGG_RELATIONS = [
     "activation_binding/association",
     "indirect effect",
     "activation_compound",
-    "activation_ubiquination"
+    "activation_ubiquination",
 ]
 
 
@@ -120,11 +125,7 @@ def to_spia_dfs(graph: BELGraph) -> SPIADataFrames:
 def get_matrix_index(graph: BELGraph) -> Set[str]:
     """Return set of HGNC names from Proteins/Rnas/Genes/miRNA, nodes that can be used by SPIA."""
     # TODO: Using HGNC Symbols for now
-    return {
-        node.name
-        for node in graph
-        if isinstance(node, CentralDogma) and node.namespace.upper() == 'HGNC'
-    }
+    return {node.name for node in graph if isinstance(node, CentralDogma) and node.namespace.upper() == "HGNC"}
 
 
 def build_spia_matrices(nodes: Set[str]) -> Dict[str, pd.DataFrame]:
@@ -143,8 +144,8 @@ def build_spia_matrices(nodes: Set[str]) -> Dict[str, pd.DataFrame]:
     return matrices
 
 
-UB_NAMES = {"Ub"} | {e.name for e in pmod_mappings['Ub']['xrefs']}
-PH_NAMES = {"Ph"} | {e.name for e in pmod_mappings['Ph']['xrefs']}
+UB_NAMES = {"Ub"} | {e.name for e in pmod_mappings["Ub"]["xrefs"]}
+PH_NAMES = {"Ph"} | {e.name for e in pmod_mappings["Ph"]["xrefs"]}
 
 
 def update_spia_matrices(
@@ -154,7 +155,7 @@ def update_spia_matrices(
     edge_data: EdgeData,
 ) -> None:
     """Populate the adjacency matrix."""
-    if u.namespace.lower() != 'hgnc' or v.namespace.lower() != 'hgnc':
+    if u.namespace.lower() != "hgnc" or v.namespace.lower() != "hgnc":
         return
 
     u_name = u.name
@@ -172,9 +173,9 @@ def update_spia_matrices(
                 elif variant.entity.name in PH_NAMES:
                     spia_matrices["activation_phosphorylation"][u_name][v_name] = 1
         elif isinstance(v, (Gene, Rna)):  # Normal increase, add activation
-            spia_matrices['expression'][u_name][v_name] = 1
+            spia_matrices["expression"][u_name][v_name] = 1
         else:
-            spia_matrices['activation'][u_name][v_name] = 1
+            spia_matrices["activation"][u_name][v_name] = 1
 
     elif relation in CAUSAL_DECREASE_RELATIONS:
         # If it has pmod check which one and add it to the corresponding matrix
@@ -183,7 +184,7 @@ def update_spia_matrices(
                 if not isinstance(variant, ProteinModification):
                     continue
                 elif variant.entity.name in UB_NAMES:
-                    spia_matrices['inhibition_ubiquination'][u_name][v_name] = 1
+                    spia_matrices["inhibition_ubiquination"][u_name][v_name] = 1
                 elif variant.entity.name in PH_NAMES:
                     spia_matrices["inhibition_phosphorylation"][u_name][v_name] = 1
         elif isinstance(v, (Gene, Rna)):  # Normal decrease, check which matrix
@@ -205,7 +206,7 @@ def spia_matrices_to_excel(spia_matrices: SPIADataFrames, path: str) -> None:
         # ["title"] from the name of the file
         # ["NumberOfReactions"] set to "0"
     """
-    writer = pd.ExcelWriter(path, engine='xlsxwriter')
+    writer = pd.ExcelWriter(path, engine="xlsxwriter")
 
     for relation, df in spia_matrices.items():
         df.to_excel(writer, sheet_name=relation, index=False)
@@ -218,4 +219,7 @@ def spia_matrices_to_tsvs(spia_matrices: SPIADataFrames, directory: str) -> None
     """Export a SPIA data dictionary into a directory as several TSV documents."""
     os.makedirs(directory, exist_ok=True)
     for relation, df in spia_matrices.items():
-        df.to_csv(os.path.join(directory, '{relation}.tsv'.format(relation=relation)), index=True)
+        df.to_csv(
+            os.path.join(directory, "{relation}.tsv".format(relation=relation)),
+            index=True,
+        )

@@ -25,6 +25,12 @@ ignore =
     S301, S403
     # Redefinition in CLI
     F811
+    # Error names
+    N818
+    # pep8 is wrong
+    E203
+    # FIXME later remove this
+    D401
 exclude =
     .tox,
     .git,

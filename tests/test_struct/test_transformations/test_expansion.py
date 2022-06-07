@@ -6,11 +6,20 @@ import unittest
 
 from pybel import BELGraph
 from pybel.examples.sialic_acid_example import (
-    cd33, cd33_phosphorylated, shp1, shp2, sialic_acid, sialic_acid_cd33_complex, sialic_acid_graph, syk,
+    cd33,
+    cd33_phosphorylated,
+    shp1,
+    shp2,
+    sialic_acid,
+    sialic_acid_cd33_complex,
+    sialic_acid_graph,
+    syk,
 )
 from pybel.struct.mutation.expansion.neighborhood import (
-    expand_node_neighborhood, expand_node_predecessors,
-    expand_node_successors, expand_nodes_neighborhoods,
+    expand_node_neighborhood,
+    expand_node_predecessors,
+    expand_node_successors,
+    expand_nodes_neighborhoods,
 )
 
 
@@ -77,8 +86,12 @@ class TestExpansion(unittest.TestCase):
         self.assertNotIn(shp1, graph[cd33_phosphorylated])
         self.assertNotIn(shp2, graph[cd33_phosphorylated])
 
-        self.assertEqual(9, graph.number_of_nodes(), msg='wrong number of nodes: {}'.format(list(graph)))
-        self.assertEqual(8, graph.number_of_edges(), msg='wrong number of edges')
+        self.assertEqual(
+            9,
+            graph.number_of_nodes(),
+            msg="wrong number of nodes: {}".format(list(graph)),
+        )
+        self.assertEqual(8, graph.number_of_edges(), msg="wrong number of edges")
         self.assertIn(sialic_acid, graph)
         self.assertIn(sialic_acid_cd33_complex, graph)
         self.assertIn(cd33_phosphorylated, graph)

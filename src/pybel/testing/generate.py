@@ -10,11 +10,11 @@ from ..dsl import protein
 from ..struct import BELGraph
 
 __all__ = [
-    'generate_random_graph',
+    "generate_random_graph",
 ]
 
 
-def generate_random_graph(n_nodes, n_edges, namespace='NS'):
+def generate_random_graph(n_nodes, n_edges, namespace="NS"):
     """Generate a sub-graph with random nodes and edges.
 
     :param int n_nodes: Number of nodes to make
@@ -24,10 +24,7 @@ def generate_random_graph(n_nodes, n_edges, namespace='NS'):
     """
     graph = BELGraph()
 
-    nodes = [
-        protein(namespace=namespace, name=str(i))
-        for i in range(1, n_nodes)
-    ]
+    nodes = [protein(namespace=namespace, name=str(i)) for i in range(1, n_nodes)]
 
     edges = list(itt.combinations(nodes, r=2))
     edge_sample = random.sample(edges, n_edges)

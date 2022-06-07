@@ -7,17 +7,17 @@ import logging
 from typing import List, Optional, TextIO, Tuple, Union
 
 from networkx.utils import open_file
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
 from . import converters
 from ...dsl import BaseEntity
 from ...struct import BELGraph
 
 __all__ = [
-    'to_triples_file',
-    'to_edgelist',
-    'to_triples',
-    'to_triple',
+    "to_triples_file",
+    "to_edgelist",
+    "to_triples",
+    "to_triple",
 ]
 
 logger = logging.getLogger(__name__)
@@ -27,14 +27,9 @@ class NoTriplesValueError(ValueError):
     """Raised when no triples could be converted."""
 
 
-@open_file(1, mode='w')
+@open_file(1, mode="w")
 def to_triples_file(
-    graph: BELGraph,
-    path: Union[str, TextIO],
-    *,
-    use_tqdm: bool = False,
-    sep='\t',
-    raise_on_none: bool = False
+    graph: BELGraph, path: Union[str, TextIO], *, use_tqdm: bool = False, sep="\t", raise_on_none: bool = False
 ) -> None:
     """Write the graph as a TSV.
 
@@ -49,14 +44,9 @@ def to_triples_file(
         print(h, r, t, sep=sep, file=path)
 
 
-@open_file(1, mode='w')
+@open_file(1, mode="w")
 def to_edgelist(
-    graph: BELGraph,
-    path: Union[str, TextIO],
-    *,
-    use_tqdm: bool = False,
-    sep='\t',
-    raise_on_none: bool = False
+    graph: BELGraph, path: Union[str, TextIO], *, use_tqdm: bool = False, sep="\t", raise_on_none: bool = False
 ) -> None:
     """Write the graph as an edgelist.
 
@@ -85,26 +75,19 @@ def to_triples(graph: BELGraph, use_tqdm: bool = False, raise_on_none: bool = Fa
         it = tqdm(
             it,
             total=graph.number_of_edges(),
-            desc='Preparing TSV for {}'.format(graph),
+            desc="Preparing TSV for {}".format(graph),
             unit_scale=True,
-            unit='edge',
+            unit="edge",
         )
 
-    triples = (
-        to_triple(graph, u, v, key)
-        for u, v, key in it
-    )
+    triples = (to_triple(graph, u, v, key) for u, v, key in it)
 
     # clean duplicates and Nones
     rv = list(
-        sorted({
-            triple
-            for triple in triples
-            if triple is not None
-        }),
+        sorted({triple for triple in triples if triple is not None}),
     )
     if raise_on_none and not rv:
-        raise NoTriplesValueError('Could not convert any triples')
+        raise NoTriplesValueError("Could not convert any triples")
     return rv
 
 
@@ -163,4 +146,4 @@ def to_triple(
         if converter.predicate(u, v, key, data):
             return converter.convert(u, v, key, data)
 
-    logger.warning('unhandled: {}'.format(graph.edge_to_bel(u, v, data)))
+    logger.warning("unhandled: {}".format(graph.edge_to_bel(u, v, data)))

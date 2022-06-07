@@ -10,7 +10,9 @@ from pybel.dsl import bioprocess, gene, protein
 from pybel.struct import filter_nodes
 from pybel.struct.filters import invert_node_predicate
 from pybel.struct.filters.node_predicate_builders import (
-    build_node_graph_data_search, build_node_name_search, data_missing_key_builder,
+    build_node_graph_data_search,
+    build_node_name_search,
+    data_missing_key_builder,
     function_inclusion_filter_builder,
 )
 from pybel.testing.utils import n
@@ -85,12 +87,12 @@ class TestNodePredicateBuilders(unittest.TestCase):
     def test_data_missing_key_builder(self):
         """Test the data_missing_key_builder function."""
         graph = BELGraph()
-        p1 = protein('HGNC', n())
-        p2 = protein('HGNC', n())
+        p1 = protein("HGNC", n())
+        p2 = protein("HGNC", n())
         graph.add_node_from_data(p1)
         graph.add_node_from_data(p2)
 
-        key, other_key = 'k1', 'k2'
+        key, other_key = "k1", "k2"
 
         data_missing_key = data_missing_key_builder(key)
 
@@ -118,26 +120,26 @@ class TestNodePredicateBuilders(unittest.TestCase):
 
         graph = BELGraph()
 
-        p1 = protein('HGNC', n())
+        p1 = protein("HGNC", n())
         graph.add_node_from_data(p1)
         graph.nodes[p1][key] = 0
         self.assertFalse(data_predicate(graph, p1))
 
-        p2 = protein('HGNC', n())
+        p2 = protein("HGNC", n())
         graph.add_node_from_data(p2)
         graph.nodes[p2][key] = 5
         self.assertTrue(data_predicate(graph, p2))
 
-        p3 = protein('HGNC', n())
+        p3 = protein("HGNC", n())
         graph.add_node_from_data(p3)
         self.assertFalse(data_predicate(graph, p3))
 
     def test_build_node_name_search(self):
         graph = BELGraph()
-        p1 = protein('HGNC', 'APP')
+        p1 = protein("HGNC", "APP")
         graph.add_node_from_data(p1)
-        p2 = protein('HGNC', 'MAPK')
+        p2 = protein("HGNC", "MAPK")
         graph.add_node_from_data(p2)
-        node_name_search = build_node_name_search(query='APP')
+        node_name_search = build_node_name_search(query="APP")
         self.assertTrue(node_name_search(graph, p1))
         self.assertFalse(node_name_search(graph, p2))

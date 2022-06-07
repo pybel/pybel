@@ -13,23 +13,47 @@ from typing import Iterable, List, Mapping, Optional, Set, Tuple
 import pandas as pd
 import requests
 import sqlalchemy
+from bel_resources import get_bel_resource
 from sqlalchemy import and_, exists, func
 from sqlalchemy.orm import aliased
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
-from bel_resources import get_bel_resource
 from .base_manager import BaseManager, build_engine_session
 from .exc import EdgeAddError
 from .lookup_manager import LookupManager
 from .models import (
-    Author, Citation, Edge, Evidence, Namespace, NamespaceEntry, Network, Node, edge_annotation, network_edge,
+    Author,
+    Citation,
+    Edge,
+    Evidence,
+    Namespace,
+    NamespaceEntry,
+    Network,
+    Node,
+    edge_annotation,
+    network_edge,
     network_node,
 )
 from .query_manager import QueryManager
-from .utils import extract_shared_optional, extract_shared_required, update_insert_values
+from .utils import (
+    extract_shared_optional,
+    extract_shared_required,
+    update_insert_values,
+)
 from ..constants import (
-    ANNOTATIONS, CITATION, CITATION_TYPE_PUBMED, EVIDENCE, IDENTIFIER, METADATA_INSERT_KEYS, NAMESPACE, RELATION,
-    SOURCE_MODIFIER, TARGET_MODIFIER, UNQUALIFIED_EDGES, belns_encodings, get_cache_connection,
+    ANNOTATIONS,
+    CITATION,
+    CITATION_TYPE_PUBMED,
+    EVIDENCE,
+    IDENTIFIER,
+    METADATA_INSERT_KEYS,
+    NAMESPACE,
+    RELATION,
+    SOURCE_MODIFIER,
+    TARGET_MODIFIER,
+    UNQUALIFIED_EDGES,
+    belns_encodings,
+    get_cache_connection,
 )
 from ..dsl import BaseConcept, BaseEntity
 from ..language import Entity
@@ -38,28 +62,28 @@ from ..struct.operations import union
 from ..typing import EdgeData
 
 __all__ = [
-    'Manager',
-    'NetworkManager',
+    "Manager",
+    "NetworkManager",
 ]
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_BELNS_ENCODING = ''.join(sorted(belns_encodings))
+DEFAULT_BELNS_ENCODING = "".join(sorted(belns_encodings))
 
 _optional_namespace_entries_mapping = {
-    'species': ('Namespace', 'SpeciesString'),
-    'query_url': ('Namespace', 'QueryValueURL'),
-    'domain': ('Namespace', 'DomainString'),
+    "species": ("Namespace", "SpeciesString"),
+    "query_url": ("Namespace", "QueryValueURL"),
+    "domain": ("Namespace", "DomainString"),
 }
 
 
 def _get_namespace_insert_values(bel_resource):
     namespace_insert_values = {
-        'name': bel_resource['Namespace']['NameString'],
+        "name": bel_resource["Namespace"]["NameString"],
     }
 
-    namespace_insert_values.update(extract_shared_required(bel_resource, 'Namespace'))
-    namespace_insert_values.update(extract_shared_optional(bel_resource, 'Namespace'))
+    namespace_insert_values.update(extract_shared_required(bel_resource, "Namespace"))
+    namespace_insert_values.update(extract_shared_optional(bel_resource, "Namespace"))
 
     update_insert_values(
         bel_resource=bel_resource,
@@ -71,14 +95,18 @@ def _get_namespace_insert_values(bel_resource):
 
 
 _annotation_mapping = {
-    'name': ('Citation', 'NameString'),
+    "name": ("Citation", "NameString"),
 }
 
 
 def _get_annotation_insert_values(bel_resource):
-    annotation_insert_values = extract_shared_required(bel_resource, 'AnnotationDefinition')
-    annotation_insert_values.update(extract_shared_optional(bel_resource, 'AnnotationDefinition'))
-    update_insert_values(bel_resource=bel_resource, mapping=_annotation_mapping, values=annotation_insert_values)
+    annotation_insert_values = extract_shared_required(bel_resource, "AnnotationDefinition")
+    annotation_insert_values.update(extract_shared_optional(bel_resource, "AnnotationDefinition"))
+    update_insert_values(
+        bel_resource=bel_resource,
+        mapping=_annotation_mapping,
+        values=annotation_insert_values,
+    )
     return annotation_insert_values
 
 
@@ -87,13 +115,18 @@ def not_resource_cachable(bel_resource):
 
     :param dict bel_resource: A dictionary returned by :func:`get_bel_resource`.
     """
-    return bel_resource['Processing'].get('CacheableFlag') not in {'yes', 'Yes', 'True', 'true'}
+    return bel_resource["Processing"].get("CacheableFlag") not in {
+        "yes",
+        "Yes",
+        "True",
+        "true",
+    }
 
 
 def _clean_bel_namespace_values(bel_resource):
-    bel_resource['Values'] = {
+    bel_resource["Values"] = {
         name: (encoding if encoding else DEFAULT_BELNS_ENCODING)
-        for name, encoding in bel_resource['Values'].items()
+        for name, encoding in bel_resource["Values"].items()
         if name
     }
 
@@ -146,17 +179,17 @@ class NamespaceManager(BaseManager):
         use_tqdm: bool = True,
         is_annotation: bool = False,
     ) -> List[Namespace]:
-        ext = 'belanno' if is_annotation else 'belns'
+        ext = "belanno" if is_annotation else "belns"
 
         rv = []
         url_to_namespace = {}
         url_to_values = {}
         url_to_name_to_id = {}
 
-        tag = 'annotations' if is_annotation else 'namespaces'
+        tag = "annotations" if is_annotation else "namespaces"
 
         if use_tqdm:
-            urls = tqdm(urls, desc=f'downloading {tag}')
+            urls = tqdm(urls, desc=f"downloading {tag}")
         for url in urls:
             result = self.get_namespace_by_url(url)
             if result:
@@ -164,7 +197,7 @@ class NamespaceManager(BaseManager):
                 continue
             bel_resource = get_bel_resource(url)
             _clean_bel_namespace_values(bel_resource)
-            url_to_values[url] = bel_resource['Values']
+            url_to_values[url] = bel_resource["Values"]
 
             if is_annotation:
                 namespace_kwargs = _get_annotation_insert_values(bel_resource)
@@ -172,16 +205,16 @@ class NamespaceManager(BaseManager):
                 namespace_kwargs = _get_namespace_insert_values(bel_resource)
             result = url_to_namespace[url] = Namespace(url=url, **namespace_kwargs)
             rv.append(result)
-            if url.endswith(f'-names.{ext}'):
-                mapping_url = url[:-len(f'-names.{ext}')] + f'.{ext}.mapping'
+            if url.endswith(f"-names.{ext}"):
+                mapping_url = url[: -len(f"-names.{ext}")] + f".{ext}.mapping"
                 try:
                     res = requests.get(mapping_url)
                     res.raise_for_status()
                 except requests.exceptions.HTTPError:
-                    logger.warning('No mappings found for %s', url)
+                    logger.warning("No mappings found for %s", url)
                 else:
                     mappings = res.json()
-                    logger.debug('got %d mappings', len(mappings))
+                    logger.debug("got %d mappings", len(mappings))
                     url_to_name_to_id[url] = {v: k for k, v in res.json().items()}
 
         self.session.add_all(url_to_namespace.values())
@@ -195,7 +228,7 @@ class NamespaceManager(BaseManager):
         rows = []
         it = url_to_values.items()
         if use_tqdm:
-            it = tqdm(it, desc=f'making {tag} entry table')
+            it = tqdm(it, desc=f"making {tag} entry table")
         if is_annotation:
             for url, values in it:
                 for name, identifier in values.items():
@@ -210,13 +243,22 @@ class NamespaceManager(BaseManager):
                         continue
                     rows.append((url_to_id[url], name, encoding, name_to_id.get(name)))
 
-        df = pd.DataFrame(rows, columns=['namespace_id', 'name', 'encoding', 'identifier'])
-        logger.info('preparing sql objects for %s', tag)
-        df.to_sql(NamespaceEntry.__tablename__, con=self.engine, if_exists='append', index=False)
-        logger.info('committing %s', tag)
+        df = pd.DataFrame(rows, columns=["namespace_id", "name", "encoding", "identifier"])
+        logger.info("preparing sql objects for %s", tag)
+        df.to_sql(
+            NamespaceEntry.__tablename__,
+            con=self.engine,
+            if_exists="append",
+            index=False,
+        )
+        logger.info("committing %s", tag)
         start_commit_time = time.time()
         self.session.commit()
-        logger.info('done committing %s after %.2f seconds', tag, time.time() - start_commit_time)
+        logger.info(
+            "done committing %s after %.2f seconds",
+            tag,
+            time.time() - start_commit_time,
+        )
 
         return rv
 
@@ -241,12 +283,12 @@ class NamespaceManager(BaseManager):
         :param pattern: The pattern for a regular expression namespace
         """
         if pattern is None:
-            raise ValueError('cannot have null pattern')
+            raise ValueError("cannot have null pattern")
 
         namespace = self.get_namespace_by_keyword_pattern(keyword, pattern)
 
         if namespace is None:
-            logger.info('creating regex namespace: %s:%s', keyword, pattern)
+            logger.info("creating regex namespace: %s:%s", keyword, pattern)
             namespace = Namespace(
                 keyword=keyword,
                 pattern=pattern,
@@ -266,12 +308,12 @@ class NamespaceManager(BaseManager):
         result = self.session.query(NamespaceEntry).join(Namespace).filter(entry_filter).all()
 
         if 0 == len(result):
-            logger.debug('could not find namespace entry for %s in url=%s', name, url)
+            logger.debug("could not find namespace entry for %s in url=%s", name, url)
             return
 
         if 1 < len(result):
             logger.warning(
-                'result for get_namespace_entry is too long. Returning first of %s',
+                "result for get_namespace_entry is too long. Returning first of %s",
                 [str(r) for r in result],
             )
 
@@ -350,11 +392,11 @@ class NetworkManager(NamespaceManager):
     def list_recent_networks(self) -> List[Network]:
         """List the most recently created version of each network (by name)."""
         most_recent_times = self.session.query(
-            Network.name.label('network_name'),
-            func.max(Network.created).label('max_created'),
+            Network.name.label("network_name"),
+            func.max(Network.created).label("max_created"),
         )
 
-        most_recent_times = most_recent_times.group_by(Network.name).subquery('most_recent_times')
+        most_recent_times = most_recent_times.group_by(Network.name).subquery("most_recent_times")
 
         and_condition = and_(
             most_recent_times.c.network_name == Network.name,
@@ -411,32 +453,29 @@ class NetworkManager(NamespaceManager):
 
     def query_singleton_edges_from_network(self, network: Network) -> sqlalchemy.orm.query.Query:
         """Return a query selecting all edge ids that only belong to the given network."""
-        ne1 = aliased(network_edge, name='ne1')
-        ne2 = aliased(network_edge, name='ne2')
+        ne1 = aliased(network_edge, name="ne1")
+        ne2 = aliased(network_edge, name="ne2")
         singleton_edge_ids_for_network = (
-            self.session
-                .query(ne1.c.edge_id)
-                .outerjoin(
-                    ne2, and_(
-                        ne1.c.edge_id == ne2.c.edge_id,
-                        ne1.c.network_id != ne2.c.network_id,
-                    ),
-                )
-                .filter(  # noqa: E131
-                    and_(
-                        ne1.c.network_id == network.id,
-                        ne2.c.edge_id == None,  # noqa: E711
-                    ),
-                )
+            self.session.query(ne1.c.edge_id)
+            .outerjoin(
+                ne2,
+                and_(
+                    ne1.c.edge_id == ne2.c.edge_id,
+                    ne1.c.network_id != ne2.c.network_id,
+                ),
+            )
+            .filter(  # noqa: E131
+                and_(
+                    ne1.c.network_id == network.id,
+                    ne2.c.edge_id == None,  # noqa: E711
+                ),
+            )
         )
         return singleton_edge_ids_for_network
 
     def get_network_versions(self, name: str) -> Set[str]:
         """Return all of the versions of a network with the given name."""
-        return {
-            version
-            for version, in self.session.query(Network.version).filter(Network.name == name).all()
-        }
+        return {version for version, in self.session.query(Network.version).filter(Network.name == name).all()}
 
     def get_network_by_name_version(self, name: str, version: str) -> Optional[Network]:
         """Load the network with the given name and version if it exists."""
@@ -477,7 +516,7 @@ class NetworkManager(NamespaceManager):
     def get_graph_by_id(self, network_id: int) -> BELGraph:
         """Get a network from the database by its identifier and converts it to a BEL graph."""
         network = self.get_network_by_id(network_id)
-        logger.debug('converting network [id=%d] %s to bel graph', network_id, network)
+        logger.debug("converting network [id=%d] %s to bel graph", network_id, network)
         return network.as_bel()
 
     def get_networks_by_ids(self, network_ids: Iterable[int]) -> List[Network]:
@@ -485,16 +524,13 @@ class NetworkManager(NamespaceManager):
 
         Note: order is not necessarily preserved.
         """
-        logger.debug('getting networks by identifiers: %s', network_ids)
+        logger.debug("getting networks by identifiers: %s", network_ids)
         return self.session.query(Network).filter(Network.id_in(network_ids)).all()
 
     def get_graphs_by_ids(self, network_ids: Iterable[int]) -> List[BELGraph]:
         """Get a list of networks with the given identifiers and converts to BEL graphs."""
-        rv = [
-            self.get_graph_by_id(network_id)
-            for network_id in network_ids
-        ]
-        logger.debug('returning graphs for network identifiers: %s', network_ids)
+        rv = [self.get_graph_by_id(network_id) for network_id in network_ids]
+        logger.debug("returning graphs for network identifiers: %s", network_ids)
         return rv
 
     def get_graph_by_ids(self, network_ids: List[int]) -> BELGraph:
@@ -502,10 +538,10 @@ class NetworkManager(NamespaceManager):
         if len(network_ids) == 1:
             return self.get_graph_by_id(network_ids[0])
 
-        logger.debug('getting graph by identifiers: %s', network_ids)
+        logger.debug("getting graph by identifiers: %s", network_ids)
         graphs = self.get_graphs_by_ids(network_ids)
 
-        logger.debug('getting union of graphs: %s', network_ids)
+        logger.debug("getting union of graphs: %s", network_ids)
         rv = union(graphs)
 
         return rv
@@ -536,12 +572,12 @@ class InsertManager(NamespaceManager, LookupManager):
         :raises: pybel.resources.exc.ResourceError
         """
         if not graph.name:
-            raise ValueError('Can not upload a graph without a name')
+            raise ValueError("Can not upload a graph without a name")
 
         if not graph.version:
-            raise ValueError('Can not upload a graph without a version')
+            raise ValueError("Can not upload a graph without a version")
 
-        logger.debug('inserting %s v%s', graph.name, graph.version)
+        logger.debug("inserting %s v%s", graph.name, graph.version)
 
         t = time.time()
 
@@ -553,11 +589,7 @@ class InsertManager(NamespaceManager, LookupManager):
         annotation_urls = graph.annotation_url.values()
         self._ensure_namespace_urls(annotation_urls, use_tqdm=use_tqdm, is_annotation=True)
 
-        network = Network(**{
-            key: value
-            for key, value in graph.document.items()
-            if key in METADATA_INSERT_KEYS
-        })
+        network = Network(**{key: value for key, value in graph.document.items() if key in METADATA_INSERT_KEYS})
 
         network.store_bel(graph)
 
@@ -566,7 +598,12 @@ class InsertManager(NamespaceManager, LookupManager):
         self.session.add(network)
         self.session.commit()
 
-        logger.info('inserted %s v%s in %.2f seconds', graph.name, graph.version, time.time() - t)
+        logger.info(
+            "inserted %s v%s in %.2f seconds",
+            graph.name,
+            graph.version,
+            time.time() - t,
+        )
 
         return network
 
@@ -576,47 +613,63 @@ class InsertManager(NamespaceManager, LookupManager):
         :raises: pybel.resources.exc.ResourceError
         :raises: EdgeAddError
         """
-        logger.debug('inserting %s into edge store', graph)
-        logger.debug('building node models')
+        logger.debug("inserting %s into edge store", graph)
+        logger.debug("building node models")
         node_model_build_start = time.time()
 
         nodes = list(graph)
         if use_tqdm:
-            nodes = tqdm(nodes, total=graph.number_of_nodes(), desc='nodes')
+            nodes = tqdm(nodes, total=graph.number_of_nodes(), desc="nodes")
 
         node_model = {}
         for node in nodes:
             node_object = self.get_or_create_node(graph, node)
 
             if node_object is None:
-                logger.warning('can not add node %s', node)
+                logger.warning("can not add node %s", node)
                 continue
 
             node_model[node] = node_object
 
         node_models = list(node_model.values())
-        logger.debug('built %d node models in %.2f seconds', len(node_models), time.time() - node_model_build_start)
+        logger.debug(
+            "built %d node models in %.2f seconds",
+            len(node_models),
+            time.time() - node_model_build_start,
+        )
 
         node_model_commit_start = time.time()
         self.session.add_all(node_models)
         self.session.commit()
-        logger.debug('stored %d node models in %.2f seconds', len(node_models), time.time() - node_model_commit_start)
+        logger.debug(
+            "stored %d node models in %.2f seconds",
+            len(node_models),
+            time.time() - node_model_commit_start,
+        )
 
-        logger.debug('building edge models')
+        logger.debug("building edge models")
         edge_model_build_start = time.time()
 
         edges = graph.edges(keys=True, data=True)
         if use_tqdm:
-            edges = tqdm(edges, total=graph.number_of_edges(), desc='edges')
+            edges = tqdm(edges, total=graph.number_of_edges(), desc="edges")
 
         edge_models = list(self._get_edge_models(graph, node_model, edges))
 
-        logger.debug('built %d edge models in %.2f seconds', len(edge_models), time.time() - edge_model_build_start)
+        logger.debug(
+            "built %d edge models in %.2f seconds",
+            len(edge_models),
+            time.time() - edge_model_build_start,
+        )
 
         edge_model_commit_start = time.time()
         self.session.add_all(edge_models)
         self.session.commit()
-        logger.debug('stored %d edge models in %.2f seconds', len(edge_models), time.time() - edge_model_commit_start)
+        logger.debug(
+            "stored %d edge models in %.2f seconds",
+            len(edge_models),
+            time.time() - edge_model_commit_start,
+        )
 
         return node_models, edge_models
 
@@ -629,12 +682,12 @@ class InsertManager(NamespaceManager, LookupManager):
         for u, v, key, data in edges:
             source = tuple_model.get(u)
             if source is None or source.md5 not in self.object_cache_node:
-                logger.warning('skipping uncached source node: %s', u)
+                logger.warning("skipping uncached source node: %s", u)
                 continue
 
             target = tuple_model.get(v)
             if target is None or target.md5 not in self.object_cache_node:
-                logger.warning('skipping uncached target node: %s', v)
+                logger.warning("skipping uncached target node: %s", v)
                 continue
 
             relation = data[RELATION]
@@ -652,7 +705,7 @@ class InsertManager(NamespaceManager, LookupManager):
                         continue
                 except Exception as e:
                     self.session.rollback()
-                    logger.exception('error storing edge in database. edge data: %s', data)
+                    logger.exception("error storing edge in database. edge data: %s", data)
                     raise EdgeAddError(e, u, v, key, data) from e
                 else:
                     yield edge
@@ -678,7 +731,7 @@ class InsertManager(NamespaceManager, LookupManager):
                         continue
                 except Exception as e:
                     self.session.rollback()
-                    logger.exception('error storing edge in database. edge data: %s', data)
+                    logger.exception("error storing edge in database. edge data: %s", data)
                     raise EdgeAddError(e, u, v, key, data)
                 else:
                     yield edge
@@ -695,10 +748,10 @@ class InsertManager(NamespaceManager, LookupManager):
             elif key in graph.annotation_list:
                 continue  # skip those
             elif key in graph.annotation_pattern:
-                logger.debug('pattern annotation in database not implemented yet not implemented')  # FIXME
+                logger.debug("pattern annotation in database not implemented yet not implemented")  # FIXME
                 continue
             else:
-                raise ValueError('Graph resources does not contain keyword: {}'.format(key))
+                raise ValueError("Graph resources does not contain keyword: {}".format(key))
 
             yield url, set(entities)
 
@@ -798,7 +851,12 @@ class InsertManager(NamespaceManager, LookupManager):
             entry = self.get_namespace_entry(url, name)
 
             if entry is None:
-                logger.debug('skipping node with entity %s:%s from url=%s', node.namespace, name, url)
+                logger.debug(
+                    "skipping node with entity %s:%s from url=%s",
+                    node.namespace,
+                    name,
+                    url,
+                )
                 return
 
             self.session.add(entry)
@@ -827,7 +885,7 @@ class InsertManager(NamespaceManager, LookupManager):
         self.session.query(Node).delete()
         self.session.commit()
 
-        logger.info('dropped all nodes in %.2f seconds', time.time() - t)
+        logger.info("dropped all nodes in %.2f seconds", time.time() - t)
 
     def drop_edges(self) -> None:
         """Drop all edges in the database."""
@@ -836,7 +894,7 @@ class InsertManager(NamespaceManager, LookupManager):
         self.session.query(Edge).delete()
         self.session.commit()
 
-        logger.info('dropped all edges in %.2f seconds', time.time() - t)
+        logger.info("dropped all edges in %.2f seconds", time.time() - t)
 
     def get_or_create_edge(
         self,
@@ -905,7 +963,7 @@ class InsertManager(NamespaceManager, LookupManager):
         if namespace is None:
             namespace = CITATION_TYPE_PUBMED
 
-        citation_curie = f'{namespace}:{identifier}'
+        citation_curie = f"{namespace}:{identifier}"
         if citation_curie in self.curie_to_citation:
             citation = self.curie_to_citation[citation_curie]
             self.session.add(citation)
@@ -955,13 +1013,7 @@ class _Manager(QueryManager, InsertManager, NetworkManager):
 class Manager(_Manager):
     """A manager for the PyBEL database."""
 
-    def __init__(
-        self,
-        connection: Optional[str] = None,
-        engine=None,
-        session=None,
-        **kwargs
-    ) -> None:
+    def __init__(self, connection: Optional[str] = None, engine=None, session=None, **kwargs) -> None:
         """Create a connection to database and a persistent session using SQLAlchemy.
 
         A custom default can be set as an environment variable with the name :data:`pybel.constants.PYBEL_CONNECTION`,
@@ -1024,7 +1076,7 @@ class Manager(_Manager):
         >>> manager = Manager(engine=my_engine, session=my_session)
         """
         if connection and (engine or session):
-            raise ValueError('can not specify connection with engine/session')
+            raise ValueError("can not specify connection with engine/session")
 
         if engine is None and session is None:
             if connection is None:
@@ -1033,10 +1085,10 @@ class Manager(_Manager):
             engine, session = build_engine_session(connection=connection, **kwargs)
 
         elif engine is None or session is None:
-            raise ValueError('need both engine and session to be specified')
+            raise ValueError("need both engine and session to be specified")
 
         elif kwargs:
-            raise ValueError('keyword arguments should not be used with engine/session')
+            raise ValueError("keyword arguments should not be used with engine/session")
 
         super().__init__(engine=engine, session=session)
         self.create_all()

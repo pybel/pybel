@@ -8,7 +8,20 @@ from collections import Counter, defaultdict
 from copy import deepcopy
 from functools import partialmethod
 from itertools import chain
-from typing import Any, Dict, Hashable, Iterable, List, Mapping, Optional, Set, TextIO, Tuple, Union
+from textwrap import dedent
+from typing import (
+    Any,
+    Dict,
+    Hashable,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Set,
+    TextIO,
+    Tuple,
+    Union,
+)
 
 import networkx as nx
 from tabulate import tabulate
@@ -17,18 +30,78 @@ from .operations import left_full_join, left_node_intersection_join, left_outer_
 from .utils import update_metadata
 from ..canonicalize import edge_to_bel
 from ..constants import (
-    ACTIVITY, ANNOTATIONS, ASSOCIATION, CAUSES_NO_CHANGE, CITATION, CITATION_AUTHORS, CITATION_TYPE_PUBMED, CORRELATION,
-    DECREASES, DEGRADATION, DIRECTLY_DECREASES, DIRECTLY_INCREASES, EFFECT, EQUIVALENT_TO, EVIDENCE, FROM_LOC,
-    GRAPH_ANNOTATION_CURIE, GRAPH_ANNOTATION_LIST, GRAPH_ANNOTATION_MIRIAM, GRAPH_ANNOTATION_PATTERN,
-    GRAPH_ANNOTATION_URL, GRAPH_METADATA, GRAPH_NAMESPACE_PATTERN, GRAPH_NAMESPACE_URL, GRAPH_PATH, GRAPH_PYBEL_VERSION,
-    HAS_PRODUCT, HAS_REACTANT, HAS_VARIANT, IDENTIFIER, INCREASES, IS_A, LOCATION, METADATA_AUTHORS, METADATA_CONTACT,
-    METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION,
-    MODIFIER, NAMESPACE, NEGATIVE_CORRELATION, NO_CORRELATION, ORTHOLOGOUS, PART_OF, POSITIVE_CORRELATION, REGULATES,
-    RELATION, SOURCE_MODIFIER, TARGET_MODIFIER, TO_LOC, TRANSCRIBED_TO, TRANSLATED_TO, TRANSLOCATION,
+    ACTIVITY,
+    ANNOTATIONS,
+    ASSOCIATION,
+    CAUSES_NO_CHANGE,
+    CITATION,
+    CITATION_AUTHORS,
+    CITATION_TYPE_PUBMED,
+    CORRELATION,
+    DECREASES,
+    DEGRADATION,
+    DIRECTLY_DECREASES,
+    DIRECTLY_INCREASES,
+    DIRECTLY_REGULATES,
+    EFFECT,
+    EQUIVALENT_TO,
+    EVIDENCE,
+    FROM_LOC,
+    GRAPH_ANNOTATION_CURIE,
+    GRAPH_ANNOTATION_LIST,
+    GRAPH_ANNOTATION_MIRIAM,
+    GRAPH_ANNOTATION_PATTERN,
+    GRAPH_ANNOTATION_URL,
+    GRAPH_METADATA,
+    GRAPH_NAMESPACE_PATTERN,
+    GRAPH_NAMESPACE_URL,
+    GRAPH_PATH,
+    GRAPH_PYBEL_VERSION,
+    HAS_PRODUCT,
+    HAS_REACTANT,
+    HAS_VARIANT,
+    IDENTIFIER,
+    INCREASES,
+    IS_A,
+    LOCATION,
+    METADATA_AUTHORS,
+    METADATA_CONTACT,
+    METADATA_COPYRIGHT,
+    METADATA_DESCRIPTION,
+    METADATA_DISCLAIMER,
+    METADATA_LICENSES,
+    METADATA_NAME,
+    METADATA_VERSION,
+    MODIFIER,
+    NAMESPACE,
+    NEGATIVE_CORRELATION,
+    NO_CORRELATION,
+    ORTHOLOGOUS,
+    PART_OF,
+    POSITIVE_CORRELATION,
+    REGULATES,
+    RELATION,
+    SOURCE_MODIFIER,
+    TARGET_MODIFIER,
+    TO_LOC,
+    TRANSCRIBED_TO,
+    TRANSLATED_TO,
+    TRANSLOCATION,
 )
 from ..dsl import (
-    BaseAbundance, BaseConcept, BaseEntity, CentralDogma, ComplexAbundance, Gene, ListAbundance, MicroRna, Protein,
-    ProteinModification, Reaction, Rna, activity,
+    BaseAbundance,
+    BaseConcept,
+    BaseEntity,
+    CentralDogma,
+    ComplexAbundance,
+    Gene,
+    ListAbundance,
+    MicroRna,
+    Protein,
+    ProteinModification,
+    Reaction,
+    Rna,
+    activity,
 )
 from ..exceptions import BELParserWarning
 from ..language import CitationDict, Entity, citation_dict
@@ -37,7 +110,7 @@ from ..utils import hash_edge
 from ..version import get_version
 
 __all__ = [
-    'BELGraph',
+    "BELGraph",
 ]
 
 logger = logging.getLogger(__name__)
@@ -49,6 +122,11 @@ WarningTuple = Tuple[Optional[str], BELParserWarning, EdgeData]
 
 class BELGraph(nx.MultiDiGraph):
     """An extension to :class:`networkx.MultiDiGraph` to represent BEL."""
+
+    #: A set of pairs of hashes of edges over which there is transitivity.
+    #: For example, for the nested statement (P(X) -> P(Y)) -> P(Z) will have
+    #: a pair for (hash(P(X) -> P(Y)), hash(P(Y) -> P(Z)))
+    transitivities: Set[Tuple[str, str]]
 
     def __init__(
         self,
@@ -78,17 +156,19 @@ class BELGraph(nx.MultiDiGraph):
 
         self._warnings = []
 
-        self.graph.update({
-            GRAPH_PYBEL_VERSION: get_version(),
-            GRAPH_METADATA: {},
-            GRAPH_NAMESPACE_URL: {},
-            GRAPH_NAMESPACE_PATTERN: {},
-            GRAPH_ANNOTATION_URL: {},
-            GRAPH_ANNOTATION_PATTERN: {},
-            GRAPH_ANNOTATION_LIST: defaultdict(set),
-            GRAPH_ANNOTATION_CURIE: set(),
-            GRAPH_ANNOTATION_MIRIAM: set(),
-        })
+        self.graph.update(
+            {
+                GRAPH_PYBEL_VERSION: get_version(),
+                GRAPH_METADATA: {},
+                GRAPH_NAMESPACE_URL: {},
+                GRAPH_NAMESPACE_PATTERN: {},
+                GRAPH_ANNOTATION_URL: {},
+                GRAPH_ANNOTATION_PATTERN: {},
+                GRAPH_ANNOTATION_LIST: defaultdict(set),
+                GRAPH_ANNOTATION_CURIE: set(),
+                GRAPH_ANNOTATION_MIRIAM: set(),
+            }
+        )
 
         if name:
             self.name = name
@@ -117,6 +197,8 @@ class BELGraph(nx.MultiDiGraph):
         if path:
             self.path = path
 
+        self.transitivities = set()
+
         #: A reference to the parent graph
         self.parent = None
         self._count = CountDispatch(self)
@@ -127,7 +209,7 @@ class BELGraph(nx.MultiDiGraph):
 
         self.raise_on_missing_annotations = False
 
-    def child(self) -> 'BELGraph':
+    def child(self) -> "BELGraph":
         """Create an empty graph with a "parent" reference back to this one."""
         rv = BELGraph()
         rv.parent = self
@@ -135,7 +217,7 @@ class BELGraph(nx.MultiDiGraph):
         return rv
 
     @property
-    def count(self) -> 'CountDispatch':  # noqa: D401
+    def count(self) -> "CountDispatch":  # noqa: D401
         """A dispatch to count functions.
 
         Can be used like this:
@@ -147,22 +229,25 @@ class BELGraph(nx.MultiDiGraph):
         return self._count
 
     @property
-    def summarize(self) -> 'SummarizeDispatch':  # noqa: D401
+    def summarize(self) -> "SummarizeDispatch":  # noqa: D401
         """A dispatch to summarize the graph."""
         return self._summary
 
+    def _repr_html_(self):
+        return self._summary._repr_html_()
+
     @property
-    def expand(self) -> 'ExpandDispatch':  # noqa: D401
+    def expand(self) -> "ExpandDispatch":  # noqa: D401
         """A dispatch to expand the graph w.r.t. its parent."""
         return self._expand
 
     @property
-    def induce(self) -> 'InduceDispatch':  # noqa: D401
+    def induce(self) -> "InduceDispatch":  # noqa: D401
         """A dispatch to mutate the graph."""
         return self._induce
 
     @property
-    def plot(self) -> 'PlotDispatch':  # noqa: D401
+    def plot(self) -> "PlotDispatch":  # noqa: D401
         """A dispatch to plot the graph using :mod:`matplotlib` and :mod:`seaborn`."""
         return self._plot
 
@@ -355,11 +440,7 @@ class BELGraph(nx.MultiDiGraph):
     @property
     def defined_annotation_keywords(self) -> Set[str]:
         """Get the set of all keywords defined as annotations in this graph."""
-        return (
-            set(self.annotation_pattern)
-            | set(self.annotation_url)
-            | set(self.annotation_list)
-        )
+        return set(self.annotation_pattern) | set(self.annotation_url) | set(self.annotation_list)
 
     @property
     def pybel_version(self) -> str:  # noqa: D401
@@ -388,7 +469,15 @@ class BELGraph(nx.MultiDiGraph):
         return set(self.count.authors())
 
     def __str__(self):
-        return '{} v{}'.format(self.name, self.version)
+        return "{} v{}".format(self.name, self.version)
+
+    def add_transitivity(self, k1: str, k2: str) -> None:
+        """Add a pair of edge hashes over which there is transitivity.
+
+        :param k1: The hash of the subject edge
+        :param k2: The hash of the object edge
+        """
+        self.transitivities.add((k1, k2))
 
     def add_warning(
         self,
@@ -400,11 +489,13 @@ class BELGraph(nx.MultiDiGraph):
         :param exception: The exception that occurred
         :param context: The context from the parser when the exception occurred
         """
-        self.warnings.append((
-            self.path,
-            exception,
-            {} if context is None else context,
-        ))
+        self.warnings.append(
+            (
+                self.path,
+                exception,
+                {} if context is None else context,
+            )
+        )
 
     def _help_add_edge(self, source: BaseEntity, target: BaseEntity, attr: Mapping) -> str:
         """Help add a pre-built edge."""
@@ -489,7 +580,7 @@ class BELGraph(nx.MultiDiGraph):
         annotations: Optional[AnnotationsHint] = None,
         source_modifier: Optional[Mapping[str, Any]] = None,
         target_modifier: Optional[Mapping[str, Any]] = None,
-        **attr
+        **attr,
     ) -> str:
         """Add a qualified edge.
 
@@ -508,12 +599,12 @@ class BELGraph(nx.MultiDiGraph):
 
         :return: The hash of the edge
         """
-        if 'subject_modifier' in attr:
-            warnings.warn('subject_modifier has been renamed to source_modifier')
-            source_modifier = attr.pop('subject_modifier')
-        if 'object_modifier' in attr:
-            warnings.warn('object_modifier has been renamed to target_modifier')
-            target_modifier = attr.pop('object_modifier')
+        if "subject_modifier" in attr:
+            warnings.warn("subject_modifier has been renamed to source_modifier")
+            source_modifier = attr.pop("subject_modifier")
+        if "object_modifier" in attr:
+            warnings.warn("object_modifier has been renamed to target_modifier")
+            target_modifier = attr.pop("object_modifier")
 
         attr = self._build_attr(
             relation=relation,
@@ -522,7 +613,7 @@ class BELGraph(nx.MultiDiGraph):
             annotations=annotations,
             source_modifier=source_modifier,
             target_modifier=target_modifier,
-            **attr
+            **attr,
         )
         return self._help_add_edge(source=source, target=target, attr=attr)
 
@@ -534,13 +625,15 @@ class BELGraph(nx.MultiDiGraph):
         annotations: Optional[AnnotationsHint] = None,
         source_modifier: Optional[Dict[str, Any]] = None,
         target_modifier: Optional[Dict[str, Any]] = None,
-        **attr
+        **attr,
     ):
-        attr.update({
-            RELATION: relation,
-            EVIDENCE: evidence,
-            CITATION: _handle_citation(citation),
-        })
+        attr.update(
+            {
+                RELATION: relation,
+                EVIDENCE: evidence,
+                CITATION: _handle_citation(citation),
+            }
+        )
 
         if annotations:  # clean up annotations
             attr[ANNOTATIONS] = self._clean_annotations(annotations)
@@ -561,7 +654,7 @@ class BELGraph(nx.MultiDiGraph):
         evidence: str,
         citation: Union[str, Tuple[str, str], CitationDict],
         annotations: Optional[AnnotationsHint] = None,
-        **attr
+        **attr,
     ) -> str:
         """Add a "binding" relationship between the two entities such that ``u => complex(u, v)``."""
         complex_abundance = ComplexAbundance([source, target])
@@ -571,7 +664,7 @@ class BELGraph(nx.MultiDiGraph):
             citation=citation,
             evidence=evidence,
             annotations=annotations,
-            **attr
+            **attr,
         )
 
     add_increases = partialmethod(add_qualified_edge, relation=INCREASES)
@@ -591,6 +684,9 @@ class BELGraph(nx.MultiDiGraph):
 
     add_regulates = partialmethod(add_qualified_edge, relation=REGULATES)
     """Add a :data:`pybel.constants.REGULATES` relationship with :meth:`add_qualified_edge`."""
+
+    add_directly_regulates = partialmethod(add_qualified_edge, relation=DIRECTLY_REGULATES)
+    """Add a :data:`pybel.constants.DIRECTLY_REGULATES` relationship with :meth:`add_qualified_edge`."""
 
     add_correlation = partialmethod(_add_two_way_qualified_edge, relation=CORRELATION)
     """Add a :data:`pybel.constants.CORRELATION` relationship with :meth:`add_qualified_edge`."""
@@ -637,33 +733,37 @@ class BELGraph(nx.MultiDiGraph):
         annotations: Optional[AnnotationsHint] = None,
         source_modifier: Optional[Mapping] = None,
         target_modifier: Optional[Mapping] = None,
-        **attr
+        **attr,
     ):
         """Add a simple modification."""
         adder = getattr(self, add_edge_fn)
         return adder(
             source=source,
-            target=target.with_variants(ProteinModification(
-                name=name, code=code, position=position,
-            )),
+            target=target.with_variants(
+                ProteinModification(
+                    name=name,
+                    code=code,
+                    position=position,
+                )
+            ),
             evidence=evidence,
             citation=citation,
             annotations=annotations,
             source_modifier=source_modifier,
             target_modifier=target_modifier,
-            **attr
+            **attr,
         )
 
-    add_phosphorylates = partialmethod(_modify, 'add_increases', 'Ph')
+    add_phosphorylates = partialmethod(_modify, "add_increases", "Ph")
     """Add an increase of modified object with phosphorylation."""
 
-    add_directly_phosphorylates = partialmethod(_modify, 'add_directly_increases', 'Ph')
+    add_directly_phosphorylates = partialmethod(_modify, "add_directly_increases", "Ph")
     """Add a direct increase of modified object with phosphorylation."""
 
-    add_dephosphorylates = partialmethod(_modify, 'add_decreases', 'Ph')
+    add_dephosphorylates = partialmethod(_modify, "add_decreases", "Ph")
     """Add a decrease of modified object with phosphorylation."""
 
-    add_directly_dephosphorylates = partialmethod(_modify, 'add_directly_decreases', 'Ph')
+    add_directly_dephosphorylates = partialmethod(_modify, "add_directly_decreases", "Ph")
     """Add a direct decrease of modified object with phosphorylation."""
 
     def add_node_from_data(self, node: BaseEntity) -> None:
@@ -724,7 +824,7 @@ class BELGraph(nx.MultiDiGraph):
         """Get the annotations for a given edge."""
         return self._get_edge_attr(u, v, key, ANNOTATIONS)
 
-    def __add__(self, other: 'BELGraph') -> 'BELGraph':
+    def __add__(self, other: "BELGraph") -> "BELGraph":
         """Copy this graph and join it with another graph with it using :func:`pybel.struct.left_full_join`.
 
         :param other: Another BEL graph
@@ -735,13 +835,13 @@ class BELGraph(nx.MultiDiGraph):
         >>> k = ras_tloc_graph + braf_graph
         """
         if not isinstance(other, BELGraph):
-            raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
+            raise TypeError("{} is not a {}".format(other, self.__class__.__name__))
 
         result = deepcopy(self)
         left_full_join(result, other)
         return result
 
-    def __iadd__(self, other: 'BELGraph') -> 'BELGraph':
+    def __iadd__(self, other: "BELGraph") -> "BELGraph":
         """Join another graph into this one, in-place, using :func:`pybel.struct.left_full_join`.
 
         :param other: Another BEL graph
@@ -752,12 +852,12 @@ class BELGraph(nx.MultiDiGraph):
         >>> ras_tloc_graph += braf_graph
         """
         if not isinstance(other, BELGraph):
-            raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
+            raise TypeError("{} is not a {}".format(other, self.__class__.__name__))
 
         left_full_join(self, other)
         return self
 
-    def __and__(self, other: 'BELGraph') -> 'BELGraph':
+    def __and__(self, other: "BELGraph") -> "BELGraph":
         """Create a deep copy of this graph and left outer joins another graph.
 
         Uses :func:`pybel.struct.left_outer_join`.
@@ -770,13 +870,13 @@ class BELGraph(nx.MultiDiGraph):
         >>> k = ras_tloc_graph & braf_graph
         """
         if not isinstance(other, BELGraph):
-            raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
+            raise TypeError("{} is not a {}".format(other, self.__class__.__name__))
 
         result = deepcopy(self)
         left_outer_join(result, other)
         return result
 
-    def __iand__(self, other: 'BELGraph') -> 'BELGraph':
+    def __iand__(self, other: "BELGraph") -> "BELGraph":
         """Join another graph into this one, in-place, using :func:`pybel.struct.left_outer_join`.
 
         :param other: Another BEL graph
@@ -787,12 +887,12 @@ class BELGraph(nx.MultiDiGraph):
         >>> ras_tloc_graph &= braf_graph
         """
         if not isinstance(other, BELGraph):
-            raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
+            raise TypeError("{} is not a {}".format(other, self.__class__.__name__))
 
         left_outer_join(self, other)
         return self
 
-    def __xor__(self, other: 'BELGraph') -> 'BELGraph':
+    def __xor__(self, other: "BELGraph") -> "BELGraph":
         """Join this graph with another using :func:`pybel.struct.left_node_intersection_join`.
 
         :param other: Another BEL graph
@@ -803,14 +903,14 @@ class BELGraph(nx.MultiDiGraph):
         >>> k = ras_tloc_graph ^ braf_graph
         """
         if not isinstance(other, BELGraph):
-            raise TypeError('{} is not a {}'.format(other, self.__class__.__name__))
+            raise TypeError("{} is not a {}".format(other, self.__class__.__name__))
 
         return left_node_intersection_join(self, other)
 
     @staticmethod
     def node_to_bel(n: BaseEntity) -> str:
         """Serialize a node as BEL."""
-        warnings.warn('use node.as_bel()', DeprecationWarning)
+        warnings.warn("use node.as_bel()", DeprecationWarning)
         return n.as_bel()
 
     @staticmethod
@@ -825,10 +925,7 @@ class BELGraph(nx.MultiDiGraph):
         return edge_to_bel(u, v, data=edge_data, sep=sep, use_identifiers=use_identifiers)
 
     def _has_no_equivalent_edge(self, u: BaseEntity, v: BaseEntity) -> bool:
-        return not any(
-            EQUIVALENT_TO == data[RELATION]
-            for data in self[u][v].values()
-        )
+        return not any(EQUIVALENT_TO == data[RELATION] for data in self[u][v].values())
 
     def _equivalent_node_iterator_helper(self, node: BaseEntity, visited: Set[BaseEntity]) -> BaseEntity:
         """Iterate over nodes and their data that are equal to the given node, starting with the original."""
@@ -868,29 +965,30 @@ class BELGraph(nx.MultiDiGraph):
 
         This also should look in the equivalent nodes.
         """
-        return any(
-            self._node_has_namespace_helper(n, namespace)
-            for n in self.iter_equivalent_nodes(node)
-        )
+        return any(self._node_has_namespace_helper(n, namespace) for n in self.iter_equivalent_nodes(node))
 
     def _describe_list(self) -> List[Tuple[str, float]]:
         """Return useful information about the graph as a list of tuples."""
-        warnings.warn('use graph.summary.list()', DeprecationWarning)
+        warnings.warn("use graph.summary.list()", DeprecationWarning)
         return self.summarize.list()
 
     def summary_dict(self) -> Mapping[str, float]:
         """Return a dictionary that summarizes the graph."""
-        warnings.warn('use graph.summary.dict()', DeprecationWarning)
+        warnings.warn("use graph.summary.dict()", DeprecationWarning)
         return self.summarize.dict()
 
     def summary_str(self) -> str:
         """Return a string that summarizes the graph."""
-        warnings.warn('use graph.summary.str()', DeprecationWarning)
+        warnings.warn("use graph.summary.str()", DeprecationWarning)
         return self.summarize.str()
 
-    def ground(self, **kwargs) -> 'BELGraph':
+    def ground(self, **kwargs) -> "BELGraph":
         """Ground this graph."""
-        from ..grounding import ground
+        try:
+            from ..grounding import ground
+        except ImportError:
+            logger.warning("Must install pyobo and protmapper, use pip install pybel[grounding] extra.")
+            raise
         return ground(self, **kwargs)
 
     def _clean_annotations(self, annotations_dict: AnnotationsHint) -> AnnotationsDict:
@@ -911,7 +1009,10 @@ class BELGraph(nx.MultiDiGraph):
            ``{'ECO': dict(namespace='ECO', identifier='0007682', name='reporter gene assay...')}``
         """
         return {
-            key: sorted(self._clean_value(key, values), key=lambda e: (e.namespace, e.identifier, e.name))
+            key: sorted(
+                self._clean_value(key, values),
+                key=lambda e: (e.namespace, e.identifier, e.name),
+            )
             for key, values in annotations_dict.items()
         }
 
@@ -928,10 +1029,10 @@ class BELGraph(nx.MultiDiGraph):
             if all(isinstance(v, dict) for v in values):
                 return [Entity(**v) for v in values]
             if not all(isinstance(v, Entity) for v in values):
-                raise ValueError('if annotation_curie, all must be given as Entity instances')
+                raise ValueError("if annotation_curie, all must be given as Entity instances")
             return values
         if key in self.annotation_miriam:
-            raise NotImplementedError('parsing of annotation as MIRIAM not yet implemented')
+            raise NotImplementedError("parsing of annotation as MIRIAM not yet implemented")
         if key in self.annotation_list or key in self.annotation_pattern:
             if isinstance(values, str):
                 return [Entity(namespace=key, identifier=values)]
@@ -943,12 +1044,12 @@ class BELGraph(nx.MultiDiGraph):
                 return [Entity(**v) for v in values]
             if all(isinstance(v, str) for v in values):
                 return [Entity(namespace=key, identifier=v) for v in values]
-            raise TypeError(f'Mixed values: {values}')
+            raise TypeError(f"Mixed values: {values}")
         if key in self.annotation_url:  # this is a name given
             return self._clean_value_helper(key=key, namespace=key, values=values)
 
         if self.raise_on_missing_annotations:
-            raise NotImplementedError(f'where is key {key}?')
+            raise NotImplementedError(f"where is key {key}?")
 
         return self._clean_value_helper(key=key, namespace=key, values=values)
 
@@ -960,24 +1061,18 @@ class BELGraph(nx.MultiDiGraph):
             ]
         if isinstance(values, (list, set)):
             if all(isinstance(v, str) for v in values):
-                return [
-                    Entity(namespace=namespace, identifier=identifier)
-                    for identifier in sorted(values)
-                ]
+                return [Entity(namespace=namespace, identifier=identifier) for identifier in sorted(values)]
             elif all(isinstance(v, Entity) for v in values):
                 return values
             elif all(isinstance(v, dict) for v in values):
                 return [Entity(**v) for v in values]
             else:
-                raise TypeError(f'list of wrong format for key {key}: {values}')
+                raise TypeError(f"list of wrong format for key {key}: {values}")
         if isinstance(values, dict):
             if all(isinstance(v, bool) for v in values.values()):
-                return [
-                    Entity(namespace=namespace, identifier=identifier)
-                    for identifier in sorted(values)
-                ]
-            raise TypeError(f'dictionary of wrong format for key {key}: {values}')
-        raise TypeError(f'values of wrong data type for key {key}: {values}')
+                return [Entity(namespace=namespace, identifier=identifier) for identifier in sorted(values)]
+            raise TypeError(f"dictionary of wrong format for key {key}: {values}")
+        raise TypeError(f"values of wrong data type for key {key}: {values}")
 
 
 def _handle_modifier(side_data: Dict[str, Any]) -> Mapping[str, Any]:
@@ -994,7 +1089,7 @@ def _handle_modifier(side_data: Dict[str, Any]) -> Mapping[str, Any]:
     elif modifier == DEGRADATION or modifier is None:
         pass
     else:
-        raise ValueError('invalid modifier: {}'.format(modifier))
+        raise ValueError("invalid modifier: {}".format(modifier))
 
     if LOCATION in side_data:
         side_data[LOCATION] = Entity(**side_data[LOCATION])
@@ -1011,9 +1106,9 @@ def _handle_citation(citation: Union[str, Tuple[str, str], CitationDict]) -> Cit
     elif isinstance(citation, dict):
         return CitationDict(**citation)
     elif citation is None:
-        raise ValueError('citation was None')
+        raise ValueError("citation was None")
     else:
-        raise TypeError(f'citation is the wrong type: {citation}')
+        raise TypeError(f"citation is the wrong type: {citation}")
 
 
 class Dispatch:
@@ -1032,45 +1127,54 @@ class CountDispatch(Dispatch):
         Counter({'Protein': 7, 'Complex': 1, 'Abundance': 1})
         """
         from .summary import count_functions
+
         return count_functions(self.graph)
 
     def namespaces(self) -> Counter:
         """Return a counter of namespaces' occurrences in nodes in the graph."""
         from .summary import count_namespaces
+
         return count_namespaces(self.graph)
 
     def pathologies(self) -> Counter:
         """Return a counter of pathologies' occurrences in edges in the graph."""
         from .summary import count_pathologies
+
         return count_pathologies(self.graph)
 
     def annotations(self) -> Counter:
         """Return a counter of annotations' occurrences in edges in the graph."""
         from .summary import count_annotations
+
         return count_annotations(self.graph)
 
     def variants(self) -> Counter:
         """Return a counter of variants' occurrences in nodes in the graph."""
         from .summary import count_variants
+
         return count_variants(self.graph)
 
     def relations(self) -> Counter:
         """Return a counter of relations' occurrences in edges in the graph."""
         from .summary import count_relations
+
         return count_relations(self.graph)
 
     def error_types(self) -> Counter:
         """Return a counter of error types' occurrences in BEL script underlying the graph."""
         from .summary import count_error_types
+
         return count_error_types(self.graph)
 
     def names_by_namespace(self, namespace: str) -> Counter:
         from .summary import count_names_by_namespace
+
         return count_names_by_namespace(self.graph, namespace=namespace)
 
     def modifications(self) -> Counter:
         """Return a counter of relation modifications' occurrences (activity, translocation, etc.) in the graph."""
         from .summary.node_summary import count_modifications
+
         return count_modifications(self.graph)
 
     def authors(self) -> Counter:
@@ -1101,13 +1205,31 @@ class SummarizeDispatch(Dispatch):
 
     def __call__(self, file: Optional[TextIO] = None, examples: bool = True) -> None:
         self.statistics(file=file)
-        print('', file=file)
+        print("", file=file)
         self.nodes(file=file, examples=examples)
-        print('', file=file)
+        print("", file=file)
         self.namespaces(file=file, examples=examples)
-        print('', file=file)
+        print("", file=file)
         self.edges(file=file, examples=examples)
-        print('', file=file)
+        print("", file=file)
+
+    def _repr_html_(self) -> str:
+        from .summary import supersummary as ss
+
+        return dedent(
+            f"""\
+            <h2>Metadata</h2>
+            {tabulate(self._metadata_list(), tablefmt='html')}
+            <h2>Statistics</h2>
+            {tabulate(self._statistics_list(prose_prefix=False), tablefmt='html')}
+            <h2>Nodes</h2>
+            {ss.functions_str(self.graph, examples=True, add_count=False, tablefmt='html')}
+            <h2>Namespaces</h2>
+            {ss.namespaces_str(self.graph, examples=True, add_count=False, tablefmt='html')}
+            <h2>Edges</h2>
+            {ss.edges_str(self.graph, examples=True, add_count=False, tablefmt='html')}
+        """
+        )
 
     def statistics(self, file: Optional[TextIO] = None):
         """Print summary statistics on the graph."""
@@ -1115,53 +1237,68 @@ class SummarizeDispatch(Dispatch):
 
     def nodes(self, file: Optional[TextIO] = None, examples: bool = True):
         """Print a summary of the nodes' functions in the graph."""
-        from .summary.supersummary import functions
-        functions(self.graph, file=file, examples=examples)
+        from .summary.supersummary import functions_str
+
+        print(functions_str(self.graph, examples=examples), file=file)
 
     def namespaces(self, file: Optional[TextIO] = None, examples: bool = True):
         """Print a summary of the nodes' namespaces in the graph."""
         from .summary.supersummary import namespaces
+
         namespaces(self.graph, file=file, examples=examples)
 
     def edges(self, file: Optional[TextIO] = None, examples: bool = True):
         """Print a summary of the edges' types in the graph."""
         from .summary.supersummary import edges
+
         edges(self.graph, file=file, examples=examples)
 
     def citations(self, n: Optional[int] = 15, file: Optional[TextIO] = None):
         """Print a summary of the top citations' frequencies in the graph."""
         from .summary.supersummary import citations
+
         citations(self.graph, n=n, file=file)
 
     def dict(self) -> Mapping[str, float]:
         """Return a dictionary that summarizes the graph."""
         return dict(self.list())
 
-    def str(self) -> str:
+    def str(self, **kwargs) -> str:
         """Return a string that summarizes the graph."""
-        return tabulate(self.list())
+        return tabulate(self.list(), **kwargs)
+
+    def _metadata_list(self) -> List[Tuple[str, Any]]:
+        rv = [
+            ("Name", self.graph.name),
+            ("Version", self.graph.version),
+        ]
+        if self.graph.authors:
+            rv.append(("Authors", self.graph.authors))
+        return rv
+
+    def _statistics_list(self, prose_prefix: bool = True) -> List[Tuple[str, Any]]:
+        number_nodes = self.graph.number_of_nodes()
+        rv = [
+            ("Nodes", number_nodes),
+            ("Namespaces", len(self.graph.count.namespaces())),
+            ("Edges", self.graph.number_of_edges()),
+            ("Annotations", len(self.graph.count.annotations())),
+            ("Citations", self.graph.number_of_citations()),
+            ("Authors", self.graph.number_of_authors()),
+            ("Components", nx.number_weakly_connected_components(self.graph)),
+            ("Warnings", self.graph.number_of_warnings()),
+        ]
+        if prose_prefix:
+            rv = [(f"Number of {x}", y) for x, y in rv]
+        rv.append(("Network Density", "{:.2E}".format(nx.density(self.graph))))
+        return rv
 
     def list(self) -> List[Tuple[str, Any]]:
         """Return a list of tuples that summarize the graph."""
-        number_nodes = self.graph.number_of_nodes()
-        rv = [
-            ('Name', self.graph.name),
-            ('Version', self.graph.version),
-            ('Number of Nodes', number_nodes),
-            ('Number of Namespaces', len(self.graph.count.namespaces())),
-            ('Number of Edges', self.graph.number_of_edges()),
-            ('Number of Annotations', len(self.graph.count.annotations())),
-            ('Number of Citations', self.graph.number_of_citations()),
-            ('Number of Authors', self.graph.number_of_authors()),
-            ('Network Density', '{:.2E}'.format(nx.density(self.graph))),
-            ('Number of Components', nx.number_weakly_connected_components(self.graph)),
-            ('Number of Warnings', self.graph.number_of_warnings()),
+        return [
+            *self._metadata_list(),
+            *self._statistics_list(),
         ]
-        if self.graph.authors:
-            authors = self.graph.authors
-            key = 'Author' if authors.count(',') == 0 else 'Authors'
-            rv.insert(2, (key, authors))
-        return rv
 
 
 class PlotDispatch(Dispatch):
@@ -1170,6 +1307,7 @@ class PlotDispatch(Dispatch):
     def summary(self, save: Optional[str] = None, **kwargs):
         """Plot a summary of the graph's nodes and edges using :mod:`matplotlib`."""
         from pybel_tools.summary.visualization import plot_summary
+
         fig, axes = plot_summary(self.graph, **kwargs)
         if save:
             fig.save(save)
@@ -1182,7 +1320,7 @@ class ExpandDispatch(Dispatch):
     def parent(self) -> BELGraph:
         """Get the parent BEL graph."""
         if not self.graph.parent:
-            raise RuntimeError('Can not use expand dispatch on graph without a parent')
+            raise RuntimeError("Can not use expand dispatch on graph without a parent")
         return self.graph.parent
 
     def neighborhood(self, node: BaseEntity) -> BELGraph:
@@ -1200,6 +1338,7 @@ class ExpandDispatch(Dispatch):
         >>> assert thpo in subgraph_2 and raf1 not in subgraph_2
         """
         from .mutation import expand_node_neighborhood
+
         cp = self.graph.copy()
         expand_node_neighborhood(universe=self.parent, graph=cp, node=node)
         return cp
@@ -1207,6 +1346,7 @@ class ExpandDispatch(Dispatch):
     def periphery(self, **kwargs):
         """Expand around the periphery of the graph w.r.t. its parent graph."""
         from pybel_tools.mutation.expansion import expand_periphery
+
         cp = self.graph.copy()
         expand_periphery(universe=self.parent, graph=cp, **kwargs)
         return cp
@@ -1214,6 +1354,7 @@ class ExpandDispatch(Dispatch):
     def internal(self, **kwargs):
         """Expand missing edges between nodes in the graph w.r.t. its parent graph."""
         from pybel_tools.mutation.expansion import expand_internal
+
         cp = self.graph.copy()
         expand_internal(universe=self.parent, graph=cp, **kwargs)
         return cp
@@ -1225,19 +1366,23 @@ class InduceDispatch(Dispatch):
     def paths(self, nodes: Iterable[BaseEntity]) -> Optional[BELGraph]:
         """Induce a subgraph on shortest paths between the nodes."""
         from .mutation import get_subgraph_by_all_shortest_paths
+
         return get_subgraph_by_all_shortest_paths(self.graph, nodes)
 
     def neighborhood(self, nodes: Iterable[BaseEntity]) -> Optional[BELGraph]:
         """Induce a subgraph around the neighborhood."""
         from .mutation import get_subgraph_by_neighborhood
+
         return get_subgraph_by_neighborhood(self.graph, nodes)
 
     def random(self, **kwargs) -> Optional[BELGraph]:
         """Induce a random subgraph."""
         from .mutation import get_random_subgraph
+
         return get_random_subgraph(self.graph, **kwargs)
 
     def annotation(self, prefix: str, identifier: str) -> Optional[BELGraph]:
         """Induce a subgraph on edges with the given annotation."""
         from .mutation import get_subgraph_by_annotation_value
+
         return get_subgraph_by_annotation_value(self.graph, prefix, identifier)

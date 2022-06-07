@@ -15,7 +15,7 @@ from typing import Any, Mapping, Optional, Tuple
 
 import jsonschema
 
-__all__ = ['is_valid_node', 'is_valid_edge']
+__all__ = ["is_valid_node", "is_valid_edge"]
 
 logger = logging.getLogger(__name__)
 

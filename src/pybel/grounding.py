@@ -54,34 +54,57 @@ from typing import Any, Collection, Mapping, Optional, Tuple, Union
 
 import pyobo
 from protmapper.uniprot_client import get_id_from_mnemonic, get_mnemonic
-from pyobo.extract import get_id_name_mapping, get_name_id_mapping
-from pyobo.getters import MissingOboBuild, NoOboFoundry
+from pyobo.getters import NoBuild
 from pyobo.identifier_utils import normalize_prefix
-from pyobo.registries import get_namespace_synonyms
 from pyobo.xrefdb.sources.famplex import get_remapping
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
 from pybel.constants import (
-    ACTIVITY, ANNOTATIONS, CONCEPT, EFFECT, FROM_LOC, FUSION, GMOD, IDENTIFIER, KIND, LOCATION,
-    MEMBERS, MODIFIER, NAME, NAMESPACE, PARTNER_3P, PARTNER_5P, PMOD, PRODUCTS, REACTANTS, SOURCE_MODIFIER,
-    TARGET_MODIFIER, TO_LOC, TRANSLOCATION, VARIANTS,
+    ACTIVITY,
+    ANNOTATIONS,
+    CONCEPT,
+    EFFECT,
+    FROM_LOC,
+    FUSION,
+    GMOD,
+    IDENTIFIER,
+    KIND,
+    LOCATION,
+    MEMBERS,
+    MODIFIER,
+    NAME,
+    NAMESPACE,
+    PARTNER_3P,
+    PARTNER_5P,
+    PMOD,
+    PRODUCTS,
+    REACTANTS,
+    SOURCE_MODIFIER,
+    TARGET_MODIFIER,
+    TO_LOC,
+    TRANSLOCATION,
+    VARIANTS,
 )
 from pybel.dsl import BaseConcept
 from pybel.io import from_nodelink, to_nodelink
 from pybel.language import (
-    Entity, activity_mapping, compartment_mapping, gmod_mappings, pmod_mappings, text_location_labels,
+    Entity,
+    activity_mapping,
+    compartment_mapping,
+    gmod_mappings,
+    pmod_mappings,
+    text_location_labels,
 )
 from pybel.struct import BELGraph, get_annotations, get_namespaces, get_ungrounded_nodes
 
 __all__ = [
-    'ground',
-    'ground_nodelink',
+    "ground",
+    "ground_nodelink",
 ]
 
 logger = logging.getLogger(__name__)
-SKIP = {'ncbigene', 'pubchem.compound', 'chembl.compound'}
-NO_NAMES = {'fplx', 'eccode', 'dbsnp', 'smiles', 'inchi', 'inchikey'}
-SYNONYM_TO_KEY = get_namespace_synonyms()
+SKIP = {"ncbigene", "pubchem.compound", "chembl.compound"}
+NO_NAMES = {"fplx", "eccode", "dbsnp", "smiles", "inchi", "inchikey"}
 
 # TODO will get updated
 #: A mapping of (prefix, name) pairs to (prefix, identifier, name) triples
@@ -92,6 +115,8 @@ _ID_REMAPPING = {}
 
 
 def _get_name_remapping(prefix: str, name: str) -> Union[Tuple[str, str, str], Tuple[None, None, None]]:
+    if prefix.lower() in {"sfam", "scomp"} and ("bel", name) in _NAME_REMAPPING:
+        return _NAME_REMAPPING["bel", name]
     return _NAME_REMAPPING.get((prefix, name), (None, None, None))
 
 
@@ -120,18 +145,12 @@ def ground(
         graph.remove_nodes_from(ungrounded_nodes)
         graph.namespace_url.clear()
         graph.namespace_pattern.clear()
-        graph.namespace_pattern.update({
-            namespace: '.*'
-            for namespace in get_namespaces(graph)
-        })
+        graph.namespace_pattern.update({namespace: ".*" for namespace in get_namespaces(graph)})
 
         graph.annotation_url.clear()
         graph.annotation_pattern.clear()
         graph.annotation_list.clear()
-        graph.annotation_pattern.update({
-            annotation: '.*'
-            for annotation in get_annotations(graph)
-        })
+        graph.annotation_pattern.update({annotation: ".*" for annotation in get_annotations(graph)})
 
     return graph
 
@@ -141,51 +160,51 @@ def remove_unused_annotation_metadata(graph) -> None:
 
     unused_patterns = set(graph.annotation_pattern) - used_annotations
     for annotation in unused_patterns:
-        logger.warning('deleting unused annotation pattern: %s', annotation)
+        logger.warning("deleting unused annotation pattern: %s", annotation)
         del graph.annotation_pattern[annotation]
 
     unused_urls = set(graph.annotation_pattern) - used_annotations
     for annotation in unused_urls:
-        logger.warning('deleting unused annotation URL: %s', annotation)
+        logger.warning("deleting unused annotation URL: %s", annotation)
         del graph.annotation_url[annotation]
 
     unused_lists = set(graph.annotation_list) - used_annotations
     for annotation in unused_lists:
-        logger.warning('deleting unused annotation list: %s', annotation)
+        logger.warning("deleting unused annotation list: %s", annotation)
         del graph.annotation_list[annotation]
 
 
 def ground_nodelink(graph_nodelink_dict, skip_namespaces: Optional[Collection[str]] = None) -> None:
     """Ground entities in a nodelink data structure."""
-    name = graph_nodelink_dict.get('graph', {}).get('name', 'graph')
+    name = graph_nodelink_dict.get("graph", {}).get("name", "graph")
 
-    for data in tqdm(graph_nodelink_dict['links'], desc='grounding edges in {}'.format(name)):
+    for data in tqdm(graph_nodelink_dict["links"], desc="grounding edges in {}".format(name)):
         _process_edge_side(data.get(SOURCE_MODIFIER), skip_namespaces=skip_namespaces)
         _process_edge_side(data.get(TARGET_MODIFIER), skip_namespaces=skip_namespaces)
         if ANNOTATIONS in data:
             _process_annotations(data, skip_namespaces=skip_namespaces)
 
-    for node in tqdm(graph_nodelink_dict['nodes'], desc='grounding nodes in {}'.format(name)):
+    for node in tqdm(graph_nodelink_dict["nodes"], desc="grounding nodes in {}".format(name)):
         _process_node(node, skip_namespaces=skip_namespaces)
 
 
 _BEL_ANNOTATION_PREFIX_MAP = {
-    'MeSHDisease': 'mesh',
-    'MeSHAnatomy': 'mesh',
-    'CellStructure': 'mesh',
-    'Species': 'ncbitaxon',
-    'Disease': 'doid',
-    'Cell': 'cl',
-    'Anatomy': 'uberon',
+    "MeSHDisease": "mesh",
+    "MeSHAnatomy": "mesh",
+    "CellStructure": "mesh",
+    "Species": "ncbitaxon",
+    "Disease": "doid",
+    "Cell": "cl",
+    "Anatomy": "uberon",
 }
 _BEL_ANNOTATION_PREFIX_CATEGORY_MAP = {
-    'MeSHDisease': 'Disease',
-    'MeSHAnatomy': 'Anatomy',
+    "MeSHDisease": "Disease",
+    "MeSHAnatomy": "Anatomy",
 }
 
 _UNHANDLED_ANNOTATION = set()
 CATEGORY_BLACKLIST = {
-    'TextLocation',
+    "TextLocation",
 }
 
 
@@ -195,13 +214,13 @@ def _process_annotations(
     skip_namespaces: Optional[Collection[str]] = None,
 ) -> None:
     """Process the annotations in a PyBEL edge data dictionary."""
-    cell_line_entities = data[ANNOTATIONS].get('CellLine')
+    cell_line_entities = data[ANNOTATIONS].get("CellLine")
     if cell_line_entities:
         ne = []
         for entity in cell_line_entities:
-            if entity[NAMESPACE] == 'CellLine':
+            if entity[NAMESPACE] == "CellLine":
                 _namespaces = [
-                    'efo',
+                    "efo",
                     # 'clo',  # FIXME implement CLO in PyOBO then uncomment
                 ]
                 g_prefix, g_identifier, g_name = pyobo.ground(_namespaces, entity[IDENTIFIER])
@@ -210,14 +229,13 @@ def _process_annotations(
                 elif not remove_ungrounded:
                     logger.warning('could not ground CellLine: "%s"', entity[IDENTIFIER])
                     ne.append(entity)
-        data[ANNOTATIONS]['CellLine'] = ne
+        data[ANNOTATIONS]["CellLine"] = ne
 
     # fix text locations
-    text_location = data[ANNOTATIONS].get('TextLocation')
+    text_location = data[ANNOTATIONS].get("TextLocation")
     if text_location:
-        data[ANNOTATIONS]['TextLocation'] = [
-            text_location_labels.get(entity.identifier, entity)
-            for entity in text_location
+        data[ANNOTATIONS]["TextLocation"] = [
+            text_location_labels.get(entity.identifier, entity) for entity in text_location
         ]
 
     # remap category names
@@ -233,7 +251,7 @@ def _process_annotations(
         ne = []
         for entity in entities:
             if not isinstance(entity, dict):
-                raise TypeError(f'entity should be a dict. got: {entity}')
+                raise TypeError(f"entity should be a dict. got: {entity}")
             nn = _BEL_ANNOTATION_PREFIX_MAP.get(entity[NAMESPACE])
             if nn is not None:
                 entity[NAMESPACE] = nn
@@ -289,7 +307,7 @@ def _process_node(node: Mapping[str, Any], skip_namespaces: Optional[Collection[
 def _process_concept(*, concept, node=None, skip_namespaces: Optional[Collection[str]] = None) -> bool:
     """Process a node JSON object."""
     namespace = concept[NAMESPACE]
-    if namespace.lower() in {'text', 'fixme'}:
+    if namespace.lower() in {"text", "fixme"}:
         return False
 
     if skip_namespaces and namespace in skip_namespaces:
@@ -309,16 +327,22 @@ def _process_concept(*, concept, node=None, skip_namespaces: Optional[Collection
             concept=concept,
             prefix=prefix,
             identifier=identifier,
-            skip_namespaces=skip_namespaces
+            skip_namespaces=skip_namespaces,
         )
         if not map_success:  # just in case the name gets put in the identifier
             map_success = _handle_name_and_not_identifier(
-                concept=concept, prefix=prefix, name=identifier, node=node,
+                concept=concept,
+                prefix=prefix,
+                name=identifier,
+                node=node,
                 skip_namespaces=skip_namespaces,
             )
     else:
         map_success = _handle_name_and_not_identifier(
-            concept=concept, prefix=prefix, name=name, node=node,
+            concept=concept,
+            prefix=prefix,
+            name=name,
+            node=node,
             skip_namespaces=skip_namespaces,
         )
 
@@ -334,9 +358,14 @@ def _remap_by_identifier(concept) -> bool:
     if identifier is None:
         return False
     namespace = concept[NAMESPACE]
-    logger.debug('attempting to remap %s:%s', namespace, identifier)
+    logger.debug("attempting to remap %s:%s", namespace, identifier)
     remapped_prefix, remapped_identifier, remapped_name = _get_id_remapping(namespace, identifier)
-    logger.debug('remapping result %s:%s ! %s', remapped_prefix, remapped_identifier, remapped_name)
+    logger.debug(
+        "remapping result %s:%s ! %s",
+        remapped_prefix,
+        remapped_identifier,
+        remapped_name,
+    )
     if remapped_prefix:
         concept[NAMESPACE] = remapped_prefix
         concept[IDENTIFIER] = remapped_identifier
@@ -346,7 +375,11 @@ def _remap_by_identifier(concept) -> bool:
 
 
 def _handle_identifier_not_name(
-    *, concept, prefix, identifier, skip_namespaces: Optional[Collection[str]] = None,
+    *,
+    concept,
+    prefix,
+    identifier,
+    skip_namespaces: Optional[Collection[str]] = None,
 ) -> bool:
     # Some namespaces are just too much of a problem at the moment to look up
     if prefix in SKIP:
@@ -358,13 +391,13 @@ def _handle_identifier_not_name(
         concept[NAME] = concept[IDENTIFIER]
         return True
 
-    if prefix == 'uniprot':
+    if prefix == "uniprot":
         concept[NAME] = get_mnemonic(identifier)
         return True
 
     try:
-        id_name_mapping = get_id_name_mapping(prefix)
-    except (NoOboFoundry, MissingOboBuild):
+        id_name_mapping = pyobo.api.names.get_id_name_mapping(prefix)
+    except NoBuild:
         return False
 
     if id_name_mapping is None:
@@ -373,7 +406,7 @@ def _handle_identifier_not_name(
 
     name = id_name_mapping.get(identifier)
     if name is None:
-        logger.warning('could not get name for curie %s:%s', prefix, identifier)
+        logger.warning("could not get name for curie %s:%s", prefix, identifier)
         return False
     concept[NAME] = name
 
@@ -381,7 +414,12 @@ def _handle_identifier_not_name(
 
 
 def _handle_name_and_not_identifier(
-    *, concept, prefix, name, node=None, skip_namespaces: Optional[Collection[str]] = None,
+    *,
+    concept,
+    prefix,
+    name,
+    node=None,
+    skip_namespaces: Optional[Collection[str]] = None,
 ) -> bool:
     remapped_prefix, remapped_identifier, remapped_name = _get_name_remapping(prefix, name)
     if remapped_prefix:
@@ -401,36 +439,36 @@ def _handle_name_and_not_identifier(
         concept[IDENTIFIER] = name
         return True
 
-    if prefix == 'bel' and node is not None and KIND in node:
+    if prefix == "bel" and node is not None and KIND in node:
         kind = node[KIND]
         if kind == PMOD and name in pmod_mappings:
             # the 0th position xref is the preferred one (usually GO)
-            _mapped = pmod_mappings[name]['xrefs'][0]
+            _mapped = pmod_mappings[name]["xrefs"][0]
         elif kind == GMOD and name in gmod_mappings:
-            _mapped = gmod_mappings[name]['xrefs'][0]
+            _mapped = gmod_mappings[name]["xrefs"][0]
         else:
-            raise ValueError(f'invalid kind: {kind}')
+            raise ValueError(f"invalid kind: {kind}")
         concept[NAMESPACE] = _mapped[NAMESPACE]
         concept[IDENTIFIER] = _mapped[IDENTIFIER]
         concept[NAME] = _mapped[NAME]
         return True
-    elif prefix == 'bel' and name in activity_mapping:
+    elif prefix == "bel" and name in activity_mapping:
         _mapped = activity_mapping[name]
         concept[NAMESPACE] = _mapped[NAMESPACE]
         concept[IDENTIFIER] = _mapped[IDENTIFIER]
         concept[NAME] = _mapped[NAME]
         return True
-    elif prefix == 'bel' and name in compartment_mapping:
+    elif prefix == "bel" and name in compartment_mapping:
         _mapped = compartment_mapping[name]
         concept[NAMESPACE] = _mapped[NAMESPACE]
         concept[IDENTIFIER] = _mapped[IDENTIFIER]
         concept[NAME] = _mapped[NAME]
         return True
-    elif prefix == 'bel':
+    elif prefix == "bel":
         logger.warning('could not figure out how to map bel ! "%s"', name)
         return False
 
-    if prefix == 'uniprot':
+    if prefix == "uniprot":
         # assume identifier given as name
         identifier = get_id_from_mnemonic(name)
         if identifier is not None:
@@ -447,13 +485,13 @@ def _handle_name_and_not_identifier(
         return False
 
     try:
-        id_name_mapping = get_name_id_mapping(prefix)
-    except (NoOboFoundry, MissingOboBuild) as e:
-        logger.warning('could not get namespace %s - %s', prefix, e)
+        id_name_mapping = pyobo.api.names.get_name_id_mapping(prefix)
+    except NoBuild as e:
+        logger.warning("could not get namespace %s - %s", prefix, e)
         return False
 
     if id_name_mapping is None:
-        logger.warning('unhandled namespace in %s ! %s', prefix, name)
+        logger.warning("unhandled namespace in %s ! %s", prefix, name)
         return False
 
     identifier = id_name_mapping.get(name)

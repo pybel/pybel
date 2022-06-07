@@ -6,12 +6,21 @@ import json
 import unittest
 from typing import Mapping, Tuple
 
-from pybel import BELGraph, BaseEntity
-from pybel.constants import ANNOTATIONS, CITATION, EVIDENCE, IDENTIFIER, NAMESPACE, TARGET_MODIFIER, RELATION, SOURCE_MODIFIER
+from pybel import BaseEntity, BELGraph
+from pybel.constants import (
+    ANNOTATIONS,
+    CITATION,
+    EVIDENCE,
+    IDENTIFIER,
+    NAMESPACE,
+    RELATION,
+    SOURCE_MODIFIER,
+    TARGET_MODIFIER,
+)
 from pybel.typing import EdgeData
 
 __all__ = [
-    'TestCase',
+    "TestCase",
 ]
 
 
@@ -32,10 +41,7 @@ def _edge_to_tuple(u: BaseEntity, v: BaseEntity, edge_data: EdgeData):
     if annotations is None:
         annotations_hashable = None
     else:
-        annotations_hashable = tuple(
-            (key, tuple(sorted(values)))
-            for key, values in sorted(annotations.items())
-        )
+        annotations_hashable = tuple((key, tuple(sorted(values))) for key, values in sorted(annotations.items()))
 
     source_modifier = edge_data.get(SOURCE_MODIFIER)
     if source_modifier is None:
@@ -69,11 +75,10 @@ def _hash_edge(u: BaseEntity, v: BaseEntity, data: EdgeData) -> int:
     return hash(_edge_to_tuple(u, v, data))
 
 
-def _get_edge_dict(graph: BELGraph) -> Mapping[int, Tuple[BaseEntity, BaseEntity, EdgeData]]:
-    return {
-        _hash_edge(u, v, data): (u, v, data)
-        for u, v, k, data in graph.edges(keys=True, data=True)
-    }
+def _get_edge_dict(
+    graph: BELGraph,
+) -> Mapping[int, Tuple[BaseEntity, BaseEntity, EdgeData]]:
+    return {_hash_edge(u, v, data): (u, v, data) for u, v, k, data in graph.edges(keys=True, data=True)}
 
 
 class TestCase(unittest.TestCase):
@@ -81,10 +86,10 @@ class TestCase(unittest.TestCase):
 
     def assert_graph_equal(self, g1: BELGraph, g2: BELGraph) -> None:
         """Assert two BEL graphs are the same."""
-        self.assertEqual(g1.graph, g2.graph, msg='Metadata were not the same')
+        self.assertEqual(g1.graph, g2.graph, msg="Metadata were not the same")
 
         # self.assertEqual(g1.number_of_nodes(), g2.number_of_nodes())
-        self.assertEqual(set(g1), set(g2), msg='Nodes were not the same')
+        self.assertEqual(set(g1), set(g2), msg="Nodes were not the same")
 
         # self.assertEqual(g1.number_of_edges(), g2.number_of_edges())
         self.assertEqual(set(g1.edges()), set(g2.edges()))
@@ -109,11 +114,11 @@ class TestCase(unittest.TestCase):
             self.fail()
 
         elif g1ng2 and g2ng1:
-            print('in g1 but not g2:')
+            print("in g1 but not g2:")
             for k in g1ng2:
                 print(k[:6], g1_edge_hashes[k])
 
-            print('in g2 but not g1:')
+            print("in g2 but not g1:")
             for k in g2ng1:
                 print(k[:6], g2_edge_hashes[k])
             self.fail()

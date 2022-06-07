@@ -7,9 +7,19 @@ import json
 import unittest
 
 from pybel.constants import (
-    CITATION_TYPE_PUBMED, IDENTIFIER,
-    METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER,
-    METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAME, NAMESPACE, NAMESPACE_DOMAIN_OTHER,
+    CITATION_TYPE_PUBMED,
+    IDENTIFIER,
+    METADATA_AUTHORS,
+    METADATA_CONTACT,
+    METADATA_COPYRIGHT,
+    METADATA_DESCRIPTION,
+    METADATA_DISCLAIMER,
+    METADATA_LICENSES,
+    METADATA_NAME,
+    METADATA_VERSION,
+    NAME,
+    NAMESPACE,
+    NAMESPACE_DOMAIN_OTHER,
 )
 from pybel.language import citation_dict
 from pybel.manager.models import Citation, Namespace, NamespaceEntry, Network
@@ -17,7 +27,6 @@ from pybel.testing.utils import n
 
 
 class TestNetwork(unittest.TestCase):
-
     def setUp(self):
         self.name = n()
         self.version = n()
@@ -31,7 +40,7 @@ class TestNetwork(unittest.TestCase):
         self.expected = {
             METADATA_NAME: self.name,
             METADATA_VERSION: self.version,
-            'created': str(self.created),
+            "created": str(self.created),
         }
 
     def test_to_json(self):
@@ -41,8 +50,8 @@ class TestNetwork(unittest.TestCase):
         self.assertEqual(self.name, model_json[METADATA_NAME])
         self.assertIn(METADATA_VERSION, model_json)
         self.assertEqual(self.version, model_json[METADATA_VERSION])
-        self.assertIn('created', model_json)
-        self.assertEqual(str(self.created), model_json['created'])
+        self.assertIn("created", model_json)
+        self.assertEqual(str(self.created), model_json["created"])
 
         self.assertEqual(self.expected, model_json)
 
@@ -68,7 +77,7 @@ class TestNetwork(unittest.TestCase):
         self.expected[METADATA_LICENSES] = self.model.licenses = n()
         self.assertEqual(self.expected, self.model.to_json())
 
-        self.expected['id'] = None
+        self.expected["id"] = None
         self.assertEqual(self.expected, self.model.to_json(include_id=True))
 
 
@@ -77,27 +86,27 @@ class TestModels(unittest.TestCase):
         uploaded = datetime.datetime.now()
 
         model = Namespace(
-            keyword='TEST',
-            url='http://test.com',
-            name='Test Namespace',
+            keyword="TEST",
+            url="http://test.com",
+            name="Test Namespace",
             domain=NAMESPACE_DOMAIN_OTHER,
-            species='9606',
-            version='1.0.0',
-            author='Charles Tapley Hoyt',
-            contact='cthoyt@gmail.com',
+            species="9606",
+            version="1.0.0",
+            author="Charles Tapley Hoyt",
+            contact="cthoyt@gmail.com",
             uploaded=uploaded,
         )
 
         expected = dict(
-            keyword='TEST',
-            url='http://test.com',
-            name='Test Namespace',
-            version='1.0.0',
+            keyword="TEST",
+            url="http://test.com",
+            name="Test Namespace",
+            version="1.0.0",
         )
 
         self.assertEqual(model.to_json(), expected)
 
-        expected['id'] = model.id = 1
+        expected["id"] = model.id = 1
 
         self.assertEqual(model.to_json(include_id=True), expected)
 
@@ -105,44 +114,41 @@ class TestModels(unittest.TestCase):
         uploaded = datetime.datetime.now()
 
         model = Namespace(
-            keyword='TEST',
-            pattern=r'\w+',
-            name='Test Namespace',
+            keyword="TEST",
+            pattern=r"\w+",
+            name="Test Namespace",
             domain=NAMESPACE_DOMAIN_OTHER,
-            species='9606',
-            version='1.0.0',
-            author='Charles Tapley Hoyt',
-            contact='cthoyt@gmail.com',
+            species="9606",
+            version="1.0.0",
+            author="Charles Tapley Hoyt",
+            contact="cthoyt@gmail.com",
             uploaded=uploaded,
         )
 
         expected = dict(
-            keyword='TEST',
-            pattern=r'\w+',
-            name='Test Namespace',
-            version='1.0.0',
+            keyword="TEST",
+            pattern=r"\w+",
+            name="Test Namespace",
+            version="1.0.0",
         )
 
         self.assertEqual(model.to_json(), expected)
 
     def test_namespace_entry(self):
-        model = NamespaceEntry(
-            name='entry',
-            namespace=Namespace(keyword='test')
-        )
+        model = NamespaceEntry(name="entry", namespace=Namespace(keyword="test"))
 
         expected = {
-            NAMESPACE: 'test',
-            NAME: 'entry',
+            NAMESPACE: "test",
+            NAME: "entry",
         }
 
         self.assertEqual(model.to_json(), expected)
 
-        expected['id'] = model.id = 1
+        expected["id"] = model.id = 1
 
         self.assertEqual(model.to_json(include_id=True), expected)
 
-        expected[IDENTIFIER] = model.identifier = 'test:00001'
+        expected[IDENTIFIER] = model.identifier = "test:00001"
 
         self.assertEqual(model.to_json(include_id=True), expected)
 

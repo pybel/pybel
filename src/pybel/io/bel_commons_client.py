@@ -10,49 +10,43 @@ BEL Commons, there are instructions on its GitHub page.
 """
 
 import logging
-import os
 from typing import Optional
 
+import pystow
 import requests
 
 from .nodelink import from_nodelink, to_nodelink
-from ..config import config
-from ..constants import PYBEL_REMOTE_HOST, PYBEL_REMOTE_PASSWORD, PYBEL_REMOTE_USER
 from ..struct.graph import BELGraph
 from ..version import get_version
 
 __all__ = [
-    'to_bel_commons',
-    'from_bel_commons',
+    "to_bel_commons",
+    "from_bel_commons",
 ]
 
 logger = logging.getLogger(__name__)
 
-RECIEVE_ENDPOINT = '/api/receive/'
-GET_ENDPOINT = '/api/network/{}/export/nodelink'
-
-
-def _get_config_or_env(name: str) -> Optional[str]:
-    return config.get(name) or os.environ.get(name)
+RECIEVE_ENDPOINT = "/api/receive/"
+GET_ENDPOINT = "/api/network/{}/export/nodelink"
 
 
 def _get_host() -> Optional[str]:
-    """Find the host.
+    """Find the host with :func:`pystow.get_config`.
 
     Has two possibilities:
 
     1. The PyBEL config entry ``PYBEL_REMOTE_HOST``, loaded in :mod:`pybel.constants`
     2. The environment variable ``PYBEL_REMOTE_HOST``
     """
-    return _get_config_or_env(PYBEL_REMOTE_HOST)
+    return pystow.get_config("pybel", "remote_host")
 
 
 def _get_user() -> Optional[str]:
-    return _get_config_or_env(PYBEL_REMOTE_USER)
+    return pystow.get_config("pybel", "remote_user")
 
 
 def _get_password() -> Optional[str]:
-    return _get_config_or_env(PYBEL_REMOTE_PASSWORD)
+    return pystow.get_config("pybel", "remote_password")
 
 
 def to_bel_commons(
@@ -76,33 +70,33 @@ def to_bel_commons(
     """
     if host is None:
         host = _get_host()
-        logger.debug('using host: %s', host)
+        logger.debug("using host: %s", host)
 
     if user is None:
         user = _get_user()
 
         if user is None:
-            raise ValueError('no user found')
+            raise ValueError("no user found")
 
     if password is None:
         password = _get_password()
 
         if password is None:
-            raise ValueError('no password found')
+            raise ValueError("no password found")
 
-    url = host.rstrip('/') + RECIEVE_ENDPOINT
+    url = host.rstrip("/") + RECIEVE_ENDPOINT
 
     response = requests.post(
         url,
         json=to_nodelink(graph),
         headers={
-            'content-type': 'application/json',
-            'User-Agent': 'PyBEL v{}'.format(get_version()),
-            'bel-commons-public': 'true' if public else 'false',
+            "content-type": "application/json",
+            "User-Agent": "PyBEL v{}".format(get_version()),
+            "bel-commons-public": "true" if public else "false",
         },
         auth=(user, password),
     )
-    logger.debug('received response: %s', response)
+    logger.debug("received response: %s", response)
 
     return response
 
@@ -120,7 +114,7 @@ def from_bel_commons(network_id: int, host: Optional[str] = None) -> BELGraph:
     if host is None:
         host = _get_host()
     if host is None:
-        raise ValueError('host not specified in arguments, PyBEL configuration, or environment.')
+        raise ValueError("host not specified in arguments, PyBEL configuration, or environment.")
 
     url = host + GET_ENDPOINT.format(network_id)
     res = requests.get(url)

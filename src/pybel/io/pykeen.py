@@ -61,10 +61,10 @@ from .nodelink import from_nodelink_file
 from .triples import to_triples
 
 __all__ = [
-    'get_triples_from_bel',
-    'get_triples_from_bel_nodelink',
-    'get_triples_from_bel_pickle',
-    'get_triples_from_bel_commons',
+    "get_triples_from_bel",
+    "get_triples_from_bel_nodelink",
+    "get_triples_from_bel_pickle",
+    "get_triples_from_bel_commons",
 ]
 
 
@@ -75,6 +75,7 @@ def get_triples_from_bel(path: str) -> np.ndarray:
     :return: A three column array with head, relation, and tail in each row
     """
     from pybel import from_bel_script
+
     return _from_bel(path, from_bel_script)
 
 

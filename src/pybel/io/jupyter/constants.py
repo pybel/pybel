@@ -2,7 +2,18 @@
 
 """Constants for PyBEL-Jupyter."""
 
-from ...constants import ABUNDANCE, BIOPROCESS, COMPLEX, COMPOSITE, GENE, MIRNA, PATHOLOGY, PROTEIN, REACTION, RNA
+from ...constants import (
+    ABUNDANCE,
+    BIOPROCESS,
+    COMPLEX,
+    COMPOSITE,
+    GENE,
+    MIRNA,
+    PATHOLOGY,
+    PROTEIN,
+    REACTION,
+    RNA,
+)
 
 #: The color map defining the node colors in visualization
 DEFAULT_COLOR_MAP = {

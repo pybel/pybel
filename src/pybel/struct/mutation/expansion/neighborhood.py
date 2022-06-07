@@ -13,12 +13,12 @@ from ...utils import update_metadata
 from ....dsl import BaseEntity
 
 __all__ = [
-    'expand_node_predecessors',
-    'expand_node_successors',
-    'expand_node_neighborhood',
-    'expand_nodes_neighborhoods',
-    'expand_all_node_neighborhoods',
-    'expand_internal',
+    "expand_node_predecessors",
+    "expand_node_successors",
+    "expand_node_neighborhood",
+    "expand_nodes_neighborhoods",
+    "expand_all_node_neighborhoods",
+    "expand_internal",
 ]
 
 

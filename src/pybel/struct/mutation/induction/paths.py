@@ -16,9 +16,9 @@ from ....constants import FUNCTION, PATHOLOGY
 from ....dsl import BaseEntity
 
 __all__ = [
-    'get_nodes_in_all_shortest_paths',
-    'get_subgraph_by_all_shortest_paths',
-    'get_random_path',
+    "get_nodes_in_all_shortest_paths",
+    "get_subgraph_by_all_shortest_paths",
+    "get_random_path",
 ]
 
 logger = logging.getLogger(__name__)
@@ -27,11 +27,7 @@ logger = logging.getLogger(__name__)
 def _remove_pathologies_oop(graph: BELGraph):
     """Remove pathology nodes from the graph."""
     rv = graph.copy()
-    victims = [
-        node
-        for node in rv
-        if node[FUNCTION] == PATHOLOGY
-    ]
+    victims = [node for node in rv if node[FUNCTION] == PATHOLOGY]
     rv.remove_nodes_from(victims)
     return rv
 
@@ -96,7 +92,7 @@ def get_subgraph_by_all_shortest_paths(
 
     for node in nodes:
         if node not in graph:
-            logger.debug('%s not in %s', node, graph)
+            logger.debug("%s not in %s", node, graph)
             continue
         query_nodes.append(node)
 

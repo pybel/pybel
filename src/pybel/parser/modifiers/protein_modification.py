@@ -76,15 +76,25 @@ twice to become active. This results in the following:
 
 import logging
 
-from pyparsing import Group, MatchFirst, Optional, ParseResults, ParserElement, oneOf, pyparsing_common as ppc
+from pyparsing import Group, MatchFirst, Optional, ParserElement, ParseResults, oneOf
+from pyparsing import pyparsing_common as ppc
 
 from .constants import amino_acid
 from ..utils import WCW, nest, one_of_tags
-from ...constants import CONCEPT, IDENTIFIER, KIND, NAME, NAMESPACE, PMOD, PMOD_CODE, PMOD_POSITION
+from ...constants import (
+    CONCEPT,
+    IDENTIFIER,
+    KIND,
+    NAME,
+    NAMESPACE,
+    PMOD,
+    PMOD_CODE,
+    PMOD_POSITION,
+)
 from ...language import pmod_legacy_labels, pmod_mappings, pmod_namespace
 
 __all__ = [
-    'get_protein_modification_language',
+    "get_protein_modification_language",
 ]
 
 logger = logging.getLogger(__name__)
@@ -97,19 +107,19 @@ def _handle_pmod_default_ns(_, __, tokens: ParseResults) -> ParseResults:
 
 def _handle_pmod_legacy_ns(line, _, tokens: ParseResults) -> ParseResults:
     upgraded = pmod_legacy_labels[tokens[0]]
-    logger.log(5, 'legacy pmod() value %s upgraded to %s', line, upgraded)
+    logger.log(5, "legacy pmod() value %s upgraded to %s", line, upgraded)
     return _r(upgraded, tokens)
 
 
 def _r(upgraded, tokens):
-    e = pmod_mappings[upgraded]['xrefs'][0]
+    e = pmod_mappings[upgraded]["xrefs"][0]
     tokens[NAMESPACE] = e.namespace
     tokens[IDENTIFIER] = e.identifier
     tokens[NAME] = e.name
     return tokens
 
 
-pmod_tag = one_of_tags(tags=['pmod', 'proteinModification'], canonical_tag=PMOD, name=KIND)
+pmod_tag = one_of_tags(tags=["pmod", "proteinModification"], canonical_tag=PMOD, name=KIND)
 pmod_default_ns = oneOf(list(pmod_namespace)).setParseAction(_handle_pmod_default_ns)
 pmod_legacy_ns = oneOf(list(pmod_legacy_labels)).setParseAction(_handle_pmod_legacy_ns)
 
@@ -119,18 +129,18 @@ def get_protein_modification_language(
     concept_qualified: ParserElement,
 ) -> ParserElement:
     """Build a protein modification parser."""
-    pmod_concept = MatchFirst([
-        concept_fqualified,
-        concept_qualified,
-        pmod_default_ns,
-        pmod_legacy_ns,
-    ])
+    pmod_concept = MatchFirst(
+        [
+            concept_fqualified,
+            concept_qualified,
+            pmod_default_ns,
+            pmod_legacy_ns,
+        ]
+    )
 
     return pmod_tag + nest(
         Group(pmod_concept)(CONCEPT)
         + Optional(
-            WCW
-            + amino_acid(PMOD_CODE)
-            + Optional(WCW + ppc.integer(PMOD_POSITION)),
+            WCW + amino_acid(PMOD_CODE) + Optional(WCW + ppc.integer(PMOD_POSITION)),
         ),
     )

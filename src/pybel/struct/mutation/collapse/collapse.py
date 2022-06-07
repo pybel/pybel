@@ -13,20 +13,15 @@ from ....dsl import BaseEntity
 from ....utils import hash_edge
 
 __all__ = [
-    'collapse_pair',
-    'collapse_nodes',
-    'collapse_all_variants',
-    'surviors_are_inconsistent',
+    "collapse_pair",
+    "collapse_nodes",
+    "collapse_all_variants",
+    "surviors_are_inconsistent",
 ]
 
 
 def _remove_self_edges(graph):
-    self_edges = [
-        (u, u, k)
-        for u in graph
-        if u in graph[u]
-        for k in graph[u][u]
-    ]
+    self_edges = [(u, u, k) for u in graph if u in graph[u] for k in graph[u][u]]
     graph.remove_edges_from(self_edges)
 
 
@@ -58,6 +53,7 @@ def collapse_pair(graph, survivor: BaseEntity, victim: BaseEntity) -> None:
 
 # TODO what happens when collapsing is not consistent? Need to build intermediate mappings and test their consistency.
 
+
 @in_place_transformation
 def collapse_nodes(graph, survivor_mapping: Mapping[BaseEntity, Set[BaseEntity]]) -> None:
     """Collapse all nodes in values to the key nodes, in place.
@@ -68,7 +64,7 @@ def collapse_nodes(graph, survivor_mapping: Mapping[BaseEntity, Set[BaseEntity]]
     """
     inconsistencies = surviors_are_inconsistent(survivor_mapping)
     if inconsistencies:
-        raise ValueError('survivor mapping is inconsistent: {}'.format(inconsistencies))
+        raise ValueError("survivor mapping is inconsistent: {}".format(inconsistencies))
 
     for survivor, victims in survivor_mapping.items():
         for victim in victims:

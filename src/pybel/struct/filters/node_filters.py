@@ -13,7 +13,10 @@ A general use for a node predicate is to use the built-in :func:`filter` in code
 
 from typing import Iterable, Set
 
-from .node_predicate_builders import function_inclusion_filter_builder, namespace_inclusion_builder
+from .node_predicate_builders import (
+    function_inclusion_filter_builder,
+    namespace_inclusion_builder,
+)
 from .node_predicates import concatenate_node_predicates
 from .typing import NodePredicates
 from ..graph import BELGraph
@@ -21,12 +24,12 @@ from ...dsl import BaseEntity
 from ...typing import Strings
 
 __all__ = [
-    'filter_nodes',
-    'get_nodes',
-    'count_passed_node_filter',
-    'summarize_node_filter',
-    'get_nodes_by_function',
-    'get_nodes_by_namespace',
+    "filter_nodes",
+    "get_nodes",
+    "count_passed_node_filter",
+    "summarize_node_filter",
+    "get_nodes_by_function",
+    "get_nodes_by_namespace",
 ]
 
 
@@ -55,7 +58,7 @@ def summarize_node_filter(graph: BELGraph, node_filters: NodePredicates) -> None
     :param node_filters: A node filter or list/tuple of node filters
     """
     passed = count_passed_node_filter(graph, node_filters)
-    print('{}/{} nodes passed'.format(passed, graph.number_of_nodes()))
+    print("{}/{} nodes passed".format(passed, graph.number_of_nodes()))
 
 
 def get_nodes_by_function(graph: BELGraph, func: Strings) -> Set[BaseEntity]:

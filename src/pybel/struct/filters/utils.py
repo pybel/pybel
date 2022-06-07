@@ -6,7 +6,7 @@ from ...constants import MODIFIER
 from ...typing import EdgeData
 
 __all__ = [
-    'part_has_modifier',
+    "part_has_modifier",
 ]
 
 

@@ -3,11 +3,11 @@
 """Exceptions for the :mod:`pybel.struct.pipeline` module."""
 
 __all__ = [
-    'MissingPipelineFunctionError',
-    'MetaValueError',
-    'MissingUniverseError',
-    'DeprecationMappingError',
-    'PipelineNameError',
+    "MissingPipelineFunctionError",
+    "MetaValueError",
+    "MissingUniverseError",
+    "DeprecationMappingError",
+    "PipelineNameError",
 ]
 
 

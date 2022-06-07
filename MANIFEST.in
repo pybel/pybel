@@ -14,13 +14,8 @@ include docs/Makefile
 global-exclude *.py[cod] __pycache__ *.so *.dylib .DS_Store *.gpickle
 
 exclude .bumpversion.cfg
-exclude .pre-commit-config.yaml
-exclude .travis.yml
-exclude .readthedocs.yml
-exclude .appveyor.yml
-exclude .codeclimate.yml
-exclude .codecov.yml
-exclude .coveragerc
+exclude .readthedocs.yaml
 exclude .flake8
 exclude tox.ini
-include *.rst *.txt LICENSE
+exclude CONTRIBUTING.md CHANGELOG.rst AUTHORS.rst
+include LICENSE README.rst

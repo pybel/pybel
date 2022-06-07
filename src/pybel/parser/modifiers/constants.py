@@ -14,7 +14,7 @@ aa_triple = oneOf(list(language.amino_acid_dict.values()))
 
 #: In biological literature, the X is used to denote a truncation. Text mining efforts often encode X as an amino
 #: acid, for which we will throw an error using :func:`handle_aa_placeholder`
-aa_placeholder = Keyword('X')
+aa_placeholder = Keyword("X")
 
 
 def handle_aa_placeholder(line, position, tokens):

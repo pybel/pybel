@@ -5,8 +5,8 @@
 import os
 
 __all__ = [
-    'build_template_environment',
-    'build_template_renderer',
+    "build_template_environment",
+    "build_template_renderer",
 ]
 
 
@@ -18,13 +18,13 @@ def build_template_environment(here: str):
     """
     from jinja2 import Environment, FileSystemLoader
 
-    loader = FileSystemLoader(os.path.join(here, 'templates'))
+    loader = FileSystemLoader(os.path.join(here, "templates"))
     environment = Environment(
         autoescape=True,
         loader=loader,
         trim_blocks=False,
     )
-    environment.globals['STATIC_PREFIX'] = here + '/static/'
+    environment.globals["STATIC_PREFIX"] = here + "/static/"
     return environment
 
 

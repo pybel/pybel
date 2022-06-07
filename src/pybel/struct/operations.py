@@ -5,18 +5,18 @@
 from typing import Iterable
 
 import networkx as nx
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
 from .utils import update_metadata
 from ..dsl import BaseEntity
 
 __all__ = [
-    'subgraph',
-    'left_full_join',
-    'left_outer_join',
-    'union',
-    'left_node_intersection_join',
-    'node_intersection',
+    "subgraph",
+    "left_full_join",
+    "left_outer_join",
+    "union",
+    "left_node_intersection_join",
+    "node_intersection",
 ]
 
 
@@ -34,10 +34,7 @@ def subgraph(graph, nodes: Iterable[BaseEntity]):
     for node, data in sg.nodes(data=True):
         rv.add_node(node, **data)
 
-    rv.add_edges_from(
-        (u, v, key, datadict.copy())
-        for u, v, key, datadict in sg.edges(keys=True, data=True)
-    )
+    rv.add_edges_from((u, v, key, datadict.copy()) for u, v, key, datadict in sg.edges(keys=True, data=True))
 
     return rv
 
@@ -55,11 +52,7 @@ def left_full_join(g, h) -> None:
     >>> h = pybel.from_bel_script('...')
     >>> left_full_join(g, h)
     """
-    g.add_nodes_from(
-        (node, data)
-        for node, data in h.nodes(data=True)
-        if node not in g
-    )
+    g.add_nodes_from((node, data) for node, data in h.nodes(data=True) if node not in g)
     g.add_edges_from(
         (u, v, key, data)
         for u, v, key, data in h.edges(keys=True, data=True)
@@ -130,12 +123,12 @@ def union(graphs, use_tqdm: bool = False):
     it = iter(graphs)
 
     if use_tqdm:
-        it = tqdm(it, desc='taking union')
+        it = tqdm(it, desc="taking union")
 
     try:
         target = next(it)
     except StopIteration as e:
-        raise ValueError('no graphs given') from e
+        raise ValueError("no graphs given") from e
 
     try:
         graph = next(it)
@@ -200,7 +193,7 @@ def node_intersection(graphs):
     n_graphs = len(graphs)
 
     if n_graphs == 0:
-        raise ValueError('no graphs given')
+        raise ValueError("no graphs given")
 
     if n_graphs == 1:
         return graphs[0]
@@ -210,7 +203,4 @@ def node_intersection(graphs):
     for graph in graphs[1:]:
         nodes.intersection_update(graph)
 
-    return union(
-        subgraph(graph, nodes)
-        for graph in graphs
-    )
+    return union(subgraph(graph, nodes) for graph in graphs)

@@ -78,7 +78,7 @@ function init_d3_force(d3, graph, chart, width, height, function_colors) {
      * @returns {str} canonical name of the node
      */
     function getCanonicalName(d) {
-        if (d.concept.name && !(d.variants || d.reactants || d.products || d.members)) {
+        if (d.concept && d.concept.name && !(d.variants || d.reactants || d.products || d.members)) {
             return d.concept.name
         } else if (d.bel) {
             return d.bel

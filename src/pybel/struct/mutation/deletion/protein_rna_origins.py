@@ -10,7 +10,7 @@ from ....constants import GENE, RELATION, RNA, TRANSCRIBED_TO, TRANSLATED_TO
 from ....dsl import BaseEntity
 
 __all__ = [
-    'prune_protein_rna_origins',
+    "prune_protein_rna_origins",
 ]
 
 

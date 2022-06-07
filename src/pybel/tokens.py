@@ -7,18 +7,59 @@ from typing import Any, List, Mapping, Union
 from pyparsing import ParseResults
 
 from .constants import (
-    CONCEPT, FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_START, FRAGMENT_STOP, FUNCTION, FUSION, FUSION_MISSING,
-    FUSION_REFERENCE, FUSION_START, FUSION_STOP, GMOD, HGVS, IDENTIFIER, KIND, MEMBERS, NAME, NAMESPACE, PARTNER_3P,
-    PARTNER_5P, PMOD, PMOD_CODE, PMOD_POSITION, PRODUCTS, RANGE_3P, RANGE_5P, REACTANTS, REACTION, VARIANTS, XREFS,
+    CONCEPT,
+    FRAGMENT,
+    FRAGMENT_DESCRIPTION,
+    FRAGMENT_START,
+    FRAGMENT_STOP,
+    FUNCTION,
+    FUSION,
+    FUSION_MISSING,
+    FUSION_REFERENCE,
+    FUSION_START,
+    FUSION_STOP,
+    GMOD,
+    HGVS,
+    IDENTIFIER,
+    KIND,
+    MEMBERS,
+    NAME,
+    NAMESPACE,
+    PARTNER_3P,
+    PARTNER_5P,
+    PMOD,
+    PMOD_CODE,
+    PMOD_POSITION,
+    PRODUCTS,
+    RANGE_3P,
+    RANGE_5P,
+    REACTANTS,
+    REACTION,
+    VARIANTS,
+    XREFS,
 )
 from .dsl import (
-    BaseAbundance, BaseEntity, CentralDogma, EnumeratedFusionRange, FUNC_TO_DSL, FUNC_TO_FUSION_DSL, FUNC_TO_LIST_DSL,
-    Fragment, FusionBase, FusionRangeBase, GeneModification, Hgvs, ListAbundance, MissingFusionRange,
-    ProteinModification, Reaction, Variant,
+    FUNC_TO_DSL,
+    FUNC_TO_FUSION_DSL,
+    FUNC_TO_LIST_DSL,
+    BaseAbundance,
+    BaseEntity,
+    CentralDogma,
+    EnumeratedFusionRange,
+    Fragment,
+    FusionBase,
+    FusionRangeBase,
+    GeneModification,
+    Hgvs,
+    ListAbundance,
+    MissingFusionRange,
+    ProteinModification,
+    Reaction,
+    Variant,
 )
 
 __all__ = [
-    'parse_result_to_dsl',
+    "parse_result_to_dsl",
 ]
 
 
@@ -57,11 +98,7 @@ def _fusion_to_dsl(tokens) -> FusionBase:
     member_dsl = FUNC_TO_DSL[func]
 
     partner_5p = tokens[FUSION][PARTNER_5P]
-    partner_5p_concept = (
-        partner_5p[CONCEPT]
-        if CONCEPT in tokens[FUSION][PARTNER_5P] else
-        partner_5p
-    )
+    partner_5p_concept = partner_5p[CONCEPT] if CONCEPT in tokens[FUSION][PARTNER_5P] else partner_5p
     partner_5p_node = member_dsl(
         namespace=partner_5p_concept[NAMESPACE],
         name=partner_5p_concept[NAME],
@@ -70,11 +107,7 @@ def _fusion_to_dsl(tokens) -> FusionBase:
     )
 
     partner_3p = tokens[FUSION][PARTNER_3P]
-    partner_3p_concept = (
-        partner_3p[CONCEPT]
-        if CONCEPT in tokens[FUSION][PARTNER_3P] else
-        partner_3p
-    )
+    partner_3p_concept = partner_3p[CONCEPT] if CONCEPT in tokens[FUSION][PARTNER_3P] else partner_3p
     partner_3p_node = member_dsl(
         namespace=partner_3p_concept[NAMESPACE],
         name=partner_3p_concept[NAME],
@@ -115,7 +148,7 @@ def _simple_po_to_dict(tokens) -> BaseAbundance:
     """
     dsl = FUNC_TO_DSL.get(tokens[FUNCTION])
     if dsl is None:
-        raise ValueError('invalid tokens: {}'.format(tokens))
+        raise ValueError("invalid tokens: {}".format(tokens))
 
     concept = tokens[CONCEPT]
     return dsl(
@@ -133,7 +166,7 @@ def _variant_po_to_dict(tokens) -> CentralDogma:
     """
     dsl = FUNC_TO_DSL.get(tokens[FUNCTION])
     if dsl is None:
-        raise ValueError('invalid tokens: {}'.format(tokens))
+        raise ValueError("invalid tokens: {}".format(tokens))
 
     concept = tokens[CONCEPT]
     return dsl(
@@ -141,10 +174,7 @@ def _variant_po_to_dict(tokens) -> CentralDogma:
         name=concept[NAME],
         identifier=concept.get(IDENTIFIER),
         xrefs=tokens.get(XREFS),
-        variants=[
-            _variant_to_dsl_helper(variant_tokens)
-            for variant_tokens in tokens[VARIANTS]
-        ],
+        variants=[_variant_to_dsl_helper(variant_tokens) for variant_tokens in tokens[VARIANTS]],
     )
 
 
@@ -186,7 +216,7 @@ def _variant_to_dsl_helper(tokens) -> Variant:
             description=tokens.get(FRAGMENT_DESCRIPTION),
         )
 
-    raise ValueError('invalid fragment kind: {}'.format(kind))
+    raise ValueError("invalid fragment kind: {}".format(kind))
 
 
 def _reaction_po_to_dict(tokens) -> Reaction:
@@ -235,7 +265,4 @@ def _parse_tokens_list(tokens) -> List[BaseEntity]:
 
     :type tokens: ParseResult
     """
-    return [
-        parse_result_to_dsl(token)
-        for token in tokens
-    ]
+    return [parse_result_to_dsl(token) for token in tokens]

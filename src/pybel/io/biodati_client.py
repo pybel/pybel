@@ -24,8 +24,8 @@ from .graphdati import _iter_graphdati, from_graphdati, to_graphdati
 from ..struct import BELGraph
 
 __all__ = [
-    'to_biodati',
-    'from_biodati',
+    "to_biodati",
+    "from_biodati",
 ]
 
 logger = logging.getLogger(__name__)
@@ -34,15 +34,15 @@ logger = logging.getLogger(__name__)
 def to_biodati(  # noqa: S107
     graph: BELGraph,
     *,
-    username: str = 'demo@biodati.com',
-    password: str = 'demo',
-    base_url: str = 'https://nanopubstore.demo.biodati.com',
+    username: str = "demo@biodati.com",
+    password: str = "demo",
+    base_url: str = "https://nanopubstore.demo.biodati.com",
     chunksize: Optional[int] = None,
     use_tqdm: bool = True,
     collections: Optional[Iterable[str]] = None,
     overwrite: bool = False,
     validate: bool = True,
-    email: Union[bool, str] = False
+    email: Union[bool, str] = False,
 ) -> requests.Response:
     """Post this graph to a BioDati server.
 
@@ -93,9 +93,9 @@ def to_biodati(  # noqa: S107
 
 def from_biodati(  # noqa: S107
     network_id: str,
-    username: str = 'demo@biodati.com',
-    password: str = 'demo',
-    base_url: str = 'https://networkstore.demo.biodati.com',
+    username: str = "demo@biodati.com",
+    password: str = "demo",
+    base_url: str = "https://networkstore.demo.biodati.com",
 ) -> BELGraph:
     """Get a graph from a BioDati network store based on its network identifier.
 
@@ -132,16 +132,16 @@ class BiodatiClient:
     """A client for the BioDati nanopub store and network store's APIs."""
 
     def __init__(self, username: str, password: str, base_url: str):
-        self.base_url = base_url.rstrip('/')
+        self.base_url = base_url.rstrip("/")
         self.username = username
         res = requests.post(
-            '{}/token'.format(base_url),
+            "{}/token".format(base_url),
             data=dict(username=username, password=password),
         )
         token_dict = res.json()
-        self.token_type = token_dict['token_type']
-        self.id_token = token_dict['id_token']
-        self.access_token = token_dict['access_token']
+        self.token_type = token_dict["token_type"]
+        self.id_token = token_dict["id_token"]
+        self.access_token = token_dict["access_token"]
 
     def post(self, endpoint: str, **kwargs):
         """Send a post request to BioDati."""
@@ -153,20 +153,20 @@ class BiodatiClient:
 
     def _help_request(self, requester, endpoint: str, **kwargs):
         """Send a request to BioDati."""
-        url = '{}/{}'.format(self.base_url, endpoint)
-        logger.info('requesting %s with params %s', url, kwargs.get('params', {}))
-        headers = {'Authorization': '{} {}'.format(self.token_type, self.id_token)}
+        url = "{}/{}".format(self.base_url, endpoint)
+        logger.info("requesting %s with params %s", url, kwargs.get("params", {}))
+        headers = {"Authorization": "{} {}".format(self.token_type, self.id_token)}
         return requester(url, headers=headers, **kwargs)
 
     def get_graph(self, network_id: str) -> BELGraph:
         """Get a graph from BioDati."""
         return from_graphdati(self.get_graph_json(network_id))
 
-    def get_graph_json(self, network_id: str, network_format: str = 'normal'):
+    def get_graph_json(self, network_id: str, network_format: str = "normal"):
         """Get the graph JSON."""
         res = self.get(
-            'networks/{network_id}'.format(network_id=network_id),
-            params={'format': network_format},
+            "networks/{network_id}".format(network_id=network_id),
+            params={"format": network_format},
         )
         # FIXME network_format='full' causes internal server error currently
         res_json = res.json()
@@ -180,7 +180,7 @@ class BiodatiClient:
         collections: Optional[List[str]] = None,
         overwrite: bool = False,
         validate: bool = True,
-        email: Union[bool, str] = False
+        email: Union[bool, str] = False,
     ) -> requests.Response:
         """Post the graph to BioDati.
 
@@ -213,7 +213,7 @@ class BiodatiClient:
         collections: Optional[Iterable[str]] = None,
         overwrite: bool = False,
         validate: bool = True,
-        email: Union[bool, str] = False
+        email: Union[bool, str] = False,
     ) -> requests.Response:
         """Post the graph to BioDati in chunks, when the graph is too big for a normal upload.
 
@@ -257,7 +257,7 @@ class BiodatiClient:
          used for login. If string, emails to that user. If false, no email.
         """
         file = BytesIO()
-        file.write(json.dumps(graph_json).encode('utf-8'))
+        file.write(json.dumps(graph_json).encode("utf-8"))
         file.seek(0)
         return self.post_graph_file(
             file,
@@ -283,12 +283,12 @@ class BiodatiClient:
         """
         params = dict(overwrite=overwrite, validate=validate)
         if isinstance(email, str):
-            params['email'] = email
+            params["email"] = email
         elif email:
-            params['email'] = self.username
+            params["email"] = self.username
 
         return self.post(
-            'nanopubs/import/file',
+            "nanopubs/import/file",
             files=dict(file=file),
             params=params,
         )
@@ -296,11 +296,11 @@ class BiodatiClient:
 
 def _main():
     """Run with python -m pybel.io.graphdati."""
-    network_id = '01E46GDFQAGK5W8EFS9S9WMH12'
+    network_id = "01E46GDFQAGK5W8EFS9S9WMH12"
     graph = from_biodati(network_id=network_id)
     graph.summarize()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     _main()

@@ -16,19 +16,19 @@ from ..tokens import parse_result_to_dsl
 from ..utils import hash_edge
 
 __all__ = [
-    'to_sbel_file',
-    'to_sbel',
-    'to_sbel_gz',
-    'from_sbel',
-    'from_sbel_gz',
-    'from_sbel_file',
+    "to_sbel_file",
+    "to_sbel",
+    "to_sbel_gz",
+    "from_sbel",
+    "from_sbel_gz",
+    "from_sbel_file",
 ]
 
 SBEL = Any
 
 
-@open_file(1, mode='w')
-def to_sbel_file(graph: BELGraph, path: Union[str, TextIO], separators=(',', ':'), **kwargs) -> None:
+@open_file(1, mode="w")
+def to_sbel_file(graph: BELGraph, path: Union[str, TextIO], separators=(",", ":"), **kwargs) -> None:
     """Write this graph as BEL JSONL to a file.
 
     :param graph: A BEL graph
@@ -36,17 +36,20 @@ def to_sbel_file(graph: BELGraph, path: Union[str, TextIO], separators=(',', ':'
     :param path: A path or file-like
     """
     for i in iterate_sbel(graph):
-        print(json.dumps(i, ensure_ascii=False, separators=separators, **kwargs), file=path)
+        print(
+            json.dumps(i, ensure_ascii=False, separators=separators, **kwargs),
+            file=path,
+        )
 
 
-def to_sbel_gz(graph: BELGraph, path: str, separators=(',', ':'), **kwargs) -> None:
+def to_sbel_gz(graph: BELGraph, path: str, separators=(",", ":"), **kwargs) -> None:
     """Write a graph as BEL JSONL to a gzip file.
 
     :param graph: A BEL graph
     :param separators: The separators used in :func:`json.dumps`
     :param path: A path for a gzip file
     """
-    with gzip.open(path, 'wt') as file:
+    with gzip.open(path, "wt") as file:
         to_sbel_file(graph, file, separators=separators, **kwargs)
 
 
@@ -62,9 +65,9 @@ def iterate_sbel(graph: BELGraph) -> Iterable[SBEL]:
     yield g
     for u, v, k, d in graph.edges(data=True, keys=True):
         yield {
-            'source': _augment_node(u),
-            'target': _augment_node(v),
-            'key': k,
+            "source": _augment_node(u),
+            "target": _augment_node(v),
+            "key": k,
             **d,
         }
 
@@ -98,13 +101,9 @@ def add_sbel(graph: BELGraph, it: Iterable[SBEL]) -> None:
 
 def add_sbel_row(graph: BELGraph, data: SBEL) -> str:
     """Add a single SBEL data dictionary to a graph."""
-    u = parse_result_to_dsl(data['source'])
-    v = parse_result_to_dsl(data['target'])
-    edge_data = {
-        k: v
-        for k, v in data.items()
-        if k not in {'source', 'target', 'key'}
-    }
+    u = parse_result_to_dsl(data["source"])
+    v = parse_result_to_dsl(data["target"])
+    edge_data = {k: v for k, v in data.items() if k not in {"source", "target", "key"}}
     for side in (SOURCE_MODIFIER, TARGET_MODIFIER):
         side_data = edge_data.get(side)
         if side_data:
@@ -114,19 +113,16 @@ def add_sbel_row(graph: BELGraph, data: SBEL) -> str:
     return graph.add_edge(u, v, key=hash_edge(u, v, edge_data), **edge_data)
 
 
-@open_file(0, mode='r')
+@open_file(0, mode="r")
 def from_sbel_file(path: Union[str, TextIO]) -> BELGraph:
     """Build a graph from the BEL JSONL contained in the given file.
 
     :param path: A path or file-like
     """
-    return from_sbel((
-        json.loads(line)
-        for line in path
-    ))
+    return from_sbel((json.loads(line) for line in path))
 
 
 def from_sbel_gz(path: str) -> BELGraph:
     """Read a graph as BEL JSONL from a gzip file."""
-    with gzip.open(path, 'rt') as file:
+    with gzip.open(path, "rt") as file:
         return from_sbel_file(file)

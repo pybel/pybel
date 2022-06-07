@@ -13,9 +13,15 @@ from typing import Any, Iterable, Mapping, Optional, Set, TextIO, Tuple, Union
 
 import click
 import pandas as pd
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 
-from .cli import connection_option, host_option, password_option, user_option, verbose_option
+from .cli import (
+    connection_option,
+    host_option,
+    password_option,
+    user_option,
+    verbose_option,
+)
 from .constants import CITATION
 from .io import from_bel_script, to_bel_commons, to_indra_statements
 from .io.api import dump, load
@@ -26,19 +32,19 @@ from .struct.operations import union
 from .version import get_version
 
 __all__ = [
-    'BELMetadata',
-    'BELRepository',
-    'append_click_group',
+    "BELMetadata",
+    "BELRepository",
+    "append_click_group",
 ]
 
 logger = logging.getLogger(__name__)
 
-private_option = click.option('--private', is_flag=True)
+private_option = click.option("--private", is_flag=True)
 
 OUTPUT_KWARGS = {
-    'nodelink.json': dict(indent=2, sort_keys=True),
-    'cx.json': dict(indent=2, sort_keys=True),
-    'jgif.json': dict(indent=2, sort_keys=True),
+    "nodelink.json": dict(indent=2, sort_keys=True),
+    "cx.json": dict(indent=2, sort_keys=True),
+    "jgif.json": dict(indent=2, sort_keys=True),
 }
 
 
@@ -88,14 +94,14 @@ class BELRepository:
     directory: str
     output_directory: Optional[str] = None
 
-    bel_cache_name: str = '_cache.bel'
+    bel_cache_name: str = "_cache.bel"
     metadata: Optional[BELMetadata] = None
-    formats: Tuple[str, ...] = ('pickle', 'nodelink.json')
+    formats: Tuple[str, ...] = ("pickle", "nodelink.json")
 
     #: Must include {file_name} and {extension}
-    cache_fmt: str = '{file_name}.{extension}'
-    global_summary_ext: str = 'summary.tsv'
-    warnings_ext: str = 'warnings.tsv'
+    cache_fmt: str = "{file_name}.{extension}"
+    global_summary_ext: str = "summary.tsv"
+    warnings_ext: str = "warnings.tsv"
 
     #: Arguments passed to :func:`pybel.from_path` during compilation
     from_path_kwargs: Mapping[str, Any] = field(default_factory=dict)
@@ -110,20 +116,23 @@ class BELRepository:
         self.bel_summary_path = self._build_cache_ext_path(
             root=self.output_directory,
             file_name=self.bel_cache_name,
-            extension=self.global_summary_ext.lstrip('.'),
+            extension=self.global_summary_ext.lstrip("."),
         )
 
     def _get_global_cache_path_by_extension(self, extension: str) -> str:
         return self._build_cache_ext_path(self.output_directory, self.bel_cache_name, extension)
 
     def _build_warnings_path(self, root: str, file_name: str) -> str:
-        return self._build_cache_ext_path(root, file_name, self.warnings_ext.lstrip('.'))
+        return self._build_cache_ext_path(root, file_name, self.warnings_ext.lstrip("."))
 
     def _build_summary_path(self, root: str, file_name: str) -> str:
-        return self._build_cache_ext_path(root, file_name, 'summary.json')
+        return self._build_cache_ext_path(root, file_name, "summary.json")
 
     def _build_cache_ext_path(self, root: str, file_name: str, extension: str) -> str:
-        return os.path.join(root, self.cache_fmt.format(file_name=file_name, extension=extension.lstrip('.')))
+        return os.path.join(
+            root,
+            self.cache_fmt.format(file_name=file_name, extension=extension.lstrip(".")),
+        )
 
     def walk(self) -> Iterable[Tuple[str, Iterable[str], Iterable[str]]]:
         """Recursively walk this directory."""
@@ -133,7 +142,7 @@ class BELRepository:
         """Yield all paths to BEL documents."""
         for root, _dirs, file_names in self.walk():
             for file_name in sorted(file_names):
-                if not file_name.startswith('_') and file_name.endswith('.bel'):
+                if not file_name.startswith("_") and file_name.endswith(".bel"):
                     yield root, file_name
 
     def clear_global_cache(self) -> None:
@@ -178,17 +187,26 @@ class BELRepository:
             kwargs = OUTPUT_KWARGS.get(extension, {})
             dump(graph, path, **kwargs)
 
-        with open(self._build_summary_path(root, file_name), 'w') as file:
+        with open(self._build_summary_path(root, file_name), "w") as file:
             json.dump(graph.summarize.dict(), file, indent=2)
 
         if graph.warnings:
-            logger.info(f' - {graph.number_of_warnings()} warnings')
+            logger.info(f" - {graph.number_of_warnings()} warnings")
             warnings_path = self._build_warnings_path(root, file_name)
-            warnings_df = pd.DataFrame([
-                (exc.line_number, exc.position, exc.line, exc.__class__.__name__, str(exc))
-                for _, exc, _ in graph.warnings
-            ], columns=['Line Number', 'Position', 'Line', 'Error', 'Message'])
-            warnings_df.to_csv(warnings_path, sep='\t', index=False)
+            warnings_df = pd.DataFrame(
+                [
+                    (
+                        exc.line_number,
+                        exc.position,
+                        exc.line,
+                        exc.__class__.__name__,
+                        str(exc),
+                    )
+                    for _, exc, _ in graph.warnings
+                ],
+                columns=["Line Number", "Position", "Line", "Error", "Message"],
+            )
+            warnings_df.to_csv(warnings_path, sep="\t", index=False)
 
     def _export_global(self, graph: BELGraph) -> None:
         self._export_local(graph, self.output_directory, self.bel_cache_name)
@@ -228,10 +246,7 @@ class BELRepository:
 
         :rtype: List[indra.statements.Statement]
         """
-        return list(chain.from_iterable(
-            to_indra_statements(graph)
-            for graph in self.get_graphs(**kwargs).values()
-        ))
+        return list(chain.from_iterable(to_indra_statements(graph) for graph in self.get_graphs(**kwargs).values()))
 
     def get_graphs(
         self,
@@ -266,7 +281,7 @@ class BELRepository:
                 graph = rv[path] = from_bel_script(path, manager=manager, **_from_path_kwargs)
                 graph.path = os.path.relpath(os.path.join(root, file_name), self.directory)
             except Exception as exc:
-                logger.warning(f'problem with {path}: {exc}')
+                logger.warning(f"problem with {path}: {exc}")
                 continue
 
             enrich_pubmed_citations(graph=graph, manager=manager)
@@ -295,23 +310,22 @@ class BELRepository:
 
     def _get_summary_df_from_graphs(self, graphs, save: Union[str, bool, TextIO] = True):
         summary_dicts = {
-            os.path.relpath(path, self.directory): graph.summarize.dict()
-            for path, graph in graphs.items()
+            os.path.relpath(path, self.directory): graph.summarize.dict() for path, graph in graphs.items()
         }
 
-        df = pd.DataFrame.from_dict(summary_dicts, orient='index')
+        df = pd.DataFrame.from_dict(summary_dicts, orient="index")
 
         if isinstance(save, str):
-            df.to_csv(save, sep='\t')
+            df.to_csv(save, sep="\t")
         elif save:
-            df.to_csv(self.bel_summary_path, sep='\t')
+            df.to_csv(self.bel_summary_path, sep="\t")
 
         return df
 
     def build_cli(self):  # noqa: D202
         """Build a command line interface."""
 
-        @click.group(help=f'Tools for the BEL repository at {self.directory} using PyBEL v{get_version()}')
+        @click.group(help=f"Tools for the BEL repository at {self.directory} using PyBEL v{get_version()}")
         @click.pass_context
         def main(ctx):
             """Group the commands."""
@@ -323,11 +337,7 @@ class BELRepository:
     def get_extensions(self, root: str, file_name: str) -> Set[str]:
         """Get all compiled files for the given BEL."""
         # TODO check that this is a valid BEL path!
-        return {
-            extension
-            for extension, path in self._iterate_extension_path(root, file_name)
-            if os.path.exists(path)
-        }
+        return {extension for extension, path in self._iterate_extension_path(root, file_name) if os.path.exists(path)}
 
     def _get_global_caches(self):
         return self.get_extensions(self.output_directory, self.bel_cache_name)
@@ -341,7 +351,7 @@ class BELRepository:
 
 
 def _write_caches(bel_repository: BELRepository, root: str, file_name: str):
-    extensions = ', '.join(sorted(bel_repository.get_extensions(root, file_name)))
+    extensions = ", ".join(sorted(bel_repository.get_extensions(root, file_name)))
     has_warnings = os.path.exists(bel_repository._build_warnings_path(root, file_name))
 
     try:
@@ -351,20 +361,23 @@ def _write_caches(bel_repository: BELRepository, root: str, file_name: str):
         summary = None
 
     if extensions and has_warnings:
-        s = click.style('✘️ ', fg='red')
+        s = click.style("✘️ ", fg="red")
     elif extensions and not has_warnings:
-        s = click.style('✔︎ ', fg='green')
+        s = click.style("✔︎ ", fg="green")
     else:
-        s = click.style('? ', fg='yellow', bold=True)
+        s = click.style("? ", fg="yellow", bold=True)
 
     path = os.path.join(root, file_name)
     s += os.path.relpath(path, bel_repository.directory)
 
     if extensions:
-        s += click.style(f' ({extensions})', fg='green')
+        s += click.style(f" ({extensions})", fg="green")
 
     if summary:
-        s += click.style(f' ({summary["Number of Nodes"]} nodes, {summary["Number of Edges"]} edges)', fg='blue')
+        s += click.style(
+            f' ({summary["Number of Nodes"]} nodes, {summary["Number of Edges"]} edges)',
+            fg="blue",
+        )
 
     click.echo(s)
 
@@ -378,9 +391,13 @@ def append_click_group(group: click.Group) -> None:  # noqa: D202, C901
         """List the contents of the repository."""
         global_caches = bel_repository._get_global_caches()
         if global_caches:
-            click.secho('Global Cache', fg='red', bold=True)
-            _write_caches(bel_repository, bel_repository.output_directory, bel_repository.bel_cache_name)
-            click.secho('Local Caches', fg='red', bold=True)
+            click.secho("Global Cache", fg="red", bold=True)
+            _write_caches(
+                bel_repository,
+                bel_repository.output_directory,
+                bel_repository.bel_cache_name,
+            )
+            click.secho("Local Caches", fg="red", bold=True)
 
         for root, file_name in bel_repository.iterate_bel():
             _write_caches(bel_repository, root, file_name)
@@ -390,28 +407,35 @@ def append_click_group(group: click.Group) -> None:  # noqa: D202, C901
     def citations(repository: BELRepository):
         """List citations in the repository."""
         for database, reference in sorted(set(repository._iterate_citations(use_tqdm=True)), key=lambda x: int(x[1])):
-            click.echo(f'{database}\t{reference}')
+            click.echo(f"{database}\t{reference}")
 
     @group.command()
     @host_option
     @user_option
     @password_option
-    @click.option('-s', '--sleep', type=int, default=3, help='Seconds to sleep between sending')
+    @click.option("-s", "--sleep", type=int, default=3, help="Seconds to sleep between sending")
     @private_option
     @click.pass_obj
-    def upload_separate(repository: BELRepository, host: str, user: str, password: str, sleep: int, private: bool):
+    def upload_separate(
+        repository: BELRepository,
+        host: str,
+        user: str,
+        password: str,
+        sleep: int,
+        private: bool,
+    ):
         """Upload all to BEL Commons."""
         it = tqdm(repository.get_graphs().items())
         for name, graph in it:
             res = to_bel_commons(graph, host=host, user=user, password=password, public=not private)
             res_json = res.json()
-            task_id = res_json.get('task_id')
+            task_id = res_json.get("task_id")
             if task_id is not None:
-                it.write(f'task:{task_id} - {name}')
+                it.write(f"task:{task_id} - {name}")
                 it.write(f'see: {host.rstrip("/")}/api/task/{task_id}')
                 time.sleep(sleep)
             else:
-                it.write(f'problem with {name}: {res_json}')
+                it.write(f"problem with {name}: {res_json}")
 
     @group.command()
     @host_option
@@ -424,12 +448,12 @@ def append_click_group(group: click.Group) -> None:  # noqa: D202, C901
         graph = repository.get_graph()
         res = to_bel_commons(graph, host=host, user=user, password=password, public=not private)
         res_json = res.json()
-        task_id = res_json.get('task_id')
+        task_id = res_json.get("task_id")
         if task_id is not None:
-            click.echo(f'task:{task_id} - {graph}')
+            click.echo(f"task:{task_id} - {graph}")
             click.echo(f'see: {host.rstrip("/")}/api/task/{task_id}')
         else:
-            click.echo(f'problem with {graph.name}: {res_json}')
+            click.echo(f"problem with {graph.name}: {res_json}")
 
     @group.command()
     @click.confirmation_option()
@@ -462,8 +486,8 @@ def append_click_group(group: click.Group) -> None:  # noqa: D202, C901
 
     @group.command()
     @connection_option
-    @click.option('-r', '--reload', is_flag=True)
-    @click.option('--no-tqdm', is_flag=True)
+    @click.option("-r", "--reload", is_flag=True)
+    @click.option("--no-tqdm", is_flag=True)
     @verbose_option
     @click.pass_obj
     def compile(bel_repository: BELRepository, connection: str, reload: bool, no_tqdm: bool):
@@ -478,7 +502,7 @@ def append_click_group(group: click.Group) -> None:  # noqa: D202, C901
             use_cached=(not reload),
             use_tqdm=(not no_tqdm),
             tqdm_kwargs=dict(
-                desc='Loading BEL',
+                desc="Loading BEL",
                 leave=False,
             ),
             from_path_kwargs=dict(
@@ -491,7 +515,7 @@ def append_click_group(group: click.Group) -> None:  # noqa: D202, C901
         click.echo(graph.summarize.str())
 
     @group.command()
-    @click.argument('file', type=click.File('w'))
+    @click.argument("file", type=click.File("w"))
     @click.pass_obj
     def html(bel_repository: BELRepository, file: TextIO):
         """Output an HTML summary."""
@@ -499,7 +523,7 @@ def append_click_group(group: click.Group) -> None:  # noqa: D202, C901
         try:
             from pybel_tools.assembler.html import to_html_file
         except ImportError:
-            click.secho('pybel_tools.assembler.html is not available', fg='red')
+            click.secho("pybel_tools.assembler.html is not available", fg="red")
             sys.exit(1)
         else:
             to_html_file(graph, file)
@@ -508,9 +532,11 @@ def append_click_group(group: click.Group) -> None:  # noqa: D202, C901
 @click.group()
 @click.version_option()
 @click.option(
-    '-d', '--directory',
-    default=os.getcwd(), type=click.Path(file_okay=False, dir_okay=True, exists=True),
-    help='Defaults to current working directory',
+    "-d",
+    "--directory",
+    default=os.getcwd(),
+    type=click.Path(file_okay=False, dir_okay=True, exists=True),
+    help="Defaults to current working directory",
 )
 @click.pass_context
 def main(ctx, directory: str):
@@ -520,5 +546,5 @@ def main(ctx, directory: str):
 
 append_click_group(main)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

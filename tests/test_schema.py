@@ -13,10 +13,7 @@ from pybel.testing.utils import n
 
 NAMESPACE, NAME, IDENTIFIER = n(), n(), n()
 
-BLANK_ABUNDANCE = {
-    "function": "",
-    "variants": []
-}
+BLANK_ABUNDANCE = {"function": "", "variants": []}
 
 # Abundances
 PROTEIN = pybel.dsl.Protein(namespace=NAMESPACE, name=NAME, identifier=IDENTIFIER)
@@ -24,9 +21,8 @@ GENE = pybel.dsl.Gene(NAMESPACE, name=NAME, identifier=IDENTIFIER)
 
 # Variants
 GENE_MOD = pybel.dsl.GeneModification(NAME, namespace=NAMESPACE, identifier=IDENTIFIER)
-PROTEIN_SUB = pybel.dsl.ProteinSubstitution('Ala', 1, 'Tyr')
-PROTEIN_MOD = pybel.dsl.ProteinModification(NAME, code='Ala', position=1,
-                                            namespace=NAMESPACE, identifier=IDENTIFIER)
+PROTEIN_SUB = pybel.dsl.ProteinSubstitution("Ala", 1, "Tyr")
+PROTEIN_MOD = pybel.dsl.ProteinModification(NAME, code="Ala", position=1, namespace=NAMESPACE, identifier=IDENTIFIER)
 FRAGMENT = pybel.dsl.Fragment(1, 2)
 
 
@@ -71,20 +67,20 @@ class TestNodeSchema(unittest.TestCase):
 
     def test_fusions(self):
         """Test validating fusion nodes."""
-        protein = pybel.dsl.Protein(namespace=NAMESPACE, name=NAME,
-                                    identifier=IDENTIFIER)
+        protein = pybel.dsl.Protein(namespace=NAMESPACE, name=NAME, identifier=IDENTIFIER)
         enum_fusion_range = pybel.dsl.EnumeratedFusionRange("r", 1, 79)
         missing_fusion_range = pybel.dsl.MissingFusionRange()
-        fusion_node = pybel.dsl.FusionBase(protein, protein,
-                                           range_5p=enum_fusion_range,
-                                           range_3p=missing_fusion_range)
+        fusion_node = pybel.dsl.FusionBase(protein, protein, range_5p=enum_fusion_range, range_3p=missing_fusion_range)
         self.assertTrue(is_valid_node(fusion_node))
 
     def test_list_abundances(self):
         """Test validating list abundance nodes."""
         complex_abundance = pybel.dsl.ComplexAbundance(
             [GENE.with_variants(GENE_MOD), PROTEIN.with_variants(PROTEIN_SUB)],
-            namespace=NAMESPACE, name=NAME, identifier=IDENTIFIER)
+            namespace=NAMESPACE,
+            name=NAME,
+            identifier=IDENTIFIER,
+        )
         composite_abundance = pybel.dsl.CompositeAbundance([PROTEIN, complex_abundance])
         self.assertTrue(is_valid_node(complex_abundance))
         self.assertTrue(is_valid_node(composite_abundance))
@@ -115,11 +111,11 @@ class TestNodeSchema(unittest.TestCase):
     def test_invalid_amino(self):
         """Test that protein variants with invalid amino acid codes are caught."""
         invalid_psub = dict(PROTEIN_SUB)
-        invalid_psub['hgvs'] = 'p.Aaa0Bbb'
+        invalid_psub["hgvs"] = "p.Aaa0Bbb"
         self.assertFalse(is_valid_node(invalid_psub))
 
         invalid_pmod = dict(PROTEIN_MOD)
-        invalid_pmod['code'] = 'Aaa'
+        invalid_pmod["code"] = "Aaa"
         self.assertFalse(is_valid_node(invalid_pmod))
 
 
@@ -130,7 +126,7 @@ class TestEdgeSchema(unittest.TestCase):
     def setUpClass(cls):
         """Load the edge contained in example_edge.json."""
         here = os.path.abspath(os.path.dirname(__file__))
-        example_file = os.path.join(here, 'example_edge.json')
+        example_file = os.path.join(here, "example_edge.json")
         with open(example_file) as example_json:
             edge = json.load(example_json)
         cls.example_edge = edge
@@ -145,21 +141,21 @@ class TestEdgeSchema(unittest.TestCase):
         edge = self.example_edge
 
         missing_source = copy.deepcopy(edge)
-        missing_source.pop('source')
+        missing_source.pop("source")
         self.assertFalse(is_valid_edge(missing_source))
 
         missing_relation = copy.deepcopy(edge)
-        missing_relation.pop('relation')
+        missing_relation.pop("relation")
         self.assertFalse(is_valid_edge(missing_relation))
 
         missing_target = copy.deepcopy(edge)
-        missing_target.pop('target')
+        missing_target.pop("target")
         self.assertFalse(is_valid_edge(missing_target))
 
         missing_location = copy.deepcopy(edge)
-        missing_location['target']['effect'].pop('fromLoc')
+        missing_location["target"]["effect"].pop("fromLoc")
         self.assertFalse(is_valid_edge(missing_location))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

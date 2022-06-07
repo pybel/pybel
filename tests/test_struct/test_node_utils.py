@@ -6,8 +6,18 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import INCREASES
-from pybel.dsl import ComplexAbundance as g, CompositeAbundance as c, Protein, Reaction
-from pybel.examples.various_example import adp, atp, glucose, glucose_6_phosphate, hk1, phosphate, single_reaction_graph
+from pybel.dsl import ComplexAbundance as g
+from pybel.dsl import CompositeAbundance as c
+from pybel.dsl import Protein, Reaction
+from pybel.examples.various_example import (
+    adp,
+    atp,
+    glucose,
+    glucose_6_phosphate,
+    hk1,
+    phosphate,
+    single_reaction_graph,
+)
 from pybel.struct.node_utils import flatten_list_abundance, reaction_cartesian_expansion
 
 
@@ -16,7 +26,7 @@ class TestNodeUtils(unittest.TestCase):
 
     def test_flatten_complex(self):
         """Test flattening a nested complex."""
-        p1, p2, p3 = (Protein('N', str(i + 1)) for i in range(3))
+        p1, p2, p3 = (Protein("N", str(i + 1)) for i in range(3))
 
         pairs = [
             # Mainly complexes
@@ -67,7 +77,7 @@ class TestNodeUtils(unittest.TestCase):
 
         glycolisis_step_1 = Reaction(reactants=[glucose, hk1, atp], products=[glucose_6_phosphate, adp, hk1])
 
-        node_increases_reaction_graph.add_increases(glucose_6_phosphate, glycolisis_step_1, citation='X', evidence='X')
+        node_increases_reaction_graph.add_increases(glucose_6_phosphate, glycolisis_step_1, citation="X", evidence="X")
 
         self.assertEqual(node_increases_reaction_graph.number_of_nodes(), 6)
         self.assertEqual(node_increases_reaction_graph.number_of_edges(), 7)
@@ -99,7 +109,7 @@ class TestNodeUtils(unittest.TestCase):
         reaction_1 = Reaction(reactants=[glucose, atp], products=hk1)
         reaction_2 = Reaction(reactants=glucose_6_phosphate, products=adp)
 
-        two_reactions_graph.add_increases(reaction_1, reaction_2, citation='X', evidence='X')
+        two_reactions_graph.add_increases(reaction_1, reaction_2, citation="X", evidence="X")
 
         self.assertEqual(two_reactions_graph.number_of_nodes(), 7)
         self.assertEqual(two_reactions_graph.number_of_edges(), 6)

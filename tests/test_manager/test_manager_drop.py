@@ -11,16 +11,14 @@ from pybel.testing.mocks import mock_bel_resources
 from pybel.testing.utils import make_dummy_annotations, make_dummy_namespaces, n
 from tests.constants import test_citation_dict, test_evidence_text
 
-yfg1 = hgnc(identifier='1', name='YFG1')
-yfg2 = hgnc(identifier='2', name='YFG1')
-yfg3 = hgnc(identifier='3', name='YFG3')
+yfg1 = hgnc(identifier="1", name="YFG1")
+yfg2 = hgnc(identifier="2", name="YFG1")
+yfg3 = hgnc(identifier="3", name="YFG3")
 
 
 def make_increase_edge(u, v):
-    bel = '{} {} {}'.format(u.as_bel(), INCREASES, v.as_bel())
-    data = json.dumps({
-        RELATION: INCREASES
-    })
+    bel = "{} {} {}".format(u.as_bel(), INCREASES, v.as_bel())
+    data = json.dumps({RELATION: INCREASES})
     assert data
     return Edge(source=u, target=v, relation=INCREASES, bel=bel, data=data)
 
@@ -29,17 +27,17 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
     @mock_bel_resources
     def test_simple(self, mock):
         """This test checks that the network can be added and dropped"""
-        graph = BELGraph(name='test', version='0.0.0')
-        graph.annotation_pattern['Disease'] = '.*'
-        graph.annotation_pattern['Cell'] = '.*'
+        graph = BELGraph(name="test", version="0.0.0")
+        graph.annotation_pattern["Disease"] = ".*"
+        graph.annotation_pattern["Cell"] = ".*"
         graph.add_increases(
             yfg1,
             yfg2,
             evidence=test_evidence_text,
             citation=test_citation_dict,
             annotations={
-                'Disease': {'Disease1': True},
-                'Cell': {'Cell1': True},
+                "Disease": {"Disease1": True},
+                "Cell": {"Cell1": True},
             },
         )
 
@@ -144,11 +142,18 @@ class TestCascades(TemporaryCacheMixin):
 
         self.manager.session.commit()
 
-        self.assertEqual(1, self.manager.count_namespaces(), msg='Should have one namespace')
-        self.assertEqual(n_entries, self.manager.count_namespace_entries(),
-                         msg='Should have {} entries'.format(n_entries))
+        self.assertEqual(1, self.manager.count_namespaces(), msg="Should have one namespace")
+        self.assertEqual(
+            n_entries,
+            self.manager.count_namespace_entries(),
+            msg="Should have {} entries".format(n_entries),
+        )
 
         self.manager.drop_namespace_by_url(url)
 
-        self.assertEqual(0, self.manager.count_namespaces(), msg='Should have no namespaces')
-        self.assertEqual(0, self.manager.count_namespace_entries(), msg='Entries should have been dropped')
+        self.assertEqual(0, self.manager.count_namespaces(), msg="Should have no namespaces")
+        self.assertEqual(
+            0,
+            self.manager.count_namespace_entries(),
+            msg="Entries should have been dropped",
+        )

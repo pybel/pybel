@@ -9,10 +9,26 @@ from pybel import BELGraph, Pipeline
 from pybel.dsl import Protein
 from pybel.examples.egf_example import egf_graph, vcp
 from pybel.examples.homology_example import (
-    homology_graph, mouse_csf1_protein, mouse_csf1_rna, mouse_mapk1_protein, mouse_mapk1_rna,
+    homology_graph,
+    mouse_csf1_protein,
+    mouse_csf1_rna,
+    mouse_mapk1_protein,
+    mouse_mapk1_rna,
 )
-from pybel.examples.sialic_acid_example import (cd33_phosphorylated, dap12, shp1, shp2, sialic_acid_graph, syk, trem2)
-from pybel.struct import expand_node_neighborhood, expand_nodes_neighborhoods, get_subgraph_by_annotation_value
+from pybel.examples.sialic_acid_example import (
+    cd33_phosphorylated,
+    dap12,
+    shp1,
+    shp2,
+    sialic_acid_graph,
+    syk,
+    trem2,
+)
+from pybel.struct import (
+    expand_node_neighborhood,
+    expand_nodes_neighborhoods,
+    get_subgraph_by_annotation_value,
+)
 from pybel.struct.mutation import collapse_to_genes, enrich_protein_and_rna_origins
 from pybel.struct.query import Query, QueryMissingNetworksError, Seeding
 from pybel.testing.generate import generate_random_graph
@@ -28,12 +44,11 @@ def add(query, manager, graph):
 
 
 class TestSeedingConstructor(unittest.TestCase):
-
     def test_none(self):
         """Test construction of a seeding container."""
         seeding = Seeding()
         self.assertEqual(0, len(seeding))
-        self.assertEqual('[]', seeding.dumps())
+        self.assertEqual("[]", seeding.dumps())
 
     def test_append_sample(self):
         seeding = Seeding()
@@ -66,7 +81,7 @@ class TestQueryConstructor(unittest.TestCase):
 
     def test_network_ids_type_error(self):
         with self.assertRaises(TypeError):
-            Query(network_ids='a')
+            Query(network_ids="a")
 
     def test_seeding(self):
         query = Query(seeding=Seeding())
@@ -160,7 +175,11 @@ class QueryTestEgf(unittest.TestCase):
         query.append_seeding_sample(number_edges=10)
 
         result = self.run_query()
-        self.assertIn(result.number_of_edges(), {16, 17, 18, 19, 20}, msg='This will rail randomly sometimes, lol')
+        self.assertIn(
+            result.number_of_edges(),
+            {16, 17, 18, 19, 20},
+            msg="This will rail randomly sometimes, lol",
+        )
 
 
 class QueryTest(unittest.TestCase):
@@ -176,7 +195,7 @@ class QueryTest(unittest.TestCase):
 
         self.assertEqual(
             32,  # 10 protein nodes already there + complex + bp +  2*10 (genes and rnas)
-            graph.number_of_nodes()
+            graph.number_of_nodes(),
         )
 
         # 6 already there + 5 complex hasComponent edges + new 2*10 edges
@@ -187,10 +206,7 @@ class QueryTest(unittest.TestCase):
         pipeline = Pipeline()
         pipeline.append(collapse_to_genes)
 
-        query = Query(
-            network_ids=[network.id],
-            pipeline=pipeline
-        )
+        query = Query(network_ids=[network.id], pipeline=pipeline)
         result_graph = query.run(self.manager)
 
         self.assertEqual(12, result_graph.number_of_nodes())  # same number of nodes than there were
@@ -204,10 +220,10 @@ class QueryTest(unittest.TestCase):
 
         query = Query(network_ids=[network_id])
         query.append_seeding_neighbors(vcp)
-        query.append_pipeline(get_subgraph_by_annotation_value, 'Species', '9606')
+        query.append_pipeline(get_subgraph_by_annotation_value, "Species", "9606")
 
         result = query.run(self.manager)
-        self.assertIsNotNone(result, msg='Query returned none')
+        self.assertIsNotNone(result, msg="Query returned none")
 
         self.assertEqual(3, result.number_of_nodes())
 
@@ -222,7 +238,7 @@ class QueryTest(unittest.TestCase):
         query.append_pipeline(enrich_protein_and_rna_origins)
 
         result = query.run(self.manager)
-        self.assertIsNotNone(result, msg='Query returned none')
+        self.assertIsNotNone(result, msg="Query returned none")
 
         self.assertIn(shp1, result)
         self.assertIn(shp2, result)
@@ -235,13 +251,13 @@ class QueryTest(unittest.TestCase):
     def test_get_subgraph_by_annotation_value(self):
         graph = homology_graph.copy()
 
-        result = get_subgraph_by_annotation_value(graph, 'Species', '10090')
+        result = get_subgraph_by_annotation_value(graph, "Species", "10090")
 
-        self.assertIsNotNone(result, msg='Query returned none')
+        self.assertIsNotNone(result, msg="Query returned none")
         self.assertIsInstance(result, BELGraph)
         self.assertLess(0, result.number_of_nodes())
 
-        self.assertIn(mouse_mapk1_protein, result, msg='nodes:\n{}'.format(list(map(repr, graph))))
+        self.assertIn(mouse_mapk1_protein, result, msg="nodes:\n{}".format(list(map(repr, graph))))
         self.assertIn(mouse_csf1_protein, result)
 
         self.assertEqual(2, result.number_of_nodes())
@@ -254,7 +270,7 @@ class QueryTest(unittest.TestCase):
         query.append_seeding_neighbors([mouse_csf1_rna, mouse_mapk1_rna])
 
         result = query.run(self.manager)
-        self.assertIsNotNone(result, msg='Query returned none')
+        self.assertIsNotNone(result, msg="Query returned none")
         self.assertIsInstance(result, BELGraph)
 
         self.assertIn(mouse_mapk1_rna, result)
@@ -272,7 +288,7 @@ class QueryTest(unittest.TestCase):
         query.append_seeding_neighbors([trem2, dap12, shp2])
         query.append_pipeline(expand_nodes_neighborhoods, [trem2, dap12, shp2])
         result = query.run(self.manager)
-        self.assertIsNotNone(result, msg='Query returned none')
+        self.assertIsNotNone(result, msg="Query returned none")
         self.assertIsInstance(result, BELGraph)
 
         self.assertIn(trem2, result)
@@ -290,15 +306,12 @@ class QueryTest(unittest.TestCase):
         pipeline = Pipeline()
         pipeline.append(expand_node_neighborhood, mouse_mapk1_protein)
 
-        query = Query(
-            network_ids=[test_network_1.id],
-            pipeline=pipeline
-        )
-        query.append_seeding_annotation('Species', {'10090'})
+        query = Query(network_ids=[test_network_1.id], pipeline=pipeline)
+        query.append_seeding_annotation("Species", {"10090"})
 
         result = query.run(self.manager)
 
-        self.assertIsNotNone(result, msg='Query returned none')
+        self.assertIsNotNone(result, msg="Query returned none")
 
         self.assertEqual(3, result.number_of_nodes())
         self.assertIn(mouse_mapk1_protein, result)

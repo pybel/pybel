@@ -12,19 +12,30 @@ from .baseparser import BaseParser
 from .constants import NamespaceTermEncodingMapping
 from .utils import delimited_quoted_list, ns, qid, quote, word
 from ..constants import (
-    BEL_KEYWORD_ANNOTATION, BEL_KEYWORD_AS, BEL_KEYWORD_DEFINE, BEL_KEYWORD_DOCUMENT, BEL_KEYWORD_LIST,
-    BEL_KEYWORD_NAMESPACE, BEL_KEYWORD_PATTERN, BEL_KEYWORD_SET, BEL_KEYWORD_URL, DOCUMENT_KEYS, METADATA_VERSION,
+    BEL_KEYWORD_ANNOTATION,
+    BEL_KEYWORD_AS,
+    BEL_KEYWORD_DEFINE,
+    BEL_KEYWORD_DOCUMENT,
+    BEL_KEYWORD_LIST,
+    BEL_KEYWORD_NAMESPACE,
+    BEL_KEYWORD_PATTERN,
+    BEL_KEYWORD_SET,
+    BEL_KEYWORD_URL,
+    DOCUMENT_KEYS,
+    METADATA_VERSION,
     belns_encodings,
 )
 from ..exceptions import (
-    InvalidMetadataException, RedefinedAnnotationError, RedefinedNamespaceError,
+    InvalidMetadataException,
+    RedefinedAnnotationError,
+    RedefinedNamespaceError,
     VersionFormatWarning,
 )
 from ..resources.resources import keyword_to_url
 from ..utils import valid_date_version
 
 __all__ = [
-    'MetadataParser',
+    "MetadataParser",
 ]
 
 logger = logging.getLogger(__name__)
@@ -35,13 +46,13 @@ list_tag = Suppress(BEL_KEYWORD_LIST)
 set_tag = Suppress(BEL_KEYWORD_SET)
 define_tag = Suppress(BEL_KEYWORD_DEFINE)
 
-function_tags = Word(''.join(belns_encodings))
+function_tags = Word("".join(belns_encodings))
 
 SEMANTIC_VERSION_STRING_RE = re.compile(
-    r'(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(?:-(?P<release>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+(?P<build>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?',
+    r"(?P<major>\d+)\.(?P<minor>\d+)\.(?P<patch>\d+)(?:-(?P<release>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?(?:\+(?P<build>[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?",
 )
 
-MALFORMED_VERSION_STRING_RE = re.compile(r'(?P<major>\d+)(\.(?P<minor>\d+)(\.(?P<patch>\d+))?)?')
+MALFORMED_VERSION_STRING_RE = re.compile(r"(?P<major>\d+)(\.(?P<minor>\d+)(\.(?P<patch>\d+))?)?")
 
 NAMESPACE_BLACKLIST = {}  # TODO: {'SCOMP', 'SFAM'}
 
@@ -109,22 +120,24 @@ class MetadataParser(BaseParser):
         #: A dictionary from {annotation keyword: BEL annotation URL}
         self.annotation_url_dict = {}
 
-        self.document = And([
-            set_tag,
-            Suppress(BEL_KEYWORD_DOCUMENT),
-            word('key'),
-            Suppress('='),
-            qid('value'),
-        ])
+        self.document = And(
+            [
+                set_tag,
+                Suppress(BEL_KEYWORD_DOCUMENT),
+                word("key"),
+                Suppress("="),
+                qid("value"),
+            ]
+        )
 
-        namespace_tag = And([define_tag, Suppress(BEL_KEYWORD_NAMESPACE), ns('name'), as_tag])
-        self.namespace_url = And([namespace_tag, url_tag, quote('url')])
-        self.namespace_pattern = And([namespace_tag, Suppress(BEL_KEYWORD_PATTERN), quote('value')])
+        namespace_tag = And([define_tag, Suppress(BEL_KEYWORD_NAMESPACE), ns("name"), as_tag])
+        self.namespace_url = And([namespace_tag, url_tag, quote("url")])
+        self.namespace_pattern = And([namespace_tag, Suppress(BEL_KEYWORD_PATTERN), quote("value")])
 
-        annotation_tag = And([define_tag, Suppress(BEL_KEYWORD_ANNOTATION), ns('name'), as_tag])
-        self.annotation_url = And([annotation_tag, url_tag, quote('url')])
-        self.annotation_list = And([annotation_tag, list_tag, delimited_quoted_list('values')])
-        self.annotation_pattern = And([annotation_tag, Suppress(BEL_KEYWORD_PATTERN), quote('value')])
+        annotation_tag = And([define_tag, Suppress(BEL_KEYWORD_ANNOTATION), ns("name"), as_tag])
+        self.annotation_url = And([annotation_tag, url_tag, quote("url")])
+        self.annotation_list = And([annotation_tag, list_tag, delimited_quoted_list("values")])
+        self.annotation_pattern = And([annotation_tag, Suppress(BEL_KEYWORD_PATTERN), quote("value")])
 
         self.document.setParseAction(self.handle_document)
         self.namespace_url.setParseAction(self.handle_namespace_url)
@@ -133,14 +146,16 @@ class MetadataParser(BaseParser):
         self.annotation_list.setParseAction(self.handle_annotation_list)
         self.annotation_pattern.setParseAction(self.handle_annotation_pattern)
 
-        self.language = MatchFirst([
-            self.document,
-            self.namespace_url,
-            self.annotation_url,
-            self.annotation_list,
-            self.annotation_pattern,
-            self.namespace_pattern,
-        ]).setName('BEL Metadata')
+        self.language = MatchFirst(
+            [
+                self.document,
+                self.namespace_url,
+                self.annotation_url,
+                self.annotation_list,
+                self.annotation_pattern,
+                self.namespace_pattern,
+            ]
+        ).setName("BEL Metadata")
 
         super().__init__(self.language)
 
@@ -150,8 +165,8 @@ class MetadataParser(BaseParser):
         :raises: InvalidMetadataException
         :raises: VersionFormatWarning
         """
-        key = tokens['key']
-        value = tokens['value']
+        key = tokens["key"]
+        value = tokens["value"]
 
         if key not in DOCUMENT_KEYS:
             raise InvalidMetadataException(self.get_line_number(), line, position, key, value)
@@ -159,7 +174,7 @@ class MetadataParser(BaseParser):
         norm_key = DOCUMENT_KEYS[key]
 
         if norm_key in self.document_metadata:
-            logger.warning('Tried to overwrite metadata: %s', key)
+            logger.warning("Tried to overwrite metadata: %s", key)
             return tokens
 
         self.document_metadata[norm_key] = value
@@ -183,14 +198,14 @@ class MetadataParser(BaseParser):
         :raises: RedefinedNamespaceError
         :raises: pybel.resources.exc.ResourceError
         """
-        namespace_keyword = tokens['name']
+        namespace_keyword = tokens["name"]
 
         if namespace_keyword in NAMESPACE_BLACKLIST:
-            raise ValueError('Upgrade usage to FamPlex')
+            raise ValueError("Upgrade usage to FamPlex")
 
         self.raise_for_redefined_namespace(line, position, namespace_keyword)
 
-        url = tokens['url']
+        url = tokens["url"]
         if self.upgrade_urls and namespace_keyword.lower() in keyword_to_url:
             url = keyword_to_url[namespace_keyword.lower()]
 
@@ -220,9 +235,9 @@ class MetadataParser(BaseParser):
 
         :raises: RedefinedNamespaceError
         """
-        namespace = tokens['name']
+        namespace = tokens["name"]
         self.raise_for_redefined_namespace(line, position, namespace)
-        self.namespace_to_pattern[namespace] = re.compile(tokens['value'])
+        self.namespace_to_pattern[namespace] = re.compile(tokens["value"])
         return tokens
 
     def raise_for_redefined_annotation(self, line: str, position: int, annotation: str) -> None:
@@ -238,9 +253,9 @@ class MetadataParser(BaseParser):
 
         :raises: RedefinedAnnotationError
         """
-        keyword = tokens['name']
+        keyword = tokens["name"]
         self.raise_for_redefined_annotation(line, position, keyword)
-        self.annotation_url_dict[keyword] = tokens['url']
+        self.annotation_url_dict[keyword] = tokens["url"]
         return tokens
 
     def handle_annotation_list(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
@@ -248,9 +263,9 @@ class MetadataParser(BaseParser):
 
         :raises: RedefinedAnnotationError
         """
-        annotation = tokens['name']
+        annotation = tokens["name"]
         self.raise_for_redefined_annotation(line, position, annotation)
-        self.annotation_to_local[annotation] = set(tokens['values'])
+        self.annotation_to_local[annotation] = set(tokens["values"])
         return tokens
 
     def handle_annotation_pattern(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
@@ -258,9 +273,9 @@ class MetadataParser(BaseParser):
 
         :raises: RedefinedAnnotationError
         """
-        annotation = tokens['name']
+        annotation = tokens["name"]
         self.raise_for_redefined_annotation(line, position, annotation)
-        self.annotation_to_pattern[annotation] = re.compile(tokens['value'])
+        self.annotation_to_pattern[annotation] = re.compile(tokens["value"])
         return tokens
 
     def has_enumerated_annotation(self, annotation: str) -> bool:

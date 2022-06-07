@@ -14,7 +14,7 @@ import pybel.exceptions
 app = flask.Flask(__name__)
 
 
-@app.route('/parse', methods=['POST'])
+@app.route("/parse", methods=["POST"])
 def parse():
     """Parse the BEL in the `text` JSON field.
 
@@ -24,9 +24,9 @@ def parse():
     >>> requests.post('http://localhost:5000/parse', json={'text': 'p(HGNC:123) increases p(HGNC:456)'}).json()
     {'input': 'p(HGNC:123) increases p(HGNC:456)', 'output': {'object': {'concept': {'name': '456', 'namespace': 'HGNC'}, 'function': 'Protein'}, 'relation': 'increases', 'subject': {'concept': {'name': '123', 'namespace': 'HGNC'}, 'function': 'Protein'}}, 'success': True}
     """
-    text = flask.request.json.get('text')
+    text = flask.request.json.get("text")
     if text is None:
-        return flask.jsonify(success=False, message='missing `text`')
+        return flask.jsonify(success=False, message="missing `text`")
 
     try:
         rv = pybel.parse(text)
@@ -36,5 +36,5 @@ def parse():
         return flask.jsonify(success=True, input=text, output=rv)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run()

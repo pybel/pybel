@@ -5,8 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on `Keep a Changelog <http://keepachangelog.com/>`_
 and this project adheres to `Semantic Versioning <http://semver.org/>`_
 
-`0.15.0 <https://github.com/pybel/pybel/compare/v0.14.10...0.15.0>`_
---------------------------------------------------------------------
+`0.15.3 <https://github.com/pybel/pybel/compare/v0.15.2...0.15.3>`_ - 2021-04-19
+--------------------------------------------------------------------------------
+Added
+~~~~~
+- Exposed transitivities parsed via nested statements through ``pybel.BELGraph.transitivities``
+  (https://github.com/pybel/pybel/issues/490).
+
+Fixed
+~~~~~
+- Some dependencies updated their interfaces (https://github.com/pybel/pybel/pull/491)
+
+`0.15.2 <https://github.com/pybel/pybel/compare/v0.15.1...0.15.2>`_ - 2021-03-21
+--------------------------------------------------------------------------------
+Added
+~~~~~
+- Support for direct regulations via ``pybel.constants.DIRECTLY_REGUALTES`` and
+  ``pybel.BELGraph.add_directly_regulates``
+
+`0.15.1 <https://github.com/pybel/pybel/compare/v0.15.0...0.15.1>`_ - 2021-02-07
+--------------------------------------------------------------------------------
+- Add support for named reactions (https://github.com/pybel/pybel/pull/485)
+- Switch to GitHub Actions
+- Use `PyStow <https://github.com/cthoyt/pystow>`_ for file management
+- Use `Bioregistry <https://github.com/bioregistry/bioregistry>`_ for prefix normalization
+
+`0.15.0 <https://github.com/pybel/pybel/compare/v0.14.10...0.15.0>`_ - 2020-12-17
+---------------------------------------------------------------------------------
 Added
 ~~~~~
 - Support for homomultimers in ML triples export

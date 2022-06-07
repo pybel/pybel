@@ -37,36 +37,37 @@ it is shown with uppercase letters referring to constants from :code:`pybel.cons
     - PyBEL module :py:class:`pybel.parser.modifiers.get_legacy_fusion_language`
 """
 
-from pyparsing import (
-    Group, Keyword, Optional, ParserElement, Suppress, oneOf, pyparsing_common,
-    pyparsing_common as ppc, replaceWith,
-)
+from pyparsing import Group, Keyword, Optional, ParserElement, Suppress, oneOf
+from pyparsing import pyparsing_common
+from pyparsing import pyparsing_common as ppc
+from pyparsing import replaceWith
 
 from ..utils import WCW, nest
 from ...constants import (
-    CONCEPT, FUSION, FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, PARTNER_3P, PARTNER_5P, RANGE_3P,
+    CONCEPT,
+    FUSION,
+    FUSION_MISSING,
+    FUSION_REFERENCE,
+    FUSION_START,
+    FUSION_STOP,
+    PARTNER_3P,
+    PARTNER_5P,
+    RANGE_3P,
     RANGE_5P,
 )
 
 __all__ = [
-    'fusion_tags',
-    'get_fusion_language',
-    'get_legacy_fusion_langauge',
+    "fusion_tags",
+    "get_fusion_language",
+    "get_legacy_fusion_langauge",
 ]
 
-fusion_tags = oneOf(['fus', 'fusion']).setParseAction(replaceWith(FUSION))
-reference_seq = oneOf(['r', 'p', 'c'])
-coordinate = pyparsing_common.integer | '?'
-missing = Keyword('?')
-range_coordinate_unquoted = (
-    missing(FUSION_MISSING)
-    | (
-        reference_seq(FUSION_REFERENCE)
-        + Suppress('.')
-        + coordinate(FUSION_START)
-        + Suppress('_')
-        + coordinate(FUSION_STOP)
-    )
+fusion_tags = oneOf(["fus", "fusion"]).setParseAction(replaceWith(FUSION))
+reference_seq = oneOf(["r", "p", "c"])
+coordinate = pyparsing_common.integer | "?"
+missing = Keyword("?")
+range_coordinate_unquoted = missing(FUSION_MISSING) | (
+    reference_seq(FUSION_REFERENCE) + Suppress(".") + coordinate(FUSION_START) + Suppress("_") + coordinate(FUSION_STOP)
 )
 
 
@@ -87,8 +88,8 @@ def get_fusion_language(concept: ParserElement, permissive: bool = True) -> Pars
 
 def get_legacy_fusion_langauge(concept: ParserElement, reference: str) -> ParserElement:
     """Build a legacy fusion parser."""
-    break_start = (ppc.integer | '?').setParseAction(_fusion_break_handler_wrapper(reference, start=True))
-    break_end = (ppc.integer | '?').setParseAction(_fusion_break_handler_wrapper(reference, start=False))
+    break_start = (ppc.integer | "?").setParseAction(_fusion_break_handler_wrapper(reference, start=True))
+    break_end = (ppc.integer | "?").setParseAction(_fusion_break_handler_wrapper(reference, start=False))
 
     res = (
         Group(concept(CONCEPT))(PARTNER_5P)
@@ -107,20 +108,20 @@ def get_legacy_fusion_langauge(concept: ParserElement, reference: str) -> Parser
 def _fusion_legacy_handler(_, __, tokens):
     """Handle a legacy fusion."""
     if RANGE_5P not in tokens:
-        tokens[RANGE_5P] = {FUSION_MISSING: '?'}
+        tokens[RANGE_5P] = {FUSION_MISSING: "?"}
     if RANGE_3P not in tokens:
-        tokens[RANGE_3P] = {FUSION_MISSING: '?'}
+        tokens[RANGE_3P] = {FUSION_MISSING: "?"}
     return tokens
 
 
 def _fusion_break_handler_wrapper(reference: str, start: bool):
     def fusion_break_handler(_, __, tokens):
-        if tokens[0] == '?':
-            tokens[FUSION_MISSING] = '?'
+        if tokens[0] == "?":
+            tokens[FUSION_MISSING] = "?"
             return tokens
         else:  # The break point is specified as an integer
             tokens[FUSION_REFERENCE] = reference
-            tokens[FUSION_START if start else FUSION_STOP] = '?'
+            tokens[FUSION_START if start else FUSION_STOP] = "?"
             tokens[FUSION_STOP if start else FUSION_START] = int(tokens[0])
             return tokens
 

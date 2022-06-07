@@ -17,14 +17,14 @@ except ImportError:
     import pickle
 
 __all__ = [
-    'to_bytes',
-    'from_bytes',
-    'to_bytes_gz',
-    'from_bytes_gz',
-    'to_pickle',
-    'to_pickle_gz',
-    'from_pickle',
-    'from_pickle_gz',
+    "to_bytes",
+    "from_bytes",
+    "to_bytes_gz",
+    "from_bytes_gz",
+    "to_pickle",
+    "to_pickle_gz",
+    "from_pickle",
+    "from_pickle_gz",
 ]
 
 
@@ -65,7 +65,7 @@ def to_bytes_gz(graph: BELGraph, protocol: int = pickle.HIGHEST_PROTOCOL) -> byt
     :param protocol: Pickling protocol to use. Defaults to ``HIGHEST_PROTOCOL``.
     """
     io = BytesIO()
-    with gzip.open(io, mode='wb') as file:
+    with gzip.open(io, mode="wb") as file:
         pickle.dump(graph, file, protocol=protocol)
     return io.getvalue()
 
@@ -75,11 +75,11 @@ def from_bytes_gz(bytes_graph: bytes) -> BELGraph:
 
     :param bytes_graph: File or filename to write
     """
-    with gzip.GzipFile(fileobj=BytesIO(bytes_graph), mode='rb') as file:
+    with gzip.GzipFile(fileobj=BytesIO(bytes_graph), mode="rb") as file:
         return pickle.load(file)
 
 
-@open_file(1, mode='wb')
+@open_file(1, mode="wb")
 def to_pickle(graph: BELGraph, path: Union[str, BinaryIO], protocol: int = pickle.HIGHEST_PROTOCOL) -> None:
     """Write this graph to a pickle file.
 
@@ -98,11 +98,11 @@ def to_pickle(graph: BELGraph, path: Union[str, BinaryIO], protocol: int = pickl
 
 def to_pickle_gz(graph: BELGraph, path: str, protocol: int = pickle.HIGHEST_PROTOCOL) -> None:
     """Write this graph to a gzipped pickle file."""
-    with gzip.open(path, 'wb') as file:
+    with gzip.open(path, "wb") as file:
         to_pickle(graph, file, protocol=protocol)
 
 
-@open_file(0, mode='rb')
+@open_file(0, mode="rb")
 def from_pickle(path: Union[str, BinaryIO], check_version: bool = True) -> BELGraph:
     """Read a graph from a pickle file.
 
@@ -120,5 +120,5 @@ def from_pickle(path: Union[str, BinaryIO], check_version: bool = True) -> BELGr
 
 def from_pickle_gz(path: str) -> BELGraph:
     """Read a graph from a gzipped pickle file."""
-    with gzip.open(path, 'rb') as file:
+    with gzip.open(path, "rb") as file:
         return from_pickle(file)

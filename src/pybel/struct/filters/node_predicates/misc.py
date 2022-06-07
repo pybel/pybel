@@ -11,9 +11,9 @@ from ....constants import PART_OF, RELATION
 from ....dsl import BaseEntity, ListAbundance
 
 __all__ = [
-    'none_of',
-    'one_of',
-    'is_isolated_list_abundance',
+    "none_of",
+    "one_of",
+    "is_isolated_list_abundance",
 ]
 
 
@@ -50,8 +50,5 @@ def is_isolated_list_abundance(
     return (
         isinstance(node, cls)
         and 0 == graph.out_degree(node)
-        and all(
-            data[RELATION] == PART_OF
-            for _, __, data in graph.in_edges(node, data=True)
-        )
+        and all(data[RELATION] == PART_OF for _, __, data in graph.in_edges(node, data=True))
     )

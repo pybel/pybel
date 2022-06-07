@@ -6,17 +6,29 @@ import unittest
 
 from pybel import BELGraph
 from pybel.constants import POSITIVE_CORRELATION, RELATION
-from pybel.dsl import CompositeAbundance, Protein, gene, hgvs, pathology, protein_fusion, rna, rna_fusion
+from pybel.dsl import (
+    CompositeAbundance,
+    Protein,
+    gene,
+    hgvs,
+    pathology,
+    protein_fusion,
+    rna,
+    rna_fusion,
+)
 from pybel.struct.mutation import (
-    enrich_protein_and_rna_origins, prune_protein_rna_origins, remove_associations, remove_isolated_list_abundances,
+    enrich_protein_and_rna_origins,
+    prune_protein_rna_origins,
+    remove_associations,
+    remove_isolated_list_abundances,
     remove_pathologies,
 )
 from pybel.struct.mutation.utils import remove_isolated_nodes, remove_isolated_nodes_op
 from pybel.testing.utils import n
 
-trem2_gene = gene(namespace='HGNC', name='TREM2')
-trem2_rna = rna(namespace='HGNC', name='TREM2')
-trem2_protein = Protein(namespace='HGNC', name='TREM2')
+trem2_gene = gene(namespace="HGNC", name="TREM2")
+trem2_rna = rna(namespace="HGNC", name="TREM2")
+trem2_protein = Protein(namespace="HGNC", name="TREM2")
 
 
 class TestDeletions(unittest.TestCase):
@@ -26,8 +38,8 @@ class TestDeletions(unittest.TestCase):
         """Test removal of pathologies."""
         g = BELGraph()
 
-        p1, p2, p3 = (Protein(namespace='HGNC', name=n()) for _ in range(3))
-        d1, d2 = (pathology(namespace='MESH', name=n()) for _ in range(2))
+        p1, p2, p3 = (Protein(namespace="HGNC", name=n()) for _ in range(3))
+        d1, d2 = (pathology(namespace="MESH", name=n()) for _ in range(2))
 
         g.add_increases(p1, p2, citation=n(), evidence=n())
         g.add_increases(p2, p3, citation=n(), evidence=n())
@@ -88,7 +100,7 @@ class TestDeletions(unittest.TestCase):
     def test_remove_isolated_list_abundances(self):
         """Test removing isolated list abundances."""
         g = BELGraph()
-        p1, p2 = [Protein('HGNC', n()) for _ in range(2)]
+        p1, p2 = [Protein("HGNC", n()) for _ in range(2)]
         node = CompositeAbundance([p1, p2])
         g.add_node_from_data(node)
         self.assertEqual(3, g.number_of_nodes())
@@ -141,7 +153,7 @@ class TestProcessing(unittest.TestCase):
 
     def test_no_infer_on_protein_variants(self):
         """Test that expansion doesn't occur on protein variants."""
-        p = Protein('HGNC', n(), variants=[hgvs(n())])
+        p = Protein("HGNC", n(), variants=[hgvs(n())])
 
         graph = BELGraph()
         graph.add_node_from_data(p)
@@ -156,7 +168,7 @@ class TestProcessing(unittest.TestCase):
 
     def test_no_infer_on_rna_variants(self):
         """Test that expansion doesn't occur on RNA variants."""
-        r = rna('HGNC', n(), variants=[hgvs(n())])
+        r = rna("HGNC", n(), variants=[hgvs(n())])
 
         graph = BELGraph()
         graph.add_node_from_data(r)

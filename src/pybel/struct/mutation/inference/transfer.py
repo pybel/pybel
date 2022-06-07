@@ -6,23 +6,25 @@ from typing import Iterable, List
 
 from ...graph import BELGraph
 from ....constants import (
-    ANNOTATIONS, CAUSAL_RELATIONS, CITATION, EVIDENCE, IS_A, RELATION, SOURCE_MODIFIER,
+    ANNOTATIONS,
+    CAUSAL_RELATIONS,
+    CITATION,
+    EVIDENCE,
+    IS_A,
+    RELATION,
+    SOURCE_MODIFIER,
     TARGET_MODIFIER,
 )
 from ....dsl import BaseEntity
 
 __all__ = [
-    'infer_child_relations',
+    "infer_child_relations",
 ]
 
 
 def iter_children(graph: BELGraph, node: BaseEntity) -> Iterable[BaseEntity]:
     """Iterate over children of the node."""
-    return (
-        node
-        for node, _, d in graph.in_edges(node, data=True)
-        if d[RELATION] == IS_A
-    )
+    return (node for node, _, d in graph.in_edges(node, data=True) if d[RELATION] == IS_A)
 
 
 def transfer_causal_edges(graph: BELGraph, source: BaseEntity, target: BaseEntity) -> Iterable[str]:

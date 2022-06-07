@@ -11,22 +11,16 @@ from pkg_resources import iter_entry_points
 from ..struct import BELGraph
 
 __all__ = [
-    'load',
-    'dump',
-    'InvalidExtensionError',
+    "load",
+    "dump",
+    "InvalidExtensionError",
 ]
 
 #: Mapping from extension to importer function
-IMPORTERS = {
-    entry.name: entry.load()
-    for entry in iter_entry_points(group='pybel.importer')
-}
+IMPORTERS = {entry.name: entry.load() for entry in iter_entry_points(group="pybel.importer")}
 
 #: Mapping from extension to exporter function
-EXPORTERS = {
-    entry.name: entry.load()
-    for entry in iter_entry_points(group='pybel.exporter')
-}
+EXPORTERS = {entry.name: entry.load() for entry in iter_entry_points(group="pybel.exporter")}
 
 
 class InvalidExtensionError(ValueError):
@@ -34,7 +28,7 @@ class InvalidExtensionError(ValueError):
 
     def __init__(self, path):
         fname = os.path.basename(path)
-        super().__init__('Invalid extension for file: {}'.format(fname))
+        super().__init__("Invalid extension for file: {}".format(fname))
 
 
 def load(path: str, **kwargs) -> BELGraph:

@@ -7,8 +7,14 @@ and the concept of `predicates <https://en.wikipedia.org/wiki/Predicate_(mathema
 """
 
 from . import (
-    edge_filters, edge_predicate_builders, edge_predicates, node_filters, node_predicate_builders, node_predicates,
-    typing, utils,
+    edge_filters,
+    edge_predicate_builders,
+    edge_predicates,
+    node_filters,
+    node_predicate_builders,
+    node_predicates,
+    typing,
+    utils,
 )
 from .edge_filters import *
 from .edge_predicate_builders import *
@@ -19,4 +25,4 @@ from .node_predicates import *
 from .typing import *
 from .utils import *
 
-__all__ = [k for k in locals() if not k.startswith('_')]
+__all__ = [k for k in locals() if not k.startswith("_")]

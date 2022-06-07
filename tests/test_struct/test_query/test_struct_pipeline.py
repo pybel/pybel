@@ -24,17 +24,22 @@ class TestEgfExample(unittest.TestCase):
         self.original_number_edges = self.graph.number_of_edges()
 
     def check_original_unchanged(self):
-        self.assertEqual(self.original_number_nodes, self.graph.number_of_nodes(),
-                         msg='original graph nodes should remain unchanged')
-        self.assertEqual(self.original_number_edges, self.graph.number_of_edges(),
-                         msg='original graph edges should remain unchanged')
+        self.assertEqual(
+            self.original_number_nodes,
+            self.graph.number_of_nodes(),
+            msg="original graph nodes should remain unchanged",
+        )
+        self.assertEqual(
+            self.original_number_edges,
+            self.graph.number_of_edges(),
+            msg="original graph edges should remain unchanged",
+        )
 
 
 class TestPipelineFailures(unittest.TestCase):
-
     def test_assert_failure(self):
         with self.assertRaises(MissingPipelineFunctionError):
-            get_transformation('missing function')
+            get_transformation("missing function")
 
     def test_assert_success(self):
         m = list(mapped)
@@ -53,12 +58,12 @@ class TestPipelineFailures(unittest.TestCase):
         p = Pipeline()
 
         with self.assertRaises(MissingPipelineFunctionError):
-            p._get_function('nonsense name')
+            p._get_function("nonsense name")
 
     def test_build_meta_failure(self):
         p1, p2 = Pipeline(), Pipeline()
 
-        p = Pipeline._build_meta('wrong', [p1, p2])
+        p = Pipeline._build_meta("wrong", [p1, p2])
 
         with self.assertRaises(MetaValueError):
             p(BELGraph())
@@ -66,7 +71,7 @@ class TestPipelineFailures(unittest.TestCase):
     def test_fail_add(self):
         pipeline = Pipeline()
         with self.assertRaises(MissingPipelineFunctionError):
-            pipeline.append('missing function')
+            pipeline.append("missing function")
 
 
 class TestPipeline(TestEgfExample):
@@ -74,26 +79,26 @@ class TestPipeline(TestEgfExample):
         pipeline = Pipeline()
         self.assertEqual(0, len(pipeline))
 
-        pipeline.append('enrich_protein_and_rna_origins')
+        pipeline.append("enrich_protein_and_rna_origins")
         self.assertEqual(1, len(pipeline))
 
     def test_extend(self):
-        p1 = Pipeline.from_functions(['enrich_protein_and_rna_origins'])
+        p1 = Pipeline.from_functions(["enrich_protein_and_rna_origins"])
         self.assertEqual(1, len(p1))
 
-        p2 = Pipeline.from_functions(['remove_pathologies'])
+        p2 = Pipeline.from_functions(["remove_pathologies"])
         p1.extend(p2)
 
         self.assertEqual(2, len(p1))
 
     def test_serialize_string(self):
-        p = Pipeline.from_functions(['enrich_protein_and_rna_origins'])
+        p = Pipeline.from_functions(["enrich_protein_and_rna_origins"])
         s = p.dumps()
         p_reconstituted = Pipeline.loads(s)
         self.assertEqual(p.protocol, p_reconstituted.protocol)
 
     def test_serialize_file(self):
-        p = Pipeline.from_functions(['enrich_protein_and_rna_origins'])
+        p = Pipeline.from_functions(["enrich_protein_and_rna_origins"])
         sio = StringIO()
         p.dump(sio)
         sio.seek(0)
@@ -101,9 +106,11 @@ class TestPipeline(TestEgfExample):
         self.assertEqual(p.protocol, p_reconstituted.protocol)
 
     def test_pipeline_by_string(self):
-        pipeline = Pipeline.from_functions([
-            'enrich_protein_and_rna_origins',
-        ])
+        pipeline = Pipeline.from_functions(
+            [
+                "enrich_protein_and_rna_origins",
+            ]
+        )
         result = pipeline(self.graph)
 
         self.assertEqual(32, result.number_of_nodes())
@@ -114,9 +121,11 @@ class TestPipeline(TestEgfExample):
         self.check_original_unchanged()
 
     def test_pipeline_by_function(self):
-        pipeline = Pipeline.from_functions([
-            enrich_protein_and_rna_origins,
-        ])
+        pipeline = Pipeline.from_functions(
+            [
+                enrich_protein_and_rna_origins,
+            ]
+        )
         result = pipeline(self.graph)
 
         self.assertEqual(32, result.number_of_nodes())

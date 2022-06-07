@@ -8,7 +8,12 @@ import random
 from collections import UserList
 from typing import Any, Dict, List, Set, TextIO, Union
 
-from .constants import SEED_TYPE_ANNOTATION, SEED_TYPE_INDUCTION, SEED_TYPE_NEIGHBORS, SEED_TYPE_SAMPLE
+from .constants import (
+    SEED_TYPE_ANNOTATION,
+    SEED_TYPE_INDUCTION,
+    SEED_TYPE_NEIGHBORS,
+    SEED_TYPE_SAMPLE,
+)
 from .selection import get_subgraph
 from ...dsl import BaseEntity
 from ...struct import union
@@ -16,8 +21,8 @@ from ...tokens import parse_result_to_dsl
 
 logger = logging.getLogger(__name__)
 
-SEED_METHOD = 'type'
-SEED_DATA = 'data'
+SEED_METHOD = "type"
+SEED_DATA = "data"
 
 MaybeNodeList = Union[BaseEntity, List[BaseEntity], List[Dict]]
 
@@ -25,7 +30,7 @@ MaybeNodeList = Union[BaseEntity, List[BaseEntity], List[Dict]]
 class Seeding(UserList):
     """Represents a container of seeding methods to apply to a network."""
 
-    def append_induction(self, nodes: MaybeNodeList) -> 'Seeding':
+    def append_induction(self, nodes: MaybeNodeList) -> "Seeding":
         """Add a seed induction method.
 
         :param nodes: A node or list of nodes
@@ -33,7 +38,7 @@ class Seeding(UserList):
         """
         return self._append_seed_handle_nodes(SEED_TYPE_INDUCTION, nodes)
 
-    def append_neighbors(self, nodes: MaybeNodeList) -> 'Seeding':
+    def append_neighbors(self, nodes: MaybeNodeList) -> "Seeding":
         """Add a seed by neighbors.
 
         :param nodes: A node or list of nodes
@@ -41,7 +46,7 @@ class Seeding(UserList):
         """
         return self._append_seed_handle_nodes(SEED_TYPE_NEIGHBORS, nodes)
 
-    def append_annotation(self, annotation: str, values: Set[str]) -> 'Seeding':
+    def append_annotation(self, annotation: str, values: Set[str]) -> "Seeding":
         """Add a seed induction method for single annotation's values.
 
         :param annotation: The annotation to filter by
@@ -49,14 +54,15 @@ class Seeding(UserList):
         :returns: self for fluid API
         """
         return self._append_seed(
-            SEED_TYPE_ANNOTATION, {
-                'annotations': {
+            SEED_TYPE_ANNOTATION,
+            {
+                "annotations": {
                     annotation: values,
                 },
             },
         )
 
-    def append_sample(self, **kwargs) -> 'Seeding':
+    def append_sample(self, **kwargs) -> "Seeding":
         """Add seed induction methods.
 
         Kwargs can have ``number_edges`` or ``number_seed_nodes``.
@@ -64,24 +70,26 @@ class Seeding(UserList):
         :returns: self for fluid API
         """
         data = {
-            'seed': random.randint(0, 1000000),
+            "seed": random.randint(0, 1000000),
         }
         data.update(kwargs)
 
         return self._append_seed(SEED_TYPE_SAMPLE, data)
 
-    def _append_seed(self, seed_type: str, data: Any) -> 'Seeding':
+    def _append_seed(self, seed_type: str, data: Any) -> "Seeding":
         """Add a seeding method and returns self.
 
         :returns: self for fluid API
         """
-        self.append({
-            SEED_METHOD: seed_type,
-            SEED_DATA: data,
-        })
+        self.append(
+            {
+                SEED_METHOD: seed_type,
+                SEED_DATA: data,
+            }
+        )
         return self
 
-    def _append_seed_handle_nodes(self, seed_type: str, nodes: MaybeNodeList) -> 'Seeding':
+    def _append_seed_handle_nodes(self, seed_type: str, nodes: MaybeNodeList) -> "Seeding":
         """Add a seeding method and returns self.
 
         :param seed_type: The seed type
@@ -97,7 +105,7 @@ class Seeding(UserList):
         :rtype: Optional[pybel.BELGraph]
         """
         if not self:
-            logger.debug('no seeding, returning graph: %s', graph)
+            logger.debug("no seeding, returning graph: %s", graph)
             return graph
 
         subgraphs = []
@@ -105,17 +113,17 @@ class Seeding(UserList):
         for seed in self:
             seed_method, seed_data = seed[SEED_METHOD], seed[SEED_DATA]
 
-            logger.debug('seeding with %s: %s', seed_method, seed_data)
+            logger.debug("seeding with %s: %s", seed_method, seed_data)
             subgraph = get_subgraph(graph, seed_method=seed_method, seed_data=seed_data)
 
             if subgraph is None:
-                logger.debug('seed returned empty graph: %s', seed)
+                logger.debug("seed returned empty graph: %s", seed)
                 continue
 
             subgraphs.append(subgraph)
 
         if not subgraphs:
-            logger.debug('no subgraphs returned')
+            logger.debug("no subgraphs returned")
             return
 
         return union(subgraphs)
@@ -133,17 +141,17 @@ class Seeding(UserList):
         return json.dumps(self.to_json(), sort_keys=sort_keys, **kwargs)
 
     @staticmethod
-    def from_json(data) -> 'Seeding':
+    def from_json(data) -> "Seeding":
         """Build a seeding container from a JSON list."""
         return Seeding(data)
 
     @staticmethod
-    def load(file: TextIO) -> 'Seeding':
+    def load(file: TextIO) -> "Seeding":
         """Load a seeding container from a JSON file."""
         return Seeding.from_json(json.load(file))
 
     @staticmethod
-    def loads(s: str) -> 'Seeding':
+    def loads(s: str) -> "Seeding":
         """Load a seeding container from a JSON string."""
         return Seeding.from_json(json.loads(s))
 
@@ -153,11 +161,4 @@ def _handle_nodes(nodes: MaybeNodeList) -> List[BaseEntity]:
     if isinstance(nodes, BaseEntity):
         return [nodes]
 
-    return [
-        (
-            parse_result_to_dsl(node)
-            if not isinstance(node, BaseEntity) else
-            node
-        )
-        for node in nodes
-    ]
+    return [(parse_result_to_dsl(node) if not isinstance(node, BaseEntity) else node) for node in nodes]

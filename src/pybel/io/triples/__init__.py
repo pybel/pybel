@@ -13,7 +13,7 @@ which uses this module to convert BEL graphs into a format for knowledge graph e
 from .api import to_edgelist, to_triples, to_triples_file  # noqa: F401
 
 __all__ = [
-    'to_triples_file',
-    'to_triples',
-    'to_edgelist',
+    "to_triples_file",
+    "to_triples",
+    "to_edgelist",
 ]

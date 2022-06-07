@@ -15,12 +15,15 @@ from ..constants import CAUSAL_DECREASE_RELATIONS, CAUSAL_INCREASE_RELATIONS, RE
 from ..dsl import Gene, MicroRna, Protein, Rna
 from ..struct import BELGraph
 from ..struct.getters import get_tf_pairs
-from ..struct.node_utils import list_abundance_cartesian_expansion, reaction_cartesian_expansion
+from ..struct.node_utils import (
+    list_abundance_cartesian_expansion,
+    reaction_cartesian_expansion,
+)
 
 __all__ = [
-    'to_npa_directory',
-    'to_npa_dfs',
-    'to_npa_layers',
+    "to_npa_directory",
+    "to_npa_dfs",
+    "to_npa_layers",
 ]
 
 logger = logging.getLogger(__name__)
@@ -34,8 +37,8 @@ DEBELIZED_CODE_FOR_INODES = "*"
 def to_npa_directory(graph: BELGraph, directory: str, **kwargs) -> None:
     """Write the BEL file to two files in the directory for :mod:`pynpa`."""
     ppi_df, transcription_df = to_npa_dfs(graph, **kwargs)
-    ppi_df.to_csv(os.path.join(directory, 'ppi_layer.tsv'), sep='\t', index=False)
-    transcription_df.to_csv(os.path.join(directory, 'transcriptional_layer.tsv'), sep='\t', index=False)
+    ppi_df.to_csv(os.path.join(directory, "ppi_layer.tsv"), sep="\t", index=False)
+    transcription_df.to_csv(os.path.join(directory, "transcriptional_layer.tsv"), sep="\t", index=False)
 
 
 def to_npa_dfs(
@@ -72,21 +75,15 @@ def to_npa_dfs(
 
 def _get_df(layer: Layer, method: Optional[str] = None) -> pd.DataFrame:
     rows = _normalize_layer(layer, method=method)
-    return pd.DataFrame(rows, columns=['source', 'target', 'relation']).sort_values(['source', 'target'])
+    return pd.DataFrame(rows, columns=["source", "target", "relation"]).sort_values(["source", "target"])
 
 
 def _normalize_layer(layer: Layer, method: Optional[str] = None) -> List[Tuple[str, str, int]]:
-    if method == 'curie' or method is None:
-        return [
-            (source.curie, target.curie, direction)
-            for (source, target), direction in layer.items()
-        ]
-    elif method == 'name':
-        return [
-            (source.name, target.name, direction)
-            for (source, target), direction in layer.items()
-        ]
-    elif method == 'inodes':
+    if method == "curie" or method is None:
+        return [(source.curie, target.curie, direction) for (source, target), direction in layer.items()]
+    elif method == "name":
+        return [(source.name, target.name, direction) for (source, target), direction in layer.items()]
+    elif method == "inodes":
         return [
             (
                 "{}{}".format(DEBELIZED_CODE_FOR_INODES, source.name),
@@ -96,7 +93,7 @@ def _normalize_layer(layer: Layer, method: Optional[str] = None) -> List[Tuple[s
             for (source, target), direction in layer.items()
         ]
     else:
-        raise ValueError('Invalid export method: {method}'.format(method=method))
+        raise ValueError("Invalid export method: {method}".format(method=method))
 
 
 def to_npa_layers(
@@ -118,10 +115,9 @@ def to_npa_layers(
         reaction_cartesian_expansion(graph)
 
     transcription_layer = {
-        (u.get_rna().get_gene(), v.get_gene()): r
-        for u, v, r in get_tf_pairs(graph, direct_only=direct_tf_only)
+        (u.get_rna().get_gene(), v.get_gene()): r for u, v, r in get_tf_pairs(graph, direct_only=direct_tf_only)
     }
-    logger.info('extracted %d pairs for the transcription layer', len(transcription_layer))
+    logger.info("extracted %d pairs for the transcription layer", len(transcription_layer))
 
     ppi_layer = {}
     for u, v, d in graph.edges(data=True):
@@ -138,7 +134,7 @@ def to_npa_layers(
             ppi_layer[u, v] = -1
         # TODO what about contradictions
 
-    logger.info('extracted %d pairs for the ppi layer', len(ppi_layer))
+    logger.info("extracted %d pairs for the ppi layer", len(ppi_layer))
     return ppi_layer, transcription_layer
 
 

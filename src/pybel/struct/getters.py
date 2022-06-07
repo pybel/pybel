@@ -6,13 +6,16 @@ from typing import Iterable, Tuple
 
 from .graph import BELGraph
 from ..constants import (
-    CAUSAL_DECREASE_RELATIONS, CAUSAL_INCREASE_RELATIONS, DIRECTLY_DECREASES, DIRECTLY_INCREASES,
+    CAUSAL_DECREASE_RELATIONS,
+    CAUSAL_INCREASE_RELATIONS,
+    DIRECTLY_DECREASES,
+    DIRECTLY_INCREASES,
     RELATION,
 )
 from ..dsl import ComplexAbundance, Gene, Protein, Rna
 
 __all__ = [
-    'get_tf_pairs',
+    "get_tf_pairs",
 ]
 
 
@@ -54,8 +57,4 @@ def get_tf_pairs(graph: BELGraph, direct_only: bool = False) -> Iterable[Tuple[P
 
 
 def _iterate_proteins(graph: BELGraph) -> Iterable[Protein]:
-    return (
-        node
-        for node in graph
-        if isinstance(node, Protein)
-    )
+    return (node for node in graph if isinstance(node, Protein))

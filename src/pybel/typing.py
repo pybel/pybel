@@ -5,8 +5,8 @@
 from typing import Iterable, Mapping, Union
 
 __all__ = [
-    'Strings',
-    'EdgeData',
+    "Strings",
+    "EdgeData",
 ]
 
 Strings = Union[str, Iterable[str]]

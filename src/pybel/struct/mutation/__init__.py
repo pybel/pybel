@@ -2,7 +2,16 @@
 
 """This module contains functions that mutate or make transformations on a network."""
 
-from . import collapse, deletion, expansion, induction, induction_expansion, inference, metadata, utils
+from . import (
+    collapse,
+    deletion,
+    expansion,
+    induction,
+    induction_expansion,
+    inference,
+    metadata,
+    utils,
+)
 from .collapse import *
 from .deletion import *
 from .expansion import *
@@ -14,4 +23,4 @@ from .inference.transfer import *
 from .metadata import *
 from .utils import *
 
-__all__ = [k for k in locals() if not k.startswith('_')]
+__all__ = [k for k in locals() if not k.startswith("_")]

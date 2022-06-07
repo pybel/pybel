@@ -16,11 +16,10 @@ log = logging.getLogger(__name__)
 
 
 class TestSeedingConstructor(unittest.TestCase):
-
     def test_none(self):
         seeding = Seeding()
         self.assertEqual(0, len(seeding))
-        self.assertEqual('[]', seeding.dumps())
+        self.assertEqual("[]", seeding.dumps())
 
     def test_append_sample(self):
         seeding = Seeding()

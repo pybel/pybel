@@ -9,25 +9,26 @@ from typing import Iterable, List, Mapping, Set
 from ..filters.edge_predicates import edge_has_annotation
 from ..graph import BELGraph, WarningTuple
 from ...constants import ANNOTATIONS
-from ...exceptions import BELSyntaxError, MissingNamespaceNameWarning, MissingNamespaceRegexWarning, NakedNameWarning
+from ...exceptions import (
+    BELSyntaxError,
+    MissingNamespaceNameWarning,
+    MissingNamespaceRegexWarning,
+    NakedNameWarning,
+)
 
 __all__ = [
-    'get_syntax_errors',
-    'count_error_types',
-    'count_naked_names',
-    'get_naked_names',
-    'calculate_incorrect_name_dict',
-    'calculate_error_by_annotation',
+    "get_syntax_errors",
+    "count_error_types",
+    "count_naked_names",
+    "get_naked_names",
+    "calculate_incorrect_name_dict",
+    "calculate_error_by_annotation",
 ]
 
 
 def get_syntax_errors(graph: BELGraph) -> List[WarningTuple]:
     """List the syntax errors encountered during compilation of a BEL script."""
-    return [
-        (path, exc, an)
-        for path, exc, an in graph.warnings
-        if isinstance(exc, BELSyntaxError)
-    ]
+    return [(path, exc, an) for path, exc, an in graph.warnings if isinstance(exc, BELSyntaxError)]
 
 
 def count_error_types(graph: BELGraph) -> typing.Counter[str]:
@@ -35,10 +36,7 @@ def count_error_types(graph: BELGraph) -> typing.Counter[str]:
 
     :return: A Counter of {error type: frequency}
     """
-    return Counter(
-        exc.__class__.__name__
-        for _, exc, _ in graph.warnings
-    )
+    return Counter(exc.__class__.__name__ for _, exc, _ in graph.warnings)
 
 
 def _naked_names_iter(graph: BELGraph) -> Iterable[str]:

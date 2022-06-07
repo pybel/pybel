@@ -7,14 +7,44 @@ from collections import defaultdict
 from typing import Any, Iterable, Mapping, Optional, Tuple
 
 from sqlalchemy import (
-    Boolean, Column, Date, DateTime, ForeignKey, Integer, JSON, LargeBinary, String, Table, Text, UniqueConstraint,
+    JSON,
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    ForeignKey,
+    Integer,
+    LargeBinary,
+    String,
+    Table,
+    Text,
+    UniqueConstraint,
 )
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import backref, relationship
 
 from .. import constants as pc
 from ..constants import (
-    CITATION, CITATION_AUTHORS, CITATION_DATE, CITATION_FIRST_AUTHOR, CITATION_JOURNAL, CITATION_LAST_AUTHOR, CITATION_PAGES, CITATION_VOLUME, EVIDENCE, IDENTIFIER, METADATA_AUTHORS, METADATA_CONTACT, METADATA_COPYRIGHT, METADATA_DESCRIPTION, METADATA_DISCLAIMER, METADATA_LICENSES, METADATA_NAME, METADATA_VERSION, NAME, NAMESPACE,
+    CITATION,
+    CITATION_AUTHORS,
+    CITATION_DATE,
+    CITATION_FIRST_AUTHOR,
+    CITATION_JOURNAL,
+    CITATION_LAST_AUTHOR,
+    CITATION_PAGES,
+    CITATION_VOLUME,
+    EVIDENCE,
+    IDENTIFIER,
+    METADATA_AUTHORS,
+    METADATA_CONTACT,
+    METADATA_COPYRIGHT,
+    METADATA_DESCRIPTION,
+    METADATA_DISCLAIMER,
+    METADATA_LICENSES,
+    METADATA_NAME,
+    METADATA_VERSION,
+    NAME,
+    NAMESPACE,
 )
 from ..io.gpickle import from_bytes_gz, to_bytes_gz
 from ..language import CitationDict, Entity
@@ -22,39 +52,39 @@ from ..struct.graph import BELGraph
 from ..tokens import parse_result_to_dsl
 
 __all__ = [
-    'Base',
-    'Namespace',
-    'NamespaceEntry',
-    'Network',
-    'Node',
-    'Author',
-    'Citation',
-    'Evidence',
-    'Edge',
-    'edge_annotation',
-    'network_edge',
-    'network_node',
+    "Base",
+    "Namespace",
+    "NamespaceEntry",
+    "Network",
+    "Node",
+    "Author",
+    "Citation",
+    "Evidence",
+    "Edge",
+    "edge_annotation",
+    "network_edge",
+    "network_node",
 ]
 
-NAME_TABLE_NAME = 'pybel_name'
-NAMESPACE_TABLE_NAME = 'pybel_namespace'
+NAME_TABLE_NAME = "pybel_name"
+NAMESPACE_TABLE_NAME = "pybel_namespace"
 
-NODE_TABLE_NAME = 'pybel_node'
+NODE_TABLE_NAME = "pybel_node"
 
-EDGE_TABLE_NAME = 'pybel_edge'
-EDGE_ANNOTATION_TABLE_NAME = 'pybel_edge_name'
+EDGE_TABLE_NAME = "pybel_edge"
+EDGE_ANNOTATION_TABLE_NAME = "pybel_edge_name"
 
-AUTHOR_TABLE_NAME = 'pybel_author'
-CITATION_TABLE_NAME = 'pybel_citation'
-AUTHOR_CITATION_TABLE_NAME = 'pybel_author_citation'
+AUTHOR_TABLE_NAME = "pybel_author"
+CITATION_TABLE_NAME = "pybel_citation"
+AUTHOR_CITATION_TABLE_NAME = "pybel_author_citation"
 
-EVIDENCE_TABLE_NAME = 'pybel_evidence'
+EVIDENCE_TABLE_NAME = "pybel_evidence"
 
-NETWORK_TABLE_NAME = 'pybel_network'
-NETWORK_NODE_TABLE_NAME = 'pybel_network_node'
-NETWORK_EDGE_TABLE_NAME = 'pybel_network_edge'
-NETWORK_NAMESPACE_TABLE_NAME = 'pybel_network_namespace'
-NETWORK_ANNOTATION_TABLE_NAME = 'pybel_network_annotation'
+NETWORK_TABLE_NAME = "pybel_network"
+NETWORK_NODE_TABLE_NAME = "pybel_network_node"
+NETWORK_EDGE_TABLE_NAME = "pybel_network_edge"
+NETWORK_NAMESPACE_TABLE_NAME = "pybel_network_namespace"
+NETWORK_ANNOTATION_TABLE_NAME = "pybel_network_annotation"
 
 LONGBLOB = 4294967295
 
@@ -67,44 +97,72 @@ class Namespace(Base):
     __tablename__ = NAMESPACE_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
-    uploaded = Column(DateTime, nullable=False, default=datetime.datetime.utcnow, doc='The date of upload')
+    uploaded = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.datetime.utcnow,
+        doc="The date of upload",
+    )
 
     # logically the "namespace"
     keyword = Column(
-        String(255), nullable=True, index=True,
-        doc='Keyword that is used in a BEL file to identify a specific namespace',
+        String(255),
+        nullable=True,
+        index=True,
+        doc="Keyword that is used in a BEL file to identify a specific namespace",
     )
 
     # A namespace either needs a URL or a pattern
     pattern = Column(
-        String(255), nullable=True, index=True,
+        String(255),
+        nullable=True,
+        index=True,
         doc="Contains regex pattern for value identification.",
     )
 
     miriam_id = Column(
-        String(16), nullable=True,
-        doc=r'MIRIAM resource identifier matching the regular expression ``^MIR:001\d{5}$``',
+        String(16),
+        nullable=True,
+        doc=r"MIRIAM resource identifier matching the regular expression ``^MIR:001\d{5}$``",
     )
     miriam_name = Column(String(255), nullable=True)
     miriam_namespace = Column(String(255), nullable=True)
     miriam_uri = Column(String(255), nullable=True)
     miriam_description = Column(Text, nullable=True)
 
-    version = Column(String(255), nullable=True, doc='Version of the namespace')
+    version = Column(String(255), nullable=True, doc="Version of the namespace")
 
-    url = Column(String(255), nullable=True, unique=True, index=True, doc='BELNS Resource location as URL')
+    url = Column(
+        String(255),
+        nullable=True,
+        unique=True,
+        index=True,
+        doc="BELNS Resource location as URL",
+    )
 
-    name = Column(String(255), nullable=True, doc='Name of the given namespace')
-    domain = Column(String(255), nullable=True, doc='Domain for which this namespace is valid')
-    species = Column(String(255), nullable=True, doc='Taxonomy identifiers for which this namespace is valid')
-    description = Column(Text, nullable=True, doc='Optional short description of the namespace')
+    name = Column(String(255), nullable=True, doc="Name of the given namespace")
+    domain = Column(String(255), nullable=True, doc="Domain for which this namespace is valid")
+    species = Column(
+        String(255),
+        nullable=True,
+        doc="Taxonomy identifiers for which this namespace is valid",
+    )
+    description = Column(Text, nullable=True, doc="Optional short description of the namespace")
 
-    created = Column(DateTime, nullable=True, doc='DateTime of the creation of the namespace definition file')
-    query_url = Column(Text, nullable=True, doc='URL that can be used to query the namespace (externally from PyBEL)')
+    created = Column(
+        DateTime,
+        nullable=True,
+        doc="DateTime of the creation of the namespace definition file",
+    )
+    query_url = Column(
+        Text,
+        nullable=True,
+        doc="URL that can be used to query the namespace (externally from PyBEL)",
+    )
 
-    author = Column(String(255), nullable=True, doc='The author of the namespace')
-    license = Column(String(255), nullable=True, doc='License information')
-    contact = Column(String(255), nullable=True, doc='Contact information')
+    author = Column(String(255), nullable=True, doc="The author of the namespace")
+    license = Column(String(255), nullable=True, doc="License information")
+    contact = Column(String(255), nullable=True, doc="Contact information")
 
     citation = Column(String(255), nullable=True)
     citation_description = Column(Text, nullable=True)
@@ -115,14 +173,11 @@ class Namespace(Base):
     is_annotation = Column(Boolean)
 
     def __str__(self):
-        return f'[id={self.id}] {self.keyword}'
+        return f"[id={self.id}] {self.keyword}"
 
     def get_term_to_encodings(self) -> Mapping[Tuple[Optional[str], str], str]:
         """Return the term (db, id, name) to encodings from this namespace."""
-        return {
-            (entry.identifier, entry.name): entry.encoding
-            for entry in self.entries
-        }
+        return {(entry.identifier, entry.name): entry.encoding for entry in self.entries}
 
     def to_json(self, include_id: bool = False) -> Mapping[str, str]:
         """Return the most useful entries as a dictionary.
@@ -130,18 +185,18 @@ class Namespace(Base):
         :param include_id: If true, includes the model identifier
         """
         result = {
-            'keyword': self.keyword,
-            'name': self.name,
-            'version': self.version,
+            "keyword": self.keyword,
+            "name": self.name,
+            "version": self.version,
         }
 
         if self.url:
-            result['url'] = self.url
+            result["url"] = self.url
         else:
-            result['pattern'] = self.pattern
+            result["pattern"] = self.pattern
 
         if include_id:
-            result['id'] = self.id
+            result["id"] = self.id
 
         return result
 
@@ -153,14 +208,25 @@ class NamespaceEntry(Base):
     id = Column(Integer, primary_key=True)
 
     name = Column(
-        String(1023), index=True, nullable=True,
-        doc='Name that is defined in the corresponding namespace definition file',
+        String(1023),
+        index=True,
+        nullable=True,
+        doc="Name that is defined in the corresponding namespace definition file",
     )
-    identifier = Column(String(255), index=True, nullable=True, doc='The database accession number')
-    encoding = Column(String(8), nullable=True, doc='The biological entity types for which this name is valid')
+    identifier = Column(String(255), index=True, nullable=True, doc="The database accession number")
+    encoding = Column(
+        String(8),
+        nullable=True,
+        doc="The biological entity types for which this name is valid",
+    )
 
-    namespace_id = Column(Integer, ForeignKey('{}.id'.format(NAMESPACE_TABLE_NAME)), nullable=False, index=True)
-    namespace = relationship(Namespace, backref=backref('entries', lazy='dynamic'))
+    namespace_id = Column(
+        Integer,
+        ForeignKey("{}.id".format(NAMESPACE_TABLE_NAME)),
+        nullable=False,
+        index=True,
+    )
+    namespace = relationship(Namespace, backref=backref("entries", lazy="dynamic"))
 
     is_name = Column(Boolean)
     is_annotation = Column(Boolean)
@@ -181,7 +247,7 @@ class NamespaceEntry(Base):
             result[IDENTIFIER] = self.identifier
 
         if include_id:
-            result['id'] = self.id
+            result["id"] = self.id
 
         return result
 
@@ -191,7 +257,7 @@ class NamespaceEntry(Base):
         return cls.name.contains(name_query)
 
     def __str__(self):
-        return '[id={namespace_id}] {namespace_name}:{identifier} ! {name}'.format(
+        return "[id={namespace_id}] {namespace_name}:{identifier} ! {name}".format(
             namespace_id=self.namespace.id,
             namespace_name=self.namespace.keyword,
             identifier=self.identifier,
@@ -200,15 +266,37 @@ class NamespaceEntry(Base):
 
 
 network_edge = Table(
-    NETWORK_EDGE_TABLE_NAME, Base.metadata,
-    Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
-    Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True),
+    NETWORK_EDGE_TABLE_NAME,
+    Base.metadata,
+    Column(
+        "network_id",
+        Integer,
+        ForeignKey("{}.id".format(NETWORK_TABLE_NAME)),
+        primary_key=True,
+    ),
+    Column(
+        "edge_id",
+        Integer,
+        ForeignKey("{}.id".format(EDGE_TABLE_NAME)),
+        primary_key=True,
+    ),
 )
 
 network_node = Table(
-    NETWORK_NODE_TABLE_NAME, Base.metadata,
-    Column('network_id', Integer, ForeignKey('{}.id'.format(NETWORK_TABLE_NAME)), primary_key=True),
-    Column('node_id', Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), primary_key=True),
+    NETWORK_NODE_TABLE_NAME,
+    Base.metadata,
+    Column(
+        "network_id",
+        Integer,
+        ForeignKey("{}.id".format(NETWORK_TABLE_NAME)),
+        primary_key=True,
+    ),
+    Column(
+        "node_id",
+        Integer,
+        ForeignKey("{}.id".format(NODE_TABLE_NAME)),
+        primary_key=True,
+    ),
 )
 
 
@@ -218,21 +306,40 @@ class Network(Base):
     __tablename__ = NETWORK_TABLE_NAME
     id = Column(Integer, primary_key=True)
 
-    name = Column(String(255), nullable=False, index=True, doc='Name of the given Network (from the BEL file)')
-    version = Column(String(255), nullable=False, doc='Release version of the given Network (from the BEL file)')
+    name = Column(
+        String(255),
+        nullable=False,
+        index=True,
+        doc="Name of the given Network (from the BEL file)",
+    )
+    version = Column(
+        String(255),
+        nullable=False,
+        doc="Release version of the given Network (from the BEL file)",
+    )
 
-    authors = Column(Text, nullable=True, doc='Authors of the underlying BEL file')
-    contact = Column(String(255), nullable=True, doc='Contact email from the underlying BEL file')
-    description = Column(Text, nullable=True, doc='Descriptive text from the underlying BEL file')
-    copyright = Column(Text, nullable=True, doc='Copyright information')
-    disclaimer = Column(Text, nullable=True, doc='Disclaimer information')
-    licenses = Column(Text, nullable=True, doc='License information')
+    authors = Column(Text, nullable=True, doc="Authors of the underlying BEL file")
+    contact = Column(String(255), nullable=True, doc="Contact email from the underlying BEL file")
+    description = Column(Text, nullable=True, doc="Descriptive text from the underlying BEL file")
+    copyright = Column(Text, nullable=True, doc="Copyright information")
+    disclaimer = Column(Text, nullable=True, doc="Disclaimer information")
+    licenses = Column(Text, nullable=True, doc="License information")
 
     created = Column(DateTime, nullable=False, default=datetime.datetime.utcnow)
-    blob = Column(LargeBinary(LONGBLOB), doc='A pickled version of this network')
+    blob = Column(LargeBinary(LONGBLOB), doc="A pickled version of this network")
 
-    nodes = relationship('Node', secondary=network_node, lazy='dynamic', backref=backref('networks', lazy='dynamic'))
-    edges = relationship('Edge', secondary=network_edge, lazy='dynamic', backref=backref('networks', lazy='dynamic'))
+    nodes = relationship(
+        "Node",
+        secondary=network_node,
+        lazy="dynamic",
+        backref=backref("networks", lazy="dynamic"),
+    )
+    edges = relationship(
+        "Edge",
+        secondary=network_edge,
+        lazy="dynamic",
+        backref=backref("networks", lazy="dynamic"),
+    )
 
     def to_json(self, include_id: bool = False) -> Mapping[str, Any]:
         """Return this network as JSON.
@@ -245,10 +352,10 @@ class Network(Base):
         }
 
         if self.created:
-            result['created'] = str(self.created)
+            result["created"] = str(self.created)
 
         if include_id:
-            result['id'] = self.id
+            result["id"] = self.id
 
         if self.authors:
             result[METADATA_AUTHORS] = self.authors
@@ -286,7 +393,7 @@ class Network(Base):
         return cls.id.in_(network_ids)
 
     def __repr__(self):
-        return '{} v{}'.format(self.name, self.version)
+        return "{} v{}".format(self.name, self.version)
 
     def __str__(self):
         return repr(self)
@@ -306,18 +413,29 @@ class Node(Base):
     __tablename__ = NODE_TABLE_NAME
     id = Column(Integer, primary_key=True)
 
-    type = Column(String(32), nullable=False, doc='The type of the represented biological entity e.g. Protein or Gene')
-    bel = Column(String(1023), nullable=False, doc='Canonical BEL term that represents the given node')
+    type = Column(
+        String(32),
+        nullable=False,
+        doc="The type of the represented biological entity e.g. Protein or Gene",
+    )
+    bel = Column(
+        String(1023),
+        nullable=False,
+        doc="Canonical BEL term that represents the given node",
+    )
     md5 = Column(String(255), nullable=False, unique=True, index=True)
 
-    namespace_entry_id = Column(Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), nullable=True)
-    namespace_entry = relationship(NamespaceEntry, foreign_keys=[namespace_entry_id],
-                                   backref=backref('nodes', lazy='dynamic'))
+    namespace_entry_id = Column(Integer, ForeignKey("{}.id".format(NAME_TABLE_NAME)), nullable=True)
+    namespace_entry = relationship(
+        NamespaceEntry,
+        foreign_keys=[namespace_entry_id],
+        backref=backref("nodes", lazy="dynamic"),
+    )
 
-    data = Column(JSON, nullable=False, doc='PyBEL BaseEntity as JSON')
+    data = Column(JSON, nullable=False, doc="PyBEL BaseEntity as JSON")
 
     @staticmethod
-    def _start_from_base_entity(base_entity) -> 'Node':
+    def _start_from_base_entity(base_entity) -> "Node":
         """Convert a base entity to a node model.
 
         :type base_entity: pybel.dsl.BaseEntity
@@ -338,13 +456,10 @@ class Node(Base):
         return self.bel
 
     def __repr__(self):
-        return '<Node {}: {}>'.format(self.md5[:10], self.bel)
+        return "<Node {}: {}>".format(self.md5[:10], self.bel)
 
     def _get_list_by_relation(self, relation):
-        return [
-            edge.target.to_json()
-            for edge in self.out_edges.filter(Edge.relation == relation)
-        ]
+        return [edge.target.to_json() for edge in self.out_edges.filter(Edge.relation == relation)]
 
     def as_bel(self):
         """Serialize this node as a PyBEL DSL object.
@@ -359,9 +474,20 @@ class Node(Base):
 
 
 author_citation = Table(
-    AUTHOR_CITATION_TABLE_NAME, Base.metadata,
-    Column('author_id', Integer, ForeignKey('{}.id'.format(AUTHOR_TABLE_NAME)), primary_key=True),
-    Column('citation_id', Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)), primary_key=True),
+    AUTHOR_CITATION_TABLE_NAME,
+    Base.metadata,
+    Column(
+        "author_id",
+        Integer,
+        ForeignKey("{}.id".format(AUTHOR_TABLE_NAME)),
+        primary_key=True,
+    ),
+    Column(
+        "citation_id",
+        Integer,
+        ForeignKey("{}.id".format(CITATION_TABLE_NAME)),
+        primary_key=True,
+    ),
 )
 
 
@@ -397,36 +523,48 @@ class Citation(Base):
 
     id = Column(Integer, primary_key=True)
 
-    db = Column(String(16), nullable=False, doc='Type of the stored publication e.g. PubMed')
-    db_id = Column(String(255), nullable=False, doc='Reference identifier of the publication e.g. PubMed_ID')
-
-    article_type = Column(Text, nullable=True, doc='Type of the publication')
-    title = Column(Text, nullable=True, doc='Title of the publication')
-    journal = Column(Text, nullable=True, doc='Journal name')
-    volume = Column(Text, nullable=True, doc='Volume of the journal')
-    issue = Column(Text, nullable=True, doc='Issue within the volume')
-    pages = Column(Text, nullable=True, doc='Pages of the publication')
-    date = Column(Date, nullable=True, doc='Publication date')
-
-    first_id = Column(Integer, ForeignKey('{}.id'.format(AUTHOR_TABLE_NAME)), nullable=True, doc='First author')
-    first = relationship(Author, foreign_keys=[first_id])
-
-    last_id = Column(Integer, ForeignKey('{}.id'.format(AUTHOR_TABLE_NAME)), nullable=True, doc='Last author')
-    last = relationship(Author, foreign_keys=[last_id])
-
-    authors = relationship(Author, secondary=author_citation, backref='citations')
-
-    __table_args__ = (
-        UniqueConstraint(db, db_id),
+    db = Column(String(16), nullable=False, doc="Type of the stored publication e.g. PubMed")
+    db_id = Column(
+        String(255),
+        nullable=False,
+        doc="Reference identifier of the publication e.g. PubMed_ID",
     )
 
+    article_type = Column(Text, nullable=True, doc="Type of the publication")
+    title = Column(Text, nullable=True, doc="Title of the publication")
+    journal = Column(Text, nullable=True, doc="Journal name")
+    volume = Column(Text, nullable=True, doc="Volume of the journal")
+    issue = Column(Text, nullable=True, doc="Issue within the volume")
+    pages = Column(Text, nullable=True, doc="Pages of the publication")
+    date = Column(Date, nullable=True, doc="Publication date")
+
+    first_id = Column(
+        Integer,
+        ForeignKey("{}.id".format(AUTHOR_TABLE_NAME)),
+        nullable=True,
+        doc="First author",
+    )
+    first = relationship(Author, foreign_keys=[first_id])
+
+    last_id = Column(
+        Integer,
+        ForeignKey("{}.id".format(AUTHOR_TABLE_NAME)),
+        nullable=True,
+        doc="Last author",
+    )
+    last = relationship(Author, foreign_keys=[last_id])
+
+    authors = relationship(Author, secondary=author_citation, backref="citations")
+
+    __table_args__ = (UniqueConstraint(db, db_id),)
+
     def __str__(self):
-        return '{}:{}'.format(self.db, self.db_id)
+        return "{}:{}".format(self.db, self.db_id)
 
     @property
     def is_pubmed(self) -> bool:
         """Return if this is a PubMed citation."""
-        return self.db == 'pubmed'
+        return self.db == "pubmed"
 
     @property
     def is_enriched(self) -> bool:
@@ -446,7 +584,7 @@ class Citation(Base):
         )
 
         if include_id:
-            result['id'] = self.id
+            result["id"] = self.id
 
         if self.title:
             result[NAME] = self.title
@@ -461,7 +599,7 @@ class Citation(Base):
             result[CITATION_PAGES] = self.pages
 
         if self.date:
-            result[CITATION_DATE] = self.date.strftime('%Y-%m-%d')
+            result[CITATION_DATE] = self.date.strftime("%Y-%m-%d")
 
         if self.first:
             result[CITATION_FIRST_AUTHOR] = self.first.name
@@ -473,10 +611,7 @@ class Citation(Base):
             result[pc.CITATION_ARTICLE_TYPE] = self.article_type
 
         if self.authors:
-            result[CITATION_AUTHORS] = sorted(
-                author.name
-                for author in self.authors
-            )
+            result[CITATION_AUTHORS] = sorted(author.name for author in self.authors)
 
         return result
 
@@ -487,17 +622,15 @@ class Evidence(Base):
     __tablename__ = EVIDENCE_TABLE_NAME
 
     id = Column(Integer, primary_key=True)
-    text = Column(Text, nullable=False, doc='Supporting text from a given publication')
+    text = Column(Text, nullable=False, doc="Supporting text from a given publication")
 
-    citation_id = Column(Integer, ForeignKey('{}.id'.format(CITATION_TABLE_NAME)), nullable=False)
-    citation = relationship(Citation, backref=backref('evidences'))
+    citation_id = Column(Integer, ForeignKey("{}.id".format(CITATION_TABLE_NAME)), nullable=False)
+    citation = relationship(Citation, backref=backref("evidences"))
 
-    __table_args__ = (
-        UniqueConstraint(citation_id, text),
-    )
+    __table_args__ = (UniqueConstraint(citation_id, text),)
 
     def __str__(self):
-        return '{}:{}:{}'.format(self.citation.db, self.citation.db_id, self.text)
+        return "{}:{}:{}".format(self.citation.db, self.citation.db_id, self.text)
 
     def to_json(self, include_id: bool = False):
         """Create a dictionary that is used to recreate the edge data dictionary for a :class:`BELGraph`.
@@ -512,15 +645,26 @@ class Evidence(Base):
         }
 
         if include_id:
-            result['id'] = self.id
+            result["id"] = self.id
 
         return result
 
 
 edge_annotation = Table(
-    EDGE_ANNOTATION_TABLE_NAME, Base.metadata,
-    Column('edge_id', Integer, ForeignKey('{}.id'.format(EDGE_TABLE_NAME)), primary_key=True),
-    Column('name_id', Integer, ForeignKey('{}.id'.format(NAME_TABLE_NAME)), primary_key=True),
+    EDGE_ANNOTATION_TABLE_NAME,
+    Base.metadata,
+    Column(
+        "edge_id",
+        Integer,
+        ForeignKey("{}.id".format(EDGE_TABLE_NAME)),
+        primary_key=True,
+    ),
+    Column(
+        "name_id",
+        Integer,
+        ForeignKey("{}.id".format(NAME_TABLE_NAME)),
+        primary_key=True,
+    ),
 )
 
 
@@ -531,43 +675,52 @@ class Edge(Base):
 
     id = Column(Integer, primary_key=True)
 
-    bel = Column(Text, nullable=False, doc='Valid BEL statement that represents the given edge')
+    bel = Column(Text, nullable=False, doc="Valid BEL statement that represents the given edge")
     relation = Column(String(32), nullable=False)
 
-    source_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), nullable=False)
+    source_id = Column(Integer, ForeignKey("{}.id".format(NODE_TABLE_NAME)), nullable=False)
     source = relationship(
-        Node, foreign_keys=[source_id],
-        backref=backref('out_edges', lazy='dynamic', cascade='all, delete-orphan'),
+        Node,
+        foreign_keys=[source_id],
+        backref=backref("out_edges", lazy="dynamic", cascade="all, delete-orphan"),
     )
 
-    target_id = Column(Integer, ForeignKey('{}.id'.format(NODE_TABLE_NAME)), nullable=False)
+    target_id = Column(Integer, ForeignKey("{}.id".format(NODE_TABLE_NAME)), nullable=False)
     target = relationship(
-        Node, foreign_keys=[target_id],
-        backref=backref('in_edges', lazy='dynamic', cascade='all, delete-orphan'),
+        Node,
+        foreign_keys=[target_id],
+        backref=backref("in_edges", lazy="dynamic", cascade="all, delete-orphan"),
     )
 
-    evidence_id = Column(Integer, ForeignKey('{}.id'.format(EVIDENCE_TABLE_NAME)), nullable=True)
-    evidence = relationship(Evidence, backref=backref('edges', lazy='dynamic'))
+    evidence_id = Column(Integer, ForeignKey("{}.id".format(EVIDENCE_TABLE_NAME)), nullable=True)
+    evidence = relationship(Evidence, backref=backref("edges", lazy="dynamic"))
 
     annotations = relationship(
-        NamespaceEntry, secondary=edge_annotation, lazy="dynamic",
-        backref=backref('edges', lazy='dynamic'),
+        NamespaceEntry,
+        secondary=edge_annotation,
+        lazy="dynamic",
+        backref=backref("edges", lazy="dynamic"),
     )
 
     # free_annotations = Column(JSON, nullable=True, doc='Ungrounded extra annotations')
 
-    source_modifier = Column(JSON, nullable=True, doc='Modifiers for the source of the edge')
-    target_modifier = Column(JSON, nullable=True, doc='Modifiers for the target of the edge')
+    source_modifier = Column(JSON, nullable=True, doc="Modifiers for the source of the edge")
+    target_modifier = Column(JSON, nullable=True, doc="Modifiers for the target of the edge")
 
-    md5 = Column(String(255), index=True, unique=True, doc='The hash of the source, target, and associated metadata')
+    md5 = Column(
+        String(255),
+        index=True,
+        unique=True,
+        doc="The hash of the source, target, and associated metadata",
+    )
 
-    data = Column(JSON, nullable=False, doc='The stringified JSON representing this edge')
+    data = Column(JSON, nullable=False, doc="The stringified JSON representing this edge")
 
     def __str__(self):
         return self.bel
 
     def __repr__(self):
-        return '<Edge {}: {}>'.format(self.md5, self.bel)
+        return "<Edge {}: {}>".format(self.md5, self.bel)
 
     def get_annotations_json(self):
         """Format the annotations properly.
@@ -589,19 +742,19 @@ class Edge(Base):
                  and edge data information.
         """
         source_dict = self.source.to_json()
-        source_dict['md5'] = source_dict.md5
+        source_dict["md5"] = source_dict.md5
         target_dict = self.target.to_json()
-        target_dict['md5'] = target_dict.md5
+        target_dict["md5"] = target_dict.md5
 
         result = {
-            'source': source_dict,
-            'target': target_dict,
-            'key': self.md5,
-            'data': self.data,
+            "source": source_dict,
+            "target": target_dict,
+            "key": self.md5,
+            "data": self.data,
         }
 
         if include_id:
-            result['id'] = self.id
+            result["id"] = self.id
 
         return result
 

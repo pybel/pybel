@@ -9,7 +9,7 @@ from ..graph import BELGraph
 from ...constants import CITATION, IDENTIFIER, NAMESPACE
 
 __all__ = [
-    'get_subgraphs_by_citation',
+    "get_subgraphs_by_citation",
 ]
 
 

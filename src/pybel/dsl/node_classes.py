@@ -7,67 +7,101 @@ from abc import ABCMeta, abstractmethod
 from operator import methodcaller
 from typing import Iterable, List, Optional, Set, Union
 
-from .exc import InferCentralDogmaException, ListAbundanceEmptyException, ReactionEmptyException
+from .exc import (
+    InferCentralDogmaException,
+    ListAbundanceEmptyException,
+    ReactionEmptyException,
+)
 from ..constants import (
-    ABUNDANCE, BIOPROCESS, COMPLEX, COMPOSITE, CONCEPT, FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING,
-    FRAGMENT_START, FRAGMENT_STOP, FUNCTION, FUSION, FUSION_MISSING, FUSION_REFERENCE, FUSION_START, FUSION_STOP, GENE,
-    GMOD, HGVS, KIND, MEMBERS, MIRNA, PARTNER_3P, PARTNER_5P, PATHOLOGY, PMOD, PMOD_CODE, PMOD_ORDER, PMOD_POSITION,
-    POPULATION, PRODUCTS, PROTEIN, RANGE_3P, RANGE_5P, REACTANTS, REACTION, RNA, VARIANTS, XREFS, rev_abundance_labels,
+    ABUNDANCE,
+    BIOPROCESS,
+    COMPLEX,
+    COMPOSITE,
+    CONCEPT,
+    FRAGMENT,
+    FRAGMENT_DESCRIPTION,
+    FRAGMENT_MISSING,
+    FRAGMENT_START,
+    FRAGMENT_STOP,
+    FUNCTION,
+    FUSION,
+    FUSION_MISSING,
+    FUSION_REFERENCE,
+    FUSION_START,
+    FUSION_STOP,
+    GENE,
+    GMOD,
+    HGVS,
+    KIND,
+    MEMBERS,
+    MIRNA,
+    PARTNER_3P,
+    PARTNER_5P,
+    PATHOLOGY,
+    PMOD,
+    PMOD_CODE,
+    PMOD_ORDER,
+    PMOD_POSITION,
+    POPULATION,
+    PRODUCTS,
+    PROTEIN,
+    RANGE_3P,
+    RANGE_5P,
+    REACTANTS,
+    REACTION,
+    RNA,
+    VARIANTS,
+    XREFS,
+    rev_abundance_labels,
 )
 from ..language import Entity, gmod_mappings, pmod_mappings
 
 __all__ = [
     # Base Classes
-    'Entity',
-    'BaseEntity',
-    'BaseAbundance',
-    'ListAbundance',
-
+    "Entity",
+    "BaseEntity",
+    "BaseAbundance",
+    "ListAbundance",
     # Named entities
-    'Abundance',
-    'BiologicalProcess',
-    'Pathology',
-    'Population',
-    'NamedComplexAbundance',
-
+    "Abundance",
+    "BiologicalProcess",
+    "Pathology",
+    "Population",
+    "NamedComplexAbundance",
     # Central Dogma Stuff
-    'CentralDogma',
-    'Gene',
-    'Transcribable',
-    'Rna',
-    'MicroRna',
-    'Protein',
-
+    "CentralDogma",
+    "Gene",
+    "Transcribable",
+    "Rna",
+    "MicroRna",
+    "Protein",
     # Fusions
-    'FusionBase',
-    'ProteinFusion',
-    'RnaFusion',
-    'GeneFusion',
-
+    "FusionBase",
+    "ProteinFusion",
+    "RnaFusion",
+    "GeneFusion",
     # Fusion Ranges
-    'FusionRangeBase',
-    'EnumeratedFusionRange',
-    'MissingFusionRange',
-
+    "FusionRangeBase",
+    "EnumeratedFusionRange",
+    "MissingFusionRange",
     # Variants
-    'Variant',
-    'EntityVariant',
-    'ProteinModification',
-    'GeneModification',
-    'Hgvs',
-    'HgvsReference',
-    'HgvsUnspecified',
-    'ProteinSubstitution',
-    'Fragment',
-
+    "Variant",
+    "EntityVariant",
+    "ProteinModification",
+    "GeneModification",
+    "Hgvs",
+    "HgvsReference",
+    "HgvsUnspecified",
+    "ProteinSubstitution",
+    "Fragment",
     # List Entities
-    'ComplexAbundance',
-    'CompositeAbundance',
-    'Reaction',
+    "ComplexAbundance",
+    "CompositeAbundance",
+    "Reaction",
 ]
 
 # A methodcaller for the key argument of sorted()
-_as_bel = methodcaller('as_bel')
+_as_bel = methodcaller("as_bel")
 
 
 class BaseEntity(dict, metaclass=ABCMeta):
@@ -100,7 +134,7 @@ class BaseEntity(dict, metaclass=ABCMeta):
     def md5(self) -> str:
         """Get the MD5 hash of this node."""
         if self._md5 is None:
-            self._md5 = hashlib.md5(self.as_bel().encode('utf8')).hexdigest()  # noqa: S303
+            self._md5 = hashlib.md5(self.as_bel().encode("utf8")).hexdigest()  # noqa: S303
         return self._md5
 
     def __hash__(self):  # noqa: D105
@@ -110,7 +144,7 @@ class BaseEntity(dict, metaclass=ABCMeta):
         return isinstance(other, BaseEntity) and self.as_bel() == other.as_bel()
 
     def __repr__(self):
-        return '<BEL {bel}>'.format(bel=self.as_bel(use_identifiers=True))
+        return "<BEL {bel}>".format(bel=self.as_bel(use_identifiers=True))
 
     def __str__(self):  # noqa: D105
         return self.as_bel()
@@ -304,18 +338,15 @@ class CentralDogma(BaseAbundance):
         if not self.variants:
             return super().as_bel(use_identifiers=use_identifiers)
 
-        variants_canon = sorted([
-            variant.as_bel(use_identifiers=use_identifiers)
-            for variant in self.variants
-        ])
+        variants_canon = sorted([variant.as_bel(use_identifiers=use_identifiers) for variant in self.variants])
 
         return "{}({}, {})".format(
             self._bel_function,
             self.obo if use_identifiers and self.entity.identifier and self.entity.name else self.curie,
-            ', '.join(variants_canon),
+            ", ".join(variants_canon),
         )
 
-    def get_parent(self) -> Optional['CentralDogma']:
+    def get_parent(self) -> Optional["CentralDogma"]:
         """Get the parent, or none if it's already a reference node.
 
         >>> from pybel.dsl import Protein, Fragment
@@ -333,7 +364,7 @@ class CentralDogma(BaseAbundance):
             xrefs=self.xrefs,
         )
 
-    def with_variants(self, variants: Union[Variant, List[Variant]]) -> 'CentralDogma':
+    def with_variants(self, variants: Union[Variant, List[Variant]]) -> "CentralDogma":
         """Create a new entity with the given variants.
 
         :param variants: An optional variant or list of variants
@@ -382,7 +413,7 @@ class EntityVariant(Variant, BaseConcept):
             identifier=identifier,
         )
         if xrefs:
-            self['xref'] = xrefs
+            self["xref"] = xrefs
 
 
 class ProteinModification(EntityVariant):
@@ -429,7 +460,7 @@ class ProteinModification(EntityVariant):
 
         """
         if name and not namespace and not identifier:
-            x = pmod_mappings[name]['xrefs'][0]
+            x = pmod_mappings[name]["xrefs"][0]
             namespace, identifier, name = x.namespace, x.identifier, x.name
 
         super().__init__(
@@ -452,9 +483,9 @@ class ProteinModification(EntityVariant):
         else:
             x = self.entity.curie
 
-        return 'pmod({}{})'.format(
+        return "pmod({}{})".format(
             x,
-            ''.join(', {}'.format(self[x]) for x in PMOD_ORDER[2:] if x in self),
+            "".join(", {}".format(self[x]) for x in PMOD_ORDER[2:] if x in self),
         )
 
 
@@ -492,7 +523,7 @@ class GeneModification(EntityVariant):
 
         """
         if name and not namespace and not identifier:
-            x = gmod_mappings[name]['xrefs'][0]
+            x = gmod_mappings[name]["xrefs"][0]
             namespace, identifier, name = x.namespace, x.identifier, x.name
 
         super().__init__(
@@ -509,7 +540,7 @@ class GeneModification(EntityVariant):
         else:
             x = self.entity.curie
 
-        return 'gmod({})'.format(x)
+        return "gmod({})".format(x)
 
 
 class Hgvs(Variant):
@@ -540,14 +571,14 @@ class HgvsReference(Hgvs):
     """Represents the "reference" variant in HGVS."""
 
     def __init__(self) -> None:
-        super().__init__(variant='=')
+        super().__init__(variant="=")
 
 
 class HgvsUnspecified(Hgvs):
     """Represents an unspecified variant in HGVS."""
 
     def __init__(self) -> None:
-        super().__init__(variant='?')
+        super().__init__(variant="?")
 
 
 class ProteinSubstitution(Hgvs):
@@ -564,7 +595,7 @@ class ProteinSubstitution(Hgvs):
         >>> Protein(namespace='HGNC', name='AKT1', variants=[ProteinSubstitution('Ala', 127, 'Tyr')])
 
         """
-        super().__init__('p.{}{}{}'.format(from_aa, position, to_aa))
+        super().__init__("p.{}{}{}".format(from_aa, position, to_aa))
 
 
 class Fragment(Variant):
@@ -599,7 +630,7 @@ class Fragment(Variant):
             self[FRAGMENT_START] = start
             self[FRAGMENT_STOP] = stop
         else:
-            self[FRAGMENT_MISSING] = '?'
+            self[FRAGMENT_MISSING] = "?"
 
         if description:
             self[FRAGMENT_DESCRIPTION] = description
@@ -608,9 +639,9 @@ class Fragment(Variant):
     def range(self) -> str:
         """Get the range of this fragment."""
         if FRAGMENT_MISSING in self:
-            return '?'
+            return "?"
 
-        return '{}_{}'.format(self[FRAGMENT_START], self[FRAGMENT_STOP])
+        return "{}_{}".format(self[FRAGMENT_START], self[FRAGMENT_STOP])
 
     def as_bel(self, use_identifiers=False) -> str:
         """Return this fragment variant as a BEL string."""
@@ -619,7 +650,7 @@ class Fragment(Variant):
         if FRAGMENT_DESCRIPTION in self:
             res += ', "{}"'.format(self[FRAGMENT_DESCRIPTION])
 
-        return 'frag({})'.format(res)
+        return "frag({})".format(res)
 
 
 class Gene(CentralDogma):
@@ -627,10 +658,10 @@ class Gene(CentralDogma):
 
     function = GENE
 
-    def get_rna(self) -> 'Rna':
+    def get_rna(self) -> "Rna":
         """Get the corresponding RNA."""
         if self.variants:
-            raise InferCentralDogmaException('can not get gene for variant')
+            raise InferCentralDogmaException("can not get gene for variant")
         return Rna(
             namespace=self.namespace,
             name=self.name,
@@ -648,7 +679,7 @@ class Transcribable(CentralDogma):
         :raises: InferCentralDogmaException
         """
         if self.variants:
-            raise InferCentralDogmaException('can not get gene for variant')
+            raise InferCentralDogmaException("can not get gene for variant")
 
         return Gene(
             namespace=self.namespace,
@@ -727,7 +758,7 @@ class Protein(CentralDogma):
         :raises: InferCentralDogmaException
         """
         if self.variants:
-            raise InferCentralDogmaException('can not get rna for variant')
+            raise InferCentralDogmaException("can not get rna for variant")
 
         return Rna(
             namespace=self.namespace,
@@ -739,10 +770,18 @@ class Protein(CentralDogma):
 
 def _entity_list_as_bel(entities: Iterable[BaseEntity], use_identifiers: bool = True) -> str:
     """Stringify a list of BEL entities."""
-    return ', '.join(
-        e.as_bel(use_identifiers=use_identifiers)
-        for e in entities
-    )
+    return ", ".join(e.as_bel(use_identifiers=use_identifiers) for e in entities)
+
+
+def _help_named(self, namespace, identifier, name, xrefs):
+    if namespace:
+        self[CONCEPT] = Entity(
+            namespace=namespace,
+            name=name,
+            identifier=identifier,
+        )
+        if xrefs:
+            self[XREFS] = xrefs
 
 
 class Reaction(BaseEntity):
@@ -754,17 +793,26 @@ class Reaction(BaseEntity):
         self,
         reactants: Union[BaseAbundance, Iterable[BaseAbundance]],
         products: Union[BaseAbundance, Iterable[BaseAbundance]],
+        namespace: Optional[str] = None,
+        name: Optional[str] = None,
+        identifier: Optional[str] = None,
+        xrefs: Optional[List[Entity]] = None,
     ) -> None:
         """Build a reaction node.
 
         :param reactants: A list of PyBEL node data dictionaries representing the reactants
         :param products: A list of PyBEL node data dictionaries representing the products
+        :param namespace: The namespace from which the name originates
+        :param name: The name of the complex
+        :param identifier: The identifier in the namespace in which the name originates
+        :param xrefs: Alternate identifiers for the entity if it is named
 
         >>> from pybel.dsl import Reaction, Protein, Abundance
         >>> Reaction([Protein(namespace='HGNC', name='KNG1')], [Abundance(namespace='CHEBI', name='bradykinin')])
 
         """
         super().__init__()
+        _help_named(self, namespace=namespace, identifier=identifier, name=name, xrefs=xrefs)
 
         if isinstance(reactants, BaseEntity):
             reactants = [reactants]
@@ -776,13 +824,15 @@ class Reaction(BaseEntity):
         else:
             products = sorted(products, key=_as_bel)
 
-        if not reactants and not products:
-            raise ReactionEmptyException('Reaction can not be instantiated with an empty members list.')
+        if not reactants and not products and not namespace:
+            raise ReactionEmptyException("Reaction can not be instantiated with an empty members list.")
 
-        self.update({
-            REACTANTS: reactants,
-            PRODUCTS: products,
-        })
+        self.update(
+            {
+                REACTANTS: reactants,
+                PRODUCTS: products,
+            }
+        )
 
     @property
     def reactants(self) -> List[BaseAbundance]:
@@ -800,7 +850,7 @@ class Reaction(BaseEntity):
 
     def as_bel(self, use_identifiers: bool = True) -> str:
         """Return this reaction as a BEL string."""
-        return 'rxn(reactants({}), products({}))'.format(
+        return "rxn(reactants({}), products({}))".format(
             _entity_list_as_bel(self.reactants, use_identifiers=use_identifiers),
             _entity_list_as_bel(self.products, use_identifiers=use_identifiers),
         )
@@ -822,7 +872,7 @@ class ListAbundance(BaseEntity):
             self[MEMBERS] = sorted(members, key=_as_bel)
 
         if not self[MEMBERS]:
-            raise ListAbundanceEmptyException('List abundance can not be instantiated with an empty members list.')
+            raise ListAbundanceEmptyException("List abundance can not be instantiated with an empty members list.")
 
     @property
     def members(self) -> List[BaseAbundance]:
@@ -831,7 +881,7 @@ class ListAbundance(BaseEntity):
 
     def as_bel(self, use_identifiers: bool = True) -> str:
         """Return this list abundance as a BEL string."""
-        return '{}({})'.format(
+        return "{}({})".format(
             self._bel_function,
             _entity_list_as_bel(self.members, use_identifiers=use_identifiers),
         )
@@ -859,14 +909,7 @@ class ComplexAbundance(ListAbundance):
         :param xrefs: Alternate identifiers for the entity if it is named
         """
         super().__init__(members=members)
-        if namespace:
-            self[CONCEPT] = Entity(
-                namespace=namespace,
-                name=name,
-                identifier=identifier,
-            )
-            if xrefs:
-                self[XREFS] = xrefs
+        _help_named(self, namespace=namespace, identifier=identifier, name=name, xrefs=xrefs)
 
     @property
     def entity(self) -> Optional[Entity]:  # noqa:D401
@@ -926,13 +969,15 @@ class MissingFusionRange(FusionRangeBase):
 
     def __init__(self):
         """Build a missing fusion range."""
-        super(MissingFusionRange, self).__init__({
-            FUSION_MISSING: '?',
-        })
+        super(MissingFusionRange, self).__init__(
+            {
+                FUSION_MISSING: "?",
+            }
+        )
 
     def as_bel(self) -> str:
         """Return this missing fusion range as BEL."""
-        return '?'
+        return "?"
 
 
 class EnumeratedFusionRange(FusionRangeBase):
@@ -950,15 +995,17 @@ class EnumeratedFusionRange(FusionRangeBase):
         >>> EnumeratedFusionRange('r', 1, 79)
 
         """
-        super().__init__({
-            FUSION_REFERENCE: reference,
-            FUSION_START: start,
-            FUSION_STOP: stop,
-        })
+        super().__init__(
+            {
+                FUSION_REFERENCE: reference,
+                FUSION_START: start,
+                FUSION_STOP: stop,
+            }
+        )
 
     def as_bel(self) -> str:
         """Return this fusion range as a BEL string."""
-        return '{reference}.{start}_{stop}'.format(
+        return "{reference}.{start}_{stop}".format(
             reference=self[FUSION_REFERENCE],
             start=self[FUSION_START],
             stop=self[FUSION_STOP],

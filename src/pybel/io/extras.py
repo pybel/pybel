@@ -11,13 +11,13 @@ from ..dsl import CentralDogma
 from ..struct import BELGraph
 
 __all__ = [
-    'to_csv',
-    'to_sif',
-    'to_gsea',
+    "to_csv",
+    "to_sif",
+    "to_gsea",
 ]
 
 
-@open_file(1, mode='w')
+@open_file(1, mode="w")
 def to_csv(graph: BELGraph, path: Union[str, TextIO], sep: Optional[str] = None) -> None:
     """Write the graph as a tab-separated edge list.
 
@@ -32,7 +32,7 @@ def to_csv(graph: BELGraph, path: Union[str, TextIO], sep: Optional[str] = None)
     as queryable information about transforms on the subject and object and their associated metadata.
     """
     if sep is None:
-        sep = '\t'
+        sep = "\t"
 
     for u, v, data in graph.edges(data=True):
         print(
@@ -43,7 +43,7 @@ def to_csv(graph: BELGraph, path: Union[str, TextIO], sep: Optional[str] = None)
         )
 
 
-@open_file(1, mode='w')
+@open_file(1, mode="w")
 def to_sif(graph: BELGraph, path: Union[str, TextIO], sep: Optional[str] = None) -> None:
     """Write the graph as a tab-separated SIF file.
 
@@ -57,7 +57,7 @@ def to_sif(graph: BELGraph, path: Union[str, TextIO], sep: Optional[str] = None)
     relation metadata.
     """
     if sep is None:
-        sep = '\t'
+        sep = "\t"
 
     for u, v, data in graph.edges(data=True):
         print(
@@ -66,7 +66,7 @@ def to_sif(graph: BELGraph, path: Union[str, TextIO], sep: Optional[str] = None)
         )
 
 
-@open_file(1, mode='w')
+@open_file(1, mode="w")
 def to_gsea(graph: BELGraph, path: Union[str, TextIO]) -> None:
     """Write the genes/gene products to a GRP file for use with GSEA gene set enrichment analysis.
 
@@ -75,11 +75,9 @@ def to_gsea(graph: BELGraph, path: Union[str, TextIO]) -> None:
         - GRP `format specification <http://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats#GRP:_Gene_set_file_format_.28.2A.grp.29>`_
         - GSEA `publication <https://doi.org/10.1073/pnas.0506580102>`_
     """
-    print('# {}'.format(graph.name), file=path)
+    print("# {}".format(graph.name), file=path)
     hgnc_gene_symbols = {
-        node.name
-        for node in graph
-        if isinstance(node, CentralDogma) and node.namespace.lower() == 'hgnc'
+        node.name for node in graph if isinstance(node, CentralDogma) and node.namespace.lower() == "hgnc"
     }
     for hgnc_gene_symbol in sorted(hgnc_gene_symbols):
         print(hgnc_gene_symbol, file=path)

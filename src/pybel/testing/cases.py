@@ -7,19 +7,20 @@ import os
 import tempfile
 import unittest
 
-from ..config import config
+import pystow
+
 from ..manager import Manager
 
 __all__ = [
-    'TEST_CONNECTION',
-    'TemporaryCacheMixin',
-    'TemporaryCacheClsMixin',
-    'FleetingTemporaryCacheMixin',
+    "TEST_CONNECTION",
+    "TemporaryCacheMixin",
+    "TemporaryCacheClsMixin",
+    "FleetingTemporaryCacheMixin",
 ]
 
 logger = logging.getLogger(__name__)
 
-TEST_CONNECTION = config.get('test_connection')
+TEST_CONNECTION = pystow.get_config("pybel", "test_connection")
 
 
 class TemporaryCacheMixin(unittest.TestCase):
@@ -31,8 +32,8 @@ class TemporaryCacheMixin(unittest.TestCase):
             self.connection = TEST_CONNECTION
         else:
             self.fd, self.path = tempfile.mkstemp()
-            self.connection = 'sqlite:///' + self.path
-            logger.info('Test generated connection string %s', self.connection)
+            self.connection = "sqlite:///" + self.path
+            logger.info("Test generated connection string %s", self.connection)
 
         self.manager = Manager(connection=self.connection, autoflush=True)
         self.manager.create_all()
@@ -60,8 +61,8 @@ class TemporaryCacheClsMixin(unittest.TestCase):
             cls.connection = TEST_CONNECTION
         else:
             cls.fd, cls.path = tempfile.mkstemp()
-            cls.connection = 'sqlite:///' + cls.path
-            logger.info('Test generated connection string %s', cls.connection)
+            cls.connection = "sqlite:///" + cls.path
+            logger.info("Test generated connection string %s", cls.connection)
 
         cls.manager = Manager(connection=cls.connection, autoflush=True)
         cls.manager.create_all()

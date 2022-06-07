@@ -59,18 +59,26 @@ is represented with the key :data:`pybel.constants.FRAGMENT_MISSING` and the val
     - PyBEL module :py:class:`pybel.parser.modifiers.get_fragment_language`
 """
 
-from pyparsing import And, Keyword, Optional, ParserElement, Suppress, pyparsing_common as ppc
+from pyparsing import And, Keyword, Optional, ParserElement, Suppress
+from pyparsing import pyparsing_common as ppc
 
 from ..utils import WCW, nest, one_of_tags, quote
-from ...constants import FRAGMENT, FRAGMENT_DESCRIPTION, FRAGMENT_MISSING, FRAGMENT_START, FRAGMENT_STOP, KIND
+from ...constants import (
+    FRAGMENT,
+    FRAGMENT_DESCRIPTION,
+    FRAGMENT_MISSING,
+    FRAGMENT_START,
+    FRAGMENT_STOP,
+    KIND,
+)
 
 __all__ = [
-    'get_fragment_language',
+    "get_fragment_language",
 ]
 
-fragment_tag = one_of_tags(tags=['frag', 'fragment'], canonical_tag=FRAGMENT, name=KIND)
-fragment_range = (ppc.integer | '?')(FRAGMENT_START) + '_' + (ppc.integer | '?' | '*')(FRAGMENT_STOP)
-missing_fragment = Keyword('?')(FRAGMENT_MISSING)
+fragment_tag = one_of_tags(tags=["frag", "fragment"], canonical_tag=FRAGMENT, name=KIND)
+fragment_range = (ppc.integer | "?")(FRAGMENT_START) + "_" + (ppc.integer | "?" | "*")(FRAGMENT_STOP)
+missing_fragment = Keyword("?")(FRAGMENT_MISSING)
 
 
 def get_fragment_language() -> ParserElement:

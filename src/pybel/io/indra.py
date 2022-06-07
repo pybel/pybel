@@ -43,14 +43,14 @@ except ImportError:
     from pickle import load
 
 __all__ = [
-    'from_indra_statements',
-    'from_indra_statements_json',
-    'from_indra_statements_json_file',
-    'from_indra_pickle',
-    'to_indra_statements',
-    'to_indra_statements_json',
-    'to_indra_statements_json_file',
-    'from_biopax',
+    "from_indra_statements",
+    "from_indra_statements_json",
+    "from_indra_statements_json_file",
+    "from_indra_pickle",
+    "to_indra_statements",
+    "to_indra_statements_json",
+    "to_indra_statements_json_file",
+    "from_biopax",
 ]
 
 
@@ -82,7 +82,7 @@ def from_indra_statements(
     from indra.assemblers.pybel import PybelAssembler
 
     if authors is None:
-        authors = 'INDRA'
+        authors = "INDRA"
 
     pba = PybelAssembler(
         stmts=stmts,
@@ -108,11 +108,12 @@ def from_indra_statements_json(stmts_json: List[Mapping[str, Any]], **kwargs):
     Other kwargs are passed to :func:`from_indra_statements`.
     """
     from indra.statements import stmts_from_json
+
     statements = stmts_from_json(stmts_json)
     return from_indra_statements(statements, **kwargs)
 
 
-@open_file(0, mode='r')
+@open_file(0, mode="r")
 def from_indra_statements_json_file(file, **kwargs):
     """Get a BEL graph from INDRA statements JSON file.
 
@@ -131,7 +132,7 @@ def from_indra_pickle(path: str, **kwargs):
 
     Other kwargs are passed to :func:`from_indra_statements`.
     """
-    with open(path, 'rb') as f:
+    with open(path, "rb") as f:
         statements = load(f)
 
     return from_indra_statements(stmts=statements, **kwargs)
@@ -154,13 +155,10 @@ def to_indra_statements_json(graph) -> List[Mapping[str, Any]]:
 
     :param pybel.BELGraph graph: A BEL graph
     """
-    return [
-        statement.to_json()
-        for statement in to_indra_statements(graph)
-    ]
+    return [statement.to_json() for statement in to_indra_statements(graph)]
 
 
-@open_file(1, mode='w')
+@open_file(1, mode="w")
 def to_indra_statements_json_file(graph, path: Union[str, TextIO], indent: Optional[int] = 2, **kwargs):
     """Export this graph as INDRA statement JSON.
 

@@ -12,24 +12,39 @@ This module handles parsing control statement, which add annotations and namespa
 import logging
 from typing import Any, Dict, List, Mapping, Optional, Pattern, Set
 
-from pyparsing import And, Keyword, MatchFirst, ParseResults, Suppress, oneOf, pyparsing_common as ppc
+from pyparsing import And, Keyword, MatchFirst, ParseResults, Suppress, oneOf
+from pyparsing import pyparsing_common as ppc
 
 from .baseparser import BaseParser
 from .utils import delimited_quoted_list, delimited_unquoted_list, is_int, qid, quote
 from .. import constants as pc
 from ..constants import (
-    ANNOTATIONS, BEL_KEYWORD_ALL, BEL_KEYWORD_CITATION, BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SET,
-    BEL_KEYWORD_STATEMENT_GROUP, BEL_KEYWORD_SUPPORT, BEL_KEYWORD_UNSET, CITATION, CITATION_TYPES,
+    ANNOTATIONS,
+    BEL_KEYWORD_ALL,
+    BEL_KEYWORD_CITATION,
+    BEL_KEYWORD_EVIDENCE,
+    BEL_KEYWORD_SET,
+    BEL_KEYWORD_STATEMENT_GROUP,
+    BEL_KEYWORD_SUPPORT,
+    BEL_KEYWORD_UNSET,
+    CITATION,
+    CITATION_TYPES,
     EVIDENCE,
 )
 from ..exceptions import (
-    CitationTooLongException, CitationTooShortException, IllegalAnnotationValueWarning, InvalidCitationType,
-    InvalidPubMedIdentifierWarning, MissingAnnotationKeyWarning, MissingAnnotationRegexWarning,
-    MissingCitationException, UndefinedAnnotationWarning,
+    CitationTooLongException,
+    CitationTooShortException,
+    IllegalAnnotationValueWarning,
+    InvalidCitationType,
+    InvalidPubMedIdentifierWarning,
+    MissingAnnotationKeyWarning,
+    MissingAnnotationRegexWarning,
+    MissingCitationException,
+    UndefinedAnnotationWarning,
 )
 from ..language import CitationDict, Entity
 
-__all__ = ['ControlParser']
+__all__ = ["ControlParser"]
 
 logger = logging.getLogger(__name__)
 
@@ -39,9 +54,9 @@ unset_all = Suppress(BEL_KEYWORD_ALL)
 
 supporting_text_tags = oneOf([BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT])
 
-set_statement_group_stub = And([Suppress(BEL_KEYWORD_STATEMENT_GROUP), Suppress('='), qid('group')])
-set_citation_stub = And([Suppress(BEL_KEYWORD_CITATION), Suppress('='), delimited_quoted_list('values')])
-set_evidence_stub = And([Suppress(supporting_text_tags), Suppress('='), quote('value')])
+set_statement_group_stub = And([Suppress(BEL_KEYWORD_STATEMENT_GROUP), Suppress("="), qid("group")])
+set_citation_stub = And([Suppress(BEL_KEYWORD_CITATION), Suppress("="), delimited_quoted_list("values")])
+set_evidence_stub = And([Suppress(supporting_text_tags), Suppress("="), quote("value")])
 
 
 class ControlParser(BaseParser):
@@ -82,20 +97,20 @@ class ControlParser(BaseParser):
         self.annotations = {}
         self.required_annotations = required_annotations or []
 
-        annotation_key = ppc.identifier('key').setParseAction(self.handle_annotation_key)
+        annotation_key = ppc.identifier("key").setParseAction(self.handle_annotation_key)
 
         self.set_statement_group = set_statement_group_stub().setParseAction(self.handle_set_statement_group)
         self.set_citation = set_citation_stub.setParseAction(self.handle_set_citation)
         self.set_evidence = set_evidence_stub.setParseAction(self.handle_set_evidence)
 
-        set_command_prefix = And([annotation_key('key'), Suppress('=')])
-        self.set_command = set_command_prefix + qid('value')
+        set_command_prefix = And([annotation_key("key"), Suppress("=")])
+        self.set_command = set_command_prefix + qid("value")
         self.set_command.setParseAction(self.handle_set_command)
 
-        self.set_command_list = set_command_prefix + delimited_quoted_list('values')
+        self.set_command_list = set_command_prefix + delimited_quoted_list("values")
         self.set_command_list.setParseAction(self.handle_set_command_list)
 
-        self.unset_command = annotation_key('key')
+        self.unset_command = annotation_key("key")
         self.unset_command.addParseAction(self.handle_unset_command)
 
         self.unset_evidence = supporting_text_tags(EVIDENCE)
@@ -107,27 +122,31 @@ class ControlParser(BaseParser):
         self.unset_statement_group = Suppress(BEL_KEYWORD_STATEMENT_GROUP)
         self.unset_statement_group.setParseAction(self.handle_unset_statement_group)
 
-        self.unset_list = delimited_unquoted_list('values')
+        self.unset_list = delimited_unquoted_list("values")
         self.unset_list.setParseAction(self.handle_unset_list)
 
         self.unset_all = unset_all.setParseAction(self.handle_unset_all)
 
-        self.set_statements = set_tag('action') + MatchFirst([
-            self.set_statement_group,
-            self.set_citation,
-            self.set_evidence,
-            self.set_command,
-            self.set_command_list,
-        ])
+        self.set_statements = set_tag("action") + MatchFirst(
+            [
+                self.set_statement_group,
+                self.set_citation,
+                self.set_evidence,
+                self.set_command,
+                self.set_command_list,
+            ]
+        )
 
-        self.unset_statements = unset_tag('action') + MatchFirst([
-            self.unset_all,
-            self.unset_citation,
-            self.unset_evidence,
-            self.unset_statement_group,
-            self.unset_command,
-            self.unset_list,
-        ])
+        self.unset_statements = unset_tag("action") + MatchFirst(
+            [
+                self.unset_all,
+                self.unset_citation,
+                self.unset_evidence,
+                self.unset_statement_group,
+                self.unset_command,
+                self.unset_list,
+            ]
+        )
 
         self.language = self.set_statements | self.unset_statements
 
@@ -203,21 +222,21 @@ class ControlParser(BaseParser):
 
         :raise: MissingCitationException or UndefinedAnnotationWarning
         """
-        key = tokens['key']
+        key = tokens["key"]
         self.raise_for_missing_citation(line, position)
         self.raise_for_undefined_annotation(line, position, key)
         return tokens
 
     def handle_set_statement_group(self, _, __, tokens: ParseResults) -> ParseResults:
         """Handle a ``SET STATEMENT_GROUP = "X"`` statement."""
-        self.statement_group = tokens['group']
+        self.statement_group = tokens["group"]
         return tokens
 
     def handle_set_citation(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
         """Handle a ``SET Citation = {"X", "Y", "Z", ...}`` statement."""
         self.clear_citation()
 
-        values = tokens['values']
+        values = tokens["values"]
 
         if len(values) < 2:
             raise CitationTooShortException(self.get_line_number(), line, position)
@@ -235,13 +254,13 @@ class ControlParser(BaseParser):
 
         else:
             if 3 == len(values):
-                logger.debug('Throwing away JOURNAL entry in position 2')
+                logger.debug("Throwing away JOURNAL entry in position 2")
             else:
-                logger.debug('Throwing away JOURNAL entry in position 2 and everything after position 3')
+                logger.debug("Throwing away JOURNAL entry in position 2 and everything after position 3")
 
             citation_db_id = values[2]
 
-        if citation_namespace == 'pubmed' and not is_int(citation_db_id):
+        if citation_namespace == "pubmed" and not is_int(citation_db_id):
             raise InvalidPubMedIdentifierWarning(self.get_line_number(), line, position, citation_db_id)
 
         self.citation_db = citation_namespace
@@ -250,19 +269,19 @@ class ControlParser(BaseParser):
 
     def handle_set_evidence(self, _, __, tokens: ParseResults) -> ParseResults:
         """Handle a ``SET Evidence = ""`` statement."""
-        self.evidence = tokens['value']
+        self.evidence = tokens["value"]
         return tokens
 
     def handle_set_command(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
         """Handle a ``SET X = "Y"`` statement."""
-        key, value = tokens['key'], tokens['value']
+        key, value = tokens["key"], tokens["value"]
         self.raise_for_invalid_annotation_value(line, position, key, value)
         self.annotations[key] = [Entity(namespace=key, identifier=value)]
         return tokens
 
     def handle_set_command_list(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
         """Handle a ``SET X = {"Y", "Z", ...}`` statement."""
-        key, values = tokens['key'], tokens['values']
+        key, values = tokens["key"], tokens["values"]
         for value in values:
             self.raise_for_invalid_annotation_value(line, position, key, value)
         self.annotations[key] = [Entity(namespace=key, identifier=value) for value in values]
@@ -315,7 +334,7 @@ class ControlParser(BaseParser):
 
         :raises: MissingAnnotationKeyWarning
         """
-        key = tokens['key']
+        key = tokens["key"]
         self.validate_unset_command(line, position, key)
         del self.annotations[key]
         return tokens
@@ -327,7 +346,7 @@ class ControlParser(BaseParser):
 
         :raises: MissingAnnotationKeyWarning
         """
-        for key in tokens['values']:
+        for key in tokens["values"]:
             if key in {BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT}:
                 self.evidence = None
             else:
@@ -353,7 +372,8 @@ class ControlParser(BaseParser):
         """Get the citation dictionary."""
         return (
             CitationDict(namespace=self.citation_db, identifier=self.citation_db_id)
-            if self.citation_db and self.citation_db_id else None
+            if self.citation_db and self.citation_db_id
+            else None
         )
 
     def get_missing_required_annotations(self) -> List[str]:

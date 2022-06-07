@@ -57,10 +57,7 @@ class MockQueryManager:
         if len(network_ids) == 1:
             return self.id_graph[network_ids[0]]
 
-        graphs = [
-            self.id_graph[graph_id]
-            for graph_id in network_ids
-        ]
+        graphs = [self.id_graph[graph_id] for graph_id in network_ids]
 
         return union(graphs)
 

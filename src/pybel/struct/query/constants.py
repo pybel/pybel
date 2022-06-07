@@ -3,25 +3,25 @@
 """Constants for the query builder."""
 
 #: Induce a subgraph over the given nodes
-SEED_TYPE_INDUCTION = 'induction'
+SEED_TYPE_INDUCTION = "induction"
 #: Induce a subgraph over the given nodes and expand to their first neighbors
-SEED_TYPE_NEIGHBORS = 'neighbors'
+SEED_TYPE_NEIGHBORS = "neighbors"
 #: Induce a subgraph over the given nodes and expand to their second neighbors
-SEED_TYPE_DOUBLE_NEIGHBORS = 'dneighbors'
+SEED_TYPE_DOUBLE_NEIGHBORS = "dneighbors"
 #: Induce a subgraph over the nodes in all shortest paths between the given nodes
-SEED_TYPE_PATHS = 'shortest_paths'
+SEED_TYPE_PATHS = "shortest_paths"
 #: Induce a subgraph over the edges provided by the given authors and their neighboring nodes
-SEED_TYPE_AUTHOR = 'authors'
+SEED_TYPE_AUTHOR = "authors"
 #: Induce a subgraph over the edges provided by the given citations and their neighboring nodes
-SEED_TYPE_PUBMED = 'pubmed'
+SEED_TYPE_PUBMED = "pubmed"
 #: Generate an upstream candidate mechanism
-SEED_TYPE_UPSTREAM = 'upstream'
+SEED_TYPE_UPSTREAM = "upstream"
 #: Generate a downstream candidate mechanism
-SEED_TYPE_DOWNSTREAM = 'downstream'
+SEED_TYPE_DOWNSTREAM = "downstream"
 #: Induce a subgraph over the edges matching the given annotations
-SEED_TYPE_ANNOTATION = 'annotation'
+SEED_TYPE_ANNOTATION = "annotation"
 #: Induce a subgraph over a random set of (hopefully) connected edges
-SEED_TYPE_SAMPLE = 'sample'
+SEED_TYPE_SAMPLE = "sample"
 
 #: A set of the allowed seed type strings, as defined above
 SEED_TYPES = {

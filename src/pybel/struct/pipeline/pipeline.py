@@ -13,18 +13,18 @@ from .exc import MetaValueError, MissingPipelineFunctionError, MissingUniverseEr
 from ..operations import node_intersection, union
 
 __all__ = [
-    'Pipeline',
+    "Pipeline",
 ]
 
 logger = logging.getLogger(__name__)
 
-META_UNION = 'union'
-META_INTERSECTION = 'intersection'
+META_UNION = "union"
+META_INTERSECTION = "intersection"
 
 
 def _get_protocol_tuple(data: Dict[str, Any]) -> Tuple[str, List, Dict]:
     """Convert a dictionary to a tuple."""
-    return data['function'], data.get('args', []), data.get('kwargs', {})
+    return data["function"], data.get("args", []), data.get("kwargs", {})
 
 
 class Pipeline:
@@ -58,7 +58,7 @@ class Pipeline:
         return iter(self.protocol)
 
     @staticmethod
-    def from_functions(functions) -> 'Pipeline':
+    def from_functions(functions) -> "Pipeline":
         """Build a pipeline from a list of functions.
 
         :param functions: A list of functions or names of functions
@@ -100,7 +100,7 @@ class Pipeline:
         f = mapped.get(name)
 
         if f is None:
-            raise MissingPipelineFunctionError('{} is not registered as a pipeline function'.format(name))
+            raise MissingPipelineFunctionError("{} is not registered as a pipeline function".format(name))
 
         if name in universe_map and name in in_place_map:
             return self._wrap_in_place(self._wrap_universe(f))
@@ -113,7 +113,7 @@ class Pipeline:
 
         return f
 
-    def append(self, name, *args, **kwargs) -> 'Pipeline':
+    def append(self, name, *args, **kwargs) -> "Pipeline":
         """Add a function (either as a reference, or by name) and arguments to the pipeline.
 
         :param name: The name of the function
@@ -128,22 +128,22 @@ class Pipeline:
         elif isinstance(name, str):
             get_transformation(name)
         else:
-            raise TypeError('invalid function argument: {}'.format(name))
+            raise TypeError("invalid function argument: {}".format(name))
 
         av = {
-            'function': name,
+            "function": name,
         }
 
         if args:
-            av['args'] = args
+            av["args"] = args
 
         if kwargs:
-            av['kwargs'] = kwargs
+            av["kwargs"] = kwargs
 
         self.protocol.append(av)
         return self
 
-    def extend(self, protocol: Union[Iterable[Dict], 'Pipeline']) -> 'Pipeline':
+    def extend(self, protocol: Union[Iterable[Dict], "Pipeline"]) -> "Pipeline":
         """Add another pipeline to the end of the current pipeline.
 
         :param protocol: An iterable of dictionaries (or another Pipeline)
@@ -171,17 +171,14 @@ class Pipeline:
         result = graph
 
         for entry in protocol:
-            meta_entry = entry.get('meta')
+            meta_entry = entry.get("meta")
 
             if meta_entry is None:
                 name, args, kwargs = _get_protocol_tuple(entry)
                 func = self._get_function(name)
                 result = func(result, *args, **kwargs)
             else:
-                networks = (
-                    self._run_helper(graph, subprotocol)
-                    for subprotocol in entry['pipelines']
-                )
+                networks = (self._run_helper(graph, subprotocol) for subprotocol in entry["pipelines"])
 
                 if meta_entry == META_UNION:
                     result = union(networks)
@@ -190,7 +187,7 @@ class Pipeline:
                     result = node_intersection(networks)
 
                 else:
-                    raise MetaValueError('invalid meta-command: {}'.format(meta_entry))
+                    raise MetaValueError("invalid meta-command: {}".format(meta_entry))
 
         return result
 
@@ -235,7 +232,7 @@ class Pipeline:
             """Apply the enclosed function with the universe given as the first argument."""
             if self.universe is None:
                 raise MissingUniverseError(
-                    'Can not run universe function [{}] - No universe is set'.format(func.__name__),
+                    "Can not run universe function [{}] - No universe is set".format(func.__name__),
                 )
 
             return func(self.universe, graph, *args, **kwargs)
@@ -267,12 +264,12 @@ class Pipeline:
         return json.dump(self.to_json(), file, **kwargs)
 
     @staticmethod
-    def from_json(data: List) -> 'Pipeline':
+    def from_json(data: List) -> "Pipeline":
         """Build a pipeline from a JSON list."""
         return Pipeline(data)
 
     @staticmethod
-    def load(file: TextIO) -> 'Pipeline':
+    def load(file: TextIO) -> "Pipeline":
         """Load a protocol from JSON contained in file.
 
         :return: The pipeline represented by the JSON in the file
@@ -281,7 +278,7 @@ class Pipeline:
         return Pipeline.from_json(json.load(file))
 
     @staticmethod
-    def loads(s: str) -> 'Pipeline':
+    def loads(s: str) -> "Pipeline":
         """Load a protocol from a JSON string.
 
         :param s: A JSON string
@@ -294,7 +291,7 @@ class Pipeline:
         return json.dumps(self.protocol, indent=2)
 
     @staticmethod
-    def _build_meta(meta: str, pipelines: Iterable['Pipeline']) -> 'Pipeline':
+    def _build_meta(meta: str, pipelines: Iterable["Pipeline"]) -> "Pipeline":
         """Build a pipeline with a given meta-argument.
 
         :param meta: either union or intersection
@@ -303,17 +300,14 @@ class Pipeline:
         return Pipeline(
             protocol=[
                 {
-                    'meta': meta,
-                    'pipelines': [
-                        pipeline.protocol
-                        for pipeline in pipelines
-                    ],
+                    "meta": meta,
+                    "pipelines": [pipeline.protocol for pipeline in pipelines],
                 },
             ],
         )
 
     @staticmethod
-    def union(pipelines: Iterable['Pipeline']) -> 'Pipeline':
+    def union(pipelines: Iterable["Pipeline"]) -> "Pipeline":
         """Take the union of multiple pipelines.
 
         :param pipelines: A list of pipelines
@@ -322,7 +316,7 @@ class Pipeline:
         return Pipeline._build_meta(META_UNION, pipelines)
 
     @staticmethod
-    def intersection(pipelines: Iterable['Pipeline']) -> 'Pipeline':
+    def intersection(pipelines: Iterable["Pipeline"]) -> "Pipeline":
         """Take the intersection of the results from multiple pipelines.
 
         :param pipelines: A list of pipelines

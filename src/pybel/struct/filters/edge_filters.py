@@ -18,10 +18,10 @@ from ..graph import BELGraph
 from ...dsl import BaseEntity
 
 __all__ = [
-    'invert_edge_predicate',
-    'and_edge_predicates',
-    'filter_edges',
-    'count_passed_edge_filter',
+    "invert_edge_predicate",
+    "and_edge_predicates",
+    "filter_edges",
+    "count_passed_edge_filter",
 ]
 
 
@@ -51,10 +51,7 @@ def and_edge_predicates(edge_predicates: EdgePredicates) -> EdgePredicate:
 
         :return: If the edge passes all enclosed predicates
         """
-        return all(
-            edge_predicate(graph, u, v, k)
-            for edge_predicate in edge_predicates
-        )
+        return all(edge_predicate(graph, u, v, k) for edge_predicate in edge_predicates)
 
     return concatenated_edge_predicate
 
@@ -72,7 +69,4 @@ def filter_edges(graph: BELGraph, edge_predicates: EdgePredicates) -> EdgeIterat
 
 def count_passed_edge_filter(graph: BELGraph, edge_predicates: EdgePredicates) -> int:
     """Return the number of edges passing a given set of predicates."""
-    return sum(
-        1
-        for _ in filter_edges(graph, edge_predicates=edge_predicates)
-    )
+    return sum(1 for _ in filter_edges(graph, edge_predicates=edge_predicates))

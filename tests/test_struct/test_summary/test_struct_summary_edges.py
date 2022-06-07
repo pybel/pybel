@@ -10,8 +10,14 @@ from pybel.dsl import protein
 from pybel.examples import sialic_acid_graph
 from pybel.language import Entity
 from pybel.struct.summary.edge_summary import (
-    count_annotations, get_annotation_values, get_annotation_values_by_annotation, get_annotations,
-    get_unused_annotations, get_unused_list_annotation_values, iter_annotation_value_pairs, iter_annotation_values,
+    count_annotations,
+    get_annotation_values,
+    get_annotation_values_by_annotation,
+    get_annotations,
+    get_unused_annotations,
+    get_unused_list_annotation_values,
+    iter_annotation_value_pairs,
+    iter_annotation_values,
 )
 from pybel.testing.utils import n
 
@@ -22,25 +28,18 @@ class TestEdgeSummary(unittest.TestCase):
     def test_1(self):
         """Test iterating over annotation/value pairs."""
         graph = BELGraph()
-        graph.annotation_list.update({
-            'A': set('1234'),
-            'B': set('XYZ'),
-            'C': set('abcde'),
-        })
-        u = protein('HGNC', name='U')
-        v = protein('HGNC', name='V')
-        w = protein('HGNC', name='W')
-
-        graph.add_increases(
-            u,
-            v,
-            evidence=n(),
-            citation=n(),
-            annotations={
-                'A': {'1', '2'},
-                'B': {'X'}
+        graph.annotation_list.update(
+            {
+                "A": set("1234"),
+                "B": set("XYZ"),
+                "C": set("abcde"),
             }
         )
+        u = protein("HGNC", name="U")
+        v = protein("HGNC", name="V")
+        w = protein("HGNC", name="W")
+
+        graph.add_increases(u, v, evidence=n(), citation=n(), annotations={"A": {"1", "2"}, "B": {"X"}})
 
         graph.add_increases(
             u,
@@ -48,8 +47,8 @@ class TestEdgeSummary(unittest.TestCase):
             evidence=n(),
             citation=n(),
             annotations={
-                'A': {'1', '3'},
-                'C': {'a'},
+                "A": {"1", "3"},
+                "C": {"a"},
             },
         )
 
@@ -62,43 +61,46 @@ class TestEdgeSummary(unittest.TestCase):
 
         x = dict(Counter((key, entity.identifier) for key, entity in iter_annotation_value_pairs(graph)))
 
-        self.assertEqual({
-            ('A', '1'): 2,
-            ('A', '2'): 1,
-            ('A', '3'): 1,
-            ('B', 'X'): 1,
-            ('C', 'a'): 1,
-        }, x)
+        self.assertEqual(
+            {
+                ("A", "1"): 2,
+                ("A", "2"): 1,
+                ("A", "3"): 1,
+                ("B", "X"): 1,
+                ("C", "a"): 1,
+            },
+            x,
+        )
 
-        y = Counter(iter_annotation_values(graph, 'A'))
-        self.assertEqual(x['A', '1'] + x['A', '2'] + x['A', '3'], sum(y.values()))
+        y = Counter(iter_annotation_values(graph, "A"))
+        self.assertEqual(x["A", "1"] + x["A", "2"] + x["A", "3"], sum(y.values()))
 
-        y = Counter(iter_annotation_values(graph, 'B'))
-        self.assertEqual(x['B', 'X'], sum(y.values()))
+        y = Counter(iter_annotation_values(graph, "B"))
+        self.assertEqual(x["B", "X"], sum(y.values()))
 
-        y = Counter(iter_annotation_values(graph, 'C'))
-        self.assertEqual(x['C', 'a'], sum(y.values()))
+        y = Counter(iter_annotation_values(graph, "C"))
+        self.assertEqual(x["C", "a"], sum(y.values()))
 
     def test_get_annotation_values(self):
         """Test getting annotation values."""
         expected = {
-            'Confidence': {
-                Entity(namespace='Confidence', identifier='High'),
-                Entity(namespace='Confidence', identifier='Low'),
+            "Confidence": {
+                Entity(namespace="Confidence", identifier="High"),
+                Entity(namespace="Confidence", identifier="Low"),
             },
-            'Species': {
-                Entity(namespace='Species', identifier='9606'),
+            "Species": {
+                Entity(namespace="Species", identifier="9606"),
             },
         }
 
-        self.assertEqual({'Confidence', 'Species'}, get_annotations(sialic_acid_graph))
-        self.assertEqual({'Confidence': 8, 'Species': 8}, dict(count_annotations(sialic_acid_graph)))
+        self.assertEqual({"Confidence", "Species"}, get_annotations(sialic_acid_graph))
+        self.assertEqual({"Confidence": 8, "Species": 8}, dict(count_annotations(sialic_acid_graph)))
 
         annotation_values_by_annotation = get_annotation_values_by_annotation(sialic_acid_graph)
         self.assertEqual(expected, annotation_values_by_annotation)
 
-        annotation_values = get_annotation_values(sialic_acid_graph, 'Confidence')
-        self.assertEqual(expected['Confidence'], annotation_values)
+        annotation_values = get_annotation_values(sialic_acid_graph, "Confidence")
+        self.assertEqual(expected["Confidence"], annotation_values)
 
     def test_get_unused_annotation_url(self):
         graph = BELGraph()
@@ -121,16 +123,17 @@ class TestEdgeSummary(unittest.TestCase):
     def test_get_unused_annotation_list_values(self):
         """Test getting unused annotation list values."""
         graph = BELGraph()
-        annotation_key = 'test'
-        graph.annotation_list[annotation_key] = set('abc')
+        annotation_key = "test"
+        graph.annotation_list[annotation_key] = set("abc")
         graph.add_increases(
-            protein(n(), n()), protein(n(), n()),
+            protein(n(), n()),
+            protein(n(), n()),
             citation=n(),
             evidence=n(),
-            annotations={annotation_key: {'a'}},
+            annotations={annotation_key: {"a"}},
         )
 
         rv = get_unused_list_annotation_values(graph)
         self.assertIsInstance(rv, dict)
 
-        self.assertEqual({annotation_key: set('bc')}, rv)
+        self.assertEqual({annotation_key: set("bc")}, rv)
