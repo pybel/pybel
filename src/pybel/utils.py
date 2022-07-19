@@ -161,6 +161,9 @@ def parse_datetime(s: str) -> datetime.date:
 def _get_citation_str(data: Mapping) -> Optional[str]:
     citation = data.get(CITATION)
     if citation is not None:
+
+        if isinstance(citation, str):
+            return citation
         return citation.curie
 
 
