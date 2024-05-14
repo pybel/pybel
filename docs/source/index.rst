@@ -15,10 +15,6 @@ Installation is as easy as getting the code from `PyPI <https://pypi.python.org/
 
 For citation information, see the :doc:`references <meta/references>` page.
 
-PyBEL is tested on Python 3.5+ on Mac OS and Linux using
-`Travis CI <https://travis-ci.org/pybel/pybel>`_ as well as on Windows using
-`AppVeyor <https://ci.appveyor.com/project/cthoyt/pybel>`_.
-
 .. seealso::
 
     - Specified by `BEL 1.0 <https://github.com/OpenBEL/language/raw/master/docs/version_1.0/bel_specification_version_1.0.pdf>`_,
@@ -26,7 +22,7 @@ PyBEL is tested on Python 3.5+ on Mac OS and Linux using
       `BEL 2.0+ <https://biological-expression-language.github.io>`_
     - Documented on `Read the Docs <http://pybel.readthedocs.io/>`_
     - Versioned on `GitHub <https://github.com/pybel/pybel>`_
-    - Tested on `Travis CI <https://travis-ci.org/pybel/pybel>`_
+    - Tested on `GitHub Actions <https://github.com/pybel/pybel/actions>`_
     - Distributed by `PyPI <https://pypi.python.org/pypi/pybel>`_
 
 .. toctree::
