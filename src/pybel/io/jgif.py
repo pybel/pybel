@@ -264,7 +264,7 @@ def from_jgif(graph_jgif_dict, parser_kwargs: Optional[Mapping[str, Any]] = None
             graph.graph[k] = root[k]
 
     parser = BELParser(graph, namespace_to_pattern=NAMESPACE_TO_PATTERN)
-    parser.bel_term.addParseAction(parser.handle_term)
+    parser.bel_term.add_parse_action(parser.handle_term)
 
     for node in root["nodes"]:
         node_label = node.get("label")

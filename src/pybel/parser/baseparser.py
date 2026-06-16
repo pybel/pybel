@@ -44,7 +44,7 @@ class BaseParser(object):
         :param line_number: The current line number of the parser
         """
         self._line_number = line_number
-        return self.language.parseString(line)
+        return self.language.parse_string(line)
 
     def get_line_number(self) -> int:
         """Get the current line number."""

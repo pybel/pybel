@@ -58,9 +58,9 @@ AMINO_ACID = "aminoacid"
 def get_truncation_language() -> ParserElement:
     """Build a parser for protein truncations."""
     l1 = truncation_tag + nest(amino_acid(AMINO_ACID) + ppc.integer(TRUNCATION_POSITION))
-    l1.setParseAction(_handle_trunc)
+    l1.set_parse_action(_handle_trunc)
     l2 = truncation_tag + nest(ppc.integer(TRUNCATION_POSITION))
-    l2.setParseAction(_handle_trunc_legacy)
+    l2.set_parse_action(_handle_trunc_legacy)
     return l1 | l2
 
 

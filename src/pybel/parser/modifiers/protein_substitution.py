@@ -56,7 +56,7 @@ def get_protein_substitution_language() -> ParserElement:
         ppc.integer(PSUB_POSITION),
         amino_acid(PSUB_VARIANT),
     )
-    parser_element.setParseAction(_handle_psub)
+    parser_element.set_parse_action(_handle_psub)
     return parser_element
 
 

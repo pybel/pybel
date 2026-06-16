@@ -76,7 +76,7 @@ twice to become active. This results in the following:
 
 import logging
 
-from pyparsing import Group, MatchFirst, Optional, ParserElement, ParseResults, oneOf
+from pyparsing import Group, MatchFirst, Optional, ParserElement, ParseResults, one_of
 from pyparsing import pyparsing_common as ppc
 
 from .constants import amino_acid
@@ -120,8 +120,8 @@ def _r(upgraded, tokens):
 
 
 pmod_tag = one_of_tags(tags=["pmod", "proteinModification"], canonical_tag=PMOD, name=KIND)
-pmod_default_ns = oneOf(list(pmod_namespace)).setParseAction(_handle_pmod_default_ns)
-pmod_legacy_ns = oneOf(list(pmod_legacy_labels)).setParseAction(_handle_pmod_legacy_ns)
+pmod_default_ns = one_of(list(pmod_namespace)).set_parse_action(_handle_pmod_default_ns)
+pmod_legacy_ns = one_of(list(pmod_legacy_labels)).set_parse_action(_handle_pmod_legacy_ns)
 
 
 def get_protein_modification_language(

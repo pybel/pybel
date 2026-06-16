@@ -16,10 +16,10 @@ from pyparsing import (
     ZeroOrMore,
     alphanums,
     dblQuotedString,
-    delimitedList,
-    oneOf,
+    delimited_list,
+    one_of,
     removeQuotes,
-    replaceWith,
+    replace_with,
 )
 
 from ..constants import RELATION, SOURCE, TARGET
@@ -50,10 +50,10 @@ RP = W + Suppress(")")
 word = Word(alphanums)
 ns = Word(alphanums + "_-.")
 identifier = Word(alphanums + "_")
-quote = dblQuotedString().setParseAction(removeQuotes)
+quote = dblQuotedString().set_parse_action(removeQuotes)
 qid = quote | identifier
-delimited_quoted_list = And([Suppress("{"), delimitedList(quote), Suppress("}")])
-delimited_unquoted_list = And([Suppress("{"), delimitedList(identifier), Suppress("}")])
+delimited_quoted_list = And([Suppress("{"), delimited_list(quote), Suppress("}")])
+delimited_unquoted_list = And([Suppress("{"), delimited_list(identifier), Suppress("}")])
 
 
 def nest(*content):
@@ -79,12 +79,12 @@ def one_of_tags(
                             (note capitalization) is used for the abundance of a gene
     :param name: this is the key under which the value for this tag is put in the PyParsing framework.
     """
-    element = oneOf(tags).setParseAction(replaceWith(canonical_tag))
+    element = one_of(tags).set_parse_action(replace_with(canonical_tag))
 
     if name is None:
         return element
 
-    return element.setResultsName(name)
+    return element.set_results_name(name)
 
 
 def triple(subject, relation, obj) -> ParserElement:
