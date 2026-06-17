@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
-
 """Internal DSL functions for edges."""
-
-from typing import Dict, Optional, Union
 
 from ..constants import (
     ACTIVITY,
@@ -21,20 +17,20 @@ from ..language import Entity, activity_mapping, compartment_mapping
 
 __all__ = [
     "activity",
-    "degradation",
-    "translocation",
-    "secretion",
     "cell_surface_expression",
+    "degradation",
     "location",
+    "secretion",
+    "translocation",
 ]
 
-ModifierDict = Dict
-LocationDict = Dict
+ModifierDict = dict
+LocationDict = dict
 
 
 def _modifier_helper(
     modifier: str,
-    location: Optional[LocationDict] = None,
+    location: LocationDict | None = None,
 ) -> ModifierDict:
     """Make a modifier dictionary.
 
@@ -52,10 +48,10 @@ def _modifier_helper(
 
 
 def activity(
-    name: Optional[str] = None,
-    namespace: Optional[str] = None,
-    identifier: Optional[str] = None,
-    location: Optional[LocationDict] = None,
+    name: str | None = None,
+    namespace: str | None = None,
+    identifier: str | None = None,
+    location: LocationDict | None = None,
 ) -> ModifierDict:
     """Make a subject/object modifier dictionary.
 
@@ -79,7 +75,7 @@ def activity(
     return rv
 
 
-def degradation(location: Optional[LocationDict] = None) -> ModifierDict:
+def degradation(location: LocationDict | None = None) -> ModifierDict:
     """Make a degradation dictionary.
 
     :param location: An entity from :func:`pybel.dsl.entity` representing the location of the node
@@ -88,8 +84,8 @@ def degradation(location: Optional[LocationDict] = None) -> ModifierDict:
 
 
 def translocation(
-    from_loc: Union[str, Entity],
-    to_loc: Union[str, Entity],
+    from_loc: str | Entity,
+    to_loc: str | Entity,
 ) -> ModifierDict:
     """Make a translocation dictionary.
 
@@ -177,7 +173,7 @@ def location(identifier: Entity) -> LocationDict:
             target,
             citation=...,
             evidence=...,
-            target_modifier=activity('kin', location=entity(namespace='GO', name='cytosol', identifier='GO:0005829')),
+            target_modifier=activity("kin", location=entity(namespace="GO", name="cytosol", identifier="GO:0005829")),
         )
     """
     return {

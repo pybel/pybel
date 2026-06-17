@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
-
 """Importer for Hetionet JSON."""
 
 import bz2
 import json
 import logging
-from typing import Any, Mapping, Set, Tuple, Union
+from collections.abc import Mapping
+from typing import Any
 
 import pystow
 from tqdm.autonotebook import tqdm
@@ -27,10 +26,10 @@ from ...dsl import Abundance, Protein
 from ...struct import BELGraph
 
 __all__ = [
-    "get_hetionet",
-    "from_hetionet_json",
-    "from_hetionet_gz",
     "from_hetionet_file",
+    "from_hetionet_gz",
+    "from_hetionet_json",
+    "get_hetionet",
 ]
 
 logger = logging.getLogger(__name__)
@@ -88,7 +87,7 @@ def from_hetionet_json(
     return graph
 
 
-def _get_node(edge, key, kind_identifier_to_name) -> Union[Tuple[None, None, None, None], Tuple[str, str, str, str]]:
+def _get_node(edge, key, kind_identifier_to_name) -> tuple[None, None, None, None] | tuple[str, str, str, str]:
     node_type, node_identifier = edge[key]
     namespace = DSL_MAP.get(node_type)
     if namespace is None:
@@ -102,12 +101,12 @@ def _get_node(edge, key, kind_identifier_to_name) -> Union[Tuple[None, None, Non
     return node_type, namespace, node_identifier, node_name
 
 
-def _add_edge(  # noqa: C901
+def _add_edge(
     graph,
     edge,
     kind_identifier_to_name,
     it_logger,
-) -> Union[None, str, Set[str]]:
+) -> None | str | set[str]:
     source_type, source_ns, source_identifier, source_name = _get_node(edge, "source_id", kind_identifier_to_name)
     target_type, target_ns, target_identifier, target_name = _get_node(edge, "target_id", kind_identifier_to_name)
     if source_type is None or target_type is None:
@@ -125,7 +124,7 @@ def _add_edge(  # noqa: C901
         source = data.pop("source")
         annotations["source"] = {source: True}
     elif "sources" in data:
-        annotations["source"] = {source: True for source in data.pop("sources")}
+        annotations["source"] = dict.fromkeys(data.pop("sources"), True)
     else:
         pass
         # it_logger(f'Missing source for {source_identifier}-{kind}-{target_identifier}\n{e}')
@@ -139,15 +138,7 @@ def _add_edge(  # noqa: C901
         if k in {"actions", "urls", "subtypes"}:
             continue  # handled explicitly later
         if not isinstance(v, (str, int, bool, float)):
-            it_logger(
-                "Unhandled: {source_identifier}-{kind}-{target_identifier} {k}: {v}".format(
-                    source_identifier=source_identifier,
-                    kind=kind,
-                    target_identifier=target_identifier,
-                    k=k,
-                    v=v,
-                )
-            )
+            it_logger(f"Unhandled: {source_identifier}-{kind}-{target_identifier} {k}: {v}")
             continue
         annotations[k] = {v: True}
 
@@ -226,14 +217,7 @@ def _add_edge(  # noqa: C901
                     evidence="",
                     annotations=annotations,
                 )
-                it_logger(
-                    "Unhandled action for {source_identifier}-{kind}-{target_identifier}: {action}".format(
-                        source_identifier=source_identifier,
-                        kind=kind,
-                        target_identifier=target_identifier,
-                        action=action,
-                    )
-                )
+                it_logger(f"Unhandled action for {source_identifier}-{kind}-{target_identifier}: {action}")
             rv.add(key)
         return rv
 
@@ -243,4 +227,4 @@ def _add_edge(  # noqa: C901
             Abundance(namespace="drugcentral", name=source_name, identifier=source_identifier),
         )
 
-    it_logger("missed: {edge}".format(edge=edge))
+    it_logger(f"missed: {edge}")

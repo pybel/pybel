@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Protein Modifications.
 
 The addition of a post-translational modification (PTM) tag results in an entry called 'variants'

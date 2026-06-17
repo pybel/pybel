@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
-
 """Query builder."""
 
 import json
 import logging
-from typing import Dict, Iterable, List, Mapping, Optional, Set, TextIO, Union
+from collections.abc import Iterable, Mapping
+from typing import TextIO
 
 from .exc import QueryMissingNetworksError
 from .seeding import Seeding
@@ -23,9 +22,9 @@ class Query:
 
     def __init__(
         self,
-        network_ids: Union[None, int, Iterable[int]] = None,
-        seeding: Optional[Seeding] = None,
-        pipeline: Optional[Pipeline] = None,
+        network_ids: None | int | Iterable[int] = None,
+        seeding: Seeding | None = None,
+        pipeline: Pipeline | None = None,
     ) -> None:
         """Build a query.
 
@@ -47,11 +46,11 @@ class Query:
             raise TypeError(network_ids)
 
         if seeding is not None and not isinstance(seeding, Seeding):
-            raise TypeError("Not a Seeding: {}".format(seeding))
+            raise TypeError(f"Not a Seeding: {seeding}")
         self.seeding = seeding or Seeding()
 
         if pipeline is not None and not isinstance(pipeline, Pipeline):
-            raise TypeError("Not a pipeline: {}".format(pipeline))
+            raise TypeError(f"Not a pipeline: {pipeline}")
         self.pipeline = pipeline or Pipeline()
 
     def append_network(self, network_id: int) -> "Query":
@@ -63,21 +62,21 @@ class Query:
         self.network_ids.append(network_id)
         return self
 
-    def append_seeding_induction(self, nodes: Union[BaseEntity, List[BaseEntity], List[Dict]]) -> Seeding:
+    def append_seeding_induction(self, nodes: BaseEntity | list[BaseEntity] | list[dict]) -> Seeding:
         """Add a seed induction method.
 
         :returns: seeding container for fluid API
         """
         return self.seeding.append_induction(nodes)
 
-    def append_seeding_neighbors(self, nodes: Union[BaseEntity, List[BaseEntity], List[Dict]]) -> Seeding:
+    def append_seeding_neighbors(self, nodes: BaseEntity | list[BaseEntity] | list[dict]) -> Seeding:
         """Add a seed by neighbors.
 
         :returns: seeding container for fluid API
         """
         return self.seeding.append_neighbors(nodes)
 
-    def append_seeding_annotation(self, annotation: str, values: Set[str]) -> Seeding:
+    def append_seeding_annotation(self, annotation: str, values: set[str]) -> Seeding:
         """Add a seed induction method for single annotation's values.
 
         :param annotation: The annotation to filter by
@@ -134,7 +133,7 @@ class Query:
 
         return universe
 
-    def to_json(self) -> Dict:
+    def to_json(self) -> dict:
         """Return this query as a JSON object."""
         rv = {
             "network_ids": self.network_ids,
@@ -197,4 +196,4 @@ class Query:
         return Query.from_json(json.loads(s))
 
     def __str__(self):
-        return "Query(networks={}, seeding={}, pipeline={})".format(self.network_ids, self.seeding, self.pipeline)
+        return f"Query(networks={self.network_ids}, seeding={self.seeding}, pipeline={self.pipeline})"

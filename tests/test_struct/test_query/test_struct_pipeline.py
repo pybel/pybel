@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import unittest
 from io import StringIO
@@ -16,7 +14,7 @@ log.setLevel(10)
 
 
 class TestEgfExample(unittest.TestCase):
-    """Random test for mutation functions"""
+    """Random test for mutation functions."""
 
     def setUp(self):
         self.graph = egf_graph.copy()

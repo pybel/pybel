@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Utilities for node filters."""
 
 from ...constants import MODIFIER

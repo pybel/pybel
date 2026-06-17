@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
-
 """Induction methods for graphs over shortest paths."""
 
 import itertools as itt
 import logging
 import random
-from typing import Iterable, List, Optional, Set, Tuple
+from collections.abc import Iterable
 
 import networkx as nx
 
@@ -17,8 +15,8 @@ from ....dsl import BaseEntity
 
 __all__ = [
     "get_nodes_in_all_shortest_paths",
-    "get_subgraph_by_all_shortest_paths",
     "get_random_path",
+    "get_subgraph_by_all_shortest_paths",
 ]
 
 logger = logging.getLogger(__name__)
@@ -35,15 +33,14 @@ def _remove_pathologies_oop(graph: BELGraph):
 def _iterate_nodes_in_shortest_paths(
     graph: BELGraph,
     nodes: Iterable[BaseEntity],
-    weight: Optional[str] = None,
+    weight: str | None = None,
 ) -> Iterable[BaseEntity]:
     """Iterate over nodes in the shortest paths between all pairs of nodes in the given list."""
     for source, target in itt.product(nodes, repeat=2):
         try:
             paths = nx.all_shortest_paths(graph, source, target, weight=weight)
             for path in paths:
-                for node in path:
-                    yield node
+                yield from path
         except nx.exception.NetworkXNoPath:
             continue
 
@@ -51,9 +48,9 @@ def _iterate_nodes_in_shortest_paths(
 def get_nodes_in_all_shortest_paths(
     graph: BELGraph,
     nodes: Iterable[BaseEntity],
-    weight: Optional[str] = None,
+    weight: str | None = None,
     remove_pathologies: bool = False,
-) -> Set[BaseEntity]:
+) -> set[BaseEntity]:
     """Get a set of nodes in all shortest paths between the given nodes.
 
     Thinly wraps :func:`networkx.all_shortest_paths`.
@@ -76,9 +73,9 @@ def get_nodes_in_all_shortest_paths(
 def get_subgraph_by_all_shortest_paths(
     graph,
     nodes: Iterable[BaseEntity],
-    weight: Optional[str] = None,
+    weight: str | None = None,
     remove_pathologies: bool = False,
-) -> Optional[BELGraph]:
+) -> BELGraph | None:
     """Induce a subgraph over the nodes in the pairwise shortest paths between all of the nodes in the given list.
 
     :param pybel.BELGraph graph: A BEL graph
@@ -112,7 +109,7 @@ def get_subgraph_by_all_shortest_paths(
     return get_subgraph_by_induction(graph, induced_nodes)
 
 
-def get_random_path(graph: BELGraph) -> List[BaseEntity]:
+def get_random_path(graph: BELGraph) -> list[BaseEntity]:
     """Get a random path from the graph as a list of nodes.
 
     :param graph: A BEL graph
@@ -121,7 +118,7 @@ def get_random_path(graph: BELGraph) -> List[BaseEntity]:
 
     nodes = wg.nodes()
 
-    def pick_random_pair() -> Tuple[BaseEntity, BaseEntity]:
+    def pick_random_pair() -> tuple[BaseEntity, BaseEntity]:
         """Get a pair of random nodes."""
         return random.sample(list(nodes), k=2)
 

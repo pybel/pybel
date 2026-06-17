@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 """Utilities for displaying graphs with inline HTML in Jupyter Notebooks."""
 
+from collections.abc import Mapping
 from random import sample
-from typing import Mapping, Optional
 
 from .constants import DEFAULT_COLOR_MAP
 from ..jinja_utils import build_template_renderer
@@ -25,7 +23,7 @@ def to_jupyter(
     graph: BELGraph,
     width: int = DEFAULT_WIDTH,
     height: int = DEFAULT_HEIGHT,
-    color_map: Optional[Mapping[str, str]] = None,
+    color_map: Mapping[str, str] | None = None,
 ):
     """Display a BEL graph inline in a Jupyter notebook.
 
@@ -55,7 +53,7 @@ def to_jupyter_str(
     graph: BELGraph,
     width: int = DEFAULT_WIDTH,
     height: int = DEFAULT_HEIGHT,
-    color_map: Optional[Mapping[str, str]] = None,
+    color_map: Mapping[str, str] | None = None,
 ) -> str:
     """Return the string to be javascript-ified by the Jupyter notebook function :class:`IPython.display.Javascript`.
 

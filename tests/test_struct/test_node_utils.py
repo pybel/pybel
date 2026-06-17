@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for node utilities."""
 
 import unittest
@@ -68,7 +66,7 @@ class TestNodeUtils(unittest.TestCase):
             (phosphate, INCREASES, adp),
         ]
 
-        for source, target, data in single_reaction_graph_copy.edges(data=True):
+        for source, target, _data in single_reaction_graph_copy.edges(data=True):
             self.assertIn((source, INCREASES, target), pairs)
 
     def test_flatten_reaction_2(self):

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Make hetionet exports."""
 
 from .cli import main

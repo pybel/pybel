@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 """Functions for inducing graphs based on edge annotations."""
 
 import logging
-from typing import Iterable, Optional, Union
+from collections.abc import Iterable
 
 from .utils import get_subgraph_by_edge_filter
 from ...filters.edge_predicate_builders import (
@@ -25,7 +23,7 @@ logger = logging.getLogger(__name__)
 def get_subgraph_by_annotations(
     graph: BELGraph,
     annotations: AnnotationsHint,
-    or_: Optional[bool] = None,
+    or_: bool | None = None,
 ) -> BELGraph:
     """Induce a sub-graph given an annotations filter.
 
@@ -42,7 +40,7 @@ def get_subgraph_by_annotations(
 
 
 @transformation
-def get_subgraph_by_annotation_value(graph: BELGraph, annotation: str, values: Union[str, Iterable[str]]) -> BELGraph:
+def get_subgraph_by_annotation_value(graph: BELGraph, annotation: str, values: str | Iterable[str]) -> BELGraph:
     """Induce a sub-graph over all edges whose annotations match the given key and value.
 
     :param graph: A BEL graph

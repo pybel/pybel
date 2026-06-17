@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Mutations that expand the graph."""
 
 from . import neighborhood, upstream

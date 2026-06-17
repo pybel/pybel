@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """General-use induction functions."""
 
 import networkx as nx
@@ -14,9 +12,9 @@ from ..pipeline import (
 from ..utils import update_metadata
 
 __all__ = [
+    "expand_by_edge_filter",
     "remove_isolated_nodes",
     "remove_isolated_nodes_op",
-    "expand_by_edge_filter",
 ]
 
 

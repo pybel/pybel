@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """PyBEL implements an internal domain-specific language (DSL).
 
 This enables you to write BEL using Python scripts. Even better,

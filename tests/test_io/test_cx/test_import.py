@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Testing for CX and NDEx import/export."""
 
 import os

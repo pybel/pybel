@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-
 """Language constants for BEL.
 
 This module contains mappings between PyBEL's internal constants and BEL language keywords.
 """
 
 import warnings
-from typing import Optional
 
 from .constants import (
     ABUNDANCE,
@@ -37,8 +34,8 @@ class Entity(dict):
         self,
         *,
         namespace: str,
-        name: Optional[str] = None,
-        identifier: Optional[str] = None,
+        name: str | None = None,
+        identifier: str | None = None,
     ) -> None:
         """Create a dictionary representing a reference to an entity.
 
@@ -49,7 +46,7 @@ class Entity(dict):
         if name is None and identifier is None:
             raise ValueError("cannot create an entity with neither a name nor identifier")
         if not isinstance(namespace, str):
-            raise TypeError("namespace should be a string: {}".format(namespace))
+            raise TypeError(f"namespace should be a string: {namespace}")
         if not namespace:
             raise ValueError("namespace should be non-empty")
 
@@ -61,7 +58,7 @@ class Entity(dict):
 
         if name is not None:
             if not isinstance(name, str):
-                raise TypeError("name should be a string: {}".format(name))
+                raise TypeError(f"name should be a string: {name}")
             if not name:
                 raise ValueError("name should be non-empty")
             self[NAME] = name
@@ -74,38 +71,31 @@ class Entity(dict):
             self[IDENTIFIER] = identifier
 
     @property
-    def namespace(self) -> str:  # noqa: D401
+    def namespace(self) -> str:
         """The entity's namespace."""
         return self[NAMESPACE]
 
     @property
-    def name(self) -> str:  # noqa: D401
+    def name(self) -> str:
         """The entity's name or label."""
         return self.get(NAME)
 
     @property
-    def identifier(self) -> str:  # noqa: D401
+    def identifier(self) -> str:
         """The entity's identifier."""
         return self.get(IDENTIFIER)
 
     @property
     def curie(self) -> str:
         """Return this entity as a CURIE."""
-        return "{}:{}".format(
-            self.namespace,
-            ensure_quotes(self.identifier if self.identifier else self.name),
-        )
+        return f"{self.namespace}:{ensure_quotes(self.identifier if self.identifier else self.name)}"
 
     @property
     def obo(self) -> str:
         """Return this entity as an OBO-style CURIE."""
-        return "{}:{} ! {}".format(
-            self.namespace,
-            ensure_quotes(self.identifier),
-            ensure_quotes(self.name),
-        )
+        return f"{self.namespace}:{ensure_quotes(self.identifier)} ! {ensure_quotes(self.name)}"
 
-    def __str__(self):  # noqa: D105
+    def __str__(self):
         return self.obo if self.identifier and self.name else self.curie
 
     def __hash__(self) -> int:
@@ -623,18 +613,18 @@ gmod_mappings = {
 class CitationDict(Entity):
     """A dictionary describing a citation."""
 
-    def __init__(self, namespace: str, identifier: str, *, name: Optional[str] = None, **kwargs):
+    def __init__(self, namespace: str, identifier: str, *, name: str | None = None, **kwargs):
         super().__init__(namespace=namespace, identifier=identifier, name=name)
         self.update(kwargs)
 
 
 def citation_dict(
     *,
-    namespace: Optional[str] = None,
-    db: Optional[str] = None,
-    identifier: Optional[str] = None,
-    db_id: Optional[str] = None,
-    name: Optional[str] = None,
+    namespace: str | None = None,
+    db: str | None = None,
+    identifier: str | None = None,
+    db_id: str | None = None,
+    name: str | None = None,
     **kwargs,
 ) -> CitationDict:
     """Make a citation dictionary."""
@@ -647,6 +637,7 @@ def citation_dict(
             "usage of keyword argument `db` in citation_dict() should be replaced with `namespace`. "
             "Will be removed in PyBEL 16.",
             DeprecationWarning,
+            stacklevel=2,
         )
         namespace = db
     if db_id:
@@ -654,6 +645,7 @@ def citation_dict(
             "usage of keyword argument `db_id` in citation_dict() should be replaced with `identifier`. "
             "Will be removed in PyBEL 16.",
             DeprecationWarning,
+            stacklevel=2,
         )
         identifier = db_id
 

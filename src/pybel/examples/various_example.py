@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Small graphs with grouped nodes"."""
 
 from ..dsl import Abundance, ComplexAbundance, CompositeAbundance, Protein, Reaction
@@ -7,9 +5,9 @@ from ..resources import CHEBI_URL, GO_URL, HGNC_URL
 from ..struct.graph import BELGraph
 
 __all__ = [
-    "single_reaction_graph",
-    "single_composite_graph",
     "single_complex_graph",
+    "single_composite_graph",
+    "single_reaction_graph",
 ]
 
 citation = "None"

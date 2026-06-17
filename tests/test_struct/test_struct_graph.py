@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for data structures in PyBEL."""
 
 import os
@@ -45,7 +43,7 @@ class TestGraphProperties(unittest.TestCase):
         self.assertEqual(self.copyrights, graph.copyright)
         self.assertEqual(self.disclaimer, graph.disclaimer)
 
-        self.assertEqual("{name} v{version}".format(name=self.name, version=self.version), str(graph))
+        self.assertEqual(f"{self.name} v{self.version}", str(graph))
 
     def test_str_kwargs(self):
         """Test setting of metadata through keyword arguments."""

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Grounding for PyBEL.
 
 Why does this module exist, even though BEL relies on definitions of external vocabularies?
@@ -23,9 +21,11 @@ After installation with ``pip install git+https://github.com/hemekg/hemekg.git``
 .. code-block:: python
 
     import hemekg
+
     heme_graph = hemekg.get_graph()
 
     import pybel.grounding
+
     pybel.grounding.ground(heme_graph)
 
 After installation with ``pip install git+https://github.com/covid19kg/covid19kg.git``, it can be run with:
@@ -33,9 +33,11 @@ After installation with ``pip install git+https://github.com/covid19kg/covid19kg
 .. code-block:: python
 
     import covid19kg
+
     covid19_graph = covid19kg.get_graph()
 
     import pybel.grounding
+
     pybel.grounding.ground(covid19_graph)
 
 After installation with ``pip install git+https://github.com/cthoyt/selventa-knowledge.git``, it can be run with:
@@ -43,14 +45,17 @@ After installation with ``pip install git+https://github.com/cthoyt/selventa-kno
 .. code-block:: python
 
     import selventa_knowledge
+
     selventa_graph = selventa_knowledge.get_graph()
 
     import pybel.grounding
+
     pybel.grounding.ground(selventa_graph)
 """
 
 import logging
-from typing import Any, Collection, Mapping, Optional, Tuple, Union
+from collections.abc import Collection, Mapping
+from typing import Any
 
 import pyobo
 from bioregistry import normalize_prefix
@@ -109,7 +114,7 @@ NO_NAMES = {"fplx", "eccode", "dbsnp", "smiles", "inchi", "inchikey"}
 FAMPLEX_EQUIVALENCES_URL = "https://github.com/sorgerlab/famplex/raw/master/equivalences.csv"
 
 
-def get_remapping() -> Mapping[Tuple[str, str], Tuple[str, str, str]]:
+def get_remapping() -> Mapping[tuple[str, str], tuple[str, str, str]]:
     """Get a mapping from (prefix, name) pairs to FamPlex (prefix, identifier, name) triples."""
     df = ensure_df(
         "fplx",
@@ -128,20 +133,20 @@ _NAME_REMAPPING = get_remapping()
 _ID_REMAPPING = {}
 
 
-def _get_name_remapping(prefix: str, name: str) -> Union[Tuple[str, str, str], Tuple[None, None, None]]:
+def _get_name_remapping(prefix: str, name: str) -> tuple[str, str, str] | tuple[None, None, None]:
     if prefix.lower() in {"sfam", "scomp"} and ("bel", name) in _NAME_REMAPPING:
         return _NAME_REMAPPING["bel", name]
     return _NAME_REMAPPING.get((prefix, name), (None, None, None))
 
 
-def _get_id_remapping(prefix: str, identifier: str) -> Union[Tuple[str, str, str], Tuple[None, None, None]]:
+def _get_id_remapping(prefix: str, identifier: str) -> tuple[str, str, str] | tuple[None, None, None]:
     return _ID_REMAPPING.get((prefix, identifier), (None, None, None))
 
 
 def ground(
     graph: BELGraph,
     remove_ungrounded: bool = True,
-    skip_namespaces: Optional[Collection[str]] = None,
+    skip_namespaces: Collection[str] | None = None,
 ) -> BELGraph:
     """Ground all entities in a BEL graph."""
     j = to_nodelink(graph)
@@ -159,12 +164,12 @@ def ground(
         graph.remove_nodes_from(ungrounded_nodes)
         graph.namespace_url.clear()
         graph.namespace_pattern.clear()
-        graph.namespace_pattern.update({namespace: ".*" for namespace in get_namespaces(graph)})
+        graph.namespace_pattern.update(dict.fromkeys(get_namespaces(graph), ".*"))
 
         graph.annotation_url.clear()
         graph.annotation_pattern.clear()
         graph.annotation_list.clear()
-        graph.annotation_pattern.update({annotation: ".*" for annotation in get_annotations(graph)})
+        graph.annotation_pattern.update(dict.fromkeys(get_annotations(graph), ".*"))
 
     return graph
 
@@ -188,17 +193,17 @@ def remove_unused_annotation_metadata(graph) -> None:
         del graph.annotation_list[annotation]
 
 
-def ground_nodelink(graph_nodelink_dict, skip_namespaces: Optional[Collection[str]] = None) -> None:
+def ground_nodelink(graph_nodelink_dict, skip_namespaces: Collection[str] | None = None) -> None:
     """Ground entities in a nodelink data structure."""
     name = graph_nodelink_dict.get("graph", {}).get("name", "graph")
 
-    for data in tqdm(graph_nodelink_dict["links"], desc="grounding edges in {}".format(name)):
+    for data in tqdm(graph_nodelink_dict["links"], desc=f"grounding edges in {name}"):
         _process_edge_side(data.get(SOURCE_MODIFIER), skip_namespaces=skip_namespaces)
         _process_edge_side(data.get(TARGET_MODIFIER), skip_namespaces=skip_namespaces)
         if ANNOTATIONS in data:
             _process_annotations(data, skip_namespaces=skip_namespaces)
 
-    for node in tqdm(graph_nodelink_dict["nodes"], desc="grounding nodes in {}".format(name)):
+    for node in tqdm(graph_nodelink_dict["nodes"], desc=f"grounding nodes in {name}"):
         _process_node(node, skip_namespaces=skip_namespaces)
 
 
@@ -225,7 +230,7 @@ CATEGORY_BLACKLIST = {
 def _process_annotations(
     data,
     remove_ungrounded: bool = False,
-    skip_namespaces: Optional[Collection[str]] = None,
+    skip_namespaces: Collection[str] | None = None,
 ) -> None:
     """Process the annotations in a PyBEL edge data dictionary."""
     cell_line_entities = data[ANNOTATIONS].get("CellLine")
@@ -275,7 +280,7 @@ def _process_annotations(
         data[ANNOTATIONS][category] = ne
 
 
-def _process_edge_side(side_data, skip_namespaces: Optional[Collection[str]] = None) -> bool:
+def _process_edge_side(side_data, skip_namespaces: Collection[str] | None = None) -> bool:
     """Process an edge JSON object, in place."""
     if side_data is None:
         return True
@@ -297,7 +302,7 @@ def _process_edge_side(side_data, skip_namespaces: Optional[Collection[str]] = N
 _UNHANDLED_NAMESPACES = set()
 
 
-def _process_node(node: Mapping[str, Any], skip_namespaces: Optional[Collection[str]] = None) -> bool:
+def _process_node(node: Mapping[str, Any], skip_namespaces: Collection[str] | None = None) -> bool:
     """Process a node JSON object, in place.
 
     :return: If all parts of the node were successfully grounded
@@ -318,7 +323,7 @@ def _process_node(node: Mapping[str, Any], skip_namespaces: Optional[Collection[
     return success
 
 
-def _process_concept(*, concept, node=None, skip_namespaces: Optional[Collection[str]] = None) -> bool:
+def _process_concept(*, concept, node=None, skip_namespaces: Collection[str] | None = None) -> bool:
     """Process a node JSON object."""
     namespace = concept[NAMESPACE]
     if namespace.lower() in {"text", "fixme"}:
@@ -393,7 +398,7 @@ def _handle_identifier_not_name(
     concept,
     prefix,
     identifier,
-    skip_namespaces: Optional[Collection[str]] = None,
+    skip_namespaces: Collection[str] | None = None,
 ) -> bool:
     # Some namespaces are just too much of a problem at the moment to look up
     if prefix in SKIP:
@@ -433,7 +438,7 @@ def _handle_name_and_not_identifier(
     prefix,
     name,
     node=None,
-    skip_namespaces: Optional[Collection[str]] = None,
+    skip_namespaces: Collection[str] | None = None,
 ) -> bool:
     remapped_prefix, remapped_identifier, remapped_name = _get_name_remapping(prefix, name)
     if remapped_prefix:
@@ -518,13 +523,13 @@ def _handle_name_and_not_identifier(
     return True
 
 
-def _process_fusion(fusion, skip_namespaces: Optional[Collection[str]] = None) -> bool:
+def _process_fusion(fusion, skip_namespaces: Collection[str] | None = None) -> bool:
     success_3p = _process_node(fusion[PARTNER_3P], skip_namespaces=skip_namespaces)
     success_5p = _process_node(fusion[PARTNER_5P], skip_namespaces=skip_namespaces)
     return success_3p and success_5p
 
 
-def _process_list(members, skip_namespaces: Optional[Collection[str]] = None) -> bool:
+def _process_list(members, skip_namespaces: Collection[str] | None = None) -> bool:
     success = True
     for member in members:
         success = success and _process_node(member, skip_namespaces=skip_namespaces)

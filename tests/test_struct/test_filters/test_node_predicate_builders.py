@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for functions for building node predicates."""
 
 import unittest

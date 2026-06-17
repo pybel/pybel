@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Connection configuration for PyBEL."""
 
 import logging
@@ -7,9 +5,9 @@ import logging
 import pystow
 
 __all__ = [
-    "connection",
-    "PYBEL_MINIMUM_IMPORT_VERSION",
     "PYBEL_HOME",
+    "PYBEL_MINIMUM_IMPORT_VERSION",
+    "connection",
 ]
 
 logger = logging.getLogger(__name__)

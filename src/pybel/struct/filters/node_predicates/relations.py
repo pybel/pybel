@@ -1,31 +1,27 @@
-# -*- coding: utf-8 -*-
-
 """Predicate functions for nodes based on their incident edges' relations."""
-
-from typing import Set
 
 from ...graph import BELGraph
 from ....constants import CAUSAL_RELATIONS, RELATION
 from ....dsl import BaseEntity
 
 __all__ = [
-    "has_in_edges",
-    "has_causal_out_edges",
-    "has_causal_in_edges",
     "has_causal_edges",
+    "has_causal_in_edges",
+    "has_causal_out_edges",
+    "has_in_edges",
     "has_out_edges",
     "is_causal_central",
     "is_causal_sink",
     "is_causal_source",
-    "no_causal_out_edges",
-    "no_causal_in_edges",
-    "no_out_edges",
-    "no_in_edges",
     "no_causal_edges",
+    "no_causal_in_edges",
+    "no_causal_out_edges",
+    "no_in_edges",
+    "no_out_edges",
 ]
 
 
-def has_in_edges(graph: BELGraph, node: BaseEntity, edge_types: Set[str]) -> bool:
+def has_in_edges(graph: BELGraph, node: BaseEntity, edge_types: set[str]) -> bool:
     """Check if the node has any in-edges in the given set.
 
     :param graph: A BEL graph
@@ -35,7 +31,7 @@ def has_in_edges(graph: BELGraph, node: BaseEntity, edge_types: Set[str]) -> boo
     return any(data[RELATION] in edge_types for _, _, data in graph.in_edges(node, data=True))
 
 
-def no_in_edges(graph: BELGraph, node: BaseEntity, edge_types: Set[str]) -> bool:
+def no_in_edges(graph: BELGraph, node: BaseEntity, edge_types: set[str]) -> bool:
     """Check if the node does not have any in-edges in the given set.
 
     :param graph: A BEL graph
@@ -45,7 +41,7 @@ def no_in_edges(graph: BELGraph, node: BaseEntity, edge_types: Set[str]) -> bool
     return all(data[RELATION] not in edge_types for _, _, data in graph.in_edges(node, data=True))
 
 
-def has_out_edges(graph: BELGraph, node: BaseEntity, edge_types: Set[str]) -> bool:
+def has_out_edges(graph: BELGraph, node: BaseEntity, edge_types: set[str]) -> bool:
     """Check if the node has any out-edges in the given set.
 
     :param graph: A BEL graph
@@ -55,7 +51,7 @@ def has_out_edges(graph: BELGraph, node: BaseEntity, edge_types: Set[str]) -> bo
     return any(data[RELATION] in edge_types for _, _, data in graph.out_edges(node, data=True))
 
 
-def no_out_edges(graph: BELGraph, node: BaseEntity, edge_types: Set[str]) -> bool:
+def no_out_edges(graph: BELGraph, node: BaseEntity, edge_types: set[str]) -> bool:
     """Check if the node does not have any out-edges in the given set.
 
     :param graph: A BEL graph

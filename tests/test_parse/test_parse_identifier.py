@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import re
 import unittest
 
@@ -172,7 +170,7 @@ class TestConceptParserLenient(_ParserMixin):
 
 
 class TestConceptParserRegex(unittest.TestCase):
-    """Tests for regular expression parsing"""
+    """Tests for regular expression parsing."""
 
     def setUp(self) -> None:
         self.parser = ConceptParser(
@@ -201,8 +199,7 @@ class TestConceptParserRegex(unittest.TestCase):
         """Test invalid BEL term."""
         s = "hgnc:AKT1"
         with self.assertRaises(MissingNamespaceRegexWarning):
-            result = self.parser.parse_string(s)
-            print(result.asDict())
+            self.parser.parse_string(s)
 
     def test_valid_obo(self):
         """Test parsing an identifier that has a name."""
@@ -220,5 +217,4 @@ class TestConceptParserRegex(unittest.TestCase):
         """Test parsing an OBO-style identifier where the identifier and name are switched."""
         s = "hgnc:AKT1 ! 391"
         with self.assertRaises(MissingNamespaceRegexWarning):
-            result = self.parser.parse_string(s)
-            print(result.asDict())
+            self.parser.parse_string(s)

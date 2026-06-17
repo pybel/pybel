@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Warnings for old TSV conversion module."""
 
 import warnings
@@ -8,8 +6,8 @@ from ..triples import to_edgelist
 from ..triples import to_triples_file as to_tsv
 
 __all__ = [
-    "to_tsv",
     "to_edgelist",
+    "to_tsv",
 ]
 
 warnings.warn(
@@ -20,4 +18,5 @@ warnings.warn(
 Will be removed in PyBEL v0.16.*
   """,
     DeprecationWarning,
+    stacklevel=2,
 )

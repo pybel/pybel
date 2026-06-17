@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Parsing, validation, compilation, and data exchange of Biological Expression Language (BEL)."""
 
 from .canonicalize import (

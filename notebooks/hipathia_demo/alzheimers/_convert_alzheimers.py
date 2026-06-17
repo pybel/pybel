@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 
 """Convert the AD graph for Hipathia."""
 

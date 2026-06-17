@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Test parsing metadata from a BEL script."""
 
 import logging
@@ -35,7 +33,7 @@ LOCAL_TEST_PATH = os.path.expanduser("~/dev/pybel/src/pybel/testing/resources/be
 
 class TestParseMetadata(FleetingTemporaryCacheMixin):
     def setUp(self):
-        super(TestParseMetadata, self).setUp()
+        super().setUp()
         self.parser = MetadataParser(manager=self.manager)
 
     def _help_test_local_annotation(self, annotation: str) -> None:
@@ -71,7 +69,7 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
 
         self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotation_to_term)
 
-        s = 'DEFINE ANNOTATION {} AS LIST {{"A","B","C"}}'.format(MESH_DISEASES_KEYWORD)
+        s = f'DEFINE ANNOTATION {MESH_DISEASES_KEYWORD} AS LIST {{"A","B","C"}}'
         with self.assertRaises(RedefinedAnnotationError):
             self.parser.parse_string(s)
 
@@ -83,7 +81,7 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
         )
 
     def test_annotation_name_persistience_2(self):
-        """Tests that an annotation defined by a list can't be overwritten by a definition by URL"""
+        """Tests that an annotation defined by a list can't be overwritten by a definition by URL."""
         s = 'DEFINE ANNOTATION TextLocation AS LIST {"Abstract","Results","Legend","Review"}'
         self.parser.parse_string(s)
         self._help_test_local_annotation("TextLocation")
@@ -96,7 +94,7 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
         self.assertIn("Abstract", self.parser.annotation_to_local["TextLocation"])
 
     def test_underscore(self):
-        """Tests that an underscore is a valid character in an annotation name"""
+        """Tests that an underscore is a valid character in an annotation name."""
         s = 'DEFINE ANNOTATION Text_Location AS LIST {"Abstract","Results","Legend","Review"}'
         self.parser.parse_string(s)
         self._help_test_local_annotation("Text_Location")
@@ -141,7 +139,7 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
 
     @mock_bel_resources
     def test_parse_namespace_url_file(self, mock):
-        """Tests parsing a namespace by file URL"""
+        """Tests parsing a namespace by file URL."""
         s = NAMESPACE_URL_FMT.format("TESTNS1", test_ns_1)
         self.parser.parse_string(s)
         self.parser.ensure_resources()
@@ -165,7 +163,7 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
             )
 
     def test_parse_annotation_url_file(self):
-        """Tests parsing an annotation by file URL"""
+        """Tests parsing an annotation by file URL."""
         keyword = "TESTAN1"
         url = Path(test_an_1).as_uri()
         line = ANNOTATION_URL_FMT.format(keyword, url)

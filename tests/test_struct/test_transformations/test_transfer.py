@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for transfer of knowledge and inference functions."""
 
 import unittest

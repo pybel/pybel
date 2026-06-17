@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Utilities for PyBEL testing."""
 
 from uuid import uuid4

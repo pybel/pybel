@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 """Utilities for functions for collapsing nodes."""
 
 import itertools as itt
-from typing import Mapping, Set
+from collections.abc import Mapping
 
 from ...filters.edge_filters import filter_edges
 from ...filters.edge_predicate_builders import build_relation_predicate
@@ -13,9 +11,9 @@ from ....dsl import BaseEntity
 from ....utils import hash_edge
 
 __all__ = [
-    "collapse_pair",
-    "collapse_nodes",
     "collapse_all_variants",
+    "collapse_nodes",
+    "collapse_pair",
     "surviors_are_inconsistent",
 ]
 
@@ -55,7 +53,7 @@ def collapse_pair(graph, survivor: BaseEntity, victim: BaseEntity) -> None:
 
 
 @in_place_transformation
-def collapse_nodes(graph, survivor_mapping: Mapping[BaseEntity, Set[BaseEntity]]) -> None:
+def collapse_nodes(graph, survivor_mapping: Mapping[BaseEntity, set[BaseEntity]]) -> None:
     """Collapse all nodes in values to the key nodes, in place.
 
     :param pybel.BELGraph graph: A BEL graph
@@ -64,7 +62,7 @@ def collapse_nodes(graph, survivor_mapping: Mapping[BaseEntity, Set[BaseEntity]]
     """
     inconsistencies = surviors_are_inconsistent(survivor_mapping)
     if inconsistencies:
-        raise ValueError("survivor mapping is inconsistent: {}".format(inconsistencies))
+        raise ValueError(f"survivor mapping is inconsistent: {inconsistencies}")
 
     for survivor, victims in survivor_mapping.items():
         for victim in victims:
@@ -74,8 +72,8 @@ def collapse_nodes(graph, survivor_mapping: Mapping[BaseEntity, Set[BaseEntity]]
 
 
 def surviors_are_inconsistent(
-    survivor_mapping: Mapping[BaseEntity, Set[BaseEntity]],
-) -> Set[BaseEntity]:
+    survivor_mapping: Mapping[BaseEntity, set[BaseEntity]],
+) -> set[BaseEntity]:
     """Check that there's no transitive shit going on."""
     victim_mapping = set()
     for victim in itt.chain.from_iterable(survivor_mapping.values()):

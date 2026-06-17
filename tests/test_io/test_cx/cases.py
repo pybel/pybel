@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-
 """Test cases for PyBEL-CX."""
 
 import json
 import unittest
-from typing import Mapping, Tuple
+from collections.abc import Mapping
 
 from pybel import BaseEntity, BELGraph
 from pybel.constants import (
@@ -77,7 +75,7 @@ def _hash_edge(u: BaseEntity, v: BaseEntity, data: EdgeData) -> int:
 
 def _get_edge_dict(
     graph: BELGraph,
-) -> Mapping[int, Tuple[BaseEntity, BaseEntity, EdgeData]]:
+) -> Mapping[int, tuple[BaseEntity, BaseEntity, EdgeData]]:
     return {_hash_edge(u, v, data): (u, v, data) for u, v, k, data in graph.edges(keys=True, data=True)}
 
 
@@ -104,21 +102,19 @@ class TestCase(unittest.TestCase):
         g2ng1 = g2k - g1k
 
         if g1ng2 and not g2ng1:
-            for k in g1ng2:
-                print(k[:6], g1_edge_hashes[k])
+            for _k in g1ng2:
+                pass
             self.fail()
 
         elif not g1ng2 and g2ng1:
-            for k in g2ng1:
-                print(k[:6], g2_edge_hashes[k])
+            for _k in g2ng1:
+                pass
             self.fail()
 
         elif g1ng2 and g2ng1:
-            print("in g1 but not g2:")
-            for k in g1ng2:
-                print(k[:6], g1_edge_hashes[k])
+            for _k in g1ng2:
+                pass
 
-            print("in g2 but not g1:")
-            for k in g2ng1:
-                print(k[:6], g2_edge_hashes[k])
+            for _k in g2ng1:
+                pass
             self.fail()

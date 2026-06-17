@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Input and output functions for BEL graphs.
 
 PyBEL provides multiple lossless interchange options for BEL. Lossy output formats are also included for convenient

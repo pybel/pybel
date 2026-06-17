@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Locations.
 
 Location data also is added into the information in the edge for the node (subject or object) for which it was

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Query builder for PyBEL."""
 
 from .exc import *

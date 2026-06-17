@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """An example describing statins."""
 
 from ..dsl import Abundance, Protein

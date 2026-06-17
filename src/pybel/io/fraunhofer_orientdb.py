@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Transport functions for `Fraunhofer's OrientDB <http://graphstore.scai.fraunhofer.de>`_.
 
 `Fraunhofer <https://www.scai.fraunhofer.de/en/business-research-areas/bioinformatics.html>`_ hosts
@@ -12,7 +10,8 @@ a single function :func:`pybel.from_fraunhofer_orientdb` is provided by PyBEL.
 """
 
 import logging
-from typing import Any, Iterable, Mapping, Optional
+from collections.abc import Iterable, Mapping
+from typing import Any
 from urllib.parse import quote_plus
 
 import requests
@@ -29,11 +28,11 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-def from_fraunhofer_orientdb(  # noqa:S107
+def from_fraunhofer_orientdb(
     database: str = "covid",
     user: str = "covid_user",
     password: str = "covid",
-    query: Optional[str] = None,
+    query: str | None = None,
 ) -> BELGraph:
     """Get a BEL graph from the Fraunhofer OrientDB.
 
@@ -61,10 +60,11 @@ def from_fraunhofer_orientdb(  # noqa:S107
     .. code-block:: python
 
         import pybel
+
         graph = pybel.from_fraunhofer_orientdb(
-            database='covid',
-            user='covid_user',
-            password='covid',
+            database="covid",
+            user="covid_user",
+            password="covid",
         )
         graph.summarize()
 
@@ -76,6 +76,7 @@ def from_fraunhofer_orientdb(  # noqa:S107
     .. code-block:: python
 
        import covid19kg
+
        graph = covid19kg.get_graph()
        graph.summarize()
 
@@ -90,7 +91,7 @@ def from_fraunhofer_orientdb(  # noqa:S107
            cause-and-effect knowledge model of COVID-19 pathophysiology
            <https://doi.org/10.1101/2020.04.14.040667>`_. *bioRxiv* 2020.04.14.040667.
     """
-    graph = BELGraph(name="Fraunhofer OrientDB: {}".format(database))
+    graph = BELGraph(name=f"Fraunhofer OrientDB: {database}")
     parser = BELParser(graph, skip_validation=True)
     results = _request_graphstore(database, user, password, select_query_template=query)
     for result in results:
@@ -147,8 +148,8 @@ def _request_graphstore(
     database: str,
     user: str,
     password: str,
-    count_query: Optional[str] = None,
-    select_query_template: Optional[str] = None,
+    count_query: str | None = None,
+    select_query_template: str | None = None,
     page_size: int = 500,
     base: str = "http://graphstore.scai.fraunhofer.de/query",
 ) -> Iterable[Mapping[str, Any]]:
@@ -156,7 +157,7 @@ def _request_graphstore(
     if count_query is None:
         count_query = "select count(@rid) from E"
     count_query = quote_plus(count_query)
-    count_url = "{base}/{database}/sql/{count_query}".format(base=base, database=database, count_query=count_query)
+    count_url = f"{base}/{database}/sql/{count_query}"
     count_res = requests.get(count_url, auth=(user, password))
     count = count_res.json()["result"][0]["count"]
     logging.debug("fraunhofer orientdb has %d edges", count)
@@ -169,12 +170,7 @@ def _request_graphstore(
         select_query = select_query_template.format(limit=page_size, offset=offset * page_size)
         logger.debug("query: %s", select_query)
         select_query = quote_plus(select_query)
-        select_url = "{base}/{database}/sql/{select_query}/{page_size}/*:1".format(
-            base=base,
-            database=database,
-            select_query=select_query,
-            page_size=page_size,
-        )
+        select_url = f"{base}/{database}/sql/{select_query}/{page_size}/*:1"
         res = requests.get(select_url, auth=(user, password))
         res_json = res.json()
         result = res_json["result"]

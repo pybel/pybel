@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Summary functions for BEL graphs."""
 
 from . import edge_summary, errors, node_summary, provenance

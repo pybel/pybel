@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Output functions for BEL graphs to Neo4j."""
 
 from tqdm.autonotebook import tqdm

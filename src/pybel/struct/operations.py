@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-
 """Operations for BEL graphs."""
 
-from typing import Iterable
+from collections.abc import Iterable
 
 import networkx as nx
 from tqdm.autonotebook import tqdm
@@ -11,12 +9,12 @@ from .utils import update_metadata
 from ..dsl import BaseEntity
 
 __all__ = [
-    "subgraph",
     "left_full_join",
-    "left_outer_join",
-    "union",
     "left_node_intersection_join",
+    "left_outer_join",
     "node_intersection",
+    "subgraph",
+    "union",
 ]
 
 
@@ -48,8 +46,8 @@ def left_full_join(g, h) -> None:
     Example usage:
 
     >>> import pybel
-    >>> g = pybel.from_bel_script('...')
-    >>> h = pybel.from_bel_script('...')
+    >>> g = pybel.from_bel_script("...")
+    >>> h = pybel.from_bel_script("...")
     >>> left_full_join(g, h)
     """
     g.add_nodes_from((node, data) for node, data in h.nodes(data=True) if node not in g)
@@ -77,8 +75,8 @@ def left_outer_join(g, h) -> None:
     Example usage:
 
     >>> import pybel
-    >>> g = pybel.from_bel_script('...')
-    >>> h = pybel.from_bel_script('...')
+    >>> g = pybel.from_bel_script("...")
+    >>> h = pybel.from_bel_script("...")
     >>> left_outer_join(g, h)
     """
     g_nodes = set(g)
@@ -115,9 +113,9 @@ def union(graphs, use_tqdm: bool = False):
     Example usage:
 
     >>> import pybel
-    >>> g = pybel.from_bel_script('...')
-    >>> h = pybel.from_bel_script('...')
-    >>> k = pybel.from_bel_script('...')
+    >>> g = pybel.from_bel_script("...")
+    >>> h = pybel.from_bel_script("...")
+    >>> k = pybel.from_bel_script("...")
     >>> merged = union([g, h, k])
     """
     it = iter(graphs)
@@ -157,8 +155,8 @@ def left_node_intersection_join(g, h):
     Example usage:
 
     >>> import pybel
-    >>> g = pybel.from_bel_script('...')
-    >>> h = pybel.from_bel_script('...')
+    >>> g = pybel.from_bel_script("...")
+    >>> h = pybel.from_bel_script("...")
     >>> merged = left_node_intersection_join(g, h)
     """
     intersecting = set(g).intersection(set(h))
@@ -183,9 +181,9 @@ def node_intersection(graphs):
     Example usage:
 
     >>> import pybel
-    >>> g = pybel.from_bel_script('...')
-    >>> h = pybel.from_bel_script('...')
-    >>> k = pybel.from_bel_script('...')
+    >>> g = pybel.from_bel_script("...")
+    >>> h = pybel.from_bel_script("...")
+    >>> k = pybel.from_bel_script("...")
     >>> merged = node_intersection([g, h, k])
     """
     graphs = tuple(graphs)

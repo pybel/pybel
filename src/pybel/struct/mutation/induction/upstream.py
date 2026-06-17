@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 """Functions for inducing up/downstream causal subgraphs."""
 
 import logging
-from typing import Iterable, Union
+from collections.abc import Iterable
 
 from .utils import get_subgraph_by_edge_filter
 from ...filters.edge_predicate_builders import (
@@ -14,15 +12,15 @@ from ...pipeline import transformation
 from ....dsl import BaseEntity
 
 __all__ = [
-    "get_upstream_causal_subgraph",
     "get_downstream_causal_subgraph",
+    "get_upstream_causal_subgraph",
 ]
 
 logger = logging.getLogger(__name__)
 
 
 @transformation
-def get_upstream_causal_subgraph(graph, nbunch: Union[BaseEntity, Iterable[BaseEntity]]):
+def get_upstream_causal_subgraph(graph, nbunch: BaseEntity | Iterable[BaseEntity]):
     """Induce a sub-graph from all of the upstream causal entities of the nodes in the nbunch.
 
     :type graph: pybel.BELGraph
@@ -32,7 +30,7 @@ def get_upstream_causal_subgraph(graph, nbunch: Union[BaseEntity, Iterable[BaseE
 
 
 @transformation
-def get_downstream_causal_subgraph(graph, nbunch: Union[BaseEntity, Iterable[BaseEntity]]):
+def get_downstream_causal_subgraph(graph, nbunch: BaseEntity | Iterable[BaseEntity]):
     """Induce a sub-graph from all of the downstream causal entities of the nodes in the nbunch.
 
     :type graph: pybel.BELGraph

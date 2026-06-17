@@ -1,25 +1,23 @@
-# -*- coding: utf-8 -*-
-
 """Testing resources for PyBEL."""
 
 import os
 
 __all__ = [
-    # BELNS
-    "test_ns_1",
-    "test_ns_2",
-    "test_ns_empty",
     # BELANNO
     "test_an_1",
+    "test_bel_isolated",
+    "test_bel_misordered",
+    "test_bel_no_identifier_valiation",
     # BEL
     "test_bel_simple",
     "test_bel_slushy",
     "test_bel_thorough",
-    "test_bel_isolated",
-    "test_bel_misordered",
-    "test_bel_no_identifier_valiation",
     # JSON
     "test_jgif_path",
+    # BELNS
+    "test_ns_1",
+    "test_ns_2",
+    "test_ns_empty",
 ]
 
 HERE = os.path.dirname(os.path.realpath(__file__))

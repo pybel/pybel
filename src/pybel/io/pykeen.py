@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Entry points for PyKEEN.
 
 PyKEEN is a machine learning library for knowledge graph embeddings that supports node clustering,
@@ -15,18 +13,21 @@ The following example shows how you can parse/load the triples from a BEL docume
 .. code-block:: python
 
     from urllib.request import urlretrieve
-    url = 'https://raw.githubusercontent.com/cthoyt/selventa-knowledge/master/selventa_knowledge/small_corpus.bel'
-    urlretrieve(url, 'small_corpus.bel')
+
+    url = "https://raw.githubusercontent.com/cthoyt/selventa-knowledge/master/selventa_knowledge/small_corpus.bel"
+    urlretrieve(url, "small_corpus.bel")
 
     # Example 1A: Make triples factory
     from pykeen.triples import TriplesFactory
-    tf = TriplesFactory(path='small_corpus.bel')
+
+    tf = TriplesFactory(path="small_corpus.bel")
 
     # Example 1B: Use directly in the pipeline, which automatically invokes training/testing set stratification
     from pykeen.pipeline import pipeline
+
     results = pipeline(
-        dataset='small_corpus.bel',
-        model='TransE',
+        dataset="small_corpus.bel",
+        model="TransE",
     )
 
 The same is true for precompiled BEL documents in the node-link format with the `*.bel.nodelink.json` extension and
@@ -39,14 +40,16 @@ The following example shows how you can load/parse the triples from a BEL docume
 
     # Example 2A: Make a triples factory
     from pykeen.triples import TriplesFactory
+
     # the network's identifier is 528
-    tf = TriplesFactory(path='bel-commons:528')
+    tf = TriplesFactory(path="bel-commons:528")
 
     # Example 1B: Use directly in the pipeline, which automatically invokes training/testing set stratification
     from pykeen.pipeline import pipeline
+
     results = pipeline(
-        dataset='bel-commons:528',
-        model='TransR',
+        dataset="bel-commons:528",
+        model="TransR",
     )
 
 Currently, this relies on the default BEL Commons service provider at https://bel-commons-dev.scai.fraunhofer.de,
@@ -62,9 +65,9 @@ from .triples import to_triples
 
 __all__ = [
     "get_triples_from_bel",
+    "get_triples_from_bel_commons",
     "get_triples_from_bel_nodelink",
     "get_triples_from_bel_pickle",
-    "get_triples_from_bel_commons",
 ]
 
 

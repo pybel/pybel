@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """HGVS Variants.
 
 For example, the BEL term :code:`p(HGNC:GSK3B, var(p.Gly123Arg))` is translated to the following internal DSL:
@@ -7,7 +5,8 @@ For example, the BEL term :code:`p(HGNC:GSK3B, var(p.Gly123Arg))` is translated 
 .. code-block:: python
 
    from pybel.dsl import Protein, Hgvs
-   gsk3b_variant = Protien(namespace='HGNC', name='GSK3B', variants=Hgvs('p.Gly123Arg'))
+
+   gsk3b_variant = Protien(namespace="HGNC", name="GSK3B", variants=Hgvs("p.Gly123Arg"))
 
 Further, the shorthand for protein substitutions, :class:`pybel.dsl.ProteinSubstitution`, can be used to produce the
 same result, as it inherits from :class:`pybel.dsl.Hgvs`:
@@ -15,7 +14,8 @@ same result, as it inherits from :class:`pybel.dsl.Hgvs`:
 .. code-block:: python
 
    from pybel.dsl import Protein, ProteinSubstitution
-   gsk3b_variant = Protien(namespace='HGNC', name='GSK3B', variants=ProteinSubstitution('Gly', 123, 'Arg'))
+
+   gsk3b_variant = Protien(namespace="HGNC", name="GSK3B", variants=ProteinSubstitution("Gly", 123, "Arg"))
 
 Either way, the resulting object can be used like a dict that looks like:
 
@@ -25,12 +25,12 @@ Either way, the resulting object can be used like a dict that looks like:
 
     {
         FUNCTION: PROTEIN,
-        NAMESPACE: 'HGNC',
-        NAME: 'GSK3B',
+        NAMESPACE: "HGNC",
+        NAME: "GSK3B",
         VARIANTS: [
             {
                 KIND: HGVS,
-                IDENTIFIER: 'p.Gly123Arg',
+                IDENTIFIER: "p.Gly123Arg",
             },
         ],
     }

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for PyBEL induction functions."""
 
 import string
@@ -73,7 +71,7 @@ class TestInduction(TestGraphMixin):
         self.assertNotEqual(
             0,
             len(subgraph.namespace_url),
-            msg="improperly found metadata: {}".format(subgraph.graph),
+            msg=f"improperly found metadata: {subgraph.graph}",
         )
         self.assertIn(keyword, subgraph.namespace_url)
         self.assertEqual(url, subgraph.namespace_url[keyword])
@@ -359,7 +357,7 @@ class TestEdgeInduction(unittest.TestCase):
         """Test getting a subgraph by a single annotation value."""
         graph = BELGraph()
         graph.annotation_url["Subgraph"] = n()
-        a, b, c, d = [protein(namespace="test", name=n()) for _ in range(4)]
+        a, b, _c, _d = [protein(namespace="test", name=n()) for _ in range(4)]
 
         k1 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={"Subgraph": {"A"}})
 
@@ -382,7 +380,7 @@ class TestEdgeInduction(unittest.TestCase):
         graph = BELGraph()
         graph.annotation_list["Subgraph"] = set("ABCDE")
 
-        a, b, c, d = [protein(namespace="test", name=n()) for _ in range(4)]
+        a, b, _c, _d = [protein(namespace="test", name=n()) for _ in range(4)]
 
         k1 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={"Subgraph": {"A"}})
 

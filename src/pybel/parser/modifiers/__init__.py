@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Parsers for modifications to abundances."""
 
 from .fragment import get_fragment_language

@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-
 """Conversion functions for BEL graphs with `GraphML <https://en.wikipedia.org/wiki/GraphML>`_."""
 
-from typing import BinaryIO, Optional, Union
+from typing import BinaryIO
 
 import networkx as nx
 
@@ -15,7 +13,7 @@ __all__ = [
 ]
 
 
-def to_graphml(graph: BELGraph, path: Union[str, BinaryIO], schema: Optional[str] = None) -> None:
+def to_graphml(graph: BELGraph, path: str | BinaryIO, schema: str | None = None) -> None:
     """Write a graph to a GraphML XML file using :func:`networkx.write_graphml`.
 
     :param graph: BEL Graph
@@ -31,7 +29,7 @@ def to_graphml(graph: BELGraph, path: Union[str, BinaryIO], schema: Optional[str
     elif schema == "umbrella":
         rv = _to_graphml_umbrella(graph)
     else:
-        raise ValueError("Unhandled schema: {}".format(schema))
+        raise ValueError(f"Unhandled schema: {schema}")
 
     nx.write_graphml(rv, path)
 

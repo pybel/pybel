@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """An example describing a single evidence about BRAF.
 
 .. code-block:: none

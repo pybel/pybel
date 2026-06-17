@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-
 """Functions for inducing graphs by nodes and by edge filters."""
 
-from typing import Iterable, Optional
+from collections.abc import Iterable
 
 import networkx as nx
 
@@ -16,16 +14,16 @@ from ...pipeline import transformation
 from ....dsl import BaseEntity
 
 __all__ = [
+    "get_causal_subgraph",
+    "get_largest_component",
     "get_subgraph_by_edge_filter",
     "get_subgraph_by_induction",
     "get_subgraph_by_node_filter",
-    "get_largest_component",
-    "get_causal_subgraph",
 ]
 
 
 @transformation
-def get_subgraph_by_edge_filter(graph: BELGraph, edge_predicates: Optional[EdgePredicates] = None) -> BELGraph:
+def get_subgraph_by_edge_filter(graph: BELGraph, edge_predicates: EdgePredicates | None = None) -> BELGraph:
     """Induce a sub-graph on all edges that pass the given filters.
 
     :param graph: A BEL graph
@@ -38,7 +36,7 @@ def get_subgraph_by_edge_filter(graph: BELGraph, edge_predicates: Optional[EdgeP
 
 
 @transformation
-def get_subgraph_by_induction(graph: BELGraph, nodes: Iterable[BaseEntity]) -> Optional[BELGraph]:
+def get_subgraph_by_induction(graph: BELGraph, nodes: Iterable[BaseEntity]) -> BELGraph | None:
     """Induce a sub-graph over the given nodes or return None if none of the nodes are in the given graph.
 
     :param graph: A BEL graph

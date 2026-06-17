@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-
 """Mocks for PyBEL testing."""
 
-from typing import Iterable
+from collections.abc import Iterable
 
 from ..manager.models import Network
 from ..struct import union

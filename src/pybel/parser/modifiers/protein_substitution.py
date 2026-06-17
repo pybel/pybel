@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Protein Substitutions.
 
 Protein substitutions are legacy statements defined in BEL 1.0. BEL 2.0 recommends using HGVS strings. Luckily,
@@ -14,12 +12,12 @@ The previous statements both produce the underlying data:
 
     {
         FUNCTION: GENE,
-        NAMESPACE: 'HGNC',
-        NAME: 'APP',
+        NAMESPACE: "HGNC",
+        NAME: "APP",
         VARIANTS: [
             {
                 KIND: HGVS,
-                IDENTIFIER: 'p.Arg275His',
+                IDENTIFIER: "p.Arg275His",
             },
         ],
     }
@@ -61,7 +59,7 @@ def get_protein_substitution_language() -> ParserElement:
 
 
 def _handle_psub(line, _, tokens):
-    upgraded = "p.{}{}{}".format(tokens[PSUB_REFERENCE], tokens[PSUB_POSITION], tokens[PSUB_VARIANT])
+    upgraded = f"p.{tokens[PSUB_REFERENCE]}{tokens[PSUB_POSITION]}{tokens[PSUB_VARIANT]}"
     logger.log(5, "sub() in p() is deprecated: %s. Upgraded to %s", line, upgraded)
     tokens[HGVS] = upgraded
     del tokens[PSUB_REFERENCE]

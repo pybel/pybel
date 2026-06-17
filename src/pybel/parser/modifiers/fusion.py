@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Fusions.
 
 Gene, RNA, miRNA, and protein  fusions are all represented with the same underlying data structure. Below
@@ -13,17 +11,17 @@ it is shown with uppercase letters referring to constants from :code:`pybel.cons
     {
         FUNCTION: GENE,
         FUSION: {
-            PARTNER_5P: {NAMESPACE: 'HGNC', NAME: 'BCR'},
-            PARTNER_3P: {NAMESPACE: 'HGNC', NAME: 'JAK2'},
+            PARTNER_5P: {NAMESPACE: "HGNC", NAME: "BCR"},
+            PARTNER_3P: {NAMESPACE: "HGNC", NAME: "JAK2"},
             RANGE_5P: {
-                FUSION_REFERENCE: 'c',
-                FUSION_START: '?',
+                FUSION_REFERENCE: "c",
+                FUSION_START: "?",
                 FUSION_STOP: 1875,
             },
             RANGE_3P: {
-                FUSION_REFERENCE: 'c',
+                FUSION_REFERENCE: "c",
                 FUSION_START: 2626,
-                FUSION_STOP: '?',
+                FUSION_STOP: "?",
             },
         },
     }

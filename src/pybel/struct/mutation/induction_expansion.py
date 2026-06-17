@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 """Functions for building graphs that use both expansion and induction procedures."""
 
 import logging
-from typing import Iterable, Union
+from collections.abc import Iterable
 
 from .expansion import expand_all_node_neighborhoods
 from .expansion.upstream import expand_downstream_causal, expand_upstream_causal
@@ -16,8 +14,8 @@ from ..pipeline import transformation
 from ...dsl import BaseEntity
 
 __all__ = [
-    "get_multi_causal_upstream",
     "get_multi_causal_downstream",
+    "get_multi_causal_upstream",
     "get_subgraph_by_second_neighbors",
 ]
 
@@ -25,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 @transformation
-def get_multi_causal_upstream(graph, nbunch: Union[BaseEntity, Iterable[BaseEntity]]):
+def get_multi_causal_upstream(graph, nbunch: BaseEntity | Iterable[BaseEntity]):
     """Get the union of all the 2-level deep causal upstream subgraphs from the nbunch.
 
     :param pybel.BELGraph graph: A BEL graph
@@ -39,7 +37,7 @@ def get_multi_causal_upstream(graph, nbunch: Union[BaseEntity, Iterable[BaseEnti
 
 
 @transformation
-def get_multi_causal_downstream(graph, nbunch: Union[BaseEntity, Iterable[BaseEntity]]):
+def get_multi_causal_downstream(graph, nbunch: BaseEntity | Iterable[BaseEntity]):
     """Get the union of all of the 2-level deep causal downstream subgraphs from the nbunch.
 
     :param pybel.BELGraph graph: A BEL graph

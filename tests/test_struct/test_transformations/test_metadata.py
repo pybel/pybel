@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for metadata transforations."""
 
 import unittest
@@ -63,7 +61,7 @@ class TestMetadata(unittest.TestCase):
 
         add_annotation_value(graph, annotation, value)
 
-        for u, v, d in graph.edges(data=True):
+        for _u, _v, d in graph.edges(data=True):
             annotations = d.get(ANNOTATIONS)
 
             if annotations is None:
@@ -74,7 +72,7 @@ class TestMetadata(unittest.TestCase):
 
         remove_annotation_value(graph, annotation, value)
 
-        for u, v, d in graph.edges(data=True):
+        for _u, _v, d in graph.edges(data=True):
             annotations = d.get(ANNOTATIONS)
 
             if annotations is None:

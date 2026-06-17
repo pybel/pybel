@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
-
 """Streamable BEL as JSON."""
 
 import gzip
 import json
-from typing import Any, Iterable, List, TextIO, Union
+from collections.abc import Iterable
+from typing import Any, TextIO
 
 from networkx.utils import open_file
 
@@ -16,19 +15,19 @@ from ..tokens import parse_result_to_dsl
 from ..utils import hash_edge
 
 __all__ = [
-    "to_sbel_file",
-    "to_sbel",
-    "to_sbel_gz",
     "from_sbel",
-    "from_sbel_gz",
     "from_sbel_file",
+    "from_sbel_gz",
+    "to_sbel",
+    "to_sbel_file",
+    "to_sbel_gz",
 ]
 
 SBEL = Any
 
 
 @open_file(1, mode="w")
-def to_sbel_file(graph: BELGraph, path: Union[str, TextIO], separators=(",", ":"), **kwargs) -> None:
+def to_sbel_file(graph: BELGraph, path: str | TextIO, separators=(",", ":"), **kwargs) -> None:
     """Write this graph as BEL JSONL to a file.
 
     :param graph: A BEL graph
@@ -53,7 +52,7 @@ def to_sbel_gz(graph: BELGraph, path: str, separators=(",", ":"), **kwargs) -> N
         to_sbel_file(graph, file, separators=separators, **kwargs)
 
 
-def to_sbel(graph: BELGraph) -> List[SBEL]:
+def to_sbel(graph: BELGraph) -> list[SBEL]:
     """Create a list of JSON dictionaries corresponding to lines in BEL JSONL."""
     return list(iterate_sbel(graph))
 
@@ -114,12 +113,12 @@ def add_sbel_row(graph: BELGraph, data: SBEL) -> str:
 
 
 @open_file(0, mode="r")
-def from_sbel_file(path: Union[str, TextIO]) -> BELGraph:
+def from_sbel_file(path: str | TextIO) -> BELGraph:
     """Build a graph from the BEL JSONL contained in the given file.
 
     :param path: A path or file-like
     """
-    return from_sbel((json.loads(line) for line in path))
+    return from_sbel(json.loads(line) for line in path)
 
 
 def from_sbel_gz(path: str) -> BELGraph:

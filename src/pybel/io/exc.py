@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
-
 """Exceptions for input/output."""
-
-from typing import Tuple
 
 from ..exceptions import PyBELWarning
 
@@ -14,8 +10,8 @@ class ImportVersionWarning(PyBELWarning, ValueError):
 
     def __init__(
         self,
-        actual_version_tuple: Tuple[int, int, int],
-        minimum_version_tuple: Tuple[int, int, int],
+        actual_version_tuple: tuple[int, int, int],
+        minimum_version_tuple: tuple[int, int, int],
     ) -> None:
         """Build an import version warning."""
         super().__init__(actual_version_tuple, minimum_version_tuple)

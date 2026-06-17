@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Functions for enriching the origins of Proteins, RNAs, and miRNAs."""
 
 from ...graph import BELGraph
@@ -8,9 +6,9 @@ from ....constants import FUNCTION, FUSION, MIRNA, RNA, VARIANTS
 from ....dsl import Protein
 
 __all__ = [
-    "enrich_rnas_with_genes",
-    "enrich_proteins_with_rnas",
     "enrich_protein_and_rna_origins",
+    "enrich_proteins_with_rnas",
+    "enrich_rnas_with_genes",
 ]
 
 

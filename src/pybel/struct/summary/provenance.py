@@ -1,18 +1,16 @@
-# -*- coding: utf-8 -*-
-
 """Summary functions for citation and provenance information in BEL graphs."""
 
-from typing import Iterable, Set
+from collections.abc import Iterable
 
 from ..filters.edge_predicates import CITATION_PREDICATES
 from ..graph import BELGraph
 from ...constants import CITATION, IDENTIFIER
 
 __all__ = [
-    "iterate_pubmed_identifiers",
-    "iterate_pmc_identifiers",
-    "get_pubmed_identifiers",
     "get_pmc_identifiers",
+    "get_pubmed_identifiers",
+    "iterate_pmc_identifiers",
+    "iterate_pubmed_identifiers",
 ]
 
 
@@ -48,7 +46,7 @@ def iterate_pmc_identifiers(graph: BELGraph) -> Iterable[str]:
     return iterate_citation_identifiers(graph, "pmc")
 
 
-def get_citation_identifiers(graph: BELGraph, prefix: str) -> Set[str]:
+def get_citation_identifiers(graph: BELGraph, prefix: str) -> set[str]:
     """Get the set of all identifiers with the give prefix cited in the construction of a graph.
 
     :param graph: A BEL graph
@@ -58,7 +56,7 @@ def get_citation_identifiers(graph: BELGraph, prefix: str) -> Set[str]:
     return set(iterate_citation_identifiers(graph, prefix))
 
 
-def get_pubmed_identifiers(graph: BELGraph) -> Set[str]:
+def get_pubmed_identifiers(graph: BELGraph) -> set[str]:
     """Get the set of all PubMed identifiers cited in the construction of a graph.
 
     :param graph: A BEL graph
@@ -67,7 +65,7 @@ def get_pubmed_identifiers(graph: BELGraph) -> Set[str]:
     return get_citation_identifiers(graph, "pubmed")
 
 
-def get_pmc_identifiers(graph: BELGraph) -> Set[str]:
+def get_pmc_identifiers(graph: BELGraph) -> set[str]:
     """Get the set of all PMC identifiers cited in the construction of a graph.
 
     :param graph: A BEL graph

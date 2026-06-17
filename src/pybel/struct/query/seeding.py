@@ -1,12 +1,10 @@
-# -*- coding: utf-8 -*-
-
 """Query builder."""
 
 import json
 import logging
 import random
 from collections import UserList
-from typing import Any, Dict, List, Set, TextIO, Union
+from typing import Any, TextIO, Union
 
 from .constants import (
     SEED_TYPE_ANNOTATION,
@@ -24,7 +22,7 @@ logger = logging.getLogger(__name__)
 SEED_METHOD = "type"
 SEED_DATA = "data"
 
-MaybeNodeList = Union[BaseEntity, List[BaseEntity], List[Dict]]
+MaybeNodeList = Union[BaseEntity, list[BaseEntity], list[dict]]
 
 
 class Seeding(UserList):
@@ -46,7 +44,7 @@ class Seeding(UserList):
         """
         return self._append_seed_handle_nodes(SEED_TYPE_NEIGHBORS, nodes)
 
-    def append_annotation(self, annotation: str, values: Set[str]) -> "Seeding":
+    def append_annotation(self, annotation: str, values: set[str]) -> "Seeding":
         """Add a seed induction method for single annotation's values.
 
         :param annotation: The annotation to filter by
@@ -128,7 +126,7 @@ class Seeding(UserList):
 
         return union(subgraphs)
 
-    def to_json(self) -> List[Dict]:
+    def to_json(self) -> list[dict]:
         """Serialize this seeding container to a JSON object."""
         return list(self)
 
@@ -156,7 +154,7 @@ class Seeding(UserList):
         return Seeding.from_json(json.loads(s))
 
 
-def _handle_nodes(nodes: MaybeNodeList) -> List[BaseEntity]:
+def _handle_nodes(nodes: MaybeNodeList) -> list[BaseEntity]:
     """Handle node(s) that might be dictionaries."""
     if isinstance(nodes, BaseEntity):
         return [nodes]

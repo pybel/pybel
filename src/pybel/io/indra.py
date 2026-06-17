@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Conversion functions for BEL graphs with INDRA.
 
 After assembling a model with `INDRA <https://github.com/sorgerlab/indra>`_, a list of
@@ -15,16 +13,11 @@ After assembling a model with `INDRA <https://github.com/sorgerlab/indra>`_, a l
         # A list of INDRA statements
     ]
 
-    pba = PybelAssembler(
-        stmts,
-        name='Graph Name',
-        version='0.0.1',
-        description='Graph Description'
-    )
+    pba = PybelAssembler(stmts, name="Graph Name", version="0.0.1", description="Graph Description")
     graph = pba.make_model()
 
     # Write to BEL file
-    pybel.to_bel_path(belgraph, 'simple_pybel.bel')
+    pybel.to_bel_path(belgraph, "simple_pybel.bel")
 
 .. warning::
 
@@ -33,7 +26,8 @@ After assembling a model with `INDRA <https://github.com/sorgerlab/indra>`_, a l
 """
 
 import json
-from typing import Any, List, Mapping, Optional, TextIO, Union
+from collections.abc import Mapping
+from typing import Any, TextIO
 
 from networkx.utils import open_file
 
@@ -43,27 +37,27 @@ except ImportError:
     from pickle import load
 
 __all__ = [
+    "from_biopax",
+    "from_indra_pickle",
     "from_indra_statements",
     "from_indra_statements_json",
     "from_indra_statements_json_file",
-    "from_indra_pickle",
     "to_indra_statements",
     "to_indra_statements_json",
     "to_indra_statements_json_file",
-    "from_biopax",
 ]
 
 
 def from_indra_statements(
     stmts,
-    name: Optional[str] = None,
-    version: Optional[str] = None,
-    description: Optional[str] = None,
-    authors: Optional[str] = None,
-    contact: Optional[str] = None,
-    license: Optional[str] = None,
-    copyright: Optional[str] = None,
-    disclaimer: Optional[str] = None,
+    name: str | None = None,
+    version: str | None = None,
+    description: str | None = None,
+    authors: str | None = None,
+    contact: str | None = None,
+    license: str | None = None,
+    copyright: str | None = None,
+    disclaimer: str | None = None,
 ):
     """Import a model from :mod:`indra`.
 
@@ -100,7 +94,7 @@ def from_indra_statements(
     return graph
 
 
-def from_indra_statements_json(stmts_json: List[Mapping[str, Any]], **kwargs):
+def from_indra_statements_json(stmts_json: list[Mapping[str, Any]], **kwargs):
     """Get a BEL graph from INDRA statements JSON.
 
     :rtype: BELGraph
@@ -150,7 +144,7 @@ def to_indra_statements(graph):
     return pbp.statements
 
 
-def to_indra_statements_json(graph) -> List[Mapping[str, Any]]:
+def to_indra_statements_json(graph) -> list[Mapping[str, Any]]:
     """Export this graph as INDRA JSON list.
 
     :param pybel.BELGraph graph: A BEL graph
@@ -159,7 +153,7 @@ def to_indra_statements_json(graph) -> List[Mapping[str, Any]]:
 
 
 @open_file(1, mode="w")
-def to_indra_statements_json_file(graph, path: Union[str, TextIO], indent: Optional[int] = 2, **kwargs):
+def to_indra_statements_json_file(graph, path: str | TextIO, indent: int | None = 2, **kwargs):
     """Export this graph as INDRA statement JSON.
 
     :param pybel.BELGraph graph: A BEL graph
@@ -170,7 +164,7 @@ def to_indra_statements_json_file(graph, path: Union[str, TextIO], indent: Optio
     json.dump(to_indra_statements_json(graph), path, indent=indent, **kwargs)
 
 
-def from_biopax(path: str, encoding: Optional[str] = None, **kwargs):
+def from_biopax(path: str, encoding: str | None = None, **kwargs):
     """Import a model encoded in Pathway Commons `BioPAX <http://www.biopax.org/>`_ via :mod:`indra`.
 
     :param path: Path to a BioPAX OWL file

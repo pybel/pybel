@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-
 """Predicates for checking nodes' variants."""
 
 from functools import wraps
-from typing import Tuple, Type, Union
 
 from .utils import node_predicate
 from ..typing import NodePredicate
@@ -18,11 +15,11 @@ from ....dsl import (
 )
 
 __all__ = [
-    "has_variant",
-    "has_protein_modification",
-    "has_gene_modification",
     "has_fragment",
+    "has_gene_modification",
     "has_hgvs",
+    "has_protein_modification",
+    "has_variant",
 ]
 
 
@@ -33,7 +30,7 @@ def has_variant(node: BaseEntity) -> bool:
 
 
 def _variant_checker(
-    variant_cls: Union[Type[Variant], Tuple[Type[Variant], ...]],
+    variant_cls: type[Variant] | tuple[type[Variant], ...],
 ) -> NodePredicate:
     @node_predicate
     @wraps(node_has_variant)

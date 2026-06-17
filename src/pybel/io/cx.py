@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """This module wraps conversion between :class:`pybel.BELGraph` and the Cyberinfrastructure Exchange (CX) JSON.
 
 CX is an aspect-oriented network interchange format encoded in JSON with a format inspired by the JSON-LD encoding of
@@ -18,8 +16,9 @@ import json
 import logging
 import time
 from collections import defaultdict
+from collections.abc import Mapping
 from operator import methodcaller
-from typing import Dict, List, Mapping, Optional, TextIO, Union
+from typing import TextIO
 
 from networkx.utils import open_file
 
@@ -56,15 +55,15 @@ from ..tokens import parse_result_to_dsl
 from ..utils import expand_dict, flatten_dict
 
 __all__ = [
-    "to_cx",
-    "to_cx_file",
-    "to_cx_gz",
-    "to_cx_jsons",
+    "NDEX_SOURCE_FORMAT",
     "from_cx",
     "from_cx_file",
     "from_cx_gz",
     "from_cx_jsons",
-    "NDEX_SOURCE_FORMAT",
+    "to_cx",
+    "to_cx_file",
+    "to_cx_gz",
+    "to_cx_jsons",
 ]
 
 log = logging.getLogger(__name__)
@@ -76,12 +75,12 @@ NDEX_SOURCE_MODIFIER = "sourceModifier"
 NDEX_TARGET_MODIFIER = "targetModifier"
 
 
-def _cx_to_dict(list_of_dicts: List[Dict], key_tag: str = "k", value_tag: str = "v") -> Dict:
+def _cx_to_dict(list_of_dicts: list[dict], key_tag: str = "k", value_tag: str = "v") -> dict:
     """Convert a CX list of dictionaries to a flat dictionary."""
     return {d[key_tag]: d[value_tag] for d in list_of_dicts}
 
 
-def _cleanse_fusion_dict(d: Dict) -> Dict:
+def _cleanse_fusion_dict(d: dict) -> dict:
     """Fix the fusion partner names."""
     return {k.replace("_", ""): v for k, v in d.items()}
 
@@ -94,7 +93,7 @@ _p_dict = {
 }
 
 
-def _restore_fusion_dict(d: Dict) -> Dict:
+def _restore_fusion_dict(d: dict) -> dict:
     return {_p_dict[k]: v for k, v in d.items()}
 
 
@@ -103,7 +102,7 @@ def build_node_mapping(graph: BELGraph) -> Mapping[BaseEntity, int]:
     return {node: node_index for node_index, node in enumerate(sorted(graph, key=methodcaller("as_bel")))}
 
 
-def to_cx(graph: BELGraph) -> List[Dict]:  # noqa: C901
+def to_cx(graph: BELGraph) -> list[dict]:
     """Convert a BEL Graph to a CX JSON object for use with `NDEx <http://www.ndexbio.org/>`_.
 
     .. seealso::
@@ -149,7 +148,7 @@ def to_cx(graph: BELGraph) -> List[Dict]:  # noqa: C901
                         node_attributes_entry.append(
                             {
                                 "po": node_index,
-                                "n": "{}_{}_{}".format(k, i, a),
+                                "n": f"{k}_{i}_{a}",
                                 "v": b,
                             }
                         )
@@ -159,7 +158,7 @@ def to_cx(graph: BELGraph) -> List[Dict]:  # noqa: C901
                     node_attributes_entry.append(
                         {
                             "po": node_index,
-                            "n": "{}_{}".format(k, a),
+                            "n": f"{k}_{a}",
                             "v": b,
                         }
                     )
@@ -220,7 +219,7 @@ def to_cx(graph: BELGraph) -> List[Dict]:  # noqa: C901
                 edge_attributes_entry.append(
                     {
                         "po": edge_index,
-                        "n": "{}_{}".format(CITATION, k),
+                        "n": f"{CITATION}_{k}",
                         "v": v,
                     }
                 )
@@ -241,7 +240,7 @@ def to_cx(graph: BELGraph) -> List[Dict]:  # noqa: C901
                 edge_attributes_entry.append(
                     {
                         "po": edge_index,
-                        "n": "{}_{}".format(NDEX_SOURCE_MODIFIER, k),
+                        "n": f"{NDEX_SOURCE_MODIFIER}_{k}",
                         "v": v,
                     }
                 )
@@ -251,7 +250,7 @@ def to_cx(graph: BELGraph) -> List[Dict]:  # noqa: C901
                 edge_attributes_entry.append(
                     {
                         "po": edge_index,
-                        "n": "{}_{}".format(NDEX_TARGET_MODIFIER, k),
+                        "n": f"{NDEX_TARGET_MODIFIER}_{k}",
                         "v": v,
                     }
                 )
@@ -368,7 +367,7 @@ def to_cx(graph: BELGraph) -> List[Dict]:  # noqa: C901
 
 
 @open_file(1, mode="w")
-def to_cx_file(graph: BELGraph, path: Union[str, TextIO], indent: Optional[int] = 2, **kwargs) -> None:
+def to_cx_file(graph: BELGraph, path: str | TextIO, indent: int | None = 2, **kwargs) -> None:
     """Write a BEL graph to a JSON file in CX format.
 
     :param graph: A BEL graph
@@ -381,7 +380,8 @@ def to_cx_file(graph: BELGraph, path: Union[str, TextIO], indent: Optional[int] 
 
        from pybel.examples import sialic_acid_graph
        from pybel import to_cx_file
-       with open('graph.bel.cx.json', 'w') as file:
+
+       with open("graph.bel.cx.json", "w") as file:
            to_cx_file(sialic_acid_graph, file)
 
     The example below shows how to output a BEL graph as CX to a file at a given path.
@@ -390,7 +390,8 @@ def to_cx_file(graph: BELGraph, path: Union[str, TextIO], indent: Optional[int] 
 
         from pybel.examples import sialic_acid_graph
         from pybel import to_cx_file
-        to_cx_file(sialic_acid_graph, 'graph.bel.cx.json')
+
+        to_cx_file(sialic_acid_graph, "graph.bel.cx.json")
 
     If you have a big graph, you might consider storing it as a gzipped JGIF file
     by using :func:`to_cx_gz`.
@@ -410,18 +411,17 @@ def to_cx_jsons(graph: BELGraph, **kwargs) -> str:
     return json.dumps(to_cx(graph), ensure_ascii=False, **kwargs)
 
 
-def _iterate_list_of_dicts(list_of_dicts: List[Dict]):
+def _iterate_list_of_dicts(list_of_dicts: list[dict]):
     """Iterate over a list of dictionaries.
 
     :type list_of_dicts: list[dict[A,B]]
     :rtype: iter[tuple[A,B]]
     """
     for dictionary in list_of_dicts:
-        for key, value in dictionary.items():
-            yield key, value
+        yield from dictionary.items()
 
 
-def from_cx(cx: List[Dict]) -> BELGraph:  # noqa: C901
+def from_cx(cx: list[dict]) -> BELGraph:
     """Rebuild a BELGraph from CX JSON output from PyBEL.
 
     :param cx: The CX JSON object for this graph
@@ -603,7 +603,7 @@ def from_cx(cx: List[Dict]) -> BELGraph:  # noqa: C901
                 edge_relation[eid],
             )
         else:
-            raise ValueError("problem adding edge: {}".format(eid))
+            raise ValueError(f"problem adding edge: {eid}")
 
     return graph
 
@@ -614,7 +614,7 @@ def _after_underscore(key):
 
 
 @open_file(0, mode="r")
-def from_cx_file(path: Union[str, TextIO]) -> BELGraph:
+def from_cx_file(path: str | TextIO) -> BELGraph:
     """Read a file containing CX JSON and converts to a BEL graph.
 
     :param path: A readable file or file-like containing the CX JSON for this graph

@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
-
 """Utilities for BEL graphs."""
 
 import logging
 import random
 from collections import Counter
-from typing import Optional, TextIO
+from typing import TextIO
 
 import bioregistry
 import pandas as pd
@@ -41,11 +39,11 @@ def functions_str(graph, examples: bool = True, add_count: bool = True, **kwargs
     df = function_table_df(graph, examples=examples)
     headers = list(df.columns)
     if add_count:
-        headers[0] += " ({})".format(len(df.index))
+        headers[0] += f" ({len(df.index)})"
     return tabulate(df.values, headers=headers, **kwargs)
 
 
-def functions(graph, file: Optional[TextIO] = None, examples: bool = True, **kwargs) -> None:
+def functions(graph, file: TextIO | None = None, examples: bool = True, **kwargs) -> None:
     """Print a summary of the functions in the graph."""
     print(functions_str(graph=graph, examples=examples, **kwargs), file=file)
 
@@ -75,16 +73,16 @@ def namespaces_str(graph: BELGraph, examples: bool = True, add_count: bool = Tru
     df = namespaces_table_df(graph, examples=examples)
     headers = list(df.columns)
     if add_count:
-        headers[0] += " ({})".format(len(df.index))
+        headers[0] += f" ({len(df.index)})"
     return tabulate(df.values, headers=headers, **kwargs)
 
 
-def namespaces(graph: BELGraph, file: Optional[TextIO] = None, examples: bool = True, **kwargs) -> None:
+def namespaces(graph: BELGraph, file: TextIO | None = None, examples: bool = True, **kwargs) -> None:
     """Print a summary of the namespaces in the graph."""
     print(namespaces_str(graph=graph, examples=examples, **kwargs), file=file)
 
 
-def edge_table_df(graph: BELGraph, *, examples: bool = True, minimum: Optional[int] = None) -> pd.DataFrame:
+def edge_table_df(graph: BELGraph, *, examples: bool = True, minimum: int | None = None) -> pd.DataFrame:
     """Create a dataframe describing the edges in the graph."""
     edge_mapping = multidict(
         (
@@ -101,7 +99,7 @@ def edge_table_df(graph: BELGraph, *, examples: bool = True, minimum: Optional[i
                 top_level_edge,
                 count,
                 random.choice(edge_mapping[top_level_edge]),
-            )  # noqa:S311
+            )
             for top_level_edge, count in edge_c.most_common()
             if not minimum or count >= minimum
         ]
@@ -119,14 +117,14 @@ def edges_str(
     *,
     examples: bool = True,
     add_count: bool = True,
-    minimum: Optional[int] = None,
+    minimum: int | None = None,
     **kwargs,
 ) -> str:
     """Make a summary str of the edges in the graph."""
     df = edge_table_df(graph, examples=examples, minimum=minimum)
     headers = list(df.columns)
     if add_count:
-        headers[0] += " ({})".format(intword(len(df.index)))
+        headers[0] += f" ({intword(len(df.index))})"
     return tabulate(df.values, headers=headers, **kwargs)
 
 
@@ -134,15 +132,15 @@ def edges(
     graph: BELGraph,
     *,
     examples: bool = True,
-    minimum: Optional[int] = None,
-    file: Optional[TextIO] = None,
+    minimum: int | None = None,
+    file: TextIO | None = None,
     **kwargs,
 ) -> None:
     """Print a summary of the edges in the graph."""
     print(edges_str(graph=graph, examples=examples, minimum=minimum, **kwargs), file=file)
 
 
-def citations(graph: BELGraph, n: Optional[int] = 15, file: Optional[TextIO] = None) -> None:
+def citations(graph: BELGraph, n: int | None = 15, file: TextIO | None = None) -> None:
     """Print a summary of the citations in the graph."""
     edge_mapping = multidict(
         (
@@ -159,14 +157,14 @@ def citations(graph: BELGraph, n: Optional[int] = 15, file: Optional[TextIO] = N
                 ":".join(top_level_edge),
                 count,
                 random.choice(edge_mapping[top_level_edge]),
-            )  # noqa:S311
+            )
             for top_level_edge, count in edge_c.most_common(n=n)
         ],
         columns=["Citation", "Count", "Example"],
     )
 
     if n is None or len(edge_mapping) < n:
-        print("{} Citation Count: {}".format(graph, len(edge_mapping)))
+        pass
     else:
-        print("{} Citation Count: {} (Showing top {})".format(graph, len(edge_mapping), n))
+        pass
     print(tabulate(df.values, headers=df.columns), file=file)

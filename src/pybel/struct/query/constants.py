@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Constants for the query builder."""
 
 #: Induce a subgraph over the given nodes

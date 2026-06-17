@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Predicate functions for filtering lists of nodes."""
 
 from .activities import has_activity, has_edge_modifier, is_degraded, is_translocated

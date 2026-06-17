@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for the internal DSL."""
 
 import unittest
@@ -115,7 +113,7 @@ class TestDSL(unittest.TestCase):
         namespace, identifier = n(), n()
         node = Abundance(namespace=namespace, identifier=identifier)
         self.assertEqual(
-            "a({namespace}:{identifier})".format(namespace=namespace, identifier=ensure_quotes(identifier)),
+            f"a({namespace}:{ensure_quotes(identifier)})",
             node.as_bel(),
         )
 
@@ -123,7 +121,7 @@ class TestDSL(unittest.TestCase):
         namespace, identifier = n(), n()
         node = Abundance(namespace=namespace, identifier=identifier)
         self.assertEqual(
-            "a({namespace}:{identifier})".format(namespace=namespace, identifier=ensure_quotes(identifier)),
+            f"a({namespace}:{ensure_quotes(identifier)})",
             node.as_bel(),
         )
 

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for parsing full BEL relations."""
 
 import logging
@@ -111,7 +109,7 @@ class TestRelations(TestTokenParserBase):
         self.add_default_provenance()
 
     def test_ensure_no_dup_nodes(self):
-        """Ensure node isn't added twice, even if from different statements"""
+        """Ensure node isn't added twice, even if from different statements."""
         self.parser.gene.add_parse_action(self.parser.handle_term)
         result = self.parser.bel_term.parse_string("g(HGNC:AKT1)")
 
@@ -162,7 +160,7 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_edge(sub_member_2, sub, relation=PART_OF)
 
     def test_predicate_failure(self):
-        """Checks that if there's a problem with the relation/object, that an error gets thrown"""
+        """Checks that if there's a problem with the relation/object, that an error gets thrown."""
         statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(CHEBI:"Abeta_42")) -> nope(GO:"neuron apoptotic process")'
 
         with self.assertRaises(ParseException):
@@ -170,7 +168,7 @@ class TestRelations(TestTokenParserBase):
 
     def test_increases(self):
         """Test composite in subject. See BEL 2.0 specification
-        `3.1.1 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xincreases>`_
+        `3.1.1 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xincreases>`_.
         """
         statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(CHEBI:"Abeta_42")) -> bp(GO:"neuron apoptotic process")'
         result = self.parser.relation.parse_string(statement)
@@ -253,7 +251,7 @@ class TestRelations(TestTokenParserBase):
 
     def test_directlyIncreases_withTlocObject(self):
         """Test translocation in object. See BEL 2.0 specification
-        `3.1.2 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdIncreases>`_
+        `3.1.2 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdIncreases>`_.
         """
         statement = (
             'a(CHEBI:"Abeta_42") => tloc(a(CHEBI:"calcium(2+)"),fromLoc(MESH:"Cell Membrane"),'
@@ -385,7 +383,8 @@ class TestRelations(TestTokenParserBase):
     def test_directlyDecreases(self):
         """
         3.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdDecreases
-        Tests simple triple"""
+        Tests simple triple.
+        """
         statement = 'proteinAbundance(HGNC:CAT, location(GO:intracellular)) directlyDecreases abundance(CHEBI:"hydrogen peroxide")'
         result = self.parser.relation.parse_string(statement)
 
@@ -424,7 +423,8 @@ class TestRelations(TestTokenParserBase):
     def test_directlyDecreases_annotationExpansion(self):
         """
         3.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdDecreases
-        Tests simple triple"""
+        Tests simple triple.
+        """
         statement = 'g(HGNC:CAT, location(GO:intracellular)) directlyDecreases abundance(CHEBI:"hydrogen peroxide")'
 
         self.graph.annotation_list.update(
@@ -491,7 +491,7 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_edge(sub, obj, only=True, **expected_attrs)
 
     def test_rateLimitingStepOf_subjectActivity(self):
-        """3.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_ratelimitingstepof"""
+        """3.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_ratelimitingstepof."""
         statement = 'act(p(HGNC:HMGCR), ma(cat)) rateLimitingStepOf bp(GO:"cholesterol biosynthetic process")'
         result = self.parser.relation.parse_string(statement)
 
@@ -567,7 +567,8 @@ class TestRelations(TestTokenParserBase):
     def test_regulates_with_multiple_annotations(self):
         """
         3.1.7 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_regulates_reg
-        Test nested definitions"""
+        Test nested definitions.
+        """
         statement = "pep(complex(p(HGNC:F3),p(HGNC:F7))) regulates pep(p(HGNC:F9))"
         result = self.parser.relation.parse_string(statement)
 
@@ -636,7 +637,8 @@ class TestRelations(TestTokenParserBase):
     def test_negativeCorrelation_withObjectVariant(self):
         """
         3.2.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XnegCor
-        Test phosphoralation tag"""
+        Test phosphoralation tag.
+        """
         for pmod in ["P", "Ph", 'go:0006468 ! "protein phosphorylation"']:
             with self.subTest(pmod=pmod):
                 self._help_test_negative_correlation_with_object_variant(pmod)
@@ -679,7 +681,8 @@ class TestRelations(TestTokenParserBase):
     def test_positiveCorrelation_withSelfReferential(self):
         """
         3.2.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XposCor
-        Self-referential relationships"""
+        Self-referential relationships.
+        """
         statement = "p(HGNC:GSK3B, pmod(P, S, 9)) pos act(p(HGNC:GSK3B), ma(kin))"
         result = self.parser.relation.parse_string(statement)
 
@@ -715,9 +718,7 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_edge(object_node, subject_node, relation=expected_dict[RELATION])
 
     def test_orthologous(self):
-        """
-        3.3.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_orthologous
-        """
+        """3.3.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_orthologous."""
         statement = "g(HGNC:AKT1) orthologous g(MGI:AKT1)"
         result = self.parser.relation.parse_string(statement)
         expected_result = [
@@ -737,9 +738,7 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_edge(obj, sub, relation=ORTHOLOGOUS)
 
     def test_transcription(self):
-        """
-        3.3.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_transcribedto
-        """
+        """3.3.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_transcribedto."""
         statement = "g(HGNC:AKT1) :> r(HGNC:AKT1)"
         result = self.parser.relation.parse_string(statement)
 
@@ -759,9 +758,7 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_edge(sub, obj, **{RELATION: TRANSCRIBED_TO})
 
     def test_translation(self):
-        """
-        3.3.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_translatedto
-        """
+        """3.3.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_translatedto."""
         statement = "r(HGNC:AKT1,loc(GO:intracellular)) >> p(HGNC:AKT1)"
         result = self.parser.relation.parse_string(statement)
 
@@ -803,7 +800,7 @@ class TestRelations(TestTokenParserBase):
         key_data = self.parser.graph[source][target]
         self.assertEqual(1, len(key_data))
 
-        key = list(key_data)[0]
+        key = next(iter(key_data))
         data = key_data[key]
 
         self.assertIn(RELATION, data)
@@ -839,9 +836,7 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_edge(child_2, sub, **{RELATION: PART_OF})
 
     def test_member_list(self):
-        """
-        3.4.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_hasmembers
-        """
+        """3.4.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_hasmembers."""
         statement = "p(FPLX:PKC) hasMembers list(p(HGNC:PRKCA), p(HGNC:PRKCB), p(HGNC:PRKCD), p(HGNC:PRKCE))"
         result = self.parser.relation.parse_string(statement)
         expected_result = [
@@ -877,9 +872,7 @@ class TestRelations(TestTokenParserBase):
         self.assert_has_edge(obj_4, sub, relation=IS_A)
 
     def test_is_a(self):
-        """
-        3.4.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_isa
-        """
+        """3.4.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_isa."""
         statement = 'pathology(MESH:Psoriasis) isA pathology(MESH:"Skin Diseases")'
         result = self.parser.relation.parse_string(statement)
 
@@ -955,9 +948,7 @@ class TestRelations(TestTokenParserBase):
         self.assertEqual(PART_OF, v[RELATION])
 
     def test_subProcessOf(self):
-        """
-        3.4.6 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_subprocessof
-        """
+        """3.4.6 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_subprocessof."""
         statement = 'rxn(reactants(a(CHEBI:"(S)-3-hydroxy-3-methylglutaryl-CoA"),a(CHEBI:NADPH), \
             a(CHEBI:hydron)),products(a(CHEBI:mevalonate), a(CHEBI:"CoA-SH"), a(CHEBI:"NADP(+)"))) \
             subProcessOf bp(GO:"cholesterol biosynthetic process")'

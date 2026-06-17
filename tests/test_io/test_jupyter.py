@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Test for export functions in PyBEL-Jupyter."""
 
 import unittest

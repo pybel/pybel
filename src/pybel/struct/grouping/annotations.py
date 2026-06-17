@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-
 """Functions for grouping sub-graphs."""
 
 import logging
 from collections import defaultdict
-from typing import Mapping, Optional
+from collections.abc import Mapping
 
 from ..graph import BELGraph
 from ...constants import ANNOTATIONS
@@ -38,7 +36,7 @@ def _get_subgraphs_by_annotation_disregard_undefined(graph: BELGraph, annotation
 def _get_subgraphs_by_annotation_keep_undefined(
     graph: BELGraph,
     annotation: str,
-    sentinel: Optional[str],
+    sentinel: str | None,
 ) -> Mapping[Entity, BELGraph]:
     result = defaultdict(graph.child)
 
@@ -57,7 +55,7 @@ def _get_subgraphs_by_annotation_keep_undefined(
 def get_subgraphs_by_annotation(
     graph: BELGraph,
     annotation: str,
-    sentinel: Optional[str] = None,
+    sentinel: str | None = None,
 ) -> Mapping[Entity, BELGraph]:
     """Stratify the given graph into sub-graphs based on the values for edges' annotations.
 

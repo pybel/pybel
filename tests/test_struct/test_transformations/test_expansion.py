@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for expansion functions."""
 
 import unittest
@@ -89,7 +87,7 @@ class TestExpansion(unittest.TestCase):
         self.assertEqual(
             9,
             graph.number_of_nodes(),
-            msg="wrong number of nodes: {}".format(list(graph)),
+            msg=f"wrong number of nodes: {list(graph)}",
         )
         self.assertEqual(8, graph.number_of_edges(), msg="wrong number of edges")
         self.assertIn(sialic_acid, graph)

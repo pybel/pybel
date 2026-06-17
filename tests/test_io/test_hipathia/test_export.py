@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-
 """Tests for Hipathia export."""
 
 import unittest
-from typing import Tuple
 
 import pandas as pd
 
@@ -36,7 +33,7 @@ class TestExportHipathia(unittest.TestCase):
     def setUp(self) -> None:
         self.graph = BELGraph(name=name)
 
-    def _get_dfs(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    def _get_dfs(self) -> tuple[pd.DataFrame, pd.DataFrame]:
         return to_hipathia_dfs(self.graph)
 
     def test_protein_activates_protein(self):
@@ -49,8 +46,8 @@ class TestExportHipathia(unittest.TestCase):
         self.assertEqual(2, len(att_df.index))
         self.assertEqual(
             [
-                ["N-{name}-1".format(name=name), a.name, a.identifier],
-                ["N-{name}-2".format(name=name), d.name, d.identifier],
+                [f"N-{name}-1", a.name, a.identifier],
+                [f"N-{name}-2", d.name, d.identifier],
             ],
             att_df.values.tolist(),
         )
@@ -59,9 +56,9 @@ class TestExportHipathia(unittest.TestCase):
         self.assertEqual(
             [
                 [
-                    "N-{name}-1".format(name=name),
+                    f"N-{name}-1",
                     "activation",
-                    "N-{name}-2".format(name=name),
+                    f"N-{name}-2",
                 ],
             ],
             sif_df.values.tolist(),
@@ -80,11 +77,11 @@ class TestExportHipathia(unittest.TestCase):
         self.assertEqual(
             [
                 [
-                    "N-{name}-1".format(name=name),
+                    f"N-{name}-1",
                     b_family.name,
                     ",".join((b1.identifier, b2.identifier)),
                 ],
-                ["N-{name}-2".format(name=name), a.name, a.identifier],
+                [f"N-{name}-2", a.name, a.identifier],
             ],
             att_df.values.tolist(),
         )
@@ -93,9 +90,9 @@ class TestExportHipathia(unittest.TestCase):
         self.assertEqual(
             [
                 [
-                    "N-{name}-2".format(name=name),
+                    f"N-{name}-2",
                     "activation",
-                    "N-{name}-1".format(name=name),
+                    f"N-{name}-1",
                 ],
             ],
             sif_df.values.tolist(),
@@ -112,11 +109,11 @@ class TestExportHipathia(unittest.TestCase):
         self.assertEqual(
             [
                 [
-                    "N-{name}-1 2".format(name=name),
+                    f"N-{name}-1 2",
                     " ".join((e.name, f.name)),
-                    "{},/,{}".format(e.identifier, f.identifier),
+                    f"{e.identifier},/,{f.identifier}",
                 ],
-                ["N-{name}-3".format(name=name), a.name, a.identifier],
+                [f"N-{name}-3", a.name, a.identifier],
             ],
             att_df.values.tolist(),
         )
@@ -125,9 +122,9 @@ class TestExportHipathia(unittest.TestCase):
         self.assertEqual(
             [
                 [
-                    "N-{name}-3".format(name=name),
+                    f"N-{name}-3",
                     "activation",
-                    "N-{name}-1 2".format(name=name),
+                    f"N-{name}-1 2",
                 ],
             ],
             sif_df.values.tolist(),
@@ -144,11 +141,11 @@ class TestExportHipathia(unittest.TestCase):
         self.assertEqual(
             [
                 [
-                    "N-{name}-1 2".format(name=name),
+                    f"N-{name}-1 2",
                     " ".join((e.name, f.name)),
-                    "{},/,{}".format(e.identifier, f.identifier),
+                    f"{e.identifier},/,{f.identifier}",
                 ],
-                ["N-{name}-3".format(name=name), a.name, a.identifier],
+                [f"N-{name}-3", a.name, a.identifier],
             ],
             att_df.values.tolist(),
         )
@@ -157,9 +154,9 @@ class TestExportHipathia(unittest.TestCase):
         self.assertEqual(
             [
                 [
-                    "N-{name}-3".format(name=name),
+                    f"N-{name}-3",
                     "activation",
-                    "N-{name}-1 2".format(name=name),
+                    f"N-{name}-1 2",
                 ],
             ],
             sif_df.values.tolist(),

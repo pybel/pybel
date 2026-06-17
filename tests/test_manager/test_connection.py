@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-
-"""Tests for instantiating the manager"""
+"""Tests for instantiating the manager."""
 
 import os
 import tempfile
@@ -12,7 +10,7 @@ from pybel.manager.base_manager import build_engine_session
 try:
     from unittest import mock
 except ImportError:
-    import mock
+    from unittest import mock
 
 
 class TestInstantiation(unittest.TestCase):
@@ -20,8 +18,8 @@ class TestInstantiation(unittest.TestCase):
 
     def setUp(self):
         """Add two class-level variables: ``mock_global_connection`` and ``mock_module_connection`` that can be
-        used as context managers to mock the bio2bel connection getter functions."""
-
+        used as context managers to mock the bio2bel connection getter functions.
+        """
         self.fd, self.path = tempfile.mkstemp()
         self.connection = "sqlite:///" + self.path
 

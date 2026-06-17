@@ -1,8 +1,7 @@
-# -*- coding: utf-8 -*-
-
 """This module helps handle node data dictionaries."""
 
-from typing import Any, List, Mapping, Union
+from collections.abc import Mapping
+from typing import Any
 
 from pyparsing import ParseResults
 
@@ -148,7 +147,7 @@ def _simple_po_to_dict(tokens) -> BaseAbundance:
     """
     dsl = FUNC_TO_DSL.get(tokens[FUNCTION])
     if dsl is None:
-        raise ValueError("invalid tokens: {}".format(tokens))
+        raise ValueError(f"invalid tokens: {tokens}")
 
     concept = tokens[CONCEPT]
     return dsl(
@@ -166,7 +165,7 @@ def _variant_po_to_dict(tokens) -> CentralDogma:
     """
     dsl = FUNC_TO_DSL.get(tokens[FUNCTION])
     if dsl is None:
-        raise ValueError("invalid tokens: {}".format(tokens))
+        raise ValueError(f"invalid tokens: {tokens}")
 
     concept = tokens[CONCEPT]
     return dsl(
@@ -216,7 +215,7 @@ def _variant_to_dsl_helper(tokens) -> Variant:
             description=tokens.get(FRAGMENT_DESCRIPTION),
         )
 
-    raise ValueError("invalid fragment kind: {}".format(kind))
+    raise ValueError(f"invalid fragment kind: {kind}")
 
 
 def _reaction_po_to_dict(tokens) -> Reaction:
@@ -231,7 +230,7 @@ def _reaction_po_to_dict(tokens) -> Reaction:
 
 
 def _list_po_with_concept_to_dict(
-    tokens: Union[ParseResults, Mapping[str, Any]],
+    tokens: ParseResults | Mapping[str, Any],
 ) -> ListAbundance:
     """Convert a list parse object to a node.
 
@@ -262,7 +261,7 @@ def _list_po_to_dict(tokens) -> ListAbundance:
     return dsl(members)
 
 
-def _parse_tokens_list(tokens) -> List[BaseEntity]:
+def _parse_tokens_list(tokens) -> list[BaseEntity]:
     """Convert a PyParsing result to a reaction.
 
     :type tokens: ParseResult

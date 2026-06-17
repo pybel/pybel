@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Constants for PyBEL tests."""
 
 import logging
@@ -129,7 +127,7 @@ def any_dict_matches(dict_of_dicts, query_dict) -> bool:
 
 
 def any_subdict_matches(dict_of_dicts, query_dict) -> bool:
-    """Checks if dictionary target_dict matches one of the subdictionaries of a
+    """Checks if dictionary target_dict matches one of the subdictionaries of a.
 
     :param dict[any,dict] dict_of_dicts: dictionary of dictionaries
     :param dict query_dict: dictionary
@@ -173,7 +171,7 @@ def assert_has_edge(
         expected_edge_data[ANNOTATIONS] = graph._clean_annotations(expected_edge_data[ANNOTATIONS])
 
     if only:
-        _key, actual_edge_data = list(graph[u][v].items())[0]
+        _key, actual_edge_data = next(iter(graph[u][v].items()))
         self.assertEqual(
             _remove_line(expected_edge_data),
             _remove_line(actual_edge_data),
@@ -186,12 +184,7 @@ def assert_has_edge(
         else:
             matches = any_dict_matches(actual_dicts, _remove_line(expected_edge_data))
 
-        msg = "No edge ({}, {}) with correct properties. expected:\n {}\nbut got:\n{}".format(
-            u,
-            v,
-            dumps(expected_edge_data, indent=2, sort_keys=True),
-            dumps(actual_dicts, indent=2, sort_keys=True),
-        )
+        msg = f"No edge ({u}, {v}) with correct properties. expected:\n {dumps(expected_edge_data, indent=2, sort_keys=True)}\nbut got:\n{dumps(actual_dicts, indent=2, sort_keys=True)}"
         self.assertTrue(matches, msg=msg)
 
 
@@ -528,13 +521,13 @@ class BelReconstitutionMixin(TestGraphMixin):
                 self.assertEqual(
                     3,
                     len(warning_tuple),
-                    msg="Warning tuple is wrong size: {}".format(warning_tuple),
+                    msg=f"Warning tuple is wrong size: {warning_tuple}",
                 )
 
             _sliced_warnings = [(w.line_number, w.__class__) for _, w, _ in graph.warnings]
             self.assertEqual(expected_warnings, _sliced_warnings, msg="wrong warnings")
 
-            for (el, ew), (_, exc, _) in zip(expected_warnings, graph.warnings):
+            for (el, ew), (_, exc, _) in zip(expected_warnings, graph.warnings, strict=False):
                 self.assertIsInstance(exc, BELParserWarning)
                 self.assertIsInstance(exc.line, str)
                 self.assertIsInstance(exc.line_number, int)
@@ -542,11 +535,9 @@ class BelReconstitutionMixin(TestGraphMixin):
                 self.assertEqual(
                     el,
                     exc.line_number,
-                    msg="Expected {} on line {} but got {} on line {}: {}".format(
-                        ew, el, exc.__class__, exc.line_number, exc
-                    ),
+                    msg=f"Expected {ew} on line {el} but got {exc.__class__} on line {exc.line_number}: {exc}",
                 )
-                self.assertIsInstance(exc, ew, msg="Line: {}".format(el))
+                self.assertIsInstance(exc, ew, msg=f"Line: {el}")
 
         for node in graph:
             self.assertIsInstance(node, BaseEntity)

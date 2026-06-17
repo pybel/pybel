@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 """Functions for expanding the neighborhoods of nodes."""
 
 import itertools as itt
-from typing import Iterable
+from collections.abc import Iterable
 
 from ...filters.node_predicates import is_pathology
 from ...filters.typing import EdgeIterator
@@ -13,12 +11,12 @@ from ...utils import update_metadata
 from ....dsl import BaseEntity
 
 __all__ = [
-    "expand_node_predecessors",
-    "expand_node_successors",
-    "expand_node_neighborhood",
-    "expand_nodes_neighborhoods",
     "expand_all_node_neighborhoods",
     "expand_internal",
+    "expand_node_neighborhood",
+    "expand_node_predecessors",
+    "expand_node_successors",
+    "expand_nodes_neighborhoods",
 ]
 
 

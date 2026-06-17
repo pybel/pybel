@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for the umbrella node-link JSON exporter."""
 
 import unittest

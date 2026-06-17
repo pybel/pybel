@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """A parser for BEL.
 
 This module handles parsing BEL relations and validation of semantics.
@@ -7,8 +5,10 @@ This module handles parsing BEL relations and validation of semantics.
 
 import itertools as itt
 import logging
+from collections.abc import Mapping
 from functools import lru_cache
-from typing import Any, Dict, List, Mapping, Optional, Pattern, Set, Union
+from re import Pattern
+from typing import Any
 
 import pyparsing
 from pyparsing import (
@@ -308,19 +308,19 @@ class BELParser(BaseParser):
 
     def __init__(
         self,
-        graph: Optional[BELGraph] = None,
-        namespace_to_term_to_encoding: Optional[NamespaceTermEncodingMapping] = None,
-        namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
-        annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
-        annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
-        annotation_to_local: Optional[Mapping[str, Set[str]]] = None,
+        graph: BELGraph | None = None,
+        namespace_to_term_to_encoding: NamespaceTermEncodingMapping | None = None,
+        namespace_to_pattern: Mapping[str, Pattern] | None = None,
+        annotation_to_term: Mapping[str, set[str]] | None = None,
+        annotation_to_pattern: Mapping[str, Pattern] | None = None,
+        annotation_to_local: Mapping[str, set[str]] | None = None,
         allow_naked_names: bool = False,
         disallow_nested: bool = False,
         disallow_unqualified_translocations: bool = False,
         citation_clearing: bool = True,
         skip_validation: bool = False,
         autostreamline: bool = True,
-        required_annotations: Optional[List[str]] = None,
+        required_annotations: list[str] | None = None,
     ) -> None:
         """Build a BEL parser.
 
@@ -750,7 +750,7 @@ class BELParser(BaseParser):
         self.language = self.control_parser.language | self.statement
         self.language.set_name("BEL")
 
-        super(BELParser, self).__init__(self.language, streamline=autostreamline)
+        super().__init__(self.language, streamline=autostreamline)
 
     def parse(self, s: str) -> Mapping[str, Any]:
         """Parse the string."""
@@ -766,7 +766,7 @@ class BELParser(BaseParser):
         """Return if naked names should be parsed (``True``), or if errors should be thrown (``False``)."""
         return self.concept_parser.allow_naked_names
 
-    def get_annotations(self) -> Dict:
+    def get_annotations(self) -> dict:
         """Get the current annotations in this parser."""
         return self.control_parser.get_annotations()
 
@@ -902,10 +902,10 @@ class BELParser(BaseParser):
 
     def _add_qualified_edge(self, *, source, source_modifier, relation, target, target_modifier) -> str:
         """Add an edge, then adds the opposite direction edge if it should."""
-        d = dict(
-            relation=relation,
-            annotations=self.control_parser.annotations,
-        )
+        d = {
+            "relation": relation,
+            "annotations": self.control_parser.annotations,
+        }
         if relation in TWO_WAY_RELATIONS:
             self._add_qualified_edge_helper(
                 source=target,
@@ -938,7 +938,7 @@ class BELParser(BaseParser):
             target_modifier=target_modifier,
         )
 
-    def _handle_relation_harness(self, line: str, position: int, tokens: Union[ParseResults, Dict]) -> ParseResults:
+    def _handle_relation_harness(self, line: str, position: int, tokens: ParseResults | dict) -> ParseResults:
         """Handle BEL relations based on the policy specified on instantiation.
 
         Note: this can't be changed after instantiation!
@@ -1079,23 +1079,22 @@ def modifier_po_to_dict(tokens):
         }
 
     else:
-        raise ValueError("Invalid value for tokens[MODIFIER]: {}".format(tokens[MODIFIER]))
+        raise ValueError(f"Invalid value for tokens[MODIFIER]: {tokens[MODIFIER]}")
 
     return attrs
 
 
-@lru_cache()
+@lru_cache
 def _default_parser():
     return BELParser(skip_validation=True, citation_clearing=False)
 
 
-@lru_cache()
+@lru_cache
 def parse(s: str, pprint=False):
     """Parse a BEL statement (without validation)."""
     rv = _default_parser().parse(s)
     if pprint:
-        import json
+        pass
 
-        print(json.dumps(rv, indent=2))
     else:
         return rv
