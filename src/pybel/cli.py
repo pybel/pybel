@@ -21,11 +21,11 @@ import time
 from typing import List, Optional
 
 import click
-from click_plugins import with_plugins
 from pkg_resources import iter_entry_points
 from tqdm.autonotebook import tqdm
 
 from .canonicalize import to_bel_script
+from .click_plugins import with_plugins
 from .constants import get_cache_connection
 from .examples import (
     braf_graph,
