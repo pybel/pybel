@@ -18,7 +18,7 @@ import logging
 import os
 import sys
 import time
-from importlib.metadata import entry_points as iter_entry_points
+from importlib.metadata import entry_points
 from typing import List, Optional
 
 import click
@@ -152,7 +152,7 @@ verbose_option = click.option(
 )
 
 
-@with_plugins(iter_entry_points("pybel.cli_plugins"))
+@with_plugins(entry_points(group="pybel.cli_plugins"))
 @click.group(help="PyBEL CLI on {}".format(sys.executable))
 @click.version_option()
 @connection_option

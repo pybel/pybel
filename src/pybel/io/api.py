@@ -3,7 +3,7 @@
 """Contains the main data structure for PyBEL."""
 
 import os
-from importlib.metadata import entry_points as iter_entry_points
+from importlib.metadata import entry_points
 
 from networkx.utils import open_file
 
@@ -16,10 +16,10 @@ __all__ = [
 ]
 
 #: Mapping from extension to importer function
-IMPORTERS = {entry.name: entry.load() for entry in iter_entry_points(group="pybel.importer")}
+IMPORTERS = {entry.name: entry.load() for entry in entry_points(group="pybel.importer")}
 
 #: Mapping from extension to exporter function
-EXPORTERS = {entry.name: entry.load() for entry in iter_entry_points(group="pybel.exporter")}
+EXPORTERS = {entry.name: entry.load() for entry in entry_points(group="pybel.exporter")}
 
 
 class InvalidExtensionError(ValueError):
