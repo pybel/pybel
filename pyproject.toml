@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "pybel"
-version = "0.0.1-dev"
+version = "0.15.6-dev"
 description = "Parsing, validation, compilation, and data exchange of Biological Expression Language (BEL)"
 readme = "README.md"
 authors = [
@@ -17,7 +17,7 @@ maintainers = [
 # See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#classifiers
 # Search tags using the controlled vocabulary at https://pypi.org/classifiers
 classifiers = [
-    "Development Status :: 1 - Planning",
+    "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
@@ -33,12 +33,18 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: 3 :: Only",
     "Typing :: Typed",
-    # TODO add your topics from the Trove controlled vocabulary (see https://pypi.org/classifiers)
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Chemistry",
 ]
 keywords = [
     "snekpack", # please keep this keyword to credit the cookiecutter-snekpack template
     "cookiecutter",
-    # TODO add your own free-text keywords
+    "Biological Expression Language",
+    "BEL",
+    "domain-specific language",
+    "DSL",
+    "Systems Biology",
+    "Networks Biology",
 ]
 
 # License Information.
@@ -48,11 +54,25 @@ license-files = ["LICENSE"]
 
 requires-python = ">=3.10"
 dependencies = [
-    "more-itertools", # missing from itertools in stdlib
-    "tqdm", # progress bars
+    "networkx>=2.4",
+    "sqlalchemy",
     "click",
-    "more-click",
-    "typing-extensions",
+    "click-plugins",
+    "bel_resources>=0.0.3",
+    "more_itertools",
+    "requests",
+    "requests_file",
+    "pyparsing>=3.1.0",
+    "tqdm",
+    "humanize",
+    "tabulate",
+    "pandas",
+    "jsonschema",
+    "bioregistry",
+    "ratelimit",
+    "pystow>=0.1.2",
+    "psycopg2-binary",
+    "setuptools<81",
 ]
 
 # see https://peps.python.org/pep-0735/ and https://docs.astral.sh/uv/concepts/dependencies/#dependency-groups
@@ -101,7 +121,10 @@ pyroma = [
 
 # see https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#dependencies-optional-dependencies
 [project.optional-dependencies]
-
+indra = ["indra"]
+jupyter = ["jinja2", "ipython"]
+neo4j = ["py2neo"]
+grounding = ["pyobo", "protmapper"]
 
 # See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#urls
 # and also https://packaging.python.org/en/latest/specifications/well-known-project-urls/
