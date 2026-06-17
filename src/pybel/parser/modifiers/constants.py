@@ -8,7 +8,7 @@ from ... import language
 from ...exceptions import PlaceholderAminoAcidWarning
 
 aa_single = one_of(list(language.amino_acid_dict.keys()))
-aa_single.set_parse_action(lambda s, l, t: [language.amino_acid_dict[t[0]]])
+aa_single.set_parse_action(lambda s, loc, t: [language.amino_acid_dict[t[0]]])
 
 aa_triple = one_of(list(language.amino_acid_dict.values()))
 
