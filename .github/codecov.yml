@@ -1,0 +1,4 @@
+# see https://docs.codecov.com/v4.6/docs/codecov-yaml
+ignore:
+  - "src/pybel/__main__.py"
+  - "src/pybel/cli.py"

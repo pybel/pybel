@@ -1,14 +1,262 @@
-# See https://setuptools.readthedocs.io/en/latest/build_meta.html
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta:__legacy__"
+requires = ["uv_build>=0.11.2,<1.0"]
+build-backend = "uv_build"
 
-[tool.black]
-line-length = 120
-target-version = ["py37", "py38", "py39", "py310"]
+[project]
+name = "pybel"
+version = "0.0.1-dev"
+description = "Parsing, validation, compilation, and data exchange of Biological Expression Language (BEL)"
+readme = "README.md"
+authors = [
+    { name = "Charles Tapley Hoyt", email = "cthoyt@gmail.com" }
+]
+maintainers = [
+    { name = "Charles Tapley Hoyt", email = "cthoyt@gmail.com" }
+]
 
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-include_trailing_comma = true
-reverse_relative = true
+# See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#classifiers
+# Search tags using the controlled vocabulary at https://pypi.org/classifiers
+classifiers = [
+    "Development Status :: 1 - Planning",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Framework :: Pytest",
+    "Framework :: tox",
+    "Framework :: Sphinx",
+    "Natural Language :: English",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3 :: Only",
+    "Typing :: Typed",
+    # TODO add your topics from the Trove controlled vocabulary (see https://pypi.org/classifiers)
+]
+keywords = [
+    "snekpack", # please keep this keyword to credit the cookiecutter-snekpack template
+    "cookiecutter",
+    # TODO add your own free-text keywords
+]
+
+# License Information.
+# See PEP-639 at https://peps.python.org/pep-0639/#add-license-files-key
+license = "MIT"
+license-files = ["LICENSE"]
+
+requires-python = ">=3.10"
+dependencies = [
+    "more-itertools", # missing from itertools in stdlib
+    "tqdm", # progress bars
+    "click",
+    "more-click",
+    "typing-extensions",
+]
+
+# see https://peps.python.org/pep-0735/ and https://docs.astral.sh/uv/concepts/dependencies/#dependency-groups
+[dependency-groups]
+tests = [
+    "pytest",
+    "coverage[toml]",
+]
+docs = [
+    "sphinx>=8,<9",
+    "sphinx-rtd-theme>=3.0","sphinx-click", 
+    "sphinx_automodapi",
+    # Include if your project uses Pydantic:
+    # "autodoc_pydantic",
+    # To include LaTeX comments easily in your docs.
+    # If you uncomment this, don't forget to do the same in docs/conf.py
+    # texext
+]
+lint = [
+    "ruff",
+]
+typing = [
+    { include-group = "tests" },
+    "mypy",
+    "pydantic",
+    "types-click",
+    # You will probably have to add additional type stubs here, especially if you're using tox-uv
+]
+docs-lint = [
+    { include-group = "docs" },
+    "doc8",
+]
+format-docs = [
+    { include-group = "docs" },
+    "docstrfmt",
+]
+doctests = [
+    "xdoctest",
+    "pygments",
+]
+pyroma = [
+    "uv-build",
+    "pyroma",
+    "pygments",
+]
+
+# see https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#dependencies-optional-dependencies
+[project.optional-dependencies]
+
+
+# See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#urls
+# and also https://packaging.python.org/en/latest/specifications/well-known-project-urls/
+[project.urls]
+"Bug Tracker" = "https://github.com/pybel/pybel/issues"
+Homepage = "https://github.com/pybel/pybel"
+Repository = "https://github.com/pybel/pybel.git"
+Documentation = "https://pybel.readthedocs.io"
+Funding = "https://github.com/sponsors/cthoyt"
+
+[project.scripts]
+pybel = "pybel.cli:main"
+
+[tool.cruft]
+skip = [
+    "**/__init__.py",
+    "tests/*"
+]
+
+# MyPy, see https://mypy.readthedocs.io/en/stable/config_file.html
+[tool.mypy]
+plugins = [
+    "pydantic.mypy",
+]
+
+# Doc8, see https://doc8.readthedocs.io/en/stable/readme.html#ini-file-usage
+[tool.doc8]
+max-line-length = 120
+
+# Pytest, see https://docs.pytest.org/en/stable/reference/customize.html#pyproject-toml
+[tool.pytest.ini_options]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]
+
+# Coverage, see https://coverage.readthedocs.io/en/latest/config.html
+[tool.coverage.run]
+branch = true
+source = [
+    "pybel",
+]
+omit = [
+    "tests/*",
+    "docs/*",
+    "src/pybel/version.py",
+    "src/pybel/__main__.py",
+    "src/pybel/cli.py",
+]
+
+[tool.coverage.paths]
+source = [
+    "src/pybel",
+    ".tox/*/lib/python*/site-packages/pybel",
+]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == \"__main__\":",
+    "if TYPE_CHECKING:",
+    "def __str__",
+    "def __repr__",
+]
+
+[tool.ruff]
+line-length = 100
+extend-include = ["*.ipynb"]
+
+[tool.ruff.lint]
+# See https://docs.astral.sh/ruff/rules
+extend-select = [
+    "F", # pyflakes
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "C90", # mccabe
+    "I", # isort
+    "UP", # pyupgrade
+    "D", # pydocstyle
+    "DOC", # pydoclint
+    "B", # bugbear
+    "S", # bandit
+    "T20", # print
+    "N", # pep8 naming
+    "ERA", # eradicate commented out code
+    "NPY", # numpy checks
+    "RUF", # ruff rules
+    "C4", # comprehensions
+]
+ignore = [
+    "D105", # Missing docstring in magic method
+]
+
+# See https://docs.astral.sh/ruff/settings/#per-file-ignores
+[tool.ruff.lint.per-file-ignores]
+# Ignore security issues in the version.py, which are inconsistent
+"src/pybel/version.py" = ["S603", "S607"]
+# Ignore commented out code in Sphinx configuration file
+"docs/source/conf.py" = ["ERA001"]
+# Prints are okay in notebooks
+"notebooks/**/*.ipynb" = ["T201"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.lint.isort]
+relative-imports-order = "closest-to-furthest"
+known-third-party = [
+    "tqdm",
+]
+known-first-party = [
+    "pybel",
+    "tests",
+]
+
+[tool.ruff.format]
+# see https://docs.astral.sh/ruff/settings/#format_docstring-code-format
+docstring-code-format = true
+
+[tool.bumpversion]
+current_version = "0.0.1-dev"
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(?:-(?P<release>[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+(?P<build>[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?"
+serialize = [
+    "{major}.{minor}.{patch}-{release}+{build}",
+    "{major}.{minor}.{patch}+{build}",
+    "{major}.{minor}.{patch}-{release}",
+    "{major}.{minor}.{patch}",
+]
+commit = true
+tag = false
+
+[tool.bumpversion.parts.release]
+optional_value = "production"
+first_value = "dev"
+values = [
+    "dev",
+    "production",
+]
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = "version = \"{current_version}\""
+replace = "version = \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "docs/source/conf.py"
+search = "release = \"{current_version}\""
+replace = "release = \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "src/pybel/version.py"
+search = "VERSION = \"{current_version}\""
+replace = "VERSION = \"{new_version}\""
+[[tool.bumpversion.files]]
+filename = "CITATION.cff"
+search = "version: {current_version}"
+replace = "version: {new_version}"
