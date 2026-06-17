@@ -18,11 +18,11 @@ import logging
 import os
 import sys
 import time
+from importlib.metadata import entry_points as iter_entry_points
 from typing import List, Optional
 
 import click
 from click_plugins import with_plugins
-from pkg_resources import iter_entry_points
 from tqdm.autonotebook import tqdm
 
 from .canonicalize import to_bel_script

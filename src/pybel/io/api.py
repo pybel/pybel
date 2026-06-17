@@ -3,10 +3,9 @@
 """Contains the main data structure for PyBEL."""
 
 import os
-from typing import TextIO, Union
+from importlib.metadata import entry_points as iter_entry_points
 
 from networkx.utils import open_file
-from pkg_resources import iter_entry_points
 
 from ..struct import BELGraph
 
