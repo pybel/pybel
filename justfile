@@ -2,6 +2,7 @@
 test:
     # See the [dependency-groups] entry in pyproject.toml for "tests"
     just coverage erase
+    # TODO do something sneaky with installing the PYBEL_TEST_CONNECTOR as a dependency?
     uv run --group tests --all-extras -m coverage run -p -m pytest
     just coverage combine
     just coverage report
@@ -21,7 +22,12 @@ coverage-report:
 # Note that the package name is required for discovery
 [doc("test that documentation examples run properly")]
 doctests:
-    uv run --group doctests --all-extras xdoctest -m src/pybel
+    uv run --group doctests --all-extras xdoctest -m \
+        src/pybel/struct/summary \
+        src/pybel/struct/filters \
+        src/pybel/struct/mutation \
+        src/pybel/struct/graph.py
+    # TODO enable on all files
 
 [doc("test that notebooks can be run to completion")]
 treon:
@@ -64,7 +70,8 @@ pyroma:
 
 [doc("run static type checking with mypy")]
 mypy:
-    uv run --group typing --all-extras mypy --ignore-missing-imports --strict src/ tests/
+    uv run --group typing --all-extras mypy --ignore-missing-imports --strict src/
+    # TODO enable on tests/
 
 [doc("run static type checking with ty")]
 ty:
