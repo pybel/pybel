@@ -50,16 +50,12 @@ citation = "26438529"
 evidence_1 = """
 Sialic acid binding activates CD33, resulting in phosphorylation of the CD33 immunoreceptor tyrosine-based inhibitory
 motif (ITIM) domains and activation of the SHP-1 and SHP-2 tyrosine phosphatases [66, 67].
-""".replace(
-    "\n", " "
-).strip()
+""".replace("\n", " ").strip()
 
 evidence_2 = """These phosphatases act on multiple substrates, including Syk, to inhibit immune activation [68, 69].
 Hence, CD33 activation leads to increased SHP-1 and SHP-2 activity that antagonizes Syk, inhibiting ITAM-signaling
 proteins, possibly including TREM2/DAP12 (Fig. 1, [70, 71]).
-""".replace(
-    "\n", " "
-).strip()
+""".replace("\n", " ").strip()
 
 sialic_acid_graph = BELGraph(
     name="Sialic Acid Graph",

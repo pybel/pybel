@@ -32,7 +32,7 @@ The previous statements both produce the underlying data:
 
 import logging
 
-from pyparsing import ParserElement, oneOf
+from pyparsing import ParserElement, one_of
 from pyparsing import pyparsing_common as ppc
 
 from ..utils import nest, one_of_tags
@@ -45,7 +45,7 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 
-dna_nucleotide = oneOf(list(language.dna_nucleotide_labels.keys()))
+dna_nucleotide = one_of(list(language.dna_nucleotide_labels.keys()))
 gsub_tag = one_of_tags(tags=["sub", "substitution"], canonical_tag=HGVS, name=KIND)
 
 
@@ -56,7 +56,7 @@ def get_gene_substitution_language() -> ParserElement:
         ppc.integer(GSUB_POSITION),
         dna_nucleotide(GSUB_VARIANT),
     )
-    parser_element.setParseAction(_handle_gsub)
+    parser_element.set_parse_action(_handle_gsub)
     return parser_element
 
 

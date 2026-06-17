@@ -97,7 +97,7 @@ def _iterate_namespaces(graph: BELGraph) -> Iterable[str]:
 
 
 def _iterate_edge_entities(graph: BELGraph) -> Iterable[Entity]:
-    for ((_, _, data), side) in itt.product(graph.edges(data=True), (SOURCE_MODIFIER, TARGET_MODIFIER)):
+    for (_, _, data), side in itt.product(graph.edges(data=True), (SOURCE_MODIFIER, TARGET_MODIFIER)):
         side_data = data.get(side)
         if side_data is None:
             continue
@@ -224,7 +224,7 @@ def _identifier_filtered_iterator(graph) -> Iterable[Tuple[str, str]]:
             for pair in _get_node_names(member):
                 yield pair
 
-    for ((_, _, data), side) in itt.product(graph.edges(data=True), (SOURCE_MODIFIER, TARGET_MODIFIER)):
+    for (_, _, data), side in itt.product(graph.edges(data=True), (SOURCE_MODIFIER, TARGET_MODIFIER)):
         side_data = data.get(side)
         if side_data is None:
             continue

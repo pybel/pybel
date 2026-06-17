@@ -53,10 +53,10 @@ import logging
 from typing import Any, Collection, Mapping, Optional, Tuple, Union
 
 import pyobo
+from bioregistry import normalize_prefix
 from protmapper.uniprot_client import get_id_from_mnemonic, get_mnemonic
-from pyobo.getters import NoBuild
-from pyobo.identifier_utils import normalize_prefix
-from pyobo.xrefdb.sources.famplex import get_remapping
+from pyobo.getters import NoBuildError
+from pyobo.utils.path import ensure_df
 from tqdm.autonotebook import tqdm
 
 from pybel.constants import (
@@ -106,7 +106,15 @@ logger = logging.getLogger(__name__)
 SKIP = {"ncbigene", "pubchem.compound", "chembl.compound"}
 NO_NAMES = {"fplx", "eccode", "dbsnp", "smiles", "inchi", "inchikey"}
 
-# TODO will get updated
+FAMPLEX_EQUIVALENCES_URL = "https://github.com/sorgerlab/famplex/raw/master/equivalences.csv"
+
+
+def get_remapping() -> Mapping[Tuple[str, str], Tuple[str, str, str]]:
+    """Get a mapping from (prefix, name) pairs to FamPlex (prefix, identifier, name) triples."""
+    df = ensure_df("fplx", url=FAMPLEX_EQUIVALENCES_URL, header=None, names=["prefix", "name", "fplx"], sep=",")
+    return {("bel", name): ("fplx", fplx, fplx) for prefix, name, fplx in df.values if prefix.lower() == "bel"}
+
+
 #: A mapping of (prefix, name) pairs to (prefix, identifier, name) triples
 _NAME_REMAPPING = get_remapping()
 
@@ -397,7 +405,7 @@ def _handle_identifier_not_name(
 
     try:
         id_name_mapping = pyobo.api.names.get_id_name_mapping(prefix)
-    except NoBuild:
+    except NoBuildError:
         return False
 
     if id_name_mapping is None:
@@ -486,7 +494,7 @@ def _handle_name_and_not_identifier(
 
     try:
         id_name_mapping = pyobo.api.names.get_name_id_mapping(prefix)
-    except NoBuild as e:
+    except NoBuildError as e:
         logger.warning("could not get namespace %s - %s", prefix, e)
         return False
 

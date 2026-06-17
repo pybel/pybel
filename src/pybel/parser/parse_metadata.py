@@ -139,12 +139,12 @@ class MetadataParser(BaseParser):
         self.annotation_list = And([annotation_tag, list_tag, delimited_quoted_list("values")])
         self.annotation_pattern = And([annotation_tag, Suppress(BEL_KEYWORD_PATTERN), quote("value")])
 
-        self.document.setParseAction(self.handle_document)
-        self.namespace_url.setParseAction(self.handle_namespace_url)
-        self.namespace_pattern.setParseAction(self.handle_namespace_pattern)
-        self.annotation_url.setParseAction(self.handle_annotations_url)
-        self.annotation_list.setParseAction(self.handle_annotation_list)
-        self.annotation_pattern.setParseAction(self.handle_annotation_pattern)
+        self.document.set_parse_action(self.handle_document)
+        self.namespace_url.set_parse_action(self.handle_namespace_url)
+        self.namespace_pattern.set_parse_action(self.handle_namespace_pattern)
+        self.annotation_url.set_parse_action(self.handle_annotations_url)
+        self.annotation_list.set_parse_action(self.handle_annotation_list)
+        self.annotation_pattern.set_parse_action(self.handle_annotation_pattern)
 
         self.language = MatchFirst(
             [
@@ -155,7 +155,7 @@ class MetadataParser(BaseParser):
                 self.annotation_pattern,
                 self.namespace_pattern,
             ]
-        ).setName("BEL Metadata")
+        ).set_name("BEL Metadata")
 
         super().__init__(self.language)
 

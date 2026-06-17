@@ -44,7 +44,7 @@ This calls for thoughtful consideration of the following two statements:
     - PyBEL module :py:class:`pybel.parser.modifiers.get_location_language`
 """
 
-from pyparsing import Group, ParserElement, Suppress, oneOf
+from pyparsing import Group, ParserElement, Suppress, one_of
 
 from ..utils import nest
 from ...constants import LOCATION
@@ -53,7 +53,7 @@ __all__ = [
     "get_location_language",
 ]
 
-location_tag = Suppress(oneOf(["loc", "location"]))
+location_tag = Suppress(one_of(["loc", "location"]))
 
 
 def get_location_language(identifier: ParserElement) -> ParserElement:

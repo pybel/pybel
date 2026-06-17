@@ -70,8 +70,8 @@ class ConceptParser(BaseParser):
             self.namespace_to_identifier_to_encoding = {}
 
         if not skip_validation:
-            self.identifier_fqualified.setParseAction(self.handle_identifier_fqualified)
-            self.identifier_qualified.setParseAction(self.handle_identifier_qualified)
+            self.identifier_fqualified.set_parse_action(self.handle_identifier_fqualified)
+            self.identifier_qualified.set_parse_action(self.handle_identifier_qualified)
 
         self.namespace_to_pattern = namespace_to_pattern or {}
         if ensure_go and "go" not in self.namespace_to_name_to_encoding:
@@ -81,12 +81,12 @@ class ConceptParser(BaseParser):
         self.allow_naked_names = allow_naked_names
 
         self.identifier_bare = (ns | quote)(NAME)
-        self.identifier_bare.setParseAction(
-            self.handle_namespace_default
-            if self.default_namespace
-            else self.handle_namespace_lenient
-            if self.allow_naked_names
-            else self.handle_namespace_invalid,
+        self.identifier_bare.set_parse_action(
+            (
+                self.handle_namespace_default
+                if self.default_namespace
+                else self.handle_namespace_lenient if self.allow_naked_names else self.handle_namespace_invalid
+            ),
         )
 
         super().__init__(

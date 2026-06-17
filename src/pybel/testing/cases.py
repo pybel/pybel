@@ -41,6 +41,7 @@ class TemporaryCacheMixin(unittest.TestCase):
     def tearDown(self):
         """Tear down the test function by closing the session and removing the database."""
         self.manager.session.close()
+        self.manager.engine.dispose()
 
         if not TEST_CONNECTION:
             os.close(self.fd)
@@ -71,6 +72,7 @@ class TemporaryCacheClsMixin(unittest.TestCase):
     def tearDownClass(cls):
         """Tear down the test class by closing the session and removing the database."""
         cls.manager.session.close()
+        cls.manager.engine.dispose()
 
         if not TEST_CONNECTION:
             os.close(cls.fd)

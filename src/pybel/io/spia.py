@@ -169,13 +169,13 @@ def update_spia_matrices(
                 if not isinstance(variant, ProteinModification):
                     continue
                 elif variant.entity.name in UB_NAMES:
-                    spia_matrices["activation_ubiquination"][u_name][v_name] = 1
+                    spia_matrices["activation_ubiquination"].loc[v_name, u_name] = 1
                 elif variant.entity.name in PH_NAMES:
-                    spia_matrices["activation_phosphorylation"][u_name][v_name] = 1
+                    spia_matrices["activation_phosphorylation"].loc[v_name, u_name] = 1
         elif isinstance(v, (Gene, Rna)):  # Normal increase, add activation
-            spia_matrices["expression"][u_name][v_name] = 1
+            spia_matrices["expression"].loc[v_name, u_name] = 1
         else:
-            spia_matrices["activation"][u_name][v_name] = 1
+            spia_matrices["activation"].loc[v_name, u_name] = 1
 
     elif relation in CAUSAL_DECREASE_RELATIONS:
         # If it has pmod check which one and add it to the corresponding matrix
@@ -184,16 +184,16 @@ def update_spia_matrices(
                 if not isinstance(variant, ProteinModification):
                     continue
                 elif variant.entity.name in UB_NAMES:
-                    spia_matrices["inhibition_ubiquination"][u_name][v_name] = 1
+                    spia_matrices["inhibition_ubiquination"].loc[v_name, u_name] = 1
                 elif variant.entity.name in PH_NAMES:
-                    spia_matrices["inhibition_phosphorylation"][u_name][v_name] = 1
+                    spia_matrices["inhibition_phosphorylation"].loc[v_name, u_name] = 1
         elif isinstance(v, (Gene, Rna)):  # Normal decrease, check which matrix
-            spia_matrices["repression"][u_name][v_name] = 1
+            spia_matrices["repression"].loc[v_name, u_name] = 1
         else:
-            spia_matrices["inhibition"][u_name][v_name] = 1
+            spia_matrices["inhibition"].loc[v_name, u_name] = 1
 
     elif relation == ASSOCIATION:
-        spia_matrices["binding_association"][u_name][v_name] = 1
+        spia_matrices["binding_association"].loc[v_name, u_name] = 1
 
 
 def spia_matrices_to_excel(spia_matrices: SPIADataFrames, path: str) -> None:

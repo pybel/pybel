@@ -123,7 +123,7 @@ def get_random_path(graph: BELGraph) -> List[BaseEntity]:
 
     def pick_random_pair() -> Tuple[BaseEntity, BaseEntity]:
         """Get a pair of random nodes."""
-        return random.sample(nodes, k=2)
+        return random.sample(list(nodes), k=2)
 
     source, target = pick_random_pair()
 

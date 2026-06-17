@@ -42,7 +42,7 @@ in the OpenBEL community.
     - PyBEL module :py:func:`pybel.parser.modifiers.get_gene_modification_language`
 """
 
-from pyparsing import Group, MatchFirst, ParserElement, oneOf
+from pyparsing import Group, MatchFirst, ParserElement, one_of
 
 from ..utils import nest, one_of_tags
 from ...constants import CONCEPT, GMOD, IDENTIFIER, KIND, NAME, NAMESPACE
@@ -62,7 +62,7 @@ def _handle_gmod_default(_, __, tokens):
 
 
 gmod_tag = one_of_tags(tags=["gmod", "geneModification"], canonical_tag=GMOD, name=KIND)
-gmod_default_ns = oneOf(list(gmod_namespace)).setParseAction(_handle_gmod_default)
+gmod_default_ns = one_of(list(gmod_namespace)).set_parse_action(_handle_gmod_default)
 
 
 def get_gene_modification_language(

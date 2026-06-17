@@ -316,11 +316,11 @@ class TestParseControl2(TestParseControl):
         self.assertEqual({}, self.parser.annotations)
 
     def test_reset_citation(self):
-        s1_identifier = str(randint(0, 1e7))
+        s1_identifier = str(randint(0, 10**7))
         s1 = 'SET Citation = {{"PubMed","Test Reference 1","{}"}}'.format(s1_identifier)
         s2 = 'SET Evidence = "d"'
 
-        s3_identifier = str(randint(0, 1e7))
+        s3_identifier = str(randint(0, 10**7))
         s3 = 'SET Citation = {{"PubMed","Test Reference 2","{}"}}'.format(s3_identifier)
         _test_evidence = n()
         s4 = 'SET Evidence = "{}"'.format(_test_evidence)
@@ -346,7 +346,7 @@ class TestParseControl2(TestParseControl):
         self.assertFalse(self.parser.citation_is_set)
 
     def test_set_regex(self):
-        v = str(randint(0, 1e5))
+        v = str(randint(0, 10**5))
         s = [SET_CITATION_TEST, f'SET CustomRegex = "{v}"']
         self.parser.parse_lines(s)
 

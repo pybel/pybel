@@ -12,7 +12,7 @@ This module handles parsing control statement, which add annotations and namespa
 import logging
 from typing import Any, Dict, List, Mapping, Optional, Pattern, Set
 
-from pyparsing import And, Keyword, MatchFirst, ParseResults, Suppress, oneOf
+from pyparsing import And, Keyword, MatchFirst, ParseResults, Suppress, one_of
 from pyparsing import pyparsing_common as ppc
 
 from .baseparser import BaseParser
@@ -52,7 +52,7 @@ set_tag = Keyword(BEL_KEYWORD_SET)
 unset_tag = Keyword(BEL_KEYWORD_UNSET)
 unset_all = Suppress(BEL_KEYWORD_ALL)
 
-supporting_text_tags = oneOf([BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT])
+supporting_text_tags = one_of([BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT])
 
 set_statement_group_stub = And([Suppress(BEL_KEYWORD_STATEMENT_GROUP), Suppress("="), qid("group")])
 set_citation_stub = And([Suppress(BEL_KEYWORD_CITATION), Suppress("="), delimited_quoted_list("values")])
@@ -97,35 +97,35 @@ class ControlParser(BaseParser):
         self.annotations = {}
         self.required_annotations = required_annotations or []
 
-        annotation_key = ppc.identifier("key").setParseAction(self.handle_annotation_key)
+        annotation_key = ppc.identifier("key").set_parse_action(self.handle_annotation_key)
 
-        self.set_statement_group = set_statement_group_stub().setParseAction(self.handle_set_statement_group)
-        self.set_citation = set_citation_stub.setParseAction(self.handle_set_citation)
-        self.set_evidence = set_evidence_stub.setParseAction(self.handle_set_evidence)
+        self.set_statement_group = set_statement_group_stub().set_parse_action(self.handle_set_statement_group)
+        self.set_citation = set_citation_stub.set_parse_action(self.handle_set_citation)
+        self.set_evidence = set_evidence_stub.set_parse_action(self.handle_set_evidence)
 
         set_command_prefix = And([annotation_key("key"), Suppress("=")])
         self.set_command = set_command_prefix + qid("value")
-        self.set_command.setParseAction(self.handle_set_command)
+        self.set_command.set_parse_action(self.handle_set_command)
 
         self.set_command_list = set_command_prefix + delimited_quoted_list("values")
-        self.set_command_list.setParseAction(self.handle_set_command_list)
+        self.set_command_list.set_parse_action(self.handle_set_command_list)
 
         self.unset_command = annotation_key("key")
-        self.unset_command.addParseAction(self.handle_unset_command)
+        self.unset_command.add_parse_action(self.handle_unset_command)
 
         self.unset_evidence = supporting_text_tags(EVIDENCE)
-        self.unset_evidence.setParseAction(self.handle_unset_evidence)
+        self.unset_evidence.set_parse_action(self.handle_unset_evidence)
 
         self.unset_citation = Suppress(BEL_KEYWORD_CITATION)
-        self.unset_citation.setParseAction(self.handle_unset_citation)
+        self.unset_citation.set_parse_action(self.handle_unset_citation)
 
         self.unset_statement_group = Suppress(BEL_KEYWORD_STATEMENT_GROUP)
-        self.unset_statement_group.setParseAction(self.handle_unset_statement_group)
+        self.unset_statement_group.set_parse_action(self.handle_unset_statement_group)
 
         self.unset_list = delimited_unquoted_list("values")
-        self.unset_list.setParseAction(self.handle_unset_list)
+        self.unset_list.set_parse_action(self.handle_unset_list)
 
-        self.unset_all = unset_all.setParseAction(self.handle_unset_all)
+        self.unset_all = unset_all.set_parse_action(self.handle_unset_all)
 
         self.set_statements = set_tag("action") + MatchFirst(
             [

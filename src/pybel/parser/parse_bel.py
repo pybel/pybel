@@ -12,15 +12,15 @@ from typing import Any, Dict, List, Mapping, Optional, Pattern, Set, Union
 
 import pyparsing
 from pyparsing import (
+    DelimitedList,
     Group,
     Keyword,
     MatchFirst,
     ParseResults,
     StringEnd,
     Suppress,
-    delimitedList,
-    oneOf,
-    replaceWith,
+    one_of,
+    replace_with,
 )
 
 from .baseparser import BaseParser
@@ -188,7 +188,7 @@ population_tag = one_of_tags(["pop", "populationAbundance"], POPULATION, FUNCTIO
 activity_tag = one_of_tags(["act", "activity"], ACTIVITY, MODIFIER)
 
 #: 2.4.1 http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XmolecularA
-molecular_activity_tags = Suppress(oneOf(["ma", "molecularActivity"]))
+molecular_activity_tags = Suppress(one_of(["ma", "molecularActivity"]))
 
 ################################
 # 2.5 Transformation Functions #
@@ -214,7 +214,7 @@ reaction_tags = one_of_tags(["reaction", "rxn"], REACTION, FUNCTION)
 #####################
 
 #: `3.1.1 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#Xincreases>`_
-increases_tag = oneOf(["->", "→", "increases"]).setParseAction(replaceWith(INCREASES))
+increases_tag = one_of(["->", "→", "increases"]).set_parse_action(replace_with(INCREASES))
 
 #: `3.1.2 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XdIncreases>`_
 directly_increases_tag = one_of_tags(["=>", "⇒", "directlyIncreases"], DIRECTLY_INCREASES)
@@ -256,10 +256,10 @@ association_tag = one_of_tags(["--", "association"], ASSOCIATION)
 orthologous_tag = Keyword("orthologous")
 
 #: `3.3.2 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_transcribedto>`_
-transcribed_tag = oneOf([":>", "transcribedTo"]).setParseAction(replaceWith(TRANSCRIBED_TO))
+transcribed_tag = one_of([":>", "transcribedTo"]).set_parse_action(replace_with(TRANSCRIBED_TO))
 
 #: `3.3.3 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_translatedto>`_
-translated_tag = oneOf([">>", "translatedTo"]).setParseAction(replaceWith(TRANSLATED_TO))
+translated_tag = one_of([">>", "translatedTo"]).set_parse_action(replace_with(TRANSLATED_TO))
 
 #: `3.4.1 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_hasmember>`_
 has_member_tag = Keyword("hasMember")
@@ -412,7 +412,7 @@ class BELParser(BaseParser):
         self.general_abundance = general_abundance_tags + nest(concept + opt_location)
 
         self.gene_modified = concept + pyparsing.Optional(
-            WCW + delimitedList(Group(variant | gsub | self.gmod))(VARIANTS),
+            WCW + DelimitedList(Group(variant | gsub | self.gmod))(VARIANTS),
         )
 
         self.gene_fusion = Group(self.fusion)(FUSION)
@@ -433,7 +433,7 @@ class BELParser(BaseParser):
         self.mirna_modified = (
             concept
             + pyparsing.Optional(
-                WCW + delimitedList(Group(variant))(VARIANTS),
+                WCW + DelimitedList(Group(variant))(VARIANTS),
             )
             + opt_location
         )
@@ -443,7 +443,7 @@ class BELParser(BaseParser):
 
         self.protein_modified = concept + pyparsing.Optional(
             WCW
-            + delimitedList(Group(MatchFirst([self.pmod, variant, fragment, psub, trunc])))(
+            + DelimitedList(Group(MatchFirst([self.pmod, variant, fragment, psub, trunc])))(
                 VARIANTS,
             ),
         )
@@ -463,7 +463,7 @@ class BELParser(BaseParser):
             + opt_location,
         )
 
-        self.rna_modified = concept + pyparsing.Optional(WCW + delimitedList(Group(variant))(VARIANTS))
+        self.rna_modified = concept + pyparsing.Optional(WCW + DelimitedList(Group(variant))(VARIANTS))
 
         self.rna_fusion = Group(self.fusion)(FUSION)
         self.rna_fusion_legacy = Group(get_legacy_fusion_langauge(concept, "r"))(FUSION)
@@ -497,18 +497,18 @@ class BELParser(BaseParser):
         self.complex_singleton = complex_tag + nest(concept + opt_location)
 
         self.complex_list = complex_tag + nest(
-            delimitedList(Group(self.single_abundance | self.complex_singleton))(MEMBERS) + opt_location,
+            DelimitedList(Group(self.single_abundance | self.complex_singleton))(MEMBERS) + opt_location,
         )
 
         self.complex_abundances = self.complex_list | self.complex_singleton
 
         # Definition of all simple abundances that can be used in a composite abundance
         self.simple_abundance = self.complex_abundances | self.single_abundance
-        self.simple_abundance.setParseAction(self.check_function_semantics)
+        self.simple_abundance.set_parse_action(self.check_function_semantics)
 
         #: `2.1.3 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XcompositeA>`_
         self.composite_abundance = composite_abundance_tag + nest(
-            delimitedList(Group(self.simple_abundance))(MEMBERS) + opt_location,
+            DelimitedList(Group(self.simple_abundance))(MEMBERS) + opt_location,
         )
 
         self.abundance = self.simple_abundance | self.composite_abundance
@@ -516,7 +516,7 @@ class BELParser(BaseParser):
         # 2.4 Process Modifier Function
         # backwards compatibility with BEL v1.0
 
-        molecular_activity_default = oneOf(list(language.activity_labels)).setParseAction(
+        molecular_activity_default = one_of(list(language.activity_labels)).set_parse_action(
             handle_molecular_activity_default,
         )
 
@@ -534,15 +534,15 @@ class BELParser(BaseParser):
         self.pathology = pathology_tag + nest(concept)
 
         self.bp_path = self.biological_process | self.pathology
-        self.bp_path.setParseAction(self.check_function_semantics)
+        self.bp_path.set_parse_action(self.check_function_semantics)
 
         self.activity_standard = activity_tag + nest(
             self.simple_abundance + pyparsing.Optional(WCW + Group(self.molecular_activity)(EFFECT)),
         )
 
-        activity_legacy_tags = oneOf(language.activities)(MODIFIER)
+        activity_legacy_tags = one_of(language.activities)(MODIFIER)
         self.activity_legacy = activity_legacy_tags + nest(self.simple_abundance)
-        self.activity_legacy.setParseAction(handle_activity_legacy)
+        self.activity_legacy.set_parse_action(handle_activity_legacy)
 
         #: `2.3.3 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#Xactivity>`_
         self.activity = self.activity_standard | self.activity_legacy
@@ -555,10 +555,10 @@ class BELParser(BaseParser):
         to_loc = Suppress(TO_LOC) + nest(concept(TO_LOC))
 
         self.cell_secretion = cell_secretion_tag + nest(self.simple_abundance)
-        self.cell_secretion.addParseAction(handle_secretion)
+        self.cell_secretion.add_parse_action(handle_secretion)
 
         self.cell_surface_expression = cell_surface_expression_tag + nest(self.simple_abundance)
-        self.cell_surface_expression.addParseAction(handle_surface_expression)
+        self.cell_surface_expression.add_parse_action(handle_surface_expression)
 
         self.translocation_standard = nest(
             self.simple_abundance + WCW + Group(from_loc + WCW + to_loc)(EFFECT),
@@ -568,11 +568,11 @@ class BELParser(BaseParser):
             self.simple_abundance + WCW + Group(concept(FROM_LOC) + WCW + concept(TO_LOC))(EFFECT),
         )
 
-        self.translocation_legacy.addParseAction(handle_legacy_tloc)
+        self.translocation_legacy.add_parse_action(handle_legacy_tloc)
         self.translocation_unqualified = nest(self.simple_abundance)
 
         if self.disallow_unqualified_translocations:
-            self.translocation_unqualified.setParseAction(self.handle_translocation_illegal)
+            self.translocation_unqualified.set_parse_action(self.handle_translocation_illegal)
 
         #: `2.5.1 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_translocations>`_
         self.translocation = translocation_tag + MatchFirst(
@@ -587,8 +587,8 @@ class BELParser(BaseParser):
         self.degradation = degradation_tags + nest(self.simple_abundance)
 
         #: `2.5.3 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_reaction_rxn>`_
-        self.reactants = Suppress(REACTANTS) + nest(delimitedList(Group(self.simple_abundance)))
-        self.products = Suppress(PRODUCTS) + nest(delimitedList(Group(self.simple_abundance)))
+        self.reactants = Suppress(REACTANTS) + nest(DelimitedList(Group(self.simple_abundance)))
+        self.products = Suppress(PRODUCTS) + nest(DelimitedList(Group(self.simple_abundance)))
 
         self.reaction = reaction_tags + nest(Group(self.reactants)(REACTANTS), Group(self.products)(PRODUCTS))
 
@@ -653,13 +653,13 @@ class BELParser(BaseParser):
         self.has_member = triple(self.abundance, has_member_tag, self.abundance)
 
         #: `3.4.2 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_hasmembers>`_
-        self.abundance_list = Suppress("list") + nest(delimitedList(Group(self.abundance)))
+        self.abundance_list = Suppress("list") + nest(DelimitedList(Group(self.abundance)))
 
         self.has_members = triple(self.abundance, has_members_tag, self.abundance_list)
-        self.has_members.setParseAction(self.handle_has_members)
+        self.has_members.set_parse_action(self.handle_has_members)
 
         self.has_components = triple(self.abundance, has_components_tag, self.abundance_list)
-        self.has_components.setParseAction(self.handle_has_components)
+        self.has_components.set_parse_action(self.handle_has_components)
 
         self.has_list = self.has_members | self.has_components
 
@@ -690,7 +690,7 @@ class BELParser(BaseParser):
             ]
         )
         if self.graph is not None:
-            self.relation.setParseAction(self._handle_relation_harness)
+            self.relation.set_parse_action(self._handle_relation_harness)
 
         self.inverted_unqualified_relation = MatchFirst(
             [
@@ -699,7 +699,7 @@ class BELParser(BaseParser):
             ]
         )
         if self.graph is not None:
-            self.inverted_unqualified_relation.setParseAction(self.handle_inverse_unqualified_relation)
+            self.inverted_unqualified_relation.set_parse_action(self.handle_inverse_unqualified_relation)
 
         self.normal_unqualified_relation = MatchFirst(
             [
@@ -710,7 +710,7 @@ class BELParser(BaseParser):
             ]
         )
         if self.graph is not None:
-            self.normal_unqualified_relation.setParseAction(self.handle_unqualified_relation)
+            self.normal_unqualified_relation.set_parse_action(self.handle_unqualified_relation)
 
         #: 3.1 Causal Relationships - nested.
         causal_relation_tags = MatchFirst(
@@ -729,7 +729,7 @@ class BELParser(BaseParser):
         )
 
         if self.graph is not None:
-            self.nested_causal_relationship.setParseAction(self.handle_nested_relation)
+            self.nested_causal_relationship.set_parse_action(self.handle_nested_relation)
 
         # has_members is handled differently from all other relations becuase it gets distrinbuted
         self.relation = MatchFirst(
@@ -744,17 +744,17 @@ class BELParser(BaseParser):
 
         self.singleton_term = self.bel_term + StringEnd()
         if self.graph is not None:
-            self.singleton_term.setParseAction(self.handle_term)
+            self.singleton_term.set_parse_action(self.handle_term)
 
         self.statement = self.relation | self.singleton_term
         self.language = self.control_parser.language | self.statement
-        self.language.setName("BEL")
+        self.language.set_name("BEL")
 
         super(BELParser, self).__init__(self.language, streamline=autostreamline)
 
     def parse(self, s: str) -> Mapping[str, Any]:
         """Parse the string."""
-        return self.parseString(s).asDict()
+        return self.parseString(s).as_dict()
 
     @property
     def _namespace_dict(self) -> Mapping[str, Mapping[str, str]]:
@@ -1060,7 +1060,7 @@ def modifier_po_to_dict(tokens):
 
         if EFFECT in tokens:
             try:
-                attrs[EFFECT] = tokens[EFFECT].asDict()
+                attrs[EFFECT] = tokens[EFFECT].as_dict()
             except AttributeError:  # for when it was auto-upgraded
                 attrs[EFFECT] = dict(tokens[EFFECT])
 
