@@ -126,7 +126,7 @@ def _parse_result(parser: BELParser, result: Mapping[str, Any]) -> None:
     statement = " ".join([source, relation, target])
 
     try:
-        parser.parseString(statement)
+        parser.parse_string(statement)
     except ParseException:
         logger.warning("could not parse %s", statement)
 

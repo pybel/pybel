@@ -384,14 +384,14 @@ class TestFull(TestTokenParserBase):
     def test_regex_match(self):
         line = "g(dbSNP:rs10234) -- g(dbSNP:rs10235)"
         self.add_default_provenance()
-        self.parser.parseString(line)
+        self.parser.parse_string(line)
         self.assertIn(Gene("dbSNP", "rs10234"), self.parser.graph)
         self.assertIn(Gene("dbSNP", "rs10235"), self.parser.graph)
 
     def test_regex_mismatch(self):
         statement = "g(dbSNP:10234) -- g(dbSNP:rr10235)"
         with self.assertRaises(MissingNamespaceRegexWarning):
-            self.parser.parseString(statement)
+            self.parser.parse_string(statement)
 
     def test_semantic_failure(self):
         self.assertIsNotNone(self.parser.concept_parser.namespace_to_name_to_encoding)
@@ -400,7 +400,7 @@ class TestFull(TestTokenParserBase):
         self.assertIn("2", self.parser.concept_parser.namespace_to_name_to_encoding["TESTNS"])
         statement = "bp(TESTNS:1) -- p(TESTNS:2)"
         with self.assertRaises(InvalidFunctionSemantic):
-            self.parser.parseString(statement)
+            self.parser.parse_string(statement)
 
     def test_missing_citation(self):
         statements = [

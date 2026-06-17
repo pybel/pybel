@@ -754,7 +754,7 @@ class BELParser(BaseParser):
 
     def parse(self, s: str) -> Mapping[str, Any]:
         """Parse the string."""
-        return self.parseString(s).as_dict()
+        return self.parse_string(s).as_dict()
 
     @property
     def _namespace_dict(self) -> Mapping[str, Mapping[str, str]]:

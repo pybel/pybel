@@ -150,7 +150,7 @@ def parse_document(
 
     for line_number, line in enumerated_lines:
         try:
-            metadata_parser.parseString(line, line_number=line_number)
+            metadata_parser.parse_string(line, line_number=line_number)
         except VersionFormatWarning as exc:
             _log_parse_exception(graph, exc)
             graph.add_warning(exc)
@@ -208,7 +208,7 @@ def parse_definitions(
 
     for line_number, line in enumerated_lines:
         try:
-            metadata_parser.parseString(line, line_number=line_number)
+            metadata_parser.parse_string(line, line_number=line_number)
         except (InconsistentDefinitionError, ResourceError) as e:
             parser_logger.exception(LOG_FMT, line_number, 0, e.__class__.__name__, line)
             raise e
@@ -268,7 +268,7 @@ def parse_statements(
 
     for line_number, line in enumerated_lines:
         try:
-            bel_parser.parseString(line, line_number=line_number)
+            bel_parser.parse_string(line, line_number=line_number)
         except ParseException as e:
             exc = BELSyntaxError(line_number, line, e.loc)
             _log_parse_exception(graph, exc)
