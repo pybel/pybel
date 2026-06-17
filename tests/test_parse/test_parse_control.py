@@ -50,11 +50,11 @@ class TestParseControl(unittest.TestCase):
 class TestParseControlUnsetStatementErrors(TestParseControl):
     def test_unset_missing_evidence(self):
         with self.assertRaises(MissingAnnotationKeyWarning):
-            self.parser.parseString("UNSET Evidence")
+            self.parser.parse_string("UNSET Evidence")
 
     def test_unset_missing_citation(self):
         with self.assertRaises(MissingAnnotationKeyWarning):
-            self.parser.parseString("UNSET Citation")
+            self.parser.parse_string("UNSET Citation")
 
     def test_unset_missing_evidence_with_citation(self):
         """Tests that an evidence can't be unset without a citation"""
@@ -64,7 +64,7 @@ class TestParseControlUnsetStatementErrors(TestParseControl):
 
     def test_unset_missing_statement_group(self):
         with self.assertRaises(MissingAnnotationKeyWarning):
-            self.parser.parseString("UNSET STATEMENT_GROUP")
+            self.parser.parse_string("UNSET STATEMENT_GROUP")
 
     def test_unset_missing_command(self):
         s = [SET_CITATION_TEST, "UNSET Custom1"]
@@ -86,7 +86,7 @@ class TestParseControlUnsetStatementErrors(TestParseControl):
         self.parser.parse_lines(s)
         self.assertIn("Custom1", self.parser.annotations)
         self.assertIn("Custom2", self.parser.annotations)
-        self.parser.parseString("UNSET {Custom1,Custom2}")
+        self.parser.parse_string("UNSET {Custom1,Custom2}")
         self.assertFalse(self.parser.annotations)
 
     def test_unset_list_spaced(self):
@@ -99,36 +99,36 @@ class TestParseControlUnsetStatementErrors(TestParseControl):
         self.parser.parse_lines(s)
         self.assertIn("Custom1", self.parser.annotations)
         self.assertIn("Custom2", self.parser.annotations)
-        self.parser.parseString("UNSET {Custom1, Custom2}")
+        self.parser.parse_string("UNSET {Custom1, Custom2}")
         self.assertFalse(self.parser.annotations)
 
 
 class TestSetCitation(unittest.TestCase):
     def test_parser_double(self):
-        set_citation_stub.parseString('Citation = {"PubMed","12928037"}')
+        set_citation_stub.parse_string('Citation = {"PubMed","12928037"}')
 
     def test_parser_double_spaced(self):
-        set_citation_stub.parseString('Citation = {"PubMed", "12928037"}')
+        set_citation_stub.parse_string('Citation = {"PubMed", "12928037"}')
 
     def test_parser_triple(self):
-        set_citation_stub.parseString('Citation = {"PubMed Central","Trends in molecular medicine","12928037"}')
+        set_citation_stub.parse_string('Citation = {"PubMed Central","Trends in molecular medicine","12928037"}')
 
     def test_parser_triple_spaced(self):
-        set_citation_stub.parseString('Citation = {"PubMed Central", "Trends in molecular medicine", "12928037"}')
+        set_citation_stub.parse_string('Citation = {"PubMed Central", "Trends in molecular medicine", "12928037"}')
 
 
 class TestParseControlSetStatementErrors(TestParseControl):
     def test_invalid_citation_type(self):
         with self.assertRaises(InvalidCitationType):
-            self.parser.parseString('SET Citation = {"PubMedCentral","Trends in molecular medicine","12928037"}')
+            self.parser.parse_string('SET Citation = {"PubMedCentral","Trends in molecular medicine","12928037"}')
 
     def test_invalid_pmid(self):
         with self.assertRaises(InvalidPubMedIdentifierWarning):
-            self.parser.parseString('SET Citation = {"PubMed","Trends in molecular medicine","NOT VALID NUMBER"}')
+            self.parser.parse_string('SET Citation = {"PubMed","Trends in molecular medicine","NOT VALID NUMBER"}')
 
     def test_invalid_pmid_short(self):
         with self.assertRaises(InvalidPubMedIdentifierWarning):
-            self.parser.parseString('SET Citation = {"PubMed","NOT VALID NUMBER"}')
+            self.parser.parse_string('SET Citation = {"PubMed","NOT VALID NUMBER"}')
 
     def test_set_missing_statement(self):
         statements = [SET_CITATION_TEST, 'SET MissingKey = "lol"']
@@ -163,15 +163,15 @@ class TestParseControl2(TestParseControl):
 
         self.assertIsNone(self.parser.statement_group)
 
-        self.parser.parseString(s1)
+        self.parser.parse_string(s1)
         self.assertEqual("my group", self.parser.statement_group, msg="problem with integration")
 
         s2 = "UNSET STATEMENT_GROUP"
-        self.parser.parseString(s2)
+        self.parser.parse_string(s2)
         self.assertIsNone(self.parser.statement_group, msg="problem with unset")
 
     def test_citation_short(self):
-        self.parser.parseString(SET_CITATION_TEST)
+        self.parser.parse_string(SET_CITATION_TEST)
         self.assertEqual(test_citation_dict[IDENTIFIER], self.parser.citation_db_id)
         self.assertEqual(test_citation_dict[NAMESPACE], self.parser.citation_db)
 
@@ -182,13 +182,13 @@ class TestParseControl2(TestParseControl):
         }
         self.assertEqual(expected_annotations, self.parser.get_annotations())
 
-        self.parser.parseString("UNSET Citation")
+        self.parser.parse_string("UNSET Citation")
         self.assertFalse(self.parser.citation_is_set)
 
     def test_citation_invalid_date(self):
         s = 'SET Citation = {"PubMed","Trends in molecular medicine","12928037","01-12-1999","de Nigris"}'
 
-        self.parser.parseString(s)
+        self.parser.parse_string(s)
         self.assertEqual(CITATION_TYPE_PUBMED, self.parser.citation_db)
         self.assertEqual("12928037", self.parser.citation_db_id)
 
@@ -205,7 +205,7 @@ class TestParseControl2(TestParseControl):
 
     def test_citation_with_empty_comment(self):
         s = 'SET Citation = {"PubMed","Test Name","12928037","1999-01-01","de Nigris|Lerman A|Ignarro LJ",""}'
-        self.parser.parseString(s)
+        self.parser.parse_string(s)
 
         self.assertEqual(CITATION_TYPE_PUBMED, self.parser.citation_db)
         self.assertEqual("12928037", self.parser.citation_db_id)
@@ -223,31 +223,31 @@ class TestParseControl2(TestParseControl):
 
     def test_double(self):
         s = 'SET Citation = {"PubMed","12928037"}'
-        self.parser.parseString(s)
+        self.parser.parse_string(s)
         self.assertEqual(CITATION_TYPE_PUBMED, self.parser.citation_db)
         self.assertEqual("12928037", self.parser.citation_db_id)
 
     def test_double_with_space(self):
         """Same as test_double, but has a space between the comma and next entry"""
         s = 'SET Citation = {"PubMed", "12928037"}'
-        self.parser.parseString(s)
+        self.parser.parse_string(s)
         self.assertEqual(CITATION_TYPE_PUBMED, self.parser.citation_db)
         self.assertEqual("12928037", self.parser.citation_db_id)
 
     def test_citation_too_short(self):
         s = 'SET Citation = {"PubMed"}'
         with self.assertRaises(CitationTooShortException):
-            self.parser.parseString(s)
+            self.parser.parse_string(s)
 
     def test_citation_too_long(self):
         s = 'SET Citation = {"PubMed","Name","1234","1999-01-01","Nope|Noper","Nope", "nope nope"}'
         with self.assertRaises(CitationTooLongException):
-            self.parser.parseString(s)
+            self.parser.parse_string(s)
 
     def test_evidence(self):
-        self.parser.parseString(SET_CITATION_TEST)
+        self.parser.parse_string(SET_CITATION_TEST)
         s = 'SET Evidence = "For instance, during 7-ketocholesterol-induced apoptosis of U937 cells"'
-        self.parser.parseString(s)
+        self.parser.parse_string(s)
 
         self.assertIsNotNone(self.parser.evidence)
 
@@ -294,8 +294,8 @@ class TestParseControl2(TestParseControl):
         s1 = 'SET Evidence = "a"'
         s2 = 'SET Evidence = "b"'
 
-        self.parser.parseString(s1)
-        self.parser.parseString(s2)
+        self.parser.parse_string(s1)
+        self.parser.parse_string(s2)
 
         self.assertEqual("b", self.parser.evidence)
 
@@ -303,8 +303,8 @@ class TestParseControl2(TestParseControl):
         s1 = 'SET Evidence = "a"'
         s2 = "UNSET Evidence"
 
-        self.parser.parseString(s1)
-        self.parser.parseString(s2)
+        self.parser.parse_string(s1)
+        self.parser.parse_string(s2)
 
         self.assertEqual({}, self.parser.annotations)
 
@@ -335,13 +335,13 @@ class TestParseControl2(TestParseControl):
         self.assertEqual(CITATION_TYPE_PUBMED, self.parser.citation_db)
         self.assertEqual(s3_identifier, self.parser.citation_db_id)
 
-        self.parser.parseString("UNSET {Custom1,Evidence}")
+        self.parser.parse_string("UNSET {Custom1,Evidence}")
         self.assertNotIn("Custom1", self.parser.annotations)
         self.assertIsNone(self.parser.evidence)
         self.assertIn("Custom2", self.parser.annotations)
         self.assertTrue(self.parser.citation_is_set)
 
-        self.parser.parseString("UNSET ALL")
+        self.parser.parse_string("UNSET ALL")
         self.assertEqual(0, len(self.parser.annotations))
         self.assertFalse(self.parser.citation_is_set)
 

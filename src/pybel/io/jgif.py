@@ -274,7 +274,7 @@ def from_jgif(graph_jgif_dict, parser_kwargs: Optional[Mapping[str, Any]] = None
             continue
 
         try:
-            parser.bel_term.parseString(node_label)
+            parser.bel_term.parse_string(node_label)
         except NakedNameWarning as e:
             logger.info("Naked name: %s", e)
         except UndefinedNamespaceWarning as e:
@@ -333,7 +333,7 @@ def from_jgif(graph_jgif_dict, parser_kwargs: Optional[Mapping[str, Any]] = None
                 parser.control_parser.annotations.update(annotations)
 
                 try:
-                    parser.parseString(bel_statement, line_number=i)
+                    parser.parse_string(bel_statement, line_number=i)
                 except Exception as e:
                     logger.warning("JGIF relation parse error: %s for %s", e, bel_statement)
 

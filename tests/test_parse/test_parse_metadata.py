@@ -52,13 +52,13 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
     def test_namespace_name_persistience(self, mock_get):
         """Test that a namespace defined by a URL can't be overwritten by a definition by another URL."""
         s = NAMESPACE_URL_FMT.format(HGNC_KEYWORD, HGNC_URL)
-        self.parser.parseString(s)
+        self.parser.parse_string(s)
         self.parser.ensure_resources()
         help_check_hgnc(self, self.parser.namespace_to_term_to_encoding)
 
         s = NAMESPACE_URL_FMT.format(HGNC_KEYWORD, "XXXXX")
         with self.assertRaises(RedefinedNamespaceError):
-            self.parser.parseString(s)
+            self.parser.parse_string(s)
 
         help_check_hgnc(self, self.parser.namespace_to_term_to_encoding)
 
@@ -66,14 +66,14 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
     def test_annotation_name_persistience_1(self, mock_get):
         """Test that an annotation defined by a URL can't be overwritten by a definition by a list."""
         s = ANNOTATION_URL_FMT.format(MESH_DISEASES_KEYWORD, MESH_DISEASES_URL)
-        self.parser.parseString(s)
+        self.parser.parse_string(s)
         self.parser.ensure_resources()
 
         self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotation_to_term)
 
         s = 'DEFINE ANNOTATION {} AS LIST {{"A","B","C"}}'.format(MESH_DISEASES_KEYWORD)
         with self.assertRaises(RedefinedAnnotationError):
-            self.parser.parseString(s)
+            self.parser.parse_string(s)
 
         self.assertIn(MESH_DISEASES_KEYWORD, self.parser.annotation_to_term)
         self.assertNotIn("A", self.parser.annotation_to_term[MESH_DISEASES_KEYWORD])
@@ -85,12 +85,12 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
     def test_annotation_name_persistience_2(self):
         """Tests that an annotation defined by a list can't be overwritten by a definition by URL"""
         s = 'DEFINE ANNOTATION TextLocation AS LIST {"Abstract","Results","Legend","Review"}'
-        self.parser.parseString(s)
+        self.parser.parse_string(s)
         self._help_test_local_annotation("TextLocation")
 
         s = ANNOTATION_URL_FMT.format("TextLocation", MESH_DISEASES_URL)
         with self.assertRaises(RedefinedAnnotationError):
-            self.parser.parseString(s)
+            self.parser.parse_string(s)
 
         self._help_test_local_annotation("TextLocation")
         self.assertIn("Abstract", self.parser.annotation_to_local["TextLocation"])
@@ -98,7 +98,7 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
     def test_underscore(self):
         """Tests that an underscore is a valid character in an annotation name"""
         s = 'DEFINE ANNOTATION Text_Location AS LIST {"Abstract","Results","Legend","Review"}'
-        self.parser.parseString(s)
+        self.parser.parse_string(s)
         self._help_test_local_annotation("Text_Location")
 
     @mock_bel_resources
@@ -119,31 +119,31 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
     @unittest.skipUnless(os.path.exists(LOCAL_TEST_PATH), "Need local files to test local files")
     def test_squiggly_filepath(self):
         line = NAMESPACE_URL_FMT.format(HGNC_KEYWORD, LOCAL_TEST_PATH)
-        self.parser.parseString(line)
+        self.parser.parse_string(line)
         help_check_hgnc(self, self.parser.namespace_to_term_to_encoding)
 
     def test_document_metadata_exception(self):
         s = 'SET DOCUMENT InvalidKey = "nope"'
         with self.assertRaises(InvalidMetadataException):
-            self.parser.parseString(s)
+            self.parser.parse_string(s)
 
     def test_parse_document(self):
         s = '''SET DOCUMENT Name = "Alzheimer's Disease Model"'''
 
-        self.parser.parseString(s)
+        self.parser.parse_string(s)
 
         self.assertIn("name", self.parser.document_metadata)
         self.assertEqual("Alzheimer's Disease Model", self.parser.document_metadata["name"])
 
         # Check nothing bad happens
         # with self.assertLogs('pybel', level='WARNING'):
-        self.parser.parseString(s)
+        self.parser.parse_string(s)
 
     @mock_bel_resources
     def test_parse_namespace_url_file(self, mock):
         """Tests parsing a namespace by file URL"""
         s = NAMESPACE_URL_FMT.format("TESTNS1", test_ns_1)
-        self.parser.parseString(s)
+        self.parser.parse_string(s)
         self.parser.ensure_resources()
 
         expected_values = {
@@ -169,7 +169,7 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
         keyword = "TESTAN1"
         url = Path(test_an_1).as_uri()
         line = ANNOTATION_URL_FMT.format(keyword, url)
-        self.parser.parseString(line)
+        self.parser.parse_string(line)
         self.parser.ensure_resources()
 
         expected_values = {
@@ -186,7 +186,7 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
 
     def test_parse_annotation_pattern(self):
         s = r'DEFINE ANNOTATION Test AS PATTERN "\w+"'
-        self.parser.parseString(s)
+        self.parser.parse_string(s)
 
         self.assertNotIn("Test", self.parser.annotation_to_term)
         self.assertIn("Test", self.parser.annotation_to_pattern)
@@ -202,7 +202,7 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
             ('DEFINE NAMESPACE ec-code AS PATTERN ".*"', "ec-code", re.compile(r".*")),
         ]:
             with self.subTest(namespace=namespace):
-                self.parser.parseString(s)
+                self.parser.parse_string(s)
                 self.assertNotIn(namespace, self.parser.namespace_to_term_to_encoding)
                 self.assertIn(namespace, self.parser.namespace_to_pattern)
                 self.assertEqual(regex, self.parser.namespace_to_pattern[namespace])
@@ -210,4 +210,4 @@ class TestParseMetadata(FleetingTemporaryCacheMixin):
     def test_not_semantic_version(self):
         s = 'SET DOCUMENT Version = "1.0"'
         with self.assertRaises(VersionFormatWarning):
-            self.parser.parseString(s)
+            self.parser.parse_string(s)

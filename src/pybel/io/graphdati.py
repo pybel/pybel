@@ -301,7 +301,7 @@ def from_graphdati(j, use_tqdm: bool = True) -> BELGraph:
             # Finally, parse the BEL statement (once to go with each set of metadata)
             # TODO change parser to give back pre-compiled info so this doesn't need to be repeated
             try:
-                parser.parseString(bel_statement, line_number=i)
+                parser.parse_string(bel_statement, line_number=i)
             except pyparsing.ParseException as e:
                 logger.warning("parse error for %s: %s", bel_statement, e)
 
