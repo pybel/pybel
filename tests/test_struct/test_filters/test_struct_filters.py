@@ -304,7 +304,10 @@ class TestEdgeFilters(unittest.TestCase):
     def test_all_filter_dict(self):
         graph = BELGraph()
         graph.annotation_list["A"] = set("12345")
-        a, b = Protein(namespace="hgnc", identifier="1", name="A"), Protein(namespace="hgnc", identifier="2", name="B")
+        a, b = (
+            Protein(namespace="hgnc", identifier="1", name="A"),
+            Protein(namespace="hgnc", identifier="2", name="B"),
+        )
         graph.add_increases(
             a,
             b,

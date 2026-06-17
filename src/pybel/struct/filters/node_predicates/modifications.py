@@ -32,7 +32,9 @@ def has_variant(node: BaseEntity) -> bool:
     return isinstance(node, CentralDogma) and node.variants
 
 
-def _variant_checker(variant_cls: Union[Type[Variant], Tuple[Type[Variant], ...]]) -> NodePredicate:
+def _variant_checker(
+    variant_cls: Union[Type[Variant], Tuple[Type[Variant], ...]],
+) -> NodePredicate:
     @node_predicate
     @wraps(node_has_variant)
     def _rv(node: BaseEntity):

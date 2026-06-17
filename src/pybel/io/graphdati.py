@@ -65,7 +65,12 @@ def to_graphdati_file(graph: BELGraph, path: Union[str, TextIO], use_identifiers
     :param graph: A BEL graph
     :param path: A path or file-like
     """
-    json.dump(to_graphdati(graph, use_identifiers=use_identifiers), path, ensure_ascii=False, **kwargs)
+    json.dump(
+        to_graphdati(graph, use_identifiers=use_identifiers),
+        path,
+        ensure_ascii=False,
+        **kwargs,
+    )
 
 
 def from_graphdati_file(path: Union[str, TextIO]) -> BELGraph:
@@ -324,7 +329,9 @@ def _parse_biodati_citation(citation: str) -> Union[Tuple[None, None], Tuple[str
     return citation_db, citation_id
 
 
-def _parse_biodati_annotations(annotations: List[Mapping[str, str]]) -> Mapping[str, Mapping[str, bool]]:
+def _parse_biodati_annotations(
+    annotations: List[Mapping[str, str]],
+) -> Mapping[str, Mapping[str, bool]]:
     rv = defaultdict(set)
     for annotation in annotations:
         annotation_curie = annotation["id"]

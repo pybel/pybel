@@ -955,7 +955,7 @@ class TestProtein(TestTokenParserBase):
         self._help_test_protein_legacy_fusion_2('p(fus(HGNC:CHCHD4, "?", HGNC:AIFM1, "?"))')
 
     def _help_test_protein_trunc_1(self, statement):
-        result = self.parser.protein.parse_string(statement)
+        self.parser.protein.parse_string(statement)
 
         expected_node = protein("HGNC", "AKT1", variants=hgvs("p.40*"))
         self.assert_has_node(expected_node)
@@ -1008,7 +1008,7 @@ class TestProtein(TestTokenParserBase):
     def test_protein_pmod_1(self):
         """2.2.1 Test default BEL namespace and 1-letter amino acid code:"""
         statement = "p(HGNC:AKT1, pmod(Ph, S, 473))"
-        result = self.parser.protein.parse_string(statement)
+        self.parser.protein.parse_string(statement)
 
         parent = protein("HGNC", "AKT1")
         expected_node = parent.with_variants(pmod("Ph", code="Ser", position=473))
@@ -1024,7 +1024,7 @@ class TestProtein(TestTokenParserBase):
     def test_protein_pmod_2(self):
         """2.2.1 Test default BEL namespace and 3-letter amino acid code:"""
         statement = "p(HGNC:AKT1, pmod(Ph, Ser, 473))"
-        result = self.parser.protein.parse_string(statement)
+        self.parser.protein.parse_string(statement)
 
         parent = protein("HGNC", "AKT1")
         expected_node = parent.with_variants(pmod("Ph", code="Ser", position=473))
@@ -1040,7 +1040,7 @@ class TestProtein(TestTokenParserBase):
     def test_protein_pmod_3(self):
         """2.2.1 Test PSI-MOD namespace and 3-letter amino acid code:"""
         statement = "p(HGNC:AKT1, pmod(MOD:PhosRes,Ser,473))"
-        result = self.parser.protein.parse_string(statement)
+        self.parser.protein.parse_string(statement)
 
         parent = protein("HGNC", "AKT1")
         expected_node = parent.with_variants(pmod(namespace="MOD", name="PhosRes", code="Ser", position=473))
@@ -1056,7 +1056,7 @@ class TestProtein(TestTokenParserBase):
     def test_protein_pmod_4(self):
         """2.2.1 Test HRAS palmitoylated at an unspecified residue. Default BEL namespace"""
         statement = "p(HGNC:HRAS,pmod(Palm))"
-        result = self.parser.protein.parse_string(statement)
+        self.parser.protein.parse_string(statement)
 
         parent = protein("HGNC", "HRAS")
         expected_node = parent.with_variants(pmod("Palm"))
@@ -1147,7 +1147,7 @@ class TestProtein(TestTokenParserBase):
     def test_protein_fragment_unbounded(self):
         """2.2.3 amino-terminal fragment of unknown length"""
         statement = "p(HGNC:YFG, frag(1_?))"
-        result = self.parser.protein.parse_string(statement)
+        self.parser.protein.parse_string(statement)
 
         parent = protein("HGNC", "YFG")
         expected_node = parent.with_variants(fragment(1, "?"))
@@ -1160,7 +1160,7 @@ class TestProtein(TestTokenParserBase):
     def test_protein_fragment_unboundTerminal(self):
         """2.2.3 carboxyl-terminal fragment of unknown length"""
         statement = "p(HGNC:YFG, frag(?_*))"
-        result = self.parser.protein.parse_string(statement)
+        self.parser.protein.parse_string(statement)
 
         parent = protein("HGNC", "YFG")
         expected_node = parent.with_variants(fragment("?", "*"))
@@ -1189,7 +1189,7 @@ class TestProtein(TestTokenParserBase):
     def test_protein_fragment_descriptor(self):
         """2.2.3 fragment with unknown start/stop and a descriptor"""
         statement = 'p(HGNC:YFG, frag(?, "55kD"))'
-        result = self.parser.protein.parse_string(statement)
+        self.parser.protein.parse_string(statement)
 
         parent = protein("HGNC", "YFG")
         expected_node = parent.with_variants(fragment("?", description="55kD"))

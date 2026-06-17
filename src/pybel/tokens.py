@@ -230,7 +230,9 @@ def _reaction_po_to_dict(tokens) -> Reaction:
     )
 
 
-def _list_po_with_concept_to_dict(tokens: Union[ParseResults, Mapping[str, Any]]) -> ListAbundance:
+def _list_po_with_concept_to_dict(
+    tokens: Union[ParseResults, Mapping[str, Any]],
+) -> ListAbundance:
     """Convert a list parse object to a node.
 
     :type tokens: ParseResult

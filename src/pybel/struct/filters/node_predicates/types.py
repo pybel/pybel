@@ -56,7 +56,9 @@ __all__ = [
 ]
 
 
-def _type_checker(cls: Union[Type[BaseEntity], Tuple[Type[BaseEntity], ...]]) -> NodePredicate:
+def _type_checker(
+    cls: Union[Type[BaseEntity], Tuple[Type[BaseEntity], ...]],
+) -> NodePredicate:
     @node_predicate
     def _is_type(node: BaseEntity) -> bool:
         return isinstance(node, cls)
@@ -64,7 +66,9 @@ def _type_checker(cls: Union[Type[BaseEntity], Tuple[Type[BaseEntity], ...]]) ->
     return _is_type
 
 
-def _not_type_checker(cls: Union[Type[BaseEntity], Tuple[Type[BaseEntity], ...]]) -> NodePredicate:
+def _not_type_checker(
+    cls: Union[Type[BaseEntity], Tuple[Type[BaseEntity], ...]],
+) -> NodePredicate:
     @node_predicate
     def _not_type(node: BaseEntity) -> bool:
         return not isinstance(node, cls)

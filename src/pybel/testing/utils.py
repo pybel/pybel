@@ -10,7 +10,6 @@ from ..manager import Manager
 from ..manager.models import Namespace, NamespaceEntry
 from ..struct import BELGraph
 from ..struct.summary import (
-    get_annotation_values_by_annotation,
     iter_annotation_value_pairs,
 )
 from ..struct.summary.node_summary import get_names

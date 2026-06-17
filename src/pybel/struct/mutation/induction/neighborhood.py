@@ -7,7 +7,6 @@ from typing import Iterable, Optional
 
 from ...graph import BELGraph
 from ...pipeline import transformation
-from ...utils import update_metadata
 from ....dsl import BaseEntity
 
 __all__ = [

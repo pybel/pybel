@@ -30,7 +30,6 @@ from pybel.constants import (
     FUNCTION,
     GENE,
     GMOD,
-    GRAPH_ANNOTATION_LIST,
     HAS_PRODUCT,
     HAS_REACTANT,
     HAS_VARIANT,

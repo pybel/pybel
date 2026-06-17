@@ -12,9 +12,9 @@ import pybel
 import pybel.grounding
 
 HERE = os.path.dirname(__file__)
-URL = 'https://github.com/cthoyt/selventa-knowledge/raw/master/selventa_knowledge/small_corpus.bel.nodelink.json.gz'
-PATH = os.path.join(HERE, 'small_corpus.bel.nodelink.json.gz')
-GROUNDED_PATH = os.path.join(HERE, 'small_corpus-grounded.bel.nodelink.json.gz')
+URL = "https://github.com/cthoyt/selventa-knowledge/raw/master/selventa_knowledge/small_corpus.bel.nodelink.json.gz"
+PATH = os.path.join(HERE, "small_corpus.bel.nodelink.json.gz")
+GROUNDED_PATH = os.path.join(HERE, "small_corpus-grounded.bel.nodelink.json.gz")
 
 
 @click.command()
@@ -32,5 +32,5 @@ def main():
     pybel.to_hipathia(graph, HERE)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

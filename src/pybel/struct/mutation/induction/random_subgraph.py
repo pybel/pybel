@@ -11,7 +11,6 @@ from typing import Any, Iterable, Mapping, Optional, Set, Tuple
 from ..utils import remove_isolated_nodes
 from ...graph import BELGraph
 from ...pipeline import transformation
-from ...utils import update_metadata
 from ....dsl import BaseEntity
 
 __all__ = [
@@ -135,7 +134,6 @@ def _helper(
 
     logger.debug("adding remaining %d edges", number_edges_remaining)
     for _ in range(number_edges_remaining):
-
         source, possible_step_nodes, c = None, set(), 0
         while not source or not possible_step_nodes:
             source = get_random_node(result, node_blacklist, invert_degrees=invert_degrees)
