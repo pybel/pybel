@@ -41,6 +41,8 @@ ignore =
     B026
     # loop control var reassigns iterable
     B020
+    # too complex
+    C901
 exclude =
     .tox,
     .git,

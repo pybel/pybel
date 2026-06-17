@@ -28,7 +28,7 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-def from_fraunhofer_orientdb(
+def from_fraunhofer_orientdb(  # noqa:S107
     database: str = "covid",
     user: str = "covid_user",
     password: str = "covid",

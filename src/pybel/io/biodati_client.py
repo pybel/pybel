@@ -34,7 +34,7 @@ def to_biodati(
     graph: BELGraph,
     *,
     username: str = "demo@biodati.com",
-    password: str = "demo",
+    password: str = "demo",  # noqa:S107
     base_url: str = "https://nanopubstore.demo.biodati.com",
     chunksize: int | None = None,
     use_tqdm: bool = True,
@@ -90,7 +90,7 @@ def to_biodati(
         )
 
 
-def from_biodati(
+def from_biodati(  # noqa:S107
     network_id: str,
     username: str = "demo@biodati.com",
     password: str = "demo",

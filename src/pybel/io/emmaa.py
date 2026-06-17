@@ -11,7 +11,7 @@ major publishers, and other bespoke text corpora such as CORD-19.
 import json
 import logging
 from collections.abc import Iterable
-from xml.etree import ElementTree
+from xml.etree import ElementTree  # noqa:S405
 
 import click
 import requests
