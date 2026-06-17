@@ -1,5 +1,7 @@
 """Contains the main data structure for PyBEL."""
 
+from __future__ import annotations
+
 import logging
 import warnings
 from collections import Counter, defaultdict

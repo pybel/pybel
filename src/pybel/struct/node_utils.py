@@ -1,5 +1,7 @@
 """Utilities for handling nodes."""
 
+from __future__ import annotations
+
 import itertools as itt
 import logging
 from itertools import chain
