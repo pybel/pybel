@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Pre-defined predicates for nodes."""
 
 from ..utils import part_has_modifier
@@ -14,8 +12,8 @@ from ....constants import (
 from ....dsl import BaseEntity
 
 __all__ = [
-    "has_edge_modifier",
     "has_activity",
+    "has_edge_modifier",
     "is_degraded",
     "is_translocated",
 ]

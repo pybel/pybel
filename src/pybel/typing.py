@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
-
 """Types for PyBEL."""
 
-from typing import Iterable, Mapping, Union
+from collections.abc import Iterable, Mapping
+from typing import Union
 
 __all__ = [
-    "Strings",
     "EdgeData",
+    "Strings",
 ]
 
 Strings = Union[str, Iterable[str]]

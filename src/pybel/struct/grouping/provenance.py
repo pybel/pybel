@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 """Utility functions for grouping sub-graphs by citation."""
 
 from collections import defaultdict
-from typing import Mapping, Tuple
+from collections.abc import Mapping
 
 from ..graph import BELGraph
 from ...constants import CITATION, IDENTIFIER, NAMESPACE
@@ -13,7 +11,7 @@ __all__ = [
 ]
 
 
-def get_subgraphs_by_citation(graph: BELGraph) -> Mapping[Tuple[str, str], BELGraph]:
+def get_subgraphs_by_citation(graph: BELGraph) -> Mapping[tuple[str, str], BELGraph]:
     """Stratify the graph based on citations.
 
     :param graph: A BEL graph

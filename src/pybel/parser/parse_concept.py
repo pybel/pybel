@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
-
 """A module holding the :class:`IdentifierParser`."""
 
 import logging
 import re
 from collections import defaultdict
-from typing import Mapping, Optional, Pattern, Set
+from collections.abc import Mapping
+from re import Pattern
 
 from pyparsing import ParseResults, Suppress
 
@@ -36,9 +35,9 @@ class ConceptParser(BaseParser):
 
     def __init__(
         self,
-        namespace_to_term_to_encoding: Optional[NamespaceTermEncodingMapping] = None,
-        namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
-        default_namespace: Optional[Set[str]] = None,
+        namespace_to_term_to_encoding: NamespaceTermEncodingMapping | None = None,
+        namespace_to_pattern: Mapping[str, Pattern] | None = None,
+        default_namespace: set[str] | None = None,
         allow_naked_names: bool = False,
         skip_validation: bool = False,
         ensure_go: bool = True,

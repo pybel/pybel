@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import logging
 import re
 import unittest
@@ -57,7 +55,7 @@ class TestParseControlUnsetStatementErrors(TestParseControl):
             self.parser.parse_string("UNSET Citation")
 
     def test_unset_missing_evidence_with_citation(self):
-        """Tests that an evidence can't be unset without a citation"""
+        """Tests that an evidence can't be unset without a citation."""
         s = [SET_CITATION_TEST, "UNSET Evidence"]
         with self.assertRaises(MissingAnnotationKeyWarning):
             self.parser.parse_lines(s)
@@ -77,7 +75,7 @@ class TestParseControlUnsetStatementErrors(TestParseControl):
             self.parser.parse_lines(s)
 
     def test_unset_list_compact(self):
-        """Tests unsetting an annotation list, without spaces in it"""
+        """Tests unsetting an annotation list, without spaces in it."""
         s = [
             SET_CITATION_TEST,
             'SET Custom1 = "Custom1_A"',
@@ -90,7 +88,7 @@ class TestParseControlUnsetStatementErrors(TestParseControl):
         self.assertFalse(self.parser.annotations)
 
     def test_unset_list_spaced(self):
-        """Tests unsetting an annotation list, with spaces in it"""
+        """Tests unsetting an annotation list, with spaces in it."""
         s = [
             SET_CITATION_TEST,
             'SET Custom1 = "Custom1_A"',
@@ -145,7 +143,7 @@ class TestParseControlSetStatementErrors(TestParseControl):
             self.parser.parse_lines(statements)
 
     def test_custom_value_failure(self):
-        """Tests what happens for a valid annotation key, but an invalid value"""
+        """Tests what happens for a valid annotation key, but an invalid value."""
         s = [SET_CITATION_TEST, 'SET Custom1 = "Custom1_C"']
         with self.assertRaises(IllegalAnnotationValueWarning):
             self.parser.parse_lines(s)
@@ -158,7 +156,7 @@ class TestParseControlSetStatementErrors(TestParseControl):
 
 class TestParseControl2(TestParseControl):
     def test_set_statement_group(self):
-        """Tests a statement group gets set properly"""
+        """Tests a statement group gets set properly."""
         s1 = 'SET STATEMENT_GROUP = "my group"'
 
         self.assertIsNone(self.parser.statement_group)
@@ -228,7 +226,7 @@ class TestParseControl2(TestParseControl):
         self.assertEqual("12928037", self.parser.citation_db_id)
 
     def test_double_with_space(self):
-        """Same as test_double, but has a space between the comma and next entry"""
+        """Same as test_double, but has a space between the comma and next entry."""
         s = 'SET Citation = {"PubMed", "12928037"}'
         self.parser.parse_string(s)
         self.assertEqual(CITATION_TYPE_PUBMED, self.parser.citation_db)
@@ -317,13 +315,13 @@ class TestParseControl2(TestParseControl):
 
     def test_reset_citation(self):
         s1_identifier = str(randint(0, 10**7))
-        s1 = 'SET Citation = {{"PubMed","Test Reference 1","{}"}}'.format(s1_identifier)
+        s1 = f'SET Citation = {{"PubMed","Test Reference 1","{s1_identifier}"}}'
         s2 = 'SET Evidence = "d"'
 
         s3_identifier = str(randint(0, 10**7))
-        s3 = 'SET Citation = {{"PubMed","Test Reference 2","{}"}}'.format(s3_identifier)
+        s3 = f'SET Citation = {{"PubMed","Test Reference 2","{s3_identifier}"}}'
         _test_evidence = n()
-        s4 = 'SET Evidence = "{}"'.format(_test_evidence)
+        s4 = f'SET Evidence = "{_test_evidence}"'
         s5 = 'SET Custom1 = "Custom1_A"'
         s6 = 'SET Custom2 = "Custom2_A"'
 

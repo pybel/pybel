@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Command line interface for PyBEL.
 
 Why does this file exist, and why not put this in ``__main__``? You might be tempted to import things from ``__main__``
@@ -19,7 +17,6 @@ import os
 import sys
 import time
 from importlib.metadata import entry_points
-from typing import List, Optional
 
 import click
 from click_plugins import with_plugins
@@ -109,8 +106,8 @@ def _from_pickle_callback(ctx, param, file):
 
     if not os.path.exists(cache_path):
         click.echo(
-            "The BEL script {path} has not yet been compiled. First, try running the following command:\n\n "
-            "pybel compile {path}\n".format(path=path),
+            f"The BEL script {path} has not yet been compiled. First, try running the following command:\n\n "
+            f"pybel compile {path}\n",
         )
         sys.exit(1)
 
@@ -153,7 +150,7 @@ verbose_option = click.option(
 
 
 @with_plugins(entry_points(group="pybel.cli_plugins"))
-@click.group(help="PyBEL CLI on {}".format(sys.executable))
+@click.group(help=f"PyBEL CLI on {sys.executable}")
 @click.version_option()
 @connection_option
 @click.pass_context
@@ -254,7 +251,7 @@ def _print_summary(graph: BELGraph, ticks: bool = False):
     unused_namespaces = get_unused_namespaces(graph)
     if unused_namespaces:
         click.secho(
-            "\nUnused Namespaces ({}/{})".format(len(unused_namespaces), len(graph.defined_namespace_keywords)),
+            f"\nUnused Namespaces ({len(unused_namespaces)}/{len(graph.defined_namespace_keywords)})",
             fg="red",
             bold=True,
         )
@@ -268,7 +265,7 @@ def _print_summary(graph: BELGraph, ticks: bool = False):
     unused_annotations = get_unused_annotations(graph)
     if unused_annotations:
         click.secho(
-            "\nUnused Annotations ({}/{})".format(len(unused_annotations), len(graph.defined_annotation_keywords)),
+            f"\nUnused Annotations ({len(unused_annotations)}/{len(graph.defined_annotation_keywords)})",
             fg="red",
             bold=True,
         )
@@ -285,9 +282,9 @@ def _print_summary(graph: BELGraph, ticks: bool = False):
         if ticks:
             click.echo("```")
         for annotation, values in sorted(unused_annotation_list_values.items()):
-            click.echo("{} ({}/{})".format(annotation, len(values), len(graph.annotation_list[annotation])))
+            click.echo(f"{annotation} ({len(values)}/{len(graph.annotation_list[annotation])})")
             for value in sorted(values):
-                click.echo("  {}".format(value))
+                click.echo(f"  {value}")
         if ticks:
             click.echo("```")
 
@@ -384,21 +381,21 @@ def neo(graph: BELGraph, connection: str, password: str):
 @click.argument("agents", nargs=-1)
 @click.option("--local", is_flag=True, help="Upload to local database.")
 @host_option
-def machine(manager: Manager, agents: List[str], local: bool, host: str):
+def machine(manager: Manager, agents: list[str], local: bool, host: str):
     """Get content from the INDRA machine and upload to BEL Commons."""
     from indra.sources import indra_db_rest
 
     from pybel import from_indra_statements
 
     statements = indra_db_rest.get_statements(agents=agents)
-    click.echo("got {} statements from INDRA".format(len(statements)))
+    click.echo(f"got {len(statements)} statements from INDRA")
 
     graph = from_indra_statements(
         statements,
         name="INDRA Machine for {}".format(", ".join(sorted(agents))),
         version=time.strftime("%Y%m%d"),
     )
-    click.echo("built BEL graph with {} nodes and {} edges".format(graph.number_of_nodes(), graph.number_of_edges()))
+    click.echo(f"built BEL graph with {graph.number_of_nodes()} nodes and {graph.number_of_edges()} edges")
 
     if 0 == len(graph):
         click.echo("not uploading empty graph")
@@ -441,9 +438,9 @@ def examples(manager: Manager, debug: bool):
         egf_graph,
     ):
         if manager.has_name_version(graph.name, graph.version):
-            click.echo("already inserted {}".format(graph))
+            click.echo(f"already inserted {graph}")
             continue
-        click.echo("inserting {}".format(graph))
+        click.echo(f"inserting {graph}")
         manager.insert_graph(graph, use_tqdm=True)
 
 
@@ -452,7 +449,7 @@ def namespaces():
     """Manage namespaces."""
 
 
-@namespaces.command()  # noqa:F811
+@namespaces.command()
 @click.argument("url")
 @click.pass_obj
 def insert(manager: Manager, url: str):
@@ -474,7 +471,7 @@ def _ls(manager: Manager, model_cls, model_id: int):
 @click.option("-u", "--url", help="Specific resource URL to list")
 @click.option("-i", "--namespace-id", type=int, help="Specific resource URL to list")
 @click.pass_obj
-def ls(manager: Manager, url: Optional[str], namespace_id: Optional[int]):
+def ls(manager: Manager, url: str | None, namespace_id: int | None):
     """List cached namespaces."""
     if url:
         n = manager.get_or_create_namespace(url)
@@ -483,11 +480,11 @@ def ls(manager: Manager, url: Optional[str], namespace_id: Optional[int]):
         _ls(manager, Namespace, namespace_id)
     else:
         click.echo_via_pager(
-            "\n".join("{}\t{}\t{}".format(n.id, n.name, n.url) for n in manager.session.query(Namespace)),
+            "\n".join(f"{n.id}\t{n.name}\t{n.url}" for n in manager.session.query(Namespace)),
         )
 
 
-@namespaces.command()  # noqa:F811
+@namespaces.command()
 @click.argument("url")
 @click.pass_obj
 def drop(manager: Manager, url: str):
@@ -500,15 +497,15 @@ def networks():
     """Manage networks."""
 
 
-@networks.command()  # noqa:F811
+@networks.command()
 @click.pass_obj
 def ls(manager: Manager):
     """List network names, versions, and optionally, descriptions."""
     for n in manager.list_networks():
-        click.echo("{}\t{}\t{}".format(n.id, n.name, n.version))
+        click.echo(f"{n.id}\t{n.name}\t{n.version}")
 
 
-@networks.command()  # noqa:F811
+@networks.command()
 @click.option("-n", "--network-id", type=int, help="Identifier of network to drop")
 @click.option(
     "-y",
@@ -517,7 +514,7 @@ def ls(manager: Manager):
     help="Drop all networks without confirmation if no identifier is given",
 )
 @click.pass_obj
-def drop(manager: Manager, network_id: Optional[int], yes):
+def drop(manager: Manager, network_id: int | None, yes):
     """Drop a network by its identifier or drop all networks."""
     if network_id:
         manager.drop_network_by_id(network_id)
@@ -531,11 +528,11 @@ def edges():
     """Manage edges."""
 
 
-@edges.command()  # noqa:F811
+@edges.command()
 @click.option("--offset", type=int)
 @click.option("--limit", type=int, default=10)
 @click.pass_obj
-def ls(manager: Manager, offset: Optional[int], limit: Optional[int]):
+def ls(manager: Manager, offset: int | None, limit: int | None):
     """List edges."""
     q = manager.session.query(Edge)
 
@@ -565,20 +562,20 @@ def prune(manager: Manager):
     manager.session.commit()
 
 
-@manage.command()  # noqa:F811
+@manage.command()
 @click.pass_obj
 def summarize(manager: Manager):
     """Summarize the contents of the database."""
-    click.echo("Networks: {}".format(manager.count_networks()))
-    click.echo("Edges: {}".format(manager.count_edges()))
-    click.echo("Nodes: {}".format(manager.count_nodes()))
-    click.echo("Namespaces: {}".format(manager.count_namespaces()))
-    click.echo("Namespaces entries: {}".format(manager.count_namespace_entries()))
-    click.echo("Annotations: {}".format(manager.count_annotations()))
-    click.echo("Annotation entries: {}".format(manager.count_annotation_entries()))
+    click.echo(f"Networks: {manager.count_networks()}")
+    click.echo(f"Edges: {manager.count_edges()}")
+    click.echo(f"Nodes: {manager.count_nodes()}")
+    click.echo(f"Namespaces: {manager.count_namespaces()}")
+    click.echo(f"Namespaces entries: {manager.count_namespace_entries()}")
+    click.echo(f"Annotations: {manager.count_annotations()}")
+    click.echo(f"Annotation entries: {manager.count_annotation_entries()}")
 
 
-def echo_warnings_via_pager(warnings: List[WarningTuple], sep: str = "\t") -> None:
+def echo_warnings_via_pager(warnings: list[WarningTuple], sep: str = "\t") -> None:
     """Output the warnings from a BEL graph with Click and the system's pager."""
     # Exit if no warnings
     if not warnings:

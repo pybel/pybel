@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Gene Substitutions.
 
 Gene substitutions are legacy statements defined in BEL 1.0. BEL 2.0 recommends using HGVS strings. Luckily,
@@ -14,12 +12,12 @@ The previous statements both produce the underlying data:
 
     {
         FUNCTION: GENE,
-        NAMESPACE: 'HGNC',
-        NAME: 'APP',
+        NAMESPACE: "HGNC",
+        NAME: "APP",
         VARIANTS: [
             {
                 KIND: HGVS,
-                IDENTIFIER: 'c.275341G>C',
+                IDENTIFIER: "c.275341G>C",
             },
         ],
     }
@@ -61,7 +59,7 @@ def get_gene_substitution_language() -> ParserElement:
 
 
 def _handle_gsub(line, _, tokens):
-    upgraded = "c.{}{}>{}".format(tokens[GSUB_POSITION], tokens[GSUB_REFERENCE], tokens[GSUB_VARIANT])
+    upgraded = f"c.{tokens[GSUB_POSITION]}{tokens[GSUB_REFERENCE]}>{tokens[GSUB_VARIANT]}"
     logger.debug("legacy sub() %s upgraded to %s", line, upgraded)
     tokens[HGVS] = upgraded
     del tokens[GSUB_POSITION]

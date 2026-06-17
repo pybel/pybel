@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for ``pybel.tokens``."""
 
 import unittest

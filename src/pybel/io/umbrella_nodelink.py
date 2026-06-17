@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """The Umbrella Node-Link JSON format is similar to node-link but uses full BEL terms as nodes.
 
 Given a BEL statement describing that ``X`` phosphorylates ``Y`` like ``act(p(X)) -> p(Y, pmod(Ph))``,
@@ -21,8 +19,9 @@ A user might want to use this exporter in the following scenarios:
 
 import gzip
 import json
+from collections.abc import Mapping
 from itertools import chain, count
-from typing import Any, Mapping, TextIO, Union
+from typing import Any, TextIO
 
 from networkx.utils import open_file
 
@@ -49,7 +48,7 @@ def to_umbrella_nodelink(graph: BELGraph) -> Mapping[str, Any]:
         nodes.add(u_key)
         nodes.add(v_key)
 
-    nodes = sorted(list(nodes))
+    nodes = sorted(nodes)
     mapping = dict(zip(nodes, count()))
 
     graph_json_dict = {
@@ -80,15 +79,14 @@ def to_umbrella_nodelink(graph: BELGraph) -> Mapping[str, Any]:
 
     # Convert annotation list definitions (which are sets) to canonicalized/sorted lists
     graph_json_dict["graph"][GRAPH_ANNOTATION_LIST] = {
-        keyword: list(sorted(values))
-        for keyword, values in graph_json_dict["graph"].get(GRAPH_ANNOTATION_LIST, {}).items()
+        keyword: sorted(values) for keyword, values in graph_json_dict["graph"].get(GRAPH_ANNOTATION_LIST, {}).items()
     }
 
     return graph_json_dict
 
 
 @open_file(1, mode="w")
-def to_umbrella_nodelink_file(graph: BELGraph, path: Union[str, TextIO], **kwargs) -> None:
+def to_umbrella_nodelink_file(graph: BELGraph, path: str | TextIO, **kwargs) -> None:
     """Write this graph as an umbrella node-link JSON to a file.
 
     :param graph: A BEL graph

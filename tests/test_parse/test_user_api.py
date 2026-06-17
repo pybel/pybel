@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Test the user API."""
 
 import unittest

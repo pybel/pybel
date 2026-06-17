@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for the mocks for the query builder."""
 
 import unittest

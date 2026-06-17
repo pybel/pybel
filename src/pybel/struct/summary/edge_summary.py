@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-
 """Summary functions for edges in BEL graphs."""
 
 from collections import Counter, defaultdict
+from collections.abc import Iterable, Mapping
 from random import choice
-from typing import Iterable, Mapping, Set, Tuple
 
 from ..filters.edge_predicates import edge_has_annotation
 from ..graph import BELGraph
@@ -15,21 +13,21 @@ from ...language import Entity
 from ...utils import CanonicalEdge, canonicalize_edge
 
 __all__ = [
-    "iter_annotation_value_pairs",
-    "iter_annotation_values",
-    "get_annotation_values_by_annotation",
-    "get_annotation_values",
-    "count_relations",
-    "get_annotations",
     "count_annotations",
+    "count_relations",
+    "get_annotation_values",
+    "get_annotation_values_by_annotation",
+    "get_annotations",
+    "get_metaedge_to_key",
     "get_unused_annotations",
     "get_unused_list_annotation_values",
-    "get_metaedge_to_key",
+    "iter_annotation_value_pairs",
+    "iter_annotation_values",
     "iter_sample_metaedges",
 ]
 
 
-def iter_annotation_value_pairs(graph: BELGraph) -> Iterable[Tuple[str, Entity]]:
+def iter_annotation_value_pairs(graph: BELGraph) -> Iterable[tuple[str, Entity]]:
     """Iterate over the key/value pairs, with duplicates, for each annotation used in a BEL graph.
 
     :param graph: A BEL graph
@@ -68,7 +66,7 @@ def _group_dict_set(iterator):
     return dict(d)
 
 
-def get_annotation_values_by_annotation(graph: BELGraph) -> Mapping[str, Set[Entity]]:
+def get_annotation_values_by_annotation(graph: BELGraph) -> Mapping[str, set[Entity]]:
     """Get the set of values for each annotation used in a BEL graph.
 
     :param graph: A BEL graph
@@ -77,7 +75,7 @@ def get_annotation_values_by_annotation(graph: BELGraph) -> Mapping[str, Set[Ent
     return _group_dict_set(iter_annotation_value_pairs(graph))
 
 
-def get_annotation_values(graph: BELGraph, annotation: str) -> Set[Entity]:
+def get_annotation_values(graph: BELGraph, annotation: str) -> set[Entity]:
     """Get all values for the given annotation.
 
     :param graph: A BEL graph
@@ -96,7 +94,7 @@ def count_relations(graph: BELGraph) -> Counter:
     return Counter(data[RELATION] for _, _, data in graph.edges(data=True))
 
 
-def get_unused_annotations(graph: BELGraph) -> Set[str]:
+def get_unused_annotations(graph: BELGraph) -> set[str]:
     """Get the set of all annotations that are defined in a graph, but are never used.
 
     :param graph: A BEL graph
@@ -105,7 +103,7 @@ def get_unused_annotations(graph: BELGraph) -> Set[str]:
     return graph.defined_annotation_keywords - get_annotations(graph)
 
 
-def get_annotations(graph: BELGraph) -> Set[str]:
+def get_annotations(graph: BELGraph) -> set[str]:
     """Get the set of annotations used in the graph.
 
     :param graph: A BEL graph
@@ -131,7 +129,7 @@ def _annotation_iter_helper(graph: BELGraph) -> Iterable[str]:
     return (key for _, _, data in graph.edges(data=True) if ANNOTATIONS in data for key in data[ANNOTATIONS])
 
 
-def get_unused_list_annotation_values(graph: BELGraph) -> Mapping[str, Set[str]]:
+def get_unused_list_annotation_values(graph: BELGraph) -> Mapping[str, set[str]]:
     """Get all of the unused values for list annotations.
 
     :param graph: A BEL graph
@@ -147,7 +145,7 @@ def get_unused_list_annotation_values(graph: BELGraph) -> Mapping[str, Set[str]]
 
 def get_metaedge_to_key(
     graph: BELGraph,
-) -> Mapping[CanonicalEdge, Set[Tuple[BaseEntity, BaseEntity, str]]]:
+) -> Mapping[CanonicalEdge, set[tuple[BaseEntity, BaseEntity, str]]]:
     """Get all edge types."""
     rv = defaultdict(set)
     for u, v, k, d in graph.edges(keys=True, data=True):

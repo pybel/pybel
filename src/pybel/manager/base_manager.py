@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 """This module contains the base class for connection managers in SQLAlchemy."""
 
 import logging
-from typing import List, Optional, Tuple, Type, TypeVar
+from typing import TypeVar
 
 import pystow
 from sqlalchemy import create_engine
@@ -24,11 +22,11 @@ X = TypeVar("X")
 def build_engine_session(
     connection: str,
     echo: bool = False,
-    autoflush: Optional[bool] = None,
-    autocommit: Optional[bool] = None,
-    expire_on_commit: Optional[bool] = None,
+    autoflush: bool | None = None,
+    autocommit: bool | None = None,
+    expire_on_commit: bool | None = None,
     scopefunc=None,
-) -> Tuple:
+) -> tuple:
     """Build an engine and a session.
 
     :param connection: An RFC-1738 database connection string
@@ -86,7 +84,7 @@ def build_engine_session(
     return engine, session
 
 
-class BaseManager(object):
+class BaseManager:
     """A wrapper around a SQLAlchemy engine and session."""
 
     #: The declarative base for this manager
@@ -117,7 +115,7 @@ class BaseManager(object):
         self.base.metadata.bind = self.engine
         self.base.query = self.session.query_property()
 
-    def _list_model(self, model_cls: Type[X]) -> List[X]:
+    def _list_model(self, model_cls: type[X]) -> list[X]:
         """List the models in this class."""
         return self.session.query(model_cls).all()
 
@@ -126,4 +124,4 @@ class BaseManager(object):
         return self.session.query(model_cls).count()
 
     def __repr__(self):
-        return "<{} connection={}>".format(self.__class__.__name__, self.engine.url)
+        return f"<{self.__class__.__name__} connection={self.engine.url}>"

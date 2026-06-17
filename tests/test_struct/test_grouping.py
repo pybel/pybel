@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for functions for grouping BEL graphs into sub-graphs."""
 
 import unittest
@@ -96,7 +94,7 @@ class TestAnnotation(unittest.TestCase):
 
 
 class TestProvenance(unittest.TestCase):
-    """Tests for getting sub-graphs by provenance information (citation, etc.)"""
+    """Tests for getting sub-graphs by provenance information (citation, etc.)."""
 
     def test_get_subgraphs_by_citation(self):
         """Test getting sub-graphs by citation."""

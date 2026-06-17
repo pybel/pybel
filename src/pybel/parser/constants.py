@@ -1,15 +1,13 @@
-# -*- coding: utf-8 -*-
-
 """Type hints for the parsers."""
 
-from typing import Mapping, Optional, Tuple
+from collections.abc import Mapping
 
 __all__ = [
+    "NamespaceTermEncodingMapping",
     "Term",
     "TermEncodingMapping",
-    "NamespaceTermEncodingMapping",
 ]
 
-Term = Tuple[Optional[str], str]
+Term = tuple[str | None, str]
 TermEncodingMapping = Mapping[Term, str]
 NamespaceTermEncodingMapping = Mapping[str, Mapping[Term, str]]

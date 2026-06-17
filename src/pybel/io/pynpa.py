@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Exporter for PyNPA.
 
 .. seealso:: https://github.com/pynpa
@@ -7,7 +5,7 @@
 
 import logging
 import os
-from typing import List, Mapping, Optional, Tuple
+from collections.abc import Mapping
 
 import pandas as pd
 
@@ -21,14 +19,14 @@ from ..struct.node_utils import (
 )
 
 __all__ = [
-    "to_npa_directory",
     "to_npa_dfs",
+    "to_npa_directory",
     "to_npa_layers",
 ]
 
 logger = logging.getLogger(__name__)
 
-Layer = Mapping[Tuple[Gene, Gene], int]
+Layer = Mapping[tuple[Gene, Gene], int]
 
 #: Code to distinguish between between iNodes when nodes have been debelized
 DEBELIZED_CODE_FOR_INODES = "*"
@@ -44,10 +42,10 @@ def to_npa_directory(graph: BELGraph, directory: str, **kwargs) -> None:
 def to_npa_dfs(
     graph: BELGraph,
     cartesian_expansion: bool = False,
-    nomenclature_method_first_layer: Optional[str] = None,
-    nomenclature_method_second_layer: Optional[str] = None,
+    nomenclature_method_first_layer: str | None = None,
+    nomenclature_method_second_layer: str | None = None,
     direct_tf_only: bool = False,
-) -> Tuple[pd.DataFrame, pd.DataFrame]:
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Export the BEL graph as two lists of triples for the :mod:`pynpa`.
 
     :param graph: A BEL graph
@@ -73,12 +71,12 @@ def to_npa_dfs(
     )
 
 
-def _get_df(layer: Layer, method: Optional[str] = None) -> pd.DataFrame:
+def _get_df(layer: Layer, method: str | None = None) -> pd.DataFrame:
     rows = _normalize_layer(layer, method=method)
     return pd.DataFrame(rows, columns=["source", "target", "relation"]).sort_values(["source", "target"])
 
 
-def _normalize_layer(layer: Layer, method: Optional[str] = None) -> List[Tuple[str, str, int]]:
+def _normalize_layer(layer: Layer, method: str | None = None) -> list[tuple[str, str, int]]:
     if method == "curie" or method is None:
         return [(source.curie, target.curie, direction) for (source, target), direction in layer.items()]
     elif method == "name":
@@ -86,21 +84,21 @@ def _normalize_layer(layer: Layer, method: Optional[str] = None) -> List[Tuple[s
     elif method == "inodes":
         return [
             (
-                "{}{}".format(DEBELIZED_CODE_FOR_INODES, source.name),
-                "{}{}".format(DEBELIZED_CODE_FOR_INODES, target.name),
+                f"{DEBELIZED_CODE_FOR_INODES}{source.name}",
+                f"{DEBELIZED_CODE_FOR_INODES}{target.name}",
                 direction,
             )
             for (source, target), direction in layer.items()
         ]
     else:
-        raise ValueError("Invalid export method: {method}".format(method=method))
+        raise ValueError(f"Invalid export method: {method}")
 
 
 def to_npa_layers(
     graph: BELGraph,
     cartesian_expansion: bool = False,
     direct_tf_only: bool = False,
-) -> Tuple[Layer, Layer]:
+) -> tuple[Layer, Layer]:
     """Get the two layers for the network.
 
     :param graph: A BEL graph

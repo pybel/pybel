@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Curation of the article "Genetics ignite focus on microglial inflammation in Alzheimer's disease".
 
 .. code-block:: none

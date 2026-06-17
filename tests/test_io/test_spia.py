@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """This module contains tests for the SPIA exporter."""
 
 import unittest
@@ -33,7 +31,6 @@ class TestSpia(unittest.TestCase):
 
     def test_build_matrix(self):
         """Test build empty matrix."""
-
         node_names = get_matrix_index(self.sialic_acid_graph)
 
         matrix_dict = build_spia_matrices(node_names)
@@ -108,7 +105,6 @@ class TestSpia(unittest.TestCase):
 
     def test_update_matrix_activation_phosphorylation(self):
         """Test updating the matrix with an activation phosphorylation."""
-
         sub = protein(namespace="HGNC", name="A", identifier="1")
         obj = protein(namespace="HGNC", name="B", identifier="2", variants=[pmod("Ph")])
 

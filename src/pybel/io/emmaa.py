@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Ecosystem of Machine-maintained Models with Automated Analysis (EMMAA).
 
 `EMMAA <https://emmaa.indra.bio/>`_ is a project built on top of INDRA by
@@ -12,7 +10,7 @@ major publishers, and other bespoke text corpora such as CORD-19.
 
 import json
 import logging
-from typing import Iterable, Optional
+from collections.abc import Iterable
 from xml.etree import ElementTree  # noqa:S405
 
 import click
@@ -32,8 +30,8 @@ logger = logging.getLogger(__name__)
 def from_emmaa(
     model: str,
     *,
-    date: Optional[str] = None,
-    extension: Optional[str] = None,
+    date: str | None = None,
+    extension: str | None = None,
     suppress_warnings: bool = False,
 ) -> BELGraph:
     """Get an EMMAA model as a BEL graph.
@@ -44,7 +42,7 @@ def from_emmaa(
 
         import pybel
 
-        covid19_emmaa_graph = pybel.from_emmaa('covid19', extension='jsonl')
+        covid19_emmaa_graph = pybel.from_emmaa("covid19", extension="jsonl")
         covid19_emmaa_graph.summarize()
 
     PyBEL does its best to look up the most recent model, but if that doesn't work,
@@ -55,7 +53,7 @@ def from_emmaa(
 
         import pybel
 
-        covid19_emmaa_graph = pybel.from_emmaa('covid19', '2020-04-23-17-44-57', extension='jsonl')
+        covid19_emmaa_graph = pybel.from_emmaa("covid19", "2020-04-23-17-44-57", extension="jsonl")
         covid19_emmaa_graph.summarize()
     """
     statements = get_statements_from_emmaa(
@@ -70,8 +68,8 @@ def from_emmaa(
 def get_statements_from_emmaa(
     model: str,
     *,
-    date: Optional[str] = None,
-    extension: Optional[str] = None,
+    date: str | None = None,
+    extension: str | None = None,
     suppress_warnings: bool = False,
 ):
     """Get INDRA statements from EMMAA.

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for the command line interface."""
 
 import json
@@ -25,7 +23,7 @@ log = logging.getLogger(__name__)
 @unittest.skip
 class TestCli(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
     def setUp(self):
-        super(TestCli, self).setUp()
+        super().setUp()
         self.runner = CliRunner()
 
     @mock_bel_resources
@@ -58,11 +56,7 @@ class TestCli(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
             self.assertEqual(
                 0,
                 result.exit_code,
-                msg="{}\n{}\n{}".format(
-                    result.exc_info[0],
-                    result.exc_info[1],
-                    traceback.format_tb(result.exc_info[2]),
-                ),
+                msg=f"{result.exc_info[0]}\n{result.exc_info[1]}\n{traceback.format_tb(result.exc_info[2])}",
             )
 
             self.assertTrue(os.path.exists(test_csv))
@@ -108,7 +102,7 @@ class TestCli(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
 
         try:
             neo = Graph(neo_path)
-            neo.data('match (n)-[r]->() where r.{}="{}" detach delete n'.format(PYBEL_CONTEXT_TAG, test_context))
+            neo.data(f'match (n)-[r]->() where r.{PYBEL_CONTEXT_TAG}="{test_context}" detach delete n')
         except GraphError:
             self.skipTest("Can't query Neo4J ")
         except Exception:
@@ -128,6 +122,6 @@ class TestCli(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
                 ]
                 self.runner.invoke(cli.main, args)
 
-                q = 'match (n)-[r]->() where r.{}="{}" return count(n) as count'.format(PYBEL_CONTEXT_TAG, test_context)
+                q = f'match (n)-[r]->() where r.{PYBEL_CONTEXT_TAG}="{test_context}" return count(n) as count'
                 count = neo.data(q)[0]["count"]
                 self.assertEqual(14, count)

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Induction functions based on provenance information."""
 
 import logging
@@ -12,8 +10,8 @@ from ...filters.edge_predicate_builders import (
 from ...pipeline import transformation
 
 __all__ = [
-    "get_subgraph_by_pubmed",
     "get_subgraph_by_authors",
+    "get_subgraph_by_pubmed",
 ]
 
 logger = logging.getLogger(__name__)

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """An example graph in which a famplex (complex of families) activates something."""
 
 from ..dsl import ComplexAbundance, NamedComplexAbundance, Protein, ProteinModification

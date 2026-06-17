@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for input and output."""
 
 import logging
@@ -540,7 +538,7 @@ class TestFull(TestTokenParserBase):
 
 class TestRandom(unittest.TestCase):
     def test_import_warning(self):
-        """Tests an error is thrown when the version is set wrong"""
+        """Tests an error is thrown when the version is set wrong."""
         graph = BELGraph()
 
         # Much with stuff that would normally be set
@@ -561,7 +559,7 @@ class TestNomenclature(TemporaryCacheMixin):
     """Test that `BEP-0008 nomenclature <http://bep.bel.bio/published/BEP-0008.html>`_ gets validated properly."""
 
     def test_bep_0008(self):
-        """Test parsing works right"""
+        """Test parsing works right."""
         graph = from_bel_script(test_bel_with_obo, manager=self.manager)
         self.assertIn("hgnc", graph.namespace_pattern)
         self.assertEqual(r"\d+", graph.namespace_pattern["hgnc"])

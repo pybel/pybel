@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """The :mod:`pybel.parser` module contains utilities for parsing BEL documents and BEL statements."""
 
 from .modifiers import *

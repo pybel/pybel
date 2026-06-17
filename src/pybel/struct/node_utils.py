@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
-
 """Utilities for handling nodes."""
+
+from __future__ import annotations
 
 import itertools as itt
 import logging
 from itertools import chain
-from typing import Set, Tuple, Type, Union
 
 from networkx import relabel_nodes
 
@@ -138,7 +137,7 @@ def _reaction_cartesian_expansion_unqualified_helper(
                 graph.add_unqualified_edge(reactant, product, INCREASES)
 
 
-def _get_catalysts_in_reaction(reaction: Reaction) -> Set[BaseAbundance]:
+def _get_catalysts_in_reaction(reaction: Reaction) -> set[BaseAbundance]:
     """Return nodes that are both in reactants and reactions in a reaction."""
     # TODO replace with reaction.get_catalysts()
     return set(reaction.reactants).intersection(reaction.products)
@@ -256,6 +255,6 @@ def _remove_reaction_nodes(graph):
 
 def _remove_typed_nodes(
     graph,
-    cls: Union[Type[BaseEntity], Tuple[Type[BaseEntity], ...]],
+    cls: type[BaseEntity] | tuple[type[BaseEntity], ...],
 ) -> None:
     graph.remove_nodes_from({node for node in graph if isinstance(node, cls)})

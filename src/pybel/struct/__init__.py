@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """The :mod:`pybel.struct` module houses functions for handling the main data structure in PyBEL.
 
 Because BEL expresses how biological entities interact within many

@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 """A wrapper around selection methods."""
 
 import logging
-from typing import Any, List, Optional
+from typing import Any
 
 from .constants import (
     SEED_TYPE_ANNOTATION,
@@ -41,10 +39,10 @@ logger = logging.getLogger(__name__)
 
 def get_subgraph(
     graph,
-    seed_method: Optional[str] = None,
-    seed_data: Optional[Any] = None,
-    expand_nodes: Optional[List[BaseEntity]] = None,
-    remove_nodes: Optional[List[BaseEntity]] = None,
+    seed_method: str | None = None,
+    seed_data: Any | None = None,
+    expand_nodes: list[BaseEntity] | None = None,
+    remove_nodes: list[BaseEntity] | None = None,
 ):
     """Run a pipeline query on graph with multiple sub-graph filters and expanders.
 
@@ -101,7 +99,7 @@ def get_subgraph(
         logger.debug("no seed function - using full network: %s", result.name)
 
     else:
-        raise ValueError("Invalid seed method: {}".format(seed_method))
+        raise ValueError(f"Invalid seed method: {seed_method}")
 
     if result is None:
         logger.debug("query returned no results")

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Convert the HemeKG for Hipathia."""
 
 import os

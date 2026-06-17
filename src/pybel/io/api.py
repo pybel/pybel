@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Contains the main data structure for PyBEL."""
 
 import os
@@ -8,9 +6,9 @@ from importlib.metadata import entry_points
 from ..struct import BELGraph
 
 __all__ = [
-    "load",
-    "dump",
     "InvalidExtensionError",
+    "dump",
+    "load",
 ]
 
 #: Mapping from extension to importer function
@@ -25,7 +23,7 @@ class InvalidExtensionError(ValueError):
 
     def __init__(self, path):
         fname = os.path.basename(path)
-        super().__init__("Invalid extension for file: {}".format(fname))
+        super().__init__(f"Invalid extension for file: {fname}")
 
 
 def load(path: str, **kwargs) -> BELGraph:

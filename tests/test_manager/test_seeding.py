@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from pybel.examples import sialic_acid_graph
 from pybel.examples.sialic_acid_example import (
     cd33,

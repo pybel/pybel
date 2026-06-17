@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
-
 """Functions for inducing random sub-graphs."""
 
 import bisect
 import logging
 import random
+from collections.abc import Iterable, Mapping
 from operator import itemgetter
-from typing import Any, Iterable, Mapping, Optional, Set, Tuple
+from typing import Any
 
 from ..utils import remove_isolated_nodes
 from ...graph import BELGraph
@@ -22,7 +21,7 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-def _random_edge_iterator(graph: BELGraph, n_edges: int) -> Iterable[Tuple[BaseEntity, BaseEntity, int, Mapping]]:
+def _random_edge_iterator(graph: BELGraph, n_edges: int) -> Iterable[tuple[BaseEntity, BaseEntity, int, Mapping]]:
     """Get a random set of edges from the graph and randomly samples a key from each.
 
     :param graph: A BEL graph
@@ -90,9 +89,9 @@ class WeightedRandomGenerator:
 
 def get_random_node(
     graph,
-    node_blacklist: Set[BaseEntity],
-    invert_degrees: Optional[bool] = None,
-) -> Optional[BaseEntity]:
+    node_blacklist: set[BaseEntity],
+    invert_degrees: bool | None = None,
+) -> BaseEntity | None:
     """Choose a node from the graph with probabilities based on their degrees.
 
     :type graph: networkx.Graph
@@ -106,6 +105,7 @@ def get_random_node(
                 for node, degree in sorted(graph.degree(), key=itemgetter(1))
                 if node not in node_blacklist
             ),
+            strict=False,
         )
     except ValueError:  # something wrong with graph, probably no elements in graph.degree_iter
         return
@@ -115,15 +115,15 @@ def get_random_node(
         degrees = [1 / degree for degree in degrees]
 
     wrg = WeightedRandomGenerator(nodes, degrees)
-    return wrg.next()  # noqa: B305
+    return wrg.next()
 
 
 def _helper(
     result,
     graph,
     number_edges_remaining: int,
-    node_blacklist: Set[BaseEntity],
-    invert_degrees: Optional[bool] = None,
+    node_blacklist: set[BaseEntity],
+    invert_degrees: bool | None = None,
 ) -> None:
     """Help build a random graph.
 
@@ -167,10 +167,10 @@ def _helper(
 @transformation
 def get_random_subgraph(
     graph: BELGraph,
-    number_edges: Optional[int] = None,
-    number_seed_edges: Optional[int] = None,
-    seed: Optional[int] = None,
-    invert_degrees: Optional[bool] = None,
+    number_edges: int | None = None,
+    number_seed_edges: int | None = None,
+    seed: int | None = None,
+    invert_degrees: bool | None = None,
 ) -> BELGraph:
     """Generate a random subgraph based on weighted random walks from random seed edges.
 

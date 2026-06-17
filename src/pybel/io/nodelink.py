@@ -1,13 +1,12 @@
-# -*- coding: utf-8 -*-
-
 """Conversion functions for BEL graphs with node-link JSON."""
 
 import gzip
 import json
+from collections.abc import Mapping
 from io import BytesIO
 from itertools import chain, count
 from operator import methodcaller
-from typing import Any, Mapping, TextIO, Union
+from typing import Any, TextIO
 
 from networkx.utils import open_file
 
@@ -35,16 +34,16 @@ from ..tokens import parse_result_to_dsl
 from ..utils import hash_edge, tokenize_version
 
 __all__ = [
-    "to_nodelink",
-    "to_nodelink_file",
-    "to_nodelink_gz",
-    "to_nodelink_jsons",
     "from_nodelink",
     "from_nodelink_file",
     "from_nodelink_gz",
-    "from_nodelink_jsons",
-    "to_nodelink_gz_io",
     "from_nodelink_gz_io",
+    "from_nodelink_jsons",
+    "to_nodelink",
+    "to_nodelink_file",
+    "to_nodelink_gz",
+    "to_nodelink_gz_io",
+    "to_nodelink_jsons",
 ]
 
 
@@ -62,16 +61,14 @@ def to_nodelink(graph: BELGraph) -> Mapping[str, Any]:
 
 def _prepare_graph_dict(g):
     # Convert annotation list definitions (which are sets) to canonicalized/sorted lists
-    g[GRAPH_ANNOTATION_LIST] = {
-        keyword: list(sorted(values)) for keyword, values in g.get(GRAPH_ANNOTATION_LIST, {}).items()
-    }
+    g[GRAPH_ANNOTATION_LIST] = {keyword: sorted(values) for keyword, values in g.get(GRAPH_ANNOTATION_LIST, {}).items()}
 
-    g[GRAPH_ANNOTATION_CURIE] = list(sorted(g[GRAPH_ANNOTATION_CURIE]))
-    g[GRAPH_ANNOTATION_MIRIAM] = list(sorted(g[GRAPH_ANNOTATION_MIRIAM]))
+    g[GRAPH_ANNOTATION_CURIE] = sorted(g[GRAPH_ANNOTATION_CURIE])
+    g[GRAPH_ANNOTATION_MIRIAM] = sorted(g[GRAPH_ANNOTATION_MIRIAM])
 
 
 @open_file(1, mode="w")
-def to_nodelink_file(graph: BELGraph, path: Union[str, TextIO], **kwargs) -> None:
+def to_nodelink_file(graph: BELGraph, path: str | TextIO, **kwargs) -> None:
     """Write this graph as node-link JSON to a file.
 
     :param graph: A BEL graph
@@ -102,7 +99,7 @@ def from_nodelink(graph_json_dict: Mapping[str, Any], check_version: bool = True
 
 
 @open_file(0, mode="r")
-def from_nodelink_file(path: Union[str, TextIO], check_version: bool = True) -> BELGraph:
+def from_nodelink_file(path: str | TextIO, check_version: bool = True) -> BELGraph:
     """Build a graph from the node-link JSON contained in the given file.
 
     :param path: A path or file-like

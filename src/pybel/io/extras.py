@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 """This module contains IO functions for outputting BEL graphs to lossy formats, such as GraphML and CSV."""
 
 import json
-from typing import Optional, TextIO, Union
+from typing import TextIO
 
 from networkx.utils import open_file
 
@@ -12,13 +10,13 @@ from ..struct import BELGraph
 
 __all__ = [
     "to_csv",
-    "to_sif",
     "to_gsea",
+    "to_sif",
 ]
 
 
 @open_file(1, mode="w")
-def to_csv(graph: BELGraph, path: Union[str, TextIO], sep: Optional[str] = None) -> None:
+def to_csv(graph: BELGraph, path: str | TextIO, sep: str | None = None) -> None:
     """Write the graph as a tab-separated edge list.
 
     The resulting file will contain the following columns:
@@ -44,7 +42,7 @@ def to_csv(graph: BELGraph, path: Union[str, TextIO], sep: Optional[str] = None)
 
 
 @open_file(1, mode="w")
-def to_sif(graph: BELGraph, path: Union[str, TextIO], sep: Optional[str] = None) -> None:
+def to_sif(graph: BELGraph, path: str | TextIO, sep: str | None = None) -> None:
     """Write the graph as a tab-separated SIF file.
 
     The resulting file will contain the following columns:
@@ -67,7 +65,7 @@ def to_sif(graph: BELGraph, path: Union[str, TextIO], sep: Optional[str] = None)
 
 
 @open_file(1, mode="w")
-def to_gsea(graph: BELGraph, path: Union[str, TextIO]) -> None:
+def to_gsea(graph: BELGraph, path: str | TextIO) -> None:
     """Write the genes/gene products to a GRP file for use with GSEA gene set enrichment analysis.
 
     .. seealso::
@@ -75,7 +73,7 @@ def to_gsea(graph: BELGraph, path: Union[str, TextIO]) -> None:
         - GRP `format specification <http://software.broadinstitute.org/cancer/software/gsea/wiki/index.php/Data_formats#GRP:_Gene_set_file_format_.28.2A.grp.29>`_
         - GSEA `publication <https://doi.org/10.1073/pnas.0506580102>`_
     """
-    print("# {}".format(graph.name), file=path)
+    print(f"# {graph.name}", file=path)
     hgnc_gene_symbols = {
         node.name for node in graph if isinstance(node, CentralDogma) and node.namespace.lower() == "hgnc"
     }

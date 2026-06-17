@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for graph operations."""
 
 import unittest
@@ -20,7 +18,8 @@ p1, p2, p3, p4, p5, p6, p7, p8 = (protein(namespace="HGNC", name=n()) for _ in r
 
 class TestLeftFullJoin(unittest.TestCase):
     """Tests the variants of the left full join, including the exhaustive vs. hash algorithms and calling by function
-    or magic functions"""
+    or magic functions.
+    """
 
     def setUp(self):
         """Set up tests for the left full join with two example graphs."""
@@ -148,7 +147,7 @@ class TestLeftFullOuterJoin(unittest.TestCase):
         self.assertEqual({(p1, p3), (p1, p4), (p5, p6)}, set(h.edges()))
 
     def _help_check_result(self, j):
-        """After H has been full outer joined into G, this is what it should be"""
+        """After H has been full outer joined into G, this is what it should be."""
         self.assertEqual(4, j.number_of_nodes())
         self.assertEqual({p1, p2, p3, p4}, set(j))
         self.assertEqual(3, j.number_of_edges())
@@ -188,7 +187,7 @@ class TestLeftFullOuterJoin(unittest.TestCase):
 
 
 class TestInnerJoin(unittest.TestCase):
-    """Tests various graph merging procedures"""
+    """Tests various graph merging procedures."""
 
     def setUp(self):
         g = BELGraph()

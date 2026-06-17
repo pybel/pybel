@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """An example with orthology statements.
 
 The following is an example of orthology annotations from

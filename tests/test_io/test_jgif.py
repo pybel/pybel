@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for interchange with JGIF."""
 
 import json
@@ -143,7 +141,7 @@ class TestJgif(TestGraphMixin):
 
     @unittest.skipIf(sys.platform.startswith("win"), "does not work on Windows")
     def test_jgif_interchange(self):
-        """Tests data from CBN"""
+        """Tests data from CBN."""
         with open(test_jgif_path) as f:
             graph_jgif_dict = json.load(f)
 

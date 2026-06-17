@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """An example describing a translocation.
 
 .. code-block:: none

@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-
 """Tests for the conversion procedure."""
 
 import unittest
-from typing import Tuple, Type
 
 from pybel import BELGraph
 from pybel.constants import (
@@ -343,33 +340,33 @@ class TestConverters(unittest.TestCase):
 
     def help_test_convert(
         self,
-        converter: Type[Converter],
+        converter: type[Converter],
         u: BaseEntity,
         v: BaseEntity,
         edge_data: EdgeData,
-        triple: Tuple[str, str, str],
+        triple: tuple[str, str, str],
     ) -> None:
         """Test a converter class."""
         self.assertTrue(
             issubclass(converter, Converter),
-            msg="Not a Converter: {}".format(converter.__name__),
+            msg=f"Not a Converter: {converter.__name__}",
         )
         key = n()
         self.assertTrue(
             converter.predicate(u, v, key, edge_data),
-            msg="Predicate failed: {}".format(converter.__name__),
+            msg=f"Predicate failed: {converter.__name__}",
         )
         self.assertEqual(
             triple,
             converter.convert(u, v, key, edge_data),
-            msg="Conversion failed: {}".format(converter.__name__),
+            msg=f"Conversion failed: {converter.__name__}",
         )
         graph = BELGraph()
         graph.add_edge(u, v, key=key, **edge_data)
         self.assertEqual(
             triple,
             to_triple(graph, u, v, key),
-            msg="get_triple failed: {}".format(converter.__name__),
+            msg=f"get_triple failed: {converter.__name__}",
         )
 
     def test_converters_true(self):

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for summary functions for nodes."""
 
 import unittest

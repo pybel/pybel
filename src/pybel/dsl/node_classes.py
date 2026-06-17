@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
-
 """Classes for DSL nodes."""
 
 import hashlib
 from abc import ABCMeta, abstractmethod
+from collections.abc import Iterable
 from operator import methodcaller
-from typing import Iterable, List, Optional, Set, Union
+from typing import Optional
 
 from .exc import (
     InferCentralDogmaException,
@@ -57,47 +56,47 @@ from ..constants import (
 from ..language import Entity, gmod_mappings, pmod_mappings
 
 __all__ = [
-    # Base Classes
-    "Entity",
-    "BaseEntity",
-    "BaseAbundance",
-    "ListAbundance",
     # Named entities
     "Abundance",
+    "BaseAbundance",
+    "BaseEntity",
     "BiologicalProcess",
-    "Pathology",
-    "Population",
-    "NamedComplexAbundance",
     # Central Dogma Stuff
     "CentralDogma",
-    "Gene",
-    "Transcribable",
-    "Rna",
-    "MicroRna",
-    "Protein",
+    # List Entities
+    "ComplexAbundance",
+    "CompositeAbundance",
+    # Base Classes
+    "Entity",
+    "EntityVariant",
+    "EnumeratedFusionRange",
+    "Fragment",
     # Fusions
     "FusionBase",
-    "ProteinFusion",
-    "RnaFusion",
-    "GeneFusion",
     # Fusion Ranges
     "FusionRangeBase",
-    "EnumeratedFusionRange",
-    "MissingFusionRange",
-    # Variants
-    "Variant",
-    "EntityVariant",
-    "ProteinModification",
+    "Gene",
+    "GeneFusion",
     "GeneModification",
     "Hgvs",
     "HgvsReference",
     "HgvsUnspecified",
+    "ListAbundance",
+    "MicroRna",
+    "MissingFusionRange",
+    "NamedComplexAbundance",
+    "Pathology",
+    "Population",
+    "Protein",
+    "ProteinFusion",
+    "ProteinModification",
     "ProteinSubstitution",
-    "Fragment",
-    # List Entities
-    "ComplexAbundance",
-    "CompositeAbundance",
     "Reaction",
+    "Rna",
+    "RnaFusion",
+    "Transcribable",
+    # Variants
+    "Variant",
 ]
 
 # A methodcaller for the key argument of sorted()
@@ -134,19 +133,19 @@ class BaseEntity(dict, metaclass=ABCMeta):
     def md5(self) -> str:
         """Get the MD5 hash of this node."""
         if self._md5 is None:
-            self._md5 = hashlib.md5(self.as_bel().encode("utf8")).hexdigest()  # noqa: S303
+            self._md5 = hashlib.md5(self.as_bel().encode("utf8")).hexdigest()
         return self._md5
 
-    def __hash__(self):  # noqa: D105
+    def __hash__(self):
         return hash(self.as_bel())
 
     def __eq__(self, other):
         return isinstance(other, BaseEntity) and self.as_bel() == other.as_bel()
 
     def __repr__(self):
-        return "<BEL {bel}>".format(bel=self.as_bel(use_identifiers=True))
+        return f"<BEL {self.as_bel(use_identifiers=True)}>"
 
-    def __str__(self):  # noqa: D105
+    def __str__(self):
         return self.as_bel()
 
     @property
@@ -163,37 +162,37 @@ class BaseConcept(dict):
     """A dictionary containing a concept entry."""
 
     @property
-    def entity(self) -> Entity:  # noqa:D401
+    def entity(self) -> Entity:
         """This node's concept."""
         return self[CONCEPT]
 
     @property
-    def xrefs(self) -> List[Entity]:  # noqa:D401
+    def xrefs(self) -> list[Entity]:
         """Alternative identifiers for the node's concept."""
         return self.get(XREFS, [])
 
     @property
-    def namespace(self) -> str:  # noqa:D401
+    def namespace(self) -> str:
         """The namespace of this abundance."""
         return self.entity.namespace
 
     @property
-    def name(self) -> Optional[str]:  # noqa:D401
+    def name(self) -> str | None:
         """The name of this abundance."""
         return self.entity.name
 
     @property
-    def identifier(self) -> Optional[str]:  # noqa:D401
+    def identifier(self) -> str | None:
         """The identifier of this abundance."""
         return self.entity.identifier
 
     @property
-    def curie(self):  # noqa: D401
+    def curie(self):
         """The CURIE-style identifier for this node."""
         return self.entity.curie
 
     @property
-    def obo(self) -> str:  # noqa: D401
+    def obo(self) -> str:
         """The OBO-style identifier for this node."""
         return self.entity.obo
 
@@ -216,9 +215,9 @@ class BaseAbundance(BaseEntity, BaseConcept):
     def __init__(
         self,
         namespace: str,
-        name: Optional[str] = None,
-        identifier: Optional[str] = None,
-        xrefs: Optional[List[Entity]] = None,
+        name: str | None = None,
+        identifier: str | None = None,
+        xrefs: list[Entity] | None = None,
     ) -> None:
         """Build an abundance from a function, namespace, and a name and/or identifier.
 
@@ -238,17 +237,14 @@ class BaseAbundance(BaseEntity, BaseConcept):
 
     def as_bel(self, use_identifiers: bool = True) -> str:
         """Return this node as a BEL string."""
-        return "{}({})".format(
-            self._bel_function,
-            self.obo if use_identifiers and self.entity.identifier and self.entity.name else self.curie,
-        )
+        return f"{self._bel_function}({self.obo if use_identifiers and self.entity.identifier and self.entity.name else self.curie})"
 
 
 class Abundance(BaseAbundance):
     """Builds an abundance node.
 
     >>> from pybel.dsl import Abundance
-    >>> Abundance(namespace='CHEBI', name='water')
+    >>> Abundance(namespace="CHEBI", name="water")
     """
 
     function = ABUNDANCE
@@ -258,7 +254,7 @@ class BiologicalProcess(BaseAbundance):
     """Builds a biological process node.
 
     >>> from pybel.dsl import BiologicalProcess
-    >>> BiologicalProcess(namespace='GO', name='apoptosis')
+    >>> BiologicalProcess(namespace="GO", name="apoptosis")
     """
 
     function = BIOPROCESS
@@ -268,7 +264,7 @@ class Pathology(BaseAbundance):
     """Build a pathology node.
 
     >>> from pybel.dsl import Pathology
-    >>> Pathology(namespace='DO', name='Alzheimer Disease')
+    >>> Pathology(namespace="DO", name="Alzheimer Disease")
     """
 
     function = PATHOLOGY
@@ -278,7 +274,7 @@ class Population(BaseAbundance):
     """Builds a population node.
 
     >>> from pybel.dsl import Population
-    >>> Population(namespace='uberon', name='blood')
+    >>> Population(namespace="uberon", name="blood")
     """
 
     function = POPULATION
@@ -298,7 +294,7 @@ class Variant(dict, metaclass=ABCMeta):
     def as_bel(self, use_identifiers: bool = True) -> str:
         """Return this variant as a BEL string."""
 
-    def __str__(self):  # noqa: D105
+    def __str__(self):
         return self.as_bel()
 
 
@@ -308,10 +304,10 @@ class CentralDogma(BaseAbundance):
     def __init__(
         self,
         namespace: str,
-        name: Optional[str] = None,
-        identifier: Optional[str] = None,
-        xrefs: Optional[List[Entity]] = None,
-        variants: Union[None, Variant, Iterable[Variant]] = None,
+        name: str | None = None,
+        identifier: str | None = None,
+        xrefs: list[Entity] | None = None,
+        variants: None | Variant | Iterable[Variant] = None,
     ) -> None:
         """Build a node for a gene, RNA, miRNA, or protein.
 
@@ -329,7 +325,7 @@ class CentralDogma(BaseAbundance):
             self[VARIANTS] = sorted(variants, key=_as_bel)
 
     @property
-    def variants(self) -> Optional[List[Variant]]:
+    def variants(self) -> list[Variant] | None:
         """Return this entity's variants, if they exist."""
         return self.get(VARIANTS)
 
@@ -350,9 +346,9 @@ class CentralDogma(BaseAbundance):
         """Get the parent, or none if it's already a reference node.
 
         >>> from pybel.dsl import Protein, Fragment
-        >>> ab42 = Protein(name='APP', namespace='HGNC', variants=[Fragment(start=672, stop=713)])
+        >>> ab42 = Protein(name="APP", namespace="HGNC", variants=[Fragment(start=672, stop=713)])
         >>> app = ab42.get_parent()
-        >>> assert 'p(HGNC:APP)' == app.as_bel()
+        >>> assert "p(HGNC:APP)" == app.as_bel()
         """
         if VARIANTS not in self:
             return None
@@ -364,15 +360,15 @@ class CentralDogma(BaseAbundance):
             xrefs=self.xrefs,
         )
 
-    def with_variants(self, variants: Union[Variant, List[Variant]]) -> "CentralDogma":
+    def with_variants(self, variants: Variant | list[Variant]) -> "CentralDogma":
         """Create a new entity with the given variants.
 
         :param variants: An optional variant or list of variants
 
         >>> from pybel.dsl import Protein, Fragment
-        >>> app = Protein(name='APP', namespace='HGNC')
+        >>> app = Protein(name="APP", namespace="HGNC")
         >>> ab42 = app.with_variants([Fragment(start=672, stop=713)])
-        >>> assert 'p(HGNC:APP, frag(672_713))' == ab42.as_bel()
+        >>> assert "p(HGNC:APP, frag(672_713))" == ab42.as_bel()
         """
         return self.__class__(
             namespace=self.namespace,
@@ -391,9 +387,9 @@ class EntityVariant(Variant, BaseConcept):
     def __init__(
         self,
         name: str,
-        namespace: Optional[str] = None,
-        identifier: Optional[str] = None,
-        xrefs: Optional[List[Entity]] = None,
+        namespace: str | None = None,
+        identifier: str | None = None,
+        xrefs: list[Entity] | None = None,
     ) -> None:
         """Build a variant that has a reference.
 
@@ -424,11 +420,11 @@ class ProteinModification(EntityVariant):
     def __init__(
         self,
         name: str,
-        code: Optional[str] = None,
-        position: Optional[int] = None,
-        namespace: Optional[str] = None,
-        identifier: Optional[str] = None,
-        xrefs: Optional[List[Entity]] = None,
+        code: str | None = None,
+        position: int | None = None,
+        namespace: str | None = None,
+        identifier: str | None = None,
+        xrefs: list[Entity] | None = None,
     ) -> None:
         """Build a protein modification variant data dictionary.
 
@@ -445,12 +441,12 @@ class ProteinModification(EntityVariant):
         Example from BEL default namespace:
 
         >>> from pybel.dsl import ProteinModification
-        >>> ProteinModification('Ph', code='Thr', position=308)
+        >>> ProteinModification("Ph", code="Thr", position=308)
 
         Example from custom namespace:
 
         >>> from pybel.dsl import ProteinModification
-        >>> ProteinModification(name='protein phosphorylation', namespace='GO', code='Thr', position=308)
+        >>> ProteinModification(name="protein phosphorylation", namespace="GO", code="Thr", position=308)
 
         Example from custom namespace additionally qualified with identifier:
 
@@ -485,7 +481,7 @@ class ProteinModification(EntityVariant):
 
         return "pmod({}{})".format(
             x,
-            "".join(", {}".format(self[x]) for x in PMOD_ORDER[2:] if x in self),
+            "".join(f", {self[x]}" for x in PMOD_ORDER[2:] if x in self),
         )
 
 
@@ -497,9 +493,9 @@ class GeneModification(EntityVariant):
     def __init__(
         self,
         name: str,
-        namespace: Optional[str] = None,
-        identifier: Optional[str] = None,
-        xrefs: Optional[List[Entity]] = None,
+        namespace: str | None = None,
+        identifier: str | None = None,
+        xrefs: list[Entity] | None = None,
     ) -> None:
         """Build a protein modification variant data dictionary.
 
@@ -514,12 +510,12 @@ class GeneModification(EntityVariant):
         Example from BEL default namespace:
 
         >>> from pybel.dsl import GeneModification
-        >>> GeneModification(name='Me')
+        >>> GeneModification(name="Me")
 
         Example from custom namespace:
 
         >>> from pybel.dsl import GeneModification
-        >>> GeneModification(name='DNA methylation', namespace='GO', identifier='0006306')
+        >>> GeneModification(name="DNA methylation", namespace="GO", identifier="0006306")
 
         """
         if name and not namespace and not identifier:
@@ -540,7 +536,7 @@ class GeneModification(EntityVariant):
         else:
             x = self.entity.curie
 
-        return "gmod({})".format(x)
+        return f"gmod({x})"
 
 
 class Hgvs(Variant):
@@ -552,19 +548,19 @@ class Hgvs(Variant):
         :param variant: The HGVS variant string
 
         >>> from pybel.dsl import Protein, Hgvs
-        >>> Protein(namespace='HGNC', name='AKT1', variants=[Hgvs('p.Ala127Tyr')])
+        >>> Protein(namespace="HGNC", name="AKT1", variants=[Hgvs("p.Ala127Tyr")])
         """
         super().__init__(kind=HGVS)
         self[HGVS] = variant
 
     @property
-    def variant(self) -> str:  # noqa: D401
+    def variant(self) -> str:
         """The HGVS variant string."""
         return self[HGVS]
 
     def as_bel(self, use_identifiers: bool = True) -> str:
         """Return this HGVS variant as a BEL string."""
-        return 'var("{}")'.format(self.variant)
+        return f'var("{self.variant}")'
 
 
 class HgvsReference(Hgvs):
@@ -592,10 +588,10 @@ class ProteinSubstitution(Hgvs):
         :param to_aa: The 3-letter amino acid code of the new residue
 
         >>> from pybel.dsl import Protein, ProteinSubstitution
-        >>> Protein(namespace='HGNC', name='AKT1', variants=[ProteinSubstitution('Ala', 127, 'Tyr')])
+        >>> Protein(namespace="HGNC", name="AKT1", variants=[ProteinSubstitution("Ala", 127, "Tyr")])
 
         """
-        super().__init__("p.{}{}{}".format(from_aa, position, to_aa))
+        super().__init__(f"p.{from_aa}{position}{to_aa}")
 
 
 class Fragment(Variant):
@@ -603,9 +599,9 @@ class Fragment(Variant):
 
     def __init__(
         self,
-        start: Union[None, int, str] = None,
-        stop: Union[None, int, str] = None,
-        description: Optional[str] = None,
+        start: None | int | str = None,
+        stop: None | int | str = None,
+        description: str | None = None,
     ) -> None:
         """Build a protein fragment data dictionary.
 
@@ -616,12 +612,12 @@ class Fragment(Variant):
         Example of specified fragment:
 
         >>> from pybel.dsl import Protein, Fragment
-        >>> Protein(name='APP', namespace='HGNC', variants=[Fragment(start=672, stop=713)])
+        >>> Protein(name="APP", namespace="HGNC", variants=[Fragment(start=672, stop=713)])
 
         Example of unspecified fragment:
 
         >>> from pybel.dsl import Protein, Fragment
-        >>> Protein(name='APP', namespace='HGNC', variants=[Fragment()])
+        >>> Protein(name="APP", namespace="HGNC", variants=[Fragment()])
 
         """
         super().__init__(kind=FRAGMENT)
@@ -641,16 +637,16 @@ class Fragment(Variant):
         if FRAGMENT_MISSING in self:
             return "?"
 
-        return "{}_{}".format(self[FRAGMENT_START], self[FRAGMENT_STOP])
+        return f"{self[FRAGMENT_START]}_{self[FRAGMENT_STOP]}"
 
     def as_bel(self, use_identifiers=False) -> str:
         """Return this fragment variant as a BEL string."""
-        res = '"{}"'.format(self.range)
+        res = f'"{self.range}"'
 
         if FRAGMENT_DESCRIPTION in self:
-            res += ', "{}"'.format(self[FRAGMENT_DESCRIPTION])
+            res += f', "{self[FRAGMENT_DESCRIPTION]}"'
 
-        return "frag({})".format(res)
+        return f"frag({res})"
 
 
 class Gene(CentralDogma):
@@ -695,12 +691,12 @@ class Rna(Transcribable):
     Example: AKT1 protein coding gene's RNA:
 
     >>> from pybel.dsl import Rna
-    >>> Rna(namespace='HGNC', name='AKT1', identifier='391')
+    >>> Rna(namespace="HGNC", name="AKT1", identifier="391")
 
     Non-coding RNAs can also be encoded such as `U85 <https://www-snorna.biotoul.fr/plus.php?id=U85>`_:
 
     >>> from pybel.dsl import Rna
-    >>> Rna(namespace='SNORNABASE', identifier='SR0000073')
+    >>> Rna(namespace="SNORNABASE", identifier="SR0000073")
     """
 
     function = RNA
@@ -715,17 +711,17 @@ class MicroRna(Transcribable):
     MIR1-1 from `HGNC <https://www.genenames.org/cgi-bin/gene_symbol_report?hgnc_id=31499>`_:
 
     >>> from pybel.dsl import MicroRna
-    >>> MicroRna(namespace='HGNC', name='MIR1-1', identifier='31499')
+    >>> MicroRna(namespace="HGNC", name="MIR1-1", identifier="31499")
 
     MIR1-1 from `miRBase <http://www.mirbase.org/cgi-bin/mirna_entry.pl?acc=MI0000651>`_:
 
     >>> from pybel.dsl import MicroRna
-    >>> MicroRna(namespace='MIRBASE', identifier='MI0000651')
+    >>> MicroRna(namespace="MIRBASE", identifier="MI0000651")
 
     MIR1-1 from `Entrez Gene <https://view.ncbi.nlm.nih.gov/gene/406904>`_
 
     >>> from pybel.dsl import MicroRna
-    >>> MicroRna(namespace='ENTREZ', identifier='406904')
+    >>> MicroRna(namespace="ENTREZ", identifier="406904")
     """
 
     function = MIRNA
@@ -737,17 +733,17 @@ class Protein(CentralDogma):
     Example: AKT
 
     >>> from pybel.dsl import Protein
-    >>> Protein(namespace='HGNC', name='AKT1')
+    >>> Protein(namespace="HGNC", name="AKT1")
 
     Example: AKT with optionally included HGNC database identifier
 
     >>> from pybel.dsl import Protein
-    >>> Protein(namespace='HGNC', name='AKT1', identifier='391')
+    >>> Protein(namespace="HGNC", name="AKT1", identifier="391")
 
     Example: AKT with phosphorylation
 
     >>> from pybel.dsl import Protein, ProteinModification
-    >>> Protein(namespace='HGNC', name='AKT', variants=[ProteinModification('Ph', code='Thr', position=308)])
+    >>> Protein(namespace="HGNC", name="AKT", variants=[ProteinModification("Ph", code="Thr", position=308)])
     """
 
     function = PROTEIN
@@ -791,12 +787,12 @@ class Reaction(BaseEntity):
 
     def __init__(
         self,
-        reactants: Union[BaseAbundance, Iterable[BaseAbundance]],
-        products: Union[BaseAbundance, Iterable[BaseAbundance]],
-        namespace: Optional[str] = None,
-        name: Optional[str] = None,
-        identifier: Optional[str] = None,
-        xrefs: Optional[List[Entity]] = None,
+        reactants: BaseAbundance | Iterable[BaseAbundance],
+        products: BaseAbundance | Iterable[BaseAbundance],
+        namespace: str | None = None,
+        name: str | None = None,
+        identifier: str | None = None,
+        xrefs: list[Entity] | None = None,
     ) -> None:
         """Build a reaction node.
 
@@ -808,7 +804,7 @@ class Reaction(BaseEntity):
         :param xrefs: Alternate identifiers for the entity if it is named
 
         >>> from pybel.dsl import Reaction, Protein, Abundance
-        >>> Reaction([Protein(namespace='HGNC', name='KNG1')], [Abundance(namespace='CHEBI', name='bradykinin')])
+        >>> Reaction([Protein(namespace="HGNC", name="KNG1")], [Abundance(namespace="CHEBI", name="bradykinin")])
 
         """
         super().__init__()
@@ -835,31 +831,28 @@ class Reaction(BaseEntity):
         )
 
     @property
-    def reactants(self) -> List[BaseAbundance]:
+    def reactants(self) -> list[BaseAbundance]:
         """Return the list of reactants in this reaction."""
         return self[REACTANTS]
 
     @property
-    def products(self) -> List[BaseAbundance]:
+    def products(self) -> list[BaseAbundance]:
         """Return the list of products in this reaction."""
         return self[PRODUCTS]
 
-    def get_catalysts(self) -> Set[BaseAbundance]:
+    def get_catalysts(self) -> set[BaseAbundance]:
         """Get entities appearing in both the reactants and products."""
         return set(self.reactants).intersection(self.products)
 
     def as_bel(self, use_identifiers: bool = True) -> str:
         """Return this reaction as a BEL string."""
-        return "rxn(reactants({}), products({}))".format(
-            _entity_list_as_bel(self.reactants, use_identifiers=use_identifiers),
-            _entity_list_as_bel(self.products, use_identifiers=use_identifiers),
-        )
+        return f"rxn(reactants({_entity_list_as_bel(self.reactants, use_identifiers=use_identifiers)}), products({_entity_list_as_bel(self.products, use_identifiers=use_identifiers)}))"
 
 
 class ListAbundance(BaseEntity):
     """The superclass for all BEL terms defined by lists, as opposed to by names like in :class:`BaseAbundance`."""
 
-    def __init__(self, members: Union[BaseAbundance, Iterable[BaseAbundance]]) -> None:
+    def __init__(self, members: BaseAbundance | Iterable[BaseAbundance]) -> None:
         """Build a list abundance node.
 
         :param members: A list of PyBEL node data dictionaries
@@ -875,16 +868,13 @@ class ListAbundance(BaseEntity):
             raise ListAbundanceEmptyException("List abundance can not be instantiated with an empty members list.")
 
     @property
-    def members(self) -> List[BaseAbundance]:
+    def members(self) -> list[BaseAbundance]:
         """Return the list of members in this list abundance."""
         return self[MEMBERS]
 
     def as_bel(self, use_identifiers: bool = True) -> str:
         """Return this list abundance as a BEL string."""
-        return "{}({})".format(
-            self._bel_function,
-            _entity_list_as_bel(self.members, use_identifiers=use_identifiers),
-        )
+        return f"{self._bel_function}({_entity_list_as_bel(self.members, use_identifiers=use_identifiers)})"
 
 
 class ComplexAbundance(ListAbundance):
@@ -895,10 +885,10 @@ class ComplexAbundance(ListAbundance):
     def __init__(
         self,
         members: Iterable[BaseAbundance],
-        namespace: Optional[str] = None,
-        name: Optional[str] = None,
-        identifier: Optional[str] = None,
-        xrefs: Optional[List[Entity]] = None,
+        namespace: str | None = None,
+        name: str | None = None,
+        identifier: str | None = None,
+        xrefs: list[Entity] | None = None,
     ) -> None:
         """Build a complex list node.
 
@@ -912,12 +902,12 @@ class ComplexAbundance(ListAbundance):
         _help_named(self, namespace=namespace, identifier=identifier, name=name, xrefs=xrefs)
 
     @property
-    def entity(self) -> Optional[Entity]:  # noqa:D401
+    def entity(self) -> Entity | None:
         """The concept represented by this complex if it has been named."""
         return self.get(CONCEPT)
 
     @property
-    def xrefs(self) -> List[Entity]:  # noqa:D401
+    def xrefs(self) -> list[Entity]:
         """Alternative identifiers for the concept if it has been named."""
         return self.get(XREFS, [])
 
@@ -926,7 +916,7 @@ class NamedComplexAbundance(BaseAbundance):
     """Build a named complex abundance node.
 
     >>> from pybel.dsl import NamedComplexAbundance
-    >>> NamedComplexAbundance(namespace='FPLX', name='Calcineurin Complex')
+    >>> NamedComplexAbundance(namespace="FPLX", name="Calcineurin Complex")
     """
 
     function = COMPLEX
@@ -941,13 +931,17 @@ class CompositeAbundance(ListAbundance):
     present, then acute respiratory distress syndrome happens.
 
     >>> from pybel.dsl import CompositeAbundance, ComplexAbundance, Protein, NamedComplexAbundance
-    >>> CompositeAbundance([
-    ...     NamedComplexAbundance('fplx', 'nfkb'),
-    ...     ComplexAbundance([
-    ...         Protein('hgnc', identifier='6018', name='IL6'),
-    ...         Protein('hgnc', identifier='11364', name='STAT3'),
-    ...     ]),
-    ... ])
+    >>> CompositeAbundance(
+    ...     [
+    ...         NamedComplexAbundance("fplx", "nfkb"),
+    ...         ComplexAbundance(
+    ...             [
+    ...                 Protein("hgnc", identifier="6018", name="IL6"),
+    ...                 Protein("hgnc", identifier="11364", name="STAT3"),
+    ...             ]
+    ...         ),
+    ...     ]
+    ... )
     """
 
     function = COMPOSITE
@@ -960,7 +954,7 @@ class FusionRangeBase(dict, metaclass=ABCMeta):
     def as_bel(self) -> str:
         """Return this fusion range as BEL."""
 
-    def __str__(self):  # noqa: D105
+    def __str__(self):
         return self.as_bel()
 
 
@@ -969,7 +963,7 @@ class MissingFusionRange(FusionRangeBase):
 
     def __init__(self):
         """Build a missing fusion range."""
-        super(MissingFusionRange, self).__init__(
+        super().__init__(
             {
                 FUSION_MISSING: "?",
             }
@@ -992,7 +986,7 @@ class EnumeratedFusionRange(FusionRangeBase):
 
         Example fully specified RNA fusion range:
 
-        >>> EnumeratedFusionRange('r', 1, 79)
+        >>> EnumeratedFusionRange("r", 1, 79)
 
         """
         super().__init__(
@@ -1005,11 +999,7 @@ class EnumeratedFusionRange(FusionRangeBase):
 
     def as_bel(self) -> str:
         """Return this fusion range as a BEL string."""
-        return "{reference}.{start}_{stop}".format(
-            reference=self[FUSION_REFERENCE],
-            start=self[FUSION_START],
-            stop=self[FUSION_STOP],
-        )
+        return f"{self[FUSION_REFERENCE]}.{self[FUSION_START]}_{self[FUSION_STOP]}"
 
 
 class FusionBase(BaseEntity):
@@ -1019,8 +1009,8 @@ class FusionBase(BaseEntity):
         self,
         partner_5p: CentralDogma,
         partner_3p: CentralDogma,
-        range_5p: Optional[FusionRangeBase] = None,
-        range_3p: Optional[FusionRangeBase] = None,
+        range_5p: FusionRangeBase | None = None,
+        range_3p: FusionRangeBase | None = None,
     ) -> None:
         """Build a fusion node.
 
@@ -1069,13 +1059,7 @@ class FusionBase(BaseEntity):
         else:
             p5p = self.partner_5p.curie
 
-        return '{}(fus({}, "{}", {}, "{}"))'.format(
-            self._bel_function,
-            p5p,
-            self.range_5p.as_bel(),
-            p3p,
-            self.range_3p.as_bel(),
-        )
+        return f'{self._bel_function}(fus({p5p}, "{self.range_5p.as_bel()}", {p3p}, "{self.range_3p.as_bel()}"))'
 
 
 class ProteinFusion(FusionBase):

@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 """Tests for canonicalization functions."""
 
 import unittest
-from typing import Iterable
+from collections.abc import Iterable
 
 from pybel import BELGraph
 from pybel.canonicalize import _to_bel_lines_body, postpend_location
@@ -41,7 +39,7 @@ from pybel.utils import canonicalize_edge
 class TestCanonicalize(unittest.TestCase):
     def test_postpend_location_failure(self):
         with self.assertRaises(ValueError):
-            postpend_location("", dict(name="failure"))
+            postpend_location("", {"name": "failure"})
 
     def test_canonicalize_variant_dsl(self):
         """Use the __str__ functions in the DSL to create BEL instead of external pybel.canonicalize."""
@@ -194,7 +192,8 @@ class TestCanonicalize(unittest.TestCase):
 
 class TestCanonicalizeEdge(unittest.TestCase):
     """This class houses all testing for the canonicalization of edges such that the relation/modifications can be used
-    as a second level hash"""
+    as a second level hash.
+    """
 
     def setUp(self):
         self.g = BELGraph()
@@ -295,7 +294,7 @@ class TestSerializeBEL(unittest.TestCase):
 
         expected_lines = [
             f'SET Citation = {{"{CITATION_TYPE_PUBMED}", "{self.citation}"}}\n',
-            'SET SupportingText = "{}"'.format(self.evidence),
+            f'SET SupportingText = "{self.evidence}"',
             "p(HGNC:YFG1) increases p(HGNC:YFG)",
             "UNSET SupportingText",
             "UNSET Citation\n",
@@ -305,7 +304,7 @@ class TestSerializeBEL(unittest.TestCase):
         self._help_check_lines(expected_lines)
 
     def test_different_key_and_namespace(self):
-        key, namespace, value = map(lambda _: n(), range(3))
+        key, namespace, value = (n() for _ in range(3))
 
         self.graph.annotation_curie.add(key)
         self.graph.add_increases(
@@ -336,7 +335,7 @@ class TestSerializeBEL(unittest.TestCase):
 
     def test_single_annotation(self):
         """Test a scenario with a qualified edge, but no annotations."""
-        a1, v1 = map(lambda _: n(), range(2))
+        a1, v1 = (n() for _ in range(2))
         self.graph.annotation_list[a1] = {v1}
         self.graph.add_increases(
             Protein(namespace="HGNC", name="YFG1"),
@@ -368,7 +367,7 @@ class TestSerializeBEL(unittest.TestCase):
         self._help_check_lines(expected_lines)
 
     def test_multiple_annotations(self):
-        a1, v1, v2 = map(lambda _: n(), range(3))
+        a1, v1, v2 = (n() for _ in range(3))
         v1, v2 = sorted([v1, v2])
 
         self.graph.annotation_list[a1] = {v1, v2}

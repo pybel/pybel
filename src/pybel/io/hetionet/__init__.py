@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Importer for Hetionet JSON."""
 
 from .hetionet import (

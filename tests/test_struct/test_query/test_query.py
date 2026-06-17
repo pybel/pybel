@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for the query builder."""
 
 import logging
@@ -93,7 +91,7 @@ class TestQueryConstructor(unittest.TestCase):
 
 
 class QueryTestEgf(unittest.TestCase):
-    """Test querying the EGF subgraph"""
+    """Test querying the EGF subgraph."""
 
     def setUp(self):
         """Set up each test with a mock query manager."""
@@ -183,7 +181,7 @@ class QueryTestEgf(unittest.TestCase):
 
 
 class QueryTest(unittest.TestCase):
-    """Test the query"""
+    """Test the query."""
 
     def setUp(self):
         """Setup each test with an empty mock query manager."""
@@ -257,7 +255,7 @@ class QueryTest(unittest.TestCase):
         self.assertIsInstance(result, BELGraph)
         self.assertLess(0, result.number_of_nodes())
 
-        self.assertIn(mouse_mapk1_protein, result, msg="nodes:\n{}".format(list(map(repr, graph))))
+        self.assertIn(mouse_mapk1_protein, result, msg=f"nodes:\n{list(map(repr, graph))}")
         self.assertIn(mouse_csf1_protein, result)
 
         self.assertEqual(2, result.number_of_nodes())

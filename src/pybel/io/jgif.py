@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Conversion functions for BEL graphs with JGIF JSON.
 
 The JSON Graph Interchange Format (JGIF) is `specified <http://jsongraphformat.info/>`_ similarly to the Node-Link
@@ -12,8 +10,9 @@ import json
 import logging
 import re
 from collections import defaultdict
+from collections.abc import Mapping
 from operator import methodcaller
-from typing import Any, Mapping, Optional, TextIO, Union
+from typing import Any, TextIO
 
 import requests
 from networkx.utils import open_file
@@ -45,11 +44,11 @@ __all__ = [
     "from_jgif_file",
     "from_jgif_gz",
     "from_jgif_jsons",
+    "post_jgif",
     "to_jgif",
     "to_jgif_file",
     "to_jgif_gz",
     "to_jgif_jsons",
-    "post_jgif",
 ]
 
 logger = logging.getLogger(__name__)
@@ -174,7 +173,7 @@ NAMESPACE_TO_PATTERN = {
 
 
 @open_file(0, mode="r")
-def from_cbn_jgif_file(path: Union[str, TextIO]) -> BELGraph:
+def from_cbn_jgif_file(path: str | TextIO) -> BELGraph:
     """Build a graph from a file containing the CBN variant of JGIF.
 
     :param path: A path or file-like
@@ -196,7 +195,8 @@ def from_cbn_jgif(graph_jgif_dict):
 
         import requests
         from pybel import from_cbn_jgif
-        apoptosis_url = 'http://causalbionet.com/Networks/GetJSONGraphFile?networkId=810385422'
+
+        apoptosis_url = "http://causalbionet.com/Networks/GetJSONGraphFile?networkId=810385422"
         graph_jgif_dict = requests.get(apoptosis_url).json()
         graph = from_cbn_jgif(graph_jgif_dict)
 
@@ -239,7 +239,7 @@ def from_cbn_jgif(graph_jgif_dict):
     return graph
 
 
-def from_jgif(graph_jgif_dict, parser_kwargs: Optional[Mapping[str, Any]] = None):  # noqa:C901
+def from_jgif(graph_jgif_dict, parser_kwargs: Mapping[str, Any] | None = None):
     """Build a BEL graph from a JGIF JSON object.
 
     :param dict graph_jgif_dict: The JSON object representing the graph in JGIF format
@@ -341,7 +341,7 @@ def from_jgif(graph_jgif_dict, parser_kwargs: Optional[Mapping[str, Any]] = None
 
 
 @open_file(0, mode="r")
-def from_jgif_file(path: Union[str, TextIO]) -> BELGraph:
+def from_jgif_file(path: str | TextIO) -> BELGraph:
     """Build a graph from the JGIF JSON contained in the given file.
 
     :param path: A path or file-like
@@ -378,6 +378,7 @@ def to_jgif(graph):
 
         import os
         from pybel.examples import sialic_acid_graph
+
         graph_jgif_json = pybel.to_jgif(sialic_acid_graph)
 
     If you want to write the graph directly to a file as JGIF, see func:`to_jgif_file`.
@@ -437,7 +438,7 @@ def to_jgif(graph):
     return {
         "graph": {
             "metadata": dict(
-                origin=dict(name="pybel", version=get_version()),
+                origin={"name": "pybel", "version": get_version()},
                 **graph.document,
             ),
             "nodes": nodes_entry,
@@ -447,7 +448,7 @@ def to_jgif(graph):
 
 
 @open_file(1, mode="w")
-def to_jgif_file(graph: BELGraph, file: Union[str, TextIO], **kwargs) -> None:
+def to_jgif_file(graph: BELGraph, file: str | TextIO, **kwargs) -> None:
     """Write JGIF to a file.
 
     :param graph: A BEL graph
@@ -459,7 +460,8 @@ def to_jgif_file(graph: BELGraph, file: Union[str, TextIO], **kwargs) -> None:
 
        from pybel.examples import sialic_acid_graph
        from pybel import to_jgif_file
-       with open('graph.bel.jgif.json', 'w') as file:
+
+       with open("graph.bel.jgif.json", "w") as file:
            to_jgif_file(sialic_acid_graph, file)
 
     The example below shows how to output a BEL graph as JGIF to a file at a given path.
@@ -468,7 +470,8 @@ def to_jgif_file(graph: BELGraph, file: Union[str, TextIO], **kwargs) -> None:
 
         from pybel.examples import sialic_acid_graph
         from pybel import to_jgif_file
-        to_jgif_file(sialic_acid_graph, 'graph.bel.jgif.json')
+
+        to_jgif_file(sialic_acid_graph, "graph.bel.jgif.json")
 
     If you have a big graph, you might consider storing it as a gzipped JGIF file
     by using :func:`to_jgif_gz`.

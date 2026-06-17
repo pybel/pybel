@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Convert a BEL graph to HiPathia inputs.
 
 Input
@@ -69,7 +67,6 @@ import os
 from collections import defaultdict
 from itertools import groupby
 from operator import itemgetter
-from typing import List, Optional, Set, Tuple, Union
 
 import networkx as nx
 import pandas as pd
@@ -85,8 +82,8 @@ from ..dsl import ComplexAbundance, Protein, hgnc
 from ..struct import BELGraph
 
 __all__ = [
-    "from_hipathia_paths",
     "from_hipathia_dfs",
+    "from_hipathia_paths",
     "to_hipathia",
     "to_hipathia_dfs",
 ]
@@ -103,7 +100,7 @@ def from_hipathia_paths(name: str, att_path: str, sif_path: str) -> BELGraph:
     return from_hipathia_dfs(name=name, att_df=att_df, sif_df=sif_df)
 
 
-def group_delimited_list(entries: List[str], sep: str = "/") -> List[List[str]]:
+def group_delimited_list(entries: list[str], sep: str = "/") -> list[list[str]]:
     """Group delimited things in a list."""
     return [list(b) for a, b in groupby(entries, lambda z: z == sep) if not a]
 
@@ -128,7 +125,7 @@ def from_hipathia_dfs(name: str, att_df: pd.DataFrame, sif_df: pd.DataFrame) -> 
     """Get a BEL graph from HiPathia dataframes."""
 
     def _clean_name(s):
-        prefix = "N-{name}-".format(name=name)
+        prefix = f"N-{name}-"
         if prefix not in s:
             raise ValueError("wrong name for pathway")
         return tuple(sorted(s[len(prefix) :].split(" ")))
@@ -145,7 +142,6 @@ def from_hipathia_dfs(name: str, att_df: pd.DataFrame, sif_df: pd.DataFrame) -> 
 
     for components, component_label_lists, component_gene_lists in att_df[["ID", "label", "genesList"]].values:
         if not components:
-            print(att_df[["ID", "label", "genesList"]])
             raise ValueError("missing components in row")
 
         if len(components) == 1:  # This is a simple node, representing a protein or protein family
@@ -166,7 +162,9 @@ def from_hipathia_dfs(name: str, att_df: pd.DataFrame, sif_df: pd.DataFrame) -> 
         else:  # This is a complex node, representing a protein complex of simple nodes
             component_dsls = []
             components = tuple(sorted(components))
-            for component, label, entrez_ids in zip(components, component_label_lists, component_gene_lists):
+            for component, label, entrez_ids in zip(
+                components, component_label_lists, component_gene_lists, strict=False
+            ):
                 if len(entrez_ids) == 1:
                     simple_dsl = _p(identifier=entrez_ids[0])
                     simple_node_to_dsl[component] = simple_dsl
@@ -199,7 +197,7 @@ def from_hipathia_dfs(name: str, att_df: pd.DataFrame, sif_df: pd.DataFrame) -> 
         elif relation == "inhibition":
             graph.add_decreases(source, target, citation=(CITATION_TYPE_OTHER, "HiPathia"), evidence="")
         else:
-            raise ValueError("unknown relation: {relation}".format(relation=relation))
+            raise ValueError(f"unknown relation: {relation}")
 
     return graph
 
@@ -214,11 +212,11 @@ def to_hipathia(
     if att_df is None and sif_df is None:
         logger.warning("can not convert graph %s", graph.name)
         return
-    att_df.to_csv(os.path.join(directory, "{}.att".format(graph.name)), sep="\t", index=False)
-    sif_df.to_csv(os.path.join(directory, "{}.sif".format(graph.name)), sep="\t", index=False)
+    att_df.to_csv(os.path.join(directory, f"{graph.name}.att"), sep="\t", index=False)
+    sif_df.to_csv(os.path.join(directory, f"{graph.name}.sif"), sep="\t", index=False)
 
 
-def _is_node_family(graph: BELGraph, node: Protein) -> Optional[Set[Protein]]:
+def _is_node_family(graph: BELGraph, node: Protein) -> set[Protein] | None:
     """Get the children of the protein node, if some exist."""
     children = set()
     for child, _, data in graph.in_edges(node, data=True):
@@ -226,7 +224,7 @@ def _is_node_family(graph: BELGraph, node: Protein) -> Optional[Set[Protein]]:
             children.add(child)
 
     if children and not all(isinstance(child, Protein) for child in children):
-        logger.warning("not all children of {} are proteins: {}".format(node, children))
+        logger.warning(f"not all children of {node} are proteins: {children}")
         return
 
     return children
@@ -234,8 +232,8 @@ def _is_node_family(graph: BELGraph, node: Protein) -> Optional[Set[Protein]]:
 
 def to_hipathia_dfs(
     graph: BELGraph,
-    draw_directory: Optional[str] = None,
-) -> Union[Tuple[None, None], Tuple[pd.DataFrame, pd.DataFrame]]:
+    draw_directory: str | None = None,
+) -> tuple[None, None] | tuple[pd.DataFrame, pd.DataFrame]:
     """Get the ATT and SIF dataframes.
 
     :param graph: A BEL graph
@@ -323,7 +321,7 @@ def to_hipathia_dfs(
                     genes_lists.append([member.identifier])
             k = tuple(k)
         else:
-            logger.debug("skipping node {}".format(node))
+            logger.debug(f"skipping node {node}")
             continue
 
         k = "N-{}-{}".format(graph.name, " ".join(map(str, k)))
@@ -408,7 +406,7 @@ def to_hipathia_dfs(
             plt.figure(figsize=(20, 20))
             nx.draw_networkx(composite_graph, pos, labels=nx_labels)
             plt.axis("off")
-            plt.savefig(os.path.join(draw_directory, "{}.png".format(graph.name)))
+            plt.savefig(os.path.join(draw_directory, f"{graph.name}.png"))
 
     return att_df, sif_df
 

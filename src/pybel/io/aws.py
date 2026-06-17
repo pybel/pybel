@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Transport functions for Amazon Web Services (AWS).
 
 AWS has a cloud-based file storage service called S3 that can be programatically
@@ -9,21 +7,21 @@ wrapping upload/download of BEL graphs using the gzipped Node-Link schema.
 
 import logging
 from io import BytesIO
-from typing import Any, Optional
+from typing import Any
 
 from .nodelink import from_nodelink_gz_io, to_nodelink_gz_io
 from ..struct import BELGraph
 
 __all__ = [
-    "to_s3",
     "from_s3",
+    "to_s3",
 ]
 
 logger = logging.getLogger(__name__)
 S3Client = Any
 
 
-def to_s3(graph: BELGraph, *, bucket: str, key: str, client: Optional[S3Client] = None) -> None:
+def to_s3(graph: BELGraph, *, bucket: str, key: str, client: S3Client | None = None) -> None:
     """Save BEL to S3 as gzipped node-link JSON.
 
     If you don't specify an instantiated client, PyBEL will do its best to load a default
@@ -36,8 +34,8 @@ def to_s3(graph: BELGraph, *, bucket: str, key: str, client: Optional[S3Client] 
 
         graph = pybel.to_s3(
             sialic_acid_graph,
-            bucket='your bucket',
-            key='your file name.bel.nodelink.json.gz',
+            bucket="your bucket",
+            key="your file name.bel.nodelink.json.gz",
         )
 
     However, if you would like to configure your own, you can do it with something like this:
@@ -45,7 +43,8 @@ def to_s3(graph: BELGraph, *, bucket: str, key: str, client: Optional[S3Client] 
     .. code-block:: python
 
         import boto3
-        s3_client = boto3.client('s3')
+
+        s3_client = boto3.client("s3")
 
         import pybel
         from pybel.examples import sialic_acid_graph
@@ -53,8 +52,8 @@ def to_s3(graph: BELGraph, *, bucket: str, key: str, client: Optional[S3Client] 
         graph = pybel.to_s3(
             sialic_acid_graph,
             client=s3_client,
-            bucket='your bucket',
-            key='your file name.bel.nodelink.json.gz',
+            bucket="your bucket",
+            key="your file name.bel.nodelink.json.gz",
         )
 
     This assumes you already have credentials set up on your machine.
@@ -70,7 +69,7 @@ def to_s3(graph: BELGraph, *, bucket: str, key: str, client: Optional[S3Client] 
     client.upload_fileobj(io, bucket, key)
 
 
-def from_s3(*, bucket: str, key: str, client: Optional[S3Client] = None) -> BELGraph:
+def from_s3(*, bucket: str, key: str, client: S3Client | None = None) -> BELGraph:
     """Get BEL from gzipped node-link JSON from Amazon S3.
 
     If you don't specify an instantiated client, PyBEL will do its best to load a default
@@ -78,20 +77,22 @@ def from_s3(*, bucket: str, key: str, client: Optional[S3Client] = None) -> BELG
 
     .. code-block:: python
 
-        graph = pybel.from_s3(bucket='your bucket', key='your file name.bel.nodelink.json.gz')
+        graph = pybel.from_s3(bucket="your bucket", key="your file name.bel.nodelink.json.gz")
 
     However, if you would like to configure your own, you can do it with something like this:
 
     .. code-block:: python
 
         import boto3
-        s3_client = boto3.client('s3')
+
+        s3_client = boto3.client("s3")
 
         import pybel
+
         graph = pybel.from_s3(
             client=s3_client,
-            bucket='your bucket',
-            key='your file name.bel.nodelink.json.gz',
+            bucket="your bucket",
+            key="your file name.bel.nodelink.json.gz",
         )
     """
     if client is None:

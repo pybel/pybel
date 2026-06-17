@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Managers and subclasses for PyBEL.
 
 The :mod:`pybel.manager` module serves as an interface between the BEL graph data structure and underlying relational
@@ -37,28 +35,28 @@ from .models import (
 from .query_manager import QueryManager, graph_from_edges
 
 __all__ = [
-    "BaseManager",
-    "build_engine_session",
-    "Manager",
-    "NetworkManager",
-    "QueryManager",
-    "graph_from_edges",
-    "enrich_pubmed_citations",
-    "enrich_pmc_citations",
-    # I/O
-    "from_database",
-    "to_database",
+    "Author",
     # Models
     "Base",
+    "BaseManager",
+    "Citation",
+    "Edge",
+    "Evidence",
+    "Manager",
     "Namespace",
     "NamespaceEntry",
     "Network",
+    "NetworkManager",
     "Node",
-    "Author",
-    "Citation",
-    "Evidence",
-    "Edge",
+    "QueryManager",
+    "build_engine_session",
     "edge_annotation",
+    "enrich_pmc_citations",
+    "enrich_pubmed_citations",
+    # I/O
+    "from_database",
+    "graph_from_edges",
     "network_edge",
     "network_node",
+    "to_database",
 ]

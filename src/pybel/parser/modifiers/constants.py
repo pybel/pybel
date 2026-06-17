@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Constants for modifier parsers."""
 
 from pyparsing import Keyword, MatchFirst, one_of

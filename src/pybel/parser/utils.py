@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-
 """Utilities for the parsers."""
 
 import itertools as itt
 import logging
-from typing import Any, List, Optional
+from typing import Any
 
 from pyparsing import (
     And,
@@ -60,13 +58,20 @@ def nest(*content):
     """Define a delimited list by enumerating each element of the list."""
     if len(content) == 0:
         raise ValueError("no arguments supplied")
-    return And([LPF, content[0]] + list(itt.chain.from_iterable(zip(itt.repeat(C), content[1:]))) + [RPF])
+    return And(
+        [
+            LPF,
+            content[0],
+            *list(itt.chain.from_iterable(zip(itt.repeat(C), content[1:]))),
+            RPF,
+        ]
+    )
 
 
 def one_of_tags(
-    tags: List[str],
+    tags: list[str],
     canonical_tag: str,
-    name: Optional[str] = None,
+    name: str | None = None,
 ) -> ParserElement:
     """Define the tags usable in the :class:`BelParser`.
 

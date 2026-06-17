@@ -1,17 +1,14 @@
-# -*- coding: utf-8 -*-
-
 """Conversion functions for BEL graphs with a SQL database."""
 
 import logging
-from typing import Optional
 
 from sqlalchemy.exc import IntegrityError, OperationalError
 
 from .cache_manager import Manager
 
 __all__ = [
-    "to_database",
     "from_database",
+    "to_database",
 ]
 
 logger = logging.getLogger(__name__)
@@ -19,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 def to_database(
     graph,
-    manager: Optional[Manager] = None,
+    manager: Manager | None = None,
     use_tqdm: bool = True,
 ):
     """Store a graph in a database.
@@ -43,8 +40,8 @@ def to_database(
 
 def from_database(
     name: str,
-    version: Optional[str] = None,
-    manager: Optional[Manager] = None,
+    version: str | None = None,
+    manager: Manager | None = None,
 ):
     """Load a BEL graph from a database.
 

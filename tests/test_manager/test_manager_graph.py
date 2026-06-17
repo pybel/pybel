@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for manager functions handling BEL networks."""
 
 import time
@@ -91,7 +89,7 @@ superoxide_decomposition = Reaction(reactants=[superoxide], products=[hydrogen_p
 
 
 def assert_unqualified_edge(test_case, u: BaseEntity, v: BaseEntity, rel: str) -> None:
-    """Assert there's only one edge and get the data for it"""
+    """Assert there's only one edge and get the data for it."""
     test_case.assertIn(u, test_case.graph)
     test_case.assertIn(v, test_case.graph[u])
     edges = list(test_case.graph[u][v].values())
@@ -191,7 +189,8 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
 class TestTemporaryInsertNetwork(TemporaryCacheMixin):
     def test_insert_with_list_annotations(self):
         """This test checks that graphs that contain list annotations, which aren't cached, can be loaded properly
-        into the database."""
+        into the database.
+        """
         graph = BELGraph(name="test", version="0.0.0")
         graph.annotation_list["TEST"] = {"a", "b", "c"}
 
@@ -248,7 +247,7 @@ class TestTypedQuery(TemporaryCacheMixin):
 
 class TestQuery(TemporaryCacheMixin):
     def setUp(self):
-        super(TestQuery, self).setUp()
+        super().setUp()
 
         graph = BELGraph(name="test", version="0.0.0")
         graph.annotation_list["TEST"] = {"a", "b", "c"}
@@ -327,17 +326,17 @@ class TestQuery(TemporaryCacheMixin):
 
     def test_query_edge_by_source_function(self):
         edges = self.manager.query_edges(source_function=PROTEIN).all()
-        self.assertEqual(1, len(edges), msg="Wrong number of edges: {}".format(edges))
+        self.assertEqual(1, len(edges), msg=f"Wrong number of edges: {edges}")
 
         edges = self.manager.query_edges(source_function=BIOPROCESS).all()
-        self.assertEqual(0, len(edges), msg="Wrong number of edges: {}".format(edges))
+        self.assertEqual(0, len(edges), msg=f"Wrong number of edges: {edges}")
 
     def test_query_edge_by_target_function(self):
         edges = self.manager.query_edges(target_function=PROTEIN).all()
-        self.assertEqual(1, len(edges), msg="Wrong number of edges: {}".format(edges))
+        self.assertEqual(1, len(edges), msg=f"Wrong number of edges: {edges}")
 
         edges = self.manager.query_edges(target_function=PATHOLOGY).all()
-        self.assertEqual(0, len(edges), msg="Wrong number of edges: {}".format(edges))
+        self.assertEqual(0, len(edges), msg=f"Wrong number of edges: {edges}")
 
     def test_query_citation_by_type(self):
         rv = self.manager.query_citations(db=CITATION_TYPE_PUBMED)
@@ -419,7 +418,7 @@ class TestEnsure(TemporaryCacheMixin):
         self.assertEqual(evidence, reloaded_evidence)
 
     def test_get_or_create_author(self):
-        """This tests getting or creating author with unicode characters"""
+        """This tests getting or creating author with unicode characters."""
         author_name = "Jαckson M"
 
         # Create
@@ -453,7 +452,7 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
 
     def test_citations(self):
         citations = self.manager.session.query(Citation).all()
-        self.assertEqual(2, len(citations), msg="Citations: {}".format(citations))
+        self.assertEqual(2, len(citations), msg=f"Citations: {citations}")
 
         citation_db_ids = {"123455", "123456"}
         self.assertEqual(citation_db_ids, {citation.db_id for citation in citations})
@@ -592,7 +591,7 @@ class TestAddNodeFromData(unittest.TestCase):
         assert_unqualified_edge(self, jun, node, PART_OF)
 
     def test_dimer_complex(self):
-        """Tests what happens if a BEL statement complex(p(X), p(X)) is added"""
+        """Tests what happens if a BEL statement complex(p(X), p(X)) is added."""
         self.graph.add_node_from_data(egfr_dimer)
 
         self.assertIn(egfr, self.graph)
@@ -603,7 +602,7 @@ class TestAddNodeFromData(unittest.TestCase):
         assert_unqualified_edge(self, egfr, egfr_dimer, PART_OF)
 
     def test_nested_complex(self):
-        """Checks what happens if a theoretical BEL statement `complex(p(X), complex(p(Y), p(Z)))` is added"""
+        """Checks what happens if a theoretical BEL statement `complex(p(X), complex(p(Y), p(Z)))` is added."""
         self.graph.add_node_from_data(bound_ap1_e2f4)
         self.assertIn(bound_ap1_e2f4, self.graph)
         self.assertEqual(5, self.graph.number_of_nodes())
@@ -620,7 +619,7 @@ class TestAddNodeFromData(unittest.TestCase):
 
 
 class TestReconstituteNodeTuples(TemporaryCacheMixin):
-    """Tests the ability to go from PyBEL to relational database"""
+    """Tests the ability to go from PyBEL to relational database."""
 
     def _help_reconstitute(self, node: BaseEntity, number_nodes: int, number_edges: int):
         """Help test the round-trip conversion from PyBEL data dictionary to node model."""
@@ -693,7 +692,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
     @mock_bel_resources
     def test_gmod_custom(self, mock):
-        """Tests a gene modification that uses a non-default namespace"""
+        """Tests a gene modification that uses a non-default namespace."""
         dummy_namespace = "HGNC"
         dummy_name = "AKT1"
         dummy_mod_namespace = "GO"
@@ -853,17 +852,17 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
 
 class TestReconstituteEdges(TemporaryCacheMixin):
-    """This class tests that edges with varying properties can be added and extracted losslessly"""
+    """This class tests that edges with varying properties can be added and extracted losslessly."""
 
     def setUp(self):
-        """Creates a unit test with a manager and graph"""
+        """Creates a unit test with a manager and graph."""
         super().setUp()
         self.graph = BELGraph(name=n(), version=n())
         self.graph.annotation_pattern["Species"] = r"\d+"
 
     @mock_bel_resources
     def test_translocation_default(self, mock):
-        """This test checks that a translocation gets in the database properly"""
+        """This test checks that a translocation gets in the database properly."""
         self.graph.add_increases(
             Protein(name="F2", namespace="HGNC"),
             Protein(name="EDN1", namespace="HGNC"),
@@ -926,7 +925,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         kin_list = self.manager.session.query(NamespaceEntry).filter(NamespaceEntry.name == "kinase activity").all()
         self.assertEqual(1, len(kin_list), msg="number of kinase NamespaceEntrys")
 
-        kin = list(kin_list)[0]
+        kin = next(iter(kin_list))
         self.assertEqual("kinase activity", kin.name)
 
     @mock_bel_resources
@@ -953,7 +952,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         kin_list = self.manager.session.query(NamespaceEntry).filter(NamespaceEntry.name == dummy_activity_name).all()
         self.assertEqual(1, len(kin_list))
 
-        kin = list(kin_list)[0]
+        kin = next(iter(kin_list))
         self.assertEqual(dummy_activity_name, kin.name)
 
     @mock_bel_resources
@@ -978,7 +977,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         kin_list = self.manager.session.query(NamespaceEntry).filter(NamespaceEntry.name == "kinase activity").all()
         self.assertEqual(1, len(kin_list))
 
-        kin = list(kin_list)[0]
+        kin = next(iter(kin_list))
         self.assertEqual("kinase activity", kin.name)
 
     @mock_bel_resources
@@ -1005,7 +1004,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         kin_list = self.manager.session.query(NamespaceEntry).filter(NamespaceEntry.name == dummy_activity_name).all()
         self.assertEqual(1, len(kin_list))
 
-        kin = list(kin_list)[0]
+        kin = next(iter(kin_list))
         self.assertEqual(dummy_activity_name, kin.name)
 
     def test_subject_degradation(self):
@@ -1123,7 +1122,8 @@ class TestReconstituteEdges(TemporaryCacheMixin):
 
 class TestNoAddNode(TemporaryCacheMixin):
     """Tests scenarios where an instance of :class:`BELGraph` may contain edges that refer to uncached resources, and
-    therefore should not be added to the edge store."""
+    therefore should not be added to the edge store.
+    """
 
     @mock_bel_resources
     def test_regex_lookup(self, mock):  # FIXME this test needs to be put somewhere else

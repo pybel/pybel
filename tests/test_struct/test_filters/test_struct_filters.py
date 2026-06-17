@@ -1,7 +1,4 @@
-# -*- coding: utf-8 -*-
-
 import unittest
-from typing import Set, Tuple
 
 from pybel import BELGraph
 from pybel.constants import ANNOTATIONS
@@ -27,7 +24,7 @@ from pybel.struct.filters.typing import EdgeIterator
 from pybel.testing.utils import n
 
 
-def make_edge_iterator_set(it: EdgeIterator) -> Set[Tuple[BaseEntity, BaseEntity]]:
+def make_edge_iterator_set(it: EdgeIterator) -> set[tuple[BaseEntity, BaseEntity]]:
     return {(u, v) for u, v, _ in it}
 
 
@@ -137,7 +134,7 @@ class TestEdgeFilters(unittest.TestCase):
         )
 
     def test_any_filter_no_query(self):
-        """Test that the all filter returns true when there's no argument"""
+        """Test that the all filter returns true when there's no argument."""
         graph = BELGraph()
         graph.add_increases(Protein(n(), n()), Protein(n(), n()), citation=n(), evidence=n())
         self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_any_filter({})))
@@ -225,7 +222,7 @@ class TestEdgeFilters(unittest.TestCase):
         self.assertFalse(_annotation_dict_all_filter({ANNOTATIONS: {"A": {"1"}}}, {"B": {"1"}}))
 
     def test_all_filter_no_query(self):
-        """Test that the all filter returns true when there's no argument"""
+        """Test that the all filter returns true when there's no argument."""
         graph = BELGraph()
         graph.add_increases(Protein(n(), n()), Protein(n(), n()), citation=n(), evidence=n())
         self.assertEqual(1, count_passed_edge_filter(graph, build_annotation_dict_all_filter({})))

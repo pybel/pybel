@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
-
 """Predicates for checking a node's type."""
-
-from typing import Tuple, Type, Union
 
 from .utils import node_predicate
 from ..typing import NodePredicate
@@ -27,37 +23,37 @@ from ....dsl import (
 __all__ = [
     "is_abundance",
     "is_biological_process",
-    "is_pathology",
-    "is_transcribable",
-    "is_rna",
-    "is_reaction",
-    "is_protein",
-    "is_population",
-    "is_mirna",
-    "is_list",
-    "is_gene",
-    "is_composite",
     "is_central_dogma",
     "is_complex",
+    "is_composite",
+    "is_gene",
+    "is_list",
+    "is_mirna",
+    "is_pathology",
+    "is_population",
+    "is_protein",
+    "is_reaction",
+    "is_rna",
+    "is_transcribable",
     "not_abundance",
     "not_biological_process",
-    "not_pathology",
-    "not_rna",
-    "not_reaction",
-    "not_protein",
-    "not_population",
-    "not_mirna",
-    "not_gene",
-    "not_composite",
-    "not_complex",
     "not_central_dogma",
+    "not_complex",
+    "not_composite",
+    "not_gene",
     "not_list",
+    "not_mirna",
+    "not_pathology",
+    "not_population",
+    "not_protein",
+    "not_reaction",
+    "not_rna",
     "not_transcribable",
 ]
 
 
 def _type_checker(
-    cls: Union[Type[BaseEntity], Tuple[Type[BaseEntity], ...]],
+    cls: type[BaseEntity] | tuple[type[BaseEntity], ...],
 ) -> NodePredicate:
     @node_predicate
     def _is_type(node: BaseEntity) -> bool:
@@ -67,7 +63,7 @@ def _type_checker(
 
 
 def _not_type_checker(
-    cls: Union[Type[BaseEntity], Tuple[Type[BaseEntity], ...]],
+    cls: type[BaseEntity] | tuple[type[BaseEntity], ...],
 ) -> NodePredicate:
     @node_predicate
     def _not_type(node: BaseEntity) -> bool:

@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-
 """Functions for collapsing proteins, RNAs, microRNAs, and variants to their correspongind genes."""
 
 from collections import defaultdict
-from typing import Dict, Set
 
 from .collapse import collapse_nodes
 from ..inference import enrich_protein_and_rna_origins
@@ -16,7 +13,7 @@ __all__ = [
 ]
 
 
-def _build_collapse_to_gene_dict(graph) -> Dict[BaseEntity, Set[BaseEntity]]:
+def _build_collapse_to_gene_dict(graph) -> dict[BaseEntity, set[BaseEntity]]:
     """Build a collapse dictionary.
 
     :param pybel.BELGraph graph: A BEL graph

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Convert the Selventa graph for Hipathia."""
 
 import os

@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
-
 """Summary functions for nodes in BEL graphs."""
 
 import itertools as itt
 import typing
 from collections import Counter, defaultdict
-from typing import Any, Iterable, List, Mapping, Optional, Set, Tuple
+from collections.abc import Iterable, Mapping
+from typing import Any
 
 from ..filters import get_nodes, has_activity, has_variant, is_degraded, is_translocated
 from ..graph import BELGraph
@@ -42,22 +41,22 @@ from ...dsl import (
 from ...language import Entity
 
 __all__ = [
-    "get_functions",
     "count_functions",
-    "get_namespaces",
-    "count_namespaces",
-    "get_unused_namespaces",
     "count_names_by_namespace",
+    "count_namespaces",
+    "count_pathologies",
+    "count_variants",
+    "get_functions",
     "get_names",
     "get_names_by_namespace",
-    "iterate_node_entities",
-    "iterate_entities",
-    "node_is_grounded",
-    "get_ungrounded_nodes",
-    "count_variants",
-    "count_pathologies",
-    "get_top_pathologies",
+    "get_namespaces",
     "get_top_hubs",
+    "get_top_pathologies",
+    "get_ungrounded_nodes",
+    "get_unused_namespaces",
+    "iterate_entities",
+    "iterate_node_entities",
+    "node_is_grounded",
 ]
 
 
@@ -69,7 +68,7 @@ def _function_iterator(graph: BELGraph) -> Iterable[str]:
     return (node.function for node in graph)
 
 
-def get_functions(graph: BELGraph) -> Set[str]:
+def get_functions(graph: BELGraph) -> set[str]:
     """Get the set of all functions used in this graph.
 
     :param graph: A BEL graph
@@ -131,7 +130,7 @@ def count_namespaces(graph: BELGraph) -> typing.Counter[str]:
     return Counter(_iterate_namespaces(graph))
 
 
-def get_namespaces(graph: BELGraph) -> Set[str]:
+def get_namespaces(graph: BELGraph) -> set[str]:
     """Get the set of all namespaces used in this graph.
 
     :param graph: A BEL graph
@@ -140,7 +139,7 @@ def get_namespaces(graph: BELGraph) -> Set[str]:
     return set(_iterate_namespaces(graph))
 
 
-def get_unused_namespaces(graph: BELGraph) -> Set[str]:
+def get_unused_namespaces(graph: BELGraph) -> set[str]:
     """Get the set of all namespaces that are defined in a graph, but are never used.
 
     :param graph: A BEL graph
@@ -149,7 +148,7 @@ def get_unused_namespaces(graph: BELGraph) -> Set[str]:
     return graph.defined_namespace_keywords - get_namespaces(graph)
 
 
-def get_names(graph: BELGraph) -> Mapping[str, Set[str]]:
+def get_names(graph: BELGraph) -> Mapping[str, set[str]]:
     """Get all names for each namespace.
 
     :param graph: A BEL graph
@@ -182,20 +181,20 @@ def iterate_node_entities(node: BaseEntity) -> Iterable[Entity]:
     >>> from pybel.dsl import Protein
     >>> from pybel.language import Entity
     >>> from pybel.struct.summary import iterate_entities
-    >>> protein = Protein(namespace='hgnc', identifier='1455', name='CALR')
+    >>> protein = Protein(namespace="hgnc", identifier="1455", name="CALR")
     >>> protein_entities = list(iterate_node_entities(protein))
-    >>> assert [Entity(namespace='hgnc', identifier='1455', name='CALR')] == protein_entities
+    >>> assert [Entity(namespace="hgnc", identifier="1455", name="CALR")] == protein_entities
 
     Entities in a protein complex:
 
     >>> from pybel.dsl import Protein, ComplexAbundance
     >>> from pybel.language import Entity
     >>> from pybel.struct.summary import iterate_entities
-    >>> protein_1 = Protein(namespace='hgnc', identifier='1')
-    >>> protein_2 = Protein(namespace='hgnc', identifier='2')
+    >>> protein_1 = Protein(namespace="hgnc", identifier="1")
+    >>> protein_2 = Protein(namespace="hgnc", identifier="2")
     >>> complex_1 = ComplexAbundance([protein_1, protein_2])
     >>> complex_entities = list(iterate_node_entities(complex_1))
-    >>> assert [Entity(namespace='hgnc', identifier='1'), Entity(namespace='hgnc', identifier='2')] == complex_entities
+    >>> assert [Entity(namespace="hgnc", identifier="1"), Entity(namespace="hgnc", identifier="2")] == complex_entities
     """
     if isinstance(node, BaseConcept):
         yield node.entity
@@ -214,7 +213,7 @@ def iterate_node_entities(node: BaseEntity) -> Iterable[Entity]:
         yield from iterate_node_entities(node.partner_3p)
 
 
-def _identifier_filtered_iterator(graph) -> Iterable[Tuple[str, str]]:
+def _identifier_filtered_iterator(graph) -> Iterable[tuple[str, str]]:
     """Iterate over names in the given namespace."""
     for data in graph:
         for pair in _get_node_names(data):
@@ -249,7 +248,7 @@ def _identifier_filtered_iterator(graph) -> Iterable[Tuple[str, str]]:
             yield location[NAMESPACE], location[NAME]
 
 
-def _get_node_names(data: Mapping[str, Any]) -> Iterable[Tuple[str, str]]:
+def _get_node_names(data: Mapping[str, Any]) -> Iterable[tuple[str, str]]:
     if CONCEPT in data:
         yield data[CONCEPT][NAMESPACE], data[CONCEPT][NAME]
 
@@ -287,12 +286,12 @@ def count_names_by_namespace(graph: BELGraph, namespace: str) -> typing.Counter[
     :raises IndexError: if the namespace is not defined in the graph.
     """
     if namespace not in graph.defined_namespace_keywords:
-        raise IndexError("{} is not defined in {}".format(namespace, graph))
+        raise IndexError(f"{namespace} is not defined in {graph}")
 
     return Counter(_namespace_filtered_iterator(graph, namespace))
 
 
-def get_names_by_namespace(graph: BELGraph, namespace: str) -> Set[str]:
+def get_names_by_namespace(graph: BELGraph, namespace: str) -> set[str]:
     """Get the set of all of the names in a given namespace that are in the graph.
 
     :param pybel.BELGraph graph: A BEL graph
@@ -302,7 +301,7 @@ def get_names_by_namespace(graph: BELGraph, namespace: str) -> Set[str]:
     :raises IndexError: if the namespace is not defined in the graph.
     """
     if namespace not in graph.defined_namespace_keywords:
-        raise IndexError("{} is not defined in {}".format(namespace, graph))
+        raise IndexError(f"{namespace} is not defined in {graph}")
 
     return set(_namespace_filtered_iterator(graph, namespace))
 
@@ -315,7 +314,7 @@ def count_variants(graph: BELGraph) -> typing.Counter[str]:
     return Counter(variant_data[KIND] for data in graph if has_variant(graph, data) for variant_data in data[VARIANTS])
 
 
-def get_top_hubs(graph: BELGraph, *, n: Optional[int] = 15) -> List[Tuple[BaseEntity, int]]:
+def get_top_hubs(graph: BELGraph, *, n: int | None = 15) -> list[tuple[BaseEntity, int]]:
     """Get the top hubs in the graph by BEL.
 
     :param graph: A BEL graph
@@ -334,7 +333,7 @@ def count_pathologies(graph: BELGraph) -> typing.Counter[BaseEntity]:
     return Counter(node for node in itt.chain.from_iterable(edges) if isinstance(node, Pathology))
 
 
-def get_top_pathologies(graph: BELGraph, n: Optional[int] = 15) -> List[Tuple[BaseEntity, int]]:
+def get_top_pathologies(graph: BELGraph, n: int | None = 15) -> list[tuple[BaseEntity, int]]:
     """Get the top highest relationship-having edges in the graph by BEL.
 
     :param graph: A BEL graph
@@ -343,7 +342,7 @@ def get_top_pathologies(graph: BELGraph, n: Optional[int] = 15) -> List[Tuple[Ba
     return count_pathologies(graph).most_common(n)
 
 
-def get_ungrounded_nodes(graph: BELGraph) -> Set[BaseEntity]:
+def get_ungrounded_nodes(graph: BELGraph) -> set[BaseEntity]:
     """Get all ungrounded nodes in the graph.
 
     :param graph: A BEL graph
@@ -359,17 +358,17 @@ def node_is_grounded(node: BaseEntity) -> bool:
     return all(entity.identifier is not None and entity.name is not None for entity in iterate_node_entities(node))
 
 
-def get_degradations(graph: BELGraph) -> Set[BaseEntity]:
+def get_degradations(graph: BELGraph) -> set[BaseEntity]:
     """Get all nodes that are degraded."""
     return get_nodes(graph, is_degraded)
 
 
-def get_activities(graph: BELGraph) -> Set[BaseEntity]:
+def get_activities(graph: BELGraph) -> set[BaseEntity]:
     """Get all nodes that have molecular activities."""
     return get_nodes(graph, has_activity)
 
 
-def get_translocated(graph: BELGraph) -> Set[BaseEntity]:
+def get_translocated(graph: BELGraph) -> set[BaseEntity]:
     """Get all nodes that are translocated."""
     return get_nodes(graph, is_translocated)
 

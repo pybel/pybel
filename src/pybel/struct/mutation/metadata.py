@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Functions to modify the metadata of graphs, their edges, and their nodes."""
 
 import logging
@@ -9,10 +7,10 @@ from ..pipeline import in_place_transformation
 from ...constants import ANNOTATIONS, CITATION, IDENTIFIER, NAMESPACE
 
 __all__ = [
-    "strip_annotations",
     "add_annotation_value",
     "remove_annotation_value",
     "remove_extra_citation_metadata",
+    "strip_annotations",
 ]
 
 logger = logging.getLogger(__name__)
@@ -39,7 +37,7 @@ def add_annotation_value(graph: BELGraph, annotation: str, value: str, strict: b
     :param strict: Should the function ensure the annotation has already been defined?
     """
     if strict and annotation not in graph.defined_annotation_keywords:
-        raise ValueError("annotation not defined: {}".format(annotation))
+        raise ValueError(f"annotation not defined: {annotation}")
 
     for u, v, k in graph.edges(keys=True):
         if ANNOTATIONS not in graph[u][v][k]:

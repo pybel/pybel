@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Conversion functions for BEL graphs with GraphDati.
 
 Note that these are not exact I/O - you can't currently use them as a round trip because
@@ -10,7 +8,8 @@ import gzip
 import json
 import logging
 from collections import defaultdict
-from typing import Any, Iterable, List, Mapping, Optional, TextIO, Tuple, Union
+from collections.abc import Iterable, Mapping
+from typing import Any, TextIO
 
 import pyparsing
 from networkx.utils import open_file
@@ -34,16 +33,16 @@ from ..struct import BELGraph
 from ..typing import EdgeData
 
 __all__ = [
-    "to_graphdati",
     "from_graphdati",
-    "to_graphdati_file",
     "from_graphdati_file",
-    "to_graphdati_gz",
     "from_graphdati_gz",
-    "to_graphdati_jsons",
     "from_graphdati_jsons",
+    "to_graphdati",
+    "to_graphdati_file",
+    "to_graphdati_gz",
     "to_graphdati_jsonl",
     "to_graphdati_jsonl_gz",
+    "to_graphdati_jsons",
 ]
 
 logger = logging.getLogger(__name__)
@@ -59,7 +58,7 @@ GRAPHDATI_PUBLICATION_TYPES = {
 
 
 @open_file(1, mode="w")
-def to_graphdati_file(graph: BELGraph, path: Union[str, TextIO], use_identifiers: bool = True, **kwargs) -> None:
+def to_graphdati_file(graph: BELGraph, path: str | TextIO, use_identifiers: bool = True, **kwargs) -> None:
     """Write this graph as GraphDati JSON to a file.
 
     :param graph: A BEL graph
@@ -73,7 +72,7 @@ def to_graphdati_file(graph: BELGraph, path: Union[str, TextIO], use_identifiers
     )
 
 
-def from_graphdati_file(path: Union[str, TextIO]) -> BELGraph:
+def from_graphdati_file(path: str | TextIO) -> BELGraph:
     """Load a file containing GraphDati JSON.
 
     :param path: A path or file-like
@@ -134,8 +133,8 @@ def to_graphdati(
     use_identifiers: bool = True,
     skip_unqualified: bool = True,
     use_tqdm: bool = False,
-    metadata_extras: Optional[Mapping[str, Any]] = None,
-) -> List[NanopubMapping]:
+    metadata_extras: Mapping[str, Any] | None = None,
+) -> list[NanopubMapping]:
     """Export a GraphDati list using the nanopub.
 
     :param graph: A BEL graph
@@ -161,7 +160,7 @@ def _iter_graphdati(
     skip_unqualified: bool = True,
     use_identifiers: bool = True,
     use_tqdm: bool = False,
-    metadata_extras: Optional[Mapping[str, Any]] = None,
+    metadata_extras: Mapping[str, Any] | None = None,
 ) -> Iterable[NanopubMapping]:
     it = graph.edges(keys=True, data=True)
     if use_tqdm:
@@ -173,18 +172,18 @@ def _iter_graphdati(
 
 
 def _make_nanopub(graph: BELGraph, u, v, k, d, use_identifiers, metadata_extras=None) -> NanopubMapping:
-    return dict(
-        nanopub=dict(
-            schema_uri=SCHEMA_URI,
-            type=dict(name="BEL", version="2.1.0"),
-            annotations=_get_annotations(d),
-            citation=_get_citation(d),
-            assertions=_get_assertions(u, v, d, use_identifiers),
-            evidence=_get_evidence(d),
-            metadata=_get_metadata(graph, d, extras=metadata_extras),
-            id="pybel_{}".format(k),
-        ),
-    )
+    return {
+        "nanopub": {
+            "schema_uri": SCHEMA_URI,
+            "type": {"name": "BEL", "version": "2.1.0"},
+            "annotations": _get_annotations(d),
+            "citation": _get_citation(d),
+            "assertions": _get_assertions(u, v, d, use_identifiers),
+            "evidence": _get_evidence(d),
+            "metadata": _get_metadata(graph, d, extras=metadata_extras),
+            "id": f"pybel_{k}",
+        },
+    }
 
 
 def _get_assertions(u, v, d, use_identifiers):
@@ -193,6 +192,7 @@ def _get_assertions(u, v, d, use_identifiers):
             zip(
                 ("subject", "relation", "object"),
                 edge_to_tuple(u, v, d, use_identifiers=use_identifiers),
+                strict=False,
             )
         ),
     ]
@@ -208,21 +208,21 @@ def _get_citation(d):
     if citation is None:
         rv["reference"] = "Not Available"
     else:
-        rv["database"] = dict(name=citation[NAMESPACE], id=citation[IDENTIFIER])
+        rv["database"] = {"name": citation[NAMESPACE], "id": citation[IDENTIFIER]}
     return rv
 
 
 def _get_metadata(graph: BELGraph, _, extras=None):
-    rv = dict(
-        gd_creator=graph.authors,
-        version=graph.version,
-    )  # TODO later
+    rv = {
+        "gd_creator": graph.authors,
+        "version": graph.version,
+    }  # TODO later
     if extras is not None:
         rv.update(extras)
     return rv
 
 
-def _get_annotations(d: EdgeData) -> List[Mapping[str, str]]:
+def _get_annotations(d: EdgeData) -> list[Mapping[str, str]]:
     rv = []
     for key, values in d.get(ANNOTATIONS, {}).items():
         if isinstance(values, dict):
@@ -313,7 +313,7 @@ def from_graphdati(j, use_tqdm: bool = True) -> BELGraph:
     return graph
 
 
-def _parse_biodati_citation(citation: str) -> Union[Tuple[None, None], Tuple[str, str]]:
+def _parse_biodati_citation(citation: str) -> tuple[None, None] | tuple[str, str]:
     try:
         citation_db, citation_id = citation.split(":")
     except ValueError:
@@ -330,7 +330,7 @@ def _parse_biodati_citation(citation: str) -> Union[Tuple[None, None], Tuple[str
 
 
 def _parse_biodati_annotations(
-    annotations: List[Mapping[str, str]],
+    annotations: list[Mapping[str, str]],
 ) -> Mapping[str, Mapping[str, bool]]:
     rv = defaultdict(set)
     for annotation in annotations:

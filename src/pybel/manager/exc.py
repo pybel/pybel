@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Exceptions for the manager."""
 
 from ..constants import LINE
@@ -24,7 +22,7 @@ class EdgeAddError(PyBELWarning):
         self.data = data
 
     def __str__(self):
-        line_s = "from line {} ".format(self.line) if LINE in self.data else ""
+        line_s = f"from line {self.line} " if LINE in self.data else ""
         return MSG.format(
             line_s=line_s,
             source=self.source,

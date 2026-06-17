@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-
 """Functions for predicates for edge data from BEL graphs."""
 
-from typing import Iterable, Mapping
+from collections.abc import Iterable, Mapping
 
 from .edge_filters import invert_edge_predicate
 from .edge_predicates import (
@@ -24,15 +22,15 @@ from ...dsl import BaseEntity
 from ...typing import EdgeData, Strings
 
 __all__ = [
-    "build_pmid_exclusion_filter",
     "build_annotation_dict_all_filter",
     "build_annotation_dict_any_filter",
-    "build_upstream_edge_predicate",
-    "build_downstream_edge_predicate",
-    "build_relation_predicate",
-    "build_pmid_inclusion_filter",
-    "build_pmid_exclusion_filter",
     "build_author_inclusion_filter",
+    "build_downstream_edge_predicate",
+    "build_pmid_exclusion_filter",
+    "build_pmid_exclusion_filter",
+    "build_pmid_inclusion_filter",
+    "build_relation_predicate",
+    "build_upstream_edge_predicate",
 ]
 
 

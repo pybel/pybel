@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """The database manager for PyBEL.
 
 Under the hood, PyBEL caches namespace and annotation files for quick recall on later use. The user doesn't need to
@@ -8,7 +6,7 @@ enable this option, but can specify a database location if they choose.
 
 import logging
 import time
-from typing import Iterable, List, Mapping, Optional, Set, Tuple
+from collections.abc import Iterable, Mapping
 
 import pandas as pd
 import requests
@@ -134,7 +132,7 @@ def _clean_bel_namespace_values(bel_resource):
 class NamespaceManager(BaseManager):
     """Manages BEL namespaces."""
 
-    def list_namespaces(self) -> List[Namespace]:
+    def list_namespaces(self) -> list[Namespace]:
         """List all namespaces."""
         return self._list_model(Namespace)
 
@@ -164,11 +162,11 @@ class NamespaceManager(BaseManager):
         self.session.delete(namespace)
         self.session.commit()
 
-    def get_namespace_by_url(self, url: str) -> Optional[Namespace]:
+    def get_namespace_by_url(self, url: str) -> Namespace | None:
         """Look up a namespace by url."""
         return self.session.query(Namespace).filter(Namespace.url == url).one_or_none()
 
-    def get_namespace_by_keyword_version(self, keyword: str, version: str) -> Optional[Namespace]:
+    def get_namespace_by_keyword_version(self, keyword: str, version: str) -> Namespace | None:
         """Get a namespace with a given keyword and version."""
         filt = and_(Namespace.keyword == keyword, Namespace.version == version)
         return self.session.query(Namespace).filter(filt).one_or_none()
@@ -178,7 +176,7 @@ class NamespaceManager(BaseManager):
         urls: Iterable[str],
         use_tqdm: bool = True,
         is_annotation: bool = False,
-    ) -> List[Namespace]:
+    ) -> list[Namespace]:
         ext = "belanno" if is_annotation else "belns"
 
         rv = []
@@ -271,7 +269,7 @@ class NamespaceManager(BaseManager):
         """
         return self._ensure_namespace_urls([url])[0]
 
-    def get_namespace_by_keyword_pattern(self, keyword: str, pattern: str) -> Optional[Namespace]:
+    def get_namespace_by_keyword_pattern(self, keyword: str, pattern: str) -> Namespace | None:
         """Get a namespace with a given keyword and pattern."""
         filt = and_(Namespace.keyword == keyword, Namespace.pattern == pattern)
         return self.session.query(Namespace).filter(filt).one_or_none()
@@ -298,7 +296,7 @@ class NamespaceManager(BaseManager):
 
         return namespace
 
-    def get_namespace_entry(self, url: str, name: str) -> Optional[NamespaceEntry]:
+    def get_namespace_entry(self, url: str, name: str) -> NamespaceEntry | None:
         """Get a given NamespaceEntry object.
 
         :param url: The url of the namespace source
@@ -319,7 +317,7 @@ class NamespaceManager(BaseManager):
 
         return result[0]
 
-    def get_entity_by_identifier(self, url: str, identifier: str) -> Optional[NamespaceEntry]:
+    def get_entity_by_identifier(self, url: str, identifier: str) -> NamespaceEntry | None:
         """Get a given entity by its url/identifier combination."""
         entry_filter = and_(Namespace.url == url, NamespaceEntry.identifier == identifier)
         return self.session.query(NamespaceEntry).join(Namespace).filter(entry_filter).one_or_none()
@@ -348,7 +346,7 @@ class NamespaceManager(BaseManager):
 
         return namespace_entry
 
-    def list_annotations(self) -> List[Namespace]:
+    def list_annotations(self) -> list[Namespace]:
         """List all annotations."""
         return self.session.query(Namespace).filter(Namespace.is_annotation).all()
 
@@ -367,7 +365,7 @@ class NamespaceManager(BaseManager):
         """
         return self._ensure_namespace_urls([url], is_annotation=True)[0]
 
-    def get_annotation_entries_by_names(self, url: str, entities: Iterable[Entity]) -> List[NamespaceEntry]:
+    def get_annotation_entries_by_names(self, url: str, entities: Iterable[Entity]) -> list[NamespaceEntry]:
         """Get annotation entries by URL and names.
 
         :param url: The url of the annotation source
@@ -385,11 +383,11 @@ class NetworkManager(NamespaceManager):
         """Count the networks in the database."""
         return self._count_model(Network)
 
-    def list_networks(self) -> List[Network]:
+    def list_networks(self) -> list[Network]:
         """List all networks in the database."""
         return self._list_model(Network)
 
-    def list_recent_networks(self) -> List[Network]:
+    def list_recent_networks(self) -> list[Network]:
         """List the most recently created version of each network (by name)."""
         most_recent_times = self.session.query(
             Network.name.label("network_name"),
@@ -464,7 +462,7 @@ class NetworkManager(NamespaceManager):
                     ne1.c.network_id != ne2.c.network_id,
                 ),
             )
-            .filter(  # noqa: E131
+            .filter(
                 and_(
                     ne1.c.network_id == network.id,
                     ne2.c.edge_id == None,  # noqa: E711
@@ -473,17 +471,17 @@ class NetworkManager(NamespaceManager):
         )
         return singleton_edge_ids_for_network
 
-    def get_network_versions(self, name: str) -> Set[str]:
+    def get_network_versions(self, name: str) -> set[str]:
         """Return all of the versions of a network with the given name."""
         return {version for (version,) in self.session.query(Network.version).filter(Network.name == name).all()}
 
-    def get_network_by_name_version(self, name: str, version: str) -> Optional[Network]:
+    def get_network_by_name_version(self, name: str, version: str) -> Network | None:
         """Load the network with the given name and version if it exists."""
         name_version_filter = and_(Network.name == name, Network.version == version)
         network = self.session.query(Network).filter(name_version_filter).one_or_none()
         return network
 
-    def get_graph_by_name_version(self, name: str, version: str) -> Optional[BELGraph]:
+    def get_graph_by_name_version(self, name: str, version: str) -> BELGraph | None:
         """Load the BEL graph with the given name, or allows for specification of version."""
         network = self.get_network_by_name_version(name, version)
 
@@ -492,15 +490,15 @@ class NetworkManager(NamespaceManager):
 
         return network.as_bel()
 
-    def get_networks_by_name(self, name: str) -> List[Network]:
+    def get_networks_by_name(self, name: str) -> list[Network]:
         """Get all networks with the given name. Useful for getting all versions of a given network."""
         return self.session.query(Network).filter(Network.name.like(name)).all()
 
-    def get_most_recent_network_by_name(self, name: str) -> Optional[Network]:
+    def get_most_recent_network_by_name(self, name: str) -> Network | None:
         """Get the most recently created network with the given name."""
         return self.session.query(Network).filter(Network.name == name).order_by(Network.created.desc()).first()
 
-    def get_graph_by_most_recent(self, name: str) -> Optional[BELGraph]:
+    def get_graph_by_most_recent(self, name: str) -> BELGraph | None:
         """Get the most recently created network with the given name as a :class:`pybel.BELGraph`."""
         network = self.get_most_recent_network_by_name(name)
 
@@ -519,7 +517,7 @@ class NetworkManager(NamespaceManager):
         logger.debug("converting network [id=%d] %s to bel graph", network_id, network)
         return network.as_bel()
 
-    def get_networks_by_ids(self, network_ids: Iterable[int]) -> List[Network]:
+    def get_networks_by_ids(self, network_ids: Iterable[int]) -> list[Network]:
         """Get a list of networks with the given identifiers.
 
         Note: order is not necessarily preserved.
@@ -527,13 +525,13 @@ class NetworkManager(NamespaceManager):
         logger.debug("getting networks by identifiers: %s", network_ids)
         return self.session.query(Network).filter(Network.id_in(network_ids)).all()
 
-    def get_graphs_by_ids(self, network_ids: Iterable[int]) -> List[BELGraph]:
+    def get_graphs_by_ids(self, network_ids: Iterable[int]) -> list[BELGraph]:
         """Get a list of networks with the given identifiers and converts to BEL graphs."""
         rv = [self.get_graph_by_id(network_id) for network_id in network_ids]
         logger.debug("returning graphs for network identifiers: %s", network_ids)
         return rv
 
-    def get_graph_by_ids(self, network_ids: List[int]) -> BELGraph:
+    def get_graph_by_ids(self, network_ids: list[int]) -> BELGraph:
         """Get a combine BEL Graph from a list of network identifiers."""
         if len(network_ids) == 1:
             return self.get_graph_by_id(network_ids[0])
@@ -551,7 +549,7 @@ class InsertManager(NamespaceManager, LookupManager):
     """Manages inserting data into the edge store."""
 
     def __init__(self, *args, **kwargs):
-        super(InsertManager, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         # A set of dictionaries that contains objects of the type described by the key
         self.object_cache_modification = {}
@@ -607,7 +605,7 @@ class InsertManager(NamespaceManager, LookupManager):
 
         return network
 
-    def _store_graph_parts(self, graph: BELGraph, use_tqdm: bool = False) -> Tuple[List[Node], List[Edge]]:
+    def _store_graph_parts(self, graph: BELGraph, use_tqdm: bool = False) -> tuple[list[Node], list[Edge]]:
         """Store the given graph into the edge store.
 
         :raises: pybel.resources.exc.ResourceError
@@ -740,7 +738,7 @@ class InsertManager(NamespaceManager, LookupManager):
     def _iter_from_annotations_dict(
         graph: BELGraph,
         annotations_dict: AnnotationsDict,
-    ) -> Iterable[Tuple[str, Set[Entity]]]:
+    ) -> Iterable[tuple[str, set[Entity]]]:
         """Iterate over the key/value pairs in this edge data dictionary normalized to their source URLs."""
         for key, entities in annotations_dict.items():
             if key in graph.annotation_url:
@@ -751,11 +749,11 @@ class InsertManager(NamespaceManager, LookupManager):
                 logger.debug("pattern annotation in database not implemented yet not implemented")  # FIXME
                 continue
             else:
-                raise ValueError("Graph resources does not contain keyword: {}".format(key))
+                raise ValueError(f"Graph resources does not contain keyword: {key}")
 
             yield url, set(entities)
 
-    def _get_annotation_entries_from_data(self, graph: BELGraph, data: EdgeData) -> Optional[List[NamespaceEntry]]:
+    def _get_annotation_entries_from_data(self, graph: BELGraph, data: EdgeData) -> list[NamespaceEntry] | None:
         """Get the annotation entries from an edge data dictionary."""
         annotations_dict = data.get(ANNOTATIONS)
         if annotations_dict is None:
@@ -774,7 +772,7 @@ class InsertManager(NamespaceManager, LookupManager):
         key: str,
         bel: str,
         data: EdgeData,
-    ) -> Optional[Edge]:
+    ) -> Edge | None:
         """Add a qualified edge to the network."""
         citation_dict = data[CITATION]
         citation = self.get_or_create_citation(
@@ -827,7 +825,7 @@ class InsertManager(NamespaceManager, LookupManager):
         self.session.add(evidence)
         return evidence
 
-    def get_or_create_node(self, graph: BELGraph, node: BaseEntity) -> Optional[Node]:
+    def get_or_create_node(self, graph: BELGraph, node: BaseEntity) -> Node | None:
         """Create an entry and object for given node if it does not exist."""
         node_md5 = node.md5
         if node_md5 in self.object_cache_node:
@@ -871,7 +869,7 @@ class InsertManager(NamespaceManager, LookupManager):
             node_model.namespace_entry = entry
 
         else:
-            logger.warning("No reference in BELGraph for namespace: {}".format(node.namespace))
+            logger.warning(f"No reference in BELGraph for namespace: {node.namespace}")
             return
 
         self.session.add(node_model)
@@ -904,8 +902,8 @@ class InsertManager(NamespaceManager, LookupManager):
         bel: str,
         md5: str,
         data: EdgeData,
-        evidence: Optional[Evidence] = None,
-        annotations: Optional[List[NamespaceEntry]] = None,
+        evidence: Evidence | None = None,
+        annotations: list[NamespaceEntry] | None = None,
     ) -> Edge:
         """Create an edge if it does not exist, or return it if it does.
 
@@ -953,7 +951,7 @@ class InsertManager(NamespaceManager, LookupManager):
         self,
         *,
         identifier: str,
-        namespace: Optional[str] = None,
+        namespace: str | None = None,
     ) -> Citation:
         """Create a citation if it does not exist, or return it if it does.
 
@@ -1005,7 +1003,7 @@ class _Manager(QueryManager, InsertManager, NetworkManager):
         """Count the number of citations stored in the database."""
         return self._count_model(Citation)
 
-    def list_citations(self) -> List[Citation]:
+    def list_citations(self) -> list[Citation]:
         """List the citations in the database."""
         return self._list_model(Citation)
 
@@ -1013,7 +1011,7 @@ class _Manager(QueryManager, InsertManager, NetworkManager):
 class Manager(_Manager):
     """A manager for the PyBEL database."""
 
-    def __init__(self, connection: Optional[str] = None, engine=None, session=None, **kwargs) -> None:
+    def __init__(self, connection: str | None = None, engine=None, session=None, **kwargs) -> None:
         """Create a connection to database and a persistent session using SQLAlchemy.
 
         A custom default can be set as an environment variable with the name :data:`pybel.constants.PYBEL_CONNECTION`,
@@ -1052,22 +1050,22 @@ class Manager(_Manager):
 
         Instantiation with connection string as positional argument
 
-        >>> my_connection = 'sqlite:///~/Desktop/cache.db'
+        >>> my_connection = "sqlite:///~/Desktop/cache.db"
         >>> manager = Manager(my_connection)
 
         Instantiation with connection string as positional argument with keyword arguments
 
-        >>> my_connection = 'sqlite:///~/Desktop/cache.db'
+        >>> my_connection = "sqlite:///~/Desktop/cache.db"
         >>> manager = Manager(my_connection, echo=True)
 
         Instantiation with connection string as keyword argument
 
-        >>> my_connection = 'sqlite:///~/Desktop/cache.db'
+        >>> my_connection = "sqlite:///~/Desktop/cache.db"
         >>> manager = Manager(connection=my_connection)
 
         Instantiation with connection string as keyword argument with keyword arguments
 
-        >>> my_connection = 'sqlite:///~/Desktop/cache.db'
+        >>> my_connection = "sqlite:///~/Desktop/cache.db"
         >>> manager = Manager(connection=my_connection, echo=True)
 
         Instantiation with user-supplied engine and session objects as keyword arguments

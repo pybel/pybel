@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Convert the COVID-19 graph for Hipathia."""
 
 import os

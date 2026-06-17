@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for the jsonschema node validation."""
 
 import copy

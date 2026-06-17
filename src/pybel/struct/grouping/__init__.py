@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Functions for grouping BEL graphs into sub-graphs."""
 
 from . import annotations, provenance

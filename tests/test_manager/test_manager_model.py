@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """This module tests the to_json functions for all of the database models."""
 
 import datetime
@@ -97,12 +95,12 @@ class TestModels(unittest.TestCase):
             uploaded=uploaded,
         )
 
-        expected = dict(
-            keyword="TEST",
-            url="http://test.com",
-            name="Test Namespace",
-            version="1.0.0",
-        )
+        expected = {
+            "keyword": "TEST",
+            "url": "http://test.com",
+            "name": "Test Namespace",
+            "version": "1.0.0",
+        }
 
         self.assertEqual(model.to_json(), expected)
 
@@ -125,12 +123,12 @@ class TestModels(unittest.TestCase):
             uploaded=uploaded,
         )
 
-        expected = dict(
-            keyword="TEST",
-            pattern=r"\w+",
-            name="Test Namespace",
-            version="1.0.0",
-        )
+        expected = {
+            "keyword": "TEST",
+            "pattern": r"\w+",
+            "name": "Test Namespace",
+            "version": "1.0.0",
+        }
 
         self.assertEqual(model.to_json(), expected)
 

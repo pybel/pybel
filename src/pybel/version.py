@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """The current version of PyBEL."""
 
 import os
@@ -7,8 +5,8 @@ import subprocess  # noqa:S404
 
 __all__ = [
     "VERSION",
-    "get_version",
     "get_git_hash",
+    "get_version",
 ]
 
 VERSION = "0.15.6-dev"
@@ -18,7 +16,7 @@ def get_git_hash() -> str:
     """Get the PyBEL git hash."""
     with open(os.devnull, "w") as devnull:
         try:
-            ret = subprocess.check_output(  # noqa: S603,S607
+            ret = subprocess.check_output(  # noqa:S603,S607
                 ["git", "rev-parse", "HEAD"],
                 cwd=os.path.dirname(__file__),
                 stderr=devnull,
@@ -35,4 +33,4 @@ def get_version(with_git_hash: bool = False):
 
 
 if __name__ == "__main__":
-    print(get_version(with_git_hash=True))
+    pass

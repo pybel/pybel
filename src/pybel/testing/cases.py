@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Test cases for PyBEL testing."""
 
 import logging
@@ -13,9 +11,9 @@ from ..manager import Manager
 
 __all__ = [
     "TEST_CONNECTION",
-    "TemporaryCacheMixin",
-    "TemporaryCacheClsMixin",
     "FleetingTemporaryCacheMixin",
+    "TemporaryCacheClsMixin",
+    "TemporaryCacheMixin",
 ]
 
 logger = logging.getLogger(__name__)
@@ -86,7 +84,7 @@ class FleetingTemporaryCacheMixin(TemporaryCacheClsMixin):
 
     def setUp(self):
         """Set up the function by clearing the database."""
-        super(FleetingTemporaryCacheMixin, self).setUp()
+        super().setUp()
 
         self.manager.drop_networks()
         self.manager.drop_edges()
