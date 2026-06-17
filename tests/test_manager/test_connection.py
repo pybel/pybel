@@ -48,14 +48,17 @@ class TestInstantiation(unittest.TestCase):
         with self.mock_connection:
             manager = Manager()
             self.assertEqual(self.connection, str(manager.engine.url))
+            manager.engine.dispose()
 
     def test_instantiate_manager_positional(self):
         manager = Manager(self.connection)
         self.assertEqual(self.connection, str(manager.engine.url))
+        manager.engine.dispose()
 
     def test_instantiate_manager_positional_with_keyword(self):
         manager = Manager(self.connection, echo=False)
         self.assertEqual(self.connection, str(manager.engine.url))
+        manager.engine.dispose()
 
     def test_instantiate_manager_fail_positional(self):
         with self.assertRaises(ValueError):
@@ -64,6 +67,7 @@ class TestInstantiation(unittest.TestCase):
     def test_instantiate_manager_keyword(self):
         manager = Manager(connection=self.connection)
         self.assertEqual(self.connection, str(manager.engine.url))
+        manager.engine.dispose()
 
     def test_instantiate_manager_connection_fail_too_many_keyword(self):
         with self.assertRaises(ValueError):
