@@ -31,7 +31,7 @@ class TestConceptEnumerated(_ParserMixin):
 
     def test_valid_1(self):
         s = "A:3"
-        result = self.parser.parseString(s)
+        result = self.parser.parse_string(s)
 
         self.assertIn("namespace", result)
         self.assertIn("name", result)
@@ -40,7 +40,7 @@ class TestConceptEnumerated(_ParserMixin):
 
     def test_valid_2(self):
         s = 'A:"3"'
-        result = self.parser.parseString(s)
+        result = self.parser.parse_string(s)
 
         self.assertIn("namespace", result)
         self.assertIn("name", result)
@@ -50,22 +50,22 @@ class TestConceptEnumerated(_ParserMixin):
     def test_invalid_1(self):
         s = "C:4"
         with self.assertRaises(Exception):
-            self.parser.parseString(s)
+            self.parser.parse_string(s)
 
     def test_invalid_2(self):
         s = "A:4"
         with self.assertRaises(Exception):
-            self.parser.parseString(s)
+            self.parser.parse_string(s)
 
     def test_invalid_3(self):
         s = "bare"
         with self.assertRaises(NakedNameWarning):
-            self.parser.parseString(s)
+            self.parser.parse_string(s)
 
     def test_invalid_4(self):
         s = '"quoted"'
         with self.assertRaises(NakedNameWarning):
-            self.parser.parseString(s)
+            self.parser.parse_string(s)
 
 
 class TestConceptParserDefault(_ParserMixin):
@@ -81,7 +81,7 @@ class TestConceptParserDefault(_ParserMixin):
 
     def test_valid_1(self):
         s = "A:3"
-        result = self.parser.parseString(s)
+        result = self.parser.parse_string(s)
 
         self.assertIn("namespace", result)
         self.assertIn("name", result)
@@ -91,14 +91,14 @@ class TestConceptParserDefault(_ParserMixin):
 
     def test_valid_2(self):
         s = "X"
-        result = self.parser.parseString(s)
+        result = self.parser.parse_string(s)
 
         self.assertIn("name", result)
         self.assertEqual("X", result["name"])
 
     def test_valid_3(self):
         s = '"W Z"'
-        result = self.parser.parseString(s)
+        result = self.parser.parse_string(s)
 
         self.assertIn("name", result)
         self.assertNotIn("identifier", result)
@@ -107,7 +107,7 @@ class TestConceptParserDefault(_ParserMixin):
     def test_not_in_defaultNs(self):
         s = "D"
         with self.assertRaises(Exception):
-            self.parser.parseString(s)
+            self.parser.parse_string(s)
 
 
 class TestConceptParserLenient(_ParserMixin):
@@ -122,7 +122,7 @@ class TestConceptParserLenient(_ParserMixin):
 
     def test_valid_1(self):
         s = "A:3"
-        result = self.parser.parseString(s)
+        result = self.parser.parse_string(s)
 
         self.assertIn("namespace", result)
         self.assertIn("name", result)
@@ -132,7 +132,7 @@ class TestConceptParserLenient(_ParserMixin):
 
     def test_valid_2(self):
         s = 'A:"3"'
-        result = self.parser.parseString(s)
+        result = self.parser.parse_string(s)
 
         self.assertIn("namespace", result)
         self.assertIn("name", result)
@@ -143,16 +143,16 @@ class TestConceptParserLenient(_ParserMixin):
     def test_invalid_1(self):
         s = "C:4"
         with self.assertRaises(Exception):
-            self.parser.parseString(s)
+            self.parser.parse_string(s)
 
     def test_invalid_2(self):
         s = "A:4"
         with self.assertRaises(Exception):
-            self.parser.parseString(s)
+            self.parser.parse_string(s)
 
     def test_not_invalid_3(self):
         s = "bare"
-        result = self.parser.parseString(s)
+        result = self.parser.parse_string(s)
 
         self.assertIn("namespace", result)
         self.assertIn("name", result)
@@ -162,7 +162,7 @@ class TestConceptParserLenient(_ParserMixin):
 
     def test_not_invalid_4(self):
         s = '"quoted"'
-        result = self.parser.parseString(s)
+        result = self.parser.parse_string(s)
 
         self.assertIn("namespace", result)
         self.assertIn("name", result)
@@ -190,7 +190,7 @@ class TestConceptParserRegex(unittest.TestCase):
             ("ec-code:1.1.1.27", "ec-code", "1.1.1.27"),
         ]:
             with self.subTest(curie=curie):
-                result = self.parser.parseString(curie)
+                result = self.parser.parse_string(curie)
                 self.assertIn("namespace", result)
                 self.assertIn("name", result)
                 self.assertNotIn("identifier", result)
@@ -201,13 +201,13 @@ class TestConceptParserRegex(unittest.TestCase):
         """Test invalid BEL term."""
         s = "hgnc:AKT1"
         with self.assertRaises(MissingNamespaceRegexWarning):
-            result = self.parser.parseString(s)
+            result = self.parser.parse_string(s)
             print(result.asDict())
 
     def test_valid_obo(self):
         """Test parsing an identifier that has a name."""
         s = "hgnc:391 ! AKT1"
-        result = self.parser.parseString(s)
+        result = self.parser.parse_string(s)
 
         self.assertIn("namespace", result)
         self.assertIn("name", result)
@@ -220,5 +220,5 @@ class TestConceptParserRegex(unittest.TestCase):
         """Test parsing an OBO-style identifier where the identifier and name are switched."""
         s = "hgnc:AKT1 ! 391"
         with self.assertRaises(MissingNamespaceRegexWarning):
-            result = self.parser.parseString(s)
+            result = self.parser.parse_string(s)
             print(result.asDict())

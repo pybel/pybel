@@ -113,8 +113,8 @@ class TestRelations(TestTokenParserBase):
 
     def test_ensure_no_dup_nodes(self):
         """Ensure node isn't added twice, even if from different statements"""
-        self.parser.gene.addParseAction(self.parser.handle_term)
-        result = self.parser.bel_term.parseString("g(HGNC:AKT1)")
+        self.parser.gene.add_parse_action(self.parser.handle_term)
+        result = self.parser.bel_term.parse_string("g(HGNC:AKT1)")
 
         expected_result_dict = {
             FUNCTION: GENE,
@@ -126,8 +126,8 @@ class TestRelations(TestTokenParserBase):
 
         self.assertEqual(expected_result_dict, result.asDict())
 
-        self.parser.degradation.addParseAction(self.parser.handle_term)
-        self.parser.degradation.parseString("deg(g(HGNC:AKT1))")
+        self.parser.degradation.add_parse_action(self.parser.handle_term)
+        self.parser.degradation.parse_string("deg(g(HGNC:AKT1))")
 
         akt1_gene = gene("HGNC", "AKT1")
 
@@ -137,7 +137,7 @@ class TestRelations(TestTokenParserBase):
     def test_singleton(self):
         """Test singleton composite in subject."""
         statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(CHEBI:"Abeta_42"))'
-        result = self.parser.statement.parseString(statement)
+        result = self.parser.statement.parse_string(statement)
 
         expected = [
             COMPOSITE,
@@ -167,14 +167,14 @@ class TestRelations(TestTokenParserBase):
         statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(CHEBI:"Abeta_42")) -> nope(GO:"neuron apoptotic process")'
 
         with self.assertRaises(ParseException):
-            self.parser.relation.parseString(statement)
+            self.parser.relation.parse_string(statement)
 
     def test_increases(self):
         """Test composite in subject. See BEL 2.0 specification
         `3.1.1 <http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xincreases>`_
         """
         statement = 'composite(p(HGNC:CASP8),p(HGNC:FADD),a(CHEBI:"Abeta_42")) -> bp(GO:"neuron apoptotic process")'
-        result = self.parser.relation.parseString(statement)
+        result = self.parser.relation.parse_string(statement)
 
         expected = [
             [
@@ -217,7 +217,7 @@ class TestRelations(TestTokenParserBase):
 
     def _help_test_increases_methylation(self, x):
         statement = f'a(CHEBI:"lead atom") -> g(HGNC:APP, gmod({x}))'
-        result = self.parser.relation.parseString(statement)
+        result = self.parser.relation.parse_string(statement)
         expected_dict = {
             TARGET: {
                 FUNCTION: GENE,
@@ -260,7 +260,7 @@ class TestRelations(TestTokenParserBase):
             'a(CHEBI:"Abeta_42") => tloc(a(CHEBI:"calcium(2+)"),fromLoc(MESH:"Cell Membrane"),'
             'toLoc(MESH:"Intracellular Space"))'
         )
-        result = self.parser.relation.parseString(statement)
+        result = self.parser.relation.parse_string(statement)
 
         expected_dict = {
             SOURCE: {
@@ -311,7 +311,7 @@ class TestRelations(TestTokenParserBase):
         3.1.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xdecreases
         """
         statement = "pep(p(FPLX:CAPN, location(GO:intracellular))) -| reaction(reactants(p(HGNC:CDK5R1)),products(p(HGNC:CDK5)))"
-        result = self.parser.relation.parseString(statement)
+        result = self.parser.relation.parse_string(statement)
 
         expected_dict = {
             SOURCE: {
@@ -388,7 +388,7 @@ class TestRelations(TestTokenParserBase):
         3.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XdDecreases
         Tests simple triple"""
         statement = 'proteinAbundance(HGNC:CAT, location(GO:intracellular)) directlyDecreases abundance(CHEBI:"hydrogen peroxide")'
-        result = self.parser.relation.parseString(statement)
+        result = self.parser.relation.parse_string(statement)
 
         expected_dict = {
             SOURCE: {
@@ -443,7 +443,7 @@ class TestRelations(TestTokenParserBase):
 
         self.parser.control_parser.annotations.update(annotations)
 
-        result = self.parser.relation.parseString(statement)
+        result = self.parser.relation.parse_string(statement)
 
         expected_dict = {
             SOURCE: {
@@ -494,7 +494,7 @@ class TestRelations(TestTokenParserBase):
     def test_rateLimitingStepOf_subjectActivity(self):
         """3.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_ratelimitingstepof"""
         statement = 'act(p(HGNC:HMGCR), ma(cat)) rateLimitingStepOf bp(GO:"cholesterol biosynthetic process")'
-        result = self.parser.relation.parseString(statement)
+        result = self.parser.relation.parse_string(statement)
 
         expected_dict = {
             SOURCE: {
@@ -531,7 +531,7 @@ class TestRelations(TestTokenParserBase):
         See also: 3.1.6 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#Xcnc
         """
         statement = 'g(HGNC:APP,sub(G,275341,C)) cnc path(MESH:"Alzheimer Disease")'
-        result = self.parser.relation.parseString(statement)
+        result = self.parser.relation.parse_string(statement)
 
         expected_dict = {
             SOURCE: {
@@ -570,7 +570,7 @@ class TestRelations(TestTokenParserBase):
         3.1.7 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_regulates_reg
         Test nested definitions"""
         statement = "pep(complex(p(HGNC:F3),p(HGNC:F7))) regulates pep(p(HGNC:F9))"
-        result = self.parser.relation.parseString(statement)
+        result = self.parser.relation.parse_string(statement)
 
         expected_dict = {
             SOURCE: {
@@ -617,14 +617,14 @@ class TestRelations(TestTokenParserBase):
         statement = 'p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process"))'
         self.parser.disallow_nested = True
         with self.assertRaises(NestedRelationWarning):
-            self.parser.relation.parseString(statement)
+            self.parser.relation.parse_string(statement)
         self.parser.disallow_nested = False
 
     def test_nested_lenient(self):
         """Test nested statement (3.1)."""
         self.parser.disallow_nested = False
         statement = 'p(HGNC:CAT) -| (a(CHEBI:"hydrogen peroxide") -> bp(GO:"apoptotic process"))'
-        self.parser.relation.parseString(statement)
+        self.parser.relation.parse_string(statement)
 
         cat = protein("HGNC", "CAT")
         h2o2 = abundance("CHEBI", "hydrogen peroxide")
@@ -644,7 +644,7 @@ class TestRelations(TestTokenParserBase):
 
     def _help_test_negative_correlation_with_object_variant(self, x):
         statement = f"kin(p(FPLX:GSK3)) neg p(HGNC:MAPT,pmod({x}))"
-        result = self.parser.relation.parseString(statement)
+        result = self.parser.relation.parse_string(statement)
 
         expected_dict = {
             SOURCE: {
@@ -682,7 +682,7 @@ class TestRelations(TestTokenParserBase):
         3.2.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XposCor
         Self-referential relationships"""
         statement = "p(HGNC:GSK3B, pmod(P, S, 9)) pos act(p(HGNC:GSK3B), ma(kin))"
-        result = self.parser.relation.parseString(statement)
+        result = self.parser.relation.parse_string(statement)
 
         expected_dict = {
             SOURCE: {
@@ -720,7 +720,7 @@ class TestRelations(TestTokenParserBase):
         3.3.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_orthologous
         """
         statement = "g(HGNC:AKT1) orthologous g(MGI:AKT1)"
-        result = self.parser.relation.parseString(statement)
+        result = self.parser.relation.parse_string(statement)
         expected_result = [
             [GENE, ["HGNC", "AKT1"]],
             ORTHOLOGOUS,
@@ -742,7 +742,7 @@ class TestRelations(TestTokenParserBase):
         3.3.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_transcribedto
         """
         statement = "g(HGNC:AKT1) :> r(HGNC:AKT1)"
-        result = self.parser.relation.parseString(statement)
+        result = self.parser.relation.parse_string(statement)
 
         expected_result = [
             [GENE, ["HGNC", "AKT1"]],
@@ -764,7 +764,7 @@ class TestRelations(TestTokenParserBase):
         3.3.3 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_translatedto
         """
         statement = "r(HGNC:AKT1,loc(GO:intracellular)) >> p(HGNC:AKT1)"
-        result = self.parser.relation.parseString(statement)
+        result = self.parser.relation.parse_string(statement)
 
         # [[RNA, ['HGNC', 'AKT1']], TRANSLATED_TO, [PROTEIN, ['HGNC', 'AKT1']]]
         expected_result = {
@@ -818,7 +818,7 @@ class TestRelations(TestTokenParserBase):
 
     def test_component_list(self):
         s = "complex(FPLX:C1) hasComponents list(p(HGNC:C1QB), p(HGNC:C1S))"
-        result = self.parser.relation.parseString(s)
+        result = self.parser.relation.parse_string(s)
 
         expected_result_list = [
             [COMPLEX, ["FPLX", "C1"]],
@@ -844,7 +844,7 @@ class TestRelations(TestTokenParserBase):
         3.4.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_hasmembers
         """
         statement = "p(FPLX:PKC) hasMembers list(p(HGNC:PRKCA), p(HGNC:PRKCB), p(HGNC:PRKCD), p(HGNC:PRKCE))"
-        result = self.parser.relation.parseString(statement)
+        result = self.parser.relation.parse_string(statement)
         expected_result = [
             [PROTEIN, ["FPLX", "PKC"]],
             "hasMembers",
@@ -882,7 +882,7 @@ class TestRelations(TestTokenParserBase):
         3.4.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_isa
         """
         statement = 'pathology(MESH:Psoriasis) isA pathology(MESH:"Skin Diseases")'
-        result = self.parser.relation.parseString(statement)
+        result = self.parser.relation.parse_string(statement)
 
         expected_result = [
             [PATHOLOGY, ["MESH", "Psoriasis"]],
@@ -901,7 +901,7 @@ class TestRelations(TestTokenParserBase):
 
     def test_equivalentTo(self):
         statement = 'g(dbSNP:"rs123456") eq g(HGNC:YFG, var(c.123G>A))'
-        result = self.parser.relation.parseString(statement)
+        result = self.parser.relation.parse_string(statement)
 
         expected_result = {
             SOURCE: {
@@ -939,7 +939,7 @@ class TestRelations(TestTokenParserBase):
 
     def test_partOf(self):
         statement = 'a(UBERON:"corpus striatum") partOf a(UBERON:"basal ganglion")'
-        self.parser.relation.parseString(statement)
+        self.parser.relation.parse_string(statement)
 
         corpus_striatum = abundance(namespace="UBERON", name="corpus striatum")
         basal_ganglion = abundance(namespace="UBERON", name="basal ganglion")
@@ -962,7 +962,7 @@ class TestRelations(TestTokenParserBase):
         statement = 'rxn(reactants(a(CHEBI:"(S)-3-hydroxy-3-methylglutaryl-CoA"),a(CHEBI:NADPH), \
             a(CHEBI:hydron)),products(a(CHEBI:mevalonate), a(CHEBI:"CoA-SH"), a(CHEBI:"NADP(+)"))) \
             subProcessOf bp(GO:"cholesterol biosynthetic process")'
-        result = self.parser.relation.parseString(statement)
+        result = self.parser.relation.parse_string(statement)
         expected_result = [
             [
                 REACTION,
@@ -1015,11 +1015,11 @@ class TestRelations(TestTokenParserBase):
 
     def test_extra_1(self):
         statement = 'abundance(CHEBI:"nitric oxide") increases cellSurfaceExpression(complexAbundance(proteinAbundance(HGNC:ITGAV),proteinAbundance(HGNC:ITGB3)))'
-        self.parser.relation.parseString(statement)
+        self.parser.relation.parse_string(statement)
 
     def test_has_variant(self):
         statement = "g(HGNC:AKT1) hasVariant g(HGNC:AKT1, gmod(M))"
-        self.parser.relation.parseString(statement)
+        self.parser.relation.parse_string(statement)
 
         expected_parent = gene("HGNC", "AKT1")
         expected_child = expected_parent.with_variants(gmod("Me"))
@@ -1039,7 +1039,7 @@ class TestRelations(TestTokenParserBase):
         statement = 'rxn(reactants(a(CHEBI:"(S)-3-hydroxy-3-methylglutaryl-CoA"),a(CHEBI:NADPH), \
                     a(CHEBI:hydron)),products(a(CHEBI:mevalonate), a(CHEBI:"CoA-SH"), a(CHEBI:"NADP(+)"))) \
                     hasReactant a(CHEBI:"(S)-3-hydroxy-3-methylglutaryl-CoA")'
-        self.parser.relation.parseString(statement)
+        self.parser.relation.parse_string(statement)
 
         sub_reactant_1 = abundance("CHEBI", "(S)-3-hydroxy-3-methylglutaryl-CoA")
         sub_reactant_2 = abundance("CHEBI", "NADPH")
@@ -1077,7 +1077,7 @@ class TestRelations(TestTokenParserBase):
     def test_no_correlation(self):
         """Test the ``noCorrelation`` relation."""
         statement = "r(HGNC:X) noCorrelation r(HGNC:Y)"
-        self.parser.relation.parseString(statement)
+        self.parser.relation.parse_string(statement)
         source = Rna("HGNC", "X")
         target = Rna("HGNC", "Y")
         self.assert_has_two_way_edge(source, target, NO_CORRELATION)
@@ -1085,7 +1085,7 @@ class TestRelations(TestTokenParserBase):
     def test_correlation(self):
         """Test the ``correlation`` relation."""
         statement = "r(HGNC:X) correlation r(HGNC:Y)"
-        self.parser.relation.parseString(statement)
+        self.parser.relation.parse_string(statement)
 
         source = Rna("HGNC", "X")
         target = Rna("HGNC", "Y")
@@ -1094,7 +1094,7 @@ class TestRelations(TestTokenParserBase):
     def test_binds(self):
         """Test the ``binds`` relation."""
         statement = "p(HGNC:X) binds p(HGNC:Y)"
-        self.parser.relation.parseString(statement)
+        self.parser.relation.parse_string(statement)
 
         source = Protein("HGNC", "X")
         target = Protein("HGNC", "Y")
@@ -1119,22 +1119,22 @@ class TestCustom(unittest.TestCase):
         s = 'tloc(p(HGNC:AKT1), fromLoc(MESH:nucleus), toLoc(MISSING:"undefined"))'
 
         with self.assertRaises(UndefinedNamespaceWarning):
-            self.parser.translocation.parseString(s)
+            self.parser.translocation.parse_string(s)
 
     def test_tloc_undefined_name(self):
         s = 'tloc(p(HGNC:AKT1), fromLoc(MESH:nucleus), toLoc(MESH:"undefined"))'
 
         with self.assertRaises(MissingNamespaceNameWarning):
-            self.parser.translocation.parseString(s)
+            self.parser.translocation.parse_string(s)
 
     def test_location_undefined_namespace(self):
         s = 'p(HGNC:AKT1, loc(MISSING:"nucleus")'
 
         with self.assertRaises(UndefinedNamespaceWarning):
-            self.parser.protein.parseString(s)
+            self.parser.protein.parse_string(s)
 
     def test_location_undefined_name(self):
         s = 'p(HGNC:AKT1, loc(MESH:"undefined")'
 
         with self.assertRaises(MissingNamespaceNameWarning):
-            self.parser.protein.parseString(s)
+            self.parser.protein.parse_string(s)

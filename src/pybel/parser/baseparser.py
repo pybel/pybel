@@ -35,9 +35,9 @@ class BaseParser(object):
 
     def parse_lines(self, lines: Iterable[str]) -> List[ParseResults]:
         """Parse multiple lines in succession."""
-        return [self.parseString(line, line_number) for line_number, line in enumerate(lines)]
+        return [self.parse_string(line, line_number) for line_number, line in enumerate(lines)]
 
-    def parseString(self, line: str, line_number: int = 0) -> ParseResults:  # noqa: N802
+    def parse_string(self, line: str, line_number: int = 0) -> ParseResults:  # noqa: N802
         """Parse a string with the language represented by this parser.
 
         :param line: A string representing an instance of this parser's language

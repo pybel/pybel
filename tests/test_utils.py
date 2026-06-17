@@ -39,7 +39,7 @@ class TestRandom(unittest.TestCase):
 
     def test_bad_aminoAcid(self):
         with self.assertRaises(PlaceholderAminoAcidWarning):
-            amino_acid.parseString("X")
+            amino_acid.parse_string("X")
 
 
 class TestUtils(unittest.TestCase):

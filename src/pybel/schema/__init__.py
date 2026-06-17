@@ -9,9 +9,8 @@ clearly defined manner across the repository.
 
 import json
 import logging
-import os
-import pathlib
-from typing import Any, Mapping, Optional, Tuple
+from pathlib import Path
+from typing import Any, Mapping
 
 import jsonschema
 
@@ -19,14 +18,14 @@ __all__ = ["is_valid_node", "is_valid_edge"]
 
 logger = logging.getLogger(__name__)
 
-HERE = os.path.abspath(os.path.dirname(__file__))
+HERE = Path(__file__).parent.resolve()
 
 NODE_FILENAME = "base_node.schema.json"
 EDGE_FILENAME = "edge.schema.json"
 
 # To use schemas from other files, jsonschema needs to know where the references point to, so
 # create a resolver that directs any references (like "entity.schema.json") to the schema's dir
-schema_uri = pathlib.PurePath(__file__).as_uri()
+schema_uri = Path(__file__).as_uri()
 RESOLVER = jsonschema.RefResolver(base_uri=schema_uri, referrer=__file__)
 
 
@@ -36,9 +35,8 @@ def _build_validator(filename: str) -> jsonschema.Draft7Validator:
 
     :param filename: The relative path to the schema, e.g. "base_node.schema.json"
     """
-    path = os.path.join(HERE, filename)
-    with open(path) as json_schema:
-        schema = json.load(json_schema)
+    with HERE.joinpath(filename).open() as file:
+        schema = json.load(file)
     return jsonschema.Draft7Validator(schema, resolver=RESOLVER)
 
 

@@ -56,66 +56,66 @@ class TestHGVSParser(unittest.TestCase):
     def test_protein_del(self):
         statement = "variant(p.Phe508del)"
         expected = Hgvs("p.Phe508del")
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_protein_del_quoted(self):
         statement = 'variant("p.Phe508del")'
         expected = Hgvs("p.Phe508del")
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_protein_mut(self):
         statement = "var(p.Gly576Ala)"
         expected = Hgvs("p.Gly576Ala")
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_unspecified(self):
         statement = "var(=)"
         expected = Hgvs("=")
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_frameshift(self):
         statement = "variant(p.Thr1220Lysfs)"
         expected = Hgvs("p.Thr1220Lysfs")
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_snp(self):
         statement = "var(c.1521_1523delCTT)"
         expected = Hgvs("c.1521_1523delCTT")
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_chromosome_1(self):
         statement = "variant(g.117199646_117199648delCTT)"
         expected = Hgvs("g.117199646_117199648delCTT")
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_chromosome_2(self):
         statement = "var(c.1521_1523delCTT)"
         expected = Hgvs("c.1521_1523delCTT")
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_rna_del(self):
         statement = "var(r.1653_1655delcuu)"
         expected = Hgvs("r.1653_1655delcuu")
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
         self.assertEqual(expected, result.asDict())
 
     def test_protein_trunc_triple(self):
         statement = "var(p.Cys65*)"
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
         expected = Hgvs("p.Cys65*")
         self.assertEqual(expected, result.asDict())
 
     def test_protein_trunc_legacy(self):
         statement = "var(p.65*)"
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
         expected = Hgvs("p.65*")
         self.assertEqual(expected, result.asDict())
 
@@ -134,7 +134,7 @@ class TestPmod(unittest.TestCase):
         )
 
     def _help_test_pmod_simple(self, statement):
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
 
         expected = {
             KIND: PMOD,
@@ -159,7 +159,7 @@ class TestPmod(unittest.TestCase):
         self._help_test_pmod_simple("pmod(Ph)")
 
     def _help_test_pmod_with_residue(self, statement):
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
 
         expected = {
             KIND: PMOD,
@@ -180,7 +180,7 @@ class TestPmod(unittest.TestCase):
         self._help_test_pmod_with_residue("pmod(Ph, Ser)")
 
     def _help_test_pmod_full(self, statement):
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
 
         expected = {
             KIND: PMOD,
@@ -207,7 +207,7 @@ class TestPmod(unittest.TestCase):
         self._help_test_pmod_full("pmod(Ph, S, 473)")
 
     def _help_test_non_standard_namespace(self, statement):
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
 
         expected = {
             KIND: PMOD,
@@ -254,17 +254,17 @@ class TestGeneModification(unittest.TestCase):
 
     def test_gmod_short(self):
         statement = "geneModification(M)"
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
         self.assertEqual(self.expected, result.asDict())
 
     def test_gmod_unabbreviated(self):
         statement = "geneModification(Me)"
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
         self.assertEqual(self.expected, result.asDict())
 
     def test_gmod_long(self):
         statement = "geneModification(methylation)"
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
         self.assertEqual(self.expected, result.asDict())
 
 
@@ -274,14 +274,14 @@ class TestProteinSubstitution(unittest.TestCase):
 
     def test_psub_1(self):
         statement = "sub(A, 127, Y)"
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
 
         expected_list = Hgvs("p.Ala127Tyr")
         self.assertEqual(expected_list, result.asDict())
 
     def test_psub_2(self):
         statement = "sub(Ala, 127, Tyr)"
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
 
         expected_list = Hgvs("p.Ala127Tyr")
         self.assertEqual(expected_list, result.asDict())
@@ -293,7 +293,7 @@ class TestGeneSubstitutionParser(unittest.TestCase):
 
     def test_gsub(self):
         statement = "sub(G,308,A)"
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
 
         expected_dict = Hgvs("c.308G>A")
         self.assertEqual(expected_dict, result.asDict())
@@ -306,7 +306,7 @@ class TestFragmentParser(unittest.TestCase):
         self.parser = get_fragment_language()
 
     def _help_test_known_length(self, s):
-        result = self.parser.parseString(s)
+        result = self.parser.parse_string(s)
         expected = {KIND: FRAGMENT, FRAGMENT_START: 5, FRAGMENT_STOP: 20}
         self.assertEqual(expected, result.asDict())
 
@@ -321,7 +321,7 @@ class TestFragmentParser(unittest.TestCase):
         self._help_test_known_length(s)
 
     def _help_test_unknown_length(self, s):
-        result = self.parser.parseString(s)
+        result = self.parser.parse_string(s)
         expected = {KIND: FRAGMENT, FRAGMENT_START: 1, FRAGMENT_STOP: "?"}
         self.assertEqual(expected, result.asDict())
 
@@ -336,7 +336,7 @@ class TestFragmentParser(unittest.TestCase):
         self._help_test_unknown_length(s)
 
     def _help_test_unknown_start_stop(self, s):
-        result = self.parser.parseString(s)
+        result = self.parser.parse_string(s)
         expected = {KIND: FRAGMENT, FRAGMENT_START: "?", FRAGMENT_STOP: "*"}
         self.assertEqual(expected, result.asDict())
 
@@ -351,7 +351,7 @@ class TestFragmentParser(unittest.TestCase):
         self._help_test_unknown_start_stop(s)
 
     def _help_test_descriptor(self, s):
-        result = self.parser.parseString(s)
+        result = self.parser.parse_string(s)
         expected = {KIND: FRAGMENT, FRAGMENT_MISSING: "?", FRAGMENT_DESCRIPTION: "55kD"}
         self.assertEqual(expected, result.asDict())
 
@@ -372,7 +372,7 @@ class TestTruncationParser(unittest.TestCase):
 
     def test_trunc_1(self):
         statement = "trunc(40)"
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
 
         expected = Hgvs("p.40*")
         self.assertEqual(expected, result.asDict())
@@ -380,7 +380,7 @@ class TestTruncationParser(unittest.TestCase):
     def test_trunc_2(self):
         """Test a truncation in which the amino acid is specified."""
         statement = "trunc(Gly40)"
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
 
         expected = Hgvs("p.Gly40*")
         self.assertEqual(expected, result.asDict())
@@ -389,7 +389,7 @@ class TestTruncationParser(unittest.TestCase):
         """Test that an error is raised for a truncation in which the position is omitted."""
         statement = "trunc(Gly)"
         with self.assertRaises(Exception):
-            self.parser.parseString(statement)
+            self.parser.parse_string(statement)
 
 
 class TestFusionParser(unittest.TestCase):
@@ -401,7 +401,7 @@ class TestFusionParser(unittest.TestCase):
     def test_rna_fusion_known_breakpoints(self):
         """RNA abundance of fusion with known breakpoints"""
         statement = "fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.312_5034)"
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
 
         expected = {
             PARTNER_5P: {
@@ -429,7 +429,7 @@ class TestFusionParser(unittest.TestCase):
     def test_rna_fusion_unspecified_breakpoints(self):
         """RNA abundance of fusion with unspecified breakpoints"""
         statement = "fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?)"
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
 
         expected = {
             PARTNER_5P: {
@@ -453,7 +453,7 @@ class TestFusionParser(unittest.TestCase):
     def test_rna_fusion_specified_one_fuzzy_breakpoint(self):
         """RNA abundance of fusion with unspecified breakpoints"""
         statement = "fusion(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.?_1)"
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
 
         expected = {
             PARTNER_5P: {
@@ -477,7 +477,7 @@ class TestFusionParser(unittest.TestCase):
     def test_rna_fusion_specified_fuzzy_breakpoints(self):
         """RNA abundance of fusion with unspecified breakpoints"""
         statement = "fusion(HGNC:TMPRSS2, r.1_?, HGNC:ERG, r.?_1)"
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
 
         expected = {
             PARTNER_5P: {
@@ -507,6 +507,6 @@ class TestLocation(unittest.TestCase):
 
     def test_a(self):
         statement = "loc(GO:intracellular)"
-        result = self.parser.parseString(statement)
+        result = self.parser.parse_string(statement)
         expected = {LOCATION: {NAMESPACE: "GO", NAME: "intracellular"}}
         self.assertEqual(expected, result.asDict())
