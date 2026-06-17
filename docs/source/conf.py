@@ -71,13 +71,13 @@ extensions = [
     "sphinx.ext.coverage",
     "sphinx.ext.intersphinx",
     "sphinx.ext.todo",
-    'sphinx.ext.coverage',
+    "sphinx.ext.coverage",
     "sphinx.ext.mathjax",
     "sphinx.ext.viewcode",
     "sphinx_automodapi.automodapi",
     "sphinx_automodapi.smart_resolver",
-    'sphinx_autodoc_typehints',
-    'sphinx_click.ext',
+    "sphinx_autodoc_typehints",
+    "sphinx_click.ext",
 ]
 
 # generate autosummary pages
@@ -108,7 +108,7 @@ language = "en"
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = [
-    '**/.ipynb_checkpoints',
+    "**/.ipynb_checkpoints",
 ]
 
 # The name of the Pygments (syntax highlighting) style to use.
@@ -242,11 +242,11 @@ texinfo_documents = [
 # Note: don't add trailing slashes, since sphinx adds "/objects.inv" to the end
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
-    'networkx': ('https://networkx.github.io/documentation/latest/', None),
-    'sqlalchemy': ('https://docs.sqlalchemy.org/en/latest', None),
-    'indra': ('https://indra.readthedocs.io/en/latest/', None),
-    'bio2bel': ('https://bio2bel.readthedocs.io/en/latest/', None),
-    'requests': ('https://requests.kennethreitz.org/en/master/', None),
+    "networkx": ("https://networkx.github.io/documentation/latest/", None),
+    "sqlalchemy": ("https://docs.sqlalchemy.org/en/latest", None),
+    "indra": ("https://indra.readthedocs.io/en/latest/", None),
+    "bio2bel": ("https://bio2bel.readthedocs.io/en/latest/", None),
+    "requests": ("https://requests.kennethreitz.org/en/master/", None),
 }
 
 autoclass_content = "both"
