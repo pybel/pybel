@@ -1,30 +1,61 @@
-Installation
-============
-The latest stable code can be installed from `PyPI <https://pypi.python.org/pypi/pybel>`_ with:
+##############
+ Installation
+##############
 
-.. code-block:: sh
+The most recent release can be installed from `PyPI <https://pypi.org/project/pybel>`_
+with uv:
 
-   $ python3 -m pip install pybel
+.. code-block:: console
 
-The most recent code can be installed from the source on `GitHub <https://github.com/pybel/pybel>`_ with:
+    $ uv pip install pybel
 
-.. code-block:: sh
+or with pip:
 
-   $ python3 -m pip install git+https://github.com/pybel/pybel.git
+.. code-block:: console
 
-For developers, the repository can be cloned from `GitHub <https://github.com/pybel/pybel>`_ and installed in editable
-mode with:
+    $ python3 -m pip install pybel
 
-.. code-block:: sh
+*********************
+ Installing from git
+*********************
 
-   $ git clone https://github.com/pybel/pybel.git
-   $ cd pybel
-   $ python3 -m pip install -e .
+The most recent code and data can be installed directly from GitHub with uv:
 
-Extras
-------
-The ``setup.py`` makes use of the ``extras_require`` argument of :func:`setuptools.setup` in order to make some heavy
-packages that support special features of PyBEL optional to install, in order to make the installation more lean by
+.. code-block:: console
+
+    $ uv pip install git+https://github.com/pybel/pybel.git
+
+or with pip:
+
+.. code-block:: console
+
+    $ python3 -m pip install git+https://github.com/pybel/pybel.git
+
+****************************
+ Installing for development
+****************************
+
+To install in development mode with uv:
+
+.. code-block:: console
+
+    $ git clone git+https://github.com/pybel/pybel.git
+    $ cd pybel
+    $ uv pip install -e .
+
+or with pip:
+
+.. code-block:: console
+
+    $ python3 -m pip install -e .
+
+
+********
+ Extras
+********
+
+Some heavy
+packages that support special features of PyBEL are optional to install, in order to make the installation more lean by
 default. A single extra can be installed from PyPI like :code:`python3 -m pip install pybel[neo4j]` or multiple can
 be installed using a list like :code:`python3 -m pip install pybel[neo4j,indra]`. Likewise, for developer
 installation, extras can be installed in editable mode with :code:`python3 -m pip install -e .[neo4j]` or multiple can

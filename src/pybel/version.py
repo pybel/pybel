@@ -1,7 +1,10 @@
-"""The current version of PyBEL."""
+"""Version information for :mod:`pybel`.
+
+Run with ``python -m pybel.version``
+"""
 
 import os
-import subprocess  # noqa:S404
+from subprocess import CalledProcessError, check_output
 
 __all__ = [
     "VERSION",
@@ -13,24 +16,24 @@ VERSION = "0.15.6-dev"
 
 
 def get_git_hash() -> str:
-    """Get the PyBEL git hash."""
+    """Get the :mod:`pybel` git hash."""
     with open(os.devnull, "w") as devnull:
         try:
-            ret = subprocess.check_output(  # noqa:S603,S607
+            ret = check_output(
                 ["git", "rev-parse", "HEAD"],
                 cwd=os.path.dirname(__file__),
                 stderr=devnull,
             )
-        except subprocess.CalledProcessError:
+        except CalledProcessError:
             return "UNHASHED"
         else:
             return ret.strip().decode("utf-8")[:8]
 
 
-def get_version(with_git_hash: bool = False):
-    """Get the PyBEL version string, including a git hash."""
+def get_version(with_git_hash: bool = False) -> str:
+    """Get the :mod:`pybel` version string, including a git hash."""
     return f"{VERSION}-{get_git_hash()}" if with_git_hash else VERSION
 
 
 if __name__ == "__main__":
-    pass
+    print(get_version(with_git_hash=True))  # noqa:T201

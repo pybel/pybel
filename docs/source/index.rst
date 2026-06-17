@@ -1,5 +1,7 @@
-PyBEL |release| Documentation
-=============================
+###############################
+ PyBEL |release| Documentation
+###############################
+
 Biological Expression Language (BEL) is a domain-specific language that enables the expression of complex molecular
 relationships and their context in a machine-readable form. Its simple grammar and expressive power have led to its
 successful use in the to describe complex disease networks with several thousands of relationships.
@@ -10,14 +12,7 @@ package, `PyBEL-Tools <http://pybel-tools.readthedocs.io/>`_, contains a library
 biological networks. For result-oriented guides, see the `PyBEL-Notebooks <https://github.com/pybel/pybel-notebooks>`_
 repository.
 
-Installation is as easy as getting the code from `PyPI <https://pypi.python.org/pypi/pybel>`_ with
-:code:`python3 -m pip install pybel`. See the :doc:`installation <introduction/installation>` documentation.
-
 For citation information, see the :doc:`references <meta/references>` page.
-
-PyBEL is tested on Python 3.5+ on Mac OS and Linux using
-`Travis CI <https://travis-ci.org/pybel/pybel>`_ as well as on Windows using
-`AppVeyor <https://ci.appveyor.com/project/cthoyt/pybel>`_.
 
 .. seealso::
 
@@ -26,7 +21,6 @@ PyBEL is tested on Python 3.5+ on Mac OS and Linux using
       `BEL 2.0+ <https://biological-expression-language.github.io>`_
     - Documented on `Read the Docs <http://pybel.readthedocs.io/>`_
     - Versioned on `GitHub <https://github.com/pybel/pybel>`_
-    - Tested on `Travis CI <https://travis-ci.org/pybel/pybel>`_
     - Distributed by `PyPI <https://pypi.python.org/pypi/pybel>`_
 
 .. toctree::
@@ -34,8 +28,8 @@ PyBEL is tested on Python 3.5+ on Mac OS and Linux using
    :caption: Getting Started
    :name: start
 
-   introduction/overview
-   introduction/installation
+   overview
+   installation
 
 .. toctree::
    :maxdepth: 2
@@ -104,8 +98,10 @@ PyBEL is tested on Python 3.5+ on Mac OS and Linux using
    meta/postmortem
    meta/technology
 
-Indices and Tables
-------------------
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+********************
+ Indices and Tables
+********************
+
+- :ref:`genindex`
+- :ref:`modindex`
+- :ref:`search`

@@ -1,14 +1,341 @@
-# See https://setuptools.readthedocs.io/en/latest/build_meta.html
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta:__legacy__"
+requires = ["uv_build>=0.11.2,<1.0"]
+build-backend = "uv_build"
 
-[tool.black]
-line-length = 120
-target-version = ["py37", "py38", "py39", "py310"]
+[project]
+name = "pybel"
+version = "0.15.6-dev"
+description = "Parsing, validation, compilation, and data exchange of Biological Expression Language (BEL)"
+readme = "README.md"
+authors = [
+    { name = "Charles Tapley Hoyt", email = "cthoyt@gmail.com" }
+]
+maintainers = [
+    { name = "Charles Tapley Hoyt", email = "cthoyt@gmail.com" }
+]
 
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-include_trailing_comma = true
-reverse_relative = true
+# See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#classifiers
+# Search tags using the controlled vocabulary at https://pypi.org/classifiers
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Framework :: Pytest",
+    "Framework :: tox",
+    "Framework :: Sphinx",
+    "Natural Language :: English",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3 :: Only",
+    "Typing :: Typed",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Chemistry",
+]
+keywords = [
+    "snekpack", # please keep this keyword to credit the cookiecutter-snekpack template
+    "cookiecutter",
+    "Biological Expression Language",
+    "BEL",
+    "domain-specific language",
+    "DSL",
+    "Systems Biology",
+    "Networks Biology",
+]
+
+# License Information.
+# See PEP-639 at https://peps.python.org/pep-0639/#add-license-files-key
+license = "MIT"
+license-files = ["LICENSE"]
+
+requires-python = ">=3.11"
+dependencies = [
+    "networkx>=2.4",
+    "sqlalchemy",
+    "click",
+    "click-plugins",
+    "bel_resources>=0.0.3",
+    "more_itertools",
+    "requests",
+    "requests_file",
+    "pyparsing>=3.1.0",
+    "tqdm",
+    "humanize",
+    "tabulate",
+    "pandas",
+    "jsonschema",
+    "bioregistry>=0.13.62",
+    "ratelimit",
+    "pystow>=0.8.17",
+    "psycopg2-binary",
+    # "setuptools<81",
+]
+
+# see https://peps.python.org/pep-0735/ and https://docs.astral.sh/uv/concepts/dependencies/#dependency-groups
+[dependency-groups]
+tests = [
+    "pytest",
+    "coverage[toml]",
+]
+docs = [
+    "sphinx>=8,<9",
+    "sphinx-rtd-theme>=3.0",
+    "sphinx-click",
+    "sphinx_automodapi",
+]
+lint = [
+    "ruff",
+]
+typing = [
+    { include-group = "tests" },
+    "mypy",
+    "pydantic",
+    "types-click",
+]
+docs-lint = [
+    { include-group = "docs" },
+    "doc8",
+]
+format-docs = [
+    { include-group = "docs" },
+    "docstrfmt",
+]
+doctests = [
+    "xdoctest",
+    "pygments",
+]
+pyroma = [
+    "uv-build",
+    "pyroma",
+    "pygments",
+]
+
+# see https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#dependencies-optional-dependencies
+[project.optional-dependencies]
+jupyter = ["jinja2", "ipython"]
+neo4j = ["py2neo"]
+grounding = ["pyobo>=0.12.24", "protmapper"]
+
+# See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#urls
+# and also https://packaging.python.org/en/latest/specifications/well-known-project-urls/
+[project.urls]
+"Bug Tracker" = "https://github.com/pybel/pybel/issues"
+Homepage = "https://github.com/pybel/pybel"
+Repository = "https://github.com/pybel/pybel.git"
+Documentation = "https://pybel.readthedocs.io"
+Funding = "https://github.com/sponsors/cthoyt"
+
+[project.scripts]
+pybel = "pybel.cli:main"
+
+[project.entry-points."pybel.importer"]
+bel                     = "pybel.io.lines:from_bel_script"
+"bel.gz"                = "pybel.io.lines:from_bel_script_gz"
+"bel.nodelink.json"     = "pybel.io.nodelink:from_nodelink_file"
+"bel.nodelink.json.gz"  = "pybel.io.nodelink:from_nodelink_gz"
+"bel.jsonl"             = "pybel.io.sbel:from_sbel_file"
+"bel.jsonl.gz"          = "pybel.io.sbel:from_sbel_gz"
+"bel.cx.json"           = "pybel.io.cx:from_cx_file"
+"bel.cx.json.gz"        = "pybel.io.cx:from_cx_gz"
+"bel.graphdati.json"    = "pybel.io.graphdati:from_graphdati_file"
+"bel.graphdati.json.gz" = "pybel.io.graphdati:from_graphdati_gz"
+"bel.jgif.json"         = "pybel.io.jgif:from_jgif_file"
+"bel.jgif.json.gz"      = "pybel.io.jgif:from_jgif_gz"
+"bel.pickle"            = "pybel.io.gpickle:from_pickle"
+"bel.gpickle"           = "pybel.io.gpickle:from_pickle"
+"bel.pkl"               = "pybel.io.gpickle:from_pickle"
+"bel.pickle.gz"         = "pybel.io.gpickle:from_pickle_gz"
+"bel.gpickle.gz"        = "pybel.io.gpickle:from_pickle_gz"
+"bel.pkl.gz"            = "pybel.io.gpickle:from_pickle_gz"
+"indra.json "           = "pybel.io.indra:from_indra_statements_json_file"
+
+[project.entry-points."pybel.exporter"]
+bel                     = "pybel.canonicalize:to_bel_script"
+"bel.gz"                = "pybel.canonicalize:to_bel_script_gz"
+"bel.nodelink.json"     = "pybel.io.nodelink:to_nodelink_file"
+"bel.nodelink.json.gz"  = "pybel.io.nodelink:to_nodelink_gz"
+"bel.jsonl"             = "pybel.io.sbel:to_sbel_file"
+"bel.jsonl.gz"          = "pybel.io.sbel:to_sbel_gz"
+"bel.cx.json"           = "pybel.io.cx:to_cx_file"
+"bel.cx.json.gz"        = "pybel.io.cx:to_cx_gz"
+"bel.graphdati.json"    = "pybel.io.graphdati:to_graphdati_file"
+"bel.graphdati.json.gz" = "pybel.io.graphdati:to_graphdati_gz"
+"bel.jgif.json"         = "pybel.io.jgif:to_jgif_file"
+"bel.jgif.json.gz"      = "pybel.io.jgif:to_jgif_gz"
+"bel.pickle"            = "pybel.io.gpickle:to_pickle"
+"bel.gpickle"           = "pybel.io.gpickle:to_pickle"
+"bel.pkl"               = "pybel.io.gpickle:to_pickle"
+"bel.pickle.gz"         = "pybel.io.gpickle:to_pickle_gz"
+"bel.gpickle.gz"        = "pybel.io.gpickle:to_pickle_gz"
+"bel.pkl.gz"            = "pybel.io.gpickle:to_pickle_gz"
+"indra.json"            = "pybel.io.indra:to_indra_statements_json_file"
+# No re-import
+"bel.unodelink.json"    = "pybel.io.umbrella_nodelink:to_umbrella_nodelink_file"
+"bel.unodelink.json.gz" = "pybel.io.umbrella_nodelink:to_umbrella_nodelink_gz"
+tsv                     = "pybel.io.triples.api:to_triples_file"
+gsea                    = "pybel.io.extras:to_gsea"
+
+# Importers for PyKEEN
+[project.entry-points."pykeen.triples.extension_importer"]
+# Import BEL script to PyKEEN
+bel                 = "pybel.io.pykeen:get_triples_from_bel"
+# Import BEL Graph pickle to PyKEEN
+"bel.gpickle"       = "pybel.io.pykeen:get_triples_from_bel_pickle"
+"bel.pickle"        = "pybel.io.pykeen:get_triples_from_bel_pickle"
+"bel.pkl"           = "pybel.io.pykeen:get_triples_from_bel_pickle"
+# Import BEL NodeLink JSON to PyKEEN
+"bel.nodelink.json" = "pybel.io.pykeen:get_triples_from_bel_nodelink"
+
+[project.entry-points."pykeen.triples.prefix_importer"]
+# Import BEL from BEL Commons to PyKEEN
+bel-commons       = "pybel.io.pykeen:get_triples_from_bel_commons"
+
+
+[tool.cruft]
+skip = [
+    "**/__init__.py",
+    "tests/*"
+]
+
+# MyPy, see https://mypy.readthedocs.io/en/stable/config_file.html
+[tool.mypy]
+plugins = [
+    "pydantic.mypy",
+]
+
+# Doc8, see https://doc8.readthedocs.io/en/stable/readme.html#ini-file-usage
+[tool.doc8]
+max-line-length = 120
+
+# Pytest, see https://docs.pytest.org/en/stable/reference/customize.html#pyproject-toml
+[tool.pytest.ini_options]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+]
+
+# Coverage, see https://coverage.readthedocs.io/en/latest/config.html
+[tool.coverage.run]
+branch = true
+source = [
+    "pybel",
+]
+omit = [
+    "tests/*",
+    "docs/*",
+    "src/pybel/version.py",
+    "src/pybel/__main__.py",
+    "src/pybel/cli.py",
+]
+
+[tool.coverage.paths]
+source = [
+    "src/pybel",
+    ".tox/*/lib/python*/site-packages/pybel",
+]
+
+[tool.coverage.report]
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "raise NotImplementedError",
+    "if __name__ == \"__main__\":",
+    "if TYPE_CHECKING:",
+    "def __str__",
+    "def __repr__",
+]
+
+[tool.ruff]
+line-length = 100
+extend-include = ["*.ipynb"]
+
+[tool.ruff.lint]
+# See https://docs.astral.sh/ruff/rules
+extend-select = [
+    "F", # pyflakes
+    "E", # pycodestyle errors
+    "W", # pycodestyle warnings
+    "C90", # mccabe
+    "I", # isort
+    "UP", # pyupgrade
+    "D", # pydocstyle
+    "DOC", # pydoclint
+    "B", # bugbear
+    "S", # bandit
+    "T20", # print
+    "N", # pep8 naming
+    "ERA", # eradicate commented out code
+    "NPY", # numpy checks
+    "RUF", # ruff rules
+    "C4", # comprehensions
+]
+ignore = [
+    "D105", # Missing docstring in magic method
+]
+
+# See https://docs.astral.sh/ruff/settings/#per-file-ignores
+[tool.ruff.lint.per-file-ignores]
+# Ignore security issues in the version.py, which are inconsistent
+"src/pybel/version.py" = ["S603", "S607"]
+# Ignore commented out code in Sphinx configuration file
+"docs/source/conf.py" = ["ERA001"]
+# Prints are okay in notebooks
+"notebooks/**/*.ipynb" = ["T201"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"
+
+[tool.ruff.lint.isort]
+relative-imports-order = "closest-to-furthest"
+known-third-party = [
+    "tqdm",
+]
+known-first-party = [
+    "pybel",
+    "tests",
+]
+
+[tool.ruff.format]
+# see https://docs.astral.sh/ruff/settings/#format_docstring-code-format
+docstring-code-format = true
+
+[tool.bumpversion]
+current_version = "0.0.1-dev"
+parse = "(?P<major>\\d+)\\.(?P<minor>\\d+)\\.(?P<patch>\\d+)(?:-(?P<release>[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?(?:\\+(?P<build>[0-9A-Za-z-]+(?:\\.[0-9A-Za-z-]+)*))?"
+serialize = [
+    "{major}.{minor}.{patch}-{release}+{build}",
+    "{major}.{minor}.{patch}+{build}",
+    "{major}.{minor}.{patch}-{release}",
+    "{major}.{minor}.{patch}",
+]
+commit = true
+tag = false
+
+[tool.bumpversion.parts.release]
+optional_value = "production"
+first_value = "dev"
+values = [
+    "dev",
+    "production",
+]
+
+[[tool.bumpversion.files]]
+filename = "pyproject.toml"
+search = "version = \"{current_version}\""
+replace = "version = \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "docs/source/conf.py"
+search = "release = \"{current_version}\""
+replace = "release = \"{new_version}\""
+
+[[tool.bumpversion.files]]
+filename = "src/pybel/version.py"
+search = "VERSION = \"{current_version}\""
+replace = "VERSION = \"{new_version}\""
+[[tool.bumpversion.files]]
+filename = "CITATION.cff"
+search = "version: {current_version}"
+replace = "version: {new_version}"
