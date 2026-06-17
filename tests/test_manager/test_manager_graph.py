@@ -554,7 +554,7 @@ class TestAddNodeFromData(unittest.TestCase):
         self.graph.add_node_from_data(node_data)
         self.assertIn(node_data, self.graph)
         self.assertEqual(3, self.graph.number_of_nodes())
-        self.assertIn(il6, self.graph, msg="Nodes:\n".format("\n".join(map(str, self.graph))))
+        self.assertIn(il6, self.graph, msg="Nodes:\n")
         self.assertIn(il23, self.graph)
         self.assertEqual(2, self.graph.number_of_edges())
 
@@ -901,7 +901,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
-        edge = network.edges.first()
+        network.edges.first()
         # self.assertEqual(2, edge.properties.count())
 
     @mock_bel_resources
@@ -1023,7 +1023,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
-        edge = network.edges.first()
+        network.edges.first()
         # self.assertEqual(1, edge.properties.count())
 
     def test_object_degradation(self):
@@ -1041,7 +1041,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
-        edge = network.edges.first()
+        network.edges.first()
         # self.assertEqual(1, edge.properties.count())
 
     def test_subject_location(self):
@@ -1059,7 +1059,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
-        edge = network.edges.first()
+        network.edges.first()
         # self.assertEqual(1, edge.properties.count())
 
     def test_mixed_1(self):
@@ -1090,7 +1090,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
-        edge = network.edges.first()
+        network.edges.first()
         # self.assertEqual(2, edge.properties.count())
         # FIXME
 
@@ -1115,7 +1115,7 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
-        edge = network.edges.first()
+        network.edges.first()
         # self.assertEqual(4, edge.properties.count())
         # self.assertEqual(2, edge.properties.filter(Property.is_subject).count())
         # self.assertEqual(2, edge.properties.filter(not_(Property.is_subject)).count())

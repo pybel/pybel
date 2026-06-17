@@ -73,7 +73,9 @@ def collapse_nodes(graph, survivor_mapping: Mapping[BaseEntity, Set[BaseEntity]]
     _remove_self_edges(graph)
 
 
-def surviors_are_inconsistent(survivor_mapping: Mapping[BaseEntity, Set[BaseEntity]]) -> Set[BaseEntity]:
+def surviors_are_inconsistent(
+    survivor_mapping: Mapping[BaseEntity, Set[BaseEntity]],
+) -> Set[BaseEntity]:
     """Check that there's no transitive shit going on."""
     victim_mapping = set()
     for victim in itt.chain.from_iterable(survivor_mapping.values()):

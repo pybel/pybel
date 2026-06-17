@@ -15,13 +15,13 @@ import pybel
 import pybel.grounding
 
 HERE = os.path.dirname(__file__)
-OUTPUT = os.path.join(HERE, 'output')
-SOURCE = os.path.join(HERE, 'source')
+OUTPUT = os.path.join(HERE, "output")
+SOURCE = os.path.join(HERE, "source")
 os.makedirs(OUTPUT, exist_ok=True)
 
 # Get and unzip this in this directory
-URL = 'http://causalbionet.com/Content/jgf_bulk_files/Human-2.0.zip'
-PATH = os.path.join(HERE, 'Human-2.0.zip')
+URL = "http://causalbionet.com/Content/jgf_bulk_files/Human-2.0.zip"
+PATH = os.path.join(HERE, "Human-2.0.zip")
 
 
 @click.command()
@@ -45,5 +45,5 @@ def main():
         pybel.to_hipathia(graph, OUTPUT)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

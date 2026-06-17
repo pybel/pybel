@@ -1096,7 +1096,9 @@ def _handle_modifier(side_data: Dict[str, Any]) -> Mapping[str, Any]:
     return side_data
 
 
-def _handle_citation(citation: Union[str, Tuple[str, str], CitationDict]) -> CitationDict:
+def _handle_citation(
+    citation: Union[str, Tuple[str, str], CitationDict],
+) -> CitationDict:
     if isinstance(citation, str):
         return citation_dict(namespace=CITATION_TYPE_PUBMED, identifier=citation)
     elif isinstance(citation, tuple):
@@ -1218,15 +1220,15 @@ class SummarizeDispatch(Dispatch):
 
         return dedent(f"""\
             <h2>Metadata</h2>
-            {tabulate(self._metadata_list(), tablefmt='html')}
+            {tabulate(self._metadata_list(), tablefmt="html")}
             <h2>Statistics</h2>
-            {tabulate(self._statistics_list(prose_prefix=False), tablefmt='html')}
+            {tabulate(self._statistics_list(prose_prefix=False), tablefmt="html")}
             <h2>Nodes</h2>
-            {ss.functions_str(self.graph, examples=True, add_count=False, tablefmt='html')}
+            {ss.functions_str(self.graph, examples=True, add_count=False, tablefmt="html")}
             <h2>Namespaces</h2>
-            {ss.namespaces_str(self.graph, examples=True, add_count=False, tablefmt='html')}
+            {ss.namespaces_str(self.graph, examples=True, add_count=False, tablefmt="html")}
             <h2>Edges</h2>
-            {ss.edges_str(self.graph, examples=True, add_count=False, tablefmt='html')}
+            {ss.edges_str(self.graph, examples=True, add_count=False, tablefmt="html")}
         """)
 
     def statistics(self, file: Optional[TextIO] = None):

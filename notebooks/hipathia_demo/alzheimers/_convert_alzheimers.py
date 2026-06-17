@@ -12,9 +12,9 @@ import pybel.grounding
 from pybel.struct import get_subgraphs_by_annotation
 
 HERE = os.path.dirname(__file__)
-OUTPUT = os.path.join(HERE, 'output')
+OUTPUT = os.path.join(HERE, "output")
 os.makedirs(OUTPUT, exist_ok=True)
-PATH = os.path.join(HERE, 'alzheimers.bel.nodelink.json')
+PATH = os.path.join(HERE, "alzheimers.bel.nodelink.json")
 
 
 @click.command()
@@ -24,11 +24,11 @@ def main():
     graph = pybel.load(PATH)
     graph = pybel.grounding.ground(graph)
 
-    graphs = get_subgraphs_by_annotation(graph, annotation='Subgraph')
+    graphs = get_subgraphs_by_annotation(graph, annotation="Subgraph")
     for name, graph in graphs.items():
         graph.name = name
         pybel.to_hipathia(graph, OUTPUT)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

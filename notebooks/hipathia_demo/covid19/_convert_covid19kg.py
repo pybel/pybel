@@ -12,9 +12,9 @@ import pybel
 import pybel.grounding
 
 HERE = os.path.dirname(__file__)
-URL = 'https://github.com/covid19kg/covid19kg/raw/master/covid19kg/_cache.bel.nodelink.json'
-PATH = os.path.join(HERE, 'covid19.bel.nodelink.json')
-GROUNDED_PATH = os.path.join(HERE, 'covid19-grounded.bel.nodelink.json')
+URL = "https://github.com/covid19kg/covid19kg/raw/master/covid19kg/_cache.bel.nodelink.json"
+PATH = os.path.join(HERE, "covid19.bel.nodelink.json")
+GROUNDED_PATH = os.path.join(HERE, "covid19-grounded.bel.nodelink.json")
 
 
 @click.command()
@@ -32,5 +32,5 @@ def main():
     pybel.to_hipathia(graph, HERE)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

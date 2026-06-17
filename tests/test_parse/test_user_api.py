@@ -22,13 +22,13 @@ class TestParse(unittest.TestCase):
             "p(hgnc:1)",
         ]:
             with self.subTest(bel=bel):
-                x = pybel.parse(bel)
+                pybel.parse(bel)
 
     def test_citation(self):
-        x = pybel.parse("SET Citation = pmid:1234")
+        pybel.parse("SET Citation = pmid:1234")
 
     def test_control(self):
-        x = pybel.parse('SET Test = "5"')
+        pybel.parse('SET Test = "5"')
 
     def test_control_multiple(self):
-        x = pybel.parse('SET Test = {"1","2","3"}')
+        pybel.parse('SET Test = {"1","2","3"}')

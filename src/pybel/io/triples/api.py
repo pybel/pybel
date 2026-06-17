@@ -29,7 +29,12 @@ class NoTriplesValueError(ValueError):
 
 @open_file(1, mode="w")
 def to_triples_file(
-    graph: BELGraph, path: Union[str, TextIO], *, use_tqdm: bool = False, sep="\t", raise_on_none: bool = False
+    graph: BELGraph,
+    path: Union[str, TextIO],
+    *,
+    use_tqdm: bool = False,
+    sep="\t",
+    raise_on_none: bool = False,
 ) -> None:
     """Write the graph as a TSV.
 
@@ -46,7 +51,12 @@ def to_triples_file(
 
 @open_file(1, mode="w")
 def to_edgelist(
-    graph: BELGraph, path: Union[str, TextIO], *, use_tqdm: bool = False, sep="\t", raise_on_none: bool = False
+    graph: BELGraph,
+    path: Union[str, TextIO],
+    *,
+    use_tqdm: bool = False,
+    sep="\t",
+    raise_on_none: bool = False,
 ) -> None:
     """Write the graph as an edgelist.
 

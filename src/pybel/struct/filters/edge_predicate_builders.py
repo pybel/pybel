@@ -18,7 +18,6 @@ from ...constants import (
     CAUSAL_RELATIONS,
     CITATION,
     CITATION_AUTHORS,
-    IDENTIFIER,
     RELATION,
 )
 from ...dsl import BaseEntity
@@ -60,7 +59,9 @@ def _annotation_dict_all_filter(edge_data: EdgeData, query: Mapping[str, Iterabl
     return True
 
 
-def build_annotation_dict_all_filter(annotations: Mapping[str, Iterable[str]]) -> EdgePredicate:
+def build_annotation_dict_all_filter(
+    annotations: Mapping[str, Iterable[str]],
+) -> EdgePredicate:
     """Build an edge predicate for edges whose annotations are super-dictionaries of the given dictionary.
 
     If no annotations are given, will always evaluate to true.
@@ -91,7 +92,9 @@ def _annotation_dict_any_filter(edge_data: EdgeData, query: Mapping[str, Iterabl
     return any(key in annotations and value in annotations[key] for key, values in query.items() for value in values)
 
 
-def build_annotation_dict_any_filter(annotations: Mapping[str, Iterable[str]]) -> EdgePredicate:
+def build_annotation_dict_any_filter(
+    annotations: Mapping[str, Iterable[str]],
+) -> EdgePredicate:
     """Build an edge predicate that passes for edges whose data dictionaries match the given dictionary.
 
     If the given dictionary is empty, will always evaluate to true.

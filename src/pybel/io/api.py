@@ -5,8 +5,6 @@
 import os
 from importlib.metadata import entry_points
 
-from networkx.utils import open_file
-
 from ..struct import BELGraph
 
 __all__ = [

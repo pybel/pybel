@@ -475,7 +475,7 @@ class NetworkManager(NamespaceManager):
 
     def get_network_versions(self, name: str) -> Set[str]:
         """Return all of the versions of a network with the given name."""
-        return {version for version, in self.session.query(Network.version).filter(Network.name == name).all()}
+        return {version for (version,) in self.session.query(Network.version).filter(Network.name == name).all()}
 
     def get_network_by_name_version(self, name: str, version: str) -> Optional[Network]:
         """Load the network with the given name and version if it exists."""

@@ -47,7 +47,7 @@ from ..constants import (
     NAMESPACE,
 )
 from ..io.gpickle import from_bytes_gz, to_bytes_gz
-from ..language import CitationDict, Entity
+from ..language import CitationDict
 from ..struct.graph import BELGraph
 from ..tokens import parse_result_to_dsl
 
