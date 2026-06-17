@@ -31,6 +31,16 @@ ignore =
     E203
     # FIXME later remove this
     D401
+    # warn without stacklevel
+    B028
+    # requests without timeout
+    S113
+    # weak MD5 hash
+    S324
+    # star-arg unpacking after keyword arg
+    B026
+    # loop control var reassigns iterable
+    B020
 exclude =
     .tox,
     .git,
