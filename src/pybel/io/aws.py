@@ -57,7 +57,7 @@ def to_s3(graph: BELGraph, *, bucket: str, key: str, client: Optional[S3Client] 
             key='your file name.bel.nodelink.json.gz',
         )
 
-    .. warning:: This assumes you already have credentials set up on your machine
+    This assumes you already have credentials set up on your machine.
 
     If you don't already have a bucket, you can create one using ``boto3`` by following
     this tutorial: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-example-creating-buckets.html

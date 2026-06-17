@@ -73,7 +73,7 @@ if parsed_version.group('release'):
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -350,7 +350,6 @@ texinfo_documents = [
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
     'networkx': ('https://networkx.github.io/documentation/latest/', None),
-    'py2neo': ('https://py2neo.org/2021.0/', None),
     'sqlalchemy': ('https://docs.sqlalchemy.org/en/latest', None),
     'indra': ('https://indra.readthedocs.io/en/latest/', None),
     'bio2bel': ('https://bio2bel.readthedocs.io/en/latest/', None),
