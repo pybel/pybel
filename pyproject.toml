@@ -26,7 +26,6 @@ classifiers = [
     "Framework :: Sphinx",
     "Natural Language :: English",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -52,7 +51,7 @@ keywords = [
 license = "MIT"
 license-files = ["LICENSE"]
 
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
     "networkx>=2.4",
     "sqlalchemy",
@@ -68,9 +67,9 @@ dependencies = [
     "tabulate",
     "pandas",
     "jsonschema",
-    "bioregistry",
+    "bioregistry>=0.13.62",
     "ratelimit",
-    "pystow>=0.1.2",
+    "pystow>=0.8.17",
     "psycopg2-binary",
     # "setuptools<81",
 ]
@@ -118,7 +117,7 @@ pyroma = [
 [project.optional-dependencies]
 jupyter = ["jinja2", "ipython"]
 neo4j = ["py2neo"]
-grounding = ["pyobo", "protmapper"]
+grounding = ["pyobo>=0.12.24", "protmapper"]
 
 # See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#urls
 # and also https://packaging.python.org/en/latest/specifications/well-known-project-urls/
