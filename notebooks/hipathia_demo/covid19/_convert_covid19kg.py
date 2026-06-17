@@ -1,4 +1,3 @@
-
 """Convert the COVID-19 graph for Hipathia."""
 
 import os

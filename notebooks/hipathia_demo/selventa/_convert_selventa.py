@@ -1,4 +1,3 @@
-
 """Convert the Selventa graph for Hipathia."""
 
 import os

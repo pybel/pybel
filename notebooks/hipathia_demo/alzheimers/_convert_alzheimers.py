@@ -1,4 +1,3 @@
-
 """Convert the AD graph for Hipathia."""
 
 import os

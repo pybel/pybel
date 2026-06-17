@@ -58,7 +58,14 @@ def nest(*content):
     """Define a delimited list by enumerating each element of the list."""
     if len(content) == 0:
         raise ValueError("no arguments supplied")
-    return And([LPF, content[0], *list(itt.chain.from_iterable(zip(itt.repeat(C), content[1:]))), RPF])
+    return And(
+        [
+            LPF,
+            content[0],
+            *list(itt.chain.from_iterable(zip(itt.repeat(C), content[1:]))),
+            RPF,
+        ]
+    )
 
 
 def one_of_tags(

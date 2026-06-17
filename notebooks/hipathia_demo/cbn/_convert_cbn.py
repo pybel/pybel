@@ -1,4 +1,3 @@
-
 """Convert the `CausalBionet (CBN) <http://causalbionet.com>`_ for Hipathia."""
 
 import json

@@ -1,4 +1,3 @@
-
 """Convert the HemeKG for Hipathia."""
 
 import os
