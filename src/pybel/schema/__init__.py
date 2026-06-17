@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Validation for PyBEL data.
 
 The :mod:`pybel.schema` module houses functions to verify the format of a given node or edge.
@@ -9,12 +7,13 @@ clearly defined manner across the repository.
 
 import json
 import logging
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any
 
 import jsonschema
 
-__all__ = ["is_valid_node", "is_valid_edge"]
+__all__ = ["is_valid_edge", "is_valid_node"]
 
 logger = logging.getLogger(__name__)
 

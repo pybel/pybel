@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Transport functions for `BioDati <https://biodati.com/>`_.
 
 BioDati is a paid, closed-source platform for hosting BEL content. However,
@@ -14,8 +12,9 @@ currently maintained in an academic capacity. Disclosure: BEL Commons is develop
 
 import json
 import logging
+from collections.abc import Iterable, Mapping
 from io import BytesIO
-from typing import Any, Iterable, List, Mapping, Optional, Union
+from typing import Any
 
 import requests
 from more_itertools import chunked
@@ -24,25 +23,25 @@ from .graphdati import _iter_graphdati, from_graphdati, to_graphdati
 from ..struct import BELGraph
 
 __all__ = [
-    "to_biodati",
     "from_biodati",
+    "to_biodati",
 ]
 
 logger = logging.getLogger(__name__)
 
 
-def to_biodati(  # noqa: S107
+def to_biodati(
     graph: BELGraph,
     *,
     username: str = "demo@biodati.com",
-    password: str = "demo",
+    password: str = "demo",  # noqa:S107
     base_url: str = "https://nanopubstore.demo.biodati.com",
-    chunksize: Optional[int] = None,
+    chunksize: int | None = None,
     use_tqdm: bool = True,
-    collections: Optional[Iterable[str]] = None,
+    collections: Iterable[str] | None = None,
     overwrite: bool = False,
     validate: bool = True,
-    email: Union[bool, str] = False,
+    email: bool | str = False,
 ) -> requests.Response:
     """Post this graph to a BioDati server.
 
@@ -91,7 +90,7 @@ def to_biodati(  # noqa: S107
         )
 
 
-def from_biodati(  # noqa: S107
+def from_biodati(  # noqa:S107
     network_id: str,
     username: str = "demo@biodati.com",
     password: str = "demo",
@@ -110,12 +109,13 @@ def from_biodati(  # noqa: S107
     .. code-block:: python
 
         from pybel import from_biodati
-        network_id = '01E46GDFQAGK5W8EFS9S9WMH12'  # COVID-19 graph example from Wendy Zimmermann
+
+        network_id = "01E46GDFQAGK5W8EFS9S9WMH12"  # COVID-19 graph example from Wendy Zimmermann
         graph = from_biodati(
             network_id=network_id,
-            username='demo@biodati.com',
-            password='demo',
-            base_url='https://networkstore.demo.biodati.com',
+            username="demo@biodati.com",
+            password="demo",
+            base_url="https://networkstore.demo.biodati.com",
         )
         graph.summarize()
 
@@ -135,8 +135,8 @@ class BiodatiClient:
         self.base_url = base_url.rstrip("/")
         self.username = username
         res = requests.post(
-            "{}/token".format(base_url),
-            data=dict(username=username, password=password),
+            f"{base_url}/token",
+            data={"username": username, "password": password},
         )
         token_dict = res.json()
         self.token_type = token_dict["token_type"]
@@ -153,9 +153,9 @@ class BiodatiClient:
 
     def _help_request(self, requester, endpoint: str, **kwargs):
         """Send a request to BioDati."""
-        url = "{}/{}".format(self.base_url, endpoint)
+        url = f"{self.base_url}/{endpoint}"
         logger.info("requesting %s with params %s", url, kwargs.get("params", {}))
-        headers = {"Authorization": "{} {}".format(self.token_type, self.id_token)}
+        headers = {"Authorization": f"{self.token_type} {self.id_token}"}
         return requester(url, headers=headers, **kwargs)
 
     def get_graph(self, network_id: str) -> BELGraph:
@@ -165,7 +165,7 @@ class BiodatiClient:
     def get_graph_json(self, network_id: str, network_format: str = "normal"):
         """Get the graph JSON."""
         res = self.get(
-            "networks/{network_id}".format(network_id=network_id),
+            f"networks/{network_id}",
             params={"format": network_format},
         )
         # FIXME network_format='full' causes internal server error currently
@@ -177,10 +177,10 @@ class BiodatiClient:
         graph: BELGraph,
         *,
         use_tqdm: bool = True,
-        collections: Optional[List[str]] = None,
+        collections: list[str] | None = None,
         overwrite: bool = False,
         validate: bool = True,
-        email: Union[bool, str] = False,
+        email: bool | str = False,
     ) -> requests.Response:
         """Post the graph to BioDati.
 
@@ -193,7 +193,7 @@ class BiodatiClient:
          used for login. If string, emails to that user. If false, no email.
         :return: Last response from upload
         """
-        metadata_extras = dict()
+        metadata_extras = {}
         if collections is not None:
             metadata_extras.update(collections=list(collections))
         j = to_graphdati(graph, use_tqdm=use_tqdm, metadata_extras=metadata_extras)
@@ -210,10 +210,10 @@ class BiodatiClient:
         chunksize: int,
         *,
         use_tqdm: bool = True,
-        collections: Optional[Iterable[str]] = None,
+        collections: Iterable[str] | None = None,
         overwrite: bool = False,
         validate: bool = True,
-        email: Union[bool, str] = False,
+        email: bool | str = False,
     ) -> requests.Response:
         """Post the graph to BioDati in chunks, when the graph is too big for a normal upload.
 
@@ -227,7 +227,7 @@ class BiodatiClient:
          used for login. If string, emails to that user. If false, no email.
         :return: Last response from upload
         """
-        metadata_extras = dict()
+        metadata_extras = {}
         if collections is not None:
             metadata_extras.update(collections=list(collections))
         iterable = _iter_graphdati(graph, use_tqdm=use_tqdm, metadata_extras=metadata_extras)
@@ -243,10 +243,10 @@ class BiodatiClient:
 
     def post_graph_json(
         self,
-        graph_json: List[Mapping[str, Any]],
+        graph_json: list[Mapping[str, Any]],
         overwrite: bool = False,
         validate: bool = True,
-        email: Union[bool, str] = False,
+        email: bool | str = False,
     ) -> requests.Response:
         """Post the GraphDati object to BioDati.
 
@@ -271,7 +271,7 @@ class BiodatiClient:
         file: BytesIO,
         overwrite: bool = False,
         validate: bool = True,
-        email: Union[bool, str] = False,
+        email: bool | str = False,
     ) -> requests.Response:
         """Post a graph to BioDati.
 
@@ -281,7 +281,7 @@ class BiodatiClient:
         :param email: Who should get emailed with results about the upload? If true, emails to user
          used for login. If string, emails to that user. If false, no email.
         """
-        params = dict(overwrite=overwrite, validate=validate)
+        params = {"overwrite": overwrite, "validate": validate}
         if isinstance(email, str):
             params["email"] = email
         elif email:
@@ -289,7 +289,7 @@ class BiodatiClient:
 
         return self.post(
             "nanopubs/import/file",
-            files=dict(file=file),
+            files={"file": file},
             params=params,
         )
 

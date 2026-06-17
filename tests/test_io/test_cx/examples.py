@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Example BEL graphs for testing PyBEL-CX."""
 
 from pybel import BELGraph

@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
-
 """This module contains the SQLAlchemy database models that support the definition cache and graph cache."""
 
 import datetime
 from collections import defaultdict
-from typing import Any, Iterable, Mapping, Optional, Tuple
+from collections.abc import Iterable, Mapping
+from typing import Any
 
 from sqlalchemy import (
     JSON,
@@ -52,15 +51,15 @@ from ..struct.graph import BELGraph
 from ..tokens import parse_result_to_dsl
 
 __all__ = [
+    "Author",
     "Base",
+    "Citation",
+    "Edge",
+    "Evidence",
     "Namespace",
     "NamespaceEntry",
     "Network",
     "Node",
-    "Author",
-    "Citation",
-    "Evidence",
-    "Edge",
     "edge_annotation",
     "network_edge",
     "network_node",
@@ -175,7 +174,7 @@ class Namespace(Base):
     def __str__(self):
         return f"[id={self.id}] {self.keyword}"
 
-    def get_term_to_encodings(self) -> Mapping[Tuple[Optional[str], str], str]:
+    def get_term_to_encodings(self) -> Mapping[tuple[str | None, str], str]:
         """Return the term (db, id, name) to encodings from this namespace."""
         return {(entry.identifier, entry.name): entry.encoding for entry in self.entries}
 
@@ -222,7 +221,7 @@ class NamespaceEntry(Base):
 
     namespace_id = Column(
         Integer,
-        ForeignKey("{}.id".format(NAMESPACE_TABLE_NAME)),
+        ForeignKey(f"{NAMESPACE_TABLE_NAME}.id"),
         nullable=False,
         index=True,
     )
@@ -257,12 +256,7 @@ class NamespaceEntry(Base):
         return cls.name.contains(name_query)
 
     def __str__(self):
-        return "[id={namespace_id}] {namespace_name}:{identifier} ! {name}".format(
-            namespace_id=self.namespace.id,
-            namespace_name=self.namespace.keyword,
-            identifier=self.identifier,
-            name=self.name,
-        )
+        return f"[id={self.namespace.id}] {self.namespace.keyword}:{self.identifier} ! {self.name}"
 
 
 network_edge = Table(
@@ -271,13 +265,13 @@ network_edge = Table(
     Column(
         "network_id",
         Integer,
-        ForeignKey("{}.id".format(NETWORK_TABLE_NAME)),
+        ForeignKey(f"{NETWORK_TABLE_NAME}.id"),
         primary_key=True,
     ),
     Column(
         "edge_id",
         Integer,
-        ForeignKey("{}.id".format(EDGE_TABLE_NAME)),
+        ForeignKey(f"{EDGE_TABLE_NAME}.id"),
         primary_key=True,
     ),
 )
@@ -288,13 +282,13 @@ network_node = Table(
     Column(
         "network_id",
         Integer,
-        ForeignKey("{}.id".format(NETWORK_TABLE_NAME)),
+        ForeignKey(f"{NETWORK_TABLE_NAME}.id"),
         primary_key=True,
     ),
     Column(
         "node_id",
         Integer,
-        ForeignKey("{}.id".format(NODE_TABLE_NAME)),
+        ForeignKey(f"{NODE_TABLE_NAME}.id"),
         primary_key=True,
     ),
 )
@@ -393,7 +387,7 @@ class Network(Base):
         return cls.id.in_(network_ids)
 
     def __repr__(self):
-        return "{} v{}".format(self.name, self.version)
+        return f"{self.name} v{self.version}"
 
     def __str__(self):
         return repr(self)
@@ -425,7 +419,7 @@ class Node(Base):
     )
     md5 = Column(String(255), nullable=False, unique=True, index=True)
 
-    namespace_entry_id = Column(Integer, ForeignKey("{}.id".format(NAME_TABLE_NAME)), nullable=True)
+    namespace_entry_id = Column(Integer, ForeignKey(f"{NAME_TABLE_NAME}.id"), nullable=True)
     namespace_entry = relationship(
         NamespaceEntry,
         foreign_keys=[namespace_entry_id],
@@ -456,7 +450,7 @@ class Node(Base):
         return self.bel
 
     def __repr__(self):
-        return "<Node {}: {}>".format(self.md5[:10], self.bel)
+        return f"<Node {self.md5[:10]}: {self.bel}>"
 
     def _get_list_by_relation(self, relation):
         return [edge.target.to_json() for edge in self.out_edges.filter(Edge.relation == relation)]
@@ -479,13 +473,13 @@ author_citation = Table(
     Column(
         "author_id",
         Integer,
-        ForeignKey("{}.id".format(AUTHOR_TABLE_NAME)),
+        ForeignKey(f"{AUTHOR_TABLE_NAME}.id"),
         primary_key=True,
     ),
     Column(
         "citation_id",
         Integer,
-        ForeignKey("{}.id".format(CITATION_TABLE_NAME)),
+        ForeignKey(f"{CITATION_TABLE_NAME}.id"),
         primary_key=True,
     ),
 )
@@ -540,7 +534,7 @@ class Citation(Base):
 
     first_id = Column(
         Integer,
-        ForeignKey("{}.id".format(AUTHOR_TABLE_NAME)),
+        ForeignKey(f"{AUTHOR_TABLE_NAME}.id"),
         nullable=True,
         doc="First author",
     )
@@ -548,7 +542,7 @@ class Citation(Base):
 
     last_id = Column(
         Integer,
-        ForeignKey("{}.id".format(AUTHOR_TABLE_NAME)),
+        ForeignKey(f"{AUTHOR_TABLE_NAME}.id"),
         nullable=True,
         doc="Last author",
     )
@@ -559,7 +553,7 @@ class Citation(Base):
     __table_args__ = (UniqueConstraint(db, db_id),)
 
     def __str__(self):
-        return "{}:{}".format(self.db, self.db_id)
+        return f"{self.db}:{self.db_id}"
 
     @property
     def is_pubmed(self) -> bool:
@@ -624,13 +618,13 @@ class Evidence(Base):
     id = Column(Integer, primary_key=True)
     text = Column(Text, nullable=False, doc="Supporting text from a given publication")
 
-    citation_id = Column(Integer, ForeignKey("{}.id".format(CITATION_TABLE_NAME)), nullable=False)
+    citation_id = Column(Integer, ForeignKey(f"{CITATION_TABLE_NAME}.id"), nullable=False)
     citation = relationship(Citation, backref=backref("evidences"))
 
     __table_args__ = (UniqueConstraint(citation_id, text),)
 
     def __str__(self):
-        return "{}:{}:{}".format(self.citation.db, self.citation.db_id, self.text)
+        return f"{self.citation.db}:{self.citation.db_id}:{self.text}"
 
     def to_json(self, include_id: bool = False):
         """Create a dictionary that is used to recreate the edge data dictionary for a :class:`BELGraph`.
@@ -656,13 +650,13 @@ edge_annotation = Table(
     Column(
         "edge_id",
         Integer,
-        ForeignKey("{}.id".format(EDGE_TABLE_NAME)),
+        ForeignKey(f"{EDGE_TABLE_NAME}.id"),
         primary_key=True,
     ),
     Column(
         "name_id",
         Integer,
-        ForeignKey("{}.id".format(NAME_TABLE_NAME)),
+        ForeignKey(f"{NAME_TABLE_NAME}.id"),
         primary_key=True,
     ),
 )
@@ -678,21 +672,21 @@ class Edge(Base):
     bel = Column(Text, nullable=False, doc="Valid BEL statement that represents the given edge")
     relation = Column(String(32), nullable=False)
 
-    source_id = Column(Integer, ForeignKey("{}.id".format(NODE_TABLE_NAME)), nullable=False)
+    source_id = Column(Integer, ForeignKey(f"{NODE_TABLE_NAME}.id"), nullable=False)
     source = relationship(
         Node,
         foreign_keys=[source_id],
         backref=backref("out_edges", lazy="dynamic", cascade="all, delete-orphan"),
     )
 
-    target_id = Column(Integer, ForeignKey("{}.id".format(NODE_TABLE_NAME)), nullable=False)
+    target_id = Column(Integer, ForeignKey(f"{NODE_TABLE_NAME}.id"), nullable=False)
     target = relationship(
         Node,
         foreign_keys=[target_id],
         backref=backref("in_edges", lazy="dynamic", cascade="all, delete-orphan"),
     )
 
-    evidence_id = Column(Integer, ForeignKey("{}.id".format(EVIDENCE_TABLE_NAME)), nullable=True)
+    evidence_id = Column(Integer, ForeignKey(f"{EVIDENCE_TABLE_NAME}.id"), nullable=True)
     evidence = relationship(Evidence, backref=backref("edges", lazy="dynamic"))
 
     annotations = relationship(
@@ -720,7 +714,7 @@ class Edge(Base):
         return self.bel
 
     def __repr__(self):
-        return "<Edge {}: {}>".format(self.md5, self.bel)
+        return f"<Edge {self.md5}: {self.bel}>"
 
     def get_annotations_json(self):
         """Format the annotations properly.

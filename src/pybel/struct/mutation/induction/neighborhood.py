@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 """Functions for selecting by the neighborhoods of nodes."""
 
 import itertools as itt
-from typing import Iterable, Optional
+from collections.abc import Iterable
 
 from ...graph import BELGraph
 from ...pipeline import transformation
@@ -15,7 +13,7 @@ __all__ = [
 
 
 @transformation
-def get_subgraph_by_neighborhood(graph: BELGraph, nodes: Iterable[BaseEntity]) -> Optional[BELGraph]:
+def get_subgraph_by_neighborhood(graph: BELGraph, nodes: Iterable[BaseEntity]) -> BELGraph | None:
     """Get a BEL graph around the neighborhoods of the given nodes.
 
     Returns none if no nodes are in the graph.

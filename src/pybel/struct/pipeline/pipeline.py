@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
-
 """This module holds the Pipeline class."""
 
 import json
 import logging
 import types
+from collections.abc import Iterable
 from functools import wraps
-from typing import Any, Dict, Iterable, List, Optional, TextIO, Tuple, Union
+from typing import Any, TextIO, Union
 
 from .decorators import get_transformation, in_place_map, mapped, universe_map
 from .exc import MetaValueError, MissingPipelineFunctionError, MissingUniverseError
@@ -22,7 +21,7 @@ META_UNION = "union"
 META_INTERSECTION = "intersection"
 
 
-def _get_protocol_tuple(data: Dict[str, Any]) -> Tuple[str, List, Dict]:
+def _get_protocol_tuple(data: dict[str, Any]) -> tuple[str, list, dict]:
     """Convert a dictionary to a tuple."""
     return data["function"], data.get("args", []), data.get("kwargs", {})
 
@@ -43,7 +42,7 @@ class Pipeline:
 
     """
 
-    def __init__(self, protocol: Optional[Iterable[Dict]] = None):
+    def __init__(self, protocol: Iterable[dict] | None = None):
         """Initialize the pipeline with an optional pre-defined protocol.
 
         :param protocol: An iterable of dictionaries describing how to transform a network
@@ -73,7 +72,7 @@ class Pipeline:
         Equivalent example with function names:
 
         >>> from pybel.struct.pipeline import Pipeline
-        >>> pipeline = Pipeline.from_functions(['remove_associations'])
+        >>> pipeline = Pipeline.from_functions(["remove_associations"])
 
         Lookup by name is possible for built in functions, and those that have been registered correctly using one of
         the four decorators:
@@ -100,7 +99,7 @@ class Pipeline:
         f = mapped.get(name)
 
         if f is None:
-            raise MissingPipelineFunctionError("{} is not registered as a pipeline function".format(name))
+            raise MissingPipelineFunctionError(f"{name} is not registered as a pipeline function")
 
         if name in universe_map and name in in_place_map:
             return self._wrap_in_place(self._wrap_universe(f))
@@ -128,7 +127,7 @@ class Pipeline:
         elif isinstance(name, str):
             get_transformation(name)
         else:
-            raise TypeError("invalid function argument: {}".format(name))
+            raise TypeError(f"invalid function argument: {name}")
 
         av = {
             "function": name,
@@ -143,15 +142,15 @@ class Pipeline:
         self.protocol.append(av)
         return self
 
-    def extend(self, protocol: Union[Iterable[Dict], "Pipeline"]) -> "Pipeline":
+    def extend(self, protocol: Union[Iterable[dict], "Pipeline"]) -> "Pipeline":
         """Add another pipeline to the end of the current pipeline.
 
         :param protocol: An iterable of dictionaries (or another Pipeline)
         :return: This pipeline for fluid query building
 
         Example:
-        >>> p1 = Pipeline.from_functions(['enrich_protein_and_rna_origins'])
-        >>> p2 = Pipeline.from_functions(['remove_pathologies'])
+        >>> p1 = Pipeline.from_functions(["enrich_protein_and_rna_origins"])
+        >>> p2 = Pipeline.from_functions(["remove_pathologies"])
         >>> p1.extend(p2)
 
         """
@@ -161,7 +160,7 @@ class Pipeline:
 
         return self
 
-    def _run_helper(self, graph, protocol: Iterable[Dict]):
+    def _run_helper(self, graph, protocol: Iterable[dict]):
         """Help run the protocol.
 
         :param pybel.BELGraph graph: A BEL graph
@@ -187,7 +186,7 @@ class Pipeline:
                     result = node_intersection(networks)
 
                 else:
-                    raise MetaValueError("invalid meta-command: {}".format(meta_entry))
+                    raise MetaValueError(f"invalid meta-command: {meta_entry}")
 
         return result
 
@@ -224,7 +223,7 @@ class Pipeline:
         """
         return self.run(graph=graph, universe=universe)
 
-    def _wrap_universe(self, func):  # noqa: D202
+    def _wrap_universe(self, func):
         """Take a function that needs a universe graph as the first argument and returns a wrapped one."""
 
         @wraps(func)
@@ -232,7 +231,7 @@ class Pipeline:
             """Apply the enclosed function with the universe given as the first argument."""
             if self.universe is None:
                 raise MissingUniverseError(
-                    "Can not run universe function [{}] - No universe is set".format(func.__name__),
+                    f"Can not run universe function [{func.__name__}] - No universe is set",
                 )
 
             return func(self.universe, graph, *args, **kwargs)
@@ -240,7 +239,7 @@ class Pipeline:
         return wrapper
 
     @staticmethod
-    def _wrap_in_place(func):  # noqa: D202
+    def _wrap_in_place(func):
         """Take a function that doesn't return the graph and returns the graph."""
 
         @wraps(func)
@@ -251,7 +250,7 @@ class Pipeline:
 
         return wrapper
 
-    def to_json(self) -> List:
+    def to_json(self) -> list:
         """Return this pipeline as a JSON list."""
         return self.protocol
 
@@ -264,7 +263,7 @@ class Pipeline:
         return json.dump(self.to_json(), file, **kwargs)
 
     @staticmethod
-    def from_json(data: List) -> "Pipeline":
+    def from_json(data: list) -> "Pipeline":
         """Build a pipeline from a JSON list."""
         return Pipeline(data)
 

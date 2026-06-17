@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """An exporter for signaling pathway impact analysis (SPIA) described by [Tarca2009]_.
 
 .. [Tarca2009] Tarca, A. L., *et al* (2009). `A novel signaling pathway impact analysis
@@ -11,7 +9,7 @@
 import itertools as itt
 import os
 from collections import OrderedDict
-from typing import Dict, Mapping, Set
+from collections.abc import Mapping
 
 import pandas as pd
 
@@ -122,19 +120,19 @@ def to_spia_dfs(graph: BELGraph) -> SPIADataFrames:
     return spia_matrices
 
 
-def get_matrix_index(graph: BELGraph) -> Set[str]:
+def get_matrix_index(graph: BELGraph) -> set[str]:
     """Return set of HGNC names from Proteins/Rnas/Genes/miRNA, nodes that can be used by SPIA."""
     # TODO: Using HGNC Symbols for now
     return {node.name for node in graph if isinstance(node, CentralDogma) and node.namespace.upper() == "HGNC"}
 
 
-def build_spia_matrices(nodes: Set[str]) -> Dict[str, pd.DataFrame]:
+def build_spia_matrices(nodes: set[str]) -> dict[str, pd.DataFrame]:
     """Build an adjacency matrix for each KEGG relationship and return in a dictionary.
 
     :param nodes: A set of HGNC gene symbols
     :return: Dictionary of adjacency matrix for each relationship
     """
-    nodes = list(sorted(nodes))
+    nodes = sorted(nodes)
 
     # Create sheets of the excel in the given order
     matrices = OrderedDict()
@@ -149,7 +147,7 @@ PH_NAMES = {"Ph"} | {e.name for e in pmod_mappings["Ph"]["xrefs"]}
 
 
 def update_spia_matrices(
-    spia_matrices: Dict[str, pd.DataFrame],
+    spia_matrices: dict[str, pd.DataFrame],
     u: CentralDogma,
     v: CentralDogma,
     edge_data: EdgeData,
@@ -220,6 +218,6 @@ def spia_matrices_to_tsvs(spia_matrices: SPIADataFrames, directory: str) -> None
     os.makedirs(directory, exist_ok=True)
     for relation, df in spia_matrices.items():
         df.to_csv(
-            os.path.join(directory, "{relation}.tsv".format(relation=relation)),
+            os.path.join(directory, f"{relation}.tsv"),
             index=True,
         )

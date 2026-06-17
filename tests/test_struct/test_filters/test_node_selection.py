@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for node selection functions."""
 
 import unittest

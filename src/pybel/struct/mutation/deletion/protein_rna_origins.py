@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-
 """Functions for deleting proteins and genes that are leaves."""
 
-from typing import Iterable
+from collections.abc import Iterable
 
 from ...filters.node_filters import get_nodes_by_function
 from ...pipeline.decorators import in_place_transformation
@@ -38,7 +36,7 @@ def _iterate_leaves(graph, func, relation):
         if graph.out_degree(node) != 1:
             continue
 
-        _, _, d = list(graph.out_edges(node, data=True))[0]
+        _, _, d = next(iter(graph.out_edges(node, data=True)))
 
         if d[RELATION] == relation:
             yield node

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Utilities for PyBEL."""
 
 import hashlib
@@ -8,9 +6,9 @@ import logging
 import re
 import typing
 from collections import defaultdict
-from collections.abc import Iterable, MutableMapping
+from collections.abc import Iterable, Mapping, MutableMapping
 from datetime import datetime
-from typing import Any, List, Mapping, Optional, Tuple, TypeVar
+from typing import Any, TypeVar
 
 from .constants import (
     ACTIVITY,
@@ -39,7 +37,7 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-CanonicalEdge = Tuple[str, Optional[Tuple], Optional[Tuple]]
+CanonicalEdge = tuple[str, tuple | None, tuple | None]
 
 
 def expand_dict(flat_dict, sep: str = "_"):
@@ -95,7 +93,7 @@ def flatten_dict(
     return items
 
 
-def tokenize_version(version_string: str) -> Tuple[int, int, int]:
+def tokenize_version(version_string: str) -> tuple[int, int, int]:
     """Tokenize a version string to a tuple.
 
     Truncates qualifiers like ``-dev``.
@@ -103,7 +101,7 @@ def tokenize_version(version_string: str) -> Tuple[int, int, int]:
     :param version_string: A version string
     :return: A tuple representing the version string
 
-    >>> tokenize_version('0.1.2-dev')
+    >>> tokenize_version("0.1.2-dev")
     (0, 1, 2)
     """
     before_dash = version_string.split("-")[0]
@@ -155,10 +153,10 @@ def parse_datetime(s: str) -> datetime.date:
         else:
             return dt
 
-    raise ValueError("Incorrect datetime format for {}".format(s))
+    raise ValueError(f"Incorrect datetime format for {s}")
 
 
-def _get_citation_str(data: Mapping) -> Optional[str]:
+def _get_citation_str(data: Mapping) -> str | None:
     citation = data.get(CITATION)
     if citation is not None:
         return citation.curie
@@ -175,14 +173,14 @@ def hash_edge(source, target, edge_data: EdgeData) -> str:
     """
     edge_tuple = _get_edge_tuple(source, target, edge_data)
     edge_tuple_bytes = pickle.dumps(edge_tuple)
-    return hashlib.md5(edge_tuple_bytes).hexdigest()  # noqa: S303
+    return hashlib.md5(edge_tuple_bytes).hexdigest()
 
 
 def _get_edge_tuple(
     source,
     target,
     edge_data: EdgeData,
-) -> Tuple[str, str, Optional[str], Optional[str], CanonicalEdge]:
+) -> tuple[str, str, str | None, str | None, CanonicalEdge]:
     """Convert an edge to a consistent tuple.
 
     :param BaseEntity source: The source BEL node
@@ -217,7 +215,7 @@ def subdict_matches(target: Mapping, query: Mapping, partial_match: bool = True)
         if k not in target:
             return False
         elif not isinstance(v, (int, str, dict, Iterable)):
-            raise ValueError("invalid value: {}".format(v))
+            raise ValueError(f"invalid value: {v}")
         elif isinstance(v, (int, str)) and target[k] != v:
             return False
         elif isinstance(v, dict):
@@ -240,7 +238,7 @@ def hash_dump(data) -> str:
     :param data: An arbitrary JSON-serializable object
     :type data: dict or list or tuple
     """
-    return hashlib.md5(json.dumps(data, sort_keys=True).encode("utf-8")).hexdigest()  # noqa: S303
+    return hashlib.md5(json.dumps(data, sort_keys=True).encode("utf-8")).hexdigest()
 
 
 def canonicalize_edge(edge_data: EdgeData) -> CanonicalEdge:
@@ -252,7 +250,7 @@ def canonicalize_edge(edge_data: EdgeData) -> CanonicalEdge:
     )
 
 
-def _canonicalize_edge_modifications(edge_data: EdgeData) -> Optional[Tuple]:
+def _canonicalize_edge_modifications(edge_data: EdgeData) -> tuple | None:
     """Return the SUBJECT or OBJECT entry of a PyBEL edge data dictionary as a canonical tuple."""
     if edge_data is None:
         return
@@ -310,7 +308,7 @@ def _canonicalize_edge_modifications(edge_data: EdgeData) -> Optional[Tuple]:
         result.append(t)
 
     if not result:
-        raise ValueError("Invalid data: {}".format(edge_data))
+        raise ValueError(f"Invalid data: {edge_data}")
 
     return tuple(result)
 
@@ -320,14 +318,14 @@ def get_corresponding_pickle_path(path: str) -> str:
 
     :param path: A path to a BEL file.
     """
-    return "{path}.pickle".format(path=path)
+    return f"{path}.pickle"
 
 
 X = TypeVar("X")
 Y = TypeVar("Y")
 
 
-def multidict(pairs: typing.Iterable[Tuple[X, Y]]) -> Mapping[X, List[Y]]:
+def multidict(pairs: typing.Iterable[tuple[X, Y]]) -> Mapping[X, list[Y]]:
     """Accumulate a multidict from a list of pairs."""
     rv = defaultdict(list)
     for key, value in pairs:

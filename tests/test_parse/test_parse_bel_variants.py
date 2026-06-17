@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Test parsing variants."""
 
 import logging
@@ -300,7 +298,7 @@ class TestGeneSubstitutionParser(unittest.TestCase):
 
 
 class TestFragmentParser(unittest.TestCase):
-    """See http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_examples_2"""
+    """See http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#_examples_2."""
 
     def setUp(self):
         self.parser = get_fragment_language()
@@ -311,12 +309,12 @@ class TestFragmentParser(unittest.TestCase):
         self.assertEqual(expected, result.asDict())
 
     def test_known_length_unquoted(self):
-        """test known length"""
+        """Test known length."""
         s = "frag(5_20)"
         self._help_test_known_length(s)
 
     def test_known_length_quotes(self):
-        """test known length"""
+        """Test known length."""
         s = 'frag("5_20")'
         self._help_test_known_length(s)
 
@@ -326,12 +324,12 @@ class TestFragmentParser(unittest.TestCase):
         self.assertEqual(expected, result.asDict())
 
     def test_unknown_length_unquoted(self):
-        """amino-terminal fragment of unknown length"""
+        """amino-terminal fragment of unknown length."""
         s = "frag(1_?)"
         self._help_test_unknown_length(s)
 
     def test_unknown_length_quoted(self):
-        """amino-terminal fragment of unknown length"""
+        """amino-terminal fragment of unknown length."""
         s = 'frag("1_?")'
         self._help_test_unknown_length(s)
 
@@ -341,12 +339,12 @@ class TestFragmentParser(unittest.TestCase):
         self.assertEqual(expected, result.asDict())
 
     def test_unknown_start_stop_unquoted(self):
-        """fragment with unknown start/stop"""
+        """Fragment with unknown start/stop."""
         s = "frag(?_*)"
         self._help_test_unknown_start_stop(s)
 
     def test_unknown_start_stop_quoted(self):
-        """fragment with unknown start/stop"""
+        """Fragment with unknown start/stop."""
         s = 'frag("?_*")'
         self._help_test_unknown_start_stop(s)
 
@@ -356,12 +354,12 @@ class TestFragmentParser(unittest.TestCase):
         self.assertEqual(expected, result.asDict())
 
     def test_descriptor_unquoted(self):
-        """fragment with unknown start/stop and a descriptor"""
+        """Fragment with unknown start/stop and a descriptor."""
         s = 'frag(?, "55kD")'
         self._help_test_descriptor(s)
 
     def test_descriptor_quoted(self):
-        """fragment with unknown start/stop and a descriptor"""
+        """Fragment with unknown start/stop and a descriptor."""
         s = 'frag("?", "55kD")'
         self._help_test_descriptor(s)
 
@@ -399,7 +397,7 @@ class TestFusionParser(unittest.TestCase):
         self.parser = get_fusion_language(identifier_qualified)
 
     def test_rna_fusion_known_breakpoints(self):
-        """RNA abundance of fusion with known breakpoints"""
+        """RNA abundance of fusion with known breakpoints."""
         statement = "fus(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.312_5034)"
         result = self.parser.parse_string(statement)
 
@@ -427,7 +425,7 @@ class TestFusionParser(unittest.TestCase):
         self.assertEqual(expected, result.asDict())
 
     def test_rna_fusion_unspecified_breakpoints(self):
-        """RNA abundance of fusion with unspecified breakpoints"""
+        """RNA abundance of fusion with unspecified breakpoints."""
         statement = "fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?)"
         result = self.parser.parse_string(statement)
 
@@ -451,7 +449,7 @@ class TestFusionParser(unittest.TestCase):
         self.assertEqual(expected, result.asDict())
 
     def test_rna_fusion_specified_one_fuzzy_breakpoint(self):
-        """RNA abundance of fusion with unspecified breakpoints"""
+        """RNA abundance of fusion with unspecified breakpoints."""
         statement = "fusion(HGNC:TMPRSS2, r.1_79, HGNC:ERG, r.?_1)"
         result = self.parser.parse_string(statement)
 
@@ -475,7 +473,7 @@ class TestFusionParser(unittest.TestCase):
         self.assertEqual(expected, result.asDict())
 
     def test_rna_fusion_specified_fuzzy_breakpoints(self):
-        """RNA abundance of fusion with unspecified breakpoints"""
+        """RNA abundance of fusion with unspecified breakpoints."""
         statement = "fusion(HGNC:TMPRSS2, r.1_?, HGNC:ERG, r.?_1)"
         result = self.parser.parse_string(statement)
 

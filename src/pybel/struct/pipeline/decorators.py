@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """This module contains the functions for decorating transformation functions.
 
 A transformation function takes in a :class:`pybel.BELGraph` and either returns None (in-place) or a new
@@ -12,14 +10,14 @@ from inspect import signature
 from .exc import MissingPipelineFunctionError, PipelineNameError
 
 __all__ = [
+    "get_transformation",
+    "has_arguments_map",
     "in_place_transformation",
+    "mapped",
+    "no_arguments_map",
+    "transformation",
     "uni_in_place_transformation",
     "uni_transformation",
-    "transformation",
-    "get_transformation",
-    "mapped",
-    "has_arguments_map",
-    "no_arguments_map",
 ]
 
 logger = logging.getLogger(__name__)
@@ -48,11 +46,7 @@ def _register_function(name: str, func, universe: bool, in_place: bool):
     if name in mapped:
         mapped_func = mapped[name]
         raise PipelineNameError(
-            "{name} is already registered with {func_mod}.{func_name}".format(
-                name=name,
-                func_mod=mapped_func.__module__,
-                func_name=mapped_func.__name__,
-            ),
+            f"{name} is already registered with {mapped_func.__module__}.{mapped_func.__name__}",
         )
 
     mapped[name] = func
@@ -71,7 +65,7 @@ def _register_function(name: str, func, universe: bool, in_place: bool):
     return func
 
 
-def _build_register_function(universe: bool, in_place: bool):  # noqa: D202
+def _build_register_function(universe: bool, in_place: bool):
     """Build a decorator function to tag transformation functions.
 
     :param universe: Does the first positional argument of this function correspond to a universe graph?
@@ -109,6 +103,6 @@ def get_transformation(name: str):
     func = mapped.get(name)
 
     if func is None:
-        raise MissingPipelineFunctionError("{} is not registered as a pipeline function".format(name))
+        raise MissingPipelineFunctionError(f"{name} is not registered as a pipeline function")
 
     return func

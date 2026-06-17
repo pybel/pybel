@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Test summary functions for edges."""
 
 import unittest

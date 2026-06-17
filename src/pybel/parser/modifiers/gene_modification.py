@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Gene Modifications.
 
 PyBEL introduces the gene modification tag, gmod(), to allow for the encoding of epigenetic modifications.
@@ -20,14 +18,14 @@ For example, the node :code:`g(HGNC:GSK3B, gmod(M))` is represented with the fol
 
     {
         FUNCTION: GENE,
-        NAMESPACE: 'HGNC',
-        NAME: 'GSK3B',
+        NAMESPACE: "HGNC",
+        NAME: "GSK3B",
         VARIANTS: [
             {
                 KIND: GMOD,
                 IDENTIFIER: {
                     NAMESPACE: BEL_DEFAULT_NAMESPACE,
-                    NAME: 'Me',
+                    NAME: "Me",
                 },
             },
         ],

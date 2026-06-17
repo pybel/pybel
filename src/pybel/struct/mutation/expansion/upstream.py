@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Functions for expanding a graph based on the upstream/downstream edges."""
 
 from ..utils import expand_by_edge_filter
@@ -10,8 +8,8 @@ from ...filters.edge_predicate_builders import (
 from ...pipeline import uni_in_place_transformation
 
 __all__ = [
-    "expand_upstream_causal",
     "expand_downstream_causal",
+    "expand_upstream_causal",
 ]
 
 

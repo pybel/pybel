@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Resources for PyBEL."""
 
 CHEBI_URL = "https://raw.githubusercontent.com/pharmacome/conso/d67144bc27a21626a514837b3b4382413dd6866b/external/chebi-names.belns"
@@ -19,15 +17,15 @@ FPLX_URL = (
 )
 
 #: Default URL lookup for some keywords
-keyword_to_url = dict(
-    chebi=CHEBI_URL,
-    ec=EC_URL,
-    fb=FB_URL,
-    go=GO_URL,
-    hgnc=HGNC_URL,
-    mesh=MESH_URL,
-    mgi=MGI_URL,
-    ncbigene=NCBIGENE_URL,
-    rgd=RGD_URL,
-    fplx=FPLX_URL,
-)
+keyword_to_url = {
+    "chebi": CHEBI_URL,
+    "ec": EC_URL,
+    "fb": FB_URL,
+    "go": GO_URL,
+    "hgnc": HGNC_URL,
+    "mesh": MESH_URL,
+    "mgi": MGI_URL,
+    "ncbigene": NCBIGENE_URL,
+    "rgd": RGD_URL,
+    "fplx": FPLX_URL,
+}

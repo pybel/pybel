@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-
 """Exceptions for the query builder."""
 
 __all__ = [
-    "QueryMissingNetworksError",
     "NodeDegreeIterError",
+    "QueryMissingNetworksError",
 ]
 
 

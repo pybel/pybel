@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-
 """Summary functions for errors and warnings encountered during the compilation of BEL script."""
 
 import typing
 from collections import Counter, defaultdict
-from typing import Iterable, List, Mapping, Set
+from collections.abc import Iterable, Mapping
 
 from ..filters.edge_predicates import edge_has_annotation
 from ..graph import BELGraph, WarningTuple
@@ -17,16 +15,16 @@ from ...exceptions import (
 )
 
 __all__ = [
-    "get_syntax_errors",
+    "calculate_error_by_annotation",
+    "calculate_incorrect_name_dict",
     "count_error_types",
     "count_naked_names",
     "get_naked_names",
-    "calculate_incorrect_name_dict",
-    "calculate_error_by_annotation",
+    "get_syntax_errors",
 ]
 
 
-def get_syntax_errors(graph: BELGraph) -> List[WarningTuple]:
+def get_syntax_errors(graph: BELGraph) -> list[WarningTuple]:
     """List the syntax errors encountered during compilation of a BEL script."""
     return [(path, exc, an) for path, exc, an in graph.warnings if isinstance(exc, BELSyntaxError)]
 
@@ -54,19 +52,19 @@ def count_naked_names(graph: BELGraph) -> typing.Counter[str]:
     return Counter(_naked_names_iter(graph))
 
 
-def get_naked_names(graph: BELGraph) -> Set[str]:
+def get_naked_names(graph: BELGraph) -> set[str]:
     """Get the set of naked names in the graph."""
     return set(_naked_names_iter(graph))
 
 
-def _iterate_namespace_name(graph: BELGraph) -> Iterable[typing.Tuple[str, str]]:
+def _iterate_namespace_name(graph: BELGraph) -> Iterable[tuple[str, str]]:
     for _, exc, _ in graph.warnings:
         if not isinstance(exc, (MissingNamespaceNameWarning, MissingNamespaceRegexWarning)):
             continue
         yield exc.namespace, exc.name
 
 
-def calculate_incorrect_name_dict(graph: BELGraph) -> Mapping[str, List[str]]:
+def calculate_incorrect_name_dict(graph: BELGraph) -> Mapping[str, list[str]]:
     """Get missing names grouped by namespace."""
     missing = defaultdict(list)
 
@@ -76,7 +74,7 @@ def calculate_incorrect_name_dict(graph: BELGraph) -> Mapping[str, List[str]]:
     return dict(missing)
 
 
-def calculate_error_by_annotation(graph: BELGraph, annotation: str) -> Mapping[str, List[str]]:
+def calculate_error_by_annotation(graph: BELGraph, annotation: str) -> Mapping[str, list[str]]:
     """Group error names by a given annotation."""
     results = defaultdict(list)
 

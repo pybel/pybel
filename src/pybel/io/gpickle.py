@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-
 """Conversion functions for BEL graphs with bytes and Python pickles."""
 
 import gzip
 from io import BytesIO
-from typing import BinaryIO, Union
+from typing import BinaryIO
 
 from networkx.utils import open_file
 
@@ -17,14 +15,14 @@ except ImportError:
     import pickle
 
 __all__ = [
-    "to_bytes",
     "from_bytes",
-    "to_bytes_gz",
     "from_bytes_gz",
-    "to_pickle",
-    "to_pickle_gz",
     "from_pickle",
     "from_pickle_gz",
+    "to_bytes",
+    "to_bytes_gz",
+    "to_pickle",
+    "to_pickle_gz",
 ]
 
 
@@ -80,7 +78,7 @@ def from_bytes_gz(bytes_graph: bytes) -> BELGraph:
 
 
 @open_file(1, mode="wb")
-def to_pickle(graph: BELGraph, path: Union[str, BinaryIO], protocol: int = pickle.HIGHEST_PROTOCOL) -> None:
+def to_pickle(graph: BELGraph, path: str | BinaryIO, protocol: int = pickle.HIGHEST_PROTOCOL) -> None:
     """Write this graph to a pickle file.
 
     Note that the pickle module has some incompatibilities between Python 2 and 3. To export a universally importable
@@ -103,7 +101,7 @@ def to_pickle_gz(graph: BELGraph, path: str, protocol: int = pickle.HIGHEST_PROT
 
 
 @open_file(0, mode="rb")
-def from_pickle(path: Union[str, BinaryIO], check_version: bool = True) -> BELGraph:
+def from_pickle(path: str | BinaryIO, check_version: bool = True) -> BELGraph:
     """Read a graph from a pickle file.
 
     :param path: File or filename to read. Filenames ending in .gz or .bz2 will be uncompressed.

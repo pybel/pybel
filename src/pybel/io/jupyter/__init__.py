@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Support for displaying BEL graphs in Jupyter notebooks."""
 
 from .inline import to_jupyter, to_jupyter_str

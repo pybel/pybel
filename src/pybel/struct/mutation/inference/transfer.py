@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-
 """This module facilitates the transfer of knowledge through ontological relationships."""
 
-from typing import Iterable, List
+from collections.abc import Iterable
 
 from ...graph import BELGraph
 from ....constants import (
@@ -60,7 +58,7 @@ def transfer_causal_edges(graph: BELGraph, source: BaseEntity, target: BaseEntit
         )
 
 
-def infer_child_relations(graph: BELGraph, node: BaseEntity) -> List[str]:
+def infer_child_relations(graph: BELGraph, node: BaseEntity) -> list[str]:
     """Propagate causal relations to children."""
     return list(_infer_child_relations_iter(graph, node))
 

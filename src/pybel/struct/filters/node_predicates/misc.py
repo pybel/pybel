@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-
 """Misc node predicates."""
 
-from typing import Iterable, Type
+from collections.abc import Iterable
 
 from .utils import node_predicate
 from ..typing import NodePredicate
@@ -11,9 +9,9 @@ from ....constants import PART_OF, RELATION
 from ....dsl import BaseEntity, ListAbundance
 
 __all__ = [
+    "is_isolated_list_abundance",
     "none_of",
     "one_of",
-    "is_isolated_list_abundance",
 ]
 
 
@@ -44,7 +42,7 @@ def one_of(nodes: Iterable[BaseEntity]) -> NodePredicate:
 def is_isolated_list_abundance(
     graph: BELGraph,
     node: BaseEntity,
-    cls: Type[ListAbundance] = ListAbundance,
+    cls: type[ListAbundance] = ListAbundance,
 ) -> bool:
     """Return if the node is a list abundance but has no qualified edges."""
     return (

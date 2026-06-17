@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Convert the `CausalBionet (CBN) <http://causalbionet.com>`_ for Hipathia."""
 
 import json

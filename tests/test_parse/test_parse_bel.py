@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for the BEL parser."""
 
 import logging
@@ -104,7 +102,7 @@ TEST_PROTEIN_VARIANT = "p.Phe508del"
 
 
 class TestAbundance(TestTokenParserBase):
-    """2.1.1"""
+    """2.1.1."""
 
     def setUp(self):
         self.parser.clear()
@@ -161,7 +159,7 @@ class TestAbundance(TestTokenParserBase):
 
 
 class TestAbundanceLabeled(TestTokenParserBase):
-    """2.1.1"""
+    """2.1.1."""
 
     def setUp(self):
         self.parser.clear()
@@ -175,7 +173,7 @@ class TestAbundanceLabeled(TestTokenParserBase):
         self.assertEqual(dict(self.expected_node), result.asDict())
 
         self.assertIn(self.expected_node, self.graph)
-        node = list(self.graph)[0]
+        node = next(iter(self.graph))
         self.assertEqual(self.expected_canonical_bel, node.as_bel())
 
         self.assertEqual(
@@ -235,7 +233,7 @@ class TestAbundanceLabeled(TestTokenParserBase):
 
 
 class TestGene(TestTokenParserBase):
-    """2.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XgeneA"""
+    """2.1.4 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XgeneA."""
 
     def setUp(self):
         self.parser.clear()
@@ -337,7 +335,7 @@ class TestGene(TestTokenParserBase):
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_gene_with_substitution(self):
-        """Test BEL 1.0 gene substitution"""
+        """Test BEL 1.0 gene substitution."""
         statement = "g(HGNC:AKT1,sub(G,308,A))"
         result = self.parser.gene.parse_string(statement)
 
@@ -357,7 +355,7 @@ class TestGene(TestTokenParserBase):
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_gene_with_substitution_and_location(self):
-        """Test BEL 1.0 gene substitution with location tag"""
+        """Test BEL 1.0 gene substitution with location tag."""
         statement = "g(HGNC:AKT1,sub(G,308,A),loc(GO:intracellular))"
         result = self.parser.gene.parse_string(statement)
 
@@ -389,7 +387,7 @@ class TestGene(TestTokenParserBase):
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_multiple_variants(self):
-        """Test multiple variants"""
+        """Test multiple variants."""
         statement = "g(HGNC:AKT1, var(p.Phe508del), sub(G,308,A), var(c.1521_1523delCTT))"
         result = self.parser.gene.parse_string(statement)
 
@@ -591,7 +589,7 @@ class TestGene(TestTokenParserBase):
         self._help_test_gene_fusion_legacy_2('g(fus(HGNC:CHCHD4, "?", HGNC:AIFM1, "?"))')
 
     def test_gene_variant_snp(self):
-        """2.2.2 SNP"""
+        """2.2.2 SNP."""
         statement = "g(SNP:rs113993960, var(c.1521_1523delCTT))"
         result = self.parser.gene.parse_string(statement)
 
@@ -610,7 +608,7 @@ class TestGene(TestTokenParserBase):
         self.assert_has_edge(gene_node, expected_node, relation=HAS_VARIANT)
 
     def test_gene_variant_chromosome(self):
-        """2.2.2 chromosome"""
+        """2.2.2 chromosome."""
         statement = 'g(REF:"NC_000007.13", var(g.117199646_117199648delCTT))'
         result = self.parser.gene.parse_string(statement)
 
@@ -629,7 +627,7 @@ class TestGene(TestTokenParserBase):
         self.assert_has_edge(parent, gene_node, relation=HAS_VARIANT)
 
     def test_gene_variant_deletion(self):
-        """2.2.2 gene-coding DNA reference sequence"""
+        """2.2.2 gene-coding DNA reference sequence."""
         statement = "g(HGNC:CFTR, var(c.1521_1523delCTT))"
         result = self.parser.gene.parse_string(statement)
 
@@ -661,7 +659,7 @@ class TestGene(TestTokenParserBase):
 
 
 class TestMicroRna(TestTokenParserBase):
-    """2.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XmicroRNAA"""
+    """2.1.5 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XmicroRNAA."""
 
     def setUp(self):
         self.parser.clear()
@@ -767,7 +765,7 @@ class TestMicroRna(TestTokenParserBase):
 
 
 class TestProtein(TestTokenParserBase):
-    """2.1.6 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XproteinA"""
+    """2.1.6 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XproteinA."""
 
     def setUp(self):
         self.parser.clear()
@@ -1054,7 +1052,7 @@ class TestProtein(TestTokenParserBase):
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_protein_pmod_4(self):
-        """2.2.1 Test HRAS palmitoylated at an unspecified residue. Default BEL namespace"""
+        """2.2.1 Test HRAS palmitoylated at an unspecified residue. Default BEL namespace."""
         statement = "p(HGNC:HRAS,pmod(Palm))"
         self.parser.protein.parse_string(statement)
 
@@ -1070,7 +1068,7 @@ class TestProtein(TestTokenParserBase):
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_protein_variant_reference(self):
-        """2.2.2 Test reference allele"""
+        """2.2.2 Test reference allele."""
         statement = "p(HGNC:CFTR, var(=))"
         result = self.parser.protein.parse_string(statement)
         expected_result = [PROTEIN, ["HGNC", "CFTR"], [HGVS, "="]]
@@ -1085,7 +1083,7 @@ class TestProtein(TestTokenParserBase):
         self.assert_has_edge(protein_node, expected_node, relation=HAS_VARIANT)
 
     def test_protein_variant_unspecified(self):
-        """2.2.2 Test unspecified variant"""
+        """2.2.2 Test unspecified variant."""
         statement = "p(HGNC:CFTR, var(?))"
         result = self.parser.protein.parse_string(statement)
 
@@ -1101,7 +1099,7 @@ class TestProtein(TestTokenParserBase):
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_protein_variant_substitution(self):
-        """2.2.2 Test substitution"""
+        """2.2.2 Test substitution."""
         statement = "p(HGNC:CFTR, var(p.Gly576Ala))"
         result = self.parser.protein.parse_string(statement)
         expected_result = [PROTEIN, ["HGNC", "CFTR"], [HGVS, "p.Gly576Ala"]]
@@ -1116,7 +1114,7 @@ class TestProtein(TestTokenParserBase):
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_protein_variant_deletion(self):
-        """2.2.2 deletion"""
+        """2.2.2 deletion."""
         statement = "p(HGNC:CFTR, var(p.Phe508del))"
         result = self.parser.protein.parse_string(statement)
 
@@ -1132,7 +1130,7 @@ class TestProtein(TestTokenParserBase):
         self.assert_has_edge(protein_node, expected_node, relation=HAS_VARIANT)
 
     def test_protein_fragment_known(self):
-        """2.2.3 fragment with known start/stop"""
+        """2.2.3 fragment with known start/stop."""
         statement = "p(HGNC:YFG, frag(5_20))"
         self.parser.protein.parse_string(statement)
 
@@ -1145,7 +1143,7 @@ class TestProtein(TestTokenParserBase):
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_protein_fragment_unbounded(self):
-        """2.2.3 amino-terminal fragment of unknown length"""
+        """2.2.3 amino-terminal fragment of unknown length."""
         statement = "p(HGNC:YFG, frag(1_?))"
         self.parser.protein.parse_string(statement)
 
@@ -1158,7 +1156,7 @@ class TestProtein(TestTokenParserBase):
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_protein_fragment_unboundTerminal(self):
-        """2.2.3 carboxyl-terminal fragment of unknown length"""
+        """2.2.3 carboxyl-terminal fragment of unknown length."""
         statement = "p(HGNC:YFG, frag(?_*))"
         self.parser.protein.parse_string(statement)
 
@@ -1171,7 +1169,7 @@ class TestProtein(TestTokenParserBase):
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_protein_fragment_unknown(self):
-        """2.2.3 fragment with unknown start/stop"""
+        """2.2.3 fragment with unknown start/stop."""
         statement = "p(HGNC:YFG, frag(?))"
         result = self.parser.protein.parse_string(statement)
 
@@ -1187,7 +1185,7 @@ class TestProtein(TestTokenParserBase):
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_protein_fragment_descriptor(self):
-        """2.2.3 fragment with unknown start/stop and a descriptor"""
+        """2.2.3 fragment with unknown start/stop and a descriptor."""
         statement = 'p(HGNC:YFG, frag(?, "55kD"))'
         self.parser.protein.parse_string(statement)
 
@@ -1200,7 +1198,7 @@ class TestProtein(TestTokenParserBase):
         self.assert_has_edge(parent, expected_node, relation=HAS_VARIANT)
 
     def test_ensure_no_dup_edges(self):
-        """Ensure node and edges aren't added twice, even if from different statements and has origin completion"""
+        """Ensure node and edges aren't added twice, even if from different statements and has origin completion."""
         s1 = "p(HGNC:AKT1)"
         s2 = "deg(p(HGNC:AKT1))"
         node = protein("HGNC", "AKT1")
@@ -1217,7 +1215,7 @@ class TestProtein(TestTokenParserBase):
 
 
 class TestRna(TestTokenParserBase):
-    """2.1.7 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XrnaA"""
+    """2.1.7 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XrnaA."""
 
     def setUp(self):
         self.parser.clear()
@@ -1404,7 +1402,7 @@ class TestRna(TestTokenParserBase):
         self._help_test_rna_fusion_legacy_1('r(fus(HGNC:BCR, "r.?_1875", HGNC:JAK2, "r.2626_?"))')
 
     def test_rna_variant_codingReference(self):
-        """2.2.2 RNA coding reference sequence"""
+        """2.2.2 RNA coding reference sequence."""
         statement = "r(HGNC:CFTR, var(r.1521_1523delcuu))"
         result = self.parser.rna.parse_string(statement)
 
@@ -1431,7 +1429,7 @@ class TestRna(TestTokenParserBase):
 
 
 class TestComplex(TestTokenParserBase):
-    """2.1.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcomplexA"""
+    """2.1.2 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XcomplexA."""
 
     def setUp(self):
         self.parser.clear()
@@ -1503,7 +1501,7 @@ class TestComplex(TestTokenParserBase):
 
 
 class TestComposite(TestTokenParserBase):
-    """Tests the parsing of the composite function
+    """Tests the parsing of the composite function.
 
     .. seealso::
 
@@ -1515,7 +1513,7 @@ class TestComposite(TestTokenParserBase):
         self.parser.composite_abundance.set_parse_action(self.parser.handle_term)
 
     def test_213a(self):
-        """Evidence: ``IL-6 and IL-23 synergistically induce Th17 differentiation"""
+        """Evidence: ``IL-6 and IL-23 synergistically induce Th17 differentiation."""
         statement = 'composite(p(HGNC:IL6), complex(GO:"interleukin-23 complex"))'
         result = self.parser.composite_abundance.parse_string(statement)
 
@@ -1641,7 +1639,7 @@ class TestPopulation(TestTokenParserBase):
         self.assertEqual(
             "pop(UBERON:blood)",
             self.graph.node_to_bel(expected_node),
-            msg="Nodes: {}".format(list(self.graph)),
+            msg=f"Nodes: {list(self.graph)}",
         )
 
 
@@ -1667,7 +1665,7 @@ class TestActivity(TestTokenParserBase):
         self.assertEqual(expected_mod, mod)
 
     def test_activity_withMolecularActivityDefault(self):
-        """Tests activity modifier with molecular activity from default BEL namespace"""
+        """Tests activity modifier with molecular activity from default BEL namespace."""
         statement = "act(p(HGNC:AKT1), ma(kin))"
         result = self.parser.activity.parse_string(statement)
 
@@ -1690,7 +1688,7 @@ class TestActivity(TestTokenParserBase):
         self.assertEqual(expected_mod, mod)
 
     def test_activity_withMolecularActivityDefaultLong(self):
-        """Tests activity modifier with molecular activity from custom namespaced"""
+        """Tests activity modifier with molecular activity from custom namespaced."""
         statement = "act(p(HGNC:AKT1), ma(catalyticActivity))"
         result = self.parser.activity.parse_string(statement)
 
@@ -1713,7 +1711,7 @@ class TestActivity(TestTokenParserBase):
         self.assertEqual(expected_mod, mod)
 
     def test_activity_withMolecularActivityCustom(self):
-        """Tests activity modifier with molecular activity from custom namespaced"""
+        """Tests activity modifier with molecular activity from custom namespaced."""
         statement = 'act(p(HGNC:AKT1), ma(GO:"catalytic activity"))'
         result = self.parser.activity.parse_string(statement)
 
@@ -1739,7 +1737,7 @@ class TestActivity(TestTokenParserBase):
         self.assertEqual(expected_mod, mod)
 
     def test_activity_legacy(self):
-        """Test BEL 1.0 style molecular activity annotation"""
+        """Test BEL 1.0 style molecular activity annotation."""
         statement = "kin(p(HGNC:AKT1))"
         result = self.parser.activity.parse_string(statement)
 
@@ -1805,7 +1803,7 @@ class TestTranslocationPermissive(unittest.TestCase):
         assert_has_edge(self, u, v, self.parser.graph, **kwargs)
 
     def test_unqualified_translocation_single(self):
-        """translocation example"""
+        """Translocation example."""
         statement = "tloc(p(HGNC:EGFR))"
         result = self.parser.transformation.parse_string(statement)
 
@@ -1881,7 +1879,7 @@ class TestTransformation(TestTokenParserBase):
         self.parser.transformation.set_parse_action(self.parser.handle_term)
 
     def test_degradation_short(self):
-        """Test the short form of degradation works"""
+        """Test the short form of degradation works."""
         statement = "deg(p(HGNC:AKT1))"
         result = self.parser.transformation.parse_string(statement)
 
@@ -1905,7 +1903,7 @@ class TestTransformation(TestTokenParserBase):
         self.assertEqual(expected_mod, mod)
 
     def test_degradation_long(self):
-        """Test the long form of degradation works"""
+        """Test the long form of degradation works."""
         statement = "degradation(p(HGNC:EGFR))"
         result = self.parser.transformation.parse_string(statement)
 
@@ -1929,7 +1927,7 @@ class TestTransformation(TestTokenParserBase):
         self.assert_has_node(node)
 
     def test_translocation_standard(self):
-        """translocation example"""
+        """Translocation example."""
         statement = 'tloc(p(HGNC:EGFR), fromLoc(GO:"cell surface"), toLoc(GO:endosome))'
         result = self.parser.transformation.parse_string(statement)
 
@@ -1966,7 +1964,7 @@ class TestTransformation(TestTokenParserBase):
         self.assert_has_node(node)
 
     def test_translocation_bare(self):
-        """translocation example"""
+        """Translocation example."""
         statement = 'tloc(p(HGNC:EGFR), GO:"cell surface", GO:endosome)'
         result = self.parser.transformation.parse_string(statement)
 
@@ -1998,13 +1996,13 @@ class TestTransformation(TestTokenParserBase):
         self.assert_has_node(node)
 
     def test_unqualified_translocation_strict(self):
-        """Fail on an improperly written single argument translocation"""
+        """Fail on an improperly written single argument translocation."""
         statement = 'tloc(pop(EFO:"CD8-Positive T-Lymphocytes"))'
         with self.assertRaises(MalformedTranslocationWarning):
             self.parser.translocation.parse_string(statement)
 
     def test_translocation_secretion(self):
-        """cell secretion short form"""
+        """Cell secretion short form."""
         statement = "sec(p(HGNC:EGFR))"
         result = self.parser.transformation.parse_string(statement)
 
@@ -2019,7 +2017,7 @@ class TestTransformation(TestTokenParserBase):
         self.assert_has_node(node)
 
     def test_translocation_surface(self):
-        """cell surface expression short form"""
+        """Cell surface expression short form."""
         statement = "surf(p(HGNC:EGFR))"
         result = self.parser.transformation.parse_string(statement)
 
@@ -2098,7 +2096,7 @@ class TestTransformation(TestTokenParserBase):
         self.assertIn(expected_node, self.graph)
 
     def test_clearance(self):
-        """Tests that after adding things, the graph and parser can be cleared properly"""
+        """Tests that after adding things, the graph and parser can be cleared properly."""
         s1 = "surf(p(HGNC:EGFR))"
         s2 = 'rxn(reactants(a(CHEBI:superoxide)),products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:"oxygen")))'
 

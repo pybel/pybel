@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Utilities for BEL repositories."""
 
 import json
@@ -7,9 +5,10 @@ import logging
 import os
 import sys
 import time
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from itertools import chain
-from typing import Any, Iterable, Mapping, Optional, Set, TextIO, Tuple, Union
+from typing import Any, TextIO
 
 import click
 import pandas as pd
@@ -42,9 +41,9 @@ logger = logging.getLogger(__name__)
 private_option = click.option("--private", is_flag=True)
 
 OUTPUT_KWARGS = {
-    "nodelink.json": dict(indent=2, sort_keys=True),
-    "cx.json": dict(indent=2, sort_keys=True),
-    "jgif.json": dict(indent=2, sort_keys=True),
+    "nodelink.json": {"indent": 2, "sort_keys": True},
+    "cx.json": {"indent": 2, "sort_keys": True},
+    "jgif.json": {"indent": 2, "sort_keys": True},
 }
 
 
@@ -52,14 +51,14 @@ OUTPUT_KWARGS = {
 class BELMetadata:
     """A container for BEL document metadata."""
 
-    name: Optional[str] = None
-    version: Optional[str] = None
-    description: Optional[str] = None
-    authors: Optional[str] = None
-    contact: Optional[str] = None
-    license: Optional[str] = None
-    copyright: Optional[str] = None
-    disclaimer: Optional[str] = None
+    name: str | None = None
+    version: str | None = None
+    description: str | None = None
+    authors: str | None = None
+    contact: str | None = None
+    license: str | None = None
+    copyright: str | None = None
+    disclaimer: str | None = None
 
     def new(self) -> BELGraph:
         """Generate a new BEL graph with the given metadata."""
@@ -92,11 +91,11 @@ class BELRepository:
     """A container for a BEL repository."""
 
     directory: str
-    output_directory: Optional[str] = None
+    output_directory: str | None = None
 
     bel_cache_name: str = "_cache.bel"
-    metadata: Optional[BELMetadata] = None
-    formats: Tuple[str, ...] = ("pickle", "nodelink.json")
+    metadata: BELMetadata | None = None
+    formats: tuple[str, ...] = ("pickle", "nodelink.json")
 
     #: Must include {file_name} and {extension}
     cache_fmt: str = "{file_name}.{extension}"
@@ -109,7 +108,7 @@ class BELRepository:
     #: The location where the summary DataFrame will be output as a TSV.
     bel_summary_path: str = field(init=False)
 
-    def __post_init__(self) -> None:  # noqa: D105
+    def __post_init__(self) -> None:
         if self.output_directory is None:
             self.output_directory = self.directory
 
@@ -134,11 +133,11 @@ class BELRepository:
             self.cache_fmt.format(file_name=file_name, extension=extension.lstrip(".")),
         )
 
-    def walk(self) -> Iterable[Tuple[str, Iterable[str], Iterable[str]]]:
+    def walk(self) -> Iterable[tuple[str, Iterable[str], Iterable[str]]]:
         """Recursively walk this directory."""
         return os.walk(self.directory)
 
-    def iterate_bel(self) -> Iterable[Tuple[str, str]]:
+    def iterate_bel(self) -> Iterable[tuple[str, str]]:
         """Yield all paths to BEL documents."""
         for root, _dirs, file_names in self.walk():
             for file_name in sorted(file_names):
@@ -168,18 +167,18 @@ class BELRepository:
             if os.path.exists(path):
                 os.remove(path)
 
-    def _iterate_extension_path(self, root: str, file_name: str) -> Iterable[Tuple[str, str]]:
+    def _iterate_extension_path(self, root: str, file_name: str) -> Iterable[tuple[str, str]]:
         for extension in self.formats:
             yield extension, self._build_cache_ext_path(root, file_name, extension)
 
-    def _import_local(self, root: str, file_name: str) -> Optional[BELGraph]:
+    def _import_local(self, root: str, file_name: str) -> BELGraph | None:
         for _, path in self._iterate_extension_path(root, file_name):
             if os.path.exists(path):
                 return load(path)
 
         return None
 
-    def _import_global(self) -> Optional[BELGraph]:
+    def _import_global(self) -> BELGraph | None:
         return self._import_local(self.output_directory, self.bel_cache_name)
 
     def _export_local(self, graph: BELGraph, root: str, file_name: str) -> None:
@@ -213,11 +212,11 @@ class BELRepository:
 
     def get_graph(
         self,
-        manager: Optional[Manager] = None,
+        manager: Manager | None = None,
         use_cached: bool = True,
         use_tqdm: bool = False,
-        tqdm_kwargs: Optional[Mapping[str, Any]] = None,
-        from_path_kwargs: Optional[Mapping[str, Any]] = None,
+        tqdm_kwargs: Mapping[str, Any] | None = None,
+        from_path_kwargs: Mapping[str, Any] | None = None,
     ) -> BELGraph:
         """Get a combine graph."""
         if use_cached:
@@ -250,11 +249,11 @@ class BELRepository:
 
     def get_graphs(
         self,
-        manager: Optional[Manager] = None,
+        manager: Manager | None = None,
         use_cached: bool = True,
         use_tqdm: bool = False,
-        tqdm_kwargs: Optional[Mapping[str, Any]] = None,
-        from_path_kwargs: Optional[Mapping[str, Any]] = None,
+        tqdm_kwargs: Mapping[str, Any] | None = None,
+        from_path_kwargs: Mapping[str, Any] | None = None,
     ) -> Mapping[str, BELGraph]:
         """Get a mapping of all graphs' paths to their compiled BEL graphs."""
         if manager is None:
@@ -291,12 +290,12 @@ class BELRepository:
 
     def get_summary_df(
         self,
-        manager: Optional[Manager] = None,
+        manager: Manager | None = None,
         use_cached: bool = False,
         use_tqdm: bool = False,
-        tqdm_kwargs: Optional[Mapping[str, Any]] = None,
-        from_path_kwargs: Optional[Mapping[str, Any]] = None,
-        save: Union[bool, str, TextIO] = True,
+        tqdm_kwargs: Mapping[str, Any] | None = None,
+        from_path_kwargs: Mapping[str, Any] | None = None,
+        save: bool | str | TextIO = True,
     ) -> pd.DataFrame:
         """Get a pandas DataFrame summarizing the contents of all graphs in the repository."""
         graphs = self.get_graphs(
@@ -308,7 +307,7 @@ class BELRepository:
         )
         return self._get_summary_df_from_graphs(graphs, save=save)
 
-    def _get_summary_df_from_graphs(self, graphs, save: Union[str, bool, TextIO] = True):
+    def _get_summary_df_from_graphs(self, graphs, save: str | bool | TextIO = True):
         summary_dicts = {
             os.path.relpath(path, self.directory): graph.summarize.dict() for path, graph in graphs.items()
         }
@@ -322,7 +321,7 @@ class BELRepository:
 
         return df
 
-    def build_cli(self):  # noqa: D202
+    def build_cli(self):
         """Build a command line interface."""
 
         @click.group(help=f"Tools for the BEL repository at {self.directory} using PyBEL v{get_version()}")
@@ -334,7 +333,7 @@ class BELRepository:
         append_click_group(main)
         return main
 
-    def get_extensions(self, root: str, file_name: str) -> Set[str]:
+    def get_extensions(self, root: str, file_name: str) -> set[str]:
         """Get all compiled files for the given BEL."""
         # TODO check that this is a valid BEL path!
         return {extension for extension, path in self._iterate_extension_path(root, file_name) if os.path.exists(path)}
@@ -342,7 +341,7 @@ class BELRepository:
     def _get_global_caches(self):
         return self.get_extensions(self.output_directory, self.bel_cache_name)
 
-    def _iterate_citations(self, **kwargs) -> Iterable[Tuple[str, str]]:
+    def _iterate_citations(self, **kwargs) -> Iterable[tuple[str, str]]:
         """List all citations in documents in this repository."""
         for _, _, data in self.get_graph(**kwargs).edges(data=True):
             citation = data.get(CITATION)
@@ -382,7 +381,7 @@ def _write_caches(bel_repository: BELRepository, root: str, file_name: str):
     click.echo(s)
 
 
-def append_click_group(group: click.Group) -> None:  # noqa: D202, C901
+def append_click_group(group: click.Group) -> None:
     """Append a :py:class:`click.Group`."""
 
     @group.command()
@@ -501,16 +500,16 @@ def append_click_group(group: click.Group) -> None:  # noqa: D202, C901
             manager=manager,
             use_cached=(not reload),
             use_tqdm=(not no_tqdm),
-            tqdm_kwargs=dict(
-                desc="Loading BEL",
-                leave=False,
-            ),
-            from_path_kwargs=dict(
-                use_tqdm=(not no_tqdm),
-                tqdm_kwargs=dict(
-                    leave=False,
-                ),
-            ),
+            tqdm_kwargs={
+                "desc": "Loading BEL",
+                "leave": False,
+            },
+            from_path_kwargs={
+                "use_tqdm": (not no_tqdm),
+                "tqdm_kwargs": {
+                    "leave": False,
+                },
+            },
         )
         click.echo(graph.summarize.str())
 

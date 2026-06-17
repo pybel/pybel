@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """This module assists in running complex workflows on BEL graphs."""
 
 from . import decorators, exc, pipeline

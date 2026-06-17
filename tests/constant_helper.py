@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Constants for PyBEL tests."""
 
 import logging

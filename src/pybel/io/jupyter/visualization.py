@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Convert BEL graphs to HTML.
 
 This module provides functions for making HTML visualizations of BEL Graphs. Because the :class:`pybel.BELGraph`
@@ -8,7 +6,8 @@ inherits from :class:`networkx.MultiDiGraph`, it can also be visualized using :m
 """
 
 import json
-from typing import Mapping, Optional, TextIO, Union
+from collections.abc import Mapping
+from typing import TextIO
 
 from networkx.utils import open_file
 
@@ -23,7 +22,7 @@ __all__ = [
 ]
 
 
-def to_html(graph: BELGraph, color_map: Optional[Mapping[str, str]] = None) -> str:
+def to_html(graph: BELGraph, color_map: Mapping[str, str] | None = None) -> str:
     """Create an HTML visualization for the given JSON representation of a BEL graph.
 
     :param graph: A BEL graph
@@ -45,8 +44,8 @@ def to_html(graph: BELGraph, color_map: Optional[Mapping[str, str]] = None) -> s
 @open_file(1, mode="w")
 def to_html_file(
     graph: BELGraph,
-    file: Union[str, TextIO],
-    color_map: Optional[Mapping[str, str]] = None,
+    file: str | TextIO,
+    color_map: Mapping[str, str] | None = None,
 ) -> None:
     """Write the HTML visualization to a file or file-like.
 

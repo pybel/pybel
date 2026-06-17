@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Convenient dictionaries for mapping constants to DSL classes."""
 
 from .node_classes import (

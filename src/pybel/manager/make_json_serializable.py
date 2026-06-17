@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """A module for monkey-patching the JSON encoder.
 
 When it's imported. JSONEncoder.default() automatically checks for a special "to_json()"

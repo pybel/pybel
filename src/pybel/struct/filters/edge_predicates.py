@@ -1,9 +1,8 @@
-# -*- coding: utf-8 -*-
-
 """Predicates for edge data from BEL graphs."""
 
+from collections.abc import Callable
 from functools import wraps
-from typing import Any, Callable, Optional
+from typing import Any
 
 from .typing import EdgePredicate
 from .utils import part_has_modifier
@@ -29,29 +28,29 @@ from ...dsl import BaseEntity, BiologicalProcess, Pathology
 from ...typing import EdgeData
 
 __all__ = [
-    "edge_predicate",
-    "true_edge_predicate",
-    "false_edge_predicate",
-    "has_provenance",
-    "has_pubmed",
-    "has_pmc",
-    "has_authors",
-    "is_causal_relation",
-    "not_causal_relation",
-    "is_direct_causal_relation",
-    "is_associative_relation",
-    "has_polarity",
     "edge_has_activity",
+    "edge_has_annotation",
     "edge_has_degradation",
     "edge_has_translocation",
-    "edge_has_annotation",
+    "edge_predicate",
+    "false_edge_predicate",
+    "has_authors",
     "has_pathology_causal",
+    "has_pmc",
+    "has_polarity",
+    "has_provenance",
+    "has_pubmed",
+    "is_associative_relation",
+    "is_causal_relation",
+    "is_direct_causal_relation",
+    "not_causal_relation",
+    "true_edge_predicate",
 ]
 
 DictEdgePredicate = Callable[[EdgeData], bool]
 
 
-def edge_predicate(func: DictEdgePredicate) -> EdgePredicate:  # noqa: D202
+def edge_predicate(func: DictEdgePredicate) -> EdgePredicate:
     """Decorate an edge predicate function that only takes a dictionary as its singular argument.
 
     Apply this as a decorator to a function that takes a single argument, a PyBEL node data dictionary, to make
@@ -178,7 +177,7 @@ def edge_has_degradation(edge_data: EdgeData) -> bool:
     return _has_modifier(edge_data, DEGRADATION)
 
 
-def edge_has_annotation(edge_data: EdgeData, key: str) -> Optional[Any]:
+def edge_has_annotation(edge_data: EdgeData, key: str) -> Any | None:
     """Check if an edge has the given annotation.
 
     :param edge_data: The data dictionary from a BELGraph's edge
@@ -189,11 +188,7 @@ def edge_has_annotation(edge_data: EdgeData, key: str) -> Optional[Any]:
 
     >>> from pybel.examples import sialic_acid_graph
     >>> from pybel.examples.sialic_acid_example import sialic_acid_cd33_complex, cd33
-    >>> edges = {
-    ...     (u, v)
-    ...     for u, v, data in sialic_acid_graph.edges(data=True)
-    ...     if edge_has_annotation(data, 'Species')
-    ... }
+    >>> edges = {(u, v) for u, v, data in sialic_acid_graph.edges(data=True) if edge_has_annotation(data, "Species")}
     >>> assert (sialic_acid_cd33_complex, cd33) in edges
     """
     annotations = edge_data.get(ANNOTATIONS)

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """This module contains base exceptions that are shared through the package.
 
 A message for "General Parser Failure" is displayed when a problem was caused due to an unforeseen error. The line
@@ -29,7 +27,7 @@ class BELParserWarning(PyBELWarning):
         self.position = position
 
     def __str__(self):
-        return "General Parser Failure on line {} at pos {}: {}".format(self.line_number, self.position, self.line)
+        return f"General Parser Failure on line {self.line_number} at pos {self.position}: {self.line}"
 
 
 class BELSyntaxError(BELParserWarning, SyntaxError):
@@ -40,11 +38,11 @@ class InconsistentDefinitionError(BELParserWarning):
     """Base PyBEL error for redefinition."""
 
     def __init__(self, line_number: int, line: str, position: int, definition: str):
-        super(InconsistentDefinitionError, self).__init__(line_number, line, position, definition)
+        super().__init__(line_number, line, position, definition)
         self.definition = definition
 
     def __str__(self):
-        return "Tried to redefine {} with: {}".format(self.definition, self.line)
+        return f"Tried to redefine {self.definition} with: {self.line}"
 
 
 class RedefinedNamespaceError(InconsistentDefinitionError):
@@ -71,14 +69,14 @@ class NakedNameWarning(NameWarning):
     """Raised when there is an identifier without a namespace. Enable lenient mode to suppress."""
 
     def __str__(self):
-        return '"{}" should be qualified with a valid namespace'.format(self.name)
+        return f'"{self.name}" should be qualified with a valid namespace'
 
 
 class MissingDefaultNameWarning(NameWarning):
     """Raised if reference to value not in default namespace."""
 
     def __str__(self):
-        return '"{}" is not in the default namespace'.format(self.name)
+        return f'"{self.name}" is not in the default namespace'
 
 
 class NamespaceIdentifierWarning(NameWarning):
@@ -93,7 +91,7 @@ class NamespaceIdentifierWarning(NameWarning):
         :param namespace: The namespace of the identifier
         :param name: The name of the identifier
         """
-        super(NamespaceIdentifierWarning, self).__init__(line_number, line, position, name, namespace)
+        super().__init__(line_number, line, position, name, namespace)
         self.namespace = namespace
 
 
@@ -101,21 +99,21 @@ class UndefinedNamespaceWarning(NamespaceIdentifierWarning):
     """Raised if reference made to undefined namespace."""
 
     def __str__(self):
-        return '"{}" is not a defined namespace'.format(self.namespace)
+        return f'"{self.namespace}" is not a defined namespace'
 
 
 class MissingNamespaceNameWarning(NamespaceIdentifierWarning):
     """Raised if reference to value not in namespace."""
 
     def __str__(self):
-        return '"{}" is not in the {} namespace'.format(self.name, self.namespace)
+        return f'"{self.name}" is not in the {self.namespace} namespace'
 
 
 class MissingNamespaceRegexWarning(NamespaceIdentifierWarning):
     """Raised if reference not matching regex."""
 
     def __str__(self):
-        return """"{}" doesn't match the regex for {} namespace""".format(self.name, self.namespace)
+        return f""""{self.name}" doesn't match the regex for {self.namespace} namespace"""
 
 
 class AnnotationWarning(BELParserWarning):
@@ -129,7 +127,7 @@ class AnnotationWarning(BELParserWarning):
         :param int position: The position in the line that caused the warning
         :param str annotation: The annotation name that caused the warning
         """
-        super(AnnotationWarning, self).__init__(line_number, line, position, annotation, *args)
+        super().__init__(line_number, line, position, annotation, *args)
         self.annotation = annotation
 
 
@@ -137,21 +135,21 @@ class UndefinedAnnotationWarning(AnnotationWarning):
     """Raised when an undefined annotation is used."""
 
     def __str__(self):
-        return """"{}" is not defined""".format(self.annotation)
+        return f""""{self.annotation}" is not defined"""
 
 
 class MissingAnnotationKeyWarning(AnnotationWarning):
     """Raised when trying to unset an annotation that is not set."""
 
     def __str__(self):
-        return """"{}" is not set, so it can't be unset""".format(self.annotation)
+        return f""""{self.annotation}" is not set, so it can't be unset"""
 
 
 class AnnotationIdentifierWarning(AnnotationWarning):
     """Base exception for annotation:value pairs."""
 
     def __init__(self, line_number, line, position, annotation, value):
-        super(AnnotationIdentifierWarning, self).__init__(line_number, line, position, annotation, value)
+        super().__init__(line_number, line, position, annotation, value)
         self.value = value
 
 
@@ -159,14 +157,14 @@ class IllegalAnnotationValueWarning(AnnotationIdentifierWarning):
     """Raised when an annotation has a value that does not belong to the original set of valid annotation values."""
 
     def __str__(self):
-        return '"{}" is not defined in the {} annotation'.format(self.value, self.annotation)
+        return f'"{self.value}" is not defined in the {self.annotation} annotation'
 
 
 class MissingAnnotationRegexWarning(AnnotationIdentifierWarning):
     """Raised if annotation doesn't match regex."""
 
     def __str__(self):
-        return """"{}" doesn't match the regex for {} annotation""".format(self.value, self.annotation)
+        return f""""{self.value}" doesn't match the regex for {self.annotation} annotation"""
 
 
 # Provenance Warnings
@@ -176,13 +174,13 @@ class VersionFormatWarning(BELParserWarning):
     """Raised if the version string doesn't adhere to semantic versioning or ``YYYYMMDD`` format."""
 
     def __init__(self, line_number, line, position, version_string):
-        super(VersionFormatWarning, self).__init__(line_number, line, position, version_string)
+        super().__init__(line_number, line, position, version_string)
         self.version_string = version_string
 
     def __str__(self):
         return (
-            'Version string "{}" neither is a date like YYYYMMDD nor adheres to semantic versioning.'
-            " See http://semver.org/".format(self.version_string)
+            f'Version string "{self.version_string}" neither is a date like YYYYMMDD nor adheres to semantic versioning.'
+            " See http://semver.org/"
         )
 
 
@@ -190,7 +188,7 @@ class MetadataException(BELParserWarning):
     """Base exception for issues with document metadata."""
 
     def __str__(self):
-        return 'Invalid metadata - "{}"'.format(self.line)
+        return f'Invalid metadata - "{self.line}"'
 
 
 class MalformedMetadataException(MetadataException):
@@ -216,23 +214,23 @@ class InvalidMetadataException(BELParserWarning):
     """
 
     def __init__(self, line_number, line, position, key, value):
-        super(InvalidMetadataException, self).__init__(line_number, line, position, key, value)
+        super().__init__(line_number, line, position, key, value)
         self.key = key
         self.value = value
 
     def __str__(self):
-        return "Invalid document metadata key: {}".format(self.key)
+        return f"Invalid document metadata key: {self.key}"
 
 
 class MissingMetadataException(BELParserWarning):
     """Raised when a BEL Script is missing critical metadata."""
 
     def __init__(self, line_number, line, position, key):
-        super(MissingMetadataException, self).__init__(line_number, line, position, key)
+        super().__init__(line_number, line, position, key)
         self.key = key
 
     def __str__(self):
-        return "Missing required document metadata: {}".format(self.key)
+        return f"Missing required document metadata: {self.key}"
 
     @staticmethod
     def make(key: str):
@@ -251,14 +249,14 @@ class CitationTooShortException(InvalidCitationLengthException):
     """Raised when a citation does not have the minimum of {type, name, reference}."""
 
     def __str__(self):
-        return "Citation is missing required fields: {}".format(self.line)
+        return f"Citation is missing required fields: {self.line}"
 
 
 class CitationTooLongException(InvalidCitationLengthException):
     """Raised when a citation has more than the allowed entries, {type, name, reference, date, authors, comments}."""
 
     def __str__(self):
-        return "Citation contains too many entries: {}".format(self.line)
+        return f"Citation contains too many entries: {self.line}"
 
 
 class MissingCitationException(BELParserWarning):
@@ -273,7 +271,7 @@ class MissingCitationException(BELParserWarning):
     """
 
     def __str__(self):
-        return "Missing citation; can't add: {}".format(self.line)
+        return f"Missing citation; can't add: {self.line}"
 
 
 class MissingSupportWarning(BELParserWarning):
@@ -287,14 +285,14 @@ class MissingSupportWarning(BELParserWarning):
     """
 
     def __str__(self):
-        return "Missing evidence; can't add: {}".format(self.line)
+        return f"Missing evidence; can't add: {self.line}"
 
 
 class MissingAnnotationWarning(BELParserWarning):
     """Raised when trying to parse a BEL statement and a required annotation is not present."""
 
     def __init__(self, line_number, line, position, required_annotations):
-        super(MissingAnnotationWarning, self).__init__(line_number, line, position, required_annotations)
+        super().__init__(line_number, line, position, required_annotations)
         self.required_annotations = required_annotations
 
     def __str__(self):
@@ -318,22 +316,22 @@ class InvalidCitationType(BELParserWarning):
     """
 
     def __init__(self, line_number, line, position, citation_type):
-        super(InvalidCitationType, self).__init__(line_number, line, position, citation_type)
+        super().__init__(line_number, line, position, citation_type)
         self.citation_type = citation_type
 
     def __str__(self):
-        return '"{}" is not a valid citation type'.format(self.citation_type)
+        return f'"{self.citation_type}" is not a valid citation type'
 
 
 class InvalidPubMedIdentifierWarning(BELParserWarning):
     """Raised when a citation is set whose type is ``PubMed`` but whose database identifier is not a valid integer."""
 
     def __init__(self, line_number, line, position, reference):
-        super(InvalidPubMedIdentifierWarning, self).__init__(line_number, line, position, reference)
+        super().__init__(line_number, line, position, reference)
         self.reference = reference
 
     def __str__(self):
-        return '"{}" is not a valid PubMed identifier'.format(self.reference)
+        return f'"{self.reference}" is not a valid PubMed identifier'
 
 
 # BEL Syntax Warnings
@@ -343,11 +341,11 @@ class MalformedTranslocationWarning(BELParserWarning):
     """Raised when there is a translocation statement without location information."""
 
     def __init__(self, line_number, line, position, tokens):
-        super(MalformedTranslocationWarning, self).__init__(line_number, line, position, tokens)
+        super().__init__(line_number, line, position, tokens)
         self.tokens = tokens
 
     def __str__(self):
-        return "Unqualified translocation: {} {}".format(self.line, self.tokens)
+        return f"Unqualified translocation: {self.line} {self.tokens}"
 
 
 class PlaceholderAminoAcidWarning(BELParserWarning):
@@ -358,11 +356,11 @@ class PlaceholderAminoAcidWarning(BELParserWarning):
     """
 
     def __init__(self, line_number, line, position, code):
-        super(PlaceholderAminoAcidWarning, self).__init__(line_number, line, position, code)
+        super().__init__(line_number, line, position, code)
         self.code = code
 
     def __str__(self):
-        return "Placeholder amino acid found: {}".format(self.code)
+        return f"Placeholder amino acid found: {self.code}"
 
 
 class NestedRelationWarning(BELParserWarning):
@@ -372,7 +370,7 @@ class NestedRelationWarning(BELParserWarning):
     """
 
     def __str__(self):
-        return "Nesting is not supported. Split this statement: {}".format(self.line)
+        return f"Nesting is not supported. Split this statement: {self.line}"
 
 
 # Semantic Warnings
@@ -387,7 +385,7 @@ class InvalidEntity(BELParserWarning):
         self.name = name
 
     def __str__(self):
-        return "{}:{} should not be coded as an entity".format(self.namespace, ensure_quotes(self.name))
+        return f"{self.namespace}:{ensure_quotes(self.name)} should not be coded as an entity"
 
 
 class InvalidFunctionSemantic(BELParserWarning):

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Constants for Hetionet."""
 
 from ...dsl import Abundance, BiologicalProcess, Pathology, Population, Protein, Rna

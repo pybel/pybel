@@ -1,9 +1,6 @@
-# -*- coding: utf-8 -*-
-
 """TSV converter classes."""
 
 from abc import ABC, abstractmethod
-from typing import Dict, Tuple
 
 from ...constants import (
     ACTIVITY,
@@ -62,7 +59,7 @@ class Converter(ABC):
 
     @staticmethod
     @abstractmethod
-    def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
+    def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> tuple[str, str, str]:
         """Convert a BEL edge."""
 
 
@@ -70,7 +67,7 @@ class SimpleConverter(Converter):
     """A class for converting the source and target that have simple names."""
 
     @classmethod
-    def convert(cls, u: BaseAbundance, v: BaseAbundance, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
+    def convert(cls, u: BaseAbundance, v: BaseAbundance, key: str, edge_data: EdgeData) -> tuple[str, str, str]:
         """Convert a BEL edge."""
         return u.safe_label, edge_data[RELATION], v.safe_label
 
@@ -81,7 +78,7 @@ class TypedConverter(Converter):
     target_relation = None
 
     @classmethod
-    def convert(cls, u: BaseAbundance, v: BaseAbundance, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
+    def convert(cls, u: BaseAbundance, v: BaseAbundance, key: str, edge_data: EdgeData) -> tuple[str, str, str]:
         """Convert a BEL edge."""
         return u.safe_label, cls.target_relation, v.safe_label
 
@@ -192,7 +189,7 @@ class _ReactionHasMemberConverter(_ReactionTypedPredicate):
         return super().predicate(u, v, key, edge_data) and v not in u.get_catalysts()
 
     @classmethod
-    def convert(cls, u: Reaction, v: BaseAbundance, key: str, data: Dict) -> Tuple[str, str, str]:
+    def convert(cls, u: Reaction, v: BaseAbundance, key: str, data: dict) -> tuple[str, str, str]:
         """Convert a BEL edge."""
         return u.as_bel(), cls.target_relation, v.curie
 
@@ -222,7 +219,7 @@ class ReactionHasCatalystConverter(_ReactionTypedPredicate):
         return super().predicate(u, v, key, edge_data) and v in u.get_catalysts()
 
     @classmethod
-    def convert(cls, u: Reaction, v: BaseAbundance, key: str, data: Dict) -> Tuple[str, str, str]:
+    def convert(cls, u: Reaction, v: BaseAbundance, key: str, data: dict) -> tuple[str, str, str]:
         """Convert a BEL edge."""
         return u.as_bel(), cls.target_relation, v.curie
 
@@ -236,7 +233,7 @@ class ListComplexHasComponentConverter(SimpleTypedPredicate):
     target_relation = "partOf"
 
     @classmethod
-    def convert(cls, u: ComplexAbundance, v: BaseAbundance, key: str, data: Dict) -> Tuple[str, str, str]:
+    def convert(cls, u: ComplexAbundance, v: BaseAbundance, key: str, data: dict) -> tuple[str, str, str]:
         """Convert a BEL edge."""
         return u.curie, cls.target_relation, v.as_bel()
 
@@ -273,7 +270,7 @@ class AssociationConverter(Converter):
         return edge_data[RELATION] == ASSOCIATION
 
     @staticmethod
-    def convert(u: BaseAbundance, v: BaseAbundance, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
+    def convert(u: BaseAbundance, v: BaseAbundance, key: str, edge_data: EdgeData) -> tuple[str, str, str]:
         """Convert a BEL edge."""
         relation = edge_data.get("association_type", ASSOCIATION)  # allow more specific association to be defined
         return u.safe_label, relation, v.safe_label
@@ -470,7 +467,7 @@ class TranscriptionFactorForConverter(Converter):
     """Converts ``complex(g(A), p(B)) directlyIncreases r(A)```."""
 
     @classmethod
-    def convert(cls, u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
+    def convert(cls, u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> tuple[str, str, str]:
         """Convert a transcription factor for edge."""
         gene = v.get_gene()
         if gene == u.members[0]:
@@ -508,13 +505,13 @@ class BindsProteinConverter(Converter):
             and isinstance(v, ComplexAbundance)
             and len(v.members) == 2
             and u in v.members
-            and isinstance([m for m in v.members if m != u][0], Protein)
+            and isinstance(next(m for m in v.members if m != u), Protein)
         )
 
     @staticmethod
-    def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
+    def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> tuple[str, str, str]:
         """Convert a binds protein factor for edge."""
-        v = [m for m in v.members if m != u][0]
+        v = next(m for m in v.members if m != u)
         return u.safe_label, "bindsToProtein", v.safe_label
 
 
@@ -532,7 +529,7 @@ class HomomultimerConverter(Converter):
         )
 
     @staticmethod
-    def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
+    def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> tuple[str, str, str]:
         """Convert a homomultimer formation."""
         return u.safe_label, "bindsToProtein", u.safe_label
 
@@ -549,13 +546,13 @@ class BindsGeneConverter(Converter):
             and isinstance(v, ComplexAbundance)
             and len(v.members) == 2
             and u in v.members
-            and isinstance([m for m in v.members if m != u][0], Gene)
+            and isinstance(next(m for m in v.members if m != u), Gene)
         )
 
     @staticmethod
-    def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
+    def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> tuple[str, str, str]:
         """Convert a transcription factor for edge."""
-        v = [m for m in v.members if m != u][0]
+        v = next(m for m in v.members if m != u)
         return u.safe_label, "bindsToGene", v.safe_label
 
 
@@ -574,7 +571,7 @@ class ProteinRegulatesComplex(Converter):
         )
 
     @staticmethod
-    def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> Tuple[str, str, str]:
+    def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> tuple[str, str, str]:
         """Convert a transcription factor for edge."""
         relation = edge_data[RELATION]
         if relation in CAUSAL_INCREASE_RELATIONS:

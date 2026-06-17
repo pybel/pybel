@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
-
 """Citation utilities for the database manager."""
 
 import logging
 import re
+from collections.abc import Iterable, Mapping
 from datetime import date, datetime
 from functools import lru_cache
-from typing import Any, Dict, Iterable, List, Mapping, Optional, Set, Tuple, Union
+from typing import Any
 
 import ratelimit
 import requests
@@ -23,8 +22,8 @@ from ..struct.graph import BELGraph
 from ..struct.summary.provenance import get_citation_identifiers
 
 __all__ = [
-    "enrich_pubmed_citations",
     "enrich_pmc_citations",
+    "enrich_pubmed_citations",
 ]
 
 logger = logging.getLogger(__name__)
@@ -63,20 +62,20 @@ def sanitize_date(publication_date: str) -> str:
 
     if s:
         year, season = s.groups()
-        return "{}-{}-01".format(year, season_map[season])
+        return f"{year}-{season_map[season]}-01"
 
     s = re6.search(publication_date)
 
     if s:
-        return datetime.strptime(publication_date, "%Y %b %d-{}".format(s.groups()[0])).strftime("%Y-%m-%d")
+        return datetime.strptime(publication_date, f"%Y %b %d-{s.groups()[0]}").strftime("%Y-%m-%d")
 
     s = re7.search(publication_date)
 
     if s:
-        return datetime.strptime(publication_date, "%Y %b %d-{}".format(s.groups()[0])).strftime("%Y-%m-%d")
+        return datetime.strptime(publication_date, f"%Y %b %d-{s.groups()[0]}").strftime("%Y-%m-%d")
 
 
-def clean_pubmed_identifiers(identifiers: Iterable[str]) -> List[str]:
+def clean_pubmed_identifiers(identifiers: Iterable[str]) -> list[str]:
     """Clean a list of identifiers with string strips, deduplicates, and sorting."""
     _identifiers = (str(identifier).strip() for identifier in identifiers if identifier)
     return sorted({i for i in _identifiers if i})
@@ -149,11 +148,11 @@ def enrich_citation_model(manager: Manager, citation: models.Citation, p: Mappin
 
 def get_citations_by_pmids(
     manager: Manager,
-    pmids: Iterable[Union[str, int]],
+    pmids: Iterable[str | int],
     *,
-    group_size: Optional[int] = None,
+    group_size: int | None = None,
     offline: bool = False,
-) -> Tuple[Dict[str, Dict], Set[str]]:
+) -> tuple[dict[str, dict], set[str]]:
     return _get_citations_by_identifiers(
         manager=manager,
         identifiers=pmids,
@@ -165,12 +164,12 @@ def get_citations_by_pmids(
 
 def _get_citations_by_identifiers(
     manager: Manager,
-    identifiers: Iterable[Union[str, int]],
+    identifiers: Iterable[str | int],
     *,
-    group_size: Optional[int] = None,
+    group_size: int | None = None,
     offline: bool = False,
-    prefix: Optional[str] = None,
-) -> Tuple[Dict[str, Dict], Set[str]]:
+    prefix: str | None = None,
+) -> tuple[dict[str, dict], set[str]]:
     """Get citation information for the given list of PubMed identifiers using the NCBI's eUtils service.
 
     :type manager: pybel.Manager
@@ -310,10 +309,10 @@ def _get_citation_models(
 def enrich_pubmed_citations(
     graph: BELGraph,
     *,
-    manager: Optional[Manager] = None,
-    group_size: Optional[int] = None,
+    manager: Manager | None = None,
+    group_size: int | None = None,
     offline: bool = False,
-) -> Set[str]:
+) -> set[str]:
     """Overwrite all PubMed citations with values from NCBI's eUtils lookup service.
 
     :param graph: A BEL graph
@@ -334,10 +333,10 @@ def enrich_pubmed_citations(
 def enrich_pmc_citations(
     graph: BELGraph,
     *,
-    manager: Optional[Manager] = None,
-    group_size: Optional[int] = None,
+    manager: Manager | None = None,
+    group_size: int | None = None,
     offline: bool = False,
-) -> Set[str]:
+) -> set[str]:
     """Overwrite all PubMed citations with values from NCBI's eUtils lookup service.
 
     :param graph: A BEL graph
@@ -357,11 +356,11 @@ def enrich_pmc_citations(
 
 def _enrich_citations(
     graph: BELGraph,
-    manager: Optional[Manager],
-    group_size: Optional[int] = None,
+    manager: Manager | None,
+    group_size: int | None = None,
     offline: bool = False,
-    prefix: Optional[str] = None,
-) -> Set[str]:
+    prefix: str | None = None,
+) -> set[str]:
     """Overwrite all citations of the given prefix using the predefined lookup functions.
 
     :param graph: A BEL Graph
@@ -396,7 +395,7 @@ def _enrich_citations(
     return errors
 
 
-@lru_cache()
+@lru_cache
 def get_pmc_csl_item(pmcid: str) -> Mapping[str, Any]:
     """Get the CSL Item for a PubMed Central record by its PMID, PMCID, or DOI, using the NCBI Citation Exporter API."""
     if not pmcid.startswith("PMC"):
@@ -428,7 +427,6 @@ def enrich_citation_model_from_pmc(manager: Manager, citation: models.Citation, 
         try:
             author_name = f"{author['given']} {author['family']}"
         except KeyError:
-            print(f"problem with author in pmc:{citation.db_id}", author)
             continue
         author_model = manager.get_or_create_author(author_name)
         if author_model not in citation.authors:

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for node predicates."""
 
 import unittest
@@ -123,7 +121,7 @@ class TestNodePredicates(unittest.TestCase):
         self.assertFalse(has_fragment(p1))
 
     def test_p1_tuple_variants(self):
-        """Test node predicates on the node tuple from BRAF.s"""
+        """Test node predicates on the node tuple from BRAF.s."""
         g = BELGraph()
         g.add_node_from_data(p1)
 
@@ -185,7 +183,7 @@ class TestNodePredicates(unittest.TestCase):
         self.assertFalse(is_pathology(g1))
 
         self.assertTrue(has_variant(g1))
-        self.assertTrue(has_gene_modification(g1), msg="Should have {}: {}".format(GMOD, g1))
+        self.assertTrue(has_gene_modification(g1), msg=f"Should have {GMOD}: {g1}")
         self.assertFalse(has_protein_modification(g1))
         self.assertFalse(has_hgvs(g1))
 
@@ -202,7 +200,7 @@ class TestNodePredicates(unittest.TestCase):
         self.assertTrue(has_fragment(protein(name="APP", namespace="HGNC", variants=[fragment()])))
 
     def test_p1_active(self):
-        """cat(p(HGNC:HSD11B1)) increases deg(a(CHEBI:cortisol))"""
+        """cat(p(HGNC:HSD11B1)) increases deg(a(CHEBI:cortisol))."""
         g = BELGraph()
         g.annotation_pattern["Species"] = r"\d+"
 
@@ -236,7 +234,7 @@ class TestNodePredicates(unittest.TestCase):
         self.assertFalse(has_activity(g, v))
 
     def test_object_has_translocation(self):
-        """p(HGNC: EGF) increases tloc(p(HGNC: VCP), GO:0005634, GO:0005737)"""
+        """p(HGNC: EGF) increases tloc(p(HGNC: VCP), GO:0005634, GO:0005737)."""
         g = BELGraph()
         g.annotation_pattern["Species"] = r"\d+"
         u = protein(name="EFG", namespace="HGNC")
@@ -268,7 +266,7 @@ class TestNodePredicates(unittest.TestCase):
         self.assertFalse(has_causal_out_edges(g, v))
 
     def test_object_has_secretion(self):
-        """p(MGI:Il4) increases sec(p(MGI:Cxcl1))"""
+        """p(MGI:Il4) increases sec(p(MGI:Cxcl1))."""
         g = BELGraph()
         g.annotation_pattern["Species"] = r"\d+"
         g.annotation_pattern["MeSH"] = ".*"
@@ -301,7 +299,7 @@ class TestNodePredicates(unittest.TestCase):
         self.assertFalse(has_causal_out_edges(g, v))
 
     def test_subject_has_secretion(self):
-        """sec(p(MGI:S100b)) increases a(CHEBI:"nitric oxide")"""
+        """sec(p(MGI:S100b)) increases a(CHEBI:"nitric oxide")."""
         g = BELGraph()
         g.annotation_pattern["Species"] = r"\d+"
         g.annotation_pattern["Cell"] = r".*"

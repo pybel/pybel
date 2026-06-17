@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for parsing utilities."""
 
 import unittest
@@ -46,7 +44,7 @@ class TestSubdictMatching(unittest.TestCase):
         self.assertFalse(subdict_matches(target, query))
 
     def test_dict_matches_7_partial(self):
-        """Tests a partial match"""
+        """Tests a partial match."""
         target = {"k1": "v1", "k2": "v2"}
         query = {"k1": "v1", "k2": {"v2": "v3"}}
 

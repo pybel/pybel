@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Functions for deleting nodes and edges in networks."""
 
 from ...filters.edge_filters import filter_edges
@@ -13,13 +11,13 @@ from ...filters.node_predicates import (
 from ...pipeline import in_place_transformation
 
 __all__ = [
+    "remove_associations",
+    "remove_biological_processes",
     "remove_filtered_edges",
     "remove_filtered_nodes",
-    "remove_associations",
-    "remove_pathologies",
-    "remove_biological_processes",
     "remove_isolated_list_abundances",
     "remove_non_causal_edges",
+    "remove_pathologies",
 ]
 
 

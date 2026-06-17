@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Mutations that induce a sub-graph."""
 
 from . import (

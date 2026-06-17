@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Mocks for PyBEL testing."""
 
 import itertools as itt
@@ -54,7 +52,7 @@ class MockResponse:
             raise ValueError("missing file")
 
         if not os.path.exists(self.path):
-            raise ValueError("file doesn't exist: {}".format(self.path))
+            raise ValueError(f"file doesn't exist: {self.path}")
 
     def iter_lines(self):
         """Iterate the lines of the mock file."""

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Fragments.
 
 The addition of a fragment results in an entry called :data:`pybel.constants.VARIANTS`
@@ -19,8 +17,8 @@ For example, the node :code:`p(HGNC:GSK3B, frag(45_129))` is represented with th
 
     {
         FUNCTION: PROTEIN,
-        NAMESPACE: 'HGNC',
-        NAME: 'GSK3B',
+        NAMESPACE: "HGNC",
+        NAME: "GSK3B",
         VARIANTS: [
             {
                 KIND: FRAGMENT,
@@ -43,12 +41,12 @@ is represented with the key :data:`pybel.constants.FRAGMENT_MISSING` and the val
 
     {
         FUNCTION: PROTEIN,
-        NAMESPACE: 'HGNC',
-        NAME: 'GSK3B',
+        NAMESPACE: "HGNC",
+        NAME: "GSK3B",
         VARIANTS: [
             {
                 KIND: FRAGMENT,
-                FRAGMENT_MISSING: '?',
+                FRAGMENT_MISSING: "?",
             },
         ],
     }

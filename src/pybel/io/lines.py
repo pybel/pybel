@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-
 """This module contains IO functions for BEL scripts."""
 
 import gzip
 import logging
-from typing import TextIO, Union
+from typing import TextIO
 
 from bel_resources.utils import download
 from networkx.utils import open_file
@@ -22,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 @open_file(0, mode="r")
-def from_bel_script(path: Union[str, TextIO], **kwargs) -> BELGraph:
+def from_bel_script(path: str | TextIO, **kwargs) -> BELGraph:
     """Load a BEL graph from a file resource. This function is a thin wrapper around :func:`from_lines`.
 
     :param path: A path or file-like

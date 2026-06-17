@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Transport functions for `BEL Commons <https://github.com/bel-commons/bel-commons>`_.
 
 BEL Commons is a free, open-source platform for hosting BEL content. Because it was originally
@@ -10,7 +8,6 @@ BEL Commons, there are instructions on its GitHub page.
 """
 
 import logging
-from typing import Optional
 
 import pystow
 import requests
@@ -20,8 +17,8 @@ from ..struct.graph import BELGraph
 from ..version import get_version
 
 __all__ = [
-    "to_bel_commons",
     "from_bel_commons",
+    "to_bel_commons",
 ]
 
 logger = logging.getLogger(__name__)
@@ -30,7 +27,7 @@ RECIEVE_ENDPOINT = "/api/receive/"
 GET_ENDPOINT = "/api/network/{}/export/nodelink"
 
 
-def _get_host() -> Optional[str]:
+def _get_host() -> str | None:
     """Find the host with :func:`pystow.get_config`.
 
     Has two possibilities:
@@ -41,19 +38,19 @@ def _get_host() -> Optional[str]:
     return pystow.get_config("pybel", "remote_host")
 
 
-def _get_user() -> Optional[str]:
+def _get_user() -> str | None:
     return pystow.get_config("pybel", "remote_user")
 
 
-def _get_password() -> Optional[str]:
+def _get_password() -> str | None:
     return pystow.get_config("pybel", "remote_password")
 
 
 def to_bel_commons(
     graph: BELGraph,
-    host: Optional[str] = None,
-    user: Optional[str] = None,
-    password: Optional[str] = None,
+    host: str | None = None,
+    user: str | None = None,
+    password: str | None = None,
     public: bool = True,
 ) -> requests.Response:
     """Send a graph to the receiver service and returns the :mod:`requests` response object.
@@ -91,7 +88,7 @@ def to_bel_commons(
         json=to_nodelink(graph),
         headers={
             "content-type": "application/json",
-            "User-Agent": "PyBEL v{}".format(get_version()),
+            "User-Agent": f"PyBEL v{get_version()}",
             "bel-commons-public": "true" if public else "false",
         },
         auth=(user, password),
@@ -101,7 +98,7 @@ def to_bel_commons(
     return response
 
 
-def from_bel_commons(network_id: int, host: Optional[str] = None) -> BELGraph:
+def from_bel_commons(network_id: int, host: str | None = None) -> BELGraph:
     """Retrieve a public network from BEL Commons.
 
     In the future, this function may be extended to support authentication.

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Test for functions for inducing random sub-graphs."""
 
 import random

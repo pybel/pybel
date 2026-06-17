@@ -1,10 +1,9 @@
-# -*- coding: utf-8 -*-
-
 """This module supports the relation parser by handling statements."""
 
 import logging
 import re
-from typing import Mapping, Optional, Pattern, Set
+from collections.abc import Mapping
+from re import Pattern
 
 from pyparsing import And, MatchFirst, ParseResults, Suppress, Word
 
@@ -68,12 +67,12 @@ class MetadataParser(BaseParser):
     def __init__(
         self,
         manager,
-        namespace_to_term_to_encoding: Optional[NamespaceTermEncodingMapping] = None,
-        namespace_to_pattern: Optional[Mapping[str, Pattern]] = None,
-        annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
-        annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
-        annotation_to_local: Optional[Mapping[str, Set[str]]] = None,
-        default_namespace: Optional[Set[str]] = None,
+        namespace_to_term_to_encoding: NamespaceTermEncodingMapping | None = None,
+        namespace_to_pattern: Mapping[str, Pattern] | None = None,
+        annotation_to_term: Mapping[str, set[str]] | None = None,
+        annotation_to_pattern: Mapping[str, Pattern] | None = None,
+        annotation_to_local: Mapping[str, set[str]] | None = None,
+        default_namespace: set[str] | None = None,
         allow_redefinition: bool = False,
         skip_validation: bool = False,
         upgrade_urls: bool = False,
@@ -219,15 +218,15 @@ class MetadataParser(BaseParser):
             return
 
         if self.namespace_url_dict:
-            keywords, urls = zip(*self.namespace_url_dict.items())
+            keywords, urls = zip(*self.namespace_url_dict.items(), strict=False)
             namespaces = self.manager._ensure_namespace_urls(urls)
-            for keyword, namespace in zip(keywords, namespaces):
+            for keyword, namespace in zip(keywords, namespaces, strict=False):
                 self.namespace_to_term_to_encoding[keyword] = namespace.get_term_to_encodings()
 
         if self.annotation_url_dict:
-            keywords, urls = zip(*self.annotation_url_dict.items())
+            keywords, urls = zip(*self.annotation_url_dict.items(), strict=False)
             namespaces = self.manager._ensure_namespace_urls(urls, is_annotation=True)
-            for keyword, namespace in zip(keywords, namespaces):
+            for keyword, namespace in zip(keywords, namespaces, strict=False):
                 self.annotation_to_term[keyword] = {entry.name for entry in namespace.entries}
 
     def handle_namespace_pattern(self, line: str, position: int, tokens: ParseResults) -> ParseResults:

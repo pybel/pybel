@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """URLs for default BEL resources.
 
 This script is susceptible to rate limits from the GitHub API, so don't run it over and over!
@@ -20,21 +18,21 @@ def _get_conso_url(name):
     return get_github_url(
         owner="pharmacome",
         repo="conso",
-        path="external/{}.belns".format(name),
+        path=f"external/{name}.belns",
     )
 
 
-keyword_to_suffix = dict(
-    chebi="chebi-names",
-    ec="ec-code",
-    fb="fb-names",
-    go="go-names",
-    hgnc="hgnc-names",
-    mesh="mesh-names",
-    mgi="mgi-names",
-    ncbigene="ncbigene-names",
-    rgd="rgd-names",
-)
+keyword_to_suffix = {
+    "chebi": "chebi-names",
+    "ec": "ec-code",
+    "fb": "fb-names",
+    "go": "go-names",
+    "hgnc": "hgnc-names",
+    "mesh": "mesh-names",
+    "mgi": "mgi-names",
+    "ncbigene": "ncbigene-names",
+    "rgd": "rgd-names",
+}
 
 
 def main():
@@ -45,14 +43,14 @@ def main():
         print("# -*- coding: utf-8 -*-\n", file=file)
         print('"""Resources for PyBEL."""\n', file=file)
         for keyword, url in sorted(keyword_to_url.items()):
-            print("{}_URL = '{}'".format(keyword.upper(), url), file=file)
+            print(f"{keyword.upper()}_URL = '{url}'", file=file)
 
-        print("\nFPLX_URL = '{}'".format(get_famplex_url()), file=file)
+        print(f"\nFPLX_URL = '{get_famplex_url()}'", file=file)
 
         print("\n#: Default URL lookup for some keywords", file=file)
         print("keyword_to_url = dict(", file=file)
         for k in sorted(keyword_to_suffix):
-            print("    {}={}_URL,".format(k, k.upper()), file=file)
+            print(f"    {k}={k.upper()}_URL,", file=file)
         print("    fplx=FPLX_URL,", file=file)
         print(")", file=file)
 

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Control parser.
 
 This module handles parsing control statement, which add annotations and namespaces to the document.
@@ -10,7 +8,9 @@ This module handles parsing control statement, which add annotations and namespa
 """
 
 import logging
-from typing import Any, Dict, List, Mapping, Optional, Pattern, Set
+from collections.abc import Mapping
+from re import Pattern
+from typing import Any
 
 from pyparsing import And, Keyword, MatchFirst, ParseResults, Suppress, one_of
 from pyparsing import pyparsing_common as ppc
@@ -70,11 +70,11 @@ class ControlParser(BaseParser):
 
     def __init__(
         self,
-        annotation_to_term: Optional[Mapping[str, Set[str]]] = None,
-        annotation_to_pattern: Optional[Mapping[str, Pattern]] = None,
-        annotation_to_local: Optional[Mapping[str, Set[str]]] = None,
+        annotation_to_term: Mapping[str, set[str]] | None = None,
+        annotation_to_pattern: Mapping[str, Pattern] | None = None,
+        annotation_to_local: Mapping[str, set[str]] | None = None,
         citation_clearing: bool = True,
-        required_annotations: Optional[List[str]] = None,
+        required_annotations: list[str] | None = None,
     ) -> None:
         """Initialize the control statement parser.
 
@@ -150,7 +150,7 @@ class ControlParser(BaseParser):
 
         self.language = self.set_statements | self.unset_statements
 
-        super(ControlParser, self).__init__(self.language)
+        super().__init__(self.language)
 
     @property
     def _in_debug_mode(self) -> bool:
@@ -360,7 +360,7 @@ class ControlParser(BaseParser):
         self.clear()
         return tokens
 
-    def get_annotations(self) -> Dict[str, Any]:
+    def get_annotations(self) -> dict[str, Any]:
         """Get the current annotations."""
         return {
             EVIDENCE: self.evidence,
@@ -368,7 +368,7 @@ class ControlParser(BaseParser):
             ANNOTATIONS: self.annotations.copy(),
         }
 
-    def get_citation(self) -> Optional[CitationDict]:
+    def get_citation(self) -> CitationDict | None:
         """Get the citation dictionary."""
         return (
             CitationDict(namespace=self.citation_db, identifier=self.citation_db_id)
@@ -376,7 +376,7 @@ class ControlParser(BaseParser):
             else None
         )
 
-    def get_missing_required_annotations(self) -> List[str]:
+    def get_missing_required_annotations(self) -> list[str]:
         """Return missing required annotations."""
         return [
             required_annotation

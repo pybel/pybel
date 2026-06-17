@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for node deletion functions."""
 
 import unittest

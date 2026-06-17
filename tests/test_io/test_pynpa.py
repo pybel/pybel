@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Tests for PyNPA."""
 
 import unittest
@@ -36,7 +34,7 @@ class TestPyNPA(unittest.TestCase):
         tf_pairs = set(get_tf_pairs(self.graph))
         self.assertLess(0, len(tf_pairs), msg="No TF pairs pairs found")
         self.assertEqual(1, len(tf_pairs))
-        example_tf, example_target, _ = list(tf_pairs)[0]
+        example_tf, example_target, _ = next(iter(tf_pairs))
         self.assertEqual(p1, example_tf)
         self.assertEqual(r2, example_target)
 
@@ -59,8 +57,8 @@ class TestPyNPA(unittest.TestCase):
         self.assertIsInstance(tf_df, pd.DataFrame)
         self.assertEqual(1, len(ppi_df.index))
         self.assertEqual(1, len(tf_df.index))
-        self.assertEqual(("hgnc:2", "hgnc:3", 1), tuple(list(ppi_df.values)[0]))
-        self.assertEqual(("hgnc:1", "hgnc:2", 1), tuple(list(tf_df.values)[0]))
+        self.assertEqual(("hgnc:2", "hgnc:3", 1), tuple(next(iter(ppi_df.values))))
+        self.assertEqual(("hgnc:1", "hgnc:2", 1), tuple(next(iter(tf_df.values))))
 
     def test_export_df_name(self):
         """Test exporting dataframes with name-based nomenclature."""
@@ -69,8 +67,8 @@ class TestPyNPA(unittest.TestCase):
             nomenclature_method_first_layer="name",
             nomenclature_method_second_layer="name",
         )
-        self.assertEqual(("2", "3", 1), tuple(list(ppi_df.values)[0]))
-        self.assertEqual(("1", "2", 1), tuple(list(tf_df.values)[0]))
+        self.assertEqual(("2", "3", 1), tuple(next(iter(ppi_df.values))))
+        self.assertEqual(("1", "2", 1), tuple(next(iter(tf_df.values))))
 
     def test_export_df_inode(self):
         """Test exporting dataframes with inode-based nomenclature in the second layer."""
@@ -79,5 +77,5 @@ class TestPyNPA(unittest.TestCase):
             nomenclature_method_first_layer="name",
             nomenclature_method_second_layer="inodes",
         )
-        self.assertEqual(("2", "3", 1), tuple(list(ppi_df.values)[0]))
-        self.assertEqual(("*1", "*2", 1), tuple(list(tf_df.values)[0]))
+        self.assertEqual(("2", "3", 1), tuple(next(iter(ppi_df.values))))
+        self.assertEqual(("*1", "*2", 1), tuple(next(iter(tf_df.values))))

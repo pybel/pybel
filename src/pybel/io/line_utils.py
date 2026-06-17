@@ -1,12 +1,11 @@
-# -*- coding: utf-8 -*-
-
 """This module contains helper functions for reading BEL scripts."""
 
 import logging
 import os
 import re
 import time
-from typing import Any, Iterable, List, Mapping, Optional, Tuple
+from collections.abc import Iterable, Mapping
+from typing import Any
 
 from bel_resources import ResourceError, split_file_to_annotations_and_definitions
 from pyparsing import ParseException
@@ -42,17 +41,17 @@ LOG_FMT_PATH = "%s:%d:%d %s %s"
 def parse_lines(
     graph: BELGraph,
     lines: Iterable[str],
-    manager: Optional[Manager] = None,
+    manager: Manager | None = None,
     disallow_nested: bool = False,
     citation_clearing: bool = True,
     use_tqdm: bool = False,
-    tqdm_kwargs: Optional[Mapping[str, Any]] = None,
+    tqdm_kwargs: Mapping[str, Any] | None = None,
     no_identifier_validation: bool = False,
     disallow_unqualified_translocations: bool = False,
     allow_redefinition: bool = False,
     allow_definition_failures: bool = False,
     allow_naked_names: bool = False,
-    required_annotations: Optional[List[str]] = None,
+    required_annotations: list[str] | None = None,
     upgrade_urls: bool = False,
 ) -> None:
     """Parse an iterable of lines into this graph.
@@ -142,7 +141,7 @@ def parse_lines(
 
 def parse_document(
     graph: BELGraph,
-    enumerated_lines: Iterable[Tuple[int, str]],
+    enumerated_lines: Iterable[tuple[int, str]],
     metadata_parser: MetadataParser,
 ) -> None:
     """Parse the lines in the document section of a BEL script."""
@@ -180,11 +179,11 @@ def parse_document(
 
 def parse_definitions(
     graph: BELGraph,
-    enumerated_lines: Iterable[Tuple[int, str]],
+    enumerated_lines: Iterable[tuple[int, str]],
     metadata_parser: MetadataParser,
     allow_failures: bool = False,
     use_tqdm: bool = False,
-    tqdm_kwargs: Optional[Mapping[str, Any]] = None,
+    tqdm_kwargs: Mapping[str, Any] | None = None,
 ) -> None:
     """Parse the lines in the definitions section of a BEL script.
 
@@ -201,7 +200,7 @@ def parse_definitions(
     parse_definitions_start_time = time.time()
 
     if use_tqdm:
-        _tqdm_kwargs = dict(desc="Definitions", leave=False)
+        _tqdm_kwargs = {"desc": "Definitions", "leave": False}
         if tqdm_kwargs:
             _tqdm_kwargs.update(tqdm_kwargs)
         enumerated_lines = tqdm(list(enumerated_lines), **_tqdm_kwargs)
@@ -245,10 +244,10 @@ def parse_definitions(
 
 def parse_statements(
     graph: BELGraph,
-    enumerated_lines: Iterable[Tuple[int, str]],
+    enumerated_lines: Iterable[tuple[int, str]],
     bel_parser: BELParser,
     use_tqdm: bool = True,
-    tqdm_kwargs: Optional[Mapping[str, Any]] = None,
+    tqdm_kwargs: Mapping[str, Any] | None = None,
 ) -> None:
     """Parse a list of statements from a BEL Script.
 

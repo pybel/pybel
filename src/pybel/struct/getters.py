@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
-
 """Misc. getters."""
 
-from typing import Iterable, Tuple
+from collections.abc import Iterable
 
 from .graph import BELGraph
 from ..constants import (
@@ -19,7 +17,7 @@ __all__ = [
 ]
 
 
-def get_tf_pairs(graph: BELGraph, direct_only: bool = False) -> Iterable[Tuple[Protein, Rna, int]]:
+def get_tf_pairs(graph: BELGraph, direct_only: bool = False) -> Iterable[tuple[Protein, Rna, int]]:
     """Iterate pairs of ``p(X)`` and ``r(Y)`` such that ``complex(p(X), g(Y)) -> r(Y)``.
 
     :param graph: A BEL graph

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Modules supporting deletion and degradation of graphs."""
 
 from . import deletion, protein_rna_origins

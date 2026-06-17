@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-
-"""Tests for edge predicates"""
+"""Tests for edge predicates."""
 
 import unittest
 

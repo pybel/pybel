@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Warnings for old TSV conversion module."""
 
 import warnings
@@ -18,4 +16,5 @@ warnings.warn(
 Will be removed in PyBEL v0.16.*
   """,
     DeprecationWarning,
+    stacklevel=2,
 )

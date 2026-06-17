@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Filter functions for edges in BEL graphs.
 
 A edge predicate is a function that takes five arguments: a :class:`BELGraph`, a source node, a target node, a key,
@@ -11,21 +9,21 @@ A general use for an edge predicate is to use the built-in :func:`filter` in cod
 :code:`filter(your_edge_predicate, graph.edges(keys=True, data=True))`
 """
 
-from typing import Iterable
+from collections.abc import Iterable
 
 from .typing import EdgeIterator, EdgePredicate, EdgePredicates
 from ..graph import BELGraph
 from ...dsl import BaseEntity
 
 __all__ = [
-    "invert_edge_predicate",
     "and_edge_predicates",
-    "filter_edges",
     "count_passed_edge_filter",
+    "filter_edges",
+    "invert_edge_predicate",
 ]
 
 
-def invert_edge_predicate(edge_predicate: EdgePredicate) -> EdgePredicate:  # noqa: D202
+def invert_edge_predicate(edge_predicate: EdgePredicate) -> EdgePredicate:
     """Build an edge predicate that is the inverse of the given edge predicate."""
 
     def _inverse_filter(graph, u, v, k):

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import json
 
 from pybel import BELGraph
@@ -17,7 +15,7 @@ yfg3 = hgnc(identifier="3", name="YFG3")
 
 
 def make_increase_edge(u, v):
-    bel = "{} {} {}".format(u.as_bel(), INCREASES, v.as_bel())
+    bel = f"{u.as_bel()} {INCREASES} {v.as_bel()}"
     data = json.dumps({RELATION: INCREASES})
     assert data
     return Edge(source=u, target=v, relation=INCREASES, bel=bel, data=data)
@@ -26,7 +24,7 @@ def make_increase_edge(u, v):
 class TestReconstituteNodeTuples(TemporaryCacheMixin):
     @mock_bel_resources
     def test_simple(self, mock):
-        """This test checks that the network can be added and dropped"""
+        """This test checks that the network can be added and dropped."""
         graph = BELGraph(name="test", version="0.0.0")
         graph.annotation_pattern["Disease"] = ".*"
         graph.annotation_pattern["Cell"] = ".*"
@@ -51,7 +49,7 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
 
 class TestCascades(TemporaryCacheMixin):
     def setUp(self):
-        super(TestCascades, self).setUp()
+        super().setUp()
 
         self.n1 = Node._start_from_base_entity(yfg1)
         self.n2 = Node._start_from_base_entity(yfg2)
@@ -70,7 +68,7 @@ class TestCascades(TemporaryCacheMixin):
         self.assertEqual(2, self.manager.count_networks())
 
     def test_drop_node(self):
-        """Makes sure that when a node gets dropped, its in-edges AND out-edges also do"""
+        """Makes sure that when a node gets dropped, its in-edges AND out-edges also do."""
         self.manager.session.delete(self.n2)
         self.manager.session.commit()
 
@@ -81,7 +79,7 @@ class TestCascades(TemporaryCacheMixin):
         self.assertEqual(0, self.g2.edges.count())
 
     def test_drop_edge(self):
-        """When an edge gets dropped, make sure the network doesn't have as many edges, but nodes get to stay"""
+        """When an edge gets dropped, make sure the network doesn't have as many edges, but nodes get to stay."""
         self.manager.session.delete(self.e1)
         self.manager.session.commit()
 
@@ -98,7 +96,7 @@ class TestCascades(TemporaryCacheMixin):
         self.assertIn(self.e3.id, edges)
 
     def test_drop_network_1(self):
-        """When a network gets dropped, drop all of the edges if they don't appear in other networks"""
+        """When a network gets dropped, drop all of the edges if they don't appear in other networks."""
         self.manager.drop_network(self.g1)
 
         self.assertEqual(3, self.manager.count_nodes())
@@ -107,7 +105,7 @@ class TestCascades(TemporaryCacheMixin):
         self.assertEqual(1, self.g2.edges.count())
 
     def test_drop_network_2(self):
-        """When a network gets dropped, drop all of the edges if they don't appear in other networks"""
+        """When a network gets dropped, drop all of the edges if they don't appear in other networks."""
         self.manager.drop_network(self.g2)
 
         self.assertEqual(3, self.manager.count_nodes())
@@ -116,17 +114,17 @@ class TestCascades(TemporaryCacheMixin):
         self.assertEqual(3, self.g1.edges.count())
 
     def test_drop_all_networks(self):
-        """When all networks are dropped, make sure all the edges and network_edge mappings are gone too"""
+        """When all networks are dropped, make sure all the edges and network_edge mappings are gone too."""
         self.manager.drop_networks()
 
         self.assertEqual(0, self.manager.count_edges())
         self.assertEqual(0, self.manager.count_networks())
 
     def test_drop_modification(self):
-        """Don't let this happen"""
+        """Don't let this happen."""
 
     def test_drop_property(self):
-        """Don't let this happen"""
+        """Don't let this happen."""
 
     def test_drop_namespace(self):
         keyword, url = n(), n()
@@ -146,7 +144,7 @@ class TestCascades(TemporaryCacheMixin):
         self.assertEqual(
             n_entries,
             self.manager.count_namespace_entries(),
-            msg="Should have {} entries".format(n_entries),
+            msg=f"Should have {n_entries} entries",
         )
 
         self.manager.drop_namespace_by_url(url)

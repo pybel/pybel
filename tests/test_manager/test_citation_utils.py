@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Test the manager's citation utilities.
 
 The test data can be created with the following script:
@@ -9,10 +7,10 @@ The test data can be created with the following script:
     import json
     from pybel.manager.citation_utils import get_pubmed_citation_response
 
-    DATA = {'29324713', '29359844', '9611787', '25818332', '26438529', '26649137', '27003210'}
+    DATA = {"29324713", "29359844", "9611787", "25818332", "26438529", "26649137", "27003210"}
 
     rv = get_pubmed_citation_response(DATA)
-    with open('/Users/cthoyt/dev/bel/pybel/tests/test_manager/citation_data.json', 'w') as file:
+    with open("/Users/cthoyt/dev/bel/pybel/tests/test_manager/citation_data.json", "w") as file:
         json.dump(rv, file, indent=2)
 
 """
@@ -21,7 +19,8 @@ import json
 import os
 import time
 import unittest
-from typing import Any, Iterable, Mapping
+from collections.abc import Iterable, Mapping
+from typing import Any
 from unittest import mock
 
 from pybel import BELGraph
@@ -175,7 +174,7 @@ class TestPubmed(TemporaryCacheMixin):
 
         enrich_pubmed_citations(manager=self.manager, graph=self.graph)
 
-        _, _, d = list(self.graph.edges(data=True))[0]
+        _, _, d = next(iter(self.graph.edges(data=True)))
         citation_dict = d[CITATION]
         self.assertIsInstance(citation_dict, CitationDict)
 
@@ -193,7 +192,7 @@ class TestPubmed(TemporaryCacheMixin):
     def test_enrich_pubmed_graph(self, *_):
         enrich_pubmed_citations(manager=self.manager, graph=self.graph)
 
-        _, _, d = list(self.graph.edges(data=True))[0]
+        _, _, d = next(iter(self.graph.edges(data=True)))
         citation_dict = d[CITATION]
         self.assertIsInstance(citation_dict, CitationDict)
 
@@ -214,7 +213,7 @@ class TestPubmed(TemporaryCacheMixin):
         """Test when two authors, Gomez C and Goméz C are both checked that they are not counted as duplicates."""
         g1 = "Gomez C"
         g2 = "Gómez C"
-        pmid_1, pmid_2 = pmids = [
+        pmid_1, _pmid_2 = pmids = [
             "29324713",
             "29359844",
         ]
@@ -250,7 +249,7 @@ class TestPMC(TemporaryCacheMixin):
     def test_enrich_pmc(self, *_):
         errors = _enrich_citations(manager=self.manager, graph=self.graph, prefix="pmc")
         self.assertEqual(0, len(errors), msg=f"Got errors: {errors}")
-        _, _, d = list(self.graph.edges(data=True))[0]
+        _, _, d = next(iter(self.graph.edges(data=True)))
         citation_dict = d[CITATION]
         self.assertIsInstance(citation_dict, CitationDict)
         self.assertEqual("pmc", citation_dict.namespace)

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Constants for PyBEL.
 
 This module maintains the strings used throughout the PyBEL codebase to promote consistency.

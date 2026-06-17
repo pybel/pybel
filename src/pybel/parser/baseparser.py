@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-
 """The base parser class shared by several BEL parsers."""
 
 import logging
 import time
-from typing import Iterable, List
+from collections.abc import Iterable
 
 from pyparsing import ParserElement, ParseResults
 
@@ -13,7 +11,7 @@ __all__ = ["BaseParser"]
 logger = logging.getLogger(__name__)
 
 
-class BaseParser(object):
+class BaseParser:
     """This abstract class represents a language backed by a PyParsing statement.
 
     Multiple parsers can be easily chained together when they are all inheriting from this base class.
@@ -33,11 +31,11 @@ class BaseParser(object):
         if streamline:
             self.streamline()
 
-    def parse_lines(self, lines: Iterable[str]) -> List[ParseResults]:
+    def parse_lines(self, lines: Iterable[str]) -> list[ParseResults]:
         """Parse multiple lines in succession."""
         return [self.parse_string(line, line_number) for line_number, line in enumerate(lines)]
 
-    def parse_string(self, line: str, line_number: int = 0) -> ParseResults:  # noqa: N802
+    def parse_string(self, line: str, line_number: int = 0) -> ParseResults:
         """Parse a string with the language represented by this parser.
 
         :param line: A string representing an instance of this parser's language

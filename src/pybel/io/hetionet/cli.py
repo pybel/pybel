@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 """Make hetionet exports."""
 
 import os
@@ -39,22 +37,22 @@ def main(directory: str):
         graph = get_hetionet()
         to_nodelink_gz(graph, path)
     else:
-        click.echo("loading pickle from {}".format(path))
+        click.echo(f"loading pickle from {path}")
         graph = from_nodelink_gz(path)
 
     output_bel_gz_path = os.path.join(directory, "hetionet.bel.gz")
     if not os.path.exists(output_bel_gz_path):
-        click.echo("outputting whole hetionet as BEL GZ to {}".format(output_bel_gz_path))
+        click.echo(f"outputting whole hetionet as BEL GZ to {output_bel_gz_path}")
         to_bel_script_gz(graph, output_bel_gz_path, use_identifiers=True)
 
     output_graphdati_jsonl_gz_path = os.path.join(directory, "hetionet.bel.graphdati.jsonl.gz")
     if not os.path.exists(output_graphdati_jsonl_gz_path):
-        click.echo("outputting whole hetionet as BEL GraphDati JSONL GZ to {}".format(output_graphdati_jsonl_gz_path))
+        click.echo(f"outputting whole hetionet as BEL GraphDati JSONL GZ to {output_graphdati_jsonl_gz_path}")
         to_graphdati_jsonl_gz(graph, output_graphdati_jsonl_gz_path, use_identifiers=True)
 
     output_graphdati_gz_path = os.path.join(directory, "hetionet.bel.graphdati.json.gz")
     if not os.path.exists(output_graphdati_gz_path):
-        click.echo("outputting whole hetionet as BEL GraphDati JSON GZ to {}".format(output_graphdati_gz_path))
+        click.echo(f"outputting whole hetionet as BEL GraphDati JSON GZ to {output_graphdati_gz_path}")
         to_graphdati_gz(graph, output_graphdati_gz_path, use_identifiers=True)
 
     summary_tsv_path = os.path.join(directory, "hetionet_summary.tsv")
@@ -85,11 +83,11 @@ def main(directory: str):
         graph.remove_nodes_from(list(nx.isolates(graph)))
 
         sample_bel_path = os.path.join(directory, "hetionet_sample.bel")
-        click.echo("outputting sample hetionet in BEL to {}".format(sample_bel_path))
+        click.echo(f"outputting sample hetionet in BEL to {sample_bel_path}")
         to_bel_script(graph, sample_bel_path, use_identifiers=True)
 
         sample_graphdati_path = os.path.join(directory, "hetionet_sample.bel.graphdati.json")
-        click.echo("outputting sample hetionet in BEL to {}".format(sample_bel_path))
+        click.echo(f"outputting sample hetionet in BEL to {sample_bel_path}")
         to_graphdati_file(graph, sample_graphdati_path, use_identifiers=True, indent=2)
 
 

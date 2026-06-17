@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
-
 """The query manager for the database."""
 
 import datetime
-from typing import Iterable, List, Optional, Union
+from collections.abc import Iterable
 
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import aliased
@@ -42,11 +40,11 @@ class QueryManager(LookupManager):
 
     def query_nodes(
         self,
-        bel: Optional[str] = None,
-        type: Optional[str] = None,
-        namespace: Optional[str] = None,
-        name: Optional[str] = None,
-    ) -> List[Node]:
+        bel: str | None = None,
+        type: str | None = None,
+        namespace: str | None = None,
+        name: str | None = None,
+    ) -> list[Node]:
         """Query nodes in the database.
 
         :param bel: BEL term that describes the biological entity. e.g. ``p(HGNC:APP)``
@@ -77,29 +75,29 @@ class QueryManager(LookupManager):
         """Count the number of edges in the database."""
         return self._count_model(Edge)
 
-    def get_edges_with_citation(self, citation: Citation) -> List[Edge]:
+    def get_edges_with_citation(self, citation: Citation) -> list[Edge]:
         """Get the edges with the given citation."""
         return self.session.query(Edge).join(Evidence).filter(Evidence.citation == citation)
 
-    def get_edges_with_citations(self, citations: Iterable[Citation]) -> List[Edge]:
+    def get_edges_with_citations(self, citations: Iterable[Citation]) -> list[Edge]:
         """Get edges with one of the given citations."""
         return self.session.query(Edge).join(Evidence).filter(Evidence.citation.in_(citations)).all()
 
-    def search_edges_with_evidence(self, evidence: str) -> List[Edge]:
+    def search_edges_with_evidence(self, evidence: str) -> list[Edge]:
         """Search edges with the given evidence.
 
         :param evidence: A string to search evidences. Can use wildcard percent symbol (%).
         """
         return self.session.query(Edge).join(Evidence).filter(Evidence.text.like(evidence)).all()
 
-    def search_edges_with_bel(self, bel: str) -> List[Edge]:
+    def search_edges_with_bel(self, bel: str) -> list[Edge]:
         """Search edges with given BEL.
 
         :param bel: A BEL string to use as a search
         """
         return self.session.query(Edge).filter(Edge.bel.like(bel))
 
-    def get_edges_with_annotation(self, annotation: str, value: str) -> List[Edge]:
+    def get_edges_with_annotation(self, annotation: str, value: str) -> list[Edge]:
         """Search edges with the given annotation/value pair."""
         query = self.session.query(Edge).join(NamespaceEntry, Edge.annotations).join(Namespace)
         query = query.filter(Namespace.keyword == annotation).filter(NamespaceEntry.name == value)
@@ -112,12 +110,12 @@ class QueryManager(LookupManager):
 
     def query_edges(
         self,
-        bel: Optional[str] = None,
-        source_function: Optional[str] = None,
-        source: Union[None, str, Node] = None,
-        target_function: Optional[str] = None,
-        target: Union[None, str, Node] = None,
-        relation: Optional[str] = None,
+        bel: str | None = None,
+        source_function: str | None = None,
+        source: None | str | Node = None,
+        target_function: str | None = None,
+        target: None | str | Node = None,
+        relation: str | None = None,
     ):
         """Return a query over the edges in the database.
 
@@ -160,7 +158,7 @@ class QueryManager(LookupManager):
             elif isinstance(source, Node):
                 query = query.filter(Edge.source == source)
             else:
-                raise TypeError("Invalid type of {}: {}".format(source, source.__class__.__name__))
+                raise TypeError(f"Invalid type of {source}: {source.__class__.__name__}")
 
         if target:
             if isinstance(target, str):
@@ -170,19 +168,19 @@ class QueryManager(LookupManager):
             elif isinstance(target, Node):
                 query = query.filter(Edge.target == target)
             else:
-                raise TypeError("Invalid type of {}: {}".format(target, target.__class__.__name__))
+                raise TypeError(f"Invalid type of {target}: {target.__class__.__name__}")
 
         return query
 
     def query_citations(
         self,
-        db: Optional[str] = None,
-        db_id: Optional[str] = None,
-        name: Optional[str] = None,
-        author: Union[None, str, List[str]] = None,
-        date: Union[None, str, datetime.date] = None,
-        evidence_text: Optional[str] = None,
-    ) -> List[Citation]:
+        db: str | None = None,
+        db_id: str | None = None,
+        name: str | None = None,
+        author: None | str | list[str] = None,
+        date: None | str | datetime.date = None,
+        evidence_text: str | None = None,
+    ) -> list[Citation]:
         """Query citations in the database.
 
         :param db: Type of the citation. e.g. PubMed
@@ -224,13 +222,13 @@ class QueryManager(LookupManager):
 
         return query.all()
 
-    def query_edges_by_pubmed_identifiers(self, pubmed_identifiers: List[str]) -> List[Edge]:
+    def query_edges_by_pubmed_identifiers(self, pubmed_identifiers: list[str]) -> list[Edge]:
         """Get all edges annotated to the documents identified by the given PubMed identifiers."""
         fi = and_(Citation.db == CITATION_TYPE_PUBMED, Citation.db_id.in_(pubmed_identifiers))
         return self.session.query(Edge).join(Evidence).join(Citation).filter(fi).all()
 
     @staticmethod
-    def _edge_both_nodes(nodes: List[Node]):
+    def _edge_both_nodes(nodes: list[Node]):
         """Get edges where both the source and target are in the list of nodes."""
         node_ids = [node.id for node in nodes]
 
@@ -239,7 +237,7 @@ class QueryManager(LookupManager):
             Edge.target_id.in_(node_ids),
         )
 
-    def query_induction(self, nodes: List[Node]) -> List[Edge]:
+    def query_induction(self, nodes: list[Node]) -> list[Edge]:
         """Get all edges between any of the given nodes (minimum length of 2)."""
         if len(nodes) < 2:
             raise ValueError("not enough nodes given to induce over")
@@ -247,7 +245,7 @@ class QueryManager(LookupManager):
         return self.session.query(Edge).filter(self._edge_both_nodes(nodes)).all()
 
     @staticmethod
-    def _edge_one_node(nodes: List[Node]):
+    def _edge_one_node(nodes: list[Node]):
         """Get edges where either the source or target are in the list of nodes.
 
         Note: doing this with the nodes directly is not yet supported by SQLAlchemy
@@ -266,6 +264,6 @@ class QueryManager(LookupManager):
             Edge.target_id.in_(node_ids),
         )
 
-    def query_neighbors(self, nodes: List[Node]) -> List[Edge]:
+    def query_neighbors(self, nodes: list[Node]) -> list[Edge]:
         """Get all edges incident to any of the given nodes."""
         return self.session.query(Edge).filter(self._edge_one_node(nodes)).all()
