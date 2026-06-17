@@ -16,7 +16,7 @@ from pyparsing import (
     ZeroOrMore,
     alphanums,
     dblQuotedString,
-    delimited_list,
+    DelimitedList,
     one_of,
     removeQuotes,
     replace_with,
@@ -52,8 +52,8 @@ ns = Word(alphanums + "_-.")
 identifier = Word(alphanums + "_")
 quote = dblQuotedString().set_parse_action(removeQuotes)
 qid = quote | identifier
-delimited_quoted_list = And([Suppress("{"), delimited_list(quote), Suppress("}")])
-delimited_unquoted_list = And([Suppress("{"), delimited_list(identifier), Suppress("}")])
+delimited_quoted_list = And([Suppress("{"), DelimitedList(quote), Suppress("}")])
+delimited_unquoted_list = And([Suppress("{"), DelimitedList(identifier), Suppress("}")])
 
 
 def nest(*content):

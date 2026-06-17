@@ -18,7 +18,7 @@ from pyparsing import (
     ParseResults,
     StringEnd,
     Suppress,
-    delimited_list,
+    DelimitedList,
     one_of,
     replace_with,
 )
@@ -412,7 +412,7 @@ class BELParser(BaseParser):
         self.general_abundance = general_abundance_tags + nest(concept + opt_location)
 
         self.gene_modified = concept + pyparsing.Optional(
-            WCW + delimited_list(Group(variant | gsub | self.gmod))(VARIANTS),
+            WCW + DelimitedList(Group(variant | gsub | self.gmod))(VARIANTS),
         )
 
         self.gene_fusion = Group(self.fusion)(FUSION)
@@ -433,7 +433,7 @@ class BELParser(BaseParser):
         self.mirna_modified = (
             concept
             + pyparsing.Optional(
-                WCW + delimited_list(Group(variant))(VARIANTS),
+                WCW + DelimitedList(Group(variant))(VARIANTS),
             )
             + opt_location
         )
@@ -443,7 +443,7 @@ class BELParser(BaseParser):
 
         self.protein_modified = concept + pyparsing.Optional(
             WCW
-            + delimited_list(Group(MatchFirst([self.pmod, variant, fragment, psub, trunc])))(
+            + DelimitedList(Group(MatchFirst([self.pmod, variant, fragment, psub, trunc])))(
                 VARIANTS,
             ),
         )
@@ -463,7 +463,7 @@ class BELParser(BaseParser):
             + opt_location,
         )
 
-        self.rna_modified = concept + pyparsing.Optional(WCW + delimited_list(Group(variant))(VARIANTS))
+        self.rna_modified = concept + pyparsing.Optional(WCW + DelimitedList(Group(variant))(VARIANTS))
 
         self.rna_fusion = Group(self.fusion)(FUSION)
         self.rna_fusion_legacy = Group(get_legacy_fusion_langauge(concept, "r"))(FUSION)
@@ -497,7 +497,7 @@ class BELParser(BaseParser):
         self.complex_singleton = complex_tag + nest(concept + opt_location)
 
         self.complex_list = complex_tag + nest(
-            delimited_list(Group(self.single_abundance | self.complex_singleton))(MEMBERS) + opt_location,
+            DelimitedList(Group(self.single_abundance | self.complex_singleton))(MEMBERS) + opt_location,
         )
 
         self.complex_abundances = self.complex_list | self.complex_singleton
@@ -508,7 +508,7 @@ class BELParser(BaseParser):
 
         #: `2.1.3 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XcompositeA>`_
         self.composite_abundance = composite_abundance_tag + nest(
-            delimited_list(Group(self.simple_abundance))(MEMBERS) + opt_location,
+            DelimitedList(Group(self.simple_abundance))(MEMBERS) + opt_location,
         )
 
         self.abundance = self.simple_abundance | self.composite_abundance
@@ -587,8 +587,8 @@ class BELParser(BaseParser):
         self.degradation = degradation_tags + nest(self.simple_abundance)
 
         #: `2.5.3 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_reaction_rxn>`_
-        self.reactants = Suppress(REACTANTS) + nest(delimited_list(Group(self.simple_abundance)))
-        self.products = Suppress(PRODUCTS) + nest(delimited_list(Group(self.simple_abundance)))
+        self.reactants = Suppress(REACTANTS) + nest(DelimitedList(Group(self.simple_abundance)))
+        self.products = Suppress(PRODUCTS) + nest(DelimitedList(Group(self.simple_abundance)))
 
         self.reaction = reaction_tags + nest(Group(self.reactants)(REACTANTS), Group(self.products)(PRODUCTS))
 
@@ -653,7 +653,7 @@ class BELParser(BaseParser):
         self.has_member = triple(self.abundance, has_member_tag, self.abundance)
 
         #: `3.4.2 <http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_hasmembers>`_
-        self.abundance_list = Suppress("list") + nest(delimited_list(Group(self.abundance)))
+        self.abundance_list = Suppress("list") + nest(DelimitedList(Group(self.abundance)))
 
         self.has_members = triple(self.abundance, has_members_tag, self.abundance_list)
         self.has_members.set_parse_action(self.handle_has_members)
