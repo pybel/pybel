@@ -48,7 +48,7 @@ class TestSpia(unittest.TestCase):
         sub = protein(namespace="HGNC", name="A", identifier="1")
         obj = protein(namespace="HGNC", name="B", identifier="2", variants=[pmod("Ub")])
 
-        index = {"A", "B"}
+        index = ["A", "B"]
 
         test_dict = {}
 
@@ -71,7 +71,7 @@ class TestSpia(unittest.TestCase):
         sub = protein(namespace="HGNC", name="A", identifier="1")
         obj = protein(namespace="HGNC", name="B", identifier="2", variants=[pmod("Ub")])
 
-        index = {"A", "B"}
+        index = ["A", "B"]
 
         test_dict = {}
 
@@ -91,7 +91,7 @@ class TestSpia(unittest.TestCase):
         sub = protein(namespace="HGNC", name="A", identifier="1")
         obj = protein(namespace="HGNC", name="B", identifier="2", variants=[pmod("Ph")])
 
-        index = {"A", "B"}
+        index = ["A", "B"]
 
         test_dict = {}
 
@@ -112,7 +112,7 @@ class TestSpia(unittest.TestCase):
         sub = protein(namespace="HGNC", name="A", identifier="1")
         obj = protein(namespace="HGNC", name="B", identifier="2", variants=[pmod("Ph")])
 
-        index = {"A", "B"}
+        index = ["A", "B"]
 
         test_dict = {}
 
@@ -132,7 +132,7 @@ class TestSpia(unittest.TestCase):
         sub = protein(namespace="HGNC", name="A", identifier="1")
         obj = rna(namespace="HGNC", name="B", identifier="2")
 
-        index = {"A", "B"}
+        index = ["A", "B"]
 
         test_dict = {}
 
@@ -152,7 +152,7 @@ class TestSpia(unittest.TestCase):
         sub = protein(namespace="HGNC", name="A", identifier="1")
         obj = rna(namespace="HGNC", name="B", identifier="2")
 
-        index = {"A", "B"}
+        index = ["A", "B"]
 
         test_dict = {}
 
@@ -172,7 +172,7 @@ class TestSpia(unittest.TestCase):
         sub = protein(namespace="HGNC", name="A", identifier="1")
         obj = protein(namespace="HGNC", name="B", identifier="2")
 
-        index = {"A", "B"}
+        index = ["A", "B"]
 
         test_dict = {}
 
@@ -192,7 +192,7 @@ class TestSpia(unittest.TestCase):
         sub = protein(namespace="HGNC", name="A", identifier="1")
         obj = protein(namespace="HGNC", name="B", identifier="2")
 
-        index = {"A", "B"}
+        index = ["A", "B"]
 
         test_dict = {}
 
@@ -212,7 +212,7 @@ class TestSpia(unittest.TestCase):
         sub = protein(namespace="HGNC", name="A", identifier="1")
         obj = protein(namespace="HGNC", name="B", identifier="2")
 
-        index = {"A", "B"}
+        index = ["A", "B"]
 
         test_dict = {}
 
@@ -237,7 +237,7 @@ class TestSpia(unittest.TestCase):
             variants=[pmod("Ub"), pmod("Ph")],
         )
 
-        index = {"A", "B"}
+        index = ["A", "B"]
 
         test_dict = {}
 
