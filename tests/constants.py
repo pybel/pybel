@@ -17,7 +17,6 @@ from pybel.constants import (
     DECREASES,
     DIRECTLY_DECREASES,
     EVIDENCE,
-    IDENTIFIER,
     INCREASES,
     LINE,
     METADATA_AUTHORS,
@@ -25,7 +24,6 @@ from pybel.constants import (
     METADATA_LICENSES,
     METADATA_NAME,
     METADATA_VERSION,
-    NAMESPACE,
     PART_OF,
     RELATION,
 )
@@ -36,7 +34,6 @@ from pybel.exceptions import (
     BELSyntaxError,
     CitationTooShortException,
     IllegalAnnotationValueWarning,
-    InvalidCitationLengthException,
     InvalidCitationType,
     InvalidFunctionSemantic,
     InvalidPubMedIdentifierWarning,

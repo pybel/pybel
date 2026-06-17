@@ -2,7 +2,6 @@
 
 """Internal DSL functions for edges."""
 
-import warnings
 from typing import Dict, Optional, Union
 
 from ..constants import (
@@ -15,8 +14,6 @@ from ..constants import (
     INTRACELLULAR,
     LOCATION,
     MODIFIER,
-    NAME,
-    NAMESPACE,
     TO_LOC,
     TRANSLOCATION,
 )

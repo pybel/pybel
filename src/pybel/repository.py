@@ -375,7 +375,7 @@ def _write_caches(bel_repository: BELRepository, root: str, file_name: str):
 
     if summary:
         s += click.style(
-            f' ({summary["Number of Nodes"]} nodes, {summary["Number of Edges"]} edges)',
+            f" ({summary['Number of Nodes']} nodes, {summary['Number of Edges']} edges)",
             fg="blue",
         )
 
@@ -432,7 +432,7 @@ def append_click_group(group: click.Group) -> None:  # noqa: D202, C901
             task_id = res_json.get("task_id")
             if task_id is not None:
                 it.write(f"task:{task_id} - {name}")
-                it.write(f'see: {host.rstrip("/")}/api/task/{task_id}')
+                it.write(f"see: {host.rstrip('/')}/api/task/{task_id}")
                 time.sleep(sleep)
             else:
                 it.write(f"problem with {name}: {res_json}")
@@ -451,7 +451,7 @@ def append_click_group(group: click.Group) -> None:  # noqa: D202, C901
         task_id = res_json.get("task_id")
         if task_id is not None:
             click.echo(f"task:{task_id} - {graph}")
-            click.echo(f'see: {host.rstrip("/")}/api/task/{task_id}')
+            click.echo(f"see: {host.rstrip('/')}/api/task/{task_id}")
         else:
             click.echo(f"problem with {graph.name}: {res_json}")
 

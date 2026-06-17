@@ -426,7 +426,7 @@ def enrich_citation_model_from_pmc(manager: Manager, citation: models.Citation, 
 
     for author in csl.get("author", []):
         try:
-            author_name = f'{author["given"]} {author["family"]}'
+            author_name = f"{author['given']} {author['family']}"
         except KeyError:
             print(f"problem with author in pmc:{citation.db_id}", author)
             continue

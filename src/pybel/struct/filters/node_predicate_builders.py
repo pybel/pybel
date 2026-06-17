@@ -4,7 +4,7 @@
 
 from typing import Any, Callable, Iterable, List, Union
 
-from .node_predicates import concatenate_node_predicates, invert_node_predicate
+from .node_predicates import invert_node_predicate
 from .typing import NodePredicate
 from ..graph import BELGraph
 from ...constants import CONCEPT, NAME

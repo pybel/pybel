@@ -400,7 +400,7 @@ pmod_mappings = {
         ],
     },
     "Hy": {
-        "synonyms": ["Hy" "hydroxylation"],
+        "synonyms": ["Hyhydroxylation"],
         "xrefs": [
             Entity(namespace="go", identifier="0018126", name="protein hydroxylation"),
             Entity(namespace="mod", identifier="00677", name="hydroxylated residue"),

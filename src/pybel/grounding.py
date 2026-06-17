@@ -111,7 +111,13 @@ FAMPLEX_EQUIVALENCES_URL = "https://github.com/sorgerlab/famplex/raw/master/equi
 
 def get_remapping() -> Mapping[Tuple[str, str], Tuple[str, str, str]]:
     """Get a mapping from (prefix, name) pairs to FamPlex (prefix, identifier, name) triples."""
-    df = ensure_df("fplx", url=FAMPLEX_EQUIVALENCES_URL, header=None, names=["prefix", "name", "fplx"], sep=",")
+    df = ensure_df(
+        "fplx",
+        url=FAMPLEX_EQUIVALENCES_URL,
+        header=None,
+        names=["prefix", "name", "fplx"],
+        sep=",",
+    )
     return {("bel", name): ("fplx", fplx, fplx) for prefix, name, fplx in df.values if prefix.lower() == "bel"}
 
 
