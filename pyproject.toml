@@ -122,7 +122,6 @@ indra = ["indra"]
 
 # see https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#dependencies-optional-dependencies
 [project.optional-dependencies]
-
 jupyter = ["jinja2", "ipython"]
 neo4j = ["py2neo"]
 grounding = ["pyobo", "protmapper"]
