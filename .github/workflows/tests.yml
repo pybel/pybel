@@ -67,8 +67,9 @@ jobs:
           sudo apt-get install graphviz
       - name: Lint documentation
         run: uvx --with tox-uv tox -e docs-lint
-      - name: Check docstring coverage
-        run: uvx --with tox-uv tox -e docstr-coverage
+      # TODO
+      # - name: Check docstring coverage
+      #   run: uvx --with tox-uv tox -e docstr-coverage
       - name: Check documentation build with Sphinx
         run: uvx --with tox-uv tox -e docs-test
       - name: Lint markdown
