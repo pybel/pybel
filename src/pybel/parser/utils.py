@@ -8,6 +8,7 @@ from typing import Any, List, Optional
 
 from pyparsing import (
     And,
+    DelimitedList,
     Group,
     ParserElement,
     Suppress,
@@ -16,7 +17,6 @@ from pyparsing import (
     ZeroOrMore,
     alphanums,
     dblQuotedString,
-    DelimitedList,
     one_of,
     removeQuotes,
     replace_with,

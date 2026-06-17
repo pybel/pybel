@@ -12,13 +12,13 @@ from typing import Any, Dict, List, Mapping, Optional, Pattern, Set, Union
 
 import pyparsing
 from pyparsing import (
+    DelimitedList,
     Group,
     Keyword,
     MatchFirst,
     ParseResults,
     StringEnd,
     Suppress,
-    DelimitedList,
     one_of,
     replace_with,
 )

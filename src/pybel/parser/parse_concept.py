@@ -82,11 +82,11 @@ class ConceptParser(BaseParser):
 
         self.identifier_bare = (ns | quote)(NAME)
         self.identifier_bare.set_parse_action(
-            self.handle_namespace_default
-            if self.default_namespace
-            else self.handle_namespace_lenient
-            if self.allow_naked_names
-            else self.handle_namespace_invalid,
+            (
+                self.handle_namespace_default
+                if self.default_namespace
+                else self.handle_namespace_lenient if self.allow_naked_names else self.handle_namespace_invalid
+            ),
         )
 
         super().__init__(

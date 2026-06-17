@@ -1216,8 +1216,7 @@ class SummarizeDispatch(Dispatch):
     def _repr_html_(self) -> str:
         from .summary import supersummary as ss
 
-        return dedent(
-            f"""\
+        return dedent(f"""\
             <h2>Metadata</h2>
             {tabulate(self._metadata_list(), tablefmt='html')}
             <h2>Statistics</h2>
@@ -1228,8 +1227,7 @@ class SummarizeDispatch(Dispatch):
             {ss.namespaces_str(self.graph, examples=True, add_count=False, tablefmt='html')}
             <h2>Edges</h2>
             {ss.edges_str(self.graph, examples=True, add_count=False, tablefmt='html')}
-        """
-        )
+        """)
 
     def statistics(self, file: Optional[TextIO] = None):
         """Print summary statistics on the graph."""
