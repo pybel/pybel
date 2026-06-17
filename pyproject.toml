@@ -72,7 +72,6 @@ dependencies = [
     "ratelimit",
     "pystow>=0.1.2",
     "psycopg2-binary",
-    "setuptools<81",
 ]
 
 # see https://peps.python.org/pep-0735/ and https://docs.astral.sh/uv/concepts/dependencies/#dependency-groups
