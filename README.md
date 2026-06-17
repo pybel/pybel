@@ -32,36 +32,35 @@
 Parsing, validation, compilation, and data exchange of Biological Expression
 Language (BEL).
 
-`PyBEL <http://pybel.readthedocs.io>`_ is a pure Python package for parsing and handling biological networks encoded in
-the `Biological Expression Language <https://biological-expression-language.github.io/>`_
+[PyBEL](http://pybel.readthedocs.io) is a pure Python package for parsing and handling biological networks encoded in
+the [Biological Expression Language](https://biological-expression-language.github.io/)
 (BEL).
 
-It facilitates data interchange between data formats like `NetworkX <http://networkx.github.io/>`_,
-Node-Link JSON, `JGIF <https://github.com/jsongraph/json-graph-specification>`_, CSV, SIF,
-`Cytoscape <http://www.cytoscape.org/>`_, `CX <http://www.home.ndexbio.org/data-model/>`_,
-`INDRA <https://github.com/sorgerlab/indra>`_, and `GraphDati <https://github.com/graphdati/schemas>`_; database systems
-like SQL and `Neo4J <https://neo4j.com>`_; and web services like `NDEx <https://github.com/pybel/pybel2cx>`_,
-`BioDati Studio <https://biodati.com/>`_, and `BEL Commons <https://bel-commons-dev.scai.fraunhofer.de>`_. It also
-provides exports for analytical tools like `HiPathia <http://hipathia.babelomics.org/>`_,
-`Drug2ways <https://github.com/drug2ways/>`_ and `SPIA <https://bioconductor.org/packages/release/bioc/html/SPIA.html>`_;
-machine learning tools like `PyKEEN <https://github.com/smartdataanalytics/biokeen>`_ and
-`OpenBioLink <https://github.com/OpenBioLink/OpenBioLink#biological-expression-language-bel-writer>`_; and others.
+It facilitates data interchange between data formats like [NetworkX](http://networkx.github.io),
+Node-Link JSON, [JGIF](https://github.com/jsongraph/json-graph-specification), CSV, SIF,
+[Cytoscape](http://www.cytoscape.org), [CX](http://www.home.ndexbio.org/data-model/),
+[INDRA](https://github.com/sorgerlab/indra), and [GraphDati](https://github.com/graphdati/schemas); database systems
+like SQL and [Neo4J](https://neo4j.com); and web services like [NDEx](https://github.com/pybel/pybel2cx),
+[BioDati Studio](https://biodati.com) (shut down), and [BEL Commons](https://bel-commons-dev.scai.fraunhofer.de) (shut down). It also
+provides exports for analytical tools like [HiPathia](http://hipathia.babelomics.org),
+[Drug2ways](https://github.com/drug2ways) and [SPIA](https://bioconductor.org/packages/release/bioc/html/SPIA.html);
+machine learning tools like [PyKEEN](https://github.com/pykeen/pykeen) and
+[OpenBioLink](https://github.com/OpenBioLink/OpenBioLink#biological-expression-language-bel-writer); and others.
 
-Its companion package, `PyBEL Tools <http://pybel-tools.readthedocs.io/>`_, contains a
+Its companion package, [PyBEL Tools](http://pybel-tools.readthedocs.io), contains a
 suite of functions and pipelines for analyzing the resulting biological networks.
 
 We realize that we have a name conflict with the python wrapper for the cheminformatics package, OpenBabel. If you're
-looking for their python wrapper, see `here <https://github.com/openbabel/openbabel/tree/master/scripts/python>`_.
+looking for their python wrapper, see [here](https://github.com/openbabel/openbabel/tree/master/scripts/python).
 
 ## 💪 Getting Started
 
-More examples can be found in the `documentation <http://pybel.readthedocs.io>`_ and in the
-`PyBEL Notebooks <https://github.com/pybel/pybel-notebooks>`_ repository.
+More examples can be found in the [documentation](http://pybel.readthedocs.io) and in the
+[PyBEL Notebooks](https://github.com/pybel/pybel-notebooks) repository.
 
 ### Compiling and Saving a BEL Graph
 
-This example illustrates how a BEL document from the `Human Brain Pharmacome
-<https://raw.githubusercontent.com/pharmacome/conib>`_ project can be loaded and compiled directly from GitHub.
+This example illustrates how a BEL document from the [Human Brain Pharmacome](https://raw.githubusercontent.com/pharmacome/conib) project can be loaded and compiled directly from GitHub.
 
 ```python
 import pybel
@@ -71,13 +70,13 @@ graph = pybel.from_bel_script_url(url)
 
 Other functions for loading BEL content from many formats can be found in the
 [I/O documentation](https://pybel.readthedocs.io/en/latest/reference/io.html).
-Note that PyBEL can handle `BEL 1.0 <https://github.com/OpenBEL/language/raw/master/docs/version_1.0/bel_specification_version_1.0.pdf>`_
-and `BEL 2.0+ <https://github.com/OpenBEL/language/raw/master/docs/version_2.0/bel_specification_version_2.0.pdf>`_
+Note that PyBEL can handle [BEL 1.0](https://github.com/OpenBEL/language/raw/master/docs/version_1.0/bel_specification_version_1.0.pdf)
+and [BEL 2.0+](https://github.com/OpenBEL/language/raw/master/docs/version_2.0/bel_specification_version_2.0.pdf)
 simultaneously.
 
-After you have a BEL graph, there are numerous ways to save it. The ``pybel.dump`` function knows
-how to output it in many formats based on the file extension you give. For all of the possibilities,
-check the `I/O documentation <https://pybel.readthedocs.io/en/latest/reference/io.html>`_.
+After you have a BEL graph, there are numerous ways to save it. The `pybel.dump` function knows
+how to output it in many formats based on the file extension you give. For all possibilities,
+check the [I/O documentation](https://pybel.readthedocs.io/en/latest/reference/io.html).
 
 ```python
 import pybel
@@ -96,12 +95,12 @@ pybel.dump(graph, 'my_graph.indra.json')
 
 ### Summarizing the Contents of the Graph
 
-The ``BELGraph`` object has several "dispatches" which are properties that organize its various functionalities.
-One is the ``BELGraph.summarize`` dispatch, which allows for printing summaries to the console.
+The `BELGraph` object has several "dispatches" which are properties that organize its various functionalities.
+One is the `BELGraph.summarize` dispatch, which allows for printing summaries to the console.
 
 These examples will use the `RAS Model <https://emmaa.indra.bio/dashboard/rasmodel?tab=model>`_  from EMMAA,
-so you'll have to be sure to ``pip install indra`` first. The graph can be acquired and summarized with
-``BELGraph.summarize.statistics()`` as in:
+so you'll have to be sure to `pip install indra` first. The graph can be acquired and summarized with
+`BELGraph.summarize.statistics()` as in:
 
 ```python
 import pybel
@@ -122,7 +121,7 @@ Number of Warnings     0
 ---------------------  -------------------
 ```
 
-The number of nodes of each type can be summarized with ``BELGraph.summarize.nodes()`` as in:
+The number of nodes of each type can be summarized with `BELGraph.summarize.nodes()` as in:
 
 ```python
 >>> graph.summarize.nodes(examples=False)
@@ -133,7 +132,7 @@ Complex            27
 Abundance           2
 ```
 
-The number of nodes with each namespace can be summarized with ``BELGraph.summarize.namespaces()`` as in:
+The number of nodes with each namespace can be summarized with `BELGraph.summarize.namespaces()` as in:
 
 ```python
 >>> graph.summarize.namespaces(examples=False)
@@ -145,7 +144,7 @@ CHEBI                  1
 TEXT                   1
 ```
 
-The edges can be summarized with ``BELGraph.summarize.edges()`` as in:
+The edges can be summarized with `BELGraph.summarize.edges()` as in:
 
 ```python
 >>> graph.summarize.edges(examples=False)
@@ -184,11 +183,11 @@ import pybel.grounding
 grounded_graph = pybel.grounding.ground(graph)
 ```
 
-Note: you have to install ``pyobo`` for this to work and be running Python 3.7+.
+Note: you have to install `pyobo` for this to work and be running Python 3.7+.
 
 ### Displaying a BEL Graph in Jupyter
 
-After installing ``jinja2`` and ``ipython``, BEL graphs can be displayed in Jupyter notebooks.
+After installing `jinja2` and `ipython`, BEL graphs can be displayed in Jupyter notebooks.
 
 ```python
 from pybel.examples import sialic_acid_graph
@@ -198,8 +197,8 @@ to_jupyter(sialic_acid_graph)
 
 ### Using the Parser
 
-If you don't want to use the ``pybel.BELGraph`` data structure and just want to turn BEL statements into JSON
-for your own purposes, you can directly use the ``pybel.parse()`` function.
+If you don't want to use the `pybel.BELGraph` data structure and just want to turn BEL statements into JSON
+for your own purposes, you can directly use the `pybel.parse()` function.
 
 ```python
 import pybel
@@ -207,8 +206,8 @@ pybel.parse('p(hgnc:4617 ! GSK3B) regulates p(hgnc:6893 ! MAPT)')
 # {'source': {'function': 'Protein', 'concept': {'namespace': 'hgnc', 'identifier': '4617', 'name': 'GSK3B'}}, 'relation': 'regulates', 'target': {'function': 'Protein', 'concept': {'namespace': 'hgnc', 'identifier': '6893', 'name': 'MAPT'}}}
 ```
 
-This functionality can also be exposed through a Flask-based web application with ``python -m pybel.apps.parser`` after
-installing ``flask`` with ``pip install flask``. Note that the first run requires about a ~2 second delay to generate
+This functionality can also be exposed through a Flask-based web application with `python -m pybel.apps.parser` after
+installing `flask` with `pip install flask`. Note that the first run requires about a ~2 second delay to generate
 the parser, after which each parse is very fast.
 
 
@@ -295,17 +294,12 @@ The PyBEL [logo](https://github.com/pybel/pybel-art) was designed by [Scott Colb
 
 This project has been supported by the following grants:
 
-| Funding Body  | Program                                                      | Grant Number |
-|---------------|--------------------------------------------------------------|--------------|
-| Funder        | [Grant Name (GRANT-ACRONYM)](https://example.com/grant-link) | ABCXYZ       |
+| Funding Body                                                                                                               | Program                                       | Grant Number  |
+|----------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------|---------------|
+| DARPA                                                                                                                      | Young Faculty Award  (PI: Benjamin M. Gyori). | W911NF2010255 |
+| [European Union](https://europa.eu), [EFPIA](https://www.efpia.eu/), and [IMI](https://www.imi.europa.eu) | [AETIONOMY](https://www.aetionomy.eu)<sup>1</sup>                                              | 115568        |
 
-
-- DARPA Young Faculty Award W911NF2010255 (PI: Benjamin M. Gyori).
-- The [European Union](https://europa.eu), [European Federation of Pharmaceutical Industries and Associations
-  (EFPIA)](https://www.efpia.eu/), and [Innovative Medicines Initiative](https://www.imi.europa.eu) Joint
-  Undertaking under [AETIONOMY](https://www.aetionomy.eu/) [grant number 115568], resources of which
-  are composed of financial contribution from the European Union's Seventh Framework Programme (FP7/2007-2013) and
-  EFPIA companies in kind contribution.
+<sup>1</sup>resources of which are composed of financial contribution from the European Union's Seventh Framework Programme (FP7/2007-2013) and EFPIA companies in kind contribution. 
 
 ### 🍪 Cookiecutter
 
