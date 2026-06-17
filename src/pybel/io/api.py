@@ -3,10 +3,9 @@
 """Contains the main data structure for PyBEL."""
 
 import os
-from typing import TextIO, Union
+from importlib.metadata import entry_points
 
 from networkx.utils import open_file
-from pkg_resources import iter_entry_points
 
 from ..struct import BELGraph
 
@@ -17,10 +16,10 @@ __all__ = [
 ]
 
 #: Mapping from extension to importer function
-IMPORTERS = {entry.name: entry.load() for entry in iter_entry_points(group="pybel.importer")}
+IMPORTERS = {entry.name: entry.load() for entry in entry_points(group="pybel.importer")}
 
 #: Mapping from extension to exporter function
-EXPORTERS = {entry.name: entry.load() for entry in iter_entry_points(group="pybel.exporter")}
+EXPORTERS = {entry.name: entry.load() for entry in entry_points(group="pybel.exporter")}
 
 
 class InvalidExtensionError(ValueError):
