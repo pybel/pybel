@@ -113,7 +113,7 @@ class TestRelations(TestTokenParserBase):
 
     def test_ensure_no_dup_nodes(self):
         """Ensure node isn't added twice, even if from different statements"""
-        self.parser.gene.addParseAction(self.parser.handle_term)
+        self.parser.gene.add_parse_action(self.parser.handle_term)
         result = self.parser.bel_term.parse_string("g(HGNC:AKT1)")
 
         expected_result_dict = {
@@ -126,7 +126,7 @@ class TestRelations(TestTokenParserBase):
 
         self.assertEqual(expected_result_dict, result.asDict())
 
-        self.parser.degradation.addParseAction(self.parser.handle_term)
+        self.parser.degradation.add_parse_action(self.parser.handle_term)
         self.parser.degradation.parse_string("deg(g(HGNC:AKT1))")
 
         akt1_gene = gene("HGNC", "AKT1")

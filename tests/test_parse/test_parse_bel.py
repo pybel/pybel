@@ -2121,7 +2121,7 @@ class TestSemantics(unittest.TestCase):
 
         update_provenance(parser.control_parser)
 
-        parser.bel_term.addParseAction(parser.handle_term)
+        parser.bel_term.add_parse_action(parser.handle_term)
         parser.bel_term.parse_string("bp(ABASD)")
 
         node = bioprocess(namespace=DIRTY, name="ABASD")

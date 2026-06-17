@@ -18,7 +18,7 @@ from pyparsing import (
     alphanums,
     dblQuotedString,
     one_of,
-    removeQuotes,
+    remove_quotes,
     replace_with,
 )
 
@@ -50,7 +50,7 @@ RP = W + Suppress(")")
 word = Word(alphanums)
 ns = Word(alphanums + "_-.")
 identifier = Word(alphanums + "_")
-quote = dblQuotedString().set_parse_action(removeQuotes)
+quote = dblQuotedString().set_parse_action(remove_quotes)
 qid = quote | identifier
 delimited_quoted_list = And([Suppress("{"), DelimitedList(quote), Suppress("}")])
 delimited_unquoted_list = And([Suppress("{"), DelimitedList(identifier), Suppress("}")])
