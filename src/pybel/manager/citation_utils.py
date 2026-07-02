@@ -28,7 +28,9 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 
-EUTILS_URL_FMT = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&retmode=json&id={}"
+EUTILS_URL_FMT = (
+    "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed&retmode=json&id={}"
+)
 
 re1 = re.compile(r"^[12][0-9]{3} [a-zA-Z]{3} \d{1,2}$")
 re2 = re.compile(r"^[12][0-9]{3} [a-zA-Z]{3}$")
@@ -93,13 +95,17 @@ def get_pubmed_citation_response(pubmed_identifiers: Iterable[str]):
     """
     pubmed_identifiers = list(pubmed_identifiers)
     url = EUTILS_URL_FMT.format(
-        ",".join(pubmed_identifier for pubmed_identifier in pubmed_identifiers if pubmed_identifier),
+        ",".join(
+            pubmed_identifier for pubmed_identifier in pubmed_identifiers if pubmed_identifier
+        ),
     )
     response = requests.get(url)
     return response.json()
 
 
-def enrich_citation_model(manager: Manager, citation: models.Citation, p: Mapping[str, Any]) -> bool:
+def enrich_citation_model(
+    manager: Manager, citation: models.Citation, p: Mapping[str, Any]
+) -> bool:
     """Enrich a citation model with the information from PubMed.
 
     :param manager: A database manager
@@ -206,7 +212,9 @@ def _get_citations_by_identifiers(
     for identifier in tqdm(identifiers, desc=f"creating {prefix} models"):
         model = id_to_model.get(identifier)
         if model is None:
-            model = id_to_model[identifier] = manager.get_or_create_citation(identifier=identifier, namespace=prefix)
+            model = id_to_model[identifier] = manager.get_or_create_citation(
+                identifier=identifier, namespace=prefix
+            )
         if model.is_enriched:
             enriched_models[identifier] = model.to_json()
         else:
@@ -237,7 +245,9 @@ def _get_citations_by_identifiers(
     return enriched_models, errors
 
 
-def _help_enrich_pmids(identifiers: Iterable[str], *, manager, unenriched_models, enriched_models, errors):
+def _help_enrich_pmids(
+    identifiers: Iterable[str], *, manager, unenriched_models, enriched_models, errors
+):
     response = get_pubmed_citation_response(identifiers)
     response_pmids = response["result"]["uids"]
 
@@ -372,7 +382,9 @@ def _enrich_citations(
     if prefix is None:
         prefix = "pubmed"
 
-    identifiers = {identifier for identifier in get_citation_identifiers(graph, prefix) if identifier}
+    identifiers = {
+        identifier for identifier in get_citation_identifiers(graph, prefix) if identifier
+    }
     identifier_map, errors = _get_citations_by_identifiers(
         manager,
         identifiers=identifiers,
@@ -405,11 +417,15 @@ def get_pmc_csl_item(pmcid: str) -> Mapping[str, Any]:
 
     csl_item = get_pmc_csl_item(pmcid)
     if "URL" not in csl_item:
-        csl_item["URL"] = f"https://www.ncbi.nlm.nih.gov/pmc/articles/{csl_item.get('PMCID', pmcid)}/"
+        csl_item["URL"] = (
+            f"https://www.ncbi.nlm.nih.gov/pmc/articles/{csl_item.get('PMCID', pmcid)}/"
+        )
     return csl_item
 
 
-def enrich_citation_model_from_pmc(manager: Manager, citation: models.Citation, csl: Mapping[str, Any]) -> bool:
+def enrich_citation_model_from_pmc(
+    manager: Manager, citation: models.Citation, csl: Mapping[str, Any]
+) -> bool:
     """Enrich a citation model with the information from PubMed Central.
 
     :param manager: A database manager

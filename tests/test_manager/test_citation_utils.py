@@ -148,7 +148,9 @@ class TestPubmed(TemporaryCacheMixin):
 
         get_citations_by_pmids(manager=self.manager, pmids=pmids)
 
-        citation = self.manager.get_or_create_citation(namespace=CITATION_TYPE_PUBMED, identifier="25818332")
+        citation = self.manager.get_or_create_citation(
+            namespace=CITATION_TYPE_PUBMED, identifier="25818332"
+        )
         self.assertIsNotNone(citation)
 
     @mock_get_pubmed_citation_response
@@ -167,7 +169,9 @@ class TestPubmed(TemporaryCacheMixin):
 
     @mock_get_pubmed_citation_response
     def test_enrich_pubmed_overwrite(self, *_):
-        citation = self.manager.get_or_create_citation(namespace=CITATION_TYPE_PUBMED, identifier=self.pmid)
+        citation = self.manager.get_or_create_citation(
+            namespace=CITATION_TYPE_PUBMED, identifier=self.pmid
+        )
         self.manager.session.commit()
         self.assertIsNone(citation.date)
         self.assertIsNone(citation.title)
@@ -243,7 +247,9 @@ class TestPMC(TemporaryCacheMixin):
         self.u, self.v = (Protein(n(), n()) for _ in range(2))
         self.citation_identifier = "PMC6611653"
         self.graph = BELGraph()
-        self.graph.add_increases(self.u, self.v, citation=("pmc", self.citation_identifier), evidence=n())
+        self.graph.add_increases(
+            self.u, self.v, citation=("pmc", self.citation_identifier), evidence=n()
+        )
 
     @mock_get_pmc_csl_item
     def test_enrich_pmc(self, *_):

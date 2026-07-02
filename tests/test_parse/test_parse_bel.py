@@ -153,9 +153,15 @@ class TestAbundance(TestTokenParserBase):
     def test_abundance_with_location(self):
         """Test short/long abundance name and short/long location name."""
         self._test_abundance_with_location_helper('a(CHEBI:"oxygen atom", loc(GO:intracellular))')
-        self._test_abundance_with_location_helper('abundance(CHEBI:"oxygen atom", loc(GO:intracellular))')
-        self._test_abundance_with_location_helper('a(CHEBI:"oxygen atom", location(GO:intracellular))')
-        self._test_abundance_with_location_helper('abundance(CHEBI:"oxygen atom", location(GO:intracellular))')
+        self._test_abundance_with_location_helper(
+            'abundance(CHEBI:"oxygen atom", loc(GO:intracellular))'
+        )
+        self._test_abundance_with_location_helper(
+            'a(CHEBI:"oxygen atom", location(GO:intracellular))'
+        )
+        self._test_abundance_with_location_helper(
+            'abundance(CHEBI:"oxygen atom", location(GO:intracellular))'
+        )
 
 
 class TestAbundanceLabeled(TestTokenParserBase):
@@ -165,7 +171,9 @@ class TestAbundanceLabeled(TestTokenParserBase):
         self.parser.clear()
         self.parser.general_abundance.set_parse_action(self.parser.handle_term)
 
-        self.expected_node = abundance(namespace="CHEBI", name="oxygen atom", identifier="CHEBI:25805")
+        self.expected_node = abundance(
+            namespace="CHEBI", name="oxygen atom", identifier="CHEBI:25805"
+        )
         self.expected_canonical_bel = 'a(CHEBI:"CHEBI:25805" ! "oxygen atom")'
 
     def _test_abundance_helper(self, statement):
@@ -224,9 +232,15 @@ class TestAbundanceLabeled(TestTokenParserBase):
 
     def test_abundance_with_location(self):
         """Test short/long abundance name and short/long location name."""
-        self._test_abundance_with_location_helper('a(CHEBI:"CHEBI:25805"!"oxygen atom", loc(GO:intracellular))')
-        self._test_abundance_with_location_helper('abundance(CHEBI:"CHEBI:25805"!"oxygen atom", loc(GO:intracellular))')
-        self._test_abundance_with_location_helper('a(CHEBI:"CHEBI:25805"!"oxygen atom", location(GO:intracellular))')
+        self._test_abundance_with_location_helper(
+            'a(CHEBI:"CHEBI:25805"!"oxygen atom", loc(GO:intracellular))'
+        )
+        self._test_abundance_with_location_helper(
+            'abundance(CHEBI:"CHEBI:25805"!"oxygen atom", loc(GO:intracellular))'
+        )
+        self._test_abundance_with_location_helper(
+            'a(CHEBI:"CHEBI:25805"!"oxygen atom", location(GO:intracellular))'
+        )
         self._test_abundance_with_location_helper(
             'abundance(CHEBI:"CHEBI:25805"!"oxygen atom", location(GO:intracellular))'
         )
@@ -917,7 +931,9 @@ class TestProtein(TestTokenParserBase):
         # missing quotes
         self._help_test_protein_fusion_legacy_1("p(fus(HGNC:BCR, p.?_1875, HGNC:JAK2, p.2626_?))")
         # correct
-        self._help_test_protein_fusion_legacy_1('p(fus(HGNC:BCR, "p.?_1875", HGNC:JAK2, "p.2626_?"))')
+        self._help_test_protein_fusion_legacy_1(
+            'p(fus(HGNC:BCR, "p.?_1875", HGNC:JAK2, "p.2626_?"))'
+        )
 
     def _help_test_protein_legacy_fusion_2(self, statement):
         result = self.parser.protein.parse_string(statement)
@@ -1041,7 +1057,9 @@ class TestProtein(TestTokenParserBase):
         self.parser.protein.parse_string(statement)
 
         parent = protein("HGNC", "AKT1")
-        expected_node = parent.with_variants(pmod(namespace="MOD", name="PhosRes", code="Ser", position=473))
+        expected_node = parent.with_variants(
+            pmod(namespace="MOD", name="PhosRes", code="Ser", position=473)
+        )
         self.assert_has_node(expected_node)
         self.assertEqual(
             "p(HGNC:AKT1, pmod(MOD:PhosRes, Ser, 473))",
@@ -1265,7 +1283,9 @@ class TestRna(TestTokenParserBase):
         self.assertEqual(expected_result, result.asDict())
 
         parent = rna("HGNC", "AKT1")
-        expected_node = parent.with_variants([hgvs("c.1521_1523delCTT"), hgvs(TEST_PROTEIN_VARIANT)])
+        expected_node = parent.with_variants(
+            [hgvs("c.1521_1523delCTT"), hgvs(TEST_PROTEIN_VARIANT)]
+        )
         self.assert_has_node(expected_node)
 
         self.assertEqual(
@@ -1318,7 +1338,9 @@ class TestRna(TestTokenParserBase):
         # correct (short form)
         self._help_test_rna_fusion_1('r(fus(HGNC:TMPRSS2, "r.1_79", HGNC:ERG, "r.312_5034"))')
         # correct (long form)
-        self._help_test_rna_fusion_1('rnaAbundance(fusion(HGNC:TMPRSS2, "r.1_79", HGNC:ERG, "r.312_5034"))')
+        self._help_test_rna_fusion_1(
+            'rnaAbundance(fusion(HGNC:TMPRSS2, "r.1_79", HGNC:ERG, "r.312_5034"))'
+        )
 
     def _help_test_rna_fusion_unspecified_breakpoints(self, statement):
         result = self.parser.rna.parse_string(statement)
@@ -1355,9 +1377,13 @@ class TestRna(TestTokenParserBase):
         # missing quotes
         self._help_test_rna_fusion_unspecified_breakpoints("r(fus(HGNC:TMPRSS2, ?, HGNC:ERG, ?))")
         # correct (short form)
-        self._help_test_rna_fusion_unspecified_breakpoints('r(fus(HGNC:TMPRSS2, "?", HGNC:ERG, "?"))')
+        self._help_test_rna_fusion_unspecified_breakpoints(
+            'r(fus(HGNC:TMPRSS2, "?", HGNC:ERG, "?"))'
+        )
         # correct (long form)
-        self._help_test_rna_fusion_unspecified_breakpoints('rnaAbundance(fusion(HGNC:TMPRSS2, "?", HGNC:ERG, "?"))')
+        self._help_test_rna_fusion_unspecified_breakpoints(
+            'rnaAbundance(fusion(HGNC:TMPRSS2, "?", HGNC:ERG, "?"))'
+        )
 
     def _help_test_rna_fusion_legacy_1(self, statement):
         result = self.parser.rna.parse_string(statement)

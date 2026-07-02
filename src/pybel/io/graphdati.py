@@ -58,7 +58,9 @@ GRAPHDATI_PUBLICATION_TYPES = {
 
 
 @open_file(1, mode="w")
-def to_graphdati_file(graph: BELGraph, path: str | TextIO, use_identifiers: bool = True, **kwargs) -> None:
+def to_graphdati_file(
+    graph: BELGraph, path: str | TextIO, use_identifiers: bool = True, **kwargs
+) -> None:
     """Write this graph as GraphDati JSON to a file.
 
     :param graph: A BEL graph
@@ -171,7 +173,9 @@ def _iter_graphdati(
         yield _make_nanopub(graph, u, v, k, d, use_identifiers, metadata_extras=metadata_extras)
 
 
-def _make_nanopub(graph: BELGraph, u, v, k, d, use_identifiers, metadata_extras=None) -> NanopubMapping:
+def _make_nanopub(
+    graph: BELGraph, u, v, k, d, use_identifiers, metadata_extras=None
+) -> NanopubMapping:
     return {
         "nanopub": {
             "schema_uri": SCHEMA_URI,

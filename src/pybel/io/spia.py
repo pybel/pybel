@@ -123,7 +123,11 @@ def to_spia_dfs(graph: BELGraph) -> SPIADataFrames:
 def get_matrix_index(graph: BELGraph) -> set[str]:
     """Return set of HGNC names from Proteins/Rnas/Genes/miRNA, nodes that can be used by SPIA."""
     # TODO: Using HGNC Symbols for now
-    return {node.name for node in graph if isinstance(node, CentralDogma) and node.namespace.upper() == "HGNC"}
+    return {
+        node.name
+        for node in graph
+        if isinstance(node, CentralDogma) and node.namespace.upper() == "HGNC"
+    }
 
 
 def build_spia_matrices(nodes: set[str]) -> dict[str, pd.DataFrame]:

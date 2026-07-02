@@ -98,7 +98,9 @@ shp2 = Protein(namespace="hgnc", name="PTPN11", identifier="9644")
 syk = Protein(namespace="hgnc", name="SYK", identifier="11491")
 dap12 = Protein(namespace="hgnc", name="TYROBP", identifier="12449")
 trem2 = Protein(namespace="hgnc", name="TREM2", identifier="17761")
-cd33_phosphorylated = Protein(name="CD33", namespace="hgnc", identifier="1659", variants=ProteinModification("Ph"))
+cd33_phosphorylated = Protein(
+    name="CD33", namespace="hgnc", identifier="1659", variants=ProteinModification("Ph")
+)
 immune_response = BiologicalProcess(name="immune response", namespace="go", identifier="0006955")
 
 sialic_acid_graph.add_increases(

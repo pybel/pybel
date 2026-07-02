@@ -1,7 +1,15 @@
 """Mutations for inferring new edges in the graph."""
 
-from . import protein_rna_origins, transfer
-from .protein_rna_origins import *
-from .transfer import *
+from .protein_rna_origins import (
+    enrich_proteins_with_rnas,
+    enrich_rnas_with_genes,
+    enrich_protein_and_rna_origins,
+)
+from .transfer import infer_child_relations
 
-__all__ = [k for k in locals() if not k.startswith("_")]
+__all__ = [
+    "enrich_protein_and_rna_origins",
+    "enrich_proteins_with_rnas",
+    "enrich_rnas_with_genes",
+    "infer_child_relations",
+]

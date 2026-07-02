@@ -55,7 +55,9 @@ unset_all = Suppress(BEL_KEYWORD_ALL)
 supporting_text_tags = one_of([BEL_KEYWORD_EVIDENCE, BEL_KEYWORD_SUPPORT])
 
 set_statement_group_stub = And([Suppress(BEL_KEYWORD_STATEMENT_GROUP), Suppress("="), qid("group")])
-set_citation_stub = And([Suppress(BEL_KEYWORD_CITATION), Suppress("="), delimited_quoted_list("values")])
+set_citation_stub = And(
+    [Suppress(BEL_KEYWORD_CITATION), Suppress("="), delimited_quoted_list("values")]
+)
 set_evidence_stub = And([Suppress(supporting_text_tags), Suppress("="), quote("value")])
 
 
@@ -99,7 +101,9 @@ class ControlParser(BaseParser):
 
         annotation_key = ppc.identifier("key").set_parse_action(self.handle_annotation_key)
 
-        self.set_statement_group = set_statement_group_stub().set_parse_action(self.handle_set_statement_group)
+        self.set_statement_group = set_statement_group_stub().set_parse_action(
+            self.handle_set_statement_group
+        )
         self.set_citation = set_citation_stub.set_parse_action(self.handle_set_citation)
         self.set_evidence = set_evidence_stub.set_parse_action(self.handle_set_evidence)
 
@@ -192,7 +196,9 @@ class ControlParser(BaseParser):
         if not self.has_annotation(annotation):
             raise UndefinedAnnotationWarning(self.get_line_number(), line, position, annotation)
 
-    def raise_for_invalid_annotation_value(self, line: str, position: int, key: str, value: str) -> None:
+    def raise_for_invalid_annotation_value(
+        self, line: str, position: int, key: str, value: str
+    ) -> None:
         """Raise an exception if the annotation is not defined.
 
         :raises: IllegalAnnotationValueWarning or MissingAnnotationRegexWarning
@@ -206,7 +212,9 @@ class ControlParser(BaseParser):
         elif self.has_regex_annotation(key) and not self.annotation_to_pattern[key].match(value):
             raise MissingAnnotationRegexWarning(self.get_line_number(), line, position, key, value)
 
-        elif self.has_local_annotation(key) and value not in self.annotation_to_local[key]:  # TODO condense
+        elif (
+            self.has_local_annotation(key) and value not in self.annotation_to_local[key]
+        ):  # TODO condense
             raise IllegalAnnotationValueWarning(self.get_line_number(), line, position, key, value)
 
     def raise_for_missing_citation(self, line: str, position: int) -> None:
@@ -256,12 +264,16 @@ class ControlParser(BaseParser):
             if 3 == len(values):
                 logger.debug("Throwing away JOURNAL entry in position 2")
             else:
-                logger.debug("Throwing away JOURNAL entry in position 2 and everything after position 3")
+                logger.debug(
+                    "Throwing away JOURNAL entry in position 2 and everything after position 3"
+                )
 
             citation_db_id = values[2]
 
         if citation_namespace == "pubmed" and not is_int(citation_db_id):
-            raise InvalidPubMedIdentifierWarning(self.get_line_number(), line, position, citation_db_id)
+            raise InvalidPubMedIdentifierWarning(
+                self.get_line_number(), line, position, citation_db_id
+            )
 
         self.citation_db = citation_namespace
         self.citation_db_id = citation_db_id
@@ -279,7 +291,9 @@ class ControlParser(BaseParser):
         self.annotations[key] = [Entity(namespace=key, identifier=value)]
         return tokens
 
-    def handle_set_command_list(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
+    def handle_set_command_list(
+        self, line: str, position: int, tokens: ParseResults
+    ) -> ParseResults:
         """Handle a ``SET X = {"Y", "Z", ...}`` statement."""
         key, values = tokens["key"], tokens["values"]
         for value in values:
@@ -287,13 +301,17 @@ class ControlParser(BaseParser):
         self.annotations[key] = [Entity(namespace=key, identifier=value) for value in values]
         return tokens
 
-    def handle_unset_statement_group(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
+    def handle_unset_statement_group(
+        self, line: str, position: int, tokens: ParseResults
+    ) -> ParseResults:
         """Unset the statement group, or raises an exception if it is not set.
 
         :raises: MissingAnnotationKeyWarning
         """
         if self.statement_group is None:
-            raise MissingAnnotationKeyWarning(self.get_line_number(), line, position, BEL_KEYWORD_STATEMENT_GROUP)
+            raise MissingAnnotationKeyWarning(
+                self.get_line_number(), line, position, BEL_KEYWORD_STATEMENT_GROUP
+            )
         self.statement_group = None
         return tokens
 
@@ -303,7 +321,9 @@ class ControlParser(BaseParser):
         :raises: MissingAnnotationKeyWarning
         """
         if not self.citation_is_set:
-            raise MissingAnnotationKeyWarning(self.get_line_number(), line, position, BEL_KEYWORD_CITATION)
+            raise MissingAnnotationKeyWarning(
+                self.get_line_number(), line, position, BEL_KEYWORD_CITATION
+            )
 
         self.clear_citation()
         return tokens
@@ -317,7 +337,9 @@ class ControlParser(BaseParser):
         :raises: MissingAnnotationKeyWarning
         """
         if self.evidence is None:
-            raise MissingAnnotationKeyWarning(self.get_line_number(), line, position, tokens[EVIDENCE])
+            raise MissingAnnotationKeyWarning(
+                self.get_line_number(), line, position, tokens[EVIDENCE]
+            )
         self.evidence = None
         return tokens
 

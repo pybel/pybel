@@ -97,7 +97,9 @@ def _fusion_to_dsl(tokens) -> FusionBase:
     member_dsl = FUNC_TO_DSL[func]
 
     partner_5p = tokens[FUSION][PARTNER_5P]
-    partner_5p_concept = partner_5p[CONCEPT] if CONCEPT in tokens[FUSION][PARTNER_5P] else partner_5p
+    partner_5p_concept = (
+        partner_5p[CONCEPT] if CONCEPT in tokens[FUSION][PARTNER_5P] else partner_5p
+    )
     partner_5p_node = member_dsl(
         namespace=partner_5p_concept[NAMESPACE],
         name=partner_5p_concept[NAME],
@@ -106,7 +108,9 @@ def _fusion_to_dsl(tokens) -> FusionBase:
     )
 
     partner_3p = tokens[FUSION][PARTNER_3P]
-    partner_3p_concept = partner_3p[CONCEPT] if CONCEPT in tokens[FUSION][PARTNER_3P] else partner_3p
+    partner_3p_concept = (
+        partner_3p[CONCEPT] if CONCEPT in tokens[FUSION][PARTNER_3P] else partner_3p
+    )
     partner_3p_node = member_dsl(
         namespace=partner_3p_concept[NAMESPACE],
         name=partner_3p_concept[NAME],

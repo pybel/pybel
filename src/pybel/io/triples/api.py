@@ -69,7 +69,9 @@ def to_edgelist(
         print(h, t, json.dumps({"relation": r}), sep=sep, file=path)
 
 
-def to_triples(graph: BELGraph, use_tqdm: bool = False, raise_on_none: bool = False) -> list[tuple[str, str, str]]:
+def to_triples(
+    graph: BELGraph, use_tqdm: bool = False, raise_on_none: bool = False
+) -> list[tuple[str, str, str]]:
     """Get a non-redundant list of triples representing the graph.
 
     :param graph: A BEL graph

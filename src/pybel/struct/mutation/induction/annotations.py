@@ -33,14 +33,20 @@ def get_subgraph_by_annotations(
      edge. Defaults to True.
     :return: A subgraph of the original BEL graph
     """
-    edge_filter_builder = build_annotation_dict_any_filter if (or_ is None or or_) else build_annotation_dict_all_filter
+    edge_filter_builder = (
+        build_annotation_dict_any_filter
+        if (or_ is None or or_)
+        else build_annotation_dict_all_filter
+    )
 
     annotations = graph._clean_annotations(annotations)
     return get_subgraph_by_edge_filter(graph, edge_filter_builder(annotations))
 
 
 @transformation
-def get_subgraph_by_annotation_value(graph: BELGraph, annotation: str, values: str | Iterable[str]) -> BELGraph:
+def get_subgraph_by_annotation_value(
+    graph: BELGraph, annotation: str, values: str | Iterable[str]
+) -> BELGraph:
     """Induce a sub-graph over all edges whose annotations match the given key and value.
 
     :param graph: A BEL graph

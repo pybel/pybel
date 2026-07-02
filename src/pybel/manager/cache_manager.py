@@ -232,7 +232,9 @@ class NamespaceManager(BaseManager):
                 for name, identifier in values.items():
                     if not name:
                         continue
-                    rows.append((url_to_id[url], name, None, identifier))  # TODO is this a fair assumption?
+                    rows.append(
+                        (url_to_id[url], name, None, identifier)
+                    )  # TODO is this a fair assumption?
         else:
             for url, values in it:
                 name_to_id = url_to_name_to_id.get(url, {})
@@ -322,7 +324,9 @@ class NamespaceManager(BaseManager):
         entry_filter = and_(Namespace.url == url, NamespaceEntry.identifier == identifier)
         return self.session.query(NamespaceEntry).join(Namespace).filter(entry_filter).one_or_none()
 
-    def get_or_create_regex_namespace_entry(self, *, pattern: str, concept: Entity) -> NamespaceEntry:
+    def get_or_create_regex_namespace_entry(
+        self, *, pattern: str, concept: Entity
+    ) -> NamespaceEntry:
         """Get a namespace entry from a regular expression.
 
         Need to commit after!
@@ -334,7 +338,9 @@ class NamespaceManager(BaseManager):
 
         n_filter = and_(Namespace.pattern == pattern, NamespaceEntry.name == concept.name)
 
-        namespace_entry = self.session.query(NamespaceEntry).join(Namespace).filter(n_filter).one_or_none()
+        namespace_entry = (
+            self.session.query(NamespaceEntry).join(Namespace).filter(n_filter).one_or_none()
+        )
 
         if namespace_entry is None:
             namespace_entry = NamespaceEntry(
@@ -365,7 +371,9 @@ class NamespaceManager(BaseManager):
         """
         return self._ensure_namespace_urls([url], is_annotation=True)[0]
 
-    def get_annotation_entries_by_names(self, url: str, entities: Iterable[Entity]) -> list[NamespaceEntry]:
+    def get_annotation_entries_by_names(
+        self, url: str, entities: Iterable[Entity]
+    ) -> list[NamespaceEntry]:
         """Get annotation entries by URL and names.
 
         :param url: The url of the annotation source
@@ -407,7 +415,9 @@ class NetworkManager(NamespaceManager):
 
     def has_name_version(self, name: str, version: str) -> bool:
         """Check if there exists a network with the name/version combination in the database."""
-        return self.session.query(exists().where(and_(Network.name == name, Network.version == version))).scalar()
+        return self.session.query(
+            exists().where(and_(Network.name == name, Network.version == version))
+        ).scalar()
 
     def drop_networks(self) -> None:
         """Drop all networks."""
@@ -444,7 +454,9 @@ class NetworkManager(NamespaceManager):
         self.session.query(Edge).filter(Edge.id.in_(edge_ids)).delete(synchronize_session=False)
 
         # delete the network
-        self.session.query(Network).filter(Network.id == network.id).delete(synchronize_session=False)
+        self.session.query(Network).filter(Network.id == network.id).delete(
+            synchronize_session=False
+        )
 
         # commit it!
         self.session.commit()
@@ -473,7 +485,10 @@ class NetworkManager(NamespaceManager):
 
     def get_network_versions(self, name: str) -> set[str]:
         """Return all of the versions of a network with the given name."""
-        return {version for (version,) in self.session.query(Network.version).filter(Network.name == name).all()}
+        return {
+            version
+            for (version,) in self.session.query(Network.version).filter(Network.name == name).all()
+        }
 
     def get_network_by_name_version(self, name: str, version: str) -> Network | None:
         """Load the network with the given name and version if it exists."""
@@ -496,7 +511,12 @@ class NetworkManager(NamespaceManager):
 
     def get_most_recent_network_by_name(self, name: str) -> Network | None:
         """Get the most recently created network with the given name."""
-        return self.session.query(Network).filter(Network.name == name).order_by(Network.created.desc()).first()
+        return (
+            self.session.query(Network)
+            .filter(Network.name == name)
+            .order_by(Network.created.desc())
+            .first()
+        )
 
     def get_graph_by_most_recent(self, name: str) -> BELGraph | None:
         """Get the most recently created network with the given name as a :class:`pybel.BELGraph`."""
@@ -587,7 +607,9 @@ class InsertManager(NamespaceManager, LookupManager):
         annotation_urls = graph.annotation_url.values()
         self._ensure_namespace_urls(annotation_urls, use_tqdm=use_tqdm, is_annotation=True)
 
-        network = Network(**{key: value for key, value in graph.document.items() if key in METADATA_INSERT_KEYS})
+        network = Network(
+            **{key: value for key, value in graph.document.items() if key in METADATA_INSERT_KEYS}
+        )
 
         network.store_bel(graph)
 
@@ -605,7 +627,9 @@ class InsertManager(NamespaceManager, LookupManager):
 
         return network
 
-    def _store_graph_parts(self, graph: BELGraph, use_tqdm: bool = False) -> tuple[list[Node], list[Edge]]:
+    def _store_graph_parts(
+        self, graph: BELGraph, use_tqdm: bool = False
+    ) -> tuple[list[Node], list[Edge]]:
         """Store the given graph into the edge store.
 
         :raises: pybel.resources.exc.ResourceError
@@ -746,20 +770,26 @@ class InsertManager(NamespaceManager, LookupManager):
             elif key in graph.annotation_list:
                 continue  # skip those
             elif key in graph.annotation_pattern:
-                logger.debug("pattern annotation in database not implemented yet not implemented")  # FIXME
+                logger.debug(
+                    "pattern annotation in database not implemented yet not implemented"
+                )  # FIXME
                 continue
             else:
                 raise ValueError(f"Graph resources does not contain keyword: {key}")
 
             yield url, set(entities)
 
-    def _get_annotation_entries_from_data(self, graph: BELGraph, data: EdgeData) -> list[NamespaceEntry] | None:
+    def _get_annotation_entries_from_data(
+        self, graph: BELGraph, data: EdgeData
+    ) -> list[NamespaceEntry] | None:
         """Get the annotation entries from an edge data dictionary."""
         annotations_dict = data.get(ANNOTATIONS)
         if annotations_dict is None:
             return
         rv = []
-        for url, entities in self._iter_from_annotations_dict(graph, annotations_dict=annotations_dict):
+        for url, entities in self._iter_from_annotations_dict(
+            graph, annotations_dict=annotations_dict
+        ):
             for entry in self.get_annotation_entries_by_names(url, entities):
                 rv.append(entry)
         return rv
@@ -793,7 +823,9 @@ class InsertManager(NamespaceManager, LookupManager):
             annotations=annotations,
         )
 
-    def _add_unqualified_edge(self, source: Node, target: Node, key: str, bel: str, data: EdgeData) -> Edge:
+    def _add_unqualified_edge(
+        self, source: Node, target: Node, key: str, bel: str, data: EdgeData
+    ) -> Edge:
         """Add an unqualified edge to the network."""
         return self.get_or_create_edge(
             source=source,

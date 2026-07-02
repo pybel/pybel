@@ -20,7 +20,9 @@ GENE = pybel.dsl.Gene(NAMESPACE, name=NAME, identifier=IDENTIFIER)
 # Variants
 GENE_MOD = pybel.dsl.GeneModification(NAME, namespace=NAMESPACE, identifier=IDENTIFIER)
 PROTEIN_SUB = pybel.dsl.ProteinSubstitution("Ala", 1, "Tyr")
-PROTEIN_MOD = pybel.dsl.ProteinModification(NAME, code="Ala", position=1, namespace=NAMESPACE, identifier=IDENTIFIER)
+PROTEIN_MOD = pybel.dsl.ProteinModification(
+    NAME, code="Ala", position=1, namespace=NAMESPACE, identifier=IDENTIFIER
+)
 FRAGMENT = pybel.dsl.Fragment(1, 2)
 
 
@@ -68,7 +70,9 @@ class TestNodeSchema(unittest.TestCase):
         protein = pybel.dsl.Protein(namespace=NAMESPACE, name=NAME, identifier=IDENTIFIER)
         enum_fusion_range = pybel.dsl.EnumeratedFusionRange("r", 1, 79)
         missing_fusion_range = pybel.dsl.MissingFusionRange()
-        fusion_node = pybel.dsl.FusionBase(protein, protein, range_5p=enum_fusion_range, range_3p=missing_fusion_range)
+        fusion_node = pybel.dsl.FusionBase(
+            protein, protein, range_5p=enum_fusion_range, range_3p=missing_fusion_range
+        )
         self.assertTrue(is_valid_node(fusion_node))
 
     def test_list_abundances(self):

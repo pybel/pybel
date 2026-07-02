@@ -63,11 +63,15 @@ def to_umbrella_nodelink(graph: BELGraph) -> Mapping[str, Any]:
                     [
                         (
                             "source",
-                            mapping[_decanonicalize_edge_node(u, data, node_position=SOURCE_MODIFIER)],
+                            mapping[
+                                _decanonicalize_edge_node(u, data, node_position=SOURCE_MODIFIER)
+                            ],
                         ),
                         (
                             "target",
-                            mapping[_decanonicalize_edge_node(v, data, node_position=TARGET_MODIFIER)],
+                            mapping[
+                                _decanonicalize_edge_node(v, data, node_position=TARGET_MODIFIER)
+                            ],
                         ),
                         ("key", key),
                     ],
@@ -79,7 +83,8 @@ def to_umbrella_nodelink(graph: BELGraph) -> Mapping[str, Any]:
 
     # Convert annotation list definitions (which are sets) to canonicalized/sorted lists
     graph_json_dict["graph"][GRAPH_ANNOTATION_LIST] = {
-        keyword: sorted(values) for keyword, values in graph_json_dict["graph"].get(GRAPH_ANNOTATION_LIST, {}).items()
+        keyword: sorted(values)
+        for keyword, values in graph_json_dict["graph"].get(GRAPH_ANNOTATION_LIST, {}).items()
     }
 
     return graph_json_dict

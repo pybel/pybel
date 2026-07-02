@@ -202,7 +202,7 @@ class BELGraph(nx.MultiDiGraph):
 
         self.raise_on_missing_annotations = True
 
-    def child(self) -> "BELGraph":
+    def child(self) -> BELGraph:
         """Create an empty graph with a "parent" reference back to this one."""
         rv = BELGraph()
         rv.parent = self
@@ -210,7 +210,7 @@ class BELGraph(nx.MultiDiGraph):
         return rv
 
     @property
-    def count(self) -> "CountDispatch":
+    def count(self) -> CountDispatch:
         """A dispatch to count functions.
 
         Can be used like this:
@@ -222,7 +222,7 @@ class BELGraph(nx.MultiDiGraph):
         return self._count
 
     @property
-    def summarize(self) -> "SummarizeDispatch":
+    def summarize(self) -> SummarizeDispatch:
         """A dispatch to summarize the graph."""
         return self._summary
 
@@ -230,17 +230,17 @@ class BELGraph(nx.MultiDiGraph):
         return self._summary._repr_html_()
 
     @property
-    def expand(self) -> "ExpandDispatch":
+    def expand(self) -> ExpandDispatch:
         """A dispatch to expand the graph w.r.t. its parent."""
         return self._expand
 
     @property
-    def induce(self) -> "InduceDispatch":
+    def induce(self) -> InduceDispatch:
         """A dispatch to mutate the graph."""
         return self._induce
 
     @property
-    def plot(self) -> "PlotDispatch":
+    def plot(self) -> PlotDispatch:
         """A dispatch to plot the graph using :mod:`matplotlib` and :mod:`seaborn`."""
         return self._plot
 
@@ -496,7 +496,9 @@ class BELGraph(nx.MultiDiGraph):
         self.add_node_from_data(target)
         return self._help_add_edge_helper(source=source, target=target, attr=attr)
 
-    def _help_add_edge_helper(self, source: BaseEntity, target: BaseEntity, attr: Mapping[str, Any]) -> str:
+    def _help_add_edge_helper(
+        self, source: BaseEntity, target: BaseEntity, attr: Mapping[str, Any]
+    ) -> str:
         key = hash_edge(source, target, attr)
 
         if not self.has_edge(source, target, key):
@@ -531,12 +533,16 @@ class BELGraph(nx.MultiDiGraph):
         """
         return self.add_unqualified_edge(rna, protein, TRANSLATED_TO)
 
-    def _add_two_way_qualified_edge(self, source: BaseEntity, target: BaseEntity, *args, **kwargs) -> str:
+    def _add_two_way_qualified_edge(
+        self, source: BaseEntity, target: BaseEntity, *args, **kwargs
+    ) -> str:
         """Add an qualified edge both ways."""
         self.add_qualified_edge(source=target, target=source, *args, **kwargs)
         return self.add_qualified_edge(source=source, target=target, *args, **kwargs)
 
-    def _add_two_way_unqualified_edge(self, source: BaseEntity, target: BaseEntity, *args, **kwargs) -> str:
+    def _add_two_way_unqualified_edge(
+        self, source: BaseEntity, target: BaseEntity, *args, **kwargs
+    ) -> str:
         """Add an unqualified edge both ways."""
         self.add_unqualified_edge(target, source, *args, **kwargs)
         return self.add_unqualified_edge(source, target, *args, **kwargs)
@@ -687,10 +693,14 @@ class BELGraph(nx.MultiDiGraph):
     add_no_correlation = partialmethod(_add_two_way_qualified_edge, relation=NO_CORRELATION)
     """Add a :data:`pybel.constants.NO_CORRELATION` relationship with :meth:`add_qualified_edge`."""
 
-    add_positive_correlation = partialmethod(_add_two_way_qualified_edge, relation=POSITIVE_CORRELATION)
+    add_positive_correlation = partialmethod(
+        _add_two_way_qualified_edge, relation=POSITIVE_CORRELATION
+    )
     """Add a :data:`pybel.constants.POSITIVE_CORRELATION` relationship with :meth:`add_qualified_edge`."""
 
-    add_negative_correlation = partialmethod(_add_two_way_qualified_edge, relation=NEGATIVE_CORRELATION)
+    add_negative_correlation = partialmethod(
+        _add_two_way_qualified_edge, relation=NEGATIVE_CORRELATION
+    )
     """Add a :data:`pybel.constants.NEGATIVE_CORRELATION` relationship with :meth:`add_qualified_edge`."""
 
     add_causes_no_change = partialmethod(add_qualified_edge, relation=CAUSES_NO_CHANGE)
@@ -817,7 +827,7 @@ class BELGraph(nx.MultiDiGraph):
         """Get the annotations for a given edge."""
         return self._get_edge_attr(u, v, key, ANNOTATIONS)
 
-    def __add__(self, other: "BELGraph") -> "BELGraph":
+    def __add__(self, other: BELGraph) -> BELGraph:
         """Copy this graph and join it with another graph with it using :func:`pybel.struct.left_full_join`.
 
         :param other: Another BEL graph
@@ -834,7 +844,7 @@ class BELGraph(nx.MultiDiGraph):
         left_full_join(result, other)
         return result
 
-    def __iadd__(self, other: "BELGraph") -> "BELGraph":
+    def __iadd__(self, other: BELGraph) -> BELGraph:
         """Join another graph into this one, in-place, using :func:`pybel.struct.left_full_join`.
 
         :param other: Another BEL graph
@@ -850,7 +860,7 @@ class BELGraph(nx.MultiDiGraph):
         left_full_join(self, other)
         return self
 
-    def __and__(self, other: "BELGraph") -> "BELGraph":
+    def __and__(self, other: BELGraph) -> BELGraph:
         """Create a deep copy of this graph and left outer joins another graph.
 
         Uses :func:`pybel.struct.left_outer_join`.
@@ -869,7 +879,7 @@ class BELGraph(nx.MultiDiGraph):
         left_outer_join(result, other)
         return result
 
-    def __iand__(self, other: "BELGraph") -> "BELGraph":
+    def __iand__(self, other: BELGraph) -> BELGraph:
         """Join another graph into this one, in-place, using :func:`pybel.struct.left_outer_join`.
 
         :param other: Another BEL graph
@@ -885,7 +895,7 @@ class BELGraph(nx.MultiDiGraph):
         left_outer_join(self, other)
         return self
 
-    def __xor__(self, other: "BELGraph") -> "BELGraph":
+    def __xor__(self, other: BELGraph) -> BELGraph:
         """Join this graph with another using :func:`pybel.struct.left_node_intersection_join`.
 
         :param other: Another BEL graph
@@ -920,7 +930,9 @@ class BELGraph(nx.MultiDiGraph):
     def _has_no_equivalent_edge(self, u: BaseEntity, v: BaseEntity) -> bool:
         return not any(EQUIVALENT_TO == data[RELATION] for data in self[u][v].values())
 
-    def _equivalent_node_iterator_helper(self, node: BaseEntity, visited: set[BaseEntity]) -> BaseEntity:
+    def _equivalent_node_iterator_helper(
+        self, node: BaseEntity, visited: set[BaseEntity]
+    ) -> BaseEntity:
         """Iterate over nodes and their data that are equal to the given node, starting with the original."""
         for v in self[node]:
             if v in visited:
@@ -958,7 +970,9 @@ class BELGraph(nx.MultiDiGraph):
 
         This also should look in the equivalent nodes.
         """
-        return any(self._node_has_namespace_helper(n, namespace) for n in self.iter_equivalent_nodes(node))
+        return any(
+            self._node_has_namespace_helper(n, namespace) for n in self.iter_equivalent_nodes(node)
+        )
 
     def _describe_list(self) -> list[tuple[str, float]]:
         """Return useful information about the graph as a list of tuples."""
@@ -975,12 +989,14 @@ class BELGraph(nx.MultiDiGraph):
         warnings.warn("use graph.summary.str()", DeprecationWarning, stacklevel=2)
         return self.summarize.str()
 
-    def ground(self, **kwargs) -> "BELGraph":
+    def ground(self, **kwargs) -> BELGraph:
         """Ground this graph."""
         try:
             from ..grounding import ground
         except ImportError:
-            logger.warning("Must install pyobo and protmapper, use pip install pybel[grounding] extra.")
+            logger.warning(
+                "Must install pyobo and protmapper, use pip install pybel[grounding] extra."
+            )
             raise
         return ground(self, **kwargs)
 
@@ -1054,7 +1070,10 @@ class BELGraph(nx.MultiDiGraph):
             ]
         if isinstance(values, (list, set)):
             if all(isinstance(v, str) for v in values):
-                return [Entity(namespace=namespace, identifier=identifier) for identifier in sorted(values)]
+                return [
+                    Entity(namespace=namespace, identifier=identifier)
+                    for identifier in sorted(values)
+                ]
             elif all(isinstance(v, Entity) for v in values):
                 return values
             elif all(isinstance(v, dict) for v in values):
@@ -1063,7 +1082,10 @@ class BELGraph(nx.MultiDiGraph):
                 raise TypeError(f"list of wrong format for key {key}: {values}")
         if isinstance(values, dict):
             if all(isinstance(v, bool) for v in values.values()):
-                return [Entity(namespace=namespace, identifier=identifier) for identifier in sorted(values)]
+                return [
+                    Entity(namespace=namespace, identifier=identifier)
+                    for identifier in sorted(values)
+                ]
             raise TypeError(f"dictionary of wrong format for key {key}: {values}")
         raise TypeError(f"values of wrong data type for key {key}: {values}")
 

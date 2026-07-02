@@ -75,13 +75,19 @@ __all__ = [
 ]
 
 fragment_tag = one_of_tags(tags=["frag", "fragment"], canonical_tag=FRAGMENT, name=KIND)
-fragment_range = (ppc.integer | "?")(FRAGMENT_START) + "_" + (ppc.integer | "?" | "*")(FRAGMENT_STOP)
+fragment_range = (
+    (ppc.integer | "?")(FRAGMENT_START) + "_" + (ppc.integer | "?" | "*")(FRAGMENT_STOP)
+)
 missing_fragment = Keyword("?")(FRAGMENT_MISSING)
 
 
 def get_fragment_language() -> ParserElement:
     """Build a protein fragment parser."""
     _fragment_value_inner = fragment_range | missing_fragment(FRAGMENT_MISSING)
-    _fragment_value = _fragment_value_inner | And([Suppress('"'), _fragment_value_inner, Suppress('"')])
-    parser_element = fragment_tag + nest(_fragment_value + Optional(WCW + quote(FRAGMENT_DESCRIPTION)))
+    _fragment_value = _fragment_value_inner | And(
+        [Suppress('"'), _fragment_value_inner, Suppress('"')]
+    )
+    parser_element = fragment_tag + nest(
+        _fragment_value + Optional(WCW + quote(FRAGMENT_DESCRIPTION))
+    )
     return parser_element

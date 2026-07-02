@@ -81,10 +81,14 @@ class TestRandom(unittest.TestCase):
 
         self.assertEqual(n_edges, graph.number_of_edges())
 
-        sg_1 = get_random_subgraph(graph, number_edges=250, number_seed_edges=10, invert_degrees=False)
+        sg_1 = get_random_subgraph(
+            graph, number_edges=250, number_seed_edges=10, invert_degrees=False
+        )
         self.assertEqual(250, sg_1.number_of_edges())
 
-        sg_2 = get_random_subgraph(graph, number_edges=250, number_seed_edges=10, invert_degrees=True)
+        sg_2 = get_random_subgraph(
+            graph, number_edges=250, number_seed_edges=10, invert_degrees=True
+        )
         self.assertEqual(250, sg_2.number_of_edges())
 
     def test_random_sample_small(self):
@@ -94,14 +98,18 @@ class TestRandom(unittest.TestCase):
 
         self.assertEqual(n_edges, graph.number_of_edges())
 
-        sg_1 = get_random_subgraph(graph, number_edges=250, number_seed_edges=5, invert_degrees=False)
+        sg_1 = get_random_subgraph(
+            graph, number_edges=250, number_seed_edges=5, invert_degrees=False
+        )
         self.assertEqual(
             graph.number_of_edges(),
             sg_1.number_of_edges(),
             msg="since graph is too small, the subgraph should contain the whole thing",
         )
 
-        sg_2 = get_random_subgraph(graph, number_edges=250, number_seed_edges=5, invert_degrees=True)
+        sg_2 = get_random_subgraph(
+            graph, number_edges=250, number_seed_edges=5, invert_degrees=True
+        )
         self.assertEqual(
             graph.number_of_edges(),
             sg_2.number_of_edges(),

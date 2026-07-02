@@ -173,7 +173,9 @@ def location(identifier: Entity) -> LocationDict:
             target,
             citation=...,
             evidence=...,
-            target_modifier=activity("kin", location=entity(namespace="GO", name="cytosol", identifier="GO:0005829")),
+            target_modifier=activity(
+                "kin", location=entity(namespace="GO", name="cytosol", identifier="GO:0005829")
+            ),
         )
     """
     return {

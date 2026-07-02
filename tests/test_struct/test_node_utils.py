@@ -73,9 +73,13 @@ class TestNodeUtils(unittest.TestCase):
         """Test flattening a qualified reaction."""
         node_increases_reaction_graph = BELGraph()
 
-        glycolisis_step_1 = Reaction(reactants=[glucose, hk1, atp], products=[glucose_6_phosphate, adp, hk1])
+        glycolisis_step_1 = Reaction(
+            reactants=[glucose, hk1, atp], products=[glucose_6_phosphate, adp, hk1]
+        )
 
-        node_increases_reaction_graph.add_increases(glucose_6_phosphate, glycolisis_step_1, citation="X", evidence="X")
+        node_increases_reaction_graph.add_increases(
+            glucose_6_phosphate, glycolisis_step_1, citation="X", evidence="X"
+        )
 
         self.assertEqual(node_increases_reaction_graph.number_of_nodes(), 6)
         self.assertEqual(node_increases_reaction_graph.number_of_edges(), 7)

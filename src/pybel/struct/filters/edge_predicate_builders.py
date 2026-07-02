@@ -87,7 +87,11 @@ def _annotation_dict_any_filter(edge_data: EdgeData, query: Mapping[str, Iterabl
     if annotations is None:
         return False
 
-    return any(key in annotations and value in annotations[key] for key, values in query.items() for value in values)
+    return any(
+        key in annotations and value in annotations[key]
+        for key, values in query.items()
+        for value in values
+    )
 
 
 def build_annotation_dict_any_filter(
@@ -204,7 +208,9 @@ def build_author_inclusion_filter(authors: Strings) -> EdgePredicate:
         @edge_predicate
         def author_filter(edge_data: EdgeData) -> bool:
             """Pass for edges with citations with an author that matches one or more of the contained authors."""
-            return has_authors(edge_data) and any(author in edge_data[CITATION][CITATION_AUTHORS] for author in authors)
+            return has_authors(edge_data) and any(
+                author in edge_data[CITATION][CITATION_AUTHORS] for author in authors
+            )
 
     else:
         raise TypeError

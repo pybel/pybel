@@ -486,7 +486,11 @@ class TestAnnotations(unittest.TestCase):
         """Test upgrading the category."""
         self._help(
             {"Disease": [Entity(namespace="mesh", identifier="D010300", name="Parkinson Disease")]},
-            {"MeSHDisease": [Entity(namespace="mesh", identifier="D010300", name="Parkinson Disease")]},
+            {
+                "MeSHDisease": [
+                    Entity(namespace="mesh", identifier="D010300", name="Parkinson Disease")
+                ]
+            },
         )
 
     def test_upgrade_category_and_namespace(self, *_):
@@ -508,8 +512,12 @@ class TestAnnotations(unittest.TestCase):
         """Test upgrading MeSH disease, MeSH anatomy, and Species tags and lookup by name, in the identifiers space."""
         self._help(
             {  # Expected
-                "Disease": [Entity(namespace="mesh", identifier="D010300", name="Parkinson Disease")],
-                "Anatomy": [Entity(namespace="mesh", identifier="D013378", name="Substantia Nigra")],
+                "Disease": [
+                    Entity(namespace="mesh", identifier="D010300", name="Parkinson Disease")
+                ],
+                "Anatomy": [
+                    Entity(namespace="mesh", identifier="D013378", name="Substantia Nigra")
+                ],
                 "Species": [Entity(namespace="ncbitaxon", identifier="9606", name="Homo sapiens")],
             },
             {  # Original
@@ -523,8 +531,12 @@ class TestAnnotations(unittest.TestCase):
         """Test upgrading and lookup by identifier."""
         self._help(
             {  # Expected
-                "Disease": [Entity(namespace="mesh", identifier="D010300", name="Parkinson Disease")],
-                "Anatomy": [Entity(namespace="mesh", identifier="D013378", name="Substantia Nigra")],
+                "Disease": [
+                    Entity(namespace="mesh", identifier="D010300", name="Parkinson Disease")
+                ],
+                "Anatomy": [
+                    Entity(namespace="mesh", identifier="D013378", name="Substantia Nigra")
+                ],
                 "Species": [Entity(namespace="ncbitaxon", identifier="9606", name="Homo sapiens")],
             },
             {  # Original
@@ -538,8 +550,12 @@ class TestAnnotations(unittest.TestCase):
         """Test upgrading and lookup by name."""
         self._help(
             {  # Expected
-                "Disease": [Entity(namespace="mesh", identifier="D010300", name="Parkinson Disease")],
-                "Anatomy": [Entity(namespace="mesh", identifier="D013378", name="Substantia Nigra")],
+                "Disease": [
+                    Entity(namespace="mesh", identifier="D010300", name="Parkinson Disease")
+                ],
+                "Anatomy": [
+                    Entity(namespace="mesh", identifier="D013378", name="Substantia Nigra")
+                ],
                 "Species": [Entity(namespace="ncbitaxon", identifier="9606", name="Homo sapiens")],
             },
             {  # Original
@@ -553,10 +569,14 @@ class TestAnnotations(unittest.TestCase):
         """Test when the category can't be mapped."""
         self._help(
             {  # Expected
-                "Custom Annotation": [Entity(namespace="Custom Annotation", identifier="Custom Value")],
+                "Custom Annotation": [
+                    Entity(namespace="Custom Annotation", identifier="Custom Value")
+                ],
             },
             {
-                "Custom Annotation": [Entity(namespace="Custom Annotation", identifier="Custom Value")],
+                "Custom Annotation": [
+                    Entity(namespace="Custom Annotation", identifier="Custom Value")
+                ],
             },
         )
 

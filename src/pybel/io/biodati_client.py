@@ -90,7 +90,7 @@ def to_biodati(
         )
 
 
-def from_biodati(  # noqa:S107
+def from_biodati(
     network_id: str,
     username: str = "demo@biodati.com",
     password: str = "demo",

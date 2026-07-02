@@ -51,7 +51,9 @@ def get_multi_causal_downstream(graph, nbunch: BaseEntity | Iterable[BaseEntity]
 
 
 @transformation
-def get_subgraph_by_second_neighbors(graph, nodes: Iterable[BaseEntity], filter_pathologies: bool = False):
+def get_subgraph_by_second_neighbors(
+    graph, nodes: Iterable[BaseEntity], filter_pathologies: bool = False
+):
     """Get a graph around the neighborhoods of the given nodes and expand to the neighborhood of those nodes.
 
     Returns none if none of the nodes are in the graph.

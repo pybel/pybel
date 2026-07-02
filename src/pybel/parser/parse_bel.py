@@ -201,7 +201,9 @@ translocation_tag = one_of_tags(["translocation", "tloc"], TRANSLOCATION, MODIFI
 cell_secretion_tag = one_of_tags(["sec", "cellSecretion"], CELL_SECRETION, MODIFIER)
 
 #: 2.5.1c http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_cellsurfaceexpression_surf
-cell_surface_expression_tag = one_of_tags(["surf", "cellSurfaceExpression"], CELL_SURFACE_EXPRESSION, MODIFIER)
+cell_surface_expression_tag = one_of_tags(
+    ["surf", "cellSurfaceExpression"], CELL_SURFACE_EXPRESSION, MODIFIER
+)
 
 #: 2.5.2 http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_degradation_deg
 degradation_tags = one_of_tags(["deg", "degradation"], DEGRADATION, MODIFIER)
@@ -463,7 +465,9 @@ class BELParser(BaseParser):
             + opt_location,
         )
 
-        self.rna_modified = concept + pyparsing.Optional(WCW + DelimitedList(Group(variant))(VARIANTS))
+        self.rna_modified = concept + pyparsing.Optional(
+            WCW + DelimitedList(Group(variant))(VARIANTS)
+        )
 
         self.rna_fusion = Group(self.fusion)(FUSION)
         self.rna_fusion_legacy = Group(get_legacy_fusion_langauge(concept, "r"))(FUSION)
@@ -497,7 +501,8 @@ class BELParser(BaseParser):
         self.complex_singleton = complex_tag + nest(concept + opt_location)
 
         self.complex_list = complex_tag + nest(
-            DelimitedList(Group(self.single_abundance | self.complex_singleton))(MEMBERS) + opt_location,
+            DelimitedList(Group(self.single_abundance | self.complex_singleton))(MEMBERS)
+            + opt_location,
         )
 
         self.complex_abundances = self.complex_list | self.complex_singleton
@@ -537,7 +542,8 @@ class BELParser(BaseParser):
         self.bp_path.set_parse_action(self.check_function_semantics)
 
         self.activity_standard = activity_tag + nest(
-            self.simple_abundance + pyparsing.Optional(WCW + Group(self.molecular_activity)(EFFECT)),
+            self.simple_abundance
+            + pyparsing.Optional(WCW + Group(self.molecular_activity)(EFFECT)),
         )
 
         activity_legacy_tags = one_of(language.activities)(MODIFIER)
@@ -590,7 +596,9 @@ class BELParser(BaseParser):
         self.reactants = Suppress(REACTANTS) + nest(DelimitedList(Group(self.simple_abundance)))
         self.products = Suppress(PRODUCTS) + nest(DelimitedList(Group(self.simple_abundance)))
 
-        self.reaction = reaction_tags + nest(Group(self.reactants)(REACTANTS), Group(self.products)(PRODUCTS))
+        self.reaction = reaction_tags + nest(
+            Group(self.reactants)(REACTANTS), Group(self.products)(PRODUCTS)
+        )
 
         self.transformation = MatchFirst(
             [
@@ -625,7 +633,9 @@ class BELParser(BaseParser):
             analogous_tag,
             regulates_tag,
         ]
-        self.bel_to_bel = triple(self.bel_term, MatchFirst(self.bel_to_bel_relations), self.bel_term)
+        self.bel_to_bel = triple(
+            self.bel_term, MatchFirst(self.bel_to_bel_relations), self.bel_term
+        )
 
         # Mixed Relationships
 
@@ -699,7 +709,9 @@ class BELParser(BaseParser):
             ]
         )
         if self.graph is not None:
-            self.inverted_unqualified_relation.set_parse_action(self.handle_inverse_unqualified_relation)
+            self.inverted_unqualified_relation.set_parse_action(
+                self.handle_inverse_unqualified_relation
+            )
 
         self.normal_unqualified_relation = MatchFirst(
             [
@@ -808,7 +820,9 @@ class BELParser(BaseParser):
         self.graph.add_transitivity(subject_hash, object_hash)
         return tokens
 
-    def check_function_semantics(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
+    def check_function_semantics(
+        self, line: str, position: int, tokens: ParseResults
+    ) -> ParseResults:
         """Raise an exception if the function used on the tokens is wrong.
 
         :raises: InvalidFunctionSemantic
@@ -822,12 +836,15 @@ class BELParser(BaseParser):
         if namespace in self.concept_parser.namespace_to_pattern:
             return tokens
 
-        if self._allow_naked_names and namespace == DIRTY:  # Don't check dirty names in lenient mode
+        if (
+            self._allow_naked_names and namespace == DIRTY
+        ):  # Don't check dirty names in lenient mode
             return tokens
 
         valid_functions = set(
             itt.chain.from_iterable(
-                belns_encodings.get(encoding, set()) for encoding in self._namespace_dict[namespace][name]
+                belns_encodings.get(encoding, set())
+                for encoding in self._namespace_dict[namespace][name]
             ),
         )
 
@@ -898,9 +915,13 @@ class BELParser(BaseParser):
         if adder is not None:
             return adder(source=source, target=target, **d)
         else:
-            return self.graph.add_qualified_edge(source=source, target=target, relation=relation, **d)
+            return self.graph.add_qualified_edge(
+                source=source, target=target, relation=relation, **d
+            )
 
-    def _add_qualified_edge(self, *, source, source_modifier, relation, target, target_modifier) -> str:
+    def _add_qualified_edge(
+        self, *, source, source_modifier, relation, target, target_modifier
+    ) -> str:
         """Add an edge, then adds the opposite direction edge if it should."""
         d = {
             "relation": relation,
@@ -938,7 +959,9 @@ class BELParser(BaseParser):
             target_modifier=target_modifier,
         )
 
-    def _handle_relation_harness(self, line: str, position: int, tokens: ParseResults | dict) -> ParseResults:
+    def _handle_relation_harness(
+        self, line: str, position: int, tokens: ParseResults | dict
+    ) -> ParseResults:
         """Handle BEL relations based on the policy specified on instantiation.
 
         Note: this can't be changed after instantiation!
@@ -955,7 +978,9 @@ class BELParser(BaseParser):
 
         missing_required_annotations = self.control_parser.get_missing_required_annotations()
         if missing_required_annotations:
-            raise MissingAnnotationWarning(self.get_line_number(), line, position, missing_required_annotations)
+            raise MissingAnnotationWarning(
+                self.get_line_number(), line, position, missing_required_annotations
+            )
 
         return self._handle_relation(tokens)
 

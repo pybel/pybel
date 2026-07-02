@@ -208,9 +208,9 @@ class TestRelations(TestTokenParserBase):
 
     def test_increases_methylation(self):
         """Test a causal statement with a gene modification."""
-        for gmod in ["Me", 'go:0006306 ! "DNA methylation"']:
-            with self.subTest(gmod=gmod):
-                self._help_test_increases_methylation(gmod)
+        for gmod_val in ["Me", 'go:0006306 ! "DNA methylation"']:
+            with self.subTest(gmod=gmod_val):
+                self._help_test_increases_methylation(gmod_val)
 
     def _help_test_increases_methylation(self, x):
         statement = f'a(CHEBI:"lead atom") -> g(HGNC:APP, gmod({x}))'
@@ -639,9 +639,9 @@ class TestRelations(TestTokenParserBase):
         3.2.1 http://openbel.org/language/web/version_2.0/bel_specification_version_2.0.html#XnegCor
         Test phosphoralation tag.
         """
-        for pmod in ["P", "Ph", 'go:0006468 ! "protein phosphorylation"']:
-            with self.subTest(pmod=pmod):
-                self._help_test_negative_correlation_with_object_variant(pmod)
+        for pmod_val in ["P", "Ph", 'go:0006468 ! "protein phosphorylation"']:
+            with self.subTest(pmod=pmod_val):
+                self._help_test_negative_correlation_with_object_variant(pmod_val)
 
     def _help_test_negative_correlation_with_object_variant(self, x):
         statement = f"kin(p(FPLX:GSK3)) neg p(HGNC:MAPT,pmod({x}))"
@@ -1103,7 +1103,9 @@ class TestCustom(unittest.TestCase):
             "MESH": {(None, "nucleus"): "A"},
         }
 
-        self.parser = BELParser(graph, namespace_to_term_to_encoding=namespace_to_term, autostreamline=False)
+        self.parser = BELParser(
+            graph, namespace_to_term_to_encoding=namespace_to_term, autostreamline=False
+        )
 
     def test_tloc_undefined_namespace(self):
         s = 'tloc(p(HGNC:AKT1), fromLoc(MESH:nucleus), toLoc(MISSING:"undefined"))'

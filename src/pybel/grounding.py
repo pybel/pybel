@@ -123,7 +123,11 @@ def get_remapping() -> Mapping[tuple[str, str], tuple[str, str, str]]:
         names=["prefix", "name", "fplx"],
         sep=",",
     )
-    return {("bel", name): ("fplx", fplx, fplx) for prefix, name, fplx in df.values if prefix.lower() == "bel"}
+    return {
+        ("bel", name): ("fplx", fplx, fplx)
+        for prefix, name, fplx in df.values
+        if prefix.lower() == "bel"
+    }
 
 
 #: A mapping of (prefix, name) pairs to (prefix, identifier, name) triples
@@ -139,7 +143,9 @@ def _get_name_remapping(prefix: str, name: str) -> tuple[str, str, str] | tuple[
     return _NAME_REMAPPING.get((prefix, name), (None, None, None))
 
 
-def _get_id_remapping(prefix: str, identifier: str) -> tuple[str, str, str] | tuple[None, None, None]:
+def _get_id_remapping(
+    prefix: str, identifier: str
+) -> tuple[str, str, str] | tuple[None, None, None]:
     return _ID_REMAPPING.get((prefix, identifier), (None, None, None))
 
 
@@ -309,7 +315,9 @@ def _process_node(node: Mapping[str, Any], skip_namespaces: Collection[str] | No
     """
     success = True
     if CONCEPT in node:
-        success = success and _process_concept(concept=node[CONCEPT], node=node, skip_namespaces=skip_namespaces)
+        success = success and _process_concept(
+            concept=node[CONCEPT], node=node, skip_namespaces=skip_namespaces
+        )
     if VARIANTS in node:
         success = success and _process_list(node[VARIANTS], skip_namespaces=skip_namespaces)
     if MEMBERS in node:

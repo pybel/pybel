@@ -37,7 +37,9 @@ keyword_to_suffix = {
 
 def main():
     """Update the resources links file."""
-    keyword_to_url = {keyword: _get_conso_url(suffix) for keyword, suffix in keyword_to_suffix.items()}
+    keyword_to_url = {
+        keyword: _get_conso_url(suffix) for keyword, suffix in keyword_to_suffix.items()
+    }
 
     with open(os.path.join(HERE, "resources.py"), "w") as file:
         print("# -*- coding: utf-8 -*-\n", file=file)

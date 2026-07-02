@@ -113,7 +113,11 @@ CITATION_PREDICATES = {
 @edge_predicate
 def has_authors(edge_data: EdgeData) -> bool:
     """Check if the edge contains author information for its citation."""
-    return CITATION in edge_data and CITATION_AUTHORS in edge_data[CITATION] and edge_data[CITATION][CITATION_AUTHORS]
+    return (
+        CITATION in edge_data
+        and CITATION_AUTHORS in edge_data[CITATION]
+        and edge_data[CITATION][CITATION_AUTHORS]
+    )
 
 
 @edge_predicate
@@ -188,7 +192,11 @@ def edge_has_annotation(edge_data: EdgeData, key: str) -> Any | None:
 
     >>> from pybel.examples import sialic_acid_graph
     >>> from pybel.examples.sialic_acid_example import sialic_acid_cd33_complex, cd33
-    >>> edges = {(u, v) for u, v, data in sialic_acid_graph.edges(data=True) if edge_has_annotation(data, "Species")}
+    >>> edges = {
+    ...     (u, v)
+    ...     for u, v, data in sialic_acid_graph.edges(data=True)
+    ...     if edge_has_annotation(data, "Species")
+    ... }
     >>> assert (sialic_acid_cd33_complex, cd33) in edges
     """
     annotations = edge_data.get(ANNOTATIONS)

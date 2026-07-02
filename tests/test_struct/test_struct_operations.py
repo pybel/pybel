@@ -39,13 +39,21 @@ class TestLeftFullJoin(unittest.TestCase):
 
     def _help_check_initial_g(self, graph: BELGraph):
         """Test the initial G graph."""
-        self.assertEqual(2, graph.number_of_nodes(), msg="initial graph G had wrong number of nodes")
-        self.assertEqual(1, graph.number_of_edges(), msg="initial graph G had wrong number of edges")
+        self.assertEqual(
+            2, graph.number_of_nodes(), msg="initial graph G had wrong number of nodes"
+        )
+        self.assertEqual(
+            1, graph.number_of_edges(), msg="initial graph G had wrong number of edges"
+        )
 
     def _help_check_initial_h(self, graph: BELGraph):
         """Test the initial H graph."""
-        self.assertEqual(3, graph.number_of_nodes(), msg="initial graph H had wrong number of nodes")
-        self.assertEqual(3, graph.number_of_edges(), msg="initial graph H had wrong number of edges")
+        self.assertEqual(
+            3, graph.number_of_nodes(), msg="initial graph H had wrong number of nodes"
+        )
+        self.assertEqual(
+            3, graph.number_of_edges(), msg="initial graph H had wrong number of edges"
+        )
 
     def _help_check_result(self, j: BELGraph):
         """Help check the result of left joining H into G.

@@ -71,7 +71,9 @@ def from_hetionet_json(
     # FIXME add namespaces
     # graph.namespace_pattern.update({})
 
-    kind_identifier_to_name = {(x["kind"], x["identifier"]): x["name"] for x in hetionet_dict["nodes"]}
+    kind_identifier_to_name = {
+        (x["kind"], x["identifier"]): x["name"] for x in hetionet_dict["nodes"]
+    }
 
     edges = hetionet_dict["edges"]
 
@@ -87,7 +89,9 @@ def from_hetionet_json(
     return graph
 
 
-def _get_node(edge, key, kind_identifier_to_name) -> tuple[None, None, None, None] | tuple[str, str, str, str]:
+def _get_node(
+    edge, key, kind_identifier_to_name
+) -> tuple[None, None, None, None] | tuple[str, str, str, str]:
     node_type, node_identifier = edge[key]
     namespace = DSL_MAP.get(node_type)
     if namespace is None:
@@ -107,8 +111,12 @@ def _add_edge(
     kind_identifier_to_name,
     it_logger,
 ) -> None | str | set[str]:
-    source_type, source_ns, source_identifier, source_name = _get_node(edge, "source_id", kind_identifier_to_name)
-    target_type, target_ns, target_identifier, target_name = _get_node(edge, "target_id", kind_identifier_to_name)
+    source_type, source_ns, source_identifier, source_name = _get_node(
+        edge, "source_id", kind_identifier_to_name
+    )
+    target_type, target_ns, target_identifier, target_name = _get_node(
+        edge, "target_id", kind_identifier_to_name
+    )
     if source_type is None or target_type is None:
         return
 
@@ -217,7 +225,9 @@ def _add_edge(
                     evidence="",
                     annotations=annotations,
                 )
-                it_logger(f"Unhandled action for {source_identifier}-{kind}-{target_identifier}: {action}")
+                it_logger(
+                    f"Unhandled action for {source_identifier}-{kind}-{target_identifier}: {action}"
+                )
             rv.add(key)
         return rv
 

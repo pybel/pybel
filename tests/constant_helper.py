@@ -2,7 +2,51 @@
 
 import logging
 
-from pybel.constants import *
+from pybel.constants import (
+    EVIDENCE,
+    METADATA_NAME,
+    METADATA_DESCRIPTION,
+    METADATA_VERSION,
+    METADATA_COPYRIGHT,
+    METADATA_AUTHORS,
+    METADATA_LICENSES,
+    METADATA_CONTACT,
+    METADATA_PROJECT,
+    CITATION_TYPE_PUBMED,
+    RELATION,
+    HAS_VARIANT,
+    CITATION,
+    DIRECTLY_DECREASES,
+    TARGET_MODIFIER,
+    SOURCE_MODIFIER,
+    LOCATION,
+    NAMESPACE,
+    NAME,
+    INCREASES,
+    MODIFIER,
+    DEGRADATION,
+    ACTIVITY,
+    EFFECT,
+    CAUSES_NO_CHANGE,
+    DIRECTLY_INCREASES,
+    DECREASES,
+    INTRACELLULAR,
+    CELL_SURFACE,
+    TRANSLATED_TO,
+    PART_OF,
+    FROM_LOC,
+    TRANSLOCATION,
+    TO_LOC,
+    RATE_LIMITING_STEP_OF,
+    POSITIVE_CORRELATION,
+    REGULATES,
+    HAS_REACTANT,
+    HAS_PRODUCT,
+    SUBPROCESS_OF,
+    EQUIVALENT_TO,
+    ASSOCIATION,
+    IS_A,
+)
 from pybel.dsl import (
     Abundance,
     BiologicalProcess,
@@ -132,7 +176,9 @@ bcr_jak2_rna_fusion = RnaFusion(
     range_3p=EnumeratedFusionRange("r", 2626, "?"),
 )
 
-chchd4_aifm1_rna_fusion = RnaFusion(partner_5p=Rna("HGNC", "CHCHD4"), partner_3p=Rna("HGNC", "AIFM1"))
+chchd4_aifm1_rna_fusion = RnaFusion(
+    partner_5p=Rna("HGNC", "CHCHD4"), partner_3p=Rna("HGNC", "AIFM1")
+)
 
 tmprss2_erg_rna_fusion = RnaFusion(
     partner_5p=Rna("HGNC", "TMPRSS2"),
@@ -140,7 +186,9 @@ tmprss2_erg_rna_fusion = RnaFusion(
     partner_3p=Rna("HGNC", "ERG"),
     range_3p=EnumeratedFusionRange("r", 312, 5034),
 )
-tmprss2_erg_rna_fusion_unspecified = RnaFusion(partner_5p=Rna("HGNC", "TMPRSS2"), partner_3p=Rna("HGNC", "ERG"))
+tmprss2_erg_rna_fusion_unspecified = RnaFusion(
+    partner_5p=Rna("HGNC", "TMPRSS2"), partner_3p=Rna("HGNC", "ERG")
+)
 
 BEL_THOROUGH_NODES = {
     oxygen_atom,

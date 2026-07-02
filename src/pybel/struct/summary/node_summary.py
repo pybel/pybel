@@ -96,7 +96,9 @@ def _iterate_namespaces(graph: BELGraph) -> Iterable[str]:
 
 
 def _iterate_edge_entities(graph: BELGraph) -> Iterable[Entity]:
-    for (_, _, data), side in itt.product(graph.edges(data=True), (SOURCE_MODIFIER, TARGET_MODIFIER)):
+    for (_, _, data), side in itt.product(
+        graph.edges(data=True), (SOURCE_MODIFIER, TARGET_MODIFIER)
+    ):
         side_data = data.get(side)
         if side_data is None:
             continue
@@ -194,7 +196,10 @@ def iterate_node_entities(node: BaseEntity) -> Iterable[Entity]:
     >>> protein_2 = Protein(namespace="hgnc", identifier="2")
     >>> complex_1 = ComplexAbundance([protein_1, protein_2])
     >>> complex_entities = list(iterate_node_entities(complex_1))
-    >>> assert [Entity(namespace="hgnc", identifier="1"), Entity(namespace="hgnc", identifier="2")] == complex_entities
+    >>> assert [
+    ...     Entity(namespace="hgnc", identifier="1"),
+    ...     Entity(namespace="hgnc", identifier="2"),
+    ... ] == complex_entities
     """
     if isinstance(node, BaseConcept):
         yield node.entity
@@ -223,7 +228,9 @@ def _identifier_filtered_iterator(graph) -> Iterable[tuple[str, str]]:
             for pair in _get_node_names(member):
                 yield pair
 
-    for (_, _, data), side in itt.product(graph.edges(data=True), (SOURCE_MODIFIER, TARGET_MODIFIER)):
+    for (_, _, data), side in itt.product(
+        graph.edges(data=True), (SOURCE_MODIFIER, TARGET_MODIFIER)
+    ):
         side_data = data.get(side)
         if side_data is None:
             continue
@@ -311,7 +318,12 @@ def count_variants(graph: BELGraph) -> typing.Counter[str]:
 
     :param graph: A BEL graph
     """
-    return Counter(variant_data[KIND] for data in graph if has_variant(graph, data) for variant_data in data[VARIANTS])
+    return Counter(
+        variant_data[KIND]
+        for data in graph
+        if has_variant(graph, data)
+        for variant_data in data[VARIANTS]
+    )
 
 
 def get_top_hubs(graph: BELGraph, *, n: int | None = 15) -> list[tuple[BaseEntity, int]]:
@@ -355,7 +367,10 @@ def node_is_grounded(node: BaseEntity) -> bool:
 
     :param node: A BEL node
     """
-    return all(entity.identifier is not None and entity.name is not None for entity in iterate_node_entities(node))
+    return all(
+        entity.identifier is not None and entity.name is not None
+        for entity in iterate_node_entities(node)
+    )
 
 
 def get_degradations(graph: BELGraph) -> set[BaseEntity]:

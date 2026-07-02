@@ -21,19 +21,11 @@ logger = logging.getLogger(__name__)
 
 @transformation
 def get_upstream_causal_subgraph(graph, nbunch: BaseEntity | Iterable[BaseEntity]):
-    """Induce a sub-graph from all of the upstream causal entities of the nodes in the nbunch.
-
-    :type graph: pybel.BELGraph
-    :rtype: pybel.BELGraph
-    """
+    """Induce a sub-graph from all upstream causal entities of the nodes in the nbunch."""
     return get_subgraph_by_edge_filter(graph, build_upstream_edge_predicate(nbunch))
 
 
 @transformation
 def get_downstream_causal_subgraph(graph, nbunch: BaseEntity | Iterable[BaseEntity]):
-    """Induce a sub-graph from all of the downstream causal entities of the nodes in the nbunch.
-
-    :type graph: pybel.BELGraph
-    :rtype: pybel.BELGraph
-    """
+    """Induce a sub-graph from all downstream causal entities of the nodes in the nbunch."""
     return get_subgraph_by_edge_filter(graph, build_downstream_edge_predicate(nbunch))

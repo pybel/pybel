@@ -61,7 +61,9 @@ def to_nodelink(graph: BELGraph) -> Mapping[str, Any]:
 
 def _prepare_graph_dict(g):
     # Convert annotation list definitions (which are sets) to canonicalized/sorted lists
-    g[GRAPH_ANNOTATION_LIST] = {keyword: sorted(values) for keyword, values in g.get(GRAPH_ANNOTATION_LIST, {}).items()}
+    g[GRAPH_ANNOTATION_LIST] = {
+        keyword: sorted(values) for keyword, values in g.get(GRAPH_ANNOTATION_LIST, {}).items()
+    }
 
     g[GRAPH_ANNOTATION_CURIE] = sorted(g[GRAPH_ANNOTATION_CURIE])
     g[GRAPH_ANNOTATION_MIRIAM] = sorted(g[GRAPH_ANNOTATION_MIRIAM])
@@ -93,7 +95,9 @@ def from_nodelink(graph_json_dict: Mapping[str, Any], check_version: bool = True
     """Build a graph from node-link JSON Object."""
     pybel_version = tokenize_version(graph_json_dict["graph"]["pybel_version"])
     if pybel_version[1] < 14:  # if minor version is less than 14
-        raise ValueError("Invalid NodeLink JSON from old version of PyBEL (v{}.{}.{})".format(*pybel_version))
+        raise ValueError(
+            "Invalid NodeLink JSON from old version of PyBEL (v{}.{}.{})".format(*pybel_version)
+        )
     graph = _from_nodelink_json_helper(graph_json_dict)
     return ensure_version(graph, check_version=check_version)
 
@@ -161,7 +165,8 @@ def _augment_node(node: BaseEntity) -> BaseEntity:
 
 def _recover_graph_dict(graph: BELGraph):
     graph.graph[GRAPH_ANNOTATION_LIST] = {
-        keyword: set(values) for keyword, values in graph.graph.get(GRAPH_ANNOTATION_LIST, {}).items()
+        keyword: set(values)
+        for keyword, values in graph.graph.get(GRAPH_ANNOTATION_LIST, {}).items()
     }
     graph.graph[GRAPH_ANNOTATION_CURIE] = set(graph.graph.get(GRAPH_ANNOTATION_CURIE, []))
     graph.graph[GRAPH_ANNOTATION_MIRIAM] = set(graph.graph.get(GRAPH_ANNOTATION_MIRIAM, []))

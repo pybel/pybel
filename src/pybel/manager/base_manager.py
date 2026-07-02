@@ -50,8 +50,12 @@ def build_engine_session(
 
     engine = create_engine(connection, echo=echo)
 
-    autoflush = pystow.get_config("pybel", "manager_autoflush", passthrough=autoflush, dtype=bool, default=True)
-    autocommit = pystow.get_config("pybel", "manager_autocommit", passthrough=autocommit, dtype=bool, default=False)
+    autoflush = pystow.get_config(
+        "pybel", "manager_autoflush", passthrough=autoflush, dtype=bool, default=True
+    )
+    autocommit = pystow.get_config(
+        "pybel", "manager_autocommit", passthrough=autocommit, dtype=bool, default=False
+    )
     expire_on_commit = pystow.get_config(
         "pybel",
         "manager_autoexpire",

@@ -23,7 +23,9 @@ __all__ = [
 
 
 @transformation
-def get_subgraph_by_edge_filter(graph: BELGraph, edge_predicates: EdgePredicates | None = None) -> BELGraph:
+def get_subgraph_by_edge_filter(
+    graph: BELGraph, edge_predicates: EdgePredicates | None = None
+) -> BELGraph:
     """Induce a sub-graph on all edges that pass the given filters.
 
     :param graph: A BEL graph
@@ -62,18 +64,12 @@ def get_subgraph_by_node_filter(graph: BELGraph, node_predicates: NodePredicates
 
 @transformation
 def get_largest_component(graph: BELGraph) -> BELGraph:
-    """Get the giant component of a graph.
-
-    :param graph: A BEL graph
-    """
+    """Get the giant component of a graph."""
     biggest_component_nodes = max(nx.weakly_connected_components(graph), key=len)
     return subgraph(graph, biggest_component_nodes)
 
 
 @transformation
 def get_causal_subgraph(graph: BELGraph) -> BELGraph:
-    """Build a new sub-graph induced over the causal edges.
-
-    :param graph: A BEL graph
-    """
+    """Build a new sub-graph induced over the causal edges."""
     return get_subgraph_by_edge_filter(graph, is_causal_relation)

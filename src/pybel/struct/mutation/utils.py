@@ -52,7 +52,8 @@ def expand_by_edge_filter(source, target, edge_predicates: EdgePredicates):
     :rtype: pybel.BELGraph
     """
     target.add_edges_from(
-        (u, v, k, source[u][v][k]) for u, v, k in filter_edges(source, edge_predicates=edge_predicates)
+        (u, v, k, source[u][v][k])
+        for u, v, k in filter_edges(source, edge_predicates=edge_predicates)
     )
 
     update_metadata(source, target)

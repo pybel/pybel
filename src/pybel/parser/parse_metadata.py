@@ -136,7 +136,9 @@ class MetadataParser(BaseParser):
         annotation_tag = And([define_tag, Suppress(BEL_KEYWORD_ANNOTATION), ns("name"), as_tag])
         self.annotation_url = And([annotation_tag, url_tag, quote("url")])
         self.annotation_list = And([annotation_tag, list_tag, delimited_quoted_list("values")])
-        self.annotation_pattern = And([annotation_tag, Suppress(BEL_KEYWORD_PATTERN), quote("value")])
+        self.annotation_pattern = And(
+            [annotation_tag, Suppress(BEL_KEYWORD_PATTERN), quote("value")]
+        )
 
         self.document.set_parse_action(self.handle_document)
         self.namespace_url.set_parse_action(self.handle_namespace_url)
@@ -229,7 +231,9 @@ class MetadataParser(BaseParser):
             for keyword, namespace in zip(keywords, namespaces, strict=False):
                 self.annotation_to_term[keyword] = {entry.name for entry in namespace.entries}
 
-    def handle_namespace_pattern(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
+    def handle_namespace_pattern(
+        self, line: str, position: int, tokens: ParseResults
+    ) -> ParseResults:
         """Handle statements like ``DEFINE NAMESPACE X AS PATTERN "Y"``.
 
         :raises: RedefinedNamespaceError
@@ -247,7 +251,9 @@ class MetadataParser(BaseParser):
         if self.disallow_redefinition and self.has_annotation(annotation):
             raise RedefinedAnnotationError(self.get_line_number(), line, position, annotation)
 
-    def handle_annotations_url(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
+    def handle_annotations_url(
+        self, line: str, position: int, tokens: ParseResults
+    ) -> ParseResults:
         """Handle statements like ``DEFINE ANNOTATION X AS URL "Y"``.
 
         :raises: RedefinedAnnotationError
@@ -257,7 +263,9 @@ class MetadataParser(BaseParser):
         self.annotation_url_dict[keyword] = tokens["url"]
         return tokens
 
-    def handle_annotation_list(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
+    def handle_annotation_list(
+        self, line: str, position: int, tokens: ParseResults
+    ) -> ParseResults:
         """Handle statements like ``DEFINE ANNOTATION X AS LIST {"Y","Z", ...}``.
 
         :raises: RedefinedAnnotationError
@@ -267,7 +275,9 @@ class MetadataParser(BaseParser):
         self.annotation_to_local[annotation] = set(tokens["values"])
         return tokens
 
-    def handle_annotation_pattern(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
+    def handle_annotation_pattern(
+        self, line: str, position: int, tokens: ParseResults
+    ) -> ParseResults:
         """Handle statements like ``DEFINE ANNOTATION X AS PATTERN "Y"``.
 
         :raises: RedefinedAnnotationError

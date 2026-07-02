@@ -174,7 +174,9 @@ class TestNetworkCache(BelReconstitutionMixin, FleetingTemporaryCacheMixin):
         self.assertEqual(graph.name, most_recent_version.name)
         self.assertEqual("1.0.1", exact_name_version.version)
 
-        recent_networks = list(self.manager.list_recent_networks())  # just try it to see if it fails
+        recent_networks = list(
+            self.manager.list_recent_networks()
+        )  # just try it to see if it fails
         self.assertIsNotNone(recent_networks)
         self.assertEqual([(network.name, "1.0.1")], [(n.name, n.version) for n in recent_networks])
         self.assertEqual("1.0.1", recent_networks[0].version)
@@ -345,7 +347,9 @@ class TestQuery(TemporaryCacheMixin):
         self.assertFalse(rv[0].is_enriched)
 
     def test_query_citaiton_by_reference(self):
-        rv = self.manager.query_citations(db=CITATION_TYPE_PUBMED, db_id=test_citation_dict[IDENTIFIER])
+        rv = self.manager.query_citations(
+            db=CITATION_TYPE_PUBMED, db_id=test_citation_dict[IDENTIFIER]
+        )
         self.assertEqual(1, len(rv))
         self.assertTrue(rv[0].is_pubmed)
         self.assertFalse(rv[0].is_enriched)
@@ -369,7 +373,9 @@ class TestQuery(TemporaryCacheMixin):
     @unittest.skip
     def test_query_by_name_wildcard(self):
         # type, name like, data
-        name_dict_list2 = self.manager.query_citations(db=CITATION_TYPE_PUBMED, name="%article from%")
+        name_dict_list2 = self.manager.query_citations(
+            db=CITATION_TYPE_PUBMED, name="%article from%"
+        )
         self.assertEqual(len(name_dict_list2), 2)
         # self.assertIn(..., name_dict_list2)
         # self.assertIn(..., name_dict_list2)
@@ -406,7 +412,9 @@ class TestEnsure(TemporaryCacheMixin):
 
     def test_get_or_create_evidence(self):
         citation_db, citation_ref = CITATION_TYPE_PUBMED, str(randint(1, 1000000))
-        basic_citation = self.manager.get_or_create_citation(namespace=citation_db, identifier=citation_ref)
+        basic_citation = self.manager.get_or_create_citation(
+            namespace=citation_db, identifier=citation_ref
+        )
         utf8_test_evidence = "Yes, all the information is true! This contains a unicode alpha: α"
 
         evidence = self.manager.get_or_create_evidence(basic_citation, utf8_test_evidence)
@@ -485,11 +493,16 @@ class TestEdgeStore(TemporaryCacheClsMixin, BelReconstitutionMixin):
         self.assertEqual(dict(x), d)
 
         network_edge_associations = (
-            self.manager.session.query(models.network_edge).filter_by(network_id=self.network.id).all()
+            self.manager.session.query(models.network_edge)
+            .filter_by(network_id=self.network.id)
+            .all()
         )
 
         self.assertEqual(
-            {network_edge_association.edge_id for network_edge_association in network_edge_associations},
+            {
+                network_edge_association.edge_id
+                for network_edge_association in network_edge_associations
+            },
             {edge.id for edge in edges},
         )
 
@@ -766,7 +779,9 @@ class TestReconstituteNodeTuples(TemporaryCacheMixin):
         node_data = Protein(
             namespace=dummy_namespace,
             name=dummy_name,
-            variants=[ProteinModification(name=dummy_mod_name, namespace=dummy_mod_namespace, code="Ser")],
+            variants=[
+                ProteinModification(name=dummy_mod_name, namespace=dummy_mod_namespace, code="Ser")
+            ],
         )
         self._help_reconstitute(node_data, 2, 1)
 
@@ -922,7 +937,11 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         self.assertEqual(2, network.nodes.count(), msg="number of nodes")
         self.assertEqual(1, network.edges.count(), msg="number of edges")
 
-        kin_list = self.manager.session.query(NamespaceEntry).filter(NamespaceEntry.name == "kinase activity").all()
+        kin_list = (
+            self.manager.session.query(NamespaceEntry)
+            .filter(NamespaceEntry.name == "kinase activity")
+            .all()
+        )
         self.assertEqual(1, len(kin_list), msg="number of kinase NamespaceEntrys")
 
         kin = next(iter(kin_list))
@@ -949,7 +968,11 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
-        kin_list = self.manager.session.query(NamespaceEntry).filter(NamespaceEntry.name == dummy_activity_name).all()
+        kin_list = (
+            self.manager.session.query(NamespaceEntry)
+            .filter(NamespaceEntry.name == dummy_activity_name)
+            .all()
+        )
         self.assertEqual(1, len(kin_list))
 
         kin = next(iter(kin_list))
@@ -974,7 +997,11 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
-        kin_list = self.manager.session.query(NamespaceEntry).filter(NamespaceEntry.name == "kinase activity").all()
+        kin_list = (
+            self.manager.session.query(NamespaceEntry)
+            .filter(NamespaceEntry.name == "kinase activity")
+            .all()
+        )
         self.assertEqual(1, len(kin_list))
 
         kin = next(iter(kin_list))
@@ -1001,7 +1028,11 @@ class TestReconstituteEdges(TemporaryCacheMixin):
         self.assertEqual(2, network.nodes.count())
         self.assertEqual(1, network.edges.count())
 
-        kin_list = self.manager.session.query(NamespaceEntry).filter(NamespaceEntry.name == dummy_activity_name).all()
+        kin_list = (
+            self.manager.session.query(NamespaceEntry)
+            .filter(NamespaceEntry.name == dummy_activity_name)
+            .all()
+        )
         self.assertEqual(1, len(kin_list))
 
         kin = next(iter(kin_list))

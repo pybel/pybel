@@ -334,11 +334,15 @@ class CentralDogma(BaseAbundance):
         if not self.variants:
             return super().as_bel(use_identifiers=use_identifiers)
 
-        variants_canon = sorted([variant.as_bel(use_identifiers=use_identifiers) for variant in self.variants])
+        variants_canon = sorted(
+            [variant.as_bel(use_identifiers=use_identifiers) for variant in self.variants]
+        )
 
         return "{}({}, {})".format(
             self._bel_function,
-            self.obo if use_identifiers and self.entity.identifier and self.entity.name else self.curie,
+            self.obo
+            if use_identifiers and self.entity.identifier and self.entity.name
+            else self.curie,
             ", ".join(variants_canon),
         )
 
@@ -446,7 +450,9 @@ class ProteinModification(EntityVariant):
         Example from custom namespace:
 
         >>> from pybel.dsl import ProteinModification
-        >>> ProteinModification(name="protein phosphorylation", namespace="GO", code="Thr", position=308)
+        >>> ProteinModification(
+        ...     name="protein phosphorylation", namespace="GO", code="Thr", position=308
+        ... )
 
         Example from custom namespace additionally qualified with identifier:
 
@@ -588,7 +594,9 @@ class ProteinSubstitution(Hgvs):
         :param to_aa: The 3-letter amino acid code of the new residue
 
         >>> from pybel.dsl import Protein, ProteinSubstitution
-        >>> Protein(namespace="HGNC", name="AKT1", variants=[ProteinSubstitution("Ala", 127, "Tyr")])
+        >>> Protein(
+        ...     namespace="HGNC", name="AKT1", variants=[ProteinSubstitution("Ala", 127, "Tyr")]
+        ... )
 
         """
         super().__init__(f"p.{from_aa}{position}{to_aa}")
@@ -743,7 +751,11 @@ class Protein(CentralDogma):
     Example: AKT with phosphorylation
 
     >>> from pybel.dsl import Protein, ProteinModification
-    >>> Protein(namespace="HGNC", name="AKT", variants=[ProteinModification("Ph", code="Thr", position=308)])
+    >>> Protein(
+    ...     namespace="HGNC",
+    ...     name="AKT",
+    ...     variants=[ProteinModification("Ph", code="Thr", position=308)],
+    ... )
     """
 
     function = PROTEIN
@@ -804,7 +816,10 @@ class Reaction(BaseEntity):
         :param xrefs: Alternate identifiers for the entity if it is named
 
         >>> from pybel.dsl import Reaction, Protein, Abundance
-        >>> Reaction([Protein(namespace="HGNC", name="KNG1")], [Abundance(namespace="CHEBI", name="bradykinin")])
+        >>> Reaction(
+        ...     [Protein(namespace="HGNC", name="KNG1")],
+        ...     [Abundance(namespace="CHEBI", name="bradykinin")],
+        ... )
 
         """
         super().__init__()
@@ -821,7 +836,9 @@ class Reaction(BaseEntity):
             products = sorted(products, key=_as_bel)
 
         if not reactants and not products and not namespace:
-            raise ReactionEmptyException("Reaction can not be instantiated with an empty members list.")
+            raise ReactionEmptyException(
+                "Reaction can not be instantiated with an empty members list."
+            )
 
         self.update(
             {
@@ -865,7 +882,9 @@ class ListAbundance(BaseEntity):
             self[MEMBERS] = sorted(members, key=_as_bel)
 
         if not self[MEMBERS]:
-            raise ListAbundanceEmptyException("List abundance can not be instantiated with an empty members list.")
+            raise ListAbundanceEmptyException(
+                "List abundance can not be instantiated with an empty members list."
+            )
 
     @property
     def members(self) -> list[BaseAbundance]:

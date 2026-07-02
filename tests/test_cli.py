@@ -102,7 +102,9 @@ class TestCli(FleetingTemporaryCacheMixin, BelReconstitutionMixin):
 
         try:
             neo = Graph(neo_path)
-            neo.data(f'match (n)-[r]->() where r.{PYBEL_CONTEXT_TAG}="{test_context}" detach delete n')
+            neo.data(
+                f'match (n)-[r]->() where r.{PYBEL_CONTEXT_TAG}="{test_context}" detach delete n'
+            )
         except GraphError:
             self.skipTest("Can't query Neo4J ")
         except Exception:

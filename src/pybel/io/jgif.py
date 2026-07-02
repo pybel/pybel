@@ -66,9 +66,7 @@ species_map = {
     "mouse": "10090",
 }
 
-placeholder_evidence = (
-    "This Network edge has no supporting evidence.  Please add real evidence to this edge prior to deleting."
-)
+placeholder_evidence = "This Network edge has no supporting evidence.  Please add real evidence to this edge prior to deleting."
 
 EXPERIMENT_CONTEXT = "experiment_context"
 
@@ -168,7 +166,8 @@ ANNOTATION_URLS = {
 }
 
 NAMESPACE_TO_PATTERN = {
-    namespace: re.compile(r".*") for namespace in (set(NAMESPACE_URLS) | {"GO", "MESH"})  # don't validate anything
+    namespace: re.compile(r".*")
+    for namespace in (set(NAMESPACE_URLS) | {"GO", "MESH"})  # don't validate anything
 }
 
 
@@ -228,9 +227,7 @@ def from_cbn_jgif(graph_jgif_dict):
         and biological network models were developed and are maintained as part of a collaboration among
         Selventa, OrangeBus and ADS. The project is led and funded by Philip Morris International. For more
         information on the focus of Philip Morris International’s research, please visit www.pmi.com.
-        """.replace(
-                "\n", "\t"
-            ),
+        """.replace("\n", "\t"),
             METADATA_CONTACT: "CausalBiologicalNetworks.RD@pmi.com",
         }
     )
@@ -325,7 +322,9 @@ def from_jgif(graph_jgif_dict, parser_kwargs: Mapping[str, Any] | None = None):
 
                 parser.control_parser.clear()
                 citation_namespace = citation["type"].lower().strip()
-                citation_namespace = pc.CITATION_NORMALIZER.get(citation_namespace, citation_namespace)
+                citation_namespace = pc.CITATION_NORMALIZER.get(
+                    citation_namespace, citation_namespace
+                )
                 parser.control_parser.citation_db = citation_namespace
                 parser.control_parser.citation_db_id = citation["id"].strip()
                 parser.control_parser.evidence = summary_text

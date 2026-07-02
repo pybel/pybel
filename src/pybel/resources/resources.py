@@ -1,9 +1,7 @@
 """Resources for PyBEL."""
 
 CHEBI_URL = "https://raw.githubusercontent.com/pharmacome/conso/d67144bc27a21626a514837b3b4382413dd6866b/external/chebi-names.belns"
-EC_URL = (
-    "https://raw.githubusercontent.com/pharmacome/conso/d67144bc27a21626a514837b3b4382413dd6866b/external/ec-code.belns"
-)
+EC_URL = "https://raw.githubusercontent.com/pharmacome/conso/d67144bc27a21626a514837b3b4382413dd6866b/external/ec-code.belns"
 FB_URL = "https://raw.githubusercontent.com/pharmacome/conso/80171ae62cf43aa1fc8a6c326b94537ab342458c/external/fb-names.belns"
 GO_URL = "https://raw.githubusercontent.com/pharmacome/conso/d9d270e11aac480542c412d4222983a5f042b8ae/external/go-names.belns"
 HGNC_URL = "https://raw.githubusercontent.com/pharmacome/conso/d67144bc27a21626a514837b3b4382413dd6866b/external/hgnc-names.belns"
@@ -12,9 +10,7 @@ MGI_URL = "https://raw.githubusercontent.com/pharmacome/conso/efc856fb009a39e4d2
 NCBIGENE_URL = "https://raw.githubusercontent.com/pharmacome/conso/d67144bc27a21626a514837b3b4382413dd6866b/external/ncbigene-names.belns"
 RGD_URL = "https://raw.githubusercontent.com/pharmacome/conso/efc856fb009a39e4d284269a6801f79ed3d3cf56/external/rgd-names.belns"
 
-FPLX_URL = (
-    "https://raw.githubusercontent.com/sorgerlab/famplex/da9f2187b694e6b425e668604e24ac9fac0f2c31/export/famplex.belns"
-)
+FPLX_URL = "https://raw.githubusercontent.com/sorgerlab/famplex/da9f2187b694e6b425e668604e24ac9fac0f2c31/export/famplex.belns"
 
 #: Default URL lookup for some keywords
 keyword_to_url = {

@@ -61,7 +61,9 @@ kin(p(HGNC:PTK2)) increases kin(complex(SCOMP:"p85/p110 PI3Kinase Complex"))
 """
 
 example_graph.add_increases(ptk2, mapk1, evidence=e1, citation=c1, target_modifier=kinase_activity)
-example_graph.add_increases(ptk2_rgb2_sos1, ras_family, evidence=e1, citation=c1, target_modifier=gtp_activity)
+example_graph.add_increases(
+    ptk2_rgb2_sos1, ras_family, evidence=e1, citation=c1, target_modifier=gtp_activity
+)
 example_graph.add_increases(
     ras_family,
     mapk1,
@@ -70,7 +72,9 @@ example_graph.add_increases(
     source_modifier=gtp_activity,
     target_modifier=kinase_activity,
 )
-example_graph.add_increases(ptk2, ptk2_rgb2_sos1, evidence=e1, citation=c1, source_modifier=kinase_activity)
+example_graph.add_increases(
+    ptk2, ptk2_rgb2_sos1, evidence=e1, citation=c1, source_modifier=kinase_activity
+)
 example_graph.add_increases(
     ptk2,
     mapk1,
@@ -109,19 +113,29 @@ g(HGNC:MTHFR,sub(C,677,T)) pos path(MESH:"Alzheimer Disease")
 """
 
 c2 = "21119889"
-e2 = "Two common MTHFR polymorphisms, namely 677C>T (Ala222Val) and 1298A>C (Glu429Ala), are known to reduce MTHFR activity. \
+e2 = (
+    "Two common MTHFR polymorphisms, namely 677C>T (Ala222Val) and 1298A>C (Glu429Ala), are known to reduce MTHFR activity. \
 It has been shown that the MTHFR 677T allele is associated with increased total plasma Hcy levels (tHcy) and decreased serum folate levels, mainly in 677TT homozygous subjects.\
 the MTHFR 677C>T polymorphism as a candidate AD risk factor"
+)
 e2 = str(hash(e2))
 
 mthfr = Protein(namespace="hgnc", name="MTHFR")
-mthfr_c677t = Protein(namespace="hgnc", name="MTHFR", variants=[protein_substitution("Ala", 222, "Val")])
-mthfr_a1298c = Protein(namespace="hgnc", name="MTHFR", variants=[protein_substitution("Glu", 429, "Ala")])
+mthfr_c677t = Protein(
+    namespace="hgnc", name="MTHFR", variants=[protein_substitution("Ala", 222, "Val")]
+)
+mthfr_a1298c = Protein(
+    namespace="hgnc", name="MTHFR", variants=[protein_substitution("Glu", 429, "Ala")]
+)
 folic_acid = abundance("CHEBI", "folic acid")
 alzheimer_disease = pathology("MESH", "Alzheimer Disease")
 
-example_graph.add_decreases(mthfr_c677t, mthfr, citation=c2, evidence=e2, target_modifier=activity())
-example_graph.add_decreases(mthfr_a1298c, mthfr, citation=c2, evidence=e2, target_modifier=activity())
+example_graph.add_decreases(
+    mthfr_c677t, mthfr, citation=c2, evidence=e2, target_modifier=activity()
+)
+example_graph.add_decreases(
+    mthfr_a1298c, mthfr, citation=c2, evidence=e2, target_modifier=activity()
+)
 example_graph.add_negative_correlation(mthfr_c677t, folic_acid, citation=c2, evidence=e2)
 example_graph.add_positive_correlation(mthfr_c677t, alzheimer_disease, citation=c2, evidence=e2)
 
@@ -173,7 +187,9 @@ pla2_family = Protein("SFAM", "PLA2 Family")
 kng1_to_kallidin = reaction(reactants=[kng1], products=[kallidin])
 
 example_graph.add_increases(inflammatory_process, kng1_to_kallidin, citation=c4, evidence=e4)
-example_graph.add_increases(kallidin, bdkrb1, citation=c4, evidence=e4, target_modifier=catalytic_activity)
+example_graph.add_increases(
+    kallidin, bdkrb1, citation=c4, evidence=e4, target_modifier=catalytic_activity
+)
 example_graph.add_increases(
     bdkrb1,
     pla2_family,

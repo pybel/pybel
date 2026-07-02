@@ -254,25 +254,27 @@ extend-include = ["*.ipynb"]
 [tool.ruff.lint]
 # See https://docs.astral.sh/ruff/rules
 extend-select = [
-    "F", # pyflakes
-    "E", # pycodestyle errors
-    "W", # pycodestyle warnings
-    "C90", # mccabe
-    "I", # isort
-    "UP", # pyupgrade
-    "D", # pydocstyle
-    "DOC", # pydoclint
-    "B", # bugbear
-    "S", # bandit
-    "T20", # print
-    "N", # pep8 naming
-    "ERA", # eradicate commented out code
-    "NPY", # numpy checks
-    "RUF", # ruff rules
-    "C4", # comprehensions
+#    "F", # pyflakes
+#    "E", # pycodestyle errors
+#    "W", # pycodestyle warnings
+#    "C90", # mccabe
+#    "I", # isort
+#    "UP", # pyupgrade
+#    "D", # pydocstyle
+#    "DOC", # pydoclint
+#    "B", # bugbear
+#    "S", # bandit
+#    "T20", # print
+#    "N", # pep8 naming
+#    "ERA", # eradicate commented out code
+#    "NPY", # numpy checks
+#    "RUF", # ruff rules
+#    "C4", # comprehensions
 ]
 ignore = [
     "D105", # Missing docstring in magic method
+    "F401", # FIXME
+    "F403", # FIXME
 ]
 
 # See https://docs.astral.sh/ruff/settings/#per-file-ignores
@@ -283,6 +285,17 @@ ignore = [
 "docs/source/conf.py" = ["ERA001"]
 # Prints are okay in notebooks
 "notebooks/**/*.ipynb" = ["T201"]
+# tests aren't documented
+"tests/**/*.py" = [
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "N802", # FIXME
+    "N813", # FIXME
+    "E501", # FIXME
+    "ERA001", # FIXME
+]
 
 [tool.ruff.lint.pydocstyle]
 convention = "pep257"

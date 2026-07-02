@@ -179,16 +179,22 @@ class TestInterchange(TemporaryCacheClsMixin, BelReconstitutionMixin):
         super().setUpClass()
 
         with mock_bel_resources:
-            cls.thorough_graph = from_bel_script(test_bel_thorough, manager=cls.manager, disallow_nested=False)
+            cls.thorough_graph = from_bel_script(
+                test_bel_thorough, manager=cls.manager, disallow_nested=False
+            )
             cls.slushy_graph = from_bel_script(
                 test_bel_slushy,
                 manager=cls.manager,
                 disallow_unqualified_translocations=True,
                 disallow_nested=True,
             )
-            cls.simple_graph = from_bel_script_url(Path(test_bel_simple).as_uri(), manager=cls.manager)
+            cls.simple_graph = from_bel_script_url(
+                Path(test_bel_simple).as_uri(), manager=cls.manager
+            )
             cls.isolated_graph = from_bel_script(test_bel_isolated, manager=cls.manager)
-            cls.misordered_graph = from_bel_script(test_bel_misordered, manager=cls.manager, citation_clearing=False)
+            cls.misordered_graph = from_bel_script(
+                test_bel_misordered, manager=cls.manager, citation_clearing=False
+            )
 
     def test_thorough_path(self):
         self.bel_thorough_reconstituted(self.thorough_graph)

@@ -102,7 +102,9 @@ class TestNodeFilters(unittest.TestCase):
         def has_even_target(graph, u, v, k):
             return v % 2 == 0
 
-        edges = make_edge_iterator_set(filter_edges(self.universe, [has_odd_source, has_even_target]))
+        edges = make_edge_iterator_set(
+            filter_edges(self.universe, [has_odd_source, has_even_target])
+        )
         self.assertEqual({(1, 2), (1, 4), (5, 6)}, edges)
 
         self.assertEqual(
@@ -119,18 +121,28 @@ class TestEdgeFilters(unittest.TestCase):
     def test_a(self):
         self.assertTrue(_annotation_dict_any_filter({ANNOTATIONS: {"A": {"1", "2"}}}, {"A": {"1"}}))
 
-        self.assertTrue(_annotation_dict_any_filter({ANNOTATIONS: {"A": {"1", "2"}}}, {"A": {"1", "2"}}))
-
-        self.assertTrue(_annotation_dict_any_filter({ANNOTATIONS: {"A": {"1", "2"}}}, {"A": {"1", "2", "3"}}))
-
         self.assertTrue(
-            _annotation_dict_any_filter({ANNOTATIONS: {"A": {"1", "2"}, "B": {"X"}}}, {"A": {"3"}, "B": {"X"}})
+            _annotation_dict_any_filter({ANNOTATIONS: {"A": {"1", "2"}}}, {"A": {"1", "2"}})
         )
 
-        self.assertFalse(_annotation_dict_any_filter({ANNOTATIONS: {"A": {"1", "2"}}}, {"A": {"3"}}))
+        self.assertTrue(
+            _annotation_dict_any_filter({ANNOTATIONS: {"A": {"1", "2"}}}, {"A": {"1", "2", "3"}})
+        )
+
+        self.assertTrue(
+            _annotation_dict_any_filter(
+                {ANNOTATIONS: {"A": {"1", "2"}, "B": {"X"}}}, {"A": {"3"}, "B": {"X"}}
+            )
+        )
 
         self.assertFalse(
-            _annotation_dict_any_filter({ANNOTATIONS: {"A": {"1", "2"}, "B": {"X"}}}, {"A": {"3"}, "B": {"Y"}})
+            _annotation_dict_any_filter({ANNOTATIONS: {"A": {"1", "2"}}}, {"A": {"3"}})
+        )
+
+        self.assertFalse(
+            _annotation_dict_any_filter(
+                {ANNOTATIONS: {"A": {"1", "2"}, "B": {"X"}}}, {"A": {"3"}, "B": {"Y"}}
+            )
         )
 
     def test_any_filter_no_query(self):
@@ -197,9 +209,13 @@ class TestEdgeFilters(unittest.TestCase):
     def test_b(self):
         self.assertTrue(_annotation_dict_all_filter({ANNOTATIONS: {"A": {"1"}}}, {"A": {"1"}}))
 
-        self.assertTrue(_annotation_dict_all_filter({ANNOTATIONS: {"A": {"1", "2"}}}, {"A": {"1", "2"}}))
+        self.assertTrue(
+            _annotation_dict_all_filter({ANNOTATIONS: {"A": {"1", "2"}}}, {"A": {"1", "2"}})
+        )
 
-        self.assertTrue(_annotation_dict_all_filter({ANNOTATIONS: {"A": {"1", "2"}}}, {"A": {"1", "2"}}))
+        self.assertTrue(
+            _annotation_dict_all_filter({ANNOTATIONS: {"A": {"1", "2"}}}, {"A": {"1", "2"}})
+        )
 
         self.assertTrue(
             _annotation_dict_all_filter(
@@ -215,7 +231,9 @@ class TestEdgeFilters(unittest.TestCase):
             )
         )
 
-        self.assertFalse(_annotation_dict_all_filter({ANNOTATIONS: {"A": {"1"}}}, {"A": {"1", "2"}}))
+        self.assertFalse(
+            _annotation_dict_all_filter({ANNOTATIONS: {"A": {"1"}}}, {"A": {"1", "2"}})
+        )
 
         self.assertFalse(_annotation_dict_all_filter({ANNOTATIONS: {"A": {"1"}}}, {"A": {"2"}}))
 
@@ -287,7 +305,9 @@ class TestEdgeFilters(unittest.TestCase):
             0,
             count_passed_edge_filter(
                 graph,
-                build_annotation_dict_all_filter(graph._clean_annotations({"A": {"1", "2", "3", "4"}})),
+                build_annotation_dict_all_filter(
+                    graph._clean_annotations({"A": {"1", "2", "3", "4"}})
+                ),
             ),
         )
         self.assertEqual(
@@ -326,14 +346,18 @@ class TestEdgeFilters(unittest.TestCase):
             1,
             count_passed_edge_filter(
                 graph,
-                build_annotation_dict_all_filter(graph._clean_annotations({"A": {"1": True, "2": True}})),
+                build_annotation_dict_all_filter(
+                    graph._clean_annotations({"A": {"1": True, "2": True}})
+                ),
             ),
         )
         self.assertEqual(
             1,
             count_passed_edge_filter(
                 graph,
-                build_annotation_dict_all_filter(graph._clean_annotations({"A": {"1": True, "2": True, "3": True}})),
+                build_annotation_dict_all_filter(
+                    graph._clean_annotations({"A": {"1": True, "2": True, "3": True}})
+                ),
             ),
         )
         self.assertEqual(

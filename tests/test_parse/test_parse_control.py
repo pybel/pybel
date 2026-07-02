@@ -109,20 +109,28 @@ class TestSetCitation(unittest.TestCase):
         set_citation_stub.parse_string('Citation = {"PubMed", "12928037"}')
 
     def test_parser_triple(self):
-        set_citation_stub.parse_string('Citation = {"PubMed Central","Trends in molecular medicine","12928037"}')
+        set_citation_stub.parse_string(
+            'Citation = {"PubMed Central","Trends in molecular medicine","12928037"}'
+        )
 
     def test_parser_triple_spaced(self):
-        set_citation_stub.parse_string('Citation = {"PubMed Central", "Trends in molecular medicine", "12928037"}')
+        set_citation_stub.parse_string(
+            'Citation = {"PubMed Central", "Trends in molecular medicine", "12928037"}'
+        )
 
 
 class TestParseControlSetStatementErrors(TestParseControl):
     def test_invalid_citation_type(self):
         with self.assertRaises(InvalidCitationType):
-            self.parser.parse_string('SET Citation = {"PubMedCentral","Trends in molecular medicine","12928037"}')
+            self.parser.parse_string(
+                'SET Citation = {"PubMedCentral","Trends in molecular medicine","12928037"}'
+            )
 
     def test_invalid_pmid(self):
         with self.assertRaises(InvalidPubMedIdentifierWarning):
-            self.parser.parse_string('SET Citation = {"PubMed","Trends in molecular medicine","NOT VALID NUMBER"}')
+            self.parser.parse_string(
+                'SET Citation = {"PubMed","Trends in molecular medicine","NOT VALID NUMBER"}'
+            )
 
     def test_invalid_pmid_short(self):
         with self.assertRaises(InvalidPubMedIdentifierWarning):

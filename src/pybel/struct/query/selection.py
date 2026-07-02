@@ -1,7 +1,9 @@
 """A wrapper around selection methods."""
 
+from __future__ import annotations
+
 import logging
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from .constants import (
     SEED_TYPE_ANNOTATION,
@@ -30,6 +32,9 @@ from ..mutation import (
 )
 from ...dsl import BaseEntity
 
+if TYPE_CHECKING:
+    from ..graph import BELGraph
+
 __all__ = [
     "get_subgraph",
 ]
@@ -38,12 +43,12 @@ logger = logging.getLogger(__name__)
 
 
 def get_subgraph(
-    graph,
+    graph: BELGraph,
     seed_method: str | None = None,
     seed_data: Any | None = None,
     expand_nodes: list[BaseEntity] | None = None,
     remove_nodes: list[BaseEntity] | None = None,
-):
+) -> BELGraph | None:
     """Run a pipeline query on graph with multiple sub-graph filters and expanders.
 
     Order of Operations:
@@ -52,12 +57,11 @@ def get_subgraph(
     2. Add nodes
     3. Remove nodes
 
-    :param pybel.BELGraph graph: A BEL graph
+    :param graph: A BEL graph
     :param seed_method: The name of the get_subgraph_by_* function to use
     :param seed_data: The argument to pass to the get_subgraph function
     :param expand_nodes: Add the neighborhoods around all of these nodes
     :param remove_nodes: Remove these nodes and all of their in/out edges
-    :rtype: Optional[pybel.BELGraph]
     """
     # Seed by the given function
     if seed_method == SEED_TYPE_INDUCTION:
@@ -85,7 +89,9 @@ def get_subgraph(
         result = get_subgraph_by_authors(graph, seed_data)
 
     elif seed_method == SEED_TYPE_ANNOTATION:
-        result = get_subgraph_by_annotations(graph, seed_data["annotations"], or_=seed_data.get("or"))
+        result = get_subgraph_by_annotations(
+            graph, seed_data["annotations"], or_=seed_data.get("or")
+        )
 
     elif seed_method == SEED_TYPE_SAMPLE:
         result = get_random_subgraph(
@@ -103,7 +109,7 @@ def get_subgraph(
 
     if result is None:
         logger.debug("query returned no results")
-        return
+        return None
 
     logger.debug(
         "original graph has (%s nodes / %s edges)",

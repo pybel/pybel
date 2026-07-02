@@ -4,23 +4,120 @@ It relies heavily on the concepts of `functional programming <https://en.wikiped
 and the concept of `predicates <https://en.wikipedia.org/wiki/Predicate_(mathematical_logic)>`_.
 """
 
-from . import (
-    edge_filters,
-    edge_predicate_builders,
-    edge_predicates,
-    node_filters,
-    node_predicate_builders,
-    node_predicates,
-    typing,
-    utils,
+from .edge_filters import (
+    and_edge_predicates,
+    count_passed_edge_filter,
+    filter_edges,
+    invert_edge_predicate,
 )
-from .edge_filters import *
-from .edge_predicate_builders import *
-from .edge_predicates import *
-from .node_filters import *
-from .node_predicate_builders import *
+from .edge_predicate_builders import (
+    build_annotation_dict_all_filter,
+    build_annotation_dict_any_filter,
+    build_author_inclusion_filter,
+    build_downstream_edge_predicate,
+    build_pmid_exclusion_filter,
+    build_pmid_inclusion_filter,
+    build_relation_predicate,
+    build_upstream_edge_predicate,
+)
+from .edge_predicates import (
+    edge_has_activity,
+    edge_has_annotation,
+    edge_has_degradation,
+    edge_has_translocation,
+    edge_predicate,
+    false_edge_predicate,
+    has_authors,
+    has_pathology_causal,
+    has_pmc,
+    has_polarity,
+    has_provenance,
+    has_pubmed,
+    is_associative_relation,
+    is_causal_relation,
+    is_direct_causal_relation,
+    not_causal_relation,
+    true_edge_predicate,
+)
+from .node_filters import (
+    count_passed_node_filter,
+    filter_nodes,
+    get_nodes,
+    get_nodes_by_function,
+    get_nodes_by_namespace,
+    summarize_node_filter,
+)
+from .node_predicate_builders import (
+    build_node_data_search,
+    build_node_graph_data_search,
+    build_node_key_search,
+    build_node_name_search,
+    data_missing_key_builder,
+    function_exclusion_filter_builder,
+    function_inclusion_filter_builder,
+    namespace_inclusion_builder,
+)
 from .node_predicates import *
-from .typing import *
-from .utils import *
+from .typing import (
+    EdgeIterator,
+    EdgePredicate,
+    EdgePredicates,
+    EdgeTuple,
+    NodePredicate,
+    NodePredicates,
+)
+from .utils import part_has_modifier
 
-__all__ = [k for k in locals() if not k.startswith("_")]
+__all__ = [
+    "EdgeIterator",
+    "EdgePredicate",
+    "EdgePredicates",
+    "EdgeTuple",
+    "NodePredicate",
+    "NodePredicates",
+    "part_has_modifier",
+    "build_node_data_search",
+    "build_node_graph_data_search",
+    "build_node_key_search",
+    "build_node_name_search",
+    "data_missing_key_builder",
+    "function_exclusion_filter_builder",
+    "function_inclusion_filter_builder",
+    "namespace_inclusion_builder",
+    "count_passed_node_filter",
+    "filter_nodes",
+    "get_nodes",
+    "get_nodes_by_function",
+    "get_nodes_by_namespace",
+    "summarize_node_filter",
+    "edge_has_activity",
+    "edge_has_annotation",
+    "edge_has_degradation",
+    "edge_has_translocation",
+    "edge_predicate",
+    "false_edge_predicate",
+    "has_authors",
+    "has_pathology_causal",
+    "has_pmc",
+    "has_polarity",
+    "has_provenance",
+    "has_pubmed",
+    "is_associative_relation",
+    "is_causal_relation",
+    "is_direct_causal_relation",
+    "not_causal_relation",
+    "true_edge_predicate",
+    "build_annotation_dict_all_filter",
+    "build_annotation_dict_any_filter",
+    "build_author_inclusion_filter",
+    "build_downstream_edge_predicate",
+    "build_pmid_exclusion_filter",
+    "build_pmid_exclusion_filter",
+    "build_pmid_inclusion_filter",
+    "build_relation_predicate",
+    "build_upstream_edge_predicate",
+    "and_edge_predicates",
+    "count_passed_edge_filter",
+    "filter_edges",
+    "invert_edge_predicate",
+]

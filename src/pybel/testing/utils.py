@@ -12,7 +12,9 @@ from ..struct.summary import (
 )
 from ..struct.summary.node_summary import get_names
 
-_FRAUNHOFER_RESOURCES = "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path="
+_FRAUNHOFER_RESOURCES = (
+    "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path="
+)
 
 
 def get_uri_name(url: str) -> str:

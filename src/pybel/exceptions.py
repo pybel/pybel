@@ -27,7 +27,9 @@ class BELParserWarning(PyBELWarning):
         self.position = position
 
     def __str__(self):
-        return f"General Parser Failure on line {self.line_number} at pos {self.position}: {self.line}"
+        return (
+            f"General Parser Failure on line {self.line_number} at pos {self.position}: {self.line}"
+        )
 
 
 class BELSyntaxError(BELParserWarning, SyntaxError):

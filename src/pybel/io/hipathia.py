@@ -140,7 +140,9 @@ def from_hipathia_dfs(name: str, att_df: pd.DataFrame, sif_df: pd.DataFrame) -> 
 
     graph = BELGraph(name=name)
 
-    for components, component_label_lists, component_gene_lists in att_df[["ID", "label", "genesList"]].values:
+    for components, component_label_lists, component_gene_lists in att_df[
+        ["ID", "label", "genesList"]
+    ].values:
         if not components:
             raise ValueError("missing components in row")
 
@@ -193,9 +195,13 @@ def from_hipathia_dfs(name: str, att_df: pd.DataFrame, sif_df: pd.DataFrame) -> 
     sif_df["target"] = sif_df["target"].map(_clean_name).map(x.get)
     for source, relation, target in sif_df.values:
         if relation == "activation":
-            graph.add_increases(source, target, citation=(CITATION_TYPE_OTHER, "HiPathia"), evidence="")
+            graph.add_increases(
+                source, target, citation=(CITATION_TYPE_OTHER, "HiPathia"), evidence=""
+            )
         elif relation == "inhibition":
-            graph.add_decreases(source, target, citation=(CITATION_TYPE_OTHER, "HiPathia"), evidence="")
+            graph.add_decreases(
+                source, target, citation=(CITATION_TYPE_OTHER, "HiPathia"), evidence=""
+            )
         else:
             raise ValueError(f"unknown relation: {relation}")
 
@@ -256,10 +262,15 @@ def to_hipathia_dfs(
                 families[node] = children
             else:
                 proteins.add(node)
-        elif isinstance(node, ComplexAbundance) and all(isinstance(m, Protein) for m in node.members):
+        elif isinstance(node, ComplexAbundance) and all(
+            isinstance(m, Protein) for m in node.members
+        ):
             complexes.add(node)
 
-    families = {node: sorted(values, key=str) for node, values in sorted(families.items(), key=itemgetter(0))}
+    families = {
+        node: sorted(values, key=str)
+        for node, values in sorted(families.items(), key=itemgetter(0))
+    }
 
     nodes = sorted(proteins.union(families).union(complexes), key=str)
     new_nodes = set()

@@ -60,7 +60,9 @@ class TestCascades(TemporaryCacheMixin):
         self.g1 = Network(name=n(), version=n(), edges=[self.e1, self.e2, self.e3])
         self.g2 = Network(name=n(), version=n(), edges=[self.e1])
 
-        self.manager.session.add_all([self.n1, self.n2, self.n3, self.e1, self.e2, self.e3, self.g1, self.g2])
+        self.manager.session.add_all(
+            [self.n1, self.n2, self.n3, self.e1, self.e2, self.e3, self.g1, self.g2]
+        )
         self.manager.session.commit()
 
         self.assertEqual(3, self.manager.count_nodes())
@@ -90,7 +92,9 @@ class TestCascades(TemporaryCacheMixin):
         self.assertEqual(0, self.g2.edges.count())
 
     def test_get_orphan_edges(self):
-        edges = [result.edge_id for result in self.manager.query_singleton_edges_from_network(self.g1)]
+        edges = [
+            result.edge_id for result in self.manager.query_singleton_edges_from_network(self.g1)
+        ]
         self.assertEqual(2, len(edges))
         self.assertIn(self.e2.id, edges)
         self.assertIn(self.e3.id, edges)

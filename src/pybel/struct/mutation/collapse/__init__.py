@@ -1,7 +1,17 @@
 """Functions for collapsing nodes."""
 
-from . import collapse, protein_rna_origins
-from .collapse import *
-from .protein_rna_origins import *
+from .collapse import (
+    collapse_all_variants,
+    collapse_nodes,
+    collapse_pair,
+    surviors_are_inconsistent,
+)
+from .protein_rna_origins import collapse_to_genes
 
-__all__ = [k for k in locals() if not k.startswith("_")]
+__all__ = [
+    "collapse_all_variants",
+    "collapse_nodes",
+    "collapse_to_genes",
+    "collapse_pair",
+    "surviors_are_inconsistent",
+]

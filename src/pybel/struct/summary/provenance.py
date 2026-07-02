@@ -25,7 +25,11 @@ def iterate_citation_identifiers(graph, prefix: str):
     if predicate is None:
         raise ValueError(f"Invalid citation prefix: {prefix}")
 
-    return (data[CITATION][IDENTIFIER].strip() for _, _, data in graph.edges(data=True) if predicate(data))
+    return (
+        data[CITATION][IDENTIFIER].strip()
+        for _, _, data in graph.edges(data=True)
+        if predicate(data)
+    )
 
 
 def iterate_pubmed_identifiers(graph: BELGraph) -> Iterable[str]:

@@ -363,7 +363,9 @@ class TestEdgeInduction(unittest.TestCase):
 
         k2 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={"Subgraph": {"B"}})
 
-        k3 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={"Subgraph": {"A", "C", "D"}})
+        k3 = graph.add_increases(
+            a, b, citation=n(), evidence=n(), annotations={"Subgraph": {"A", "C", "D"}}
+        )
 
         subgraph = get_subgraph_by_annotation_value(graph, "Subgraph", "A")
         self.assertIsInstance(subgraph, BELGraph)
@@ -386,9 +388,13 @@ class TestEdgeInduction(unittest.TestCase):
 
         k2 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={"Subgraph": {"B"}})
 
-        k3 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={"Subgraph": {"A", "C", "D"}})
+        k3 = graph.add_increases(
+            a, b, citation=n(), evidence=n(), annotations={"Subgraph": {"A", "C", "D"}}
+        )
 
-        k4 = graph.add_increases(a, b, citation=n(), evidence=n(), annotations={"Subgraph": {"C", "D"}})
+        k4 = graph.add_increases(
+            a, b, citation=n(), evidence=n(), annotations={"Subgraph": {"C", "D"}}
+        )
 
         subgraph = get_subgraph_by_annotation_value(graph, "Subgraph", {"A", "C"})
         self.assertIsInstance(subgraph, BELGraph)
