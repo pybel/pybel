@@ -84,7 +84,9 @@ class ConceptParser(BaseParser):
             (
                 self.handle_namespace_default
                 if self.default_namespace
-                else self.handle_namespace_lenient if self.allow_naked_names else self.handle_namespace_invalid
+                else self.handle_namespace_lenient
+                if self.allow_naked_names
+                else self.handle_namespace_invalid
             ),
         )
 

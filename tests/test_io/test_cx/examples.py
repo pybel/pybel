@@ -109,9 +109,11 @@ g(HGNC:MTHFR,sub(C,677,T)) pos path(MESH:"Alzheimer Disease")
 """
 
 c2 = "21119889"
-e2 = "Two common MTHFR polymorphisms, namely 677C>T (Ala222Val) and 1298A>C (Glu429Ala), are known to reduce MTHFR activity. \
+e2 = (
+    "Two common MTHFR polymorphisms, namely 677C>T (Ala222Val) and 1298A>C (Glu429Ala), are known to reduce MTHFR activity. \
 It has been shown that the MTHFR 677T allele is associated with increased total plasma Hcy levels (tHcy) and decreased serum folate levels, mainly in 677TT homozygous subjects.\
 the MTHFR 677C>T polymorphism as a candidate AD risk factor"
+)
 e2 = str(hash(e2))
 
 mthfr = Protein(namespace="hgnc", name="MTHFR")

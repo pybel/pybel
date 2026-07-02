@@ -35,10 +35,17 @@ it is shown with uppercase letters referring to constants from :code:`pybel.cons
     - PyBEL module :py:class:`pybel.parser.modifiers.get_legacy_fusion_language`
 """
 
-from pyparsing import Group, Keyword, Optional, ParserElement, Suppress, one_of
-from pyparsing import pyparsing_common
+from pyparsing import (
+    Group,
+    Keyword,
+    Optional,
+    ParserElement,
+    Suppress,
+    one_of,
+    pyparsing_common,
+    replace_with,
+)
 from pyparsing import pyparsing_common as ppc
-from pyparsing import replace_with
 
 from ..utils import WCW, nest
 from ...constants import (

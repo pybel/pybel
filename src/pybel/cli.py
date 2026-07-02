@@ -413,10 +413,10 @@ def manage():
     """Manage the database."""
 
 
-@manage.command()
+@manage.command(name="drop")
 @click.confirmation_option()
 @click.pass_obj
-def drop(manager: Manager):
+def manage_drop(manager: Manager):
     """Drop the database."""
     manager.drop_all()
 
@@ -449,10 +449,10 @@ def namespaces():
     """Manage namespaces."""
 
 
-@namespaces.command()
+@namespaces.command(name="insert")
 @click.argument("url")
 @click.pass_obj
-def insert(manager: Manager, url: str):
+def namespace_insert(manager: Manager, url: str):
     """Add a namespace by URL."""
     manager.get_or_create_namespace(url)
 
@@ -467,11 +467,11 @@ def _ls(manager: Manager, model_cls, model_id: int):
             click.echo("\t".join(map(str, (n.id, n.keyword, n.version, n.url))))
 
 
-@namespaces.command()
+@namespaces.command(name="ls")
 @click.option("-u", "--url", help="Specific resource URL to list")
 @click.option("-i", "--namespace-id", type=int, help="Specific resource URL to list")
 @click.pass_obj
-def ls(manager: Manager, url: str | None, namespace_id: int | None):
+def namespace_ls(manager: Manager, url: str | None, namespace_id: int | None):
     """List cached namespaces."""
     if url:
         n = manager.get_or_create_namespace(url)
@@ -484,10 +484,10 @@ def ls(manager: Manager, url: str | None, namespace_id: int | None):
         )
 
 
-@namespaces.command()
+@namespaces.command(name="drop")
 @click.argument("url")
 @click.pass_obj
-def drop(manager: Manager, url: str):
+def namespace_drop(manager: Manager, url: str):
     """Drop a namespace by URL."""
     manager.drop_namespace_by_url(url)
 
@@ -497,15 +497,15 @@ def networks():
     """Manage networks."""
 
 
-@networks.command()
+@networks.command(name="ls")
 @click.pass_obj
-def ls(manager: Manager):
+def network_ls(manager: Manager):
     """List network names, versions, and optionally, descriptions."""
     for n in manager.list_networks():
         click.echo(f"{n.id}\t{n.name}\t{n.version}")
 
 
-@networks.command()
+@networks.command(name="drop")
 @click.option("-n", "--network-id", type=int, help="Identifier of network to drop")
 @click.option(
     "-y",
@@ -514,7 +514,7 @@ def ls(manager: Manager):
     help="Drop all networks without confirmation if no identifier is given",
 )
 @click.pass_obj
-def drop(manager: Manager, network_id: int | None, yes):
+def networks_drop(manager: Manager, network_id: int | None, yes):
     """Drop a network by its identifier or drop all networks."""
     if network_id:
         manager.drop_network_by_id(network_id)
@@ -528,11 +528,11 @@ def edges():
     """Manage edges."""
 
 
-@edges.command()
+@edges.command(name="ls")
 @click.option("--offset", type=int)
 @click.option("--limit", type=int, default=10)
 @click.pass_obj
-def ls(manager: Manager, offset: int | None, limit: int | None):
+def edge_ls(manager: Manager, offset: int | None, limit: int | None):
     """List edges."""
     q = manager.session.query(Edge)
 
@@ -562,9 +562,9 @@ def prune(manager: Manager):
     manager.session.commit()
 
 
-@manage.command()
+@manage.command(name="summarize")
 @click.pass_obj
-def summarize(manager: Manager):
+def manage_summarize(manager: Manager):
     """Summarize the contents of the database."""
     click.echo(f"Networks: {manager.count_networks()}")
     click.echo(f"Edges: {manager.count_edges()}")

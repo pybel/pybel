@@ -194,7 +194,10 @@ def iterate_node_entities(node: BaseEntity) -> Iterable[Entity]:
     >>> protein_2 = Protein(namespace="hgnc", identifier="2")
     >>> complex_1 = ComplexAbundance([protein_1, protein_2])
     >>> complex_entities = list(iterate_node_entities(complex_1))
-    >>> assert [Entity(namespace="hgnc", identifier="1"), Entity(namespace="hgnc", identifier="2")] == complex_entities
+    >>> assert [
+    ...     Entity(namespace="hgnc", identifier="1"),
+    ...     Entity(namespace="hgnc", identifier="2"),
+    ... ] == complex_entities
     """
     if isinstance(node, BaseConcept):
         yield node.entity

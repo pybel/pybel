@@ -1,0 +1,33 @@
+{
+  "template": "https://github.com/cthoyt/cookiecutter-snekpack",
+  "commit": "dadda8d5d4d28f4aec7e0832e2568a34deb6023f",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "package_name": "pybel",
+      "package_name_stylized": "PyBEL",
+      "short_description": "Parsing, validation, compilation, and data exchange of Biological Expression Language (BEL)",
+      "author_name": "Charles Tapley Hoyt",
+      "author_github": "cthoyt",
+      "author_email": "cthoyt@gmail.com",
+      "github_organization_name": "pybel",
+      "github_repository_name": "pybel",
+      "command_line_interface": true,
+      "gitlab": false,
+      "runner": "tox",
+      "citation_file": true,
+      "__not_charlie": "",
+      "__runner": "tox -e",
+      "__runner_uv": "--with tox-uv tox -e",
+      "__runner_pip": "tox tox-uv",
+      "__runner_install_uv": "uv tool install tox --with tox-uv",
+      "__runner_install_pip": "python3 -m pip install tox tox-uv",
+      "__runner_tests": "py",
+      "__gh_slug": "pybel/pybel",
+      "__package_name_dashed": "pybel",
+      "_template": "https://github.com/cthoyt/cookiecutter-snekpack",
+      "_commit": "dadda8d5d4d28f4aec7e0832e2568a34deb6023f"
+    }
+  },
+  "directory": null
+}

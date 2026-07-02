@@ -202,7 +202,7 @@ class BELGraph(nx.MultiDiGraph):
 
         self.raise_on_missing_annotations = True
 
-    def child(self) -> "BELGraph":
+    def child(self) -> BELGraph:
         """Create an empty graph with a "parent" reference back to this one."""
         rv = BELGraph()
         rv.parent = self
@@ -210,7 +210,7 @@ class BELGraph(nx.MultiDiGraph):
         return rv
 
     @property
-    def count(self) -> "CountDispatch":
+    def count(self) -> CountDispatch:
         """A dispatch to count functions.
 
         Can be used like this:
@@ -222,7 +222,7 @@ class BELGraph(nx.MultiDiGraph):
         return self._count
 
     @property
-    def summarize(self) -> "SummarizeDispatch":
+    def summarize(self) -> SummarizeDispatch:
         """A dispatch to summarize the graph."""
         return self._summary
 
@@ -230,17 +230,17 @@ class BELGraph(nx.MultiDiGraph):
         return self._summary._repr_html_()
 
     @property
-    def expand(self) -> "ExpandDispatch":
+    def expand(self) -> ExpandDispatch:
         """A dispatch to expand the graph w.r.t. its parent."""
         return self._expand
 
     @property
-    def induce(self) -> "InduceDispatch":
+    def induce(self) -> InduceDispatch:
         """A dispatch to mutate the graph."""
         return self._induce
 
     @property
-    def plot(self) -> "PlotDispatch":
+    def plot(self) -> PlotDispatch:
         """A dispatch to plot the graph using :mod:`matplotlib` and :mod:`seaborn`."""
         return self._plot
 
@@ -817,7 +817,7 @@ class BELGraph(nx.MultiDiGraph):
         """Get the annotations for a given edge."""
         return self._get_edge_attr(u, v, key, ANNOTATIONS)
 
-    def __add__(self, other: "BELGraph") -> "BELGraph":
+    def __add__(self, other: BELGraph) -> BELGraph:
         """Copy this graph and join it with another graph with it using :func:`pybel.struct.left_full_join`.
 
         :param other: Another BEL graph
@@ -834,7 +834,7 @@ class BELGraph(nx.MultiDiGraph):
         left_full_join(result, other)
         return result
 
-    def __iadd__(self, other: "BELGraph") -> "BELGraph":
+    def __iadd__(self, other: BELGraph) -> BELGraph:
         """Join another graph into this one, in-place, using :func:`pybel.struct.left_full_join`.
 
         :param other: Another BEL graph
@@ -850,7 +850,7 @@ class BELGraph(nx.MultiDiGraph):
         left_full_join(self, other)
         return self
 
-    def __and__(self, other: "BELGraph") -> "BELGraph":
+    def __and__(self, other: BELGraph) -> BELGraph:
         """Create a deep copy of this graph and left outer joins another graph.
 
         Uses :func:`pybel.struct.left_outer_join`.
@@ -869,7 +869,7 @@ class BELGraph(nx.MultiDiGraph):
         left_outer_join(result, other)
         return result
 
-    def __iand__(self, other: "BELGraph") -> "BELGraph":
+    def __iand__(self, other: BELGraph) -> BELGraph:
         """Join another graph into this one, in-place, using :func:`pybel.struct.left_outer_join`.
 
         :param other: Another BEL graph
@@ -885,7 +885,7 @@ class BELGraph(nx.MultiDiGraph):
         left_outer_join(self, other)
         return self
 
-    def __xor__(self, other: "BELGraph") -> "BELGraph":
+    def __xor__(self, other: BELGraph) -> BELGraph:
         """Join this graph with another using :func:`pybel.struct.left_node_intersection_join`.
 
         :param other: Another BEL graph
@@ -975,7 +975,7 @@ class BELGraph(nx.MultiDiGraph):
         warnings.warn("use graph.summary.str()", DeprecationWarning, stacklevel=2)
         return self.summarize.str()
 
-    def ground(self, **kwargs) -> "BELGraph":
+    def ground(self, **kwargs) -> BELGraph:
         """Ground this graph."""
         try:
             from ..grounding import ground

@@ -1,7 +1,9 @@
 """Functions for grouping BEL graphs into sub-graphs."""
 
-from . import annotations, provenance
-from .annotations import *
-from .provenance import *
+from .annotations import get_subgraphs_by_annotation
+from .provenance import get_subgraphs_by_citation
 
-__all__ = annotations.__all__ + provenance.__all__
+__all__ = [
+    "get_subgraphs_by_annotation",
+    "get_subgraphs_by_citation",
+]

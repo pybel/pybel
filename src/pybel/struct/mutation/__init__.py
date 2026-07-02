@@ -1,24 +1,127 @@
 """This module contains functions that mutate or make transformations on a network."""
 
-from . import (
-    collapse,
-    deletion,
-    expansion,
-    induction,
-    induction_expansion,
-    inference,
-    metadata,
-    utils,
+from .collapse import (
+    collapse_all_variants,
+    collapse_nodes,
+    collapse_to_genes,
+    collapse_pair,
+    surviors_are_inconsistent,
 )
-from .collapse import *
-from .deletion import *
-from .expansion import *
-from .induction import *
-from .induction_expansion import *
-from .inference import *
-from .inference import transfer
-from .inference.transfer import *
-from .metadata import *
-from .utils import *
+from .deletion import (
+    remove_associations,
+    remove_biological_processes,
+    remove_filtered_edges,
+    remove_filtered_nodes,
+    prune_protein_rna_origins,
+    remove_isolated_list_abundances,
+    remove_non_causal_edges,
+    remove_pathologies,
+)
+from .expansion import (
+    expand_downstream_causal,
+    expand_upstream_causal,
+    expand_all_node_neighborhoods,
+    expand_internal,
+    expand_node_neighborhood,
+    expand_node_predecessors,
+    expand_node_successors,
+    expand_nodes_neighborhoods,
+)
+from .induction import (
+    get_nodes_in_all_shortest_paths,
+    get_random_path,
+    get_subgraph_by_all_shortest_paths,
+    get_subgraph_by_annotation_value,
+    get_subgraph_by_neighborhood,
+    get_subgraph_by_annotations,
+    get_subgraph_by_authors,
+    get_subgraph_by_pubmed,
+    get_causal_subgraph,
+    get_largest_component,
+    get_graph_with_random_edges,
+    get_random_node,
+    get_random_subgraph,
+    get_subgraph_by_edge_filter,
+    get_subgraph_by_induction,
+    get_subgraph_by_node_filter,
+    get_downstream_causal_subgraph,
+    get_upstream_causal_subgraph,
+)
+from .induction_expansion import (
+    get_multi_causal_downstream,
+    get_multi_causal_upstream,
+    get_subgraph_by_second_neighbors,
+)
+from .inference import (
+    enrich_protein_and_rna_origins,
+    enrich_proteins_with_rnas,
+    enrich_rnas_with_genes,
+    infer_child_relations,
+)
+from .metadata import (
+    add_annotation_value,
+    remove_annotation_value,
+    remove_extra_citation_metadata,
+    strip_annotations,
+)
+from .utils import (
+    expand_by_edge_filter,
+    remove_isolated_nodes,
+    remove_isolated_nodes_op,
+)
 
-__all__ = [k for k in locals() if not k.startswith("_")]
+__all__ = [
+    "add_annotation_value",
+    "remove_annotation_value",
+    "remove_extra_citation_metadata",
+    "strip_annotations",
+    "get_multi_causal_downstream",
+    "get_multi_causal_upstream",
+    "get_subgraph_by_second_neighbors",
+    "collapse_all_variants",
+    "get_nodes_in_all_shortest_paths",
+    "get_random_path",
+    "get_subgraph_by_all_shortest_paths",
+    "get_subgraph_by_annotation_value",
+    "get_subgraph_by_neighborhood",
+    "get_subgraph_by_annotations",
+    "get_subgraph_by_authors",
+    "get_subgraph_by_pubmed",
+    "get_causal_subgraph",
+    "get_largest_component",
+    "get_graph_with_random_edges",
+    "get_random_node",
+    "get_random_subgraph",
+    "get_subgraph_by_edge_filter",
+    "get_subgraph_by_induction",
+    "get_subgraph_by_node_filter",
+    "get_downstream_causal_subgraph",
+    "get_upstream_causal_subgraph",
+    "collapse_nodes",
+    "collapse_to_genes",
+    "expand_downstream_causal",
+    "expand_upstream_causal",
+    "expand_all_node_neighborhoods",
+    "expand_internal",
+    "expand_node_neighborhood",
+    "expand_node_predecessors",
+    "expand_node_successors",
+    "enrich_protein_and_rna_origins",
+    "enrich_proteins_with_rnas",
+    "enrich_rnas_with_genes",
+    "infer_child_relations",
+    "expand_nodes_neighborhoods",
+    "collapse_pair",
+    "remove_associations",
+    "expand_by_edge_filter",
+    "remove_isolated_nodes",
+    "remove_isolated_nodes_op",
+    "remove_biological_processes",
+    "remove_filtered_edges",
+    "remove_filtered_nodes",
+    "prune_protein_rna_origins",
+    "remove_isolated_list_abundances",
+    "remove_non_causal_edges",
+    "remove_pathologies",
+    "surviors_are_inconsistent",
+]

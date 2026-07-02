@@ -8,8 +8,8 @@ This project uses the [GitHub Flow](https://guides.github.com/introduction/flow)
 model for code contributions. Follow these steps:
 
 1. [Create a fork](https://help.github.com/articles/fork-a-repo) of the upstream
-   repository at [`pybel/pybel`](https://github.com/pybel/pybel)
-   on your GitHub account (or in one of your organizations)
+   repository at [`pybel/pybel`](https://github.com/pybel/pybel) on your GitHub
+   account (or in one of your organizations)
 2. [Clone your fork](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository)
    with `git clone https://github.com/<your namespace here>/pybel.git`
 3. Make and commit changes to your fork with `git commit`
@@ -19,7 +19,8 @@ model for code contributions. Follow these steps:
 
 ### Merge Model
 
-This repository uses [squash merges](https://docs.github.com/en/github/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-pull-request-commits)
+This repository uses
+[squash merges](https://docs.github.com/en/github/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/about-pull-request-merges#squash-and-merge-your-pull-request-commits)
 to group all related commits in a given pull request into a single commit upon
 acceptance and merge into the main branch. This has several benefits:
 
@@ -30,21 +31,21 @@ acceptance and merge into the main branch. This has several benefits:
 
 ### Code Style
 
-This project encourages the use of optional static typing. It
-uses [`mypy`](http://mypy-lang.org/) as a type checker
-and [`sphinx_autodoc_typehints`](https://github.com/agronholm/sphinx-autodoc-typehints)
-to automatically generate documentation based on type hints. You can check if
-your code passes `mypy` with `tox -e mypy`.
+This project uses `tox` for running code quality checks. Start by installing it
+with `pip install tox tox-uv`.
 
-This project uses [`black`](https://github.com/psf/black) to automatically
-enforce a consistent code style. You can apply `black` and other pre-configured
-linters with `tox -e lint`.
+This project encourages the use of optional static typing. It uses
+[`mypy`](http://mypy-lang.org/) as a type checker. You can check if your code
+passes `mypy` with `tox -e mypy`.
 
-This project uses [`flake8`](https://flake8.pycqa.org) and several plugins for
+This project uses [`ruff`](https://docs.astral.sh/ruff/) to automatically
+enforce a consistent code style. You can apply `ruff format` and other
+pre-configured formatters with `tox -e format`.
+
+This project uses [`ruff`](https://docs.astral.sh/ruff/) and several plugins for
 additional checks of documentation style, security issues, good variable
-nomenclature, and more (
-see [`tox.ini`](tox.ini) for a list of flake8 plugins). You can check if your
-code passes `flake8` with `tox -e flake8`.
+nomenclature, and more (see `pyproject.toml` for a list of Ruff plugins). You
+can check if your code passes `ruff check` with `tox -e lint`.
 
 Each of these checks are run on each commit using GitHub Actions as a continuous
 integration service. Passing all of them is required for accepting a
@@ -52,22 +53,39 @@ contribution. If you're unsure how to address the feedback from one of these
 tools, please say so either in the description of your pull request or in a
 comment, and we will help you.
 
+### Pre-commit
+
+You can optionally use [pre-commit](https://pre-commit.com) to automate running
+key code quality checks on each commit. Enable it with:
+
+```console
+$ uvx pre-commit install
+```
+
+Or using `pip`:
+
+```console
+$ pip install pre-commit
+$ pre-commit install
+```
+
 ### Logging
 
 Python's builtin `print()` should not be used (except when writing to files),
 it's checked by the
-[`flake8-print`](https://github.com/jbkahn/flake8-print) plugin to `flake8`. If
-you're in a command line setting or `main()` function for a module, you can use
-`click.echo()`. Otherwise, you can use the builtin `logging` module by adding
-`logger = logging.getLogger(__name__)` below the imports at the top of your
-file.
+[`flake8-print` (T20)](https://docs.astral.sh/ruff/rules/#flake8-print-t20)
+plugin to `ruff`. If you're in a command line setting or `main()` function for a
+module, you can use `click.echo()`. Otherwise, you can use the builtin `logging`
+module by adding `logger = logging.getLogger(__name__)` below the imports at the
+top of your file.
 
 ### Documentation
 
 All public functions (i.e., not starting with an underscore `_`) must be
-documented using the [sphinx documentation format](https://sphinx-rtd-tutorial.readthedocs.io/en/latest/docstrings.html#the-sphinx-docstring-format).
-The [`darglint`](https://github.com/terrencepreilly/darglint) plugin to `flake8`
-reports on functions that are not fully documented.
+documented using the
+[sphinx documentation format](https://sphinx-rtd-tutorial.readthedocs.io/en/latest/docstrings.html#the-sphinx-docstring-format).
+The [`darglint2`](https://github.com/akaihola/darglint2) tool reports on
+functions that are not fully documented.
 
 This project uses [`sphinx`](https://www.sphinx-doc.org) to automatically build
 documentation into a narrative structure. You can check that the documentation
@@ -93,14 +111,22 @@ $ git remote add pybel https://github.com/pybel/pybel.git
 ```
 
 Then, you can merge upstream code into your branch. You can also use the GitHub
-UI to do this by following [this tutorial](https://docs.github.com/en/github/collaborating-with-pull-requests/working-with-forks/syncing-a-fork).
+UI to do this by following
+[this tutorial](https://docs.github.com/en/github/collaborating-with-pull-requests/working-with-forks/syncing-a-fork).
 
 ### Python Version Compatibility
 
 This project aims to support all versions of Python that have not passed their
 end-of-life dates. After end-of-life, the version will be removed from the Trove
-qualifiers in the [`setup.cfg`](setup.cfg) and from the GitHub Actions testing
+qualifiers in the `pyproject.toml` and from the GitHub Actions testing
 configuration.
 
 See https://endoflife.date/python for a timeline of Python release and
 end-of-life dates.
+
+## Acknowledgements
+
+These code contribution guidelines are derived from the
+[cthoyt/cookiecutter-snekpack](https://github.com/cthoyt/cookiecutter-snekpack)
+Python package template. They're free to reuse and modify as long as they're
+properly acknowledged.

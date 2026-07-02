@@ -743,7 +743,11 @@ class Protein(CentralDogma):
     Example: AKT with phosphorylation
 
     >>> from pybel.dsl import Protein, ProteinModification
-    >>> Protein(namespace="HGNC", name="AKT", variants=[ProteinModification("Ph", code="Thr", position=308)])
+    >>> Protein(
+    ...     namespace="HGNC",
+    ...     name="AKT",
+    ...     variants=[ProteinModification("Ph", code="Thr", position=308)],
+    ... )
     """
 
     function = PROTEIN
@@ -804,7 +808,10 @@ class Reaction(BaseEntity):
         :param xrefs: Alternate identifiers for the entity if it is named
 
         >>> from pybel.dsl import Reaction, Protein, Abundance
-        >>> Reaction([Protein(namespace="HGNC", name="KNG1")], [Abundance(namespace="CHEBI", name="bradykinin")])
+        >>> Reaction(
+        ...     [Protein(namespace="HGNC", name="KNG1")],
+        ...     [Abundance(namespace="CHEBI", name="bradykinin")],
+        ... )
 
         """
         super().__init__()
