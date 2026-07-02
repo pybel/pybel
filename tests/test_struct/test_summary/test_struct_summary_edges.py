@@ -37,9 +37,7 @@ class TestEdgeSummary(unittest.TestCase):
         v = protein("HGNC", name="V")
         w = protein("HGNC", name="W")
 
-        graph.add_increases(
-            u, v, evidence=n(), citation=n(), annotations={"A": {"1", "2"}, "B": {"X"}}
-        )
+        graph.add_increases(u, v, evidence=n(), citation=n(), annotations={"A": {"1", "2"}, "B": {"X"}})
 
         graph.add_increases(
             u,
@@ -59,9 +57,7 @@ class TestEdgeSummary(unittest.TestCase):
             citation=n(),
         )
 
-        x = dict(
-            Counter((key, entity.identifier) for key, entity in iter_annotation_value_pairs(graph))
-        )
+        x = dict(Counter((key, entity.identifier) for key, entity in iter_annotation_value_pairs(graph)))
 
         self.assertEqual(
             {
@@ -96,9 +92,7 @@ class TestEdgeSummary(unittest.TestCase):
         }
 
         self.assertEqual({"Confidence", "Species"}, get_annotations(sialic_acid_graph))
-        self.assertEqual(
-            {"Confidence": 8, "Species": 8}, dict(count_annotations(sialic_acid_graph))
-        )
+        self.assertEqual({"Confidence": 8, "Species": 8}, dict(count_annotations(sialic_acid_graph)))
 
         annotation_values_by_annotation = get_annotation_values_by_annotation(sialic_acid_graph)
         self.assertEqual(expected, annotation_values_by_annotation)

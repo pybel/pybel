@@ -35,12 +35,8 @@ atp = Abundance(name="ATP", namespace="CHEBI", identifier="15422")
 adp = Abundance(name="ADP", namespace="CHEBI", identifier="16761")
 phosphate = Abundance(name="phosphoric acid", namespace="CHEBI", identifier="26078")
 glucose = Abundance(name="glucose", namespace="CHEBI", identifier="17234")
-glucose_6_phosphate = Abundance(
-    name="D-glucopyranose 6-phosphate", namespace="CHEBI", identifier="4170"
-)
-glycolisis_step_1 = Reaction(
-    reactants=[glucose, hk1, atp, phosphate], products=[glucose_6_phosphate, adp, hk1]
-)
+glucose_6_phosphate = Abundance(name="D-glucopyranose 6-phosphate", namespace="CHEBI", identifier="4170")
+glycolisis_step_1 = Reaction(reactants=[glucose, hk1, atp, phosphate], products=[glucose_6_phosphate, adp, hk1])
 
 composite_example = CompositeAbundance(members=[glucose_6_phosphate, adp, hk1])
 complex_example = ComplexAbundance(members=[glucose_6_phosphate, adp, hk1])

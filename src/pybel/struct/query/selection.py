@@ -89,9 +89,7 @@ def get_subgraph(
         result = get_subgraph_by_authors(graph, seed_data)
 
     elif seed_method == SEED_TYPE_ANNOTATION:
-        result = get_subgraph_by_annotations(
-            graph, seed_data["annotations"], or_=seed_data.get("or")
-        )
+        result = get_subgraph_by_annotations(graph, seed_data["annotations"], or_=seed_data.get("or"))
 
     elif seed_method == SEED_TYPE_SAMPLE:
         result = get_random_subgraph(

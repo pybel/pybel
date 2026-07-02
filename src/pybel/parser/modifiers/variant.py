@@ -15,9 +15,7 @@ same result, as it inherits from :class:`pybel.dsl.Hgvs`:
 
    from pybel.dsl import Protein, ProteinSubstitution
 
-   gsk3b_variant = Protien(
-       namespace="HGNC", name="GSK3B", variants=ProteinSubstitution("Gly", 123, "Arg")
-   )
+   gsk3b_variant = Protien(namespace="HGNC", name="GSK3B", variants=ProteinSubstitution("Gly", 123, "Arg"))
 
 Either way, the resulting object can be used like a dict that looks like:
 

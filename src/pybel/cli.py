@@ -395,9 +395,7 @@ def machine(manager: Manager, agents: list[str], local: bool, host: str):
         name="INDRA Machine for {}".format(", ".join(sorted(agents))),
         version=time.strftime("%Y%m%d"),
     )
-    click.echo(
-        f"built BEL graph with {graph.number_of_nodes()} nodes and {graph.number_of_edges()} edges"
-    )
+    click.echo(f"built BEL graph with {graph.number_of_nodes()} nodes and {graph.number_of_edges()} edges")
 
     if 0 == len(graph):
         click.echo("not uploading empty graph")
@@ -558,9 +556,7 @@ def nodes():
 def prune(manager: Manager):
     """Prune nodes not belonging to any edges."""
     nodes_to_delete = [
-        node
-        for node in tqdm(manager.session.query(Node), total=manager.count_nodes())
-        if not node.networks
+        node for node in tqdm(manager.session.query(Node), total=manager.count_nodes()) if not node.networks
     ]
     manager.session.delete(nodes_to_delete)
     manager.session.commit()

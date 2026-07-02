@@ -126,12 +126,7 @@ def _annotation_iter_helper(graph: BELGraph) -> Iterable[str]:
 
     :param graph: A BEL graph
     """
-    return (
-        key
-        for _, _, data in graph.edges(data=True)
-        if ANNOTATIONS in data
-        for key in data[ANNOTATIONS]
-    )
+    return (key for _, _, data in graph.edges(data=True) if ANNOTATIONS in data for key in data[ANNOTATIONS])
 
 
 def get_unused_list_annotation_values(graph: BELGraph) -> Mapping[str, set[str]]:

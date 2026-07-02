@@ -30,9 +30,7 @@ class TestInstantiation(unittest.TestCase):
             """
             return self.connection
 
-        self.mock_connection = mock.patch(
-            "pybel.manager.cache_manager.get_cache_connection", mock_connection
-        )
+        self.mock_connection = mock.patch("pybel.manager.cache_manager.get_cache_connection", mock_connection)
 
     def tearDown(self):
         os.close(self.fd)

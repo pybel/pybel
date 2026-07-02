@@ -62,18 +62,14 @@ class Query:
         self.network_ids.append(network_id)
         return self
 
-    def append_seeding_induction(
-        self, nodes: BaseEntity | list[BaseEntity] | list[dict]
-    ) -> Seeding:
+    def append_seeding_induction(self, nodes: BaseEntity | list[BaseEntity] | list[dict]) -> Seeding:
         """Add a seed induction method.
 
         :returns: seeding container for fluid API
         """
         return self.seeding.append_induction(nodes)
 
-    def append_seeding_neighbors(
-        self, nodes: BaseEntity | list[BaseEntity] | list[dict]
-    ) -> Seeding:
+    def append_seeding_neighbors(self, nodes: BaseEntity | list[BaseEntity] | list[dict]) -> Seeding:
         """Add a seed by neighbors.
 
         :returns: seeding container for fluid API
@@ -200,6 +196,4 @@ class Query:
         return Query.from_json(json.loads(s))
 
     def __str__(self):
-        return (
-            f"Query(networks={self.network_ids}, seeding={self.seeding}, pipeline={self.pipeline})"
-        )
+        return f"Query(networks={self.network_ids}, seeding={self.seeding}, pipeline={self.pipeline})"

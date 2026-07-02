@@ -81,9 +81,7 @@ class QueryManager(LookupManager):
 
     def get_edges_with_citations(self, citations: Iterable[Citation]) -> list[Edge]:
         """Get edges with one of the given citations."""
-        return (
-            self.session.query(Edge).join(Evidence).filter(Evidence.citation.in_(citations)).all()
-        )
+        return self.session.query(Edge).join(Evidence).filter(Evidence.citation.in_(citations)).all()
 
     def search_edges_with_evidence(self, evidence: str) -> list[Edge]:
         """Search edges with the given evidence.

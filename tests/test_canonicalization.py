@@ -233,9 +233,7 @@ class TestCanonicalizeEdge(unittest.TestCase):
         )
 
         c4 = self.add_edge(
-            source_modifier=activity(
-                namespace="go", name="transporter activity", identifier="0005215"
-            ),
+            source_modifier=activity(namespace="go", name="transporter activity", identifier="0005215"),
         )
 
         self.assertEqual(c1, c2)
@@ -249,19 +247,13 @@ class TestCanonicalizeEdge(unittest.TestCase):
         )
 
         self.assertEqual(
-            self.add_edge(
-                source_modifier=degradation(location=Entity(name="somewhere", namespace="GO"))
-            ),
-            self.add_edge(
-                source_modifier=degradation(location=Entity(name="somewhere", namespace="GO"))
-            ),
+            self.add_edge(source_modifier=degradation(location=Entity(name="somewhere", namespace="GO"))),
+            self.add_edge(source_modifier=degradation(location=Entity(name="somewhere", namespace="GO"))),
         )
 
         self.assertNotEqual(
             self.add_edge(source_modifier=degradation()),
-            self.add_edge(
-                source_modifier=degradation(location=Entity(name="somewhere", namespace="GO"))
-            ),
+            self.add_edge(source_modifier=degradation(location=Entity(name="somewhere", namespace="GO"))),
         )
 
     def test_translocation(self):

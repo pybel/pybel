@@ -167,12 +167,8 @@ def edge_to_tuple(
     :param data: The edge's data dictionary
     :param use_identifiers: Enables extended `BEP-0008 <http://bep.bel.bio/published/BEP-0008.html>`_ syntax
     """
-    u_str = _decanonicalize_edge_node(
-        source, data, node_position=SOURCE_MODIFIER, use_identifiers=use_identifiers
-    )
-    v_str = _decanonicalize_edge_node(
-        target, data, node_position=TARGET_MODIFIER, use_identifiers=use_identifiers
-    )
+    u_str = _decanonicalize_edge_node(source, data, node_position=SOURCE_MODIFIER, use_identifiers=use_identifiers)
+    v_str = _decanonicalize_edge_node(target, data, node_position=TARGET_MODIFIER, use_identifiers=use_identifiers)
     return u_str, data[RELATION], v_str
 
 
@@ -192,9 +188,7 @@ def edge_to_bel(
     :param use_identifiers: Enables extended `BEP-0008 <http://bep.bel.bio/published/BEP-0008.html>`_ syntax
     """
     sep = sep or " "
-    return sep.join(
-        edge_to_tuple(source=source, target=target, data=data, use_identifiers=use_identifiers)
-    )
+    return sep.join(edge_to_tuple(source=source, target=target, data=data, use_identifiers=use_identifiers))
 
 
 def _sort_qualified_edges_helper(t: EdgeTuple) -> tuple[str, str, str]:
@@ -228,9 +222,7 @@ def _evidence_sort_key(t: EdgeTuple) -> str:
     return t[3][EVIDENCE]
 
 
-def _set_annotation_to_str(
-    annotation_data: Mapping[str, list[Entity]], key: str, use_curie: bool = False
-) -> str:
+def _set_annotation_to_str(annotation_data: Mapping[str, list[Entity]], key: str, use_curie: bool = False) -> str:
     """Return a set annotation string."""
     value = annotation_data[key]
 
@@ -302,9 +294,7 @@ def _to_bel_lines_body(graph, use_identifiers: bool = False) -> Iterable[str]:
 
                 keys = sorted(annotations_data) if annotations_data is not None else ()
                 for key in keys:
-                    yield _set_annotation_to_str(
-                        annotations_data, key, use_curie=key in graph.annotation_curie
-                    )
+                    yield _set_annotation_to_str(annotations_data, key, use_curie=key in graph.annotation_curie)
 
                 yield graph.edge_to_bel(u, v, data, use_identifiers=use_identifiers)
 
@@ -323,14 +313,10 @@ def _to_bel_lines_footer(graph, use_identifiers: bool = False) -> Iterable[str]:
     :param use_identifiers: Enables extended `BEP-0008 <http://bep.bel.bio/published/BEP-0008.html>`_ syntax
     """
     unqualified_edges_to_serialize = [
-        (u, v, d)
-        for u, v, d in graph.edges(data=True)
-        if d[RELATION] in UNQUALIFIED_EDGES and EVIDENCE not in d
+        (u, v, d) for u, v, d in graph.edges(data=True) if d[RELATION] in UNQUALIFIED_EDGES and EVIDENCE not in d
     ]
 
-    isolated_nodes_to_serialize = [
-        node for node in graph if not graph.pred[node] and not graph.succ[node]
-    ]
+    isolated_nodes_to_serialize = [node for node in graph if not graph.pred[node] and not graph.succ[node]]
 
     if unqualified_edges_to_serialize or isolated_nodes_to_serialize:
         yield "###############################################\n"

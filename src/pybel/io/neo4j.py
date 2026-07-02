@@ -34,9 +34,7 @@ def to_neo4j(graph, neo_connection, use_tqdm: bool = False):
     >>> import py2neo
     >>> import pybel
     >>> from pybel.examples import sialic_acid_graph
-    >>> neo_graph = py2neo.Graph(
-    ...     "http://localhost:7474/db/data/"
-    ... )  # use your own connection settings
+    >>> neo_graph = py2neo.Graph("http://localhost:7474/db/data/")  # use your own connection settings
     >>> pybel.to_neo4j(sialic_acid_graph, neo_graph)
     """
     import py2neo

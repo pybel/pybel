@@ -34,9 +34,7 @@ def subgraph(graph, nodes: Iterable[BaseEntity]):
     for node, data in sg.nodes(data=True):
         rv.add_node(node, **data)
 
-    rv.add_edges_from(
-        (u, v, key, datadict.copy()) for u, v, key, datadict in sg.edges(keys=True, data=True)
-    )
+    rv.add_edges_from((u, v, key, datadict.copy()) for u, v, key, datadict in sg.edges(keys=True, data=True))
 
     return rv
 

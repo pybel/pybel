@@ -50,9 +50,7 @@ def functions(graph, file: TextIO | None = None, examples: bool = True, **kwargs
 
 def namespaces_table_df(graph: BELGraph, examples: bool = True) -> pd.DataFrame:
     """Create a dataframe describing the namespaces in the graph."""
-    namespace_mapping = multidict(
-        (node.namespace, node) for node in graph if isinstance(node, BaseConcept)
-    )
+    namespace_mapping = multidict((node.namespace, node) for node in graph if isinstance(node, BaseConcept))
     namespace_c = count_namespaces(graph)
     if not examples:
         return pd.DataFrame(namespace_c.most_common(), columns=["Namespace", "Count"])
@@ -70,9 +68,7 @@ def namespaces_table_df(graph: BELGraph, examples: bool = True) -> pd.DataFrame:
     )
 
 
-def namespaces_str(
-    graph: BELGraph, examples: bool = True, add_count: bool = True, **kwargs
-) -> None:
+def namespaces_str(graph: BELGraph, examples: bool = True, add_count: bool = True, **kwargs) -> None:
     """Make a summary string of the namespaces in the graph."""
     df = namespaces_table_df(graph, examples=examples)
     headers = list(df.columns)
@@ -81,16 +77,12 @@ def namespaces_str(
     return tabulate(df.values, headers=headers, **kwargs)
 
 
-def namespaces(
-    graph: BELGraph, file: TextIO | None = None, examples: bool = True, **kwargs
-) -> None:
+def namespaces(graph: BELGraph, file: TextIO | None = None, examples: bool = True, **kwargs) -> None:
     """Print a summary of the namespaces in the graph."""
     print(namespaces_str(graph=graph, examples=examples, **kwargs), file=file)
 
 
-def edge_table_df(
-    graph: BELGraph, *, examples: bool = True, minimum: int | None = None
-) -> pd.DataFrame:
+def edge_table_df(graph: BELGraph, *, examples: bool = True, minimum: int | None = None) -> pd.DataFrame:
     """Create a dataframe describing the edges in the graph."""
     edge_mapping = multidict(
         (

@@ -224,18 +224,12 @@ def parse_definitions(
 
     graph.namespace_url.update(metadata_parser.namespace_url_dict)
     graph.namespace_pattern.update(
-        {
-            keyword: pattern.pattern
-            for keyword, pattern in metadata_parser.namespace_to_pattern.items()
-        }
+        {keyword: pattern.pattern for keyword, pattern in metadata_parser.namespace_to_pattern.items()}
     )
 
     graph.annotation_url.update(metadata_parser.annotation_url_dict)
     graph.annotation_pattern.update(
-        {
-            keyword: pattern.pattern
-            for keyword, pattern in metadata_parser.annotation_to_pattern.items()
-        }
+        {keyword: pattern.pattern for keyword, pattern in metadata_parser.annotation_to_pattern.items()}
     )
     graph.annotation_list.update(metadata_parser.annotation_to_local)
 

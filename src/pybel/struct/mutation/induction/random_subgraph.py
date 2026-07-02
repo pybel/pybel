@@ -21,9 +21,7 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-def _random_edge_iterator(
-    graph: BELGraph, n_edges: int
-) -> Iterable[tuple[BaseEntity, BaseEntity, int, Mapping]]:
+def _random_edge_iterator(graph: BELGraph, n_edges: int) -> Iterable[tuple[BaseEntity, BaseEntity, int, Mapping]]:
     """Get a random set of edges from the graph and randomly samples a key from each.
 
     :param graph: A BEL graph

@@ -28,9 +28,7 @@ from tests.constants import (
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 
-LOCAL_TEST_PATH = os.path.expanduser(
-    "~/dev/pybel/src/pybel/testing/resources/belns/hgnc-names.belns"
-)
+LOCAL_TEST_PATH = os.path.expanduser("~/dev/pybel/src/pybel/testing/resources/belns/hgnc-names.belns")
 
 
 class TestParseMetadata(FleetingTemporaryCacheMixin):

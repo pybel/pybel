@@ -72,11 +72,7 @@ reference_seq = one_of(["r", "p", "c"])
 coordinate = pyparsing_common.integer | "?"
 missing = Keyword("?")
 range_coordinate_unquoted = missing(FUSION_MISSING) | (
-    reference_seq(FUSION_REFERENCE)
-    + Suppress(".")
-    + coordinate(FUSION_START)
-    + Suppress("_")
-    + coordinate(FUSION_STOP)
+    reference_seq(FUSION_REFERENCE) + Suppress(".") + coordinate(FUSION_START) + Suppress("_") + coordinate(FUSION_STOP)
 )
 
 
@@ -97,12 +93,8 @@ def get_fusion_language(concept: ParserElement, permissive: bool = True) -> Pars
 
 def get_legacy_fusion_langauge(concept: ParserElement, reference: str) -> ParserElement:
     """Build a legacy fusion parser."""
-    break_start = (ppc.integer | "?").set_parse_action(
-        _fusion_break_handler_wrapper(reference, start=True)
-    )
-    break_end = (ppc.integer | "?").set_parse_action(
-        _fusion_break_handler_wrapper(reference, start=False)
-    )
+    break_start = (ppc.integer | "?").set_parse_action(_fusion_break_handler_wrapper(reference, start=True))
+    break_end = (ppc.integer | "?").set_parse_action(_fusion_break_handler_wrapper(reference, start=False))
 
     res = (
         Group(concept(CONCEPT))(PARTNER_5P)

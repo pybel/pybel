@@ -50,11 +50,7 @@ class ConceptParser(BaseParser):
         :param allow_naked_names: If true, turn off naked namespace failures
         """
         self.identifier_fqualified = (
-            ns(NAMESPACE)
-            + Suppress(":")
-            + (ns | quote)(IDENTIFIER)
-            + Suppress("!")
-            + (ns | quote)(NAME)
+            ns(NAMESPACE) + Suppress(":") + (ns | quote)(IDENTIFIER) + Suppress("!") + (ns | quote)(NAME)
         )
         self.identifier_qualified = ns(NAMESPACE) + Suppress(":") + (ns | quote)(NAME)
 
@@ -67,9 +63,7 @@ class ConceptParser(BaseParser):
                     self.namespace_to_identifier_to_encoding[namespace][identifier] = encoding
 
             self.namespace_to_name_to_encoding = dict(self.namespace_to_name_to_encoding)
-            self.namespace_to_identifier_to_encoding = dict(
-                self.namespace_to_identifier_to_encoding
-            )
+            self.namespace_to_identifier_to_encoding = dict(self.namespace_to_identifier_to_encoding)
         else:
             self.namespace_to_name_to_encoding = {}
             self.namespace_to_identifier_to_encoding = {}
@@ -108,9 +102,7 @@ class ConceptParser(BaseParser):
         """Check that the namespace has been defined by a regular expression."""
         return namespace in self.namespace_to_pattern
 
-    def raise_for_missing_namespace(
-        self, line: str, position: int, namespace: str, name: str
-    ) -> None:
+    def raise_for_missing_namespace(self, line: str, position: int, namespace: str, name: str) -> None:
         """Raise an exception if the namespace is not defined."""
         if not self.has_enumerated_namespace(namespace) and not self.has_regex_namespace(namespace):
             raise UndefinedNamespaceWarning(self.get_line_number(), line, position, namespace, name)
@@ -119,36 +111,21 @@ class ConceptParser(BaseParser):
         """Raise an exception if the namespace is not defined or if it does not validate the given name."""
         self.raise_for_missing_namespace(line, position, namespace, name)
 
-        if (
-            self.has_enumerated_namespace(namespace)
-            and name not in self.namespace_to_name_to_encoding[namespace]
-        ):
-            raise MissingNamespaceNameWarning(
-                self.get_line_number(), line, position, namespace, name
-            )
+        if self.has_enumerated_namespace(namespace) and name not in self.namespace_to_name_to_encoding[namespace]:
+            raise MissingNamespaceNameWarning(self.get_line_number(), line, position, namespace, name)
 
-        if self.has_regex_namespace(namespace) and not self.namespace_to_pattern[namespace].match(
-            name
-        ):
-            raise MissingNamespaceRegexWarning(
-                self.get_line_number(), line, position, namespace, name
-            )
+        if self.has_regex_namespace(namespace) and not self.namespace_to_pattern[namespace].match(name):
+            raise MissingNamespaceRegexWarning(self.get_line_number(), line, position, namespace, name)
 
-    def handle_identifier_fqualified(
-        self, line: str, position: int, tokens: ParseResults
-    ) -> ParseResults:
+    def handle_identifier_fqualified(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
         """Handle parsing a qualified OBO-style identifier."""
         return self._handle_identifier(line, position, tokens, key=IDENTIFIER)
 
-    def handle_identifier_qualified(
-        self, line: str, position: int, tokens: ParseResults
-    ) -> ParseResults:
+    def handle_identifier_qualified(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
         """Handle parsing a qualified identifier."""
         return self._handle_identifier(line, position, tokens, key=NAME)
 
-    def _handle_identifier(
-        self, line: str, position: int, tokens: ParseResults, key
-    ) -> ParseResults:
+    def _handle_identifier(self, line: str, position: int, tokens: ParseResults, key) -> ParseResults:
         """Handle parsing a qualified identifier."""
         namespace, name = tokens[NAMESPACE], tokens[key]
 
@@ -157,9 +134,7 @@ class ConceptParser(BaseParser):
 
         return tokens
 
-    def handle_namespace_default(
-        self, line: str, position: int, tokens: ParseResults
-    ) -> ParseResults:
+    def handle_namespace_default(self, line: str, position: int, tokens: ParseResults) -> ParseResults:
         """Handle parsing an identifier for the default namespace."""
         name = tokens[NAME]
         if not self.default_namespace:

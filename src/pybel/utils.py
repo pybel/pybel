@@ -105,9 +105,7 @@ def tokenize_version(version_string: str) -> tuple[int, int, int]:
     (0, 1, 2)
     """
     before_dash = version_string.split("-")[0]
-    major, minor, patch = before_dash.split(".")[
-        :3
-    ]  # take only the first 3 in case there's an extension like -dev.0
+    major, minor, patch = before_dash.split(".")[:3]  # take only the first 3 in case there's an extension like -dev.0
     return int(major), int(minor), int(patch)
 
 

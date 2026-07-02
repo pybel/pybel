@@ -15,9 +15,7 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-def _get_subgraphs_by_annotation_disregard_undefined(
-    graph: BELGraph, annotation: str
-) -> Mapping[Entity, BELGraph]:
+def _get_subgraphs_by_annotation_disregard_undefined(graph: BELGraph, annotation: str) -> Mapping[Entity, BELGraph]:
     result = defaultdict(graph.child)
 
     for source, target, key, data in graph.edges(keys=True, data=True):

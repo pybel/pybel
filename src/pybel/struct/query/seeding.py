@@ -166,6 +166,4 @@ def _handle_nodes(nodes: MaybeNodeList) -> list[BaseEntity]:
     if isinstance(nodes, BaseEntity):
         return [nodes]
 
-    return [
-        (parse_result_to_dsl(node) if not isinstance(node, BaseEntity) else node) for node in nodes
-    ]
+    return [(parse_result_to_dsl(node) if not isinstance(node, BaseEntity) else node) for node in nodes]

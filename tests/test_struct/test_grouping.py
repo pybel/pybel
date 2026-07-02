@@ -32,9 +32,7 @@ class TestAnnotation(unittest.TestCase):
             evidence=evidence,
             annotations={"subgraph": {"1", "2"}},
         )
-        self.graph.add_increases(
-            a, c, citation=citation, evidence=evidence, annotations={"subgraph": {"1"}}
-        )
+        self.graph.add_increases(a, c, citation=citation, evidence=evidence, annotations={"subgraph": {"1"}})
         self.graph.add_increases(
             b,
             d,
@@ -42,9 +40,7 @@ class TestAnnotation(unittest.TestCase):
             evidence=evidence,
             annotations={"subgraph": {"1", "2"}},
         )
-        self.graph.add_increases(
-            a, d, citation=citation, evidence=evidence, annotations={"subgraph": {"2"}}
-        )
+        self.graph.add_increases(a, d, citation=citation, evidence=evidence, annotations={"subgraph": {"2"}})
         self.graph.add_increases(c, d, citation=citation, evidence=evidence)
 
     def test_get_subgraphs_by_annotation(self):
@@ -89,9 +85,7 @@ class TestAnnotation(unittest.TestCase):
 
     def test_get_subgraphs_by_annotation_with_sentinel(self):
         sentinel = n()
-        subgraphs = get_subgraphs_by_annotation(
-            self.graph, annotation="subgraph", sentinel=sentinel
-        )
+        subgraphs = get_subgraphs_by_annotation(self.graph, annotation="subgraph", sentinel=sentinel)
 
         self.assertEqual(3, len(subgraphs))
         self.assertIn(Entity(namespace="subgraph", identifier="1"), subgraphs)

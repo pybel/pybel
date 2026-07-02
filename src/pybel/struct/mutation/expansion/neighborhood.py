@@ -84,9 +84,7 @@ def expand_node_neighborhood(universe: BELGraph, graph: BELGraph, node: BaseEnti
 
 
 @uni_in_place_transformation
-def expand_nodes_neighborhoods(
-    universe: BELGraph, graph: BELGraph, nodes: Iterable[BaseEntity]
-) -> None:
+def expand_nodes_neighborhoods(universe: BELGraph, graph: BELGraph, nodes: Iterable[BaseEntity]) -> None:
     """Expand around the neighborhoods of the given node in the result graph.
 
     :param universe: The graph containing the stuff to add
@@ -98,9 +96,7 @@ def expand_nodes_neighborhoods(
 
 
 @uni_in_place_transformation
-def expand_all_node_neighborhoods(
-    universe: BELGraph, graph: BELGraph, filter_pathologies: bool = False
-) -> None:
+def expand_all_node_neighborhoods(universe: BELGraph, graph: BELGraph, filter_pathologies: bool = False) -> None:
     """Expand the neighborhoods of all nodes in the given graph.
 
     :param pybel.BELGraph universe: The graph containing the stuff to add

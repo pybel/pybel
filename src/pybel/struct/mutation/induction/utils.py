@@ -23,9 +23,7 @@ __all__ = [
 
 
 @transformation
-def get_subgraph_by_edge_filter(
-    graph: BELGraph, edge_predicates: EdgePredicates | None = None
-) -> BELGraph:
+def get_subgraph_by_edge_filter(graph: BELGraph, edge_predicates: EdgePredicates | None = None) -> BELGraph:
     """Induce a sub-graph on all edges that pass the given filters.
 
     :param graph: A BEL graph

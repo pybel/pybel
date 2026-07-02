@@ -47,16 +47,12 @@ def main(directory: str):
 
     output_graphdati_jsonl_gz_path = os.path.join(directory, "hetionet.bel.graphdati.jsonl.gz")
     if not os.path.exists(output_graphdati_jsonl_gz_path):
-        click.echo(
-            f"outputting whole hetionet as BEL GraphDati JSONL GZ to {output_graphdati_jsonl_gz_path}"
-        )
+        click.echo(f"outputting whole hetionet as BEL GraphDati JSONL GZ to {output_graphdati_jsonl_gz_path}")
         to_graphdati_jsonl_gz(graph, output_graphdati_jsonl_gz_path, use_identifiers=True)
 
     output_graphdati_gz_path = os.path.join(directory, "hetionet.bel.graphdati.json.gz")
     if not os.path.exists(output_graphdati_gz_path):
-        click.echo(
-            f"outputting whole hetionet as BEL GraphDati JSON GZ to {output_graphdati_gz_path}"
-        )
+        click.echo(f"outputting whole hetionet as BEL GraphDati JSON GZ to {output_graphdati_gz_path}")
         to_graphdati_gz(graph, output_graphdati_gz_path, use_identifiers=True)
 
     summary_tsv_path = os.path.join(directory, "hetionet_summary.tsv")

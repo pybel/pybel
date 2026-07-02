@@ -59,9 +59,7 @@ class Converter(ABC):
 
     @staticmethod
     @abstractmethod
-    def convert(
-        u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData
-    ) -> tuple[str, str, str]:
+    def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> tuple[str, str, str]:
         """Convert a BEL edge."""
 
 
@@ -69,9 +67,7 @@ class SimpleConverter(Converter):
     """A class for converting the source and target that have simple names."""
 
     @classmethod
-    def convert(
-        cls, u: BaseAbundance, v: BaseAbundance, key: str, edge_data: EdgeData
-    ) -> tuple[str, str, str]:
+    def convert(cls, u: BaseAbundance, v: BaseAbundance, key: str, edge_data: EdgeData) -> tuple[str, str, str]:
         """Convert a BEL edge."""
         return u.safe_label, edge_data[RELATION], v.safe_label
 
@@ -82,9 +78,7 @@ class TypedConverter(Converter):
     target_relation = None
 
     @classmethod
-    def convert(
-        cls, u: BaseAbundance, v: BaseAbundance, key: str, edge_data: EdgeData
-    ) -> tuple[str, str, str]:
+    def convert(cls, u: BaseAbundance, v: BaseAbundance, key: str, edge_data: EdgeData) -> tuple[str, str, str]:
         """Convert a BEL edge."""
         return u.safe_label, cls.target_relation, v.safe_label
 
@@ -147,9 +141,7 @@ class ProcessCausalConverter(SimpleConverter, SimpleTypedPredicate):
     def predicate(cls, u, v, key, edge_data) -> bool:
         """Test a BEL edge has a given relation."""
         return (
-            isinstance(u, cls.subject_type)
-            and edge_data[RELATION] in cls.relations
-            and isinstance(v, cls.object_type)
+            isinstance(u, cls.subject_type) and edge_data[RELATION] in cls.relations and isinstance(v, cls.object_type)
         )
 
 
@@ -241,9 +233,7 @@ class ListComplexHasComponentConverter(SimpleTypedPredicate):
     target_relation = "partOf"
 
     @classmethod
-    def convert(
-        cls, u: ComplexAbundance, v: BaseAbundance, key: str, data: dict
-    ) -> tuple[str, str, str]:
+    def convert(cls, u: ComplexAbundance, v: BaseAbundance, key: str, data: dict) -> tuple[str, str, str]:
         """Convert a BEL edge."""
         return u.curie, cls.target_relation, v.as_bel()
 
@@ -280,13 +270,9 @@ class AssociationConverter(Converter):
         return edge_data[RELATION] == ASSOCIATION
 
     @staticmethod
-    def convert(
-        u: BaseAbundance, v: BaseAbundance, key: str, edge_data: EdgeData
-    ) -> tuple[str, str, str]:
+    def convert(u: BaseAbundance, v: BaseAbundance, key: str, edge_data: EdgeData) -> tuple[str, str, str]:
         """Convert a BEL edge."""
-        relation = edge_data.get(
-            "association_type", ASSOCIATION
-        )  # allow more specific association to be defined
+        relation = edge_data.get("association_type", ASSOCIATION)  # allow more specific association to be defined
         return u.safe_label, relation, v.safe_label
 
 
@@ -320,9 +306,7 @@ class RegulatesAmountConverter(TypedConverter):
     def predicate(cls, u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> bool:
         """Test a BEL edge."""
         target_modifier = edge_data.get(TARGET_MODIFIER)
-        return edge_data[RELATION] == cls.relation and (
-            not target_modifier or not target_modifier.get(MODIFIER)
-        )
+        return edge_data[RELATION] == cls.relation and (not target_modifier or not target_modifier.get(MODIFIER))
 
 
 class IncreasesAmountConverter(RegulatesAmountConverter):
@@ -356,11 +340,7 @@ class RegulatesDegradationConverter(TypedConverter):
     def predicate(cls, u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> bool:
         """Test a BEL edge."""
         target_modifier = edge_data.get(TARGET_MODIFIER)
-        return (
-            edge_data[RELATION] == cls.relation
-            and target_modifier
-            and target_modifier.get(MODIFIER) == DEGRADATION
-        )
+        return edge_data[RELATION] == cls.relation and target_modifier and target_modifier.get(MODIFIER) == DEGRADATION
 
 
 class IncreasesDegradationConverter(RegulatesDegradationConverter):
@@ -394,11 +374,7 @@ class RegulatesActivityConverter(TypedConverter):
     def predicate(cls, u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> bool:
         """Test a BEL edge."""
         target_modifier = edge_data.get(TARGET_MODIFIER)
-        return (
-            edge_data[RELATION] == cls.relation
-            and target_modifier
-            and target_modifier.get(MODIFIER) == ACTIVITY
-        )
+        return edge_data[RELATION] == cls.relation and target_modifier and target_modifier.get(MODIFIER) == ACTIVITY
 
 
 class IncreasesActivityConverter(RegulatesActivityConverter):
@@ -491,9 +467,7 @@ class TranscriptionFactorForConverter(Converter):
     """Converts ``complex(g(A), p(B)) directlyIncreases r(A)```."""
 
     @classmethod
-    def convert(
-        cls, u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData
-    ) -> tuple[str, str, str]:
+    def convert(cls, u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> tuple[str, str, str]:
         """Convert a transcription factor for edge."""
         gene = v.get_gene()
         if gene == u.members[0]:
@@ -535,9 +509,7 @@ class BindsProteinConverter(Converter):
         )
 
     @staticmethod
-    def convert(
-        u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData
-    ) -> tuple[str, str, str]:
+    def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> tuple[str, str, str]:
         """Convert a binds protein factor for edge."""
         v = next(m for m in v.members if m != u)
         return u.safe_label, "bindsToProtein", v.safe_label
@@ -557,9 +529,7 @@ class HomomultimerConverter(Converter):
         )
 
     @staticmethod
-    def convert(
-        u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData
-    ) -> tuple[str, str, str]:
+    def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> tuple[str, str, str]:
         """Convert a homomultimer formation."""
         return u.safe_label, "bindsToProtein", u.safe_label
 
@@ -580,9 +550,7 @@ class BindsGeneConverter(Converter):
         )
 
     @staticmethod
-    def convert(
-        u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData
-    ) -> tuple[str, str, str]:
+    def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> tuple[str, str, str]:
         """Convert a transcription factor for edge."""
         v = next(m for m in v.members if m != u)
         return u.safe_label, "bindsToGene", v.safe_label
@@ -603,9 +571,7 @@ class ProteinRegulatesComplex(Converter):
         )
 
     @staticmethod
-    def convert(
-        u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData
-    ) -> tuple[str, str, str]:
+    def convert(u: BaseEntity, v: BaseEntity, key: str, edge_data: EdgeData) -> tuple[str, str, str]:
         """Convert a transcription factor for edge."""
         relation = edge_data[RELATION]
         if relation in CAUSAL_INCREASE_RELATIONS:

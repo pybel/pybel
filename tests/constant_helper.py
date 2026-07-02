@@ -176,9 +176,7 @@ bcr_jak2_rna_fusion = RnaFusion(
     range_3p=EnumeratedFusionRange("r", 2626, "?"),
 )
 
-chchd4_aifm1_rna_fusion = RnaFusion(
-    partner_5p=Rna("HGNC", "CHCHD4"), partner_3p=Rna("HGNC", "AIFM1")
-)
+chchd4_aifm1_rna_fusion = RnaFusion(partner_5p=Rna("HGNC", "CHCHD4"), partner_3p=Rna("HGNC", "AIFM1"))
 
 tmprss2_erg_rna_fusion = RnaFusion(
     partner_5p=Rna("HGNC", "TMPRSS2"),
@@ -186,9 +184,7 @@ tmprss2_erg_rna_fusion = RnaFusion(
     partner_3p=Rna("HGNC", "ERG"),
     range_3p=EnumeratedFusionRange("r", 312, 5034),
 )
-tmprss2_erg_rna_fusion_unspecified = RnaFusion(
-    partner_5p=Rna("HGNC", "TMPRSS2"), partner_3p=Rna("HGNC", "ERG")
-)
+tmprss2_erg_rna_fusion_unspecified = RnaFusion(partner_5p=Rna("HGNC", "TMPRSS2"), partner_3p=Rna("HGNC", "ERG"))
 
 BEL_THOROUGH_NODES = {
     oxygen_atom,

@@ -84,9 +84,7 @@ class TestDefinitionManagers(TemporaryCacheClsMixin):
             },
         }
 
-        annotations_iter = dict(
-            self.manager._iter_from_annotations_dict(graph, annotations_dict=data[ANNOTATIONS])
-        )
+        annotations_iter = dict(self.manager._iter_from_annotations_dict(graph, annotations_dict=data[ANNOTATIONS]))
         self.assertIn(CELL_LINE_URL, annotations_iter)
         self.assertIn("1321N1 cell", annotations_iter[CELL_LINE_URL])
 

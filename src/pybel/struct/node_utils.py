@@ -25,11 +25,7 @@ def flatten_list_abundance(node: ListAbundance) -> ListAbundance:
     return node.__class__(
         list(
             chain.from_iterable(
-                (
-                    flatten_list_abundance(member).members
-                    if isinstance(member, ListAbundance)
-                    else [member]
-                )
+                (flatten_list_abundance(member).members if isinstance(member, ListAbundance) else [member])
                 for member in node.members
             )
         )
@@ -38,9 +34,7 @@ def flatten_list_abundance(node: ListAbundance) -> ListAbundance:
 
 def list_abundance_expansion(graph) -> None:
     """Flatten list abundances."""
-    mapping = {
-        node: flatten_list_abundance(node) for node in graph if isinstance(node, ListAbundance)
-    }
+    mapping = {node: flatten_list_abundance(node) for node in graph if isinstance(node, ListAbundance)}
     relabel_nodes(graph, mapping, copy=False)
 
 
@@ -96,9 +90,7 @@ def _reaction_cartesian_expansion_unqualified_helper(
     if isinstance(u, Reaction) and isinstance(v, Reaction):
         enzymes = _get_catalysts_in_reaction(u) | _get_catalysts_in_reaction(v)
 
-        for reactant, product in chain(
-            itt.product(u.reactants, u.products), itt.product(v.reactants, v.products)
-        ):
+        for reactant, product in chain(itt.product(u.reactants, u.products), itt.product(v.reactants, v.products)):
             if reactant in enzymes or product in enzymes:
                 continue
 

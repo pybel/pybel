@@ -39,9 +39,7 @@ def _edge_to_tuple(u: BaseEntity, v: BaseEntity, edge_data: EdgeData):
     if annotations is None:
         annotations_hashable = None
     else:
-        annotations_hashable = tuple(
-            (key, tuple(sorted(values))) for key, values in sorted(annotations.items())
-        )
+        annotations_hashable = tuple((key, tuple(sorted(values))) for key, values in sorted(annotations.items()))
 
     source_modifier = edge_data.get(SOURCE_MODIFIER)
     if source_modifier is None:
@@ -78,9 +76,7 @@ def _hash_edge(u: BaseEntity, v: BaseEntity, data: EdgeData) -> int:
 def _get_edge_dict(
     graph: BELGraph,
 ) -> Mapping[int, tuple[BaseEntity, BaseEntity, EdgeData]]:
-    return {
-        _hash_edge(u, v, data): (u, v, data) for u, v, k, data in graph.edges(keys=True, data=True)
-    }
+    return {_hash_edge(u, v, data): (u, v, data) for u, v, k, data in graph.edges(keys=True, data=True)}
 
 
 class TestCase(unittest.TestCase):

@@ -99,10 +99,7 @@ def _restore_fusion_dict(d: dict) -> dict:
 
 def build_node_mapping(graph: BELGraph) -> Mapping[BaseEntity, int]:
     """Build a mapping from a graph's nodes to their canonical sort order."""
-    return {
-        node: node_index
-        for node_index, node in enumerate(sorted(graph, key=methodcaller("as_bel")))
-    }
+    return {node: node_index for node_index, node in enumerate(sorted(graph, key=methodcaller("as_bel")))}
 
 
 def to_cx(graph: BELGraph) -> list[dict]:
@@ -284,9 +281,7 @@ def to_cx(graph: BELGraph) -> list[dict]:
             }
         )
 
-    annotation_list_keys_lookup = {
-        keyword: i for i, keyword in enumerate(sorted(graph.annotation_list))
-    }
+    annotation_list_keys_lookup = {keyword: i for i, keyword in enumerate(sorted(graph.annotation_list))}
     annotation_lists_entry = []
     for keyword, values in graph.annotation_list.items():
         for v in values:

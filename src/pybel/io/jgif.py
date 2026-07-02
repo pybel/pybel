@@ -66,7 +66,9 @@ species_map = {
     "mouse": "10090",
 }
 
-placeholder_evidence = "This Network edge has no supporting evidence.  Please add real evidence to this edge prior to deleting."
+placeholder_evidence = (
+    "This Network edge has no supporting evidence.  Please add real evidence to this edge prior to deleting."
+)
 
 EXPERIMENT_CONTEXT = "experiment_context"
 
@@ -322,9 +324,7 @@ def from_jgif(graph_jgif_dict, parser_kwargs: Mapping[str, Any] | None = None):
 
                 parser.control_parser.clear()
                 citation_namespace = citation["type"].lower().strip()
-                citation_namespace = pc.CITATION_NORMALIZER.get(
-                    citation_namespace, citation_namespace
-                )
+                citation_namespace = pc.CITATION_NORMALIZER.get(citation_namespace, citation_namespace)
                 parser.control_parser.citation_db = citation_namespace
                 parser.control_parser.citation_db_id = citation["id"].strip()
                 parser.control_parser.evidence = summary_text

@@ -177,9 +177,7 @@ class Pipeline:
                 func = self._get_function(name)
                 result = func(result, *args, **kwargs)
             else:
-                networks = (
-                    self._run_helper(graph, subprotocol) for subprotocol in entry["pipelines"]
-                )
+                networks = (self._run_helper(graph, subprotocol) for subprotocol in entry["pipelines"])
 
                 if meta_entry == META_UNION:
                     result = union(networks)

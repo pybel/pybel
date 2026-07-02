@@ -19,9 +19,7 @@ def parse():
     Example usage:
 
     >>> import requests
-    >>> requests.post(
-    ...     "http://localhost:5000/parse", json={"text": "p(HGNC:123) increases p(HGNC:456)"}
-    ... ).json()
+    >>> requests.post("http://localhost:5000/parse", json={"text": "p(HGNC:123) increases p(HGNC:456)"}).json()
     {'input': 'p(HGNC:123) increases p(HGNC:456)', 'output': {'object': {'concept': {'name': '456', 'namespace': 'HGNC'}, 'function': 'Protein'}, 'relation': 'increases', 'subject': {'concept': {'name': '123', 'namespace': 'HGNC'}, 'function': 'Protein'}}, 'success': True}
     """
     text = flask.request.json.get("text")

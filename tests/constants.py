@@ -71,9 +71,7 @@ OPENBEL_ANNOTATION_RESOURCES = OPENBEL_DOMAIN + "/belframework/20150611/annotati
 
 test_citation_dict = citation_dict(namespace=CITATION_TYPE_PUBMED, identifier="1235813")
 
-SET_CITATION_TEST = (
-    f'SET Citation = {{"{test_citation_dict.namespace}", "{test_citation_dict.identifier}"}}'
-)
+SET_CITATION_TEST = f'SET Citation = {{"{test_citation_dict.namespace}", "{test_citation_dict.identifier}"}}'
 test_evidence_text = "I read it on Twitter"
 test_set_evidence = f'SET Evidence = "{test_evidence_text}"'
 
@@ -101,9 +99,7 @@ def assert_has_node(self: unittest.TestCase, node: BaseEntity, graph: BELGraph, 
     self.assertIn(
         node,
         graph,
-        msg="{} not found in graph. Other nodes:\n{}".format(
-            node.as_bel(), "\n".join(n.as_bel() for n in graph)
-        ),
+        msg="{} not found in graph. Other nodes:\n{}".format(node.as_bel(), "\n".join(n.as_bel() for n in graph)),
     )
 
     if kwargs:
@@ -164,10 +160,7 @@ def assert_has_edge(
         msg="Edge ({}, {}) not in graph. Other edges:\n{}".format(
             u,
             v,
-            "\n".join(
-                edge_to_bel(u, v, d, use_identifiers=use_identifiers)
-                for u, v, d in graph.edges(data=True)
-            ),
+            "\n".join(edge_to_bel(u, v, d, use_identifiers=use_identifiers) for u, v, d in graph.edges(data=True)),
         ),
     )
 
@@ -440,9 +433,7 @@ class BelReconstitutionMixin(TestGraphMixin):
             self.assertLessEqual(set(expected_test_thorough_metadata), set(graph.document))
             self.assertEqual(expected_test_thorough_metadata[METADATA_NAME], graph.name)
             self.assertEqual(expected_test_thorough_metadata[METADATA_VERSION], graph.version)
-            self.assertEqual(
-                expected_test_thorough_metadata[METADATA_DESCRIPTION], graph.description
-            )
+            self.assertEqual(expected_test_thorough_metadata[METADATA_DESCRIPTION], graph.description)
 
         if check_path:
             self.assertEqual(test_bel_thorough, graph.path)
@@ -476,9 +467,7 @@ class BelReconstitutionMixin(TestGraphMixin):
         for u, v, data in BEL_THOROUGH_EDGES:
             assert_has_edge(self, u, v, graph, permissive=True, **data)
 
-    def bel_slushy_reconstituted(
-        self, graph: BELGraph, check_metadata: bool = True, check_warnings: bool = True
-    ):
+    def bel_slushy_reconstituted(self, graph: BELGraph, check_metadata: bool = True, check_warnings: bool = True):
         """Check that slushy.bel was loaded properly."""
         self.assertIsNotNone(graph)
         self.assertIsInstance(graph, BELGraph)

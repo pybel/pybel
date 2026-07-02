@@ -43,11 +43,7 @@ class LookupManager(BaseManager):
 
     def get_citation_by_reference(self, db: str, db_id: str) -> Citation | None:
         """Get a citation object by its database and reference."""
-        return (
-            self.session.query(Citation)
-            .filter(Citation.db == db, Citation.db_id == db_id)
-            .one_or_none()
-        )
+        return self.session.query(Citation).filter(Citation.db == db, Citation.db_id == db_id).one_or_none()
 
     def get_citation_by_curie(self, curie: str) -> Citation | None:
         """Get a citation object by its hash."""

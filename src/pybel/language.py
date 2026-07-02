@@ -65,9 +65,7 @@ class Entity(dict):
 
         if identifier is not None:
             if not isinstance(identifier, str):
-                raise TypeError(
-                    f"identifier should be a string. Got {type(identifier)} {identifier}"
-                )
+                raise TypeError(f"identifier should be a string. Got {type(identifier)} {identifier}")
             if not identifier:
                 raise ValueError("identifier should be non-empty")
             self[IDENTIFIER] = identifier
@@ -90,9 +88,7 @@ class Entity(dict):
     @property
     def curie(self) -> str:
         """Return this entity as a CURIE."""
-        return (
-            f"{self.namespace}:{ensure_quotes(self.identifier if self.identifier else self.name)}"
-        )
+        return f"{self.namespace}:{ensure_quotes(self.identifier if self.identifier else self.name)}"
 
     @property
     def obo(self) -> str:

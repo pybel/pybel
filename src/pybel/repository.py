@@ -245,11 +245,7 @@ class BELRepository:
 
         :rtype: List[indra.statements.Statement]
         """
-        return list(
-            chain.from_iterable(
-                to_indra_statements(graph) for graph in self.get_graphs(**kwargs).values()
-            )
-        )
+        return list(chain.from_iterable(to_indra_statements(graph) for graph in self.get_graphs(**kwargs).values()))
 
     def get_graphs(
         self,
@@ -313,8 +309,7 @@ class BELRepository:
 
     def _get_summary_df_from_graphs(self, graphs, save: str | bool | TextIO = True):
         summary_dicts = {
-            os.path.relpath(path, self.directory): graph.summarize.dict()
-            for path, graph in graphs.items()
+            os.path.relpath(path, self.directory): graph.summarize.dict() for path, graph in graphs.items()
         }
 
         df = pd.DataFrame.from_dict(summary_dicts, orient="index")
@@ -329,9 +324,7 @@ class BELRepository:
     def build_cli(self):
         """Build a command line interface."""
 
-        @click.group(
-            help=f"Tools for the BEL repository at {self.directory} using PyBEL v{get_version()}"
-        )
+        @click.group(help=f"Tools for the BEL repository at {self.directory} using PyBEL v{get_version()}")
         @click.pass_context
         def main(ctx):
             """Group the commands."""
@@ -343,11 +336,7 @@ class BELRepository:
     def get_extensions(self, root: str, file_name: str) -> set[str]:
         """Get all compiled files for the given BEL."""
         # TODO check that this is a valid BEL path!
-        return {
-            extension
-            for extension, path in self._iterate_extension_path(root, file_name)
-            if os.path.exists(path)
-        }
+        return {extension for extension, path in self._iterate_extension_path(root, file_name) if os.path.exists(path)}
 
     def _get_global_caches(self):
         return self.get_extensions(self.output_directory, self.bel_cache_name)
@@ -416,9 +405,7 @@ def append_click_group(group: click.Group) -> None:
     @click.pass_obj
     def citations(repository: BELRepository):
         """List citations in the repository."""
-        for database, reference in sorted(
-            set(repository._iterate_citations(use_tqdm=True)), key=lambda x: int(x[1])
-        ):
+        for database, reference in sorted(set(repository._iterate_citations(use_tqdm=True)), key=lambda x: int(x[1])):
             click.echo(f"{database}\t{reference}")
 
     @group.command()
@@ -455,9 +442,7 @@ def append_click_group(group: click.Group) -> None:
     @password_option
     @private_option
     @click.pass_obj
-    def upload_combine(
-        repository: BELRepository, host: str, user: str, password: str, private: bool
-    ):
+    def upload_combine(repository: BELRepository, host: str, user: str, password: str, private: bool):
         """Upload the combine graph."""
         graph = repository.get_graph()
         res = to_bel_commons(graph, host=host, user=user, password=password, public=not private)

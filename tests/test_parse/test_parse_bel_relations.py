@@ -1103,9 +1103,7 @@ class TestCustom(unittest.TestCase):
             "MESH": {(None, "nucleus"): "A"},
         }
 
-        self.parser = BELParser(
-            graph, namespace_to_term_to_encoding=namespace_to_term, autostreamline=False
-        )
+        self.parser = BELParser(graph, namespace_to_term_to_encoding=namespace_to_term, autostreamline=False)
 
     def test_tloc_undefined_namespace(self):
         s = 'tloc(p(HGNC:AKT1), fromLoc(MESH:nucleus), toLoc(MISSING:"undefined"))'

@@ -78,9 +78,7 @@ def from_bytes_gz(bytes_graph: bytes) -> BELGraph:
 
 
 @open_file(1, mode="wb")
-def to_pickle(
-    graph: BELGraph, path: str | BinaryIO, protocol: int = pickle.HIGHEST_PROTOCOL
-) -> None:
+def to_pickle(graph: BELGraph, path: str | BinaryIO, protocol: int = pickle.HIGHEST_PROTOCOL) -> None:
     """Write this graph to a pickle file.
 
     Note that the pickle module has some incompatibilities between Python 2 and 3. To export a universally importable

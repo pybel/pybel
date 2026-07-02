@@ -496,9 +496,7 @@ class BELGraph(nx.MultiDiGraph):
         self.add_node_from_data(target)
         return self._help_add_edge_helper(source=source, target=target, attr=attr)
 
-    def _help_add_edge_helper(
-        self, source: BaseEntity, target: BaseEntity, attr: Mapping[str, Any]
-    ) -> str:
+    def _help_add_edge_helper(self, source: BaseEntity, target: BaseEntity, attr: Mapping[str, Any]) -> str:
         key = hash_edge(source, target, attr)
 
         if not self.has_edge(source, target, key):
@@ -533,16 +531,12 @@ class BELGraph(nx.MultiDiGraph):
         """
         return self.add_unqualified_edge(rna, protein, TRANSLATED_TO)
 
-    def _add_two_way_qualified_edge(
-        self, source: BaseEntity, target: BaseEntity, *args, **kwargs
-    ) -> str:
+    def _add_two_way_qualified_edge(self, source: BaseEntity, target: BaseEntity, *args, **kwargs) -> str:
         """Add an qualified edge both ways."""
         self.add_qualified_edge(source=target, target=source, *args, **kwargs)
         return self.add_qualified_edge(source=source, target=target, *args, **kwargs)
 
-    def _add_two_way_unqualified_edge(
-        self, source: BaseEntity, target: BaseEntity, *args, **kwargs
-    ) -> str:
+    def _add_two_way_unqualified_edge(self, source: BaseEntity, target: BaseEntity, *args, **kwargs) -> str:
         """Add an unqualified edge both ways."""
         self.add_unqualified_edge(target, source, *args, **kwargs)
         return self.add_unqualified_edge(source, target, *args, **kwargs)
@@ -693,14 +687,10 @@ class BELGraph(nx.MultiDiGraph):
     add_no_correlation = partialmethod(_add_two_way_qualified_edge, relation=NO_CORRELATION)
     """Add a :data:`pybel.constants.NO_CORRELATION` relationship with :meth:`add_qualified_edge`."""
 
-    add_positive_correlation = partialmethod(
-        _add_two_way_qualified_edge, relation=POSITIVE_CORRELATION
-    )
+    add_positive_correlation = partialmethod(_add_two_way_qualified_edge, relation=POSITIVE_CORRELATION)
     """Add a :data:`pybel.constants.POSITIVE_CORRELATION` relationship with :meth:`add_qualified_edge`."""
 
-    add_negative_correlation = partialmethod(
-        _add_two_way_qualified_edge, relation=NEGATIVE_CORRELATION
-    )
+    add_negative_correlation = partialmethod(_add_two_way_qualified_edge, relation=NEGATIVE_CORRELATION)
     """Add a :data:`pybel.constants.NEGATIVE_CORRELATION` relationship with :meth:`add_qualified_edge`."""
 
     add_causes_no_change = partialmethod(add_qualified_edge, relation=CAUSES_NO_CHANGE)
@@ -930,9 +920,7 @@ class BELGraph(nx.MultiDiGraph):
     def _has_no_equivalent_edge(self, u: BaseEntity, v: BaseEntity) -> bool:
         return not any(EQUIVALENT_TO == data[RELATION] for data in self[u][v].values())
 
-    def _equivalent_node_iterator_helper(
-        self, node: BaseEntity, visited: set[BaseEntity]
-    ) -> BaseEntity:
+    def _equivalent_node_iterator_helper(self, node: BaseEntity, visited: set[BaseEntity]) -> BaseEntity:
         """Iterate over nodes and their data that are equal to the given node, starting with the original."""
         for v in self[node]:
             if v in visited:
@@ -970,9 +958,7 @@ class BELGraph(nx.MultiDiGraph):
 
         This also should look in the equivalent nodes.
         """
-        return any(
-            self._node_has_namespace_helper(n, namespace) for n in self.iter_equivalent_nodes(node)
-        )
+        return any(self._node_has_namespace_helper(n, namespace) for n in self.iter_equivalent_nodes(node))
 
     def _describe_list(self) -> list[tuple[str, float]]:
         """Return useful information about the graph as a list of tuples."""
@@ -994,9 +980,7 @@ class BELGraph(nx.MultiDiGraph):
         try:
             from ..grounding import ground
         except ImportError:
-            logger.warning(
-                "Must install pyobo and protmapper, use pip install pybel[grounding] extra."
-            )
+            logger.warning("Must install pyobo and protmapper, use pip install pybel[grounding] extra.")
             raise
         return ground(self, **kwargs)
 
@@ -1070,10 +1054,7 @@ class BELGraph(nx.MultiDiGraph):
             ]
         if isinstance(values, (list, set)):
             if all(isinstance(v, str) for v in values):
-                return [
-                    Entity(namespace=namespace, identifier=identifier)
-                    for identifier in sorted(values)
-                ]
+                return [Entity(namespace=namespace, identifier=identifier) for identifier in sorted(values)]
             elif all(isinstance(v, Entity) for v in values):
                 return values
             elif all(isinstance(v, dict) for v in values):
@@ -1082,10 +1063,7 @@ class BELGraph(nx.MultiDiGraph):
                 raise TypeError(f"list of wrong format for key {key}: {values}")
         if isinstance(values, dict):
             if all(isinstance(v, bool) for v in values.values()):
-                return [
-                    Entity(namespace=namespace, identifier=identifier)
-                    for identifier in sorted(values)
-                ]
+                return [Entity(namespace=namespace, identifier=identifier) for identifier in sorted(values)]
             raise TypeError(f"dictionary of wrong format for key {key}: {values}")
         raise TypeError(f"values of wrong data type for key {key}: {values}")
 

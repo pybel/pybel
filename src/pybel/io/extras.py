@@ -75,9 +75,7 @@ def to_gsea(graph: BELGraph, path: str | TextIO) -> None:
     """
     print(f"# {graph.name}", file=path)
     hgnc_gene_symbols = {
-        node.name
-        for node in graph
-        if isinstance(node, CentralDogma) and node.namespace.lower() == "hgnc"
+        node.name for node in graph if isinstance(node, CentralDogma) and node.namespace.lower() == "hgnc"
     }
     for hgnc_gene_symbol in sorted(hgnc_gene_symbols):
         print(hgnc_gene_symbol, file=path)
